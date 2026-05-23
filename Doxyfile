@@ -1,0 +1,33 @@
+# Doxyfile — Controller Toolbox API Reference
+# Generate:  doxygen Doxyfile   (from project root)
+# Output:    docs/html/index.html
+
+PROJECT_NAME           = "Controller Toolbox"
+PROJECT_NUMBER         = "1.0"
+PROJECT_BRIEF          = "Discrete-time C++ control library"
+
+OUTPUT_DIRECTORY       = docs
+INPUT                  = lib
+FILE_PATTERNS          = *.h *.hpp
+RECURSIVE              = YES
+EXCLUDE_PATTERNS       = */build/*
+
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+HTML_OUTPUT            = html
+HTML_COLORSTYLE        = LIGHT
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = YES
+MULTILINE_CPP_IS_BRIEF = YES
+
+BUILTIN_STL_SUPPORT    = YES
+TEMPLATE_RELATIONS     = YES
+
+QUIET                  = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = NO

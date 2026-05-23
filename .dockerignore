@@ -1,0 +1,53 @@
+# Local build artifacts
+build/
+out/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.lib
+
+# IDE / editor state
+.vscode/
+.idea/
+.vs/
+*.swp
+*.swo
+
+# Git internals (kept out of build context)
+.git/
+.gitignore
+
+# Documentation that's not needed for compilation
+docs/
+cheatsheet/
+prompt/
+archieved/
+*.md
+*.pdf
+
+# Python virtualenvs and caches
+**/__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+environment.yml
+
+# CSV outputs / generated data
+*.csv
+
+# Misc OS artifacts
+.DS_Store
+Thumbs.db
+
+# Windows-only build helpers (not relevant inside a Linux container)
+compile.bat
+enhance.bat
+
+# Doxygen output
+Doxyfile
+html/
+latex/
