@@ -12,7 +12,12 @@ add_executable(test_integration test_integration.cpp)
 target_link_libraries(test_integration PRIVATE controller_toolbox)
 target_include_directories(test_integration PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
+add_executable(tune_controllers tune_controllers.cpp)
+target_link_libraries(tune_controllers PRIVATE controller_toolbox)
+target_include_directories(tune_controllers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
 enable_testing()
 add_test(NAME controller_tests  COMMAND test_controllers)
 add_test(NAME tuner_tests       COMMAND test_tuners_extended)
 add_test(NAME integration_tests COMMAND test_integration)
+add_test(NAME tune_controllers      COMMAND tune_controllers)

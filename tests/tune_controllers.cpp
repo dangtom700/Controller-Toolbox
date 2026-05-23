@@ -37,11 +37,14 @@ namespace
 
     ctrl::StateSpace buildExamplePlant()
     {
-        ctrl::TransferFunction tf(
-            {0.0, 4.9625e-5, 4.9125e-5},
-            {1.0, -1.98511, 0.98522},
-            Ts);
-        return ctrl::tf2ss(tf);
+        // Build the continuous-time companion model, then discretise via c2d (ZOH)
+        Eigen::MatrixXd Ac(2, 2), Bc(2, 1), Cc(1, 2), Dc(1, 1);
+        Ac << 0.0, 1.0, -1.0, -1.5;
+        Bc << 0.0, 1.0;
+        Cc << 1.0, 0.0;
+        Dc << 0.0;
+        ctrl::StateSpace sys_c(Ac, Bc, Cc, Dc, 0.0); // Ts=0 => continuous-time
+        return ctrl::c2d(sys_c, Ts, ctrl::C2dMethod::ZOH);
     }
 
     // -- Relay test helper (simulates relay on the given plant) --
@@ -137,6 +140,17 @@ namespace
         bool seekMinimum = true;
     };
 
+    struct GPCDesign
+    {
+        int    Np    = 15;
+        int    Nu    = 4;
+        double rho_y = 1.0;
+        double rho_u = 0.1;
+        double alpha = 0.0;   // 0 = step ref, ->1 = soft reference trajectory
+        double uMin  = -10.0;
+        double uMax  =  10.0;
+    };
+
     using ControllerDesign = std::variant<
         PIDDesign,
         LQRDesign,
@@ -146,7 +160,8 @@ namespace
         SMCDesign,
         ADRCDesign,
         SmithPredictorDesign,
-        ESCDesign>;
+        ESCDesign,
+        GPCDesign>;
 
     // -----------------------------------------------------------------------------
     //  Tuning dispatcher
@@ -300,6 +315,27 @@ namespace
                       << "  seekMinimum=" << (d.seekMinimum ? "true" : "false") << "\n";
             std::cout << "  NOTE: No closed-form auto-tuner exists for ESC.\n"
                       << "        Verify: plant_BW << f_p << 1/(Ts*N_filter)\n\n";
+        }
+
+        // -- GPC ---------------------------------------------------------------
+        else if constexpr (std::is_same_v<T, GPCDesign>) {
+            std::cout << "=== GeneralizedPredictiveController (CARIMA / velocity-form MPC) ===\n";
+            ctrl::GPCParams gp;
+            gp.Np    = d.Np;
+            gp.Nu    = d.Nu;
+            gp.rho_y = d.rho_y;
+            gp.rho_u = d.rho_u;
+            gp.alpha = d.alpha;
+            gp.uMin  = d.uMin;
+            gp.uMax  = d.uMax;
+            ctrl::GeneralizedPredictiveController gpc(plant, gp);
+            std::cout << "  Np=" << gp.Np << "  Nu=" << gp.Nu << "\n";
+            std::cout << "  rho_y=" << gp.rho_y << "  rho_u=" << gp.rho_u << "\n";
+            std::cout << "  alpha=" << gp.alpha
+                      << "  (0=step ref, ->1=soft reference trajectory)\n";
+            std::cout << "  uMin=" << gp.uMin << "  uMax=" << gp.uMax << "\n";
+            double u0 = gpc.computeRef(0.0, 1.0);
+            std::cout << "  First move (y=0, r=1): u=" << u0 << "\n\n";
         } }, design);
     }
 
@@ -365,6 +401,9 @@ int main()
 
     // ESC
     designList.push_back(ESCDesign{0.1, 1.0, 0.1, 0.05, 1.0, true});
+
+    // GPC (velocity-form MPC with CARIMA integrating disturbance model)
+    designList.push_back(GPCDesign{15, 4, 1.0, 0.1, 0.0, -10.0, 10.0});
 
     // -- Tune and print -------------------------------------------------------
     for (const auto &d : designList)
