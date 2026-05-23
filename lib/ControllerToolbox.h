@@ -66,7 +66,15 @@
                               //   + LoopShapingTuner, KalmanWeightTuner
 #include "ControllerStack.h"  // Supervisory / Additive / Weighted controller stacks
 #include "TunerSuite.h"       // All tuning methods (runtime soft-warning dispatch, Nelder-Mead)
-#include "MetricsAnalyzer.h"  // Time-domain metric extraction
-#include "SystemAnalysis.h"   // Frequency-domain & stability analysis
-// #include "hal/HAL.h"           // ISensor, IActuator, SimPlant, SimSensor, SimActuator
-// #include "AtomicParamBuffer.h" // Lock-free double-buffer for RT parameter updates
+#include "MetricsAnalyzer.h"             // Time-domain metric extraction
+#include "SystemAnalysis.h"              // Frequency-domain & stability analysis
+// #include "hal/HAL.h"                  // ISensor, IActuator, SimPlant, SimSensor, SimActuator
+// #include "AtomicParamBuffer.h"        // Lock-free double-buffer for RT parameter updates
+
+// --- Algorithm gap additions (2026-05-22) ---
+#include "ExtendedKalmanFilter.h"        // EKF  - nonlinear state estimation (analytical/numerical Jacobians)
+#include "UnscentedKalmanFilter.h"       // UKF  - sigma-point nonlinear estimation (no Jacobians)
+#include "RecursiveLeastSquares.h"       // RLS  - online ARX system identification with forgetting factor
+#include "RepetitiveController.h"        // RC   - plug-in periodic disturbance/reference cancellation
+#include "GeneralizedPredictiveControl.h"// GPC  - velocity-form MPC with reference trajectory (CARIMA)
+#include "SubspaceID.h"                  // N4SID - batch subspace state-space identification (MOESP)

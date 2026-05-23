@@ -74,11 +74,17 @@ namespace ctrl
 
     TransferFunction RecursiveLeastSquares::toTransferFunction() const
     {
-        // num is [0, b1,...,bnb] to align degrees (output starts at z^-1)
-        Eigen::VectorXd num = Eigen::VectorXd::Zero(na_ + 1);
+        // num is [0, b1,...,bnb] padded/trimmed to length na_+1 to align degrees
+        Eigen::VectorXd num_e = Eigen::VectorXd::Zero(na_ + 1);
         const int copy_len = std::min(nb_, na_);
-        num.segment(1, copy_len) = theta_.segment(na_, copy_len);
-        return TransferFunction(num, denominator(), Ts_);
+        num_e.segment(1, copy_len) = theta_.segment(na_, copy_len);
+
+        const Eigen::VectorXd den_e = denominator();
+
+        // Convert Eigen vectors to std::vector<double> for TransferFunction ctor
+        std::vector<double> num_v(num_e.data(), num_e.data() + num_e.size());
+        std::vector<double> den_v(den_e.data(), den_e.data() + den_e.size());
+        return TransferFunction(num_v, den_v, Ts_);
     }
 
     StateSpace RecursiveLeastSquares::toStateSpace() const

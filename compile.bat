@@ -75,7 +75,7 @@ for %%T in (
     echo ----------------------------------------------------------
     echo [BUILD] %%T
     echo ----------------------------------------------------------
-    cmake --build "%BUILD%" --target %%T --parallel 1 --config Release
+    cmake --build "%BUILD%" --target %%T --config Release
     if !ERRORLEVEL! neq 0 (
         echo.
         echo ERROR: Failed to build [%%T]

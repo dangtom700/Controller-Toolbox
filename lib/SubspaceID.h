@@ -1,6 +1,7 @@
 #pragma once
 #include "PlantModel.h"
 #include <Eigen/Dense>
+#include <optional>
 
 // Subspace State-Space System Identification (N4SID / MOESP).
 //
@@ -40,7 +41,7 @@ namespace ctrl
 
 struct SubspaceIDResult
 {
-    StateSpace       model;           // identified A,B,C,D,Ts
+    std::optional<StateSpace> model;  // identified A,B,C,D,Ts (empty on failure)
     Eigen::VectorXd  singularValues;  // all singular values of L32 (for order selection)
     bool             success = false;
     std::string      message;         // error description on failure

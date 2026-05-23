@@ -20,6 +20,13 @@ add_library(controller_toolbox STATIC
     MetricsAnalyzer.cpp
     SystemAnalysis.cpp
     hal/SimPlant.cpp
+    # Algorithm gap additions (2026-05-22)
+    ExtendedKalmanFilter.cpp
+    UnscentedKalmanFilter.cpp
+    RecursiveLeastSquares.cpp
+    RepetitiveController.cpp
+    GeneralizedPredictiveControl.cpp
+    SubspaceID.cpp
 )
 
 # lib/ is the public include root: consumers write  #include "ControllerToolbox.h"
