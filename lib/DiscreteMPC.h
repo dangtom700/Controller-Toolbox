@@ -20,7 +20,7 @@
 // Box constraints on Δu and u are solved via gradient projection (Lipschitz step 1/L,
 // L = max eigenvalue of H, precomputed once).  Bounds for the first control step
 // are tightened to reflect both the Δu limits and the absolute u limits simultaneously.
-// qpMaxIter / qpTol tune convergence; defaults are adequate for horizons Nc ≤ 20.
+// qpMaxIter / qpTol tune convergence; defaults are adequate for horizons Nc <= 20.
 //
 // Ref: Camacho & Bordons "Model Predictive Control" (2007);
 //      Maciejowski "Predictive Control with Constraints" (2002);
@@ -81,11 +81,11 @@ namespace ctrl
         // Pre-computed condensed prediction matrices
         Eigen::MatrixXd F_;   // (Np.p) * n
         Eigen::MatrixXd Phi_; // (Np.p) * (Nc.m)
-        Eigen::MatrixXd Gu_;  // (Np.p) * m  — cumulative step response for u_prev offset
+        Eigen::MatrixXd Gu_;  // (Np.p) * m  - cumulative step response for u_prev offset
         Eigen::MatrixXd H_;   // (Φ'.Q_y.Φ + R_u) - precomputed Hessian
         Eigen::MatrixXd Qy_;  // (Np.p) * (Np.p)
         Eigen::MatrixXd Ru_;  // (Nc.m) * (Nc.m)
-        double          L_;   // max eigenvalue of H_ — Lipschitz constant for QP step
+        double          L_;   // max eigenvalue of H_ - Lipschitz constant for QP step
 
         // Pre-allocated work vectors - eliminate per-step heap allocation in computeRef()
         Eigen::VectorXd R_stack_;  // Np.p

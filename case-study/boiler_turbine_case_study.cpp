@@ -184,13 +184,13 @@ LinearStateSpace linearize(const operating_point &op, float Ts = 1.0f)
     Cc(2, 0) = 0.05f * (100.0f * dacs_dx1 + (0.854f * u2 - 0.147f) / 9.0f);
     Cc(2, 2) = 0.05f * (0.13073f + 100.0f * dacs_dx3);
 
-    // ── Output feedthrough  dy/du ──────────────────────────────────────────
+    // -- Output feedthrough  dy/du ------------------------------------------
     Eigen::Matrix3f Dc = Eigen::Matrix3f::Zero();
     Dc(2, 0) = 0.05f * 45.59f / 9.0f;
     Dc(2, 1) = 0.05f * 0.854f * x1 / 9.0f;
     Dc(2, 2) = -0.05f * 2.514f / 9.0f;
 
-    // ── Forward-Euler discretisation: Ad = I + Ts*Ac,  Bd = Ts*Bc ──────────
+    // -- Forward-Euler discretisation: Ad = I + Ts*Ac,  Bd = Ts*Bc ----------
     LinearStateSpace ss;
     ss.Ad = Eigen::Matrix3f::Identity() + Ts * Ac;
     ss.Bd = Ts * Bc;
@@ -221,7 +221,7 @@ void ss_lqr(const LinearStateSpace &ss, const operating_point &op, const std::st
               << plant.A << "\nBd:\n"
               << plant.B << "\n\n";
 
-    // ── Bryson weights ───────────────────────────────────────────────────────
+    // -- Bryson weights -------------------------------------------------------
     // xmax: max acceptable deviation from equilibrium
     //   x1 (drum pressure)  +/-5,  x2 (electric power) +/-10,  x3 (water level) +/-1
     // umax: max valve deviation from operating point (all valves \in [0,1])
@@ -238,13 +238,13 @@ void ss_lqr(const LinearStateSpace &ss, const operating_point &op, const std::st
     std::cout << "K =\n"
               << lqr.gainMatrix() << "\n\n";
 
-    // ── Initial perturbation and reference ───────────────────────────────────
+    // -- Initial perturbation and reference -----------------------------------
     // Regulate dx -> 0 (return to operating point)
     const Eigen::VectorXd x_ref = Eigen::VectorXd::Zero(3);
     Eigen::VectorXd dx(3);
     dx << 5.0, 3.0, -10.0; // small kick: +5 pressure, +3 power, -10 level
 
-    // ── CSV and console output ───────────────────────────────────────────────
+    // -- CSV and console output -----------------------------------------------
     const std::string fname = "lqr_op_" + label + ".csv";
     std::ofstream f(fname);
     f << "Time,dx1,dx2,dx3,u1,u2,u3\n";
@@ -306,7 +306,7 @@ void ss_mpc(const LinearStateSpace &ss, const operating_point &op, const std::st
 
     std::cout << "\n=== MPC @ Operating Point " << label << " ===\n";
 
-    // ── Horizon recommendation ───────────────────────────────────────────────
+    // -- Horizon recommendation -----------------------------------------------
     // x3 (water level) has an integrating mode: Ad(2,2) = 1 + Ts*df3/dx3 = 1.
     // estimateSettlingTime() hits its maxSteps cap and returns ts = 5000 s,
     // which inflates Np to 5000 and makes the 5001x5001 Hessian rebuild each step.
@@ -325,13 +325,13 @@ void ss_mpc(const LinearStateSpace &ss, const operating_point &op, const std::st
     mp.uMax = 0.5;
     ctrl::DiscreteMPC mpc(plant, mp);
 
-    // ── Initial perturbation and reference ───────────────────────────────────
+    // -- Initial perturbation and reference -----------------------------------
     // Drive dx -> 0 (return to operating point from a small kick)
     const Eigen::VectorXd r_ref = Eigen::VectorXd::Zero(plant.outputSize());
     Eigen::VectorXd dx(3);
     dx << 5.0, 3.0, -10.0; // +5 pressure, +3 power, -10 level (same as LQR)
 
-    // ── CSV output ───────────────────────────────────────────────────────────
+    // -- CSV output -----------------------------------------------------------
     const std::string fname = "mpc_op_" + label + ".csv";
     std::ofstream f(fname);
     f << "Time,dx1,dx2,dx3,u1,u2,u3\n";
@@ -728,9 +728,9 @@ void ss_extremum_seeker(const LinearStateSpace &ss, const operating_point &op, c
     // Starts at operating point (no kick): ESC assumes quasi-static plant behaviour.
     ctrl::ExtremumSeekerParams p;
     p.perturbAmp = 0.005; // small dither on feedwater valve
-    p.perturbFreq = 0.02; // Hz — 1 cycle per 50 s at Ts=1
-    p.lpfCutoff = 0.005;  // Hz — gradient smoothing
-    p.hpfCutoff = 0.002;  // Hz — DC removal
+    p.perturbFreq = 0.02; // Hz - 1 cycle per 50 s at Ts=1
+    p.lpfCutoff = 0.005;  // Hz - gradient smoothing
+    p.hpfCutoff = 0.002;  // Hz - DC removal
     p.integGain = 0.5;
     p.seekMinimum = false; // maximise y3
 

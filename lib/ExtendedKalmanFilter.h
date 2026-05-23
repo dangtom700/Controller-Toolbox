@@ -9,17 +9,17 @@
 //   y[k]   = h(x[k], u[k]) + v[k],   v ~ N(0, R_noise)
 //
 // EKF linearises around the current estimate at each step:
-//   F[k] = ∂f/∂x |_(x̂[k|k], u[k])    — state Jacobian  (n×n)
-//   H[k] = ∂h/∂x |_(x̂[k+1|k], u[k])  — observation Jacobian (p×n)
+//   F[k] = ∂f/∂x |_(x^[k|k], u[k])    - state Jacobian  (n*n)
+//   H[k] = ∂h/∂x |_(x^[k+1|k], u[k])  - observation Jacobian (p*n)
 //
 // Predict:
-//   x̂[k+1|k]   = f(x̂[k|k], u[k])
+//   x^[k+1|k]   = f(x^[k|k], u[k])
 //   P[k+1|k]    = F[k].P[k|k].F[k]' + Q
 //
 // Update (Joseph form for numerical stability):
 //   S            = H[k].P[k+1|k].H[k]' + R
 //   K            = P[k+1|k].H[k]'.S^-1
-//   x̂[k+1|k+1]  = x̂[k+1|k] + K.(y - h(x̂[k+1|k], u[k]))
+//   x^[k+1|k+1]  = x^[k+1|k] + K.(y - h(x^[k+1|k], u[k]))
 //   P[k+1|k+1]  = (I - K.H).P.(I - K.H)' + K.R.K'
 //
 // Jacobians can be analytical (preferred) or numerical via numericalJacobian().
@@ -43,12 +43,12 @@ public:
     // p:       measurement dimension
     // f:       process function  x[k+1] = f(x[k], u[k])
     // h:       measurement function  y[k] = h(x[k], u[k])
-    // Fjac:    Jacobian ∂f/∂x (n×n) evaluated at (x̂, u)
-    // Hjac:    Jacobian ∂h/∂x (p×n) evaluated at (x̂_pred, u)
-    // Q_noise: process noise covariance (n×n, PSD)
-    // R_noise: measurement noise covariance (p×p, PD)
+    // Fjac:    Jacobian ∂f/∂x (n*n) evaluated at (x^, u)
+    // Hjac:    Jacobian ∂h/∂x (p*n) evaluated at (x^_pred, u)
+    // Q_noise: process noise covariance (n*n, PSD)
+    // R_noise: measurement noise covariance (p*p, PD)
     // Ts:      sample time [s]
-    // P0:      initial error covariance (n×n, default = I)
+    // P0:      initial error covariance (n*n, default = I)
     ExtendedKalmanFilter(int n, int p,
                          StateFunc f, MeasFunc h,
                          JacobianFn Fjac, JacobianFn Hjac,
@@ -90,7 +90,7 @@ private:
     MeasFunc   h_;
     JacobianFn Fjac_, Hjac_;
     Eigen::MatrixXd Q_, R_;
-    Eigen::VectorXd x_hat_; // x̂[k|k]
+    Eigen::VectorXd x_hat_; // x^[k|k]
     Eigen::MatrixXd P_;     // P[k|k]
     double Ts_;
 };

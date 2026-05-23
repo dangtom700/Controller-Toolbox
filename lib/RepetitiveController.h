@@ -18,15 +18,15 @@
 //
 // Parameters:
 //   periodSteps (N): disturbance/reference period in samples = T/Ts (integer).
-//   Krc:            learning gain.  Small → slow but stable. Typical: 0.3..0.8.
-//   Q:              forgetting/robustness factor ∈ (0,1].
-//                   Q = 1  → perfect cancellation, zero robustness margin.
-//                   Q < 1  → exponential decay; suppresses model-mismatch instability.
+//   Krc:            learning gain.  Small -> slow but stable. Typical: 0.3..0.8.
+//   Q:              forgetting/robustness factor \in (0,1].
+//                   Q = 1  -> perfect cancellation, zero robustness margin.
+//                   Q < 1  -> exponential decay; suppresses model-mismatch instability.
 //                   Typical: 0.95..1.0.
 //
 // Stability condition (sufficient, SISO, linear base):
 //   The closed-loop with the base controller must be stable, AND
-//   Q / |1 + L(e^jω).P(e^jω)| < 1 for all ω (internal model robustness test).
+//   Q / |1 + L(e^jomega).P(e^jomega)| < 1 for all omega (internal model robustness test).
 //
 // Usage:
 //   auto pid   = std::make_shared<ctrl::DiscretePID>(pp, Ts);
@@ -40,7 +40,7 @@ namespace ctrl
 
 struct RepetitiveParams
 {
-    int    periodSteps = 100;  // N — period in samples
+    int    periodSteps = 100;  // N - period in samples
     double Krc         = 0.5;  // learning gain
     double Q           = 0.98; // forgetting / robustness factor
     double uMin        = -1e9;

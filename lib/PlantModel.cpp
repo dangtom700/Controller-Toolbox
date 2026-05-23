@@ -95,8 +95,8 @@ namespace ctrl
         }
         else // Tustin
         {
-            // Ad = (I - α.Ac)^{-1}.(I + α.Ac),  α = Ts/2
-            // Bd = Ts.(I - α.Ac)^{-1}.Bc
+            // Ad = (I - alpha.Ac)^{-1}.(I + alpha.Ac),  alpha = Ts/2
+            // Bd = Ts.(I - alpha.Ac)^{-1}.Bc
             const double alpha = Ts * 0.5;
             const Eigen::MatrixXd Im = Eigen::MatrixXd::Identity(n, n) - alpha * sys_c.A;
             const Eigen::MatrixXd Ip = Eigen::MatrixXd::Identity(n, n) + alpha * sys_c.A;

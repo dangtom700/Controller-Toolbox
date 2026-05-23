@@ -53,12 +53,12 @@ namespace ctrl
         for (int k = 1; k <= Np; ++k)
             Apow[k] = Aa_ * Apow[k - 1];
 
-        // Fa: (Np.p) × na   —   Fa(i,:) = Ca . Aa^{i+1}
+        // Fa: (Np.p) * na   -   Fa(i,:) = Ca . Aa^{i+1}
         Fa_.resize(Np * p, na);
         for (int i = 0; i < Np; ++i)
             Fa_.block(i * p, 0, p, na) = Ca_ * Apow[i + 1];
 
-        // Ga: (Np.p) × (Nu.m)   —   lower Toeplitz of step response
+        // Ga: (Np.p) * (Nu.m)   -   lower Toeplitz of step response
         Ga_.resize(Np * p, Nu * m);
         Ga_.setZero();
         for (int i = 0; i < Np; ++i)
@@ -100,7 +100,7 @@ namespace ctrl
         const auto ldlt = H_.ldlt();
         if (ldlt.info() != Eigen::Success)
         {
-            // Hessian singular — hold previous input
+            // Hessian singular - hold previous input
             y_prev_ = y;
             return u_prev_(0);
         }

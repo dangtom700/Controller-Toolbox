@@ -31,7 +31,7 @@ namespace ctrl
             Wm_(i) = Wc_(i) = w_rest;
     }
 
-    // Cholesky of (n+λ)P, columns are the perturbation vectors.
+    // Cholesky of (n+lambda)P, columns are the perturbation vectors.
     Eigen::MatrixXd UnscentedKalmanFilter::sigmaPoints() const
     {
         const Eigen::MatrixXd S =

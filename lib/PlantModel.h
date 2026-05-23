@@ -86,20 +86,20 @@ namespace ctrl
                            const Eigen::VectorXd &u);
 
     // ---------------------------------------------------------------------------
-    // c2d — discretise a continuous-time state-space model.
+    // c2d - discretise a continuous-time state-space model.
     //
     // The input StateSpace must carry Ts == 0.0 to indicate continuous time.
     // Pass the desired sample period as the second argument.
     //
     // Methods:
-    //   ZOH    — zero-order hold (exact for piecewise-constant inputs).
+    //   ZOH    - zero-order hold (exact for piecewise-constant inputs).
     //            Uses the matrix-exponential embedding:
-    //              M = expm([Ac Bc; 0 0] * Ts)  →  Ad = M[:n,:n], Bd = M[:n,n:]
+    //              M = expm([Ac Bc; 0 0] * Ts)  ->  Ad = M[:n,:n], Bd = M[:n,n:]
     //            Requires <unsupported/Eigen/MatrixFunctions>.
     //
-    //   Tustin — bilinear (Tustin) transform, s = (2/Ts)*(z-1)/(z+1).
-    //            Ad = (I - α.Ac)^{-1}.(I + α.Ac)     α = Ts/2
-    //            Bd = Ts.(I - α.Ac)^{-1}.Bc
+    //   Tustin - bilinear (Tustin) transform, s = (2/Ts)*(z-1)/(z+1).
+    //            Ad = (I - alpha.Ac)^{-1}.(I + alpha.Ac)     alpha = Ts/2
+    //            Bd = Ts.(I - alpha.Ac)^{-1}.Bc
     //            Preserves stability but distorts frequency axis.
     //
     // Cd and Dd are unchanged for both methods.

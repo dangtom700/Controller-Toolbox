@@ -32,7 +32,7 @@ namespace ctrl
         // Integral: backward Euler increment for this step
         const double ki_update = p_.Ki * Ts_ * error;
 
-        // Unsaturated output — uses I[k] = I[k-1] + ki_update (backward Euler)
+        // Unsaturated output - uses I[k] = I[k-1] + ki_update (backward Euler)
         const double u_unsat = p_.Kp * error + (integral_ + ki_update) + d_new;
 
         // Output saturation

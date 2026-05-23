@@ -270,48 +270,48 @@ The following mathematical errors and documentation gaps were identified and ful
 
 ---
 
-### 3.1 `DiscreteMPC` — Missing G_u·u_prev Term in Condensed Prediction *(Resolved)*
+### 3.1 `DiscreteMPC` - Missing G_u.u_prev Term in Condensed Prediction *(Resolved)*
 
 **Files:** `lib/DiscreteMPC.cpp`, `lib/DiscreteMPC.h`  
-**Severity:** High — systematically incorrect control action  
-**Description:** The condensed prediction used `Y = F·x + Φ·ΔU`, omitting the `G_u·u_prev` offset. For an incremental MPC formulation (ΔU decision variables), the output prediction must include the cumulative step-response matrix `G_u` applied to the previous input to correctly account for the u_prev baseline. Without it, the gradient is computed from the wrong prediction error, producing a biased optimal move.  
-**Fix:** Added `Gu_` matrix (`Np·p × m`) computed as the cumulative step response `G_u(i) = Σ_{j=0}^{i} C·A^j·B`. The prediction error in `computeRef()` is now:
+**Severity:** High - systematically incorrect control action  
+**Description:** The condensed prediction used `Y = F.x + Φ.ΔU`, omitting the `G_u.u_prev` offset. For an incremental MPC formulation (ΔU decision variables), the output prediction must include the cumulative step-response matrix `G_u` applied to the previous input to correctly account for the u_prev baseline. Without it, the gradient is computed from the wrong prediction error, producing a biased optimal move.  
+**Fix:** Added `Gu_` matrix (`Np.p * m`) computed as the cumulative step response `G_u(i) = Σ_{j=0}^{i} C.A^j.B`. The prediction error in `computeRef()` is now:
 ```cpp
 pred_err_.noalias() = F_ * x + Gu_ * u_prev_ - R_stack_;
 ```
 
 ---
 
-### 3.2 `DiscretePID` — Forward-Euler Integral Despite Backward-Euler Claim *(Resolved)*
+### 3.2 `DiscretePID` - Forward-Euler Integral Despite Backward-Euler Claim *(Resolved)*
 
 **Files:** `lib/DiscretePID.cpp`, `lib/DiscretePID.h`  
-**Severity:** Medium — implementation inconsistent with documented integration method  
-**Description:** The header declared backward Euler (`I[k] = I[k-1] + Ki·Ts·e[k]`), but the implementation computed the integral increment after forming `u_unsat`, making the current error effective only one step later (forward Euler behavior).  
-**Fix:** Integral increment `ki_update = Ki·Ts·e[k]` is computed first and included in `u_unsat` before saturation, matching the declared law:
+**Severity:** Medium - implementation inconsistent with documented integration method  
+**Description:** The header declared backward Euler (`I[k] = I[k-1] + Ki.Ts.e[k]`), but the implementation computed the integral increment after forming `u_unsat`, making the current error effective only one step later (forward Euler behavior).  
+**Fix:** Integral increment `ki_update = Ki.Ts.e[k]` is computed first and included in `u_unsat` before saturation, matching the declared law:
 ```
-I[k] = I[k-1] + Ki·Ts·e[k] + Kb·(u_sat[k] − u_unsat[k])
-u[k] = Kp·e[k] + I[k] + D[k]
+I[k] = I[k-1] + Ki.Ts.e[k] + Kb.(u_sat[k] - u_unsat[k])
+u[k] = Kp.e[k] + I[k] + D[k]
 ```
 
 ---
 
-### 3.3 `DiscreteLQG` — Kalman Innovation Uses Stale u When D ≠ 0 *(Resolved)*
+### 3.3 `DiscreteLQG` - Kalman Innovation Uses Stale u When D != 0 *(Resolved)*
 
 **Files:** `lib/DiscreteLQG.cpp`, `lib/DiscreteLQG.h`  
-**Severity:** Medium — silent accuracy degradation for non-zero D plants  
-**Description:** The Kalman innovation `y − C·x̂ − D·u` requires `u[k]`, but at update time only `u[k-1]` is available. When D ≠ 0, this one-step staleness degrades state-estimate accuracy proportionally to D's magnitude. Previously the code used zeros for the D·u term without any diagnostic.  
-**Fix:** Added a D≠0 guard in the constructor that emits a `std::cerr` warning and continues (programs are not terminated):
+**Severity:** Medium - silent accuracy degradation for non-zero D plants  
+**Description:** The Kalman innovation `y - C.x^ - D.u` requires `u[k]`, but at update time only `u[k-1]` is available. When D != 0, this one-step staleness degrades state-estimate accuracy proportionally to D's magnitude. Previously the code used zeros for the D.u term without any diagnostic.  
+**Fix:** Added a D!=0 guard in the constructor that emits a `std::cerr` warning and continues (programs are not terminated):
 ```
 [DiscreteLQG] WARNING: plant.D != 0. Kalman innovation uses u[k-1] for the D*u term (one step stale). For accurate filtering, set D = 0 in the model.
 ```
 
 ---
 
-### 3.4 `SmithPredictor` — Internal Model Output Uses D·zeros Instead of D·u_prev *(Resolved)*
+### 3.4 `SmithPredictor` - Internal Model Output Uses D.zeros Instead of D.u_prev *(Resolved)*
 
 **Files:** `lib/SmithPredictor.cpp`, `lib/SmithPredictor.h`  
-**Severity:** Low — incorrect feedthrough term in Smith correction  
-**Description:** The delay-free model output `ŷ[k] = C·x̂ + D·u` was evaluated with `D·zeros` instead of `D·u_prev`. For plants with a non-zero D matrix, the Smith correction term `ŷ_now − ŷ_delayed` was wrong, degrading dead-time compensation accuracy.  
+**Severity:** Low - incorrect feedthrough term in Smith correction  
+**Description:** The delay-free model output `ŷ[k] = C.x^ + D.u` was evaluated with `D.zeros` instead of `D.u_prev`. For plants with a non-zero D matrix, the Smith correction term `ŷ_now - ŷ_delayed` was wrong, degrading dead-time compensation accuracy.  
 **Fix:** Added `u_prev_` member (zero-initialized in constructor, updated each step after computing u). `y_now` is now:
 ```cpp
 const double y_now = (model_.C * x_model_ + model_.D * u_prev_)(0);
@@ -319,11 +319,11 @@ const double y_now = (model_.C * x_model_ + model_.D * u_prev_)(0);
 
 ---
 
-### 3.5 `DiscreteSMC` — `c_de` Ts Absorption Not Documented *(Resolved)*
+### 3.5 `DiscreteSMC` - `c_de` Ts Absorption Not Documented *(Resolved)*
 
 **File:** `lib/DiscreteSMC.h`  
-**Severity:** Low — parameter mis-sizing risk for users working from continuous-time specs  
-**Description:** The `c_de` parameter absorbs `Ts` (i.e., `c_de = λ·Ts` where `λ` is the desired continuous-time surface slope in 1/s). This was not documented, so users specifying `c_de` directly from a continuous-time design would over-weight the rate term by a factor of `1/Ts`.  
+**Severity:** Low - parameter mis-sizing risk for users working from continuous-time specs  
+**Description:** The `c_de` parameter absorbs `Ts` (i.e., `c_de = lambda.Ts` where `lambda` is the desired continuous-time surface slope in 1/s). This was not documented, so users specifying `c_de` directly from a continuous-time design would over-weight the rate term by a factor of `1/Ts`.  
 **Fix:** Updated the `c_de` field comment with explicit Ts absorption note and conversion formula:
 ```cpp
 // Note: c_de absorbs the sample time Ts. To match a continuous-time

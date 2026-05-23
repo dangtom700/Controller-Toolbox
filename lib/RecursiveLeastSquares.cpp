@@ -24,7 +24,7 @@ namespace ctrl
         // Prediction error
         const double e = y - phi.dot(theta_);
 
-        // Kalman gain: K = P.φ / (λ + φ'.P.φ)
+        // Kalman gain: K = P.φ / (lambda + φ'.P.φ)
         const Eigen::VectorXd Pphi = P_ * phi;
         const double denom = lambda_ + phi.dot(Pphi);
         const Eigen::VectorXd K = Pphi / denom;

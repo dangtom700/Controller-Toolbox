@@ -49,7 +49,7 @@ namespace ctrl
         int d_;
         double Ts_;
         Eigen::VectorXd      x_model_;  // internal model state x^
-        Eigen::VectorXd      u_prev_;   // u[k-1] for D·u feedthrough in y_now
+        Eigen::VectorXd      u_prev_;   // u[k-1] for D.u feedthrough in y_now
         std::vector<double>  y_buf_;   // fixed circular buffer of ŷ (length d_, pre-allocated)
         int                  buf_head_; // index of the oldest slot
     };

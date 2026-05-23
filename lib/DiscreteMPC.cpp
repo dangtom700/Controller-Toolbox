@@ -48,7 +48,7 @@ namespace ctrl
             for (int j = 0; j <= std::min(i, Nc - 1); ++j)
                 Phi_.block(i * p, j * m, p, m) = plant_.C * Apow[i - j] * plant_.B;
 
-        // G_u: (Np.p) * m  — G_u(i) = Σ_{j=0}^{i} C.A^j.B  (cumulative step response)
+        // G_u: (Np.p) * m  - G_u(i) = Σ_{j=0}^{i} C.A^j.B  (cumulative step response)
         Gu_.resize(Np * p, m);
         Gu_.block(0, 0, p, m) = plant_.C * plant_.B; // j=0: C.A^0.B = C.B
         for (int i = 1; i < Np; ++i)
@@ -85,14 +85,14 @@ namespace ctrl
     //   min_{ΔU}  0.5 ΔU'HΔU + g'ΔU
     //   s.t.      lb <= ΔU <= ub
     //
-    // via gradient projection with constant step α = 1/L (L = max eigenvalue of H).
+    // via gradient projection with constant step alpha = 1/L (L = max eigenvalue of H).
     // Warm-started from the clamped unconstrained optimum; typically converges in
     // a handful of iterations for MPC horizon sizes.
     //
     // Bounds per segment j of ΔU (size m each):
     //   For j == 0 (the move that is actually applied):
-    //     lb = max(duMin, uMin − u_prev)   — couples Δu and absolute u limits
-    //     ub = min(duMax, uMax − u_prev)
+    //     lb = max(duMin, uMin - u_prev)   - couples Δu and absolute u limits
+    //     ub = min(duMax, uMax - u_prev)
     //   For j > 0 (future moves, only Δu limits apply):
     //     lb = duMin,  ub = duMax
     Eigen::VectorXd DiscreteMPC::computeRef(const Eigen::VectorXd &x,
@@ -107,11 +107,11 @@ namespace ctrl
         for (int i = 0; i < Np; ++i)
             R_stack_.segment(i * p, p) = r_ref;
 
-        // Gradient at ΔU = 0: g = Φ'.Qy.(F.x + Gu.u_prev − R)
+        // Gradient at ΔU = 0: g = Φ'.Qy.(F.x + Gu.u_prev - R)
         pred_err_.noalias() = F_ * x + Gu_ * u_prev_ - R_stack_;
         grad_.noalias()     = Phi_.transpose() * (Qy_ * pred_err_);
 
-        // Build box bounds [lb, ub] on ΔU ∈ R^{Nc*m}
+        // Build box bounds [lb, ub] on ΔU \in R^{Nc*m}
         Eigen::VectorXd lb = Eigen::VectorXd::Constant(Nc * m, p_.duMin);
         Eigen::VectorXd ub = Eigen::VectorXd::Constant(Nc * m, p_.duMax);
         // Tighten first-step bounds to couple absolute u constraints
@@ -124,11 +124,11 @@ namespace ctrl
         // Warm-start: clamped unconstrained optimum
         const auto ldlt = H_.ldlt();
         if (ldlt.info() != Eigen::Success)
-            return u_prev_; // degenerate Hessian — hold previous input
+            return u_prev_; // degenerate Hessian - hold previous input
 
         DeltaU_ = (-ldlt.solve(grad_)).cwiseMax(lb).cwiseMin(ub);
 
-        // Gradient projection: x ← clamp(x − (1/L).(H.x + g), lb, ub)
+        // Gradient projection: x <- clamp(x - (1/L).(H.x + g), lb, ub)
         const double alpha = 1.0 / L_;
         for (int iter = 0; iter < p_.qpMaxIter; ++iter)
         {

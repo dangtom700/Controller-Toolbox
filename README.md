@@ -16,7 +16,7 @@ cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
 
-Requires **C++17**, **CMake ≥ 3.16**, and **Eigen ≥ 3.4**.
+Requires **C++17**, **CMake >= 3.16**, and **Eigen >= 3.4**.
 
 ### Docker build
 
@@ -61,20 +61,20 @@ for (int k = 0; k < 500; ++k) {
 | [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md) | Full API reference, class-by-class breakdown, usage workflows |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Parameter constraints, RT/RTOS integration, troubleshooting recipes |
 | [cheatsheet/](cheatsheet/) | Tuning methods, controller categories, system identification notes |
-| [case-study/](case-study/) | Nonlinear 3×3 boiler-turbine multivariable study |
+| [case-study/](case-study/) | Nonlinear 3*3 boiler-turbine multivariable study |
 
 ---
 
 ## Repository Layout
 
 ```
-├── lib/             # Library sources → target: controller_toolbox
-├── examples/        # ex01..ex22 single-file demos + cpp/ MIMO examples
-├── case-study/      # Nonlinear boiler-turbine MIMO benchmark
-├── tests/           # CTest-driven unit + integration tests
-├── scripts/         # tune_all / simulate_all / realtime_all
-├── cheatsheet/      # Reference notes
-└── docs/            # Documentation & deployment guides
+├-- lib/             # Library sources -> target: controller_toolbox
+├-- examples/        # ex01..ex22 single-file demos + cpp/ MIMO examples
+├-- case-study/      # Nonlinear boiler-turbine MIMO benchmark
+├-- tests/           # CTest-driven unit + integration tests
+├-- scripts/         # tune_all / simulate_all / realtime_all
+├-- cheatsheet/      # Reference notes
+└-- docs/            # Documentation & deployment guides
 ```
 
 ---
@@ -83,8 +83,8 @@ for (int k = 0; k < 500; ++k) {
 
 The included [`Dockerfile`](Dockerfile) uses a two-stage build:
 
-- **Stage 1 (builder)** — Debian Bookworm slim + CMake + g++ + libeigen3-dev, compiles every target with the root [`CMakeLists.txt`](CMakeLists.txt).
-- **Stage 2 (runtime)** — Slim image containing only the compiled binaries, ready to run examples, tests, or your own application.
+- **Stage 1 (builder)** - Debian Bookworm slim + CMake + g++ + libeigen3-dev, compiles every target with the root [`CMakeLists.txt`](CMakeLists.txt).
+- **Stage 2 (runtime)** - Slim image containing only the compiled binaries, ready to run examples, tests, or your own application.
 
 ### Build the image
 
@@ -120,7 +120,7 @@ docker run --rm -it -v "$(pwd):/work" -w /work \
     -c "cmake -S . -B build && cmake --build build --parallel"
 ```
 
-(Use the `builder` stage tag — see the Dockerfile for details.)
+(Use the `builder` stage tag - see the Dockerfile for details.)
 
 ---
 
@@ -136,4 +136,4 @@ docker run --rm -it -v "$(pwd):/work" -w /work \
 
 ## Project Status
 
-Eleven controllers implemented and unit-tested. Five math corrections applied 2026-05-22: MPC condensed prediction formula (`G_u·u_prev` term), PID backward-Euler integral law, LQG D≠0 staleness warning, Smith Predictor D·u_prev feedthrough, and SMC `c_de` Ts-absorption documentation — details in [docs/bug_report.md §3](docs/bug_report.md). Code-review findings tracked in [docs/bug_report.md](docs/bug_report.md). Real-time deployment guidance in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+Eleven controllers implemented and unit-tested. Five math corrections applied 2026-05-22: MPC condensed prediction formula (`G_u.u_prev` term), PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor D.u_prev feedthrough, and SMC `c_de` Ts-absorption documentation - details in [docs/bug_report.md Section 3](docs/bug_report.md). Code-review findings tracked in [docs/bug_report.md](docs/bug_report.md). Real-time deployment guidance in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).

@@ -13,14 +13,14 @@
 // covariance to third order (vs. EKF's first-order linearisation).
 //
 // Sigma points (scaled UT, Wan & Van der Merwe 2000):
-//   X_0     = x̂
-//   X_i     = x̂ + (sqrt((n+λ).P))_i      i = 1..n
-//   X_{n+i} = x̂ - (sqrt((n+λ).P))_i      i = 1..n
-//   λ = alpha².(n + kappa) - n
+//   X_0     = x^
+//   X_i     = x^ + (sqrt((n+lambda).P))_i      i = 1..n
+//   X_{n+i} = x^ - (sqrt((n+lambda).P))_i      i = 1..n
+//   lambda = alpha^2.(n + kappa) - n
 //
 // Weights:
-//   Wm_0 = λ/(n+λ),           Wc_0 = λ/(n+λ) + (1 - alpha² + beta)
-//   Wm_i = Wc_i = 1/(2(n+λ))  i = 1..2n
+//   Wm_0 = lambda/(n+lambda),           Wc_0 = lambda/(n+lambda) + (1 - alpha^2 + beta)
+//   Wm_i = Wc_i = 1/(2(n+lambda))  i = 1..2n
 //
 // Recommended tuning: alpha=1e-3, beta=2 (Gaussian prior), kappa=0.
 //
@@ -37,10 +37,10 @@ public:
     // p:       measurement dimension
     // f:       process function  x[k+1] = f(x[k], u[k])
     // h:       measurement function  y[k] = h(x[k], u[k])
-    // Q_noise: process noise covariance (n×n, PSD)
-    // R_noise: measurement noise covariance (p×p, PD)
+    // Q_noise: process noise covariance (n*n, PSD)
+    // R_noise: measurement noise covariance (p*p, PD)
     // Ts:      sample time [s]
-    // P0:      initial error covariance (n×n, default = I)
+    // P0:      initial error covariance (n*n, default = I)
     // alpha:   spread of sigma points around mean (typically 1e-3)
     // beta:    prior distribution parameter (2 for Gaussian)
     // kappa:   secondary scaling (0 or 3-n)
@@ -75,7 +75,7 @@ public:
     double sampleTime()                 const { return Ts_; }
 
 private:
-    // Compute 2n+1 sigma points from current x̂ and P.
+    // Compute 2n+1 sigma points from current x^ and P.
     // Returns matrix of size n x (2n+1); each column is a sigma point.
     Eigen::MatrixXd sigmaPoints() const;
 

@@ -9,7 +9,7 @@
 //   x[k+1] = A.x[k] + B.u[k] + w[k]
 //   y[k]   = C.x[k] + D.u[k] + v[k]
 //
-// Algorithm — MOESP oblique-projection variant (Verhaegen & Dewilde 1992):
+// Algorithm - MOESP oblique-projection variant (Verhaegen & Dewilde 1992):
 //
 //  1. Build 2i-block Hankel matrices from (Y, U):
 //       Z = [U_f; W_p; Y_f]   where W_p = [U_p; Y_p]
@@ -27,7 +27,7 @@
 //
 // Data requirements:
 //   - Persistent excitation: the input must excite at least n_order frequencies.
-//   - N >> 2*i*(m+p): more samples → better estimates.
+//   - N >> 2*i*(m+p): more samples -> better estimates.
 //   - i >= n_order/p (i_horizon must be large enough to capture all modes).
 //
 // Output singularValues can be plotted to choose n_order: look for an elbow
@@ -49,8 +49,8 @@ struct SubspaceIDResult
 
 // n4sid: batch subspace identification.
 //
-// Y:          output matrix (p × N)  — rows = outputs, cols = time samples
-// U:          input  matrix (m × N)  — rows = inputs,  cols = time samples
+// Y:          output matrix (p * N)  - rows = outputs, cols = time samples
+// U:          input  matrix (m * N)  - rows = inputs,  cols = time samples
 // n_order:    desired state order n  (choose by inspecting result.singularValues,
 //             or use suggestOrder() below)
 // i_horizon:  number of block rows in Hankel matrices (recommend i >= 2*n_order/p,
@@ -78,7 +78,7 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
 // maxOrder:  hard cap on the returned order (-1 = no cap).
 //
 // Returns at least 1.  Call after n4sid() to eliminate the manual "elbow inspection"
-// step when building adaptive loops (e.g., RLS → n4sid → GPC).
+// step when building adaptive loops (e.g., RLS -> n4sid -> GPC).
 int suggestOrder(const Eigen::VectorXd &sv,
                  double threshold = 0.01,
                  int maxOrder     = -1);
