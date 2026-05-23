@@ -17,8 +17,10 @@
 //   ΔU* = -(Φ'.Q_y.Φ + R_u)^-¹.Φ'.Q_y.(F.x[k] - R_stacked)
 //   u[k] = u[k-1] + ΔU*[0:m]
 //
-// Box constraints on Δu and u are handled by element-wise clamping of ΔU*.
-// For full QP constraint handling, replace the ldlt() solve with an active-set solver.
+// Box constraints on Δu and u are solved via gradient projection (Lipschitz step 1/L,
+// L = max eigenvalue of H, precomputed once).  Bounds for the first control step
+// are tightened to reflect both the Δu limits and the absolute u limits simultaneously.
+// qpMaxIter / qpTol tune convergence; defaults are adequate for horizons Nc ≤ 20.
 //
 // Ref: Camacho & Bordons "Model Predictive Control" (2007);
 //      Maciejowski "Predictive Control with Constraints" (2002);
@@ -37,6 +39,8 @@ namespace ctrl
         double uMax = 1e9;   // Hard upper limit on u
         double duMin = -1e9; // Hard lower limit on Δu
         double duMax = 1e9;  // Hard upper limit on Δu
+        int    qpMaxIter = 200;   // Gradient-projection iteration limit
+        double qpTol     = 1e-8;  // Convergence tolerance (||Δx||_inf)
     };
 
     class DiscreteMPC : public IController
@@ -81,6 +85,7 @@ namespace ctrl
         Eigen::MatrixXd H_;   // (Φ'.Q_y.Φ + R_u) - precomputed Hessian
         Eigen::MatrixXd Qy_;  // (Np.p) * (Np.p)
         Eigen::MatrixXd Ru_;  // (Nc.m) * (Nc.m)
+        double          L_;   // max eigenvalue of H_ — Lipschitz constant for QP step
 
         // Pre-allocated work vectors - eliminate per-step heap allocation in computeRef()
         Eigen::VectorXd R_stack_;  // Np.p

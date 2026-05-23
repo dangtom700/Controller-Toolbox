@@ -193,4 +193,51 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
     return res;
 }
 
+// ---------------------------------------------------------------------------
+// suggestOrder
+// ---------------------------------------------------------------------------
+int suggestOrder(const Eigen::VectorXd &sv, double threshold, int maxOrder)
+{
+    const int n = (maxOrder > 0)
+                  ? std::min(static_cast<int>(sv.size()), maxOrder + 1)
+                  : static_cast<int>(sv.size());
+
+    if (n <= 1)
+        return 1;
+
+    // Elbow: find i* = argmax  sv(i) / sv(i+1)
+    int    bestI    = 0;
+    double bestRatio = 0.0;
+    for (int i = 0; i < n - 1; ++i)
+    {
+        if (sv(i + 1) < 1e-14)
+        {
+            bestI = i; // everything beyond is numerical zero
+            break;
+        }
+        const double ratio = sv(i) / sv(i + 1);
+        if (ratio > bestRatio)
+        {
+            bestRatio = ratio;
+            bestI     = i;
+        }
+    }
+    int order = bestI + 1; // keep sv[0..bestI]
+
+    // Threshold guard: cap at first index where sv(i)/sv(0) < threshold
+    if (threshold > 0.0 && sv(0) > 1e-14)
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            if (sv(i) / sv(0) < threshold)
+            {
+                order = std::min(order, i);
+                break;
+            }
+        }
+    }
+
+    return std::max(1, order);
+}
+
 } // namespace ctrl

@@ -1,5 +1,7 @@
 #include "PlantModel.h"
 #include <algorithm>
+#include <stdexcept>
+#include <unsupported/Eigen/MatrixFunctions>
 
 namespace ctrl
 {
@@ -63,6 +65,46 @@ namespace ctrl
         Eigen::VectorXd y = sys.C * x + sys.D * u; // y[k]
         x = sys.A * x + sys.B * u;                 // x[k+1]
         return y;
+    }
+
+    // ---------------------------------------------------------------------------
+    // c2d
+    // ---------------------------------------------------------------------------
+    StateSpace c2d(const StateSpace &sys_c, double Ts, C2dMethod method)
+    {
+        if (Ts <= 0.0)
+            throw std::invalid_argument("c2d: Ts must be positive.");
+        if (sys_c.Ts != 0.0)
+            throw std::invalid_argument("c2d: input model must be continuous-time (Ts == 0).");
+
+        const int n = sys_c.stateSize();
+        const int m = sys_c.inputSize();
+
+        if (method == C2dMethod::ZOH)
+        {
+            // Embed [Ac Bc; 0 0] * Ts and take matrix exponential.
+            // expm([Ac Bc; 0 0]*Ts) = [Ad Bd; 0 I]
+            Eigen::MatrixXd M = Eigen::MatrixXd::Zero(n + m, n + m);
+            M.topLeftCorner(n, n)  = sys_c.A * Ts;
+            M.topRightCorner(n, m) = sys_c.B * Ts;
+            const Eigen::MatrixXd eM = M.exp();
+
+            const Eigen::MatrixXd Ad = eM.topLeftCorner(n, n);
+            const Eigen::MatrixXd Bd = eM.topRightCorner(n, m);
+            return StateSpace(Ad, Bd, sys_c.C, sys_c.D, Ts);
+        }
+        else // Tustin
+        {
+            // Ad = (I - α.Ac)^{-1}.(I + α.Ac),  α = Ts/2
+            // Bd = Ts.(I - α.Ac)^{-1}.Bc
+            const double alpha = Ts * 0.5;
+            const Eigen::MatrixXd Im = Eigen::MatrixXd::Identity(n, n) - alpha * sys_c.A;
+            const Eigen::MatrixXd Ip = Eigen::MatrixXd::Identity(n, n) + alpha * sys_c.A;
+            const Eigen::PartialPivLU<Eigen::MatrixXd> lu(Im);
+            const Eigen::MatrixXd Ad = lu.solve(Ip);
+            const Eigen::MatrixXd Bd = lu.solve(sys_c.B * Ts);
+            return StateSpace(Ad, Bd, sys_c.C, sys_c.D, Ts);
+        }
     }
 
 } // namespace ctrl

@@ -77,7 +77,7 @@ public:
 
 private:
     int na_, nb_, ntheta_;
-    double Ts_, lambda_;
+    double Ts_, lambda_, P0_scale_; // P0_scale_ cached so reset() is idempotent
     Eigen::VectorXd theta_;     // parameter estimate
     Eigen::MatrixXd P_;         // covariance
     Eigen::VectorXd y_buf_;     // circular buffer for y[k-1..k-na]

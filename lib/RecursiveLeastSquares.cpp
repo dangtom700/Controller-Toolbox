@@ -5,7 +5,7 @@ namespace ctrl
 
     RecursiveLeastSquares::RecursiveLeastSquares(int na, int nb, double Ts,
                                                  double lambda, double P0_scale)
-        : na_(na), nb_(nb), ntheta_(na + nb), Ts_(Ts), lambda_(lambda), k_(0)
+        : na_(na), nb_(nb), ntheta_(na + nb), Ts_(Ts), lambda_(lambda), P0_scale_(P0_scale), k_(0)
     {
         theta_ = Eigen::VectorXd::Zero(ntheta_);
         P_ = P0_scale * Eigen::MatrixXd::Identity(ntheta_, ntheta_);
@@ -51,7 +51,7 @@ namespace ctrl
     void RecursiveLeastSquares::reset()
     {
         theta_.setZero();
-        P_ = P_(0, 0) * Eigen::MatrixXd::Identity(ntheta_, ntheta_); // restore original scale
+        P_ = P0_scale_ * Eigen::MatrixXd::Identity(ntheta_, ntheta_);
         y_buf_.setZero();
         u_buf_.setZero();
         k_ = 0;

@@ -51,7 +51,8 @@ struct SubspaceIDResult
 //
 // Y:          output matrix (p × N)  — rows = outputs, cols = time samples
 // U:          input  matrix (m × N)  — rows = inputs,  cols = time samples
-// n_order:    desired state order n  (choose by inspecting result.singularValues)
+// n_order:    desired state order n  (choose by inspecting result.singularValues,
+//             or use suggestOrder() below)
 // i_horizon:  number of block rows in Hankel matrices (recommend i >= 2*n_order/p,
 //             minimum i = n_order + 1)
 // Ts:         sample time [s]
@@ -63,5 +64,23 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
                        int n_order,
                        int i_horizon,
                        double Ts);
+
+// suggestOrder: automated system-order selection from the singular-value spectrum.
+//
+// Uses the elbow (maximum consecutive ratio) heuristic: finds the index i* at which
+// sv(i*) / sv(i*+1) is maximised (the sharpest drop in the spectrum) and returns
+// i* + 1 as the suggested order.  A secondary threshold guard caps the result at
+// the first index where sv(i)/sv(0) falls below `threshold` (default 1 %).
+//
+// sv:        SubspaceIDResult::singularValues from a previous n4sid call.
+// threshold: relative floor; singular values below threshold*sv(0) are treated as
+//            noise.  Set to 0 to disable the threshold guard.
+// maxOrder:  hard cap on the returned order (-1 = no cap).
+//
+// Returns at least 1.  Call after n4sid() to eliminate the manual "elbow inspection"
+// step when building adaptive loops (e.g., RLS → n4sid → GPC).
+int suggestOrder(const Eigen::VectorXd &sv,
+                 double threshold = 0.01,
+                 int maxOrder     = -1);
 
 } // namespace ctrl
