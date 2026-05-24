@@ -13,7 +13,7 @@ Target audience: control engineers and software developers familiar with discret
 4. [Usage Guide](#4-usage-guide)
 5. [Class Reference](#5-class-reference)
    - 5.1 [Core Types](#51-core-types-iplantmodel)
-   - 5.2 [Controllers](#52-controllers)
+   - 5.2 [Controllers](#52-controllers) (incl. Fuzzy Logic Module)
    - 5.3 [Estimators](#53-estimators)
    - 5.4 [Tuning Layer](#54-tuning-layer)
    - 5.5 [Composition & Orchestration](#55-composition--orchestration)
@@ -132,6 +132,7 @@ cmake --build build --target docs
 | [DiscreteLeadLag.h](lib/DiscreteLeadLag.h) | Tustin-discretised lead-lag biquad |
 | [SmithPredictor.h](lib/SmithPredictor.h) | Dead-time compensator wrapper |
 | [ExtremumSeeker.h](lib/ExtremumSeeker.h) | Perturbation-based ESC |
+| [FuzzyLogic.h](lib/FuzzyLogic.h) | Mamdani/TS inference engine, `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor` |
 | [KalmanFilter.h](lib/KalmanFilter.h) | Standalone linear KF |
 | [ControllerStack.h](lib/ControllerStack.h) | Supervisory / Additive / Weighted composition |
 | [ControllerTuner.h](lib/ControllerTuner.h) | Per-family tuners (Relay, FOPDT, Bryson, MPC, ...) |
@@ -144,13 +145,26 @@ cmake --build build --target docs
 
 ### 3.2 Examples (`examples/`)
 
-23 single-file programs numbered `ex01_*` -> `ex22_*` plus `example_pid_feedback`. Each demonstrates one controller or composition pattern (see [examples/CMakeLists.txt](examples/CMakeLists.txt) for the full enumeration). The `examples/cpp/` subdirectory contains MIMO / coupled-plant scenarios (`mimo_known`, `mimo_unknown`, `siso_coupled`, `siso_unknown`).
+27 single-file programs numbered `ex01_*` through `ex26_*` plus `example_pid_feedback`. Each demonstrates one controller or composition pattern (see [examples/CMakeLists.txt](examples/CMakeLists.txt) for the full enumeration). The `examples/cpp/` subdirectory contains MIMO / coupled-plant scenarios (`mimo_known`, `mimo_unknown`, `siso_coupled`, `siso_unknown`).
+
+The fuzzy examples `ex23`–`ex26` cover four distinct application domains:
+
+| Example | Application | Fuzzy element |
+|---------|-------------|---------------|
+| `ex23_fuzzy_pd_temperature` | HVAC zone temperature | `FuzzyPD` vs PID |
+| `ex24_fuzzy_pid_dc_motor` | DC motor speed ramp | `FuzzyPID` anti-windup |
+| `ex25_fuzzy_supervisor_mpc` | pH neutralisation (nonlinear) | `FuzzySupervisor` driving adaptive MPC |
+| `ex26_fuzzy_ts_gain_scheduler` | Inverted pendulum balancing | Hand-built TS `FuzzySystem` blending two PIDs |
+
+Companion Python scripts in `examples/python/` (ex23–ex26) generate identical data via self-contained Python implementations and produce comparison plots saved to `examples/data/`.
 
 The Python folder `examples/python/` mirrors many of the C++ demos for cross-validation against `python-control`.
 
 ### 3.3 Case Study (`case-study/`)
 
-[boiler_turbine_case_study.cpp](case-study/boiler_turbine_case_study.cpp) - a 3*3 nonlinear Bell-Astrom boiler-turbine model with linearisation, then LQR / MPC / LQG / PID / SMC / Extremum-Seeker comparison across three operating points (Low / Medium / High Load). See [case-study/verdict_boiler_turbine.md](case-study/verdict_boiler_turbine.md) for the analysis verdict.
+**Boiler-Turbine:** [boiler_turbine_case_study.cpp](case-study/boiler_turbine_case_study.cpp) — a 3×3 nonlinear Bell-Åström boiler-turbine model with linearisation, then LQR / MPC / LQG / PID / SMC / Extremum-Seeker comparison across three operating points (Low / Medium / High Load). See [case-study/verdict_boiler_turbine.md](case-study/verdict_boiler_turbine.md) for the analysis verdict.
+
+**Tug Boat Numerical Simulation:** [`case-study/Tug Boat Numerical Simulation/`](case-study/Tug%20Boat%20Numerical%20Simulation/) — a 3-DOF marine vessel simulation (Li et al. 2026, Ocean Engineering 357) running 7 controllers across 4 environmental scenarios (28 runs total). Controllers: PID, KF-PID, SMC, MPC, ESC, FuzzyPID, FuzzySup-MPC. Uses the full Toolbox including `FuzzyLogic`, `KalmanFilter`, `DiscreteMPC`, `DiscreteSMC`, `ExtremumSeeker`, and `PlantModel`. Outputs CSV telemetry for Python post-processing. See the planning documents in that folder for mathematical model detail.
 
 ### 3.4 Tests (`tests/`)
 
@@ -235,7 +249,55 @@ for (int k = 0; k < N; ++k) {
 }
 ```
 
-### 4.5 Composed Controllers (`ControllerStack`)
+### 4.5 Fuzzy PID and Fuzzy Supervisor
+
+```cpp
+// ── FuzzyPID (HVAC, motor, marine — any axis needing smooth nonlinear P+D+I) ──
+ctrl::FuzzyPIDParams fp;
+fp.pd.e_scale  = 2.0;      // error value considered "large"  (plant-specific units)
+fp.pd.de_scale = 0.2;      // error rate considered "large"   (units/s)
+fp.pd.u_scale  = 3.0;      // maps fuzzy output [-1,1] to output units
+fp.pd.uMin = 0.0; fp.pd.uMax = 3.0;
+fp.Ki  = 0.006;   fp.Kb = 1.0;    // integral gain + anti-windup
+fp.uMin = 0.0;    fp.uMax = 3.0;
+ctrl::FuzzyPID fuzzy(fp, Ts);
+
+double u = fuzzy.compute(r - y);   // call once per sample step
+
+// ── FuzzySupervisor (adaptive MPC re-linearisation trigger) ──────────────────
+ctrl::SupervisorParams sp;
+sp.e_threshold      = 5.0;   // |error| at which "Large" fires
+sp.trend_threshold  = 0.5;   // d|e|/dt at which "Increasing" fires
+sp.signal_threshold = 0.5;   // fuzzy output level that triggers action
+sp.cooldown_steps   = 20;    // steps before re-triggering is allowed
+ctrl::FuzzySupervisor supervisor(sp, Ts);
+
+ctrl::SupervisorDecision dec = supervisor.update(std::abs(r - y));
+if (dec.relinearize)
+    mpc.setPlant(reLinearise(current_state));   // adapt MPC model
+
+// ── Custom FuzzySystem (Takagi-Sugeno gain scheduling) ───────────────────────
+ctrl::FuzzySystem sys;
+sys.params.inference = ctrl::InferenceMethod::TakagiSugeno;
+sys.params.defuzz    = ctrl::DefuzzMethod::WeightedAverage;
+
+ctrl::LinguisticVariable v; v.name="theta"; v.lo=0; v.hi=1.0;
+v.terms.push_back({"Near", ctrl::mfGaussian(0.0, 0.15)});
+v.terms.push_back({"Far",  ctrl::mfGaussian(0.5, 0.15)});
+sys.addInput(v);
+
+ctrl::LinguisticVariable vout; vout.name="weight"; vout.lo=0; vout.hi=1.0;
+vout.terms.push_back({"w_hi", ctrl::mfSingleton(1.0)});
+vout.terms.push_back({"w_lo", ctrl::mfSingleton(0.0)});
+sys.addOutput(vout);
+
+ctrl::Rule r1; r1.antecedents.push_back({0,0}); r1.consequent_term_idx=0; sys.addRule(r1);
+ctrl::Rule r2; r2.antecedents.push_back({0,1}); r2.consequent_term_idx=1; sys.addRule(r2);
+
+double w = sys.evaluate({std::abs(theta)});   // weight for gain-scheduled blend
+```
+
+### 4.6 Composed Controllers (`ControllerStack`)
 
 ```cpp
 auto stack = std::make_shared<ctrl::ControllerStack>(ctrl::StackMode::Supervisory, Ts);
@@ -245,7 +307,7 @@ stack->addController(std::make_shared<ctrl::DiscreteSMC>(sp, Ts), "SMC",
 double u = stack->compute(error);
 ```
 
-### 4.6 Background Tuning, RT Reads
+### 4.7 Background Tuning, RT Reads
 
 ```cpp
 ctrl::AtomicParamBuffer<ctrl::PIDParams> buf(pp_initial);
@@ -362,6 +424,56 @@ SISO TF -> controllable canonical SS conversion.
 - **Returns:** Plant input `u = theta + dither` (absolute, not deviation).
 - **Methods:** `currentEstimate()` -> integrator state theta.
 - **Convergence:** ESC does not declare convergence; user must implement a stagnation window.
+
+#### Fuzzy Logic Module ([FuzzyLogic.h](lib/FuzzyLogic.h))
+
+The fuzzy module provides a self-contained Mamdani / Takagi-Sugeno inference engine together with three ready-to-use `IController` wrappers. All classes live in the `ctrl` namespace and are included via `ControllerToolbox.h`.
+
+##### Membership function factories
+| Function | Signature | Shape |
+|----------|-----------|-------|
+| `mfTriangular` | `(a, c, b)` | Triangle peaking at `c`, zero at `a` and `b` |
+| `mfTrapezoidal` | `(a, b, c, d)` | Trapezoid: ramps up `[a,b]`, flat `[b,c]`, ramps down `[c,d]` |
+| `mfGaussian` | `(mean, sigma)` | `exp(-0.5*((x-mean)/sigma)^2)` |
+| `mfSingleton` | `(value)` | 1 only at `x == value` (for TS consequents) |
+| `mfShoulderLeft` | `(a, b)` | 1 for `x <= a`, linear 1→0 from `a` to `b` |
+| `mfShoulderRight` | `(a, b)` | 0 for `x <= a`, linear 0→1 from `a` to `b` |
+
+All factories return `ctrl::MF = std::function<double(double)>` capturing parameters by value.
+
+##### `LinguisticVariable`
+- Holds `name`, universe `[lo, hi]`, and a `std::vector<LinguisticTerm>` (name + MF pairs).
+- `fuzzify(x)` → `std::vector<double>` of membership degrees (clamped to `[0,1]`).
+- `termIndex(name)` → int (-1 if not found).
+
+##### `FuzzySystem`
+- **Purpose:** Core inference engine supporting both Mamdani and TS inference on a single output variable.
+- **Build:** `addInput(var)`, `addOutput(var)`, `addRule(rule)`.
+- **Evaluate:** `evaluate(inputs) -> double` — fuzzifies all inputs, fires all rules (product AND, max aggregation), defuzzifies.
+- **Params (`FuzzySystemParams`):** `inference` (Mamdani/TakagiSugeno), `defuzz` (CoG/WeightedAverage), `cog_resolution` (101 default), `uMin/uMax`.
+- **CoG defuzz:** discrete grid of `cog_resolution` points over the output universe; each point takes the max over all clipped output MFs; weighted centroid.
+- **TS/WeightedAverage defuzz:** strength-weighted sum over the peak location of each output term (grid-searched at 51 points).
+- **Rule format (`Rule`):** `antecedents` (vector of `{input_idx, term_idx}`), `consequent_term_idx`, optional `weight` (default 1.0). AND connector is product t-norm.
+
+##### `FuzzyPD` (implements `IController`)
+- **Purpose:** Convenience Mamdani PD controller for one axis; builds its own `FuzzySystem` automatically from the canonical 5-term partition `{NL, NS, ZE, PS, PL}` with 25-rule diagonal rule table.
+- **Parameters (`FuzzyPDParams`):** `e_scale` (normalises error to `[-1,1]`), `de_scale` (normalises error rate), `u_scale` (scales output back to physical units), `uMin/uMax`.
+- **Inputs:** `compute(error)` — normalises `e` and `de = (e - e_prev)/Ts`, runs inference, scales and clamps output.
+- **Methods:** `compute(e)`, `reset()`, `setParams(p)`, `params()`, `lastOutput()`, `sampleTime()`.
+
+##### `FuzzyPID` (implements `IController`)
+- **Purpose:** `FuzzyPD` block + crisp backward-Euler integral with back-calculation anti-windup.
+- **Architecture:** `u = clamp(u_PD + integral, uMin, uMax)` where the integral accumulates `Ki*Ts*e` and receives the standard back-calculation correction `Kb*(u_sat - u_unsat)`.
+- **Parameters (`FuzzyPIDParams`):** contains `FuzzyPDParams pd` plus `Ki`, `Kb`, `uMin/uMax` (outer saturation, may differ from `pd.uMin/uMax`).
+- **Methods:** `compute(e)`, `reset()`, `setParams(p)`, `bumplessInit(u_target, error)`, `lastOutput()`.
+
+##### `FuzzySupervisor`
+- **Purpose:** Monitors a closed-loop error channel and returns a `SupervisorDecision` indicating whether the underlying controller's linearised plant model should be refreshed.
+- **Inputs:** `update(abs_error)` — called once per step with the scalar absolute error for this axis.
+- **Output (`SupervisorDecision`):** `relinearize_signal` [0,1], `relinearize` (bool, thresholded with cooldown), `error_norm`, `trend`.
+- **Internal logic:** 9-rule Mamdani system with 2 inputs (normalised error magnitude, normalised error trend) and 1 output (re-linearisation signal). A configurable cooldown prevents rapid oscillatory triggering.
+- **Parameters (`SupervisorParams`):** `e_threshold` (error at which term "Large" fires), `trend_threshold` (d|e|/dt at which "Increasing" fires), `signal_threshold` (threshold for boolean `relinearize`), `cooldown_steps`.
+- **Typical integration:** call `mpc.setPlant(reLinearise(nu))` when `dec.relinearize == true`.
 
 ---
 

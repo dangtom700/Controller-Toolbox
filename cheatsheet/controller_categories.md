@@ -155,7 +155,7 @@ Controller structure is fixed, but parameters evolve online.
 | **Tier 1 - Core** | Closed-form, real-time, no external libraries | PID (all variants), LQR, LQI, Pole Placement, Observer, Deadbeat, Lead-Lag, Smith Predictor, Cascade, Feedforward, SMC (basic), ADRC, DOBC, ESC |
 | **Tier 2 - Optimisation** | Requires embedded QP solver (e.g., OSQP, qpOASES) | Linear MPC, GPC, DMC, Robust MPC, Explicit MPC (offline), LQG |
 | **Tier 3 - Advanced Adaptive** | Requires RLS / EKF / gradient update | MRAC, STR, Adaptive MPC, ILC, L1 Adaptive, MFAC |
-| **Tier 4 - Intelligent** | Requires inference engine (ONNX, TensorFlow Lite, fuzzylite) | Fuzzy PID, NN Control, ANFIS, RL Policy |
+| **Tier 4 - Intelligent** | Requires inference engine (ONNX, TensorFlow Lite, or native fuzzy) | Fuzzy PID, NN Control, ANFIS, RL Policy |
 | **Tier 5 - Offline / External Tool** | Controller synthesised offline (MATLAB, CVXPY); only the gain matrix runs online | Hinf, H2, mu-Synthesis, LMI-Based, NMPC, Economic MPC |
 
 ---
@@ -163,7 +163,7 @@ Controller structure is fixed, but parameters evolve online.
 ## Toolbox Implementation Mapping
 
 The files in this repository implement the highlighted **Tier 1** controllers plus
-key **Tier 2** controllers:
+key **Tier 2** and **Tier 4** controllers:
 
 | File | Controllers Covered |
 |---|---|
@@ -171,6 +171,7 @@ key **Tier 2** controllers:
 | `DiscreteLQR.h/.cpp` | Discrete LQR (DARE), LQI (augment state externally), LQRAdapter |
 | `DiscreteMPC.h/.cpp` | Linear MPC (condensed QP, unconstrained + box constraints) |
 | `ExtremumSeeker.h/.cpp` | Perturbation-based ESC (Tier 1 adaptive) |
+| `FuzzyLogic.h/.cpp` | Mamdani/TS inference engine; `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor` (Tier 4) |
 | `ControllerTuner.h/.cpp` | Relay auto-tune, Step-response FOPDT, Bryson LQR weights, MPC horizon |
 | `ControllerStack.h/.cpp` | Supervisory, Additive, Weighted stacks (gain scheduling architecture) |
 | `PlantModel.h/.cpp` | TransferFunction, StateSpace, tf2ss, ssStep |

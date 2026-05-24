@@ -1,0 +1,15 @@
+{
+  "id": "S2",
+  "description": "Paper baseline 90 deg - wind and current from 90 deg (Li et al. Table 5)",
+  "wind_speed_ms": 10.0,
+  "wind_bearing_deg": 90.0,
+  "current_speed_ms": 0.5144,
+  "current_bearing_deg": 90.0,
+  "Hs_m": 2.0,
+  "Tp_s": 10.0,
+  "ref_x": 0.0,
+  "ref_y": 0.0,
+  "ref_psi_deg": 0.0,
+  "duration_s": 5400.0,
+  "seed": 42
+}

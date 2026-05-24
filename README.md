@@ -1,8 +1,8 @@
 # Controller Toolbox
 
-A discrete-time C++17 control library with PID, LQR, LQG, MPC, ADRC, SMC, Lead-Lag, Smith Predictor, Extremum Seeking, Kalman filtering, plus an integrated tuner suite and analysis layer.
+A discrete-time C++17 control library with PID, LQR, LQG, MPC, ADRC, SMC, Lead-Lag, Smith Predictor, Extremum Seeking, Kalman filtering, Fuzzy Logic inference, plus an integrated tuner suite and analysis layer.
 
-Eleven controller implementations, eight tuning families, frequency- and time-domain analysis, controller composition (Supervisory / Additive / Weighted), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.
+Twelve controller implementations, eight tuning families, frequency- and time-domain analysis, controller composition (Supervisory / Additive / Weighted), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.
 
 ---
 
@@ -69,8 +69,8 @@ for (int k = 0; k < 500; ++k) {
 
 ```
 |-- lib/             # Library sources -> target: controller_toolbox
-|-- examples/        # ex01..ex22 single-file demos + cpp/ MIMO examples
-|-- case-study/      # Nonlinear boiler-turbine MIMO benchmark
+|-- examples/        # ex01..ex26 single-file demos + cpp/ MIMO examples
+|-- case-study/      # Boiler-turbine MIMO benchmark + Tug Boat numerical simulation
 |-- tests/           # CTest-driven unit + integration tests
 |-- scripts/         # tune_all / simulate_all / realtime_all
 |-- cheatsheet/      # Reference notes
@@ -136,4 +136,4 @@ docker run --rm -it -v "$(pwd):/work" -w /work \
 
 ## Project Status
 
-Eleven controllers implemented and unit-tested. Five math corrections applied 2026-05-22: MPC condensed prediction formula (`G_u.u_prev` term), PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor D.u_prev feedthrough, and SMC `c_de` Ts-absorption documentation - details in [docs/bug_report.md Section 3](docs/bug_report.md). Code-review findings tracked in [docs/bug_report.md](docs/bug_report.md). Real-time deployment guidance in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+Twelve controllers implemented and unit-tested. `FuzzyLogic` module added 2026-05-23: Mamdani and Takagi-Sugeno inference engines, `FuzzyPD`, `FuzzyPID`, and `FuzzySupervisor` classes — see [docs/DOCUMENTATION.md Section 5.2](docs/DOCUMENTATION.md). Four fuzzy application examples added (`ex23`–`ex26`). Five earlier math corrections (2026-05-22): MPC condensed prediction formula (`G_u.u_prev` term), PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor D.u_prev feedthrough, and SMC `c_de` Ts-absorption documentation — details in [docs/bug_report.md Section 3](docs/bug_report.md). Real-time deployment guidance in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).

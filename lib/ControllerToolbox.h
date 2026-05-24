@@ -78,3 +78,4 @@
 #include "RepetitiveController.h"        // RC   - plug-in periodic disturbance/reference cancellation
 #include "GeneralizedPredictiveControl.h"// GPC  - velocity-form MPC with reference trajectory (CARIMA)
 #include "SubspaceID.h"                  // N4SID - batch subspace state-space identification (MOESP)
+#include "FuzzyLogic.h"                  // Fuzzy - Mamdani/TS inference, FuzzyPD, FuzzyPID, FuzzySupervisor

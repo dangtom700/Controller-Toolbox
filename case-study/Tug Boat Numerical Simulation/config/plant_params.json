@@ -1,0 +1,90 @@
+{
+  "_comment": "Barge + tug parameters from Li et al. (2026) Tables 1-2. Hydrodynamic added-mass/damping coefficients are prototype defaults (non-dimensional scaling of rigid-body inertia). Refine against paper validation in Phase T.",
+
+  "barge": {
+    "displacement_kg": 1.39e8,
+    "length_m": 200.0,
+    "beam_m": 50.0,
+    "draft_m": 17.25,
+
+    "added_mass": {
+      "Xudot": 1.39e7,
+      "Yvdot": 9.73e7,
+      "Yrdot": 0.0,
+      "Nvdot": 0.0,
+      "Nrdot": 2.78e10
+    },
+
+    "linear_damping": {
+      "Xu":  5.0e5,
+      "Yv":  8.0e5,
+      "Yr":  0.0,
+      "Nv":  0.0,
+      "Nr":  5.0e9
+    },
+
+    "wind_coeff": {
+      "frontal_area_m2": 862.5,
+      "lateral_area_m2": 3450.0,
+      "Cwx_max":  0.85,
+      "Cwy_max":  1.10,
+      "Cwpsi_max": 0.20
+    },
+
+    "current_coeff": {
+      "Cu":  0.25,
+      "Cv":  0.45,
+      "Cpsi": 0.10
+    }
+  },
+
+  "tugs": {
+    "_geometry": "Identical tugs at the four pushing stations (paper Fig. 5, Table 2).",
+    "displacement_kg": 8.92e6,
+    "length_m": 80.0,
+    "beam_m": 20.0,
+    "draft_m": 6.9,
+
+    "added_mass": {
+      "Xudot": 8.92e5,
+      "Yvdot": 6.24e6,
+      "Nrdot": 1.14e9
+    },
+    "linear_damping": {
+      "Xu": 1.0e5,
+      "Yv": 1.8e5,
+      "Nr": 5.0e8
+    },
+
+    "thrust_limits_kN":      [200.0, 2500.0],
+    "thrust_rate_limit_kN_s": 150.0,
+
+    "stations": [
+      { "id": 1, "x": 60.0,  "y":  25.0, "phi_deg": 45.0, "alpha_deg": -120.0 },
+      { "id": 2, "x": -60.0, "y":  25.0, "phi_deg": 45.0, "alpha_deg":  -60.0 },
+      { "id": 3, "x": -60.0, "y": -25.0, "phi_deg": 45.0, "alpha_deg":   60.0 },
+      { "id": 4, "x": 60.0,  "y": -25.0, "phi_deg": 45.0, "alpha_deg":  120.0 }
+    ]
+  },
+
+  "fluid": {
+    "rho_air":   1.225,
+    "rho_water": 1025.0
+  },
+
+  "wave": {
+    "_comment": "Two-component JONSWAP approximation used in prototype; replace with full QTF in v2.",
+    "Hs_m":   2.0,
+    "Tp_s":  10.0,
+    "gamma":  3.3,
+    "n_components": 2,
+    "drift_coeff_x": 1.2e4,
+    "drift_coeff_y": 2.0e4,
+    "drift_coeff_psi": 5.0e5
+  },
+
+  "simulation": {
+    "dt_s": 0.5,
+    "duration_s": 5400.0
+  }
+}
