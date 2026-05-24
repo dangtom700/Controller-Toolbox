@@ -96,7 +96,7 @@ namespace ctrl
             break;
 
         case PIDTuningRule::AMIGO:
-            // Simplified AMIGO (Åström 2006) from relay test data alone
+            // Simplified AMIGO (Astrom 2006) from relay test data alone
             p.Kp = 0.40 * Ku_;
             p.Ki = 0.80 * Ku_ / Tu_;
             p.Kd = 0.10 * p.Kp * Tu_;
@@ -160,8 +160,8 @@ namespace ctrl
         if (!got283 || !got632)
             throw std::runtime_error("StepResponseTuner: output did not reach 63.2 % of steady state.");
 
-        // Process-reaction-curve method (Åström & Hägglund):
-        //   τ = 1.5.(t63.2 - t28.3),   θ = t63.2 - τ
+        // Process-reaction-curve method (Astrom & Hagglund):
+        //   tau = 1.5.(t63.2 - t28.3),   theta = t63.2 - tau
         const double tau = 1.5 * (t632 - t283);
         const double theta = std::max(0.0, t632 - tau);
 
@@ -198,7 +198,7 @@ namespace ctrl
             break;
 
         case PIDTuningRule::AMIGO:
-            // AMIGO (Åström & Hägglund 2006) - optimised for robustness
+            // AMIGO (Astrom & Hagglund 2006) - optimised for robustness
             {
                 const double ratio = m.theta / m.tau;
                 p.Kp = (1.0 / m.K) * (0.2 + 0.45 * m.tau / m.theta);

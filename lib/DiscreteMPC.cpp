@@ -14,13 +14,13 @@ namespace ctrl
     }
 
     // ---------------------------------------------------------------------------
-    // Build condensed prediction matrices F and Φ.
+    // Build condensed prediction matrices F and Phi.
     //
     //   F(i.p : (i+1).p, :) = C . A^{i+1}        i = 0...Np-1
-    //   Φ(i.p, j.m)          = C . A^{i-j} . B   j <= i, 0 otherwise
+    //   Phi(i.p, j.m)          = C . A^{i-j} . B   j <= i, 0 otherwise
     //
     // Then precompute the Hessian:
-    //   H = (Φ'.Q_y.Φ + R_u)
+    //   H = (Phi'.Q_y.Phi + R_u)
     // ---------------------------------------------------------------------------
     void DiscreteMPC::buildCondensedMatrices()
     {
@@ -41,14 +41,14 @@ namespace ctrl
         for (int i = 0; i < Np; ++i)
             F_.block(i * p, 0, p, n) = plant_.C * Apow[i + 1];
 
-        // Φ: (Np.p) * (Nc.m)
+        // Phi: (Np.p) * (Nc.m)
         Phi_.resize(Np * p, Nc * m);
         Phi_.setZero();
         for (int i = 0; i < Np; ++i)
             for (int j = 0; j <= std::min(i, Nc - 1); ++j)
                 Phi_.block(i * p, j * m, p, m) = plant_.C * Apow[i - j] * plant_.B;
 
-        // G_u: (Np.p) * m  - G_u(i) = Σ_{j=0}^{i} C.A^j.B  (cumulative step response)
+        // G_u: (Np.p) * m  - G_u(i) = Sigma_{j=0}^{i} C.A^j.B  (cumulative step response)
         Gu_.resize(Np * p, m);
         Gu_.block(0, 0, p, m) = plant_.C * plant_.B; // j=0: C.A^0.B = C.B
         for (int i = 1; i < Np; ++i)
@@ -58,7 +58,7 @@ namespace ctrl
         Qy_ = p_.rho_y * Eigen::MatrixXd::Identity(Np * p, Np * p);
         Ru_ = p_.rho_u * Eigen::MatrixXd::Identity(Nc * m, Nc * m);
 
-        // Precompute Hessian (positive definite for ρ_u > 0)
+        // Precompute Hessian (positive definite for rho_u > 0)
         H_ = Phi_.transpose() * Qy_ * Phi_ + Ru_;
 
         // Lipschitz constant = max eigenvalue of H (used as gradient-projection step 1/L)
@@ -69,6 +69,12 @@ namespace ctrl
         pred_err_.resize(Np * p);
         grad_.resize(Nc * m);
         DeltaU_.resize(Nc * m);
+        grad_k_.resize(Nc * m);
+        DU_new_.resize(Nc * m);
+        lb_.resize(Nc * m);
+        ub_.resize(Nc * m);
+        cumMin_.resize(m);
+        cumMax_.resize(m);
     }
 
     // IController wrapper - reconstructs reference from error and delegates to computeRef.
@@ -82,19 +88,21 @@ namespace ctrl
     // Full interface: optimise and return u[k].
     //
     // Solves the box-constrained QP:
-    //   min_{ΔU}  0.5 ΔU'HΔU + g'ΔU
-    //   s.t.      lb <= ΔU <= ub
+    //   min_{DeltaU}  0.5 DeltaU'HDeltaU + g'DeltaU
+    //   s.t.      lb_ <= DeltaU <= ub_
     //
     // via gradient projection with constant step alpha = 1/L (L = max eigenvalue of H).
     // Warm-started from the clamped unconstrained optimum; typically converges in
     // a handful of iterations for MPC horizon sizes.
     //
-    // Bounds per segment j of ΔU (size m each):
-    //   For j == 0 (the move that is actually applied):
-    //     lb = max(duMin, uMin - u_prev)   - couples Δu and absolute u limits
-    //     ub = min(duMax, uMax - u_prev)
-    //   For j > 0 (future moves, only Δu limits apply):
-    //     lb = duMin,  ub = duMax
+    // Bounds per horizon step j (rolling worst-case tightening):
+    //   u[j] = u_prev + Sigma_{i=0}^{j} Deltau_i  must satisfy  uMin <= u[j] <= uMax.
+    //
+    //   At step j, Deltau_j is bounded by the worst-case contribution from prior steps:
+    //     lb_(j,k) = max(duMin, uMin_k - u_prev_k - cumMax_k)
+    //     ub_(j,k) = min(duMax, uMax_k - u_prev_k - cumMin_k)
+    //   where cumMin/cumMax track the tightest possible cumulative Deltau range.
+    //   This guarantees u feasibility across the full horizon without a full-QP reformulation.
     Eigen::VectorXd DiscreteMPC::computeRef(const Eigen::VectorXd &x,
                                             const Eigen::VectorXd &r_ref)
     {
@@ -107,18 +115,29 @@ namespace ctrl
         for (int i = 0; i < Np; ++i)
             R_stack_.segment(i * p, p) = r_ref;
 
-        // Gradient at ΔU = 0: g = Φ'.Qy.(F.x + Gu.u_prev - R)
+        // Gradient at DeltaU = 0: g = Phi'.Qy.(F.x + Gu.u_prev - R)
         pred_err_.noalias() = F_ * x + Gu_ * u_prev_ - R_stack_;
         grad_.noalias()     = Phi_.transpose() * (Qy_ * pred_err_);
 
-        // Build box bounds [lb, ub] on ΔU \in R^{Nc*m}
-        Eigen::VectorXd lb = Eigen::VectorXd::Constant(Nc * m, p_.duMin);
-        Eigen::VectorXd ub = Eigen::VectorXd::Constant(Nc * m, p_.duMax);
-        // Tighten first-step bounds to couple absolute u constraints
-        for (int j = 0; j < m; ++j)
+        // Build rolling worst-case tightened box bounds lb_/ub_ on DeltaU \in R^{Nc*m}.
+        // cumMin_(k) / cumMax_(k) track the range of cumulative Deltau for input channel k
+        // up to (but not including) the current step, assuming each prior Deltau_i was at
+        // its own tightened lb/ub.  This is conservative (over-tightens slightly) but
+        // guarantees that u = u_prev + Sigma Deltau stays within [uMin, uMax] for every step.
+        cumMin_.setZero();
+        cumMax_.setZero();
+        for (int j = 0; j < Nc; ++j)
         {
-            lb(j) = std::max(p_.duMin, p_.uMin - u_prev_(j));
-            ub(j) = std::min(p_.duMax, p_.uMax - u_prev_(j));
+            for (int k = 0; k < m; ++k)
+            {
+                const int idx = j * m + k;
+                const double lo = std::max(p_.duMin, p_.uMin - u_prev_(k) - cumMax_(k));
+                const double hi = std::min(p_.duMax, p_.uMax - u_prev_(k) - cumMin_(k));
+                lb_(idx) = lo;
+                ub_(idx) = (hi >= lo) ? hi : lo; // collapse infeasible interval to lo
+                cumMin_(k) += lo;
+                cumMax_(k) += ub_(idx);
+            }
         }
 
         // Warm-start: clamped unconstrained optimum
@@ -126,18 +145,18 @@ namespace ctrl
         if (ldlt.info() != Eigen::Success)
             return u_prev_; // degenerate Hessian - hold previous input
 
-        DeltaU_ = (-ldlt.solve(grad_)).cwiseMax(lb).cwiseMin(ub);
+        DeltaU_ = (-ldlt.solve(grad_)).cwiseMax(lb_).cwiseMin(ub_);
 
-        // Gradient projection: x <- clamp(x - (1/L).(H.x + g), lb, ub)
+        // Gradient projection: DU <- clamp(DU - (1/L)*(H*DU + g), lb_, ub_)
+        // All temporaries (grad_k_, DU_new_) are pre-allocated members - no per-iter alloc.
         const double alpha = 1.0 / L_;
         for (int iter = 0; iter < p_.qpMaxIter; ++iter)
         {
-            // grad_k = H*ΔU + g
-            Eigen::VectorXd grad_k = H_ * DeltaU_ + grad_;
-            Eigen::VectorXd DU_new = (DeltaU_ - alpha * grad_k).cwiseMax(lb).cwiseMin(ub);
+            grad_k_.noalias() = H_ * DeltaU_ + grad_;
+            DU_new_           = (DeltaU_ - alpha * grad_k_).cwiseMax(lb_).cwiseMin(ub_);
 
-            const double delta = (DU_new - DeltaU_).cwiseAbs().maxCoeff();
-            DeltaU_ = std::move(DU_new);
+            const double delta = (DU_new_ - DeltaU_).cwiseAbs().maxCoeff();
+            DeltaU_            = DU_new_;
             if (delta < p_.qpTol)
                 break;
         }

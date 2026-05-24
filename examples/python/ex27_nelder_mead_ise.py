@@ -1,7 +1,7 @@
 """
 ex27 - Nelder-Mead Optimisation of PID via ISE
 ================================================
-Goal     : Implement the same Nelder-Mead simplex (alpha=1, γ=2, ρ=0.5, sigma=0.5)
+Goal     : Implement the same Nelder-Mead simplex (alpha=1, gamma=2, rho=0.5, sigma=0.5)
            used in lib/TunerSuite.cpp and optimise PID gains to minimise ISE
            on the closed-loop step response. Verify the optimised ISE is lower
            than the initial-guess ISE.

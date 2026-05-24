@@ -60,8 +60,8 @@ These controllers solve a finite-horizon optimisation problem at each sample.
 | Hybrid MPC (MLD) | mixed-integer QP (MIQP) |
 | Adaptive MPC | QP + online parameter update |
 | LQG / LQG-LTR | offline Riccati (DARE/CARE) + online KF |
-| H₂ Control | offline LMI / Riccati solve |
-| Hinf Control (loop-shaping, mixed sensitivity) | offline γ-iteration / LMI |
+| H2 Control | offline LMI / Riccati solve |
+| Hinf Control (loop-shaping, mixed sensitivity) | offline gamma-iteration / LMI |
 | mu-Synthesis | offline D-K iteration |
 | QFT | offline frequency-domain loop shaping |
 | LMI-Based Robust Control | offline SDP (e.g., CVXPY, MOSEK) |
@@ -129,7 +129,7 @@ Controller structure is fixed, but parameters evolve online.
 
 | Knowledge Level | Controllers |
 |---|---|
-| **Full model (A,B,C,D)** | LQR, LQG, MPC, Hinf, H₂, mu-Synthesis, Pole Placement, DARE-based |
+| **Full model (A,B,C,D)** | LQR, LQG, MPC, Hinf, H2, mu-Synthesis, Pole Placement, DARE-based |
 | **FOPDT / reduced model** | IMC-PID, Smith Predictor, Z-N, Tyreus-Luyben, Cohen-Coon |
 | **Frequency-response data** | QFT, Hinf loop-shaping, Lead-Lag design |
 | **Step / impulse response data** | DMC, MAC, GPC (with FIR model) |
@@ -143,7 +143,7 @@ Controller structure is fixed, but parameters evolve online.
 | Scope | Controllers |
 |---|---|
 | **SISO only** | On/Off, P/PI/PD/PID (scalar), Lead-Lag, Smith Predictor, IMC-PID, Dahlin, Deadbeat, ESC |
-| **SISO or MIMO (natural extension)** | LQR, LQG, MPC, Hinf, H₂, SMC, MRAC, Pole Placement, Observer-based |
+| **SISO or MIMO (natural extension)** | LQR, LQG, MPC, Hinf, H2, SMC, MRAC, Pole Placement, Observer-based |
 | **MIMO by design** | mu-Synthesis, LQG/LTR, Dynamic Decoupling, Multivariable PID, Distributed MPC, Consensus |
 
 ---
@@ -156,7 +156,7 @@ Controller structure is fixed, but parameters evolve online.
 | **Tier 2 - Optimisation** | Requires embedded QP solver (e.g., OSQP, qpOASES) | Linear MPC, GPC, DMC, Robust MPC, Explicit MPC (offline), LQG |
 | **Tier 3 - Advanced Adaptive** | Requires RLS / EKF / gradient update | MRAC, STR, Adaptive MPC, ILC, L1 Adaptive, MFAC |
 | **Tier 4 - Intelligent** | Requires inference engine (ONNX, TensorFlow Lite, fuzzylite) | Fuzzy PID, NN Control, ANFIS, RL Policy |
-| **Tier 5 - Offline / External Tool** | Controller synthesised offline (MATLAB, CVXPY); only the gain matrix runs online | Hinf, H₂, mu-Synthesis, LMI-Based, NMPC, Economic MPC |
+| **Tier 5 - Offline / External Tool** | Controller synthesised offline (MATLAB, CVXPY); only the gain matrix runs online | Hinf, H2, mu-Synthesis, LMI-Based, NMPC, Economic MPC |
 
 ---
 

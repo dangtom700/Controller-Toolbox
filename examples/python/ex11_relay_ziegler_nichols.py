@@ -1,5 +1,5 @@
 """
-ex11 - Relay Auto-Tuner (Åström-Hägglund) and Ziegler-Nichols
+ex11 - Relay Auto-Tuner (Astrom-Hagglund) and Ziegler-Nichols
 ===============================================================
 Goal     : Simulate the relay feedback test to extract the ultimate gain Ku
            and ultimate period Pu, then apply the Ziegler-Nichols PID rule.
@@ -67,7 +67,7 @@ else:
 print(f"\n  Relay measured: Ku={Ku_meas:.4f}, Pu={Pu_meas:.4f} s")
 
 # --- Analytic: phase-crossover frequency of G(s)=1/(s^2+1.5s+1) ---
-# phase(G(jomega)) = -pi  ->  ∠G(jomega) = -180^\circ
+# phase(G(jomega)) = -pi  ->  \angleG(jomega) = -180^\circ
 # G(jomega) = 1 / (1 - omega^2 + j.1.5omega)
 # Im/Re = -1.5omega / (1-omega^2) -> 0 at omega->inf (no real phase crossover for this stable plant)
 # Use Bode to find phase margin via scipy

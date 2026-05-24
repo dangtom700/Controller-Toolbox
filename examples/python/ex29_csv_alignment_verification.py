@@ -10,7 +10,7 @@ Data generation : Synthetic CSV files created programmatically to mimic the
                   format output by scripts/simulate_all.cpp.
 Verification    :
   - Time column is monotonically increasing.
-  - Time steps are uniform: max|Δt - Ts| / Ts < 0.1%.
+  - Time steps are uniform: max|Deltat - Ts| / Ts < 0.1%.
   - All numeric columns contain no NaN/Inf.
   - Row count matches expected STEPS.
 
@@ -85,7 +85,7 @@ dt_mean = float(np.mean(diffs))
 dt_max_err = float(np.max(np.abs(diffs - Ts)) / Ts)
 results["uniform"] = dt_max_err < 0.001
 print(f"  {'[PASS]' if results['uniform'] else '[FAIL]'} "
-      f"uniform spacing: max Δt error = {dt_max_err:.2e} ({dt_max_err:.4%})")
+      f"uniform spacing: max Deltat error = {dt_max_err:.2e} ({dt_max_err:.4%})")
 
 # No NaN / Inf
 for col in ["time", "reference", "output", "control", "error"]:

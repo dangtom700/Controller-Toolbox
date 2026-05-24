@@ -115,7 +115,7 @@ This balances data fit against model complexity without held-out data.
 
 **Pros.** Calibrated uncertainty (posterior variance usable in robust/stochastic MPC); automatic relevance determination (ARD kernel identifies irrelevant inputs); non-parametric (no structural commitment).
 
-**Cons.** $\mathcal{O}(N^3)$ training cost; $\mathcal{O}(N^2)$ memory; degrades with large datasets (sparse GP approximations: Nyström, FITC, VFE address this); multi-step prediction requires uncertainty propagation (moment matching or sigma-point methods).
+**Cons.** $\mathcal{O}(N^3)$ training cost; $\mathcal{O}(N^2)$ memory; degrades with large datasets (sparse GP approximations: Nystrom, FITC, VFE address this); multi-step prediction requires uncertainty propagation (moment matching or sigma-point methods).
 
 ---
 

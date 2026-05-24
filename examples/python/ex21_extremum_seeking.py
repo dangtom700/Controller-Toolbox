@@ -2,13 +2,13 @@
 ex21 - Extremum Seeking Control
 =================================
 Goal     : Use ExtremumSeeker to find the maximum of a static quadratic cost
-           J(θ) = -(θ - 1.5)^2 + 4  (optimum at θ* = 1.5).
+           J(theta) = -(theta - 1.5)^2 + 4  (optimum at theta* = 1.5).
            Verify the ESC converges within 5% of the optimum within 5 000 steps.
 
 Data generation : 5 000 ESC steps; performance function is the quadratic cost.
 Verification    :
-  - |θ_mean_final - θ*| < 0.1 (within 5% of range).
-  - θ trajectory moves monotonically toward optimum in 1st half.
+  - |theta_mean_final - theta*| < 0.1 (within 5% of range).
+  - theta trajectory moves monotonically toward optimum in 1st half.
 
 Run:
     conda activate soft_robotics
@@ -32,7 +32,7 @@ def cost(theta):
 print("=" * 60)
 print("ex21 - Extremum Seeking Control")
 print("=" * 60)
-print(f"\n  Cost: J(θ) = -(θ-{THETA_OPT})^2 + 4,  θ* = {THETA_OPT}")
+print(f"\n  Cost: J(theta) = -(theta-{THETA_OPT})^2 + 4,  theta* = {THETA_OPT}")
 
 esc = ExtremumSeeker(
     dither_amp=0.05,
@@ -57,14 +57,14 @@ for k in range(STEPS):
 theta_final = float(np.mean(theta_traj[-500:]))
 J_final     = float(np.mean(J_traj[-500:]))
 
-print(f"\n  θ initial: {theta_traj[0]:.4f}")
-print(f"  θ final (mean last 500): {theta_final:.4f}  (optimum={THETA_OPT})")
+print(f"\n  theta initial: {theta_traj[0]:.4f}")
+print(f"  theta final (mean last 500): {theta_final:.4f}  (optimum={THETA_OPT})")
 print(f"  J final (mean last 500): {J_final:.4f}  (J_max={cost(THETA_OPT):.4f})")
 
 results = {}
 results["converges_theta"] = abs(theta_final - THETA_OPT) < 0.1
 print(f"\n  {'[PASS]' if results['converges_theta'] else '[FAIL]'} "
-      f"|θ_final - θ*| = {abs(theta_final - THETA_OPT):.4f} < 0.1")
+      f"|theta_final - theta*| = {abs(theta_final - THETA_OPT):.4f} < 0.1")
 
 results["J_near_max"] = abs(J_final - cost(THETA_OPT)) < 0.5
 print(f"  {'[PASS]' if results['J_near_max'] else '[FAIL]'} "
@@ -77,7 +77,7 @@ dist_initial = abs(t_q1[0]  - THETA_OPT)
 dist_q1_end  = abs(t_q1[-1] - THETA_OPT)
 results["approaches_opt"] = dist_q1_end < dist_initial
 print(f"  {'[PASS]' if results['approaches_opt'] else '[FAIL]'} "
-      f"θ moves toward θ* in 1st quarter "
-      f"(Δdist: {dist_initial:.4f} -> {dist_q1_end:.4f})")
+      f"theta moves toward theta* in 1st quarter "
+      f"(Deltadist: {dist_initial:.4f} -> {dist_q1_end:.4f})")
 
 print_summary(results)

@@ -8,15 +8,15 @@
 //   Lag:   0 < p_c < z_c  -> adds gain at low freq, improves steady-state accuracy
 //
 // Discretised via Tustin (bilinear) substitution s = 2(z-1)/(Ts(z+1)):
-//   C(z) = b₀ + b₁.z^-¹
+//   C(z) = b0 + b1.z^-^1
 //          ------------   (first-order IIR)
-//          1  + a₁.z^-¹
+//          1  + a1.z^-^1
 //
-//   b₀ = K.(2/Ts + z_c) / (2/Ts + p_c)
-//   b₁ = K.(z_c - 2/Ts) / (2/Ts + p_c)
-//   a₁ = (p_c - 2/Ts)   / (2/Ts + p_c)
+//   b0 = K.(2/Ts + z_c) / (2/Ts + p_c)
+//   b1 = K.(z_c - 2/Ts) / (2/Ts + p_c)
+//   a1 = (p_c - 2/Ts)   / (2/Ts + p_c)
 //
-// Difference equation: y[k] = b₀.u[k] + b₁.u[k-1] - a₁.y[k-1]
+// Difference equation: y[k] = b0.u[k] + b1.u[k-1] - a1.y[k-1]
 //
 // Typical use: placed in series with a PID or as a standalone compensator
 // in the forward or feedback path.

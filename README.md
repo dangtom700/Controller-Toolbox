@@ -68,13 +68,13 @@ for (int k = 0; k < 500; ++k) {
 ## Repository Layout
 
 ```
-├-- lib/             # Library sources -> target: controller_toolbox
-├-- examples/        # ex01..ex22 single-file demos + cpp/ MIMO examples
-├-- case-study/      # Nonlinear boiler-turbine MIMO benchmark
-├-- tests/           # CTest-driven unit + integration tests
-├-- scripts/         # tune_all / simulate_all / realtime_all
-├-- cheatsheet/      # Reference notes
-└-- docs/            # Documentation & deployment guides
+|-- lib/             # Library sources -> target: controller_toolbox
+|-- examples/        # ex01..ex22 single-file demos + cpp/ MIMO examples
+|-- case-study/      # Nonlinear boiler-turbine MIMO benchmark
+|-- tests/           # CTest-driven unit + integration tests
+|-- scripts/         # tune_all / simulate_all / realtime_all
+|-- cheatsheet/      # Reference notes
+|-- docs/            # Documentation & deployment guides
 ```
 
 ---

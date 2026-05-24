@@ -9,17 +9,17 @@ namespace ctrl
     // ---------------------------------------------------------------------------
     // tf2ss - controllable canonical form
     //
-    // For H(z^-¹) = (b₀ + b₁z^-¹ + ... + bₙz^-ⁿ) / (1 + a₁z^-¹ + ... + aₙz^-ⁿ):
+    // For H(z^-^1) = (b0 + b1z^-^1 + ... + b_nz^-^n) / (1 + a1z^-^1 + ... + a_nz^-^n):
     //
-    //   A = [[-a₁, -a₂, ..., -aₙ],   (companion row)
+    //   A = [[-a1, -a2, ..., -a_n],   (companion row)
     //        [ 1,   0,  ...,  0  ],
     //        ...
     //        [ 0,   0,  ...,  0  ]]   (n*n)
     //   B = [[1], [0], ..., [0]]      (n*1)
-    //   C = [[b₁-a₁b₀, b₂-a₂b₀, ..., bₙ-aₙb₀]]  (1*n)
-    //   D = [[b₀]]                  (1*1)
+    //   C = [[b1-a1b0, b2-a2b0, ..., b_n-a_nb0]]  (1*n)
+    //   D = [[b0]]                  (1*1)
     //
-    // Equivalent MATLAB:  [A,B,C,D] = tf2ss(num,den) in z^-¹ convention.
+    // Equivalent MATLAB:  [A,B,C,D] = tf2ss(num,den) in z^-^1 convention.
     // ---------------------------------------------------------------------------
     StateSpace tf2ss(const TransferFunction &tf)
     {
@@ -30,9 +30,9 @@ namespace ctrl
         while (static_cast<int>(num.size()) < n + 1)
             num.insert(num.begin(), 0.0);
 
-        double d0 = num[0]; // feed-through / direct term = b₀
+        double d0 = num[0]; // feed-through / direct term = b0
 
-        // Build A (n*n companion matrix, first row = -a₁...-aₙ, sub-diagonal = 1).
+        // Build A (n*n companion matrix, first row = -a1...-a_n, sub-diagonal = 1).
         Eigen::MatrixXd A = Eigen::MatrixXd::Zero(n, n);
         for (int j = 0; j < n; ++j)
             A(0, j) = -tf.den[j + 1];
@@ -43,7 +43,7 @@ namespace ctrl
         Eigen::MatrixXd B = Eigen::MatrixXd::Zero(n, 1);
         B(0, 0) = 1.0;
 
-        // C = [b₁-a₁b₀, ..., bₙ-aₙb₀]  (long-division remainder numerator)
+        // C = [b1-a1b0, ..., b_n-a_nb0]  (long-division remainder numerator)
         Eigen::MatrixXd C = Eigen::MatrixXd::Zero(1, n);
         for (int j = 0; j < n; ++j)
             C(0, j) = num[j + 1] - d0 * tf.den[j + 1];
@@ -68,9 +68,74 @@ namespace ctrl
     }
 
     // ---------------------------------------------------------------------------
+    // ss2tf - SISO state-space to transfer function via Markov parameters.
+    //
+    // Denominator: characteristic polynomial of A via root expansion of eigenvalues.
+    //   p(z) = Pi (z - lambda_i)  ->  a = [1, a_1, ..., a_n]
+    //
+    // Numerator via the impulse-response / Markov-parameter identity:
+    //   h[0] = D,  h[k] = C A^{k-1} B  for k >= 1
+    //   b[k] = Sigma_{j=0}^{k} a[j] h[k-j]
+    //
+    // This follows from H(z^{-1}) = N(z^{-1}) / D(z^{-1}) and the convolution
+    // relation between the denominator coefficients and the impulse response.
+    // ---------------------------------------------------------------------------
+    TransferFunction ss2tf(const StateSpace &sys)
+    {
+        if (sys.inputSize() != 1 || sys.outputSize() != 1)
+            throw std::invalid_argument("ss2tf: only SISO plants supported (inputSize == outputSize == 1).");
+
+        const int n = sys.stateSize();
+
+        // ---- Denominator: characteristic polynomial from eigenvalues of A ----
+        // p(z) = Pi_{i=1}^{n} (z - lambda_i),  monic, length n+1, coefficients real.
+        // Using root-to-polynomial expansion; coefficients are real since A is real
+        // (complex eigenvalues come in conjugate pairs).
+        std::vector<double> a(n + 1, 0.0);
+        {
+            Eigen::EigenSolver<Eigen::MatrixXd> es(sys.A, false);
+            const Eigen::VectorXcd &ev = es.eigenvalues();
+            std::vector<std::complex<double>> poly = {1.0};
+            for (int i = 0; i < ev.size(); ++i)
+            {
+                std::vector<std::complex<double>> tmp(poly.size() + 1, 0.0);
+                for (int j = 0; j < static_cast<int>(poly.size()); ++j)
+                {
+                    tmp[j]     += poly[j];
+                    tmp[j + 1] -= poly[j] * ev(i);
+                }
+                poly = tmp;
+            }
+            for (int k = 0; k <= n; ++k)
+                a[k] = poly[k].real(); // imaginary parts are numerical noise
+        }
+
+        // ---- Markov parameters: h[0]=D, h[k]=C A^{k-1} B for k=1..n ----
+        std::vector<double> h(n + 1);
+        h[0] = sys.D(0, 0);
+        Eigen::MatrixXd Apow = Eigen::MatrixXd::Identity(n, n); // A^0
+        for (int k = 1; k <= n; ++k)
+        {
+            h[k] = (sys.C * Apow * sys.B)(0, 0);
+            Apow = sys.A * Apow; // A^k for next iter
+        }
+
+        // ---- Numerator: b[k] = Sigma_{j=0}^{k} a[j] h[k-j] ----
+        std::vector<double> num(n + 1, 0.0);
+        for (int k = 0; k <= n; ++k)
+            for (int j = 0; j <= k; ++j)
+                num[k] += a[j] * h[k - j];
+
+        // Convert to z^{-1} convention (monic denominator already has a[0]=1)
+        std::vector<double> den(a.begin(), a.end());
+        return TransferFunction(num, den, sys.Ts);
+    }
+
+    // ---------------------------------------------------------------------------
     // c2d
     // ---------------------------------------------------------------------------
-    StateSpace c2d(const StateSpace &sys_c, double Ts, C2dMethod method)
+    StateSpace c2d(const StateSpace &sys_c, double Ts, C2dMethod method,
+                   double prewarp_freq)
     {
         if (Ts <= 0.0)
             throw std::invalid_argument("c2d: Ts must be positive.");
@@ -93,16 +158,34 @@ namespace ctrl
             const Eigen::MatrixXd Bd = eM.topRightCorner(n, m);
             return StateSpace(Ad, Bd, sys_c.C, sys_c.D, Ts);
         }
-        else // Tustin
+        else // Tustin or TustinPrewarped
         {
-            // Ad = (I - alpha.Ac)^{-1}.(I + alpha.Ac),  alpha = Ts/2
-            // Bd = Ts.(I - alpha.Ac)^{-1}.Bc
-            const double alpha = Ts * 0.5;
+            // Standard Tustin:  s = (2/Ts) * (z-1)/(z+1)  ->  alpha = Ts/2
+            //
+            // Prewarped Tustin: s = k_p * (z-1)/(z+1)
+            //   k_p = prewarp_freq / tan(prewarp_freq * Ts / 2)
+            //   Ensures |G_d(e^{j*prewarp_freq*Ts})| = |G_c(j*prewarp_freq)|  exactly.
+            //   When prewarp_freq = 0 or method == Tustin: k_p = 2/Ts (standard).
+            //
+            // In both cases: alpha = 1/k_p, and the formulas are identical.
+            double alpha;
+            if (method == C2dMethod::TustinPrewarped && prewarp_freq > 0.0)
+            {
+                const double tan_half = std::tan(prewarp_freq * Ts * 0.5);
+                if (tan_half < 1e-300)
+                    throw std::invalid_argument("c2d TustinPrewarped: prewarp_freq * Ts / 2 too small.");
+                alpha = tan_half / prewarp_freq; // = 1/k_p
+            }
+            else
+            {
+                alpha = Ts * 0.5; // standard Tustin: alpha = Ts/2
+            }
+
             const Eigen::MatrixXd Im = Eigen::MatrixXd::Identity(n, n) - alpha * sys_c.A;
             const Eigen::MatrixXd Ip = Eigen::MatrixXd::Identity(n, n) + alpha * sys_c.A;
             const Eigen::PartialPivLU<Eigen::MatrixXd> lu(Im);
             const Eigen::MatrixXd Ad = lu.solve(Ip);
-            const Eigen::MatrixXd Bd = lu.solve(sys_c.B * Ts);
+            const Eigen::MatrixXd Bd = lu.solve(sys_c.B * (2.0 * alpha)); // Bd = (2 alpha)*(I-alpha*A)^{-1}*B
             return StateSpace(Ad, Bd, sys_c.C, sys_c.D, Ts);
         }
     }

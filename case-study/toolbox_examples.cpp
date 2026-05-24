@@ -30,9 +30,9 @@
 // ============================================================
 
 // Continuous second-order underdamped SISO plant used in most SISO examples:
-//   G_c(s) = omegan^2 / (s^2 + 2ζomegans + omegan^2),  omegan=1 rad/s, ζ=0.5
+//   G_c(s) = omegan^2 / (s^2 + 2zetaomegans + omegan^2),  omegan=1 rad/s, zeta=0.5
 //
-// Ac = [[0, 1], [-omegan^2, -2ζomegan]]
+// Ac = [[0, 1], [-omegan^2, -2zetaomegan]]
 // Bc = [[0], [omegan^2]]
 // Cc = [[1, 0]]
 // Dc = [[0]]
@@ -126,7 +126,7 @@ static ctrl::StateSpace linearizeBoilerFE(double x1, double x2, double x3,
 }
 
 // ============================================================
-// Example 1: PID tuned via relay auto-tuner (Åström-Hägglund)
+// Example 1: PID tuned via relay auto-tuner (Astrom-Hagglund)
 // ============================================================
 //
 // Chain: c2d(ZOH) -> RelayAutoTuner -> PIDParams(TyreusLuyben) -> DiscretePID
@@ -406,7 +406,7 @@ void ex04_n4sid_order_selection()
 // Boiler linearized at op_B.  Tight valve-rate limits duMin/duMax are
 // passed directly; the new gradient-projection QP respects them over
 // the full control horizon rather than just clamping the first move.
-// The CSV lets you verify ||Δu[k]||_inf <= duMax for every step.
+// The CSV lets you verify ||Deltau[k]||_inf <= duMax for every step.
 void ex05_mpc_constrained()
 {
     std::cout << "\n=== Ex05: MPC with Hard Rate Constraints (GP-QP) ===\n";

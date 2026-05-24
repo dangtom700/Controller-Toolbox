@@ -2,12 +2,12 @@
 ex19 - Sliding Mode Controller with Boundary Layer
 ====================================================
 Goal     : Simulate DiscreteSMC and verify that the sliding surface s converges
-           to the boundary layer |s| < φ within finite time (reaching phase),
+           to the boundary layer |s| < phi within finite time (reaching phase),
            after which chattering is eliminated by the saturation function.
 
 Data generation : 2 000-sample step response, SMC parameters ce=1, cde=10, k=5, phi=0.1.
 Verification    :
-  - |s| < φ for > 90% of steady-state samples (last 50%).
+  - |s| < phi for > 90% of steady-state samples (last 50%).
   - Chattering in u is quantified: std(u_ss) < std(u_reaching).
   - No divergence: |y| < 10.
 
@@ -65,7 +65,7 @@ u_ss    = u[ss_start:]
 in_boundary = float(np.mean(np.abs(s_ss) < phi))
 results["in_boundary_layer"] = in_boundary > 0.90
 print(f"  {'[PASS]' if results['in_boundary_layer'] else '[FAIL]'} "
-      f"{in_boundary:.1%} of steady-state |s| < φ={phi}")
+      f"{in_boundary:.1%} of steady-state |s| < phi={phi}")
 
 chatter_reach = float(np.std(u_reach))
 chatter_ss    = float(np.std(u_ss))

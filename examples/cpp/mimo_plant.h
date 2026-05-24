@@ -14,10 +14,10 @@
  *   cc = 0.5 Ns/m      (coupling damper)
  *
  * Continuous-time equations of motion:
- *   m1*ẍ1 = -(k1+kc)*x1 - (c1+cc)*ẋ1 + kc*x2 + cc*ẋ2 + F1
- *   m2*ẍ2 =  kc*x1 + cc*ẋ1 - (k2+kc)*x2 - (c2+cc)*ẋ2 + F2
+ *   m1*xddot1 = -(k1+kc)*x1 - (c1+cc)*xdot1 + kc*x2 + cc*xdot2 + F1
+ *   m2*xddot2 =  kc*x1 + cc*xdot1 - (k2+kc)*x2 - (c2+cc)*xdot2 + F2
  *
- * State: q = [x1, ẋ1, x2, ẋ2]'   Input: u = [F1, F2]'   Output: y = [x1, x2]'
+ * State: q = [x1, xdot1, x2, xdot2]'   Input: u = [F1, F2]'   Output: y = [x1, x2]'
  *
  *          [  0,    1,    0,    0 ]              [ 0, 0 ]
  * A_ct  =  [ -7,   -1,    3,   0.5]   B_ct  =  [ 1, 0 ]
@@ -137,7 +137,7 @@ inline void print_plant_info(const MIMOStateSpace& plant) {
     Eigen::MatrixXd RGA     = Gdc.array() * Gdc_inv.transpose().array();
 
     std::cout << "\n=== MIMO Plant: Coupled Mass-Spring-Damper (2-mass) ===\n";
-    std::cout << "  State: [x1, ẋ1, x2, ẋ2]'   Input: [F1, F2]'   Output: [x1, x2]'\n";
+    std::cout << "  State: [x1, xdot1, x2, xdot2]'   Input: [F1, F2]'   Output: [x1, x2]'\n";
     std::cout << "  Ts = " << Ts << " s   (ZOH discretization)\n\n";
     std::cout << "  DC Gain G(1) =\n" << std::fixed << std::setprecision(5) << Gdc << "\n\n";
     std::cout << "  Relative Gain Array (RGA) =\n" << RGA << "\n";

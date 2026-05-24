@@ -10,16 +10,16 @@
 // an internal model, so the inner controller C(z) sees a delay-free loop.
 //
 // Modified error delivered to the inner controller:
-//   e_sp[k] = (r[k] - y[k]) + (ŷ_model[k] - ŷ_model[k-d])
+//   e_sp[k] = (r[k] - y[k]) + (yhat_model[k] - yhat_model[k-d])
 //            = error + (current model output - d-step-delayed model output)
 //
 // Signal-flow equivalent (ref: Smith 1957):
-//   Inner loop: C(z) -> P₀(z) . z^-ᵈ   (plant with delay)
-//   Model:      ŷ    = P₀(z) . u       (model without delay)
-//   Correction: c    = ŷ - z^-ᵈŷ       (delay-induced error cancelled)
+//   Inner loop: C(z) -> P0(z) . z^-^d   (plant with delay)
+//   Model:      yhat    = P0(z) . u       (model without delay)
+//   Correction: c    = yhat - z^-^dyhat       (delay-induced error cancelled)
 //
-// Requirements: plant model P₀ must represent the delay-FREE dynamics.
-// Ref: Smith (1957); Åström & Wittenmark "Computer Controlled Systems" Section 6.4;
+// Requirements: plant model P0 must represent the delay-FREE dynamics.
+// Ref: Smith (1957); Astrom & Wittenmark "Computer Controlled Systems" Section 6.4;
 //      MATLAB Smith Predictor example (smithpredict documentation).
 namespace ctrl
 {
@@ -50,7 +50,7 @@ namespace ctrl
         double Ts_;
         Eigen::VectorXd      x_model_;  // internal model state x^
         Eigen::VectorXd      u_prev_;   // u[k-1] for D.u feedthrough in y_now
-        std::vector<double>  y_buf_;   // fixed circular buffer of ŷ (length d_, pre-allocated)
+        std::vector<double>  y_buf_;   // fixed circular buffer of yhat (length d_, pre-allocated)
         int                  buf_head_; // index of the oldest slot
     };
 

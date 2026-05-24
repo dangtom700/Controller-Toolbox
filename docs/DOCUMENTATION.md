@@ -51,15 +51,15 @@ This installs `python=3.11`, `numpy`, `scipy`, `matplotlib`, `pandas`, `scikit-l
 
 ```
 controller/
-├-- CMakeLists.txt          # Root build, subdir aggregator
-├-- lib/                    # Library sources (build target: controller_toolbox)
-├-- examples/               # Single-file demos (ex01..ex22) + advanced cpp/ folder
-├-- case-study/             # Boiler-turbine multivariable case study
-├-- tests/                  # CTest-driven unit + integration tests
-├-- scripts/                # tune_all / simulate_all / realtime_all batch tools
-├-- cheatsheet/             # Markdown reference notes (tuning, identification)
-├-- DEPLOYMENT.md           # Real-time / RTOS deployment guide (must-read for prod)
-└-- bug_report.md           # Internal code-review log
+|-- CMakeLists.txt          # Root build, subdir aggregator
+|-- lib/                    # Library sources (build target: controller_toolbox)
+|-- examples/               # Single-file demos (ex01..ex22) + advanced cpp/ folder
+|-- case-study/             # Boiler-turbine multivariable case study
+|-- tests/                  # CTest-driven unit + integration tests
+|-- scripts/                # tune_all / simulate_all / realtime_all batch tools
+|-- cheatsheet/             # Markdown reference notes (tuning, identification)
+|-- DEPLOYMENT.md           # Real-time / RTOS deployment guide (must-read for prod)
+|-- bug_report.md           # Internal code-review log
 ```
 
 ---
@@ -150,7 +150,7 @@ The Python folder `examples/python/` mirrors many of the C++ demos for cross-val
 
 ### 3.3 Case Study (`case-study/`)
 
-[boiler_turbine_case_study.cpp](case-study/boiler_turbine_case_study.cpp) - a 3*3 nonlinear Bell-Åström boiler-turbine model with linearisation, then LQR / MPC / LQG / PID / SMC / Extremum-Seeker comparison across three operating points (Low / Medium / High Load). See [case-study/verdict_boiler_turbine.md](case-study/verdict_boiler_turbine.md) for the analysis verdict.
+[boiler_turbine_case_study.cpp](case-study/boiler_turbine_case_study.cpp) - a 3*3 nonlinear Bell-Astrom boiler-turbine model with linearisation, then LQR / MPC / LQG / PID / SMC / Extremum-Seeker comparison across three operating points (Low / Medium / High Load). See [case-study/verdict_boiler_turbine.md](case-study/verdict_boiler_turbine.md) for the analysis verdict.
 
 ### 3.4 Tests (`tests/`)
 
@@ -267,7 +267,7 @@ buf.publish(newly_computed_params);         // atomic swap
 ### 5.1 Core Types ([PlantModel.h](lib/PlantModel.h))
 
 #### `TransferFunction`
-- **Purpose:** SISO discrete-time TF in `z^-¹` form: `H(z^-¹) = num / den`.
+- **Purpose:** SISO discrete-time TF in `z^-^1` form: `H(z^-^1) = num / den`.
 - **Inputs:** `num` (vector `{b0,...,bm}`), `den` (monic vector `{1,a1,...,an}`), `Ts` (sample time, seconds).
 - **Throws:** `std::invalid_argument` if `den[0] != 1`.
 - **Methods:** `order() -> int`.
@@ -303,19 +303,19 @@ SISO TF -> controllable canonical SS conversion.
 #### `DiscreteLQR` ([DiscreteLQR.h](lib/DiscreteLQR.h))
 - **Purpose:** Optimal full-state feedback `u = -K*(x - x_ref) + u_ff` with DARE solved offline via value iteration.
 - **Parameters (`LQRParams`):** `Q` (n*n, PSD state cost), `R` (m*m, PD control cost).
-- **Inputs:** `compute(x, x_ref = ∅, u_ff = ∅)` - full state vector required.
+- **Inputs:** `compute(x, x_ref = \emptyset, u_ff = \emptyset)` - full state vector required.
 - **Returns:** `Eigen::VectorXd u[k]` (size m).
 - **Methods:** `gainMatrix()`, `riccatiSolution()`, `dareConverged()`, `dareIterations()`, `sampleTime()`.
 - **Helper:** `LQRAdapter` - wraps LQR as `IController` for use inside `ControllerStack`.
 
 #### `DiscreteMPC` ([DiscreteMPC.h](lib/DiscreteMPC.h))
-- **Purpose:** Condensed receding-horizon QP with hard box constraints on `Δu` and `u`.
+- **Purpose:** Condensed receding-horizon QP with hard box constraints on `Deltau` and `u`.
 - **Parameters (`MPCParams`):** `Np` (prediction horizon), `Nc` (control horizon, `Nc <= Np`), `rho_y` (output weight), `rho_u` (move-suppression weight), `uMin/uMax`, `duMin/duMax`.
 - **Inputs:** `computeRef(x_current, r_ref)` - current state and stacked reference.
-- **Returns:** Optimal Δu vector (first move of the receding horizon).
-- **Prediction formula:** `Y = F.x + G_u.u_prev + Φ.ΔU`, where `F(i) = C.A^(i+1)`, `G_u(i) = Σ_{j=0}^{i} C.A^j.B` (cumulative step response, accounts for u_prev baseline), and `Φ(i,j) = C.A^(i-j).B`. All three matrices are pre-built in the constructor.
+- **Returns:** Optimal Deltau vector (first move of the receding horizon).
+- **Prediction formula:** `Y = F.x + G_u.u_prev + Phi.DeltaU`, where `F(i) = C.A^(i+1)`, `G_u(i) = Sigma_{j=0}^{i} C.A^j.B` (cumulative step response, accounts for u_prev baseline), and `Phi(i,j) = C.A^(i-j).B`. All three matrices are pre-built in the constructor.
 - **Methods:** `computeRef(...)`, `setPlant(plant)` (online re-linearisation), `setState(x)`, `setParams(p)`, `compute(error)` (SISO convenience).
-- **Performance:** Condensed matrices F, G_u, Φ, H are pre-built in the constructor; per-step cost is one LDLT solve.
+- **Performance:** Condensed matrices F, G_u, Phi, H are pre-built in the constructor; per-step cost is one LDLT solve.
 
 #### `DiscreteLQG` ([DiscreteLQG.h](lib/DiscreteLQG.h))
 - **Purpose:** LQR on Kalman-estimated state - output-feedback optimal control (separation principle).
@@ -326,7 +326,7 @@ SISO TF -> controllable canonical SS conversion.
 - **D != 0 note:** If the plant's D matrix is non-zero, a `std::cerr` warning is printed at construction. The Kalman innovation `y - C.x^ - D.u` must use `u[k-1]` (one step stale) because `u[k]` has not yet been computed at update time. Accuracy degrades proportionally to D's magnitude. Set D = 0 in the model for accurate filtering.
 
 #### `DiscreteSMC` ([DiscreteSMC.h](lib/DiscreteSMC.h))
-- **Purpose:** First-order SMC with sliding surface `s = c_e.e + c_de.(e - e_prev)` and saturation `sat(s/φ)` to reduce chattering.
+- **Purpose:** First-order SMC with sliding surface `s = c_e.e + c_de.(e - e_prev)` and saturation `sat(s/phi)` to reduce chattering.
 - **Parameters (`SMCParams`):** `c_e`, `c_de`, `K` (switching gain), `phi` (boundary layer thickness), `uMin/uMax`.
 - **Inputs:** `compute(error)`.
 - **Returns:** Saturated control `u[k]`.
@@ -337,7 +337,7 @@ SISO TF -> controllable canonical SS conversion.
 - **Purpose:** Bandwidth-parameterised 2nd-order Linear ADRC - ESO estimates total disturbance, PD law cancels it.
 - **Parameters (`ADRCParams`):** `omega_o` (observer BW), `omega_c` (controller BW), `b0` (approximate input gain), `uMin/uMax`.
 - **Inputs:** `compute(y)` (plant output, **not error**); set reference first via `setReference(r)` or use `computeTracking(y, r)`.
-- **Returns:** Scalar control. Internal ESO state available via `esoState() -> Vector3d {z₁, z₂, z₃}`.
+- **Returns:** Scalar control. Internal ESO state available via `esoState() -> Vector3d {z1, z2, z3}`.
 - **Stability:** Requires `omega_o * Ts < 2` (forward-Euler limit).
 
 #### `DiscreteLeadLag` ([DiscreteLeadLag.h](lib/DiscreteLeadLag.h))
@@ -353,14 +353,14 @@ SISO TF -> controllable canonical SS conversion.
 - **Inputs:** `compute(error)` - closed-loop error `r - y`.
 - **Returns:** Inner controller's output, with the modified error including the Smith correction term.
 - **Methods:** `innerController()` for runtime re-tuning. Delay buffer is a fixed-size circular buffer (no RT allocation).
-- **D feedthrough:** The internal model output `ŷ[k] = C.x^ + D.u_prev` uses the previous control input `u[k-1]` for the feedthrough term. `u_prev_` is initialised to zero and updated each step.
+- **D feedthrough:** The internal model output `yhat[k] = C.x^ + D.u_prev` uses the previous control input `u[k-1]` for the feedthrough term. `u_prev_` is initialised to zero and updated each step.
 
 #### `ExtremumSeeker` ([ExtremumSeeker.h](lib/ExtremumSeeker.h))
 - **Purpose:** Perturbation-based optimiser - injects dither, demodulates output, integrates gradient to climb to the extremum of an unknown static cost surface.
 - **Parameters (`ExtremumSeekerParams`):** `perturbAmp`, `perturbFreq`, `lpfCutoff`, `hpfCutoff`, `integGain`, `seekMinimum` (true -> min, false -> max).
 - **Inputs:** `compute(signal)` - `signal` is the **plant output / cost**, **not** an error.
-- **Returns:** Plant input `u = θ + dither` (absolute, not deviation).
-- **Methods:** `currentEstimate()` -> integrator state θ.
+- **Returns:** Plant input `u = theta + dither` (absolute, not deviation).
+- **Methods:** `currentEstimate()` -> integrator state theta.
 - **Convergence:** ESC does not declare convergence; user must implement a stagnation window.
 
 ---
@@ -378,13 +378,13 @@ SISO TF -> controllable canonical SS conversion.
 ### 5.4 Tuning Layer
 
 #### `RelayAutoTuner` ([ControllerTuner.h](lib/ControllerTuner.h))
-- **Purpose:** Åström-Hägglund relay-feedback test -> extracts ultimate gain `Ku` and period `Tu`.
+- **Purpose:** Astrom-Hagglund relay-feedback test -> extracts ultimate gain `Ku` and period `Tu`.
 - **Config (`RelayTunerConfig`):** `relayAmplitude`, `hysteresis`, `cyclesRequired`.
 - **Usage:** Drive `step(y)` until `isDone()`; then `computePIDParams(rule, lambda)` returns `PIDParams`.
 - **Rules:** `ZieglerNichols`, `TyreusLuyben`, `IMC`, `AMIGO`.
 
 #### `StepResponseTuner`
-- **Purpose:** Open-loop FOPDT identification (`K, τ, θ`) from step response data; produces PID gains via IMC.
+- **Purpose:** Open-loop FOPDT identification (`K, tau, theta`) from step response data; produces PID gains via IMC.
 - **Methods:** `identify(t, y, stepMag)` -> `FOPDTModel`; `computePIDParams(model, Ts, rule, lambda)`.
 
 #### `LQRWeightTuner`
@@ -415,7 +415,7 @@ Standalone heuristics; each exposes `tuneImpl(...)` (unchecked) and `tuneFor<C>(
 - **Purpose:** Multi-controller orchestrator with three modes.
   - **Supervisory** - first entry whose `activationCondition(error, lastOutput)` returns `true` is used; others idle. Use for gain scheduling, fallbacks.
   - **Additive** - outputs of all enabled entries are summed. Use for inner/outer cascades.
-  - **Weighted** - `u = Σ wᵢ.uᵢ(e)`. Use for fuzzy blending.
+  - **Weighted** - `u = Sigma w_i.u_i(e)`. Use for fuzzy blending.
 - **Methods:** `addController(ptr, name, weight, condition)`, `removeController(name)`, `setActive(name, bool)`, `setWeight(name, w)`, `compute(error)`, `activeControllerName()`, `entries()`.
 
 ---
@@ -440,7 +440,7 @@ Standalone heuristics; each exposes `tuneImpl(...)` (unchecked) and `tuneFor<C>(
 - **API:** `read()` (RT thread, O(1), no allocation), `publish(p)` (background thread, atomic store).
 
 #### HAL ([lib/hal/HAL.h](lib/hal/HAL.h))
-Bundles `ISensor`, `IActuator`, `SimPlant`, `SimSensor`, `SimActuator` for closed-loop simulation against a `StateSpace` plant. Suitable as a stand-in for real hardware drivers when developing/test­ing.
+Bundles `ISensor`, `IActuator`, `SimPlant`, `SimSensor`, `SimActuator` for closed-loop simulation against a `StateSpace` plant. Suitable as a stand-in for real hardware drivers when developing/testing.
 
 ```cpp
 ctrl::SimPlant    plant(sys);

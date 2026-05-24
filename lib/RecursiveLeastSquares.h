@@ -9,14 +9,14 @@
 //   y[k] = -a1.y[k-1] - ... - ana.y[k-na]
 //          + b1.u[k-1] + ... + bnb.u[k-nb]  + e[k]
 //
-// Regressor:  φ[k] = [-y[k-1],...,-y[k-na], u[k-1],...,u[k-nb]]'  (na+nb * 1)
-// Parameters: θ     = [a1,...,ana, b1,...,bnb]'
+// Regressor:  phi[k] = [-y[k-1],...,-y[k-na], u[k-1],...,u[k-nb]]'  (na+nb * 1)
+// Parameters: theta     = [a1,...,ana, b1,...,bnb]'
 //
 // Recursive update (directional forgetting via scalar lambda):
-//   K[k] = P[k-1].φ[k] / (lambda + φ[k]'.P[k-1].φ[k])
-//   e[k] = y[k] - φ[k]'.θ[k-1]       (a-posteriori prediction error)
-//   θ[k] = θ[k-1] + K[k].e[k]
-//   P[k] = (P[k-1] - K[k].φ[k]'.P[k-1]) / lambda
+//   K[k] = P[k-1].phi[k] / (lambda + phi[k]'.P[k-1].phi[k])
+//   e[k] = y[k] - phi[k]'.theta[k-1]       (a-posteriori prediction error)
+//   theta[k] = theta[k-1] + K[k].e[k]
+//   P[k] = (P[k-1] - K[k].phi[k]'.P[k-1]) / lambda
 //
 // Forgetting factor lambda \in (0,1]:
 //   lambda = 1    -> standard least squares (weights all data equally)
@@ -26,7 +26,7 @@
 // After sufficient excitation, call toTransferFunction() or toStateSpace()
 // to extract a model for use with DiscreteMPC, DiscreteLQG, etc.
 //
-// Ref: Åström & Wittenmark "Adaptive Control" (1995) Ch.2;
+// Ref: Astrom & Wittenmark "Adaptive Control" (1995) Ch.2;
 //      Ljung "System Identification" (1999) Section 11.2.
 namespace ctrl
 {
@@ -44,13 +44,13 @@ public:
                           double P0_scale = 1e4);
 
     // Feed one new sample (y[k], u[k]) and update the estimate.
-    // Returns the current prediction error e[k] = y[k] - φ'.θ_prev.
+    // Returns the current prediction error e[k] = y[k] - phi'.theta_prev.
     double update(double y, double u);
 
     // Reset buffers and covariance; restart identification.
     void reset();
 
-    // Current parameter estimate θ = [a1,...,ana, b1,...,bnb]'.
+    // Current parameter estimate theta = [a1,...,ana, b1,...,bnb]'.
     const Eigen::VectorXd &params() const { return theta_; }
 
     // Denominator polynomial [1, a1,...,ana] (monic, length na+1).

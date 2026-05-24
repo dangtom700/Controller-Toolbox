@@ -10,8 +10,8 @@ namespace ctrl
 {
 
     // ---------------------------------------------------------------------------
-    // Discrete-time transfer function H(z^-¹) = (b₀ + b₁z^-¹ + ... + bₘz^-ᵐ)
-    //                                         / (1  + a₁z^-¹ + ... + aₙz^-ⁿ)
+    // Discrete-time transfer function H(z^-^1) = (b0 + b1z^-^1 + ... + b_mz^-^m)
+    //                                         / (1  + a1z^-^1 + ... + a_nz^-^n)
     //
     // num = {b0, b1, ..., bm}  - numerator coefficients
     // den = {1,  a1, ..., an}  - monic denominator (den[0] must equal 1)
@@ -68,7 +68,7 @@ namespace ctrl
 
     // ---------------------------------------------------------------------------
     // Convert SISO discrete transfer function -> state-space (controllable canonical form).
-    // Equivalent MATLAB:  [A,B,C,D] = tf2ss(num, den)  applied to the z^-¹ polynomial.
+    // Equivalent MATLAB:  [A,B,C,D] = tf2ss(num, den)  applied to the z^-^1 polynomial.
     // Ref: Ogata "Modern Control Engineering", MATLAB tf2ss documentation.
     // ---------------------------------------------------------------------------
     StateSpace tf2ss(const TransferFunction &tf);
@@ -106,9 +106,37 @@ namespace ctrl
     //
     // Equivalent MATLAB: c2d(sys_c, Ts, 'zoh')  /  c2d(sys_c, Ts, 'tustin')
     // ---------------------------------------------------------------------------
-    enum class C2dMethod { ZOH, Tustin };
+    // ---------------------------------------------------------------------------
+    // ss2tf - convert SISO discrete state-space model -> transfer function.
+    //
+    // Computes the denominator from the characteristic polynomial of A (via
+    // Faddeev-LeVerrier / Leverrier's algorithm) and the numerator from the
+    // Markov parameters h[0]=D, h[k]=C.A^{k-1}.B (k>=1):
+    //
+    //   b[k] = Sigma_{j=0}^{k} a[j] . h[k-j]   (a[0]=1, a[1..n] from char. poly)
+    //
+    // Only valid for SISO systems (stateSize() >= 1, inputSize() == outputSize() == 1).
+    // Throws std::invalid_argument for non-SISO plants.
+    //
+    // Equivalent MATLAB:  tf(sys)  where sys is a discrete ss object.
+    // ---------------------------------------------------------------------------
+    TransferFunction ss2tf(const StateSpace &sys);
+
+    // ---------------------------------------------------------------------------
+    // c2d discretisation methods.
+    //
+    //   ZOH              - zero-order hold (exact for piecewise-constant inputs).
+    //   Tustin           - bilinear transform  s = (2/Ts)(z-1)/(z+1).
+    //   TustinPrewarped  - bilinear transform prewarped at prewarp_freq [rad/s]
+    //                      so that the discrete frequency response matches the
+    //                      continuous response exactly at that frequency.
+    //                      Set prewarp_freq to the crossover or resonant frequency.
+    //                      Degenerates to standard Tustin when prewarp_freq = 0.
+    // ---------------------------------------------------------------------------
+    enum class C2dMethod { ZOH, Tustin, TustinPrewarped };
 
     StateSpace c2d(const StateSpace &sys_c, double Ts,
-                   C2dMethod method = C2dMethod::ZOH);
+                   C2dMethod method = C2dMethod::ZOH,
+                   double prewarp_freq = 0.0);
 
 } // namespace ctrl

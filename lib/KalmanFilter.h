@@ -14,7 +14,7 @@
 //
 // Update step (called with measurement y[k]):
 //   S[k]        = C.P[k|k-1].C' + R
-//   K_kf[k]     = P[k|k-1].C'.S^-¹
+//   K_kf[k]     = P[k|k-1].C'.S^-^1
 //   x^[k|k]     = x^[k|k-1] + K_kf.(y[k] - C.x^[k|k-1] - D.u[k])
 //   P[k|k]      = (I - K_kf.C).P[k|k-1]   (Joseph form for numerical stability)
 //
@@ -44,8 +44,13 @@ namespace ctrl
         void update(const Eigen::VectorXd &y, const Eigen::VectorXd &u_current);
 
         // Combined predict + update (most common usage pattern).
+        // u_prev:    control input applied at k-1 (used in the predict step).
+        // u_current: control input applied at k   (used in the innovation D.u term).
+        //            Defaults to u_prev when omitted - correct for D = 0 plants.
+        //            For D != 0 pass the actual current input to avoid a one-step bias.
         void step(const Eigen::VectorXd &y,
-                  const Eigen::VectorXd &u_prev);
+                  const Eigen::VectorXd &u_prev,
+                  const Eigen::VectorXd &u_current = Eigen::VectorXd());
 
         void reset();
 

@@ -6,7 +6,7 @@ namespace ctrl
 
     GeneralizedPredictiveController::GeneralizedPredictiveController(
         const StateSpace &plant, const GPCParams &params)
-        : plant_(plant), p_(params), Ts_(plant.Ts), r_ref_(0.0), y_prev_(0.0)
+        : plant_(plant), p_(params), Ts_(plant.Ts), r_ref_(0.0)
     {
         const int n = plant_.stateSize();
         const int p = plant_.outputSize();
@@ -19,7 +19,7 @@ namespace ctrl
     // ---------------------------------------------------------------------------
     // Build augmented velocity-form model and condensed prediction matrices.
     //
-    // Augmented state xa = [Δx; y]  (size n+p):
+    // Augmented state xa = [Deltax; y]  (size n+p):
     //   Aa = [A,   0 ]     Ba = [B  ]     Ca = [0, I]
     //        [C.A, I ]          [C.B]
     //
@@ -77,17 +77,26 @@ namespace ctrl
         err_.resize(Np * p);
         grad_.resize(Nu * m);
         DeltaU_.resize(Nu * m);
+        grad_k_.resize(Nu * m);
+        DU_new_.resize(Nu * m);
+        lb_.resize(Nu * m);
+        ub_.resize(Nu * m);
+        cumMin_.resize(m);
+        cumMax_.resize(m);
+
+        // Lipschitz constant for gradient-projection QP step (1/L = safe step size)
+        L_ = H_.selfadjointView<Eigen::Upper>().eigenvalues().maxCoeff();
     }
 
     double GeneralizedPredictiveController::computeRef(double y, double r)
     {
         const int p  = plant_.outputSize();
         const int m  = plant_.inputSize();
-        const int n  = plant_.stateSize();
         const int Np = p_.Np;
         const int Nu = p_.Nu;
 
         // Build reference trajectory: y*[k+j] = alpha^j.y + (1-alpha^j).r
+        // i=0 gives the one-step-ahead target y*[k+1] (consistent with the GPC horizon).
         double alpha_j = p_.alpha;
         for (int i = 0; i < Np; ++i)
         {
@@ -95,35 +104,64 @@ namespace ctrl
             alpha_j  *= p_.alpha;
         }
 
-        // Unconstrained QP: ΔU* = -H^-1 . Ga' . Qy . (Fa.xa - Rtraj)
-        err_.noalias() = Fa_ * xa_ - Rtraj_;
+        // Gradient at DeltaU = 0: g = Ga'.Qy.(Fa.xa - Rtraj)
+        err_.noalias()  = Fa_ * xa_ - Rtraj_;
+        grad_.noalias() = Ga_.transpose() * (Qy_ * err_);
+
+        // Warm-start: clamped unconstrained solution
         const auto ldlt = H_.ldlt();
         if (ldlt.info() != Eigen::Success)
+            return u_prev_(0); // degenerate Hessian - hold previous input
+
+        // Build rolling worst-case tightened bounds - same strategy as DiscreteMPC.
+        cumMin_.setZero();
+        cumMax_.setZero();
+        for (int j = 0; j < Nu; ++j)
         {
-            // Hessian singular - hold previous input
-            y_prev_ = y;
-            return u_prev_(0);
+            for (int k = 0; k < m; ++k)
+            {
+                const int idx = j * m + k;
+                const double lo = std::max(p_.duMin, p_.uMin - u_prev_(k) - cumMax_(k));
+                const double hi = std::min(p_.duMax, p_.uMax - u_prev_(k) - cumMin_(k));
+                lb_(idx) = lo;
+                ub_(idx) = (hi >= lo) ? hi : lo;
+                cumMin_(k) += lo;
+                cumMax_(k) += ub_(idx);
+            }
         }
-        grad_.noalias() = Ga_.transpose() * (Qy_ * err_);
-        DeltaU_         = -ldlt.solve(grad_);
 
-        // First control increment with box constraints
+        DeltaU_ = (-ldlt.solve(grad_)).cwiseMax(lb_).cwiseMin(ub_);
+
+        // Gradient projection: DU <- clamp(DU - (1/L)*(H*DU + g), lb_, ub_)
+        const double alpha = 1.0 / L_;
+        const int    qpMaxIter = 200;
+        const double qpTol     = 1e-8;
+        for (int iter = 0; iter < qpMaxIter; ++iter)
+        {
+            grad_k_.noalias() = H_ * DeltaU_ + grad_;
+            DU_new_           = (DeltaU_ - alpha * grad_k_).cwiseMax(lb_).cwiseMin(ub_);
+
+            const double delta = (DU_new_ - DeltaU_).cwiseAbs().maxCoeff();
+            DeltaU_            = DU_new_;
+            if (delta < qpTol)
+                break;
+        }
+
+        // Apply first control increment and enforce absolute u bounds
         Eigen::VectorXd du = DeltaU_.head(m);
-        du = du.cwiseMax(p_.duMin).cwiseMin(p_.duMax);
-        Eigen::VectorXd u = (u_prev_ + du).cwiseMax(p_.uMin).cwiseMin(p_.uMax);
-        du = u - u_prev_; // recompute after u-saturation
+        Eigen::VectorXd u  = (u_prev_ + du).cwiseMax(p_.uMin).cwiseMin(p_.uMax);
+        du = u - u_prev_; // recompute Deltau after u-saturation for state update
 
-        // Advance augmented state: xa[k+1] = Aa.xa + Ba.Δu
+        // Advance augmented state: xa[k+1] = Aa.xa + Ba.Deltau
         xa_ = Aa_ * xa_ + Ba_ * du;
 
         u_prev_ = u;
-        y_prev_ = y;
         return u(0);
     }
 
     double GeneralizedPredictiveController::compute(double error)
     {
-        // Reconstruct y from stored y_prev_ and error = r - y
+        // Reconstruct y from stored setpoint and error = r - y
         const double y = r_ref_ - error;
         return computeRef(y, r_ref_);
     }
@@ -148,8 +186,7 @@ namespace ctrl
     {
         xa_.setZero();
         u_prev_.setZero();
-        y_prev_ = 0.0;
-        r_ref_  = 0.0;
+        r_ref_ = 0.0;
     }
 
 } // namespace ctrl

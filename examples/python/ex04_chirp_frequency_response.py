@@ -9,7 +9,7 @@ Goal     : Drive the plant with a log-swept chirp, estimate the frequency
 
 Data generation : 5 000 samples of chirp(0.01 -> 5 Hz) through ss_step().
 Verification    :
-  - |H(jomegan)| at omegan = 1 rad/s approx = 1/ζ_peak (for ζ=0.75, peak approx = 0 dB).
+  - |H(jomegan)| at omegan = 1 rad/s approx = 1/zeta_peak (for zeta=0.75, peak approx = 0 dB).
   - Phase at omega=0.1 rad/s approx = -arctan(1.5*0.1 / (1-0.01)) approx = -8.5^\circ.
 
 Run:

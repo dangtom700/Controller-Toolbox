@@ -10,7 +10,7 @@
  *      PRBS inputs and record the 2*2 I/O dataset.
  *   3. MIMO ARX(2,2) identification: separate LS for each output channel,
  *      both inputs used as common regressors.
- *      Regression vector:  φ(k) = [-y1(k-1), -y2(k-1), -y1(k-2), -y2(k-2),
+ *      Regression vector:  phi(k) = [-y1(k-1), -y2(k-1), -y1(k-2), -y2(k-2),
  *                                    u1(k-1),  u2(k-1),  u1(k-2),  u2(k-2)]
  *   4. Convert identified ARX model to state-space (observable companion form,
  *      8th order -> represents a 2nd-order MIMO system with 2-step lag memory).
@@ -113,7 +113,7 @@ static ARXModel identify_arx(const Eigen::MatrixXd& Y,   // N * 2
     // Solve: Y_trg = Phi * Theta'  ->  Theta = (Phi'Phi)^{-1} Phi' Y_trg
     Eigen::MatrixXd Theta = (Phi.transpose()*Phi).ldlt().solve(Phi.transpose()*Y_trg);
     ARXModel m;
-    // θ for y1: Theta.col(0) = [a11_1,a12_1,a11_2,a12_2,b11_1,b12_1,b11_2,b12_2]
+    // theta for y1: Theta.col(0) = [a11_1,a12_1,a11_2,a12_2,b11_1,b12_1,b11_2,b12_2]
     for (int j = 0; j < 2; ++j) {
         m.A1(j,0) = Theta(0,j); m.A1(j,1) = Theta(1,j);
         m.A2(j,0) = Theta(2,j); m.A2(j,1) = Theta(3,j);

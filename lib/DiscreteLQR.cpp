@@ -37,38 +37,97 @@ namespace ctrl
     }
 
     // ---------------------------------------------------------------------------
-    // Value-iteration DARE solver
-    //   P_{t+1} = A'P_t A - (A'P_t B)(R + B'P_t B)^-¹(B'P_t A) + Q
-    // Converges to the stabilising solution Pinf for stabilisable (A,B) + detectable (A,Q½).
-    // Ref: Bertsekas "Dynamic Programming and Optimal Control" Vol 1, Section 1.3.
+    // Doubling algorithm for DARE (Smith / Pappas-Laub-Sandell iteration).
+    //
+    // Maintains a triplet (X_k, L_k, G_k) such that X_k = T^{2^k}(Q) where T
+    // is the Riccati operator.  Each iteration doubles the effective horizon:
+    //
+    //   W       = I + G_k X_k
+    //   Z1      = W^{-1} L_k          (W^{-1} applied on the right of L_k)
+    //   Z2      = W^{-1} G_k
+    //   X_{k+1} = X_k + L_k' X_k Z1   (2^{k+1}-step cost)
+    //   G_{k+1} = G_k + L_k  Z2 L_k'  (2^{k+1}-step controllability Gramian)
+    //   L_{k+1} = L_k  Z1              (2^{k+1}-step closed-loop A)
+    //
+    // Converges quadratically (doubles correct digits each iteration); typically
+    // 30-50 iterations suffice for double precision, vs. thousands for value iteration.
+    //
+    // Ref: Pappas, Laub & Sandell "On a Numerical Solution of the Discrete-Time
+    //      Algebraic Riccati Equation" IEEE TAC (1980);
+    //      Varga "On solving discrete-time periodic Riccati equations" (2006).
     // ---------------------------------------------------------------------------
     DareResult DiscreteLQR::solveDARE(const Eigen::MatrixXd &A,
                                       const Eigen::MatrixXd &B,
                                       const Eigen::MatrixXd &Q,
                                       const Eigen::MatrixXd &R)
     {
-        const int maxIter = 10000;
-        const double tol = 1e-12;
+        const int    n      = A.rows();
+        const int    maxIter = 100;   // quadratic convergence: far fewer needed than value-iter
+        const double tol    = 1e-12;
 
-        Eigen::MatrixXd P = Q;
+        const Eigen::MatrixXd In = Eigen::MatrixXd::Identity(n, n);
+
+        // G0 = B R^{-1} B'  (initial "controllability Gramian" factor)
+        const Eigen::MatrixXd G0 = B * R.ldlt().solve(B.transpose());
+
+        Eigen::MatrixXd X  = Q;   // DARE solution estimate (X_0 = Q = T^1(0))
+        Eigen::MatrixXd Lk = A;   // reduced closed-loop A  (L_0 = A)
+        Eigen::MatrixXd Gk = G0;  // reduced Gramian        (G_0 = BR^{-1}B')
 
         for (int iter = 0; iter < maxIter; ++iter)
         {
-            const Eigen::MatrixXd AtP = A.transpose() * P;
-            const Eigen::MatrixXd S = R + B.transpose() * P * B;
-            const Eigen::MatrixXd Gain = S.ldlt().solve(B.transpose() * P * A);
-            const Eigen::MatrixXd P_new = AtP * A - AtP * B * Gain + Q;
+            const Eigen::MatrixXd W = In + Gk * X; // I + G_k X_k
+            const Eigen::PartialPivLU<Eigen::MatrixXd> Wlu(W);
 
-            const double err = (P_new - P).norm() / (1.0 + P.norm());
-            P = P_new;
+            // W Z1 = Lk  -->  Z1 = W^{-1} Lk
+            const Eigen::MatrixXd Z1 = Wlu.solve(Lk);
+            // W Z2 = Gk  -->  Z2 = W^{-1} Gk
+            const Eigen::MatrixXd Z2 = Wlu.solve(Gk);
+
+            const Eigen::MatrixXd X_new = X  + Lk.transpose() * X * Z1;
+            const Eigen::MatrixXd G_new = Gk + Lk * Z2 * Lk.transpose();
+            const Eigen::MatrixXd L_new = Lk * Z1;
+
+            const double err = (X_new - X).norm() / (1.0 + X.norm());
+            X  = X_new;
+            Gk = G_new;
+            Lk = L_new;
 
             if (err < tol)
-                return {P, true, iter + 1};
+                return {X, true, iter + 1};
         }
 
-        // Return the best available iterate instead of throwing so the caller
-        // can decide whether to accept an approximate solution or take other action.
-        return {P, false, maxIter};
+        return {X, false, maxIter};
+    }
+
+    // ---------------------------------------------------------------------------
+    // PBH detectability test for (A, Q).
+    // Detectability requires (A, Q^{1/2}) to satisfy: for every eigenvalue lambda
+    // of A with |lambda| >= 1, rank([lambda*I - A; Q^{1/2}]) = n.
+    // Equivalently, (A', (Q^{1/2})') must be stabilizable (dual test).
+    // We extract Q^{1/2} via eigendecomposition (Q is symmetric PSD).
+    // ---------------------------------------------------------------------------
+    static bool isPBHDetectable(const Eigen::MatrixXd &A, const Eigen::MatrixXd &Q)
+    {
+        Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig(Q);
+        const Eigen::VectorXd &sv  = eig.eigenvalues();
+        const Eigen::MatrixXd &V   = eig.eigenvectors();
+
+        // Collect rows of Q^{1/2} for non-trivial eigenvalues
+        const double eps = 1e-10 * sv.maxCoeff();
+        std::vector<int> nz;
+        for (int i = 0; i < sv.size(); ++i)
+            if (sv(i) > eps) nz.push_back(i);
+
+        if (nz.empty()) return false; // Q = 0: no information about any state
+
+        const int n = A.rows();
+        Eigen::MatrixXd CQ(static_cast<int>(nz.size()), n);
+        for (int i = 0; i < static_cast<int>(nz.size()); ++i)
+            CQ.row(i) = std::sqrt(sv(nz[i])) * V.col(nz[i]).transpose();
+
+        // Detectability of (A, CQ) <=> stabilizability of (A', CQ')
+        return isPBHStabilizable(A.transpose(), CQ.transpose());
     }
 
     DiscreteLQR::DiscreteLQR(const StateSpace &plant, const LQRParams &params)
@@ -79,6 +138,13 @@ namespace ctrl
         {
             std::cerr << "[DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. "
                       << "DARE may not converge - check that all unstable modes are controllable.\n";
+        }
+
+        if (!isPBHDetectable(plant.A, params.Q))
+        {
+            std::cerr << "[DiscreteLQR] WARNING: (A,Q) failed the PBH detectability test. "
+                      << "DARE may not converge - check that all unstable modes are penalised "
+                      << "by Q (no zero-row in Q corresponding to an unstable state).\n";
         }
 
         DareResult res = solveDARE(plant.A, plant.B, params.Q, params.R);

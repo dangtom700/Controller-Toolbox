@@ -15,7 +15,7 @@ dynamic behaviour via pole locations.
 
 | Parameter | Meaning & Effect |
 |---|---|
-| Pole locations (s-plane) | Determines natural frequency (omegaₙ) and damping ratio (ζ). Poles further left -> faster decay. Complex pairs -> oscillatory response. |
+| Pole locations (s-plane) | Determines natural frequency (omega_n) and damping ratio (zeta). Poles further left -> faster decay. Complex pairs -> oscillatory response. |
 | Ackermann's formula / `place()` | Computes the gain matrix K so that (A - BK) has exactly the desired eigenvalues. |
 
 ---
@@ -40,9 +40,9 @@ trade-off between state error and control effort.
 
 | Parameter | Meaning & Effect |
 |---|---|
-| Q (state weighting matrix) | Diagonal entries Qᵢᵢ penalise deviations of state xᵢ. Higher Qᵢᵢ -> controller works harder to regulate xᵢ -> faster but more control effort. |
-| R (control weighting matrix) | Diagonal entries Rⱼⱼ penalise control input uⱼ magnitude. Higher R -> less aggressive actuation, slower response. |
-| Bryson's Rule initialisation | Set Qᵢᵢ = 1/(max xᵢ)^2, Rⱼⱼ = 1/(max uⱼ)^2 as a physically motivated starting point. |
+| Q (state weighting matrix) | Diagonal entries Q_i_i penalise deviations of state x_i. Higher Q_i_i -> controller works harder to regulate x_i -> faster but more control effort. |
+| R (control weighting matrix) | Diagonal entries R_j_j penalise control input u_j magnitude. Higher R -> less aggressive actuation, slower response. |
+| Bryson's Rule initialisation | Set Q_i_i = 1/(max x_i)^2, R_j_j = 1/(max u_j)^2 as a physically motivated starting point. |
 
 ---
 
@@ -85,7 +85,7 @@ anticipatory control over a horizon.
 | Np (prediction horizon) | How many steps ahead MPC optimises. Should cover the open-loop settling time. Too short -> poor performance; too long -> computational burden. |
 | Nc (control horizon) | Number of free control moves computed. Typically Np/5 to Np/3. Smaller Nc -> smoother but less flexible control. |
 | Q (output/state weighting) | Penalises tracking errors. Higher Q -> tighter setpoint tracking, more aggressive moves. |
-| R (input move weighting / ρ) | Penalises changes in control input. Higher R (or scalar ρ) -> smooth, conservative actuation. |
+| R (input move weighting / rho) | Penalises changes in control input. Higher R (or scalar rho) -> smooth, conservative actuation. |
 | Terminal cost / constraints | Ensures closed-loop stability at the end of the horizon. Often set to the LQR cost-to-go. |
 
 ---
@@ -115,8 +115,8 @@ more accurate than ZN for high dead-time processes.
 | Parameter | Meaning & Effect |
 |---|---|
 | Process gain K | Steady-state output change per unit input change from step test. |
-| Time constant τ | Speed of the natural process response. |
-| Dead time θ | Transportation lag before process responds. Ratio θ/τ drives aggressiveness of Cohen-Coon formulas. |
+| Time constant tau | Speed of the natural process response. |
+| Dead time theta | Transportation lag before process responds. Ratio theta/tau drives aggressiveness of Cohen-Coon formulas. |
 
 ---
 
@@ -128,11 +128,11 @@ good for integrating or high dead-time processes.
 
 | Parameter | Meaning & Effect |
 |---|---|
-| lambda (desired closed-loop TC) | Directly sets speed of response. Rule of thumb: lambda >= θ (dead time). Larger lambda -> more robust, slower. Smaller lambda -> faster, less robust. |
+| lambda (desired closed-loop TC) | Directly sets speed of response. Rule of thumb: lambda >= theta (dead time). Larger lambda -> more robust, slower. Smaller lambda -> faster, less robust. |
 
 ---
 
-### Åström-Hägglund Relay Auto-Tuning
+### Astrom-Hagglund Relay Auto-Tuning
 **When to use:** Automated PID tuning in a running process; relay experiment is
 safe and non-invasive.
 
@@ -168,7 +168,7 @@ bandwidth graphically on a Bode plot.
 **When to use:** Plant has parametric uncertainty and you need to guarantee
 performance bounds across all plant variations.
 
-**What you tune:** Nominal loop L₀(jomega) . Controller C(s) parameters . Pre-filter F(s)
+**What you tune:** Nominal loop L0(jomega) . Controller C(s) parameters . Pre-filter F(s)
 
 | Parameter | Meaning & Effect |
 |---|---|
@@ -204,8 +204,8 @@ many design parameters.
 | Parameter | Meaning & Effect |
 |---|---|
 | Inertia weight omega | Controls momentum of particles. High omega -> broad exploration; low omega -> fine local search. Often annealed from ~0.9 to ~0.4. |
-| Cognitive coefficient c₁ | Pulls particle toward its own best found position (self-confidence). |
-| Social coefficient c₂ | Pulls particle toward global best position (swarm influence). Balance c₁ vs c₂ controls exploration vs exploitation. |
+| Cognitive coefficient c1 | Pulls particle toward its own best found position (self-confidence). |
+| Social coefficient c2 | Pulls particle toward global best position (swarm influence). Balance c1 vs c2 controls exploration vs exploitation. |
 
 ---
 
@@ -231,7 +231,7 @@ highly nonlinear or unknown dynamics.
 | Parameter | Meaning & Effect |
 |---|---|
 | Reward function r(s, a) | Encodes control goals numerically (e.g., -\|error\| - alpha.\|u\|). The most critical design choice; bad reward -> bad policy. |
-| Discount factor γ | How much future rewards matter. γ -> 1: long-horizon planning. γ -> 0: myopic greedy policy. |
+| Discount factor gamma | How much future rewards matter. gamma -> 1: long-horizon planning. gamma -> 0: myopic greedy policy. |
 | Learning rate alpha | Step size for policy/value network updates. Too large -> instability; too small -> slow convergence. |
 
 ---
@@ -255,12 +255,12 @@ condition (speed, temperature, load).
 **When to use:** Desired closed-loop behaviour is known; plant parameters are
 uncertain or slowly varying.
 
-**What you tune:** Reference model . Adaptation gain Γ
+**What you tune:** Reference model . Adaptation gain Gamma
 
 | Parameter | Meaning & Effect |
 |---|---|
-| Reference model Mₘ(s) | Defines the ideal response the real closed-loop should match. Must be stable and physically achievable. |
-| Adaptation gain Γ | Rate at which controller parameters are adjusted. Large Γ -> fast adaptation but risk of instability/oscillation. |
+| Reference model M_m(s) | Defines the ideal response the real closed-loop should match. Must be stable and physically achievable. |
+| Adaptation gain Gamma | Rate at which controller parameters are adjusted. Large Gamma -> fast adaptation but risk of instability/oscillation. |
 | Adaptation law (MIT / Lyapunov) | MIT rule: gradient descent on error. Lyapunov: guarantees stability of adaptation. Lyapunov preferred for robustness. |
 
 ---
@@ -274,7 +274,7 @@ identification is feasible.
 | Parameter | Meaning & Effect |
 |---|---|
 | Forgetting factor lambda (0 < lambda <= 1) | In recursive least squares, weights recent data more when lambda < 1. lambda = 1 -> no forgetting. Smaller lambda -> faster tracking of parameter changes but higher noise sensitivity. |
-| Covariance matrix P₀ | Initial estimation uncertainty. Large P₀ -> fast initial adaptation; small P₀ -> slow to correct initial estimates. |
+| Covariance matrix P0 | Initial estimation uncertainty. Large P0 -> fast initial adaptation; small P0 -> slow to correct initial estimates. |
 
 ---
 
@@ -284,12 +284,12 @@ identification is feasible.
 **When to use:** No plant model available; closed-loop experiments can be
 repeated; direct gradient descent on performance.
 
-**What you tune:** Controller parameters θ . Step size γ (learning rate)
+**What you tune:** Controller parameters theta . Step size gamma (learning rate)
 
 | Parameter | Meaning & Effect |
 |---|---|
-| Cost function J(θ) | Typically a weighted sum of squared tracking error and control effort over the experiment. Gradient estimated from two closed-loop runs. |
-| Step size γ | Size of parameter update per iteration. Too large -> overshoot; too small -> slow convergence. |
+| Cost function J(theta) | Typically a weighted sum of squared tracking error and control effort over the experiment. Gradient estimated from two closed-loop runs. |
+| Step size gamma | Size of parameter update per iteration. Too large -> overshoot; too small -> slow convergence. |
 | Number of iterations | Each iteration requires at least 2 experiments. Converges in 5-20 iterations typically. |
 
 ---

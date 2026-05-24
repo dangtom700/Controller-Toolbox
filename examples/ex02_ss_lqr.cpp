@@ -27,7 +27,7 @@ int main()
     const double J = 0.001;  // rotor inertia  [kg.m^2]
     const double b = 0.1;    // viscous friction [N.m.s/rad]
     const double Km = 0.01;  // motor / back-EMF constant
-    const double R = 1.0;    // armature resistance [Ω]
+    const double R = 1.0;    // armature resistance [Omega]
     const double L = 0.5;    // armature inductance [H]
     const double Ts = 0.001; // sample time [s]
 

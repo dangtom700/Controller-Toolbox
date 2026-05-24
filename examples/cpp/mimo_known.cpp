@@ -3,7 +3,7 @@
  * ================================================================
  * Case 1: Strong cross-coupling MIMO plant (Coupled Mass-Spring-Damper, 2-mass)
  *
- * Plant: G(s) 2*2, states [x1,ẋ1,x2,ẋ2]', inputs [F1,F2]', outputs [x1,x2]'
+ * Plant: G(s) 2*2, states [x1,xdot1,x2,xdot2]', inputs [F1,F2]', outputs [x1,x2]'
  * Cross-coupling RGA approx = [1.22, -0.22; -0.22, 1.22] (non-trivial pairing effect)
  *
  * Controllers evaluated (all tuned for identical reference [1, 1]'):

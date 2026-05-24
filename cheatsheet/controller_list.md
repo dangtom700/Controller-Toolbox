@@ -44,7 +44,7 @@
 
 ### 4. Robust Control
 - **Hinf (H-infinity) Control** (mixed sensitivity, loop-shaping)
-- **H₂ Control**
+- **H2 Control**
 - **mu-Synthesis** (structured singular value)
 - **Quantitative Feedback Theory (QFT)**
 - **Sliding Mode Control (SMC)** - classical first-order
@@ -52,7 +52,7 @@
 - **Higher-Order Sliding Mode** (Super-Twisting, Twisting, Prescribed-time)
 - **Kharitonov-Based Robust Design**
 - **Lyapunov's Direct Method Redesign**
-- **LMI-Based Robust Control** (Hinf, H₂, pole clustering)
+- **LMI-Based Robust Control** (Hinf, H2, pole clustering)
 
 ---
 

@@ -15,13 +15,13 @@
 //       Z = [U_f; W_p; Y_f]   where W_p = [U_p; Y_p]
 //
 //  2. Thin LQ decomposition of Z (QR of Z') isolates the (3,2) block L32
-//     which contains the oblique projection of Y_f onto W_p ⊥ U_f.
+//     which contains the oblique projection of Y_f onto W_p \perp U_f.
 //
 //  3. SVD(L32): singular values reveal system order; left singular vectors
-//     form the extended observability matrix Γ = U[:, :n].sqrt(S[:n]).
+//     form the extended observability matrix Gamma = U[:, :n].sqrt(S[:n]).
 //
-//  4. Extract  C = Γ[:p, :]
-//              A = Γ_up† . Γ_down   (shift-invariance, least squares)
+//  4. Extract  C = Gamma[:p, :]
+//              A = Gamma_up^T . Gamma_down   (shift-invariance, least squares)
 //
 //  5. Least-squares regression for B and D from the state sequence and data.
 //
@@ -43,6 +43,16 @@ struct SubspaceIDResult
 {
     std::optional<StateSpace> model;  // identified A,B,C,D,Ts (empty on failure)
     Eigen::VectorXd  singularValues;  // all singular values of L32 (for order selection)
+
+    // Stochastic realisation - estimated from residuals after the deterministic fit.
+    // kalmanGain:  n*p Kalman gain K such that x[k+1] = A x[k] + B u[k] + K epsilon[k].
+    //              Pass directly to KalmanFilter or DiscreteLQG as the innovation-based
+    //              gain, avoiding manual Q/R tuning.
+    // innovCov:    p*p innovation covariance Lambda = E[epsilon epsilon'].  Use as R_noise in KalmanFilter.
+    // Both are empty (size 0) on failure.
+    Eigen::MatrixXd  kalmanGain;      // n*p  (empty on failure)
+    Eigen::MatrixXd  innovCov;        // p*p  (empty on failure)
+
     bool             success = false;
     std::string      message;         // error description on failure
 };

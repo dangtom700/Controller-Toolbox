@@ -8,8 +8,8 @@
 // Discrete-time Linear Quadratic Regulator (LQR).
 //
 // Offline: solves the Discrete Algebraic Riccati Equation (DARE) via value iteration.
-//   Pinf = A'PinfA - (A'PinfB)(R + B'PinfB)^-¹(B'PinfA) + Q
-//   K*  = (R + B'PinfB)^-¹ B'PinfA
+//   Pinf = A'PinfA - (A'PinfB)(R + B'PinfB)^-^1(B'PinfA) + Q
+//   K*  = (R + B'PinfB)^-^1 B'PinfA
 //
 // Online: u[k] = -K*.(x[k] - x_ref) + u_ff
 //

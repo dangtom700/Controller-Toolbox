@@ -1,7 +1,7 @@
 """
 ex18 - Lead-Lag Controller via Loop Shaping
 =============================================
-Goal     : Design a lead compensator using the loop-shaping tuner (beta=sin(φ),
+Goal     : Design a lead compensator using the loop-shaping tuner (beta=sin(phi),
            alpha=(1+beta)/(1-beta)), close the loop, and verify the crossover frequency
            and phase margin match the design spec.
 
@@ -35,7 +35,7 @@ phi_deg = 50.0          # desired phase margin (deg)
 print("=" * 60)
 print("ex18 - Lead-Lag Loop Shaping")
 print("=" * 60)
-print(f"\n  Design: omega_c = {omega_c} rad/s, φ_m = {phi_deg}^\circ")
+print(f"\n  Design: omega_c = {omega_c} rad/s, phi_m = {phi_deg}^\circ")
 
 # Compute lead compensator zero/pole (C++ LoopShapingTuner formula)
 phi_rad = np.radians(phi_deg)

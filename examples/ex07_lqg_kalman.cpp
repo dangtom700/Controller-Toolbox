@@ -23,7 +23,7 @@ int main()
     const double Ts = 0.01;
 
     // ---- Plant: 2nd-order system (discretised with Euler) ----
-    // Continuous: ẍ + 0.4ẋ + 4x = u  (underdamped, omegan=2, ζ=0.1)
+    // Continuous: xddot + 0.4xdot + 4x = u  (underdamped, omegan=2, zeta=0.1)
     Eigen::Matrix2d Ac; Ac << 0.0, 1.0, -4.0, -0.4;
     Eigen::Vector2d Bc; Bc << 0.0, 1.0;
     Eigen::RowVector2d Cc; Cc << 1.0, 0.0; // only position measured

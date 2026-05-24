@@ -514,7 +514,7 @@ namespace ctrl
     //   Lagarias et al. "Convergence Properties of the Nelder-Mead Simplex
     //   Method in Low Dimensions" (SIAM J. Optim. 1998).
     //
-    // Parameters: alpha=1 (reflect), γ=2 (expand), ρ=0.5 (contract), sigma=0.5 (shrink).
+    // Parameters: alpha=1 (reflect), gamma=2 (expand), rho=0.5 (contract), sigma=0.5 (shrink).
     // Bounds are enforced by clamping candidates before each evaluation.
     // -------------------------------------------------------------------------
     std::vector<double> TunerSuite::nelderMead(

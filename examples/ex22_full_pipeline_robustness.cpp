@@ -97,7 +97,7 @@ StateSpace fopdt_to_ss(const StepResponseTuner::FOPDTModel &m)
 struct SimMetrics
 {
     double ISE = 0.0;
-    double ControlCost = 0.0; // Sum of Δu^2
+    double ControlCost = 0.0; // Sum of Deltau^2
     double SSE = 0.0;
     double MaxOvershoot = 0.0;
     bool Stable = true;

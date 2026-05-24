@@ -16,7 +16,7 @@ and (3) a troubleshooting section for the most common runtime failure modes.
 | Parameter | Constraint | Consequence if violated |
 |-----------|-----------|------------------------|
 | `Kp`, `Ki`, `Kd` | All finite, `Kp > 0` | NaN output; state corruption |
-| `N` (derivative filter) | `N > 0`; practical range `[1, 1000]` | `N -> inf` ≡ ideal derivative; amplifies high-freq noise |
+| `N` (derivative filter) | `N > 0`; practical range `[1, 1000]` | `N -> inf` \equiv ideal derivative; amplifies high-freq noise |
 | `Ts` | `Ts > 0`; must match actual sample period | Integral and derivative scale incorrectly |
 | `Ki * Ts < 2 * Kp` | Discrete integrator stability criterion | Integral term can destabilise the closed loop |
 | `uMin < uMax` | Hard requirement | Anti-windup back-calculation undefined |
@@ -69,7 +69,7 @@ if (!lqr.dareConverged()) {
 | `Np` (prediction horizon) | `1 <= Np <= ~50` (memory) | Covers at least one settling time in samples |
 | `Nc` (control horizon) | `1 <= Nc <= Np` | Smaller `Nc` gives smoother control; `Nc = 1` gives minimum-variation control |
 | `rho_y` | `> 0` | Weight on output tracking |
-| `rho_u` | `> 0` | Must be strictly positive to keep Hessian `H = Φ'Qy Φ + Ru` positive definite |
+| `rho_u` | `> 0` | Must be strictly positive to keep Hessian `H = Phi'Qy Phi + Ru` positive definite |
 | `uMin / uMax` | `uMin < uMax` | Box constraint on absolute output |
 | `duMin / duMax` | `duMin < duMax` | Box constraint on move |
 
@@ -78,7 +78,7 @@ if (!lqr.dareConverged()) {
 Increase `rho_u` if this check triggers frequently.
 
 **Real-time latency:** MPC solve time scales as O(Nc^3.m^3) for the LDLT solve plus O(Np.Nc.n.m)
-for the matrix products. For `n=4, Np=10, Nc=3` expect ~5 µs on a 3 GHz core (see benchmark
+for the matrix products. For `n=4, Np=10, Nc=3` expect ~5 mus on a 3 GHz core (see benchmark
 output). Budget at least 3* this for worst-case jitter.
 
 ---
@@ -246,7 +246,7 @@ if (!lqr.dareConverged()) {
 **Symptom:** `computeRef()` returns last safe output repeatedly; tracking error grows.
 
 **Cause 1 - Hessian not positive definite:** `rho_u` too small or zero.
-Fix: increase `rho_u`; minimum safe value is approximately `1e-6 * rho_y * max(eigenvalue(Φ'Φ))`.
+Fix: increase `rho_u`; minimum safe value is approximately `1e-6 * rho_y * max(eigenvalue(Phi'Phi))`.
 
 **Cause 2 - Model mismatch:** `F_` and `Phi_` built from a linearised model that no longer
 represents the plant. For gain-scheduled MPC, call `setPlant()` after each re-linearisation.
@@ -310,7 +310,7 @@ destabilize the predictor for lightly damped plants.
 **Fix:** Measure the transport delay experimentally (step test, cross-correlation) and ensure
 `delaySteps = round(L / Ts)` where `L` is the measured delay in seconds.
 
-For non-integer `L / Ts` (fractional delay), a first-order Padé approximation in the inner model
+For non-integer `L / Ts` (fractional delay), a first-order Pade approximation in the inner model
 is recommended - not yet implemented in this toolbox.
 
 ---
@@ -336,7 +336,7 @@ If you observe the output "freezing" at an unexpected value, check upstream:
 | PID (Ziegler-Nichols) | Use `RelayAutoTuner` - provides `Ku`, `Tu` -> `Kp = 0.6.Ku`, `Ti = 0.5.Tu`, `Td = 0.125.Tu` |
 | Lead-Lag | Phase margin < 30^\circ: add lead. `zero = omega_c / 5`, `pole = 5.omega_c`. Adjust `gain` for 0 dB at `omega_c`. |
 | LQR | Start with `Q = diag(1/y_max^2,...) `, `R = diag(1/u_max^2,...)` (Bryson's rule) |
-| MPC | `Np = round(4.τ / Ts)`, `Nc = max(1, round(Np/3))`, `rho_u = 0.01.rho_y` |
+| MPC | `Np = round(4.tau / Ts)`, `Nc = max(1, round(Np/3))`, `rho_u = 0.01.rho_y` |
 | ADRC | `omega_c approx = desired_bandwidth`, `omega_o = 5.omega_c`, `b0 = plant_DC_gain` |
 | Kalman | `Q = 1e-3.I`, `R = variance_of_sensor_noise.I`, `P0 = 10.I` - then tune Q/R ratio |
 

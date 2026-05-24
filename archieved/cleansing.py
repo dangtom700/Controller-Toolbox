@@ -70,6 +70,67 @@ REPLACEMENTS = {
     '↔': '\\leftrightarrow',     # ↔ left-right arrow
     '↺': '(anticlockwise)',   # ↺ anticlockwise open circle arrow
     '⁺': '^+',       # ⁺ superscript plus
+    # Superscripts / subscripts
+    '¹': '^1',      # ¹ superscript 1
+    '⁴': '^4',      # ⁴ superscript 4
+    '⁵': '^5',      # ⁵ superscript 5
+    'ⁿ': '^n',      # ⁿ superscript n
+    'ᵈ': '^d',      # ᵈ superscript d (discrete)
+    'ᵐ': '^m',      # ᵐ superscript m
+    '₀': '0',       # ₀ subscript 0
+    '₁': '1',       # ₁ subscript 1
+    '₂': '2',       # ₂ subscript 2
+    '₃': '3',       # ₃ subscript 3
+    'ₘ': '_m',      # ₘ subscript m
+    'ₙ': '_n',      # ₙ subscript n
+    'ᵢ': '_i',      # ᵢ subscript i
+    'ⱼ': '_j',      # ⱼ subscript j
+    # Capital Greek
+    'Δ': 'Delta',   # Δ capital delta
+    'Σ': 'Sigma',   # Σ capital sigma
+    'Φ': 'Phi',     # Φ capital phi
+    'Γ': 'Gamma',   # Γ capital gamma
+    'Λ': 'Lambda',  # Λ capital lambda
+    'Π': 'Pi',      # Π capital pi
+    'Θ': 'Theta',   # Θ capital theta
+    'Ω': 'Omega',   # Ω capital omega
+    # Lowercase Greek (not already covered)
+    'θ': 'theta',   # θ theta
+    'φ': 'phi',     # φ phi
+    'τ': 'tau',     # τ tau
+    'ρ': 'rho',     # ρ rho
+    'γ': 'gamma',   # γ gamma
+    'η': 'eta',     # η eta
+    'ζ': 'zeta',    # ζ zeta
+    'ξ': 'xi',      # ξ xi
+    # Dot-notation (ẋ = x-dot, etc.)
+    'ẋ': 'xdot',    # ẋ x with dot above
+    'ẍ': 'xddot',   # ẍ x with diaeresis (double-dot)
+    'ẏ': 'ydot',    # ẏ y with dot above
+    '̇': '.',  # ̇  combining dot above (standalone)
+    # Hat notation
+    'ŷ': 'yhat',    # ŷ y with circumflex
+    'ĝ': 'ghat',    # ĝ g with circumflex
+    # Additional math
+    '∂': 'd',            # ∂ partial derivative
+    '†': '^T',           # † dagger (transpose / pseudo-inverse)
+    '⊥': '\\perp',       # ⊥ perpendicular
+    '≡': '\\equiv',      # ≡ identical to / defined as
+    '∅': '\\emptyset',   # ∅ empty set
+    '∠': '\\angle',      # ∠ angle
+    # Box-drawing (used in ASCII art diagrams)
+    '├': '|',       # ├ box-drawing light vertical and right
+    '└': '|',       # └ box-drawing light up and right
+    # Latin letters with diacritics (author names in references)
+    'ö': 'o',       # ö o with umlaut
+    'ä': 'a',       # ä a with umlaut
+    'é': 'e',       # é e with acute
+    'ÿ': 'y',       # ÿ y with diaeresis
+    'Å': 'A',       # Å A with ring (e.g. Angstrom / Astrom)
+    # Soft hyphen (invisible, just remove)
+    '­': '',   # soft hyphen
+    # Micro sign (looks like mu but distinct codepoint)
+    'µ': 'mu',      # µ micro sign U+00B5
 }
 
 _self_basename = os.path.basename(__file__)

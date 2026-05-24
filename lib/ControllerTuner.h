@@ -40,7 +40,7 @@
 //    Bayesian opt.      -> use BoTorch / GPyOpt / scikit-optimize
 //    MRAC / STR / IFT / VRFT -> adaptive control; separate library
 //
-//  Ref: Åström & Hägglund (1988, 2006); Bryson & Ho (1975);
+//  Ref: Astrom & Hagglund (1988, 2006); Bryson & Ho (1975);
 //       Cohen & Coon (1953); Rivera, Morari & Skogestad (1986);
 //       Camacho & Bordons MPC Ch 3; Franklin, Powell & Emami-Naeini.
 // ============================================================
@@ -55,11 +55,11 @@ namespace ctrl
         ZieglerNichols, // Classic ZN - fast, ~25 % overshoot  (Ziegler & Nichols 1942)
         TyreusLuyben,   // Conservative ZN variant - better load rejection (Tyreus & Luyben 1992)
         IMC,            // Internal Model Control (lambda-tuning) - needs FOPDT model + lambda
-        AMIGO           // Approximate M-constrained Integral Gain Optimisation (Åström 2006)
+        AMIGO           // Approximate M-constrained Integral Gain Optimisation (Astrom 2006)
     };
 
     // ============================================================
-    // Relay Auto-Tuner  (Åström-Hägglund relay feedback test)
+    // Relay Auto-Tuner  (Astrom-Hagglund relay feedback test)
     // ============================================================
     // Applies a relay +/-d to the closed plant, records the resulting limit cycle,
     // then derives ultimate gain Ku and ultimate period Tu.
@@ -140,7 +140,7 @@ namespace ctrl
     // ============================================================
     // Fits a First-Order Plus Dead-Time (FOPDT) model to open-loop
     // step response data using the process-reaction-curve tangent method.
-    //   G(s) approx = K.e^{-θs} / (τs + 1)
+    //   G(s) approx = K.e^{-thetas} / (taus + 1)
     // ============================================================
     class StepResponseTuner
     {
@@ -356,13 +356,13 @@ namespace ctrl
     // ============================================================
     // Cohen-Coon Tuner  (FOPDT process-reaction-curve method)
     // ============================================================
-    // More accurate than ZN for processes where dead time θ is a
-    // significant fraction of the lag τ (θ/τ in [0.1, 1.0]).
+    // More accurate than ZN for processes where dead time theta is a
+    // significant fraction of the lag tau (theta/tau in [0.1, 1.0]).
     //
     // Formulas (PID, Cohen & Coon 1953):
-    //   Kp = (τ / (K.θ)) . (4/3 + r/4)    where r = θ/τ
-    //   Ti = θ . (32 + 6r) / (13 + 8r)
-    //   Td = 4θ / (11 + 2r)
+    //   Kp = (tau / (K.theta)) . (4/3 + r/4)    where r = theta/tau
+    //   Ti = theta . (32 + 6r) / (13 + 8r)
+    //   Td = 4theta / (11 + 2r)
     //
     // Ref: Cohen & Coon "Theoretical Consideration of Retarded Control" (1953).
     // ============================================================
@@ -402,7 +402,7 @@ namespace ctrl
     //   - The compensator contributes phase_add_deg of phase lead at omega_c
     //
     // Derivation (lead, phase_add_deg > 0):
-    //   beta = sin(φ),   alpha = (1+beta)/(1-beta)
+    //   beta = sin(phi),   alpha = (1+beta)/(1-beta)
     //   z = omega_c/\sqrtalpha,   p = omega_c.\sqrtalpha,   K = \sqrtalpha / |G(j.omega_c)|
     //
     // where |G(j.omega_c)| = gain_at_wc (open-loop plant magnitude before

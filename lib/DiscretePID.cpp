@@ -17,7 +17,7 @@ namespace ctrl
     //   alpha     = 1 / (1 + N.Ts)
     //   d[k]  = alpha.d[k-1] + Kd.N.alpha.(e[k] - e[k-1])
     //
-    // Anti-windup back-calculation (Åström & Wittenmark):
+    // Anti-windup back-calculation (Astrom & Wittenmark):
     //   I[k+1] = I[k] + Ki.Ts.e[k] + Kb.(u_sat[k] - u_unsat[k])
     double DiscretePID::compute(double error)
     {
@@ -55,6 +55,18 @@ namespace ctrl
         deriv_ = 0.0;
         e_prev_ = 0.0;
         u_prev_ = 0.0;
+    }
+
+    // Back-calculate the integral state so that compute(error) approx = u_target.
+    // Derivation: u_target approx = Kp*error + integral + Kd*N*(error-e_prev)/(1+N*Ts)
+    // Solving for integral: integral = u_target - Kp*error - deriv (zeroed here)
+    // On the very first compute() call after this, the output will be close to u_target.
+    void DiscretePID::bumplessInit(double u_target, double error)
+    {
+        deriv_    = 0.0;
+        e_prev_   = error;
+        u_prev_   = u_target;
+        integral_ = u_target - p_.Kp * error;  // absorb P term; D starts from rest
     }
 
 } // namespace ctrl

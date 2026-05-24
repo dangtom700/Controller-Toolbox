@@ -19,10 +19,10 @@
 //   Use for: inner/outer cascade (fast PID + slow MPC trim), complementary power splitting.
 //
 // StackMode::Weighted
-//   Weighted sum of all enabled entries: u = Σ wᵢ . uᵢ(e)
+//   Weighted sum of all enabled entries: u = Sigma w_i . u_i(e)
 //   Use for: blended controller transitions, fuzzy membership weighting.
 //
-// Ref: Åström "Control System Design" Ch 9 (Gain Scheduling);
+// Ref: Astrom "Control System Design" Ch 9 (Gain Scheduling);
 //      MATLAB supervisory control patterns.
 namespace ctrl
 {
@@ -78,6 +78,7 @@ namespace ctrl
         double Ts_;
         std::vector<StackEntry> entries_;
         std::string activeName_;
+        std::string prevActiveName_; // tracks last selected controller for bumpless transfer
         double lastOutput_ = 0.0;
 
         StackEntry *findEntry(const std::string &name);

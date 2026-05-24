@@ -12,7 +12,7 @@
 //   I[k]   = I[k-1] + Ki.Ts.e[k] + Kb.(u_sat[k] - u_unsat[k])
 //   u[k]   = Kp.e[k] + I[k] + D[k]   (I[k] includes current e[k])
 //
-// Ref: Åström & Wittenmark "Computer Controlled Systems" Ch 3;
+// Ref: Astrom & Wittenmark "Computer Controlled Systems" Ch 3;
 //      MATLAB pid(), pidtune(), Simulink Discrete PID Controller block.
 namespace ctrl
 {
@@ -46,6 +46,10 @@ namespace ctrl
         const PIDParams &params() const { return p_; }
 
         double lastOutput() const { return u_prev_; }
+
+        // Bumpless initialisation: set integral so that compute(error) would return u_target.
+        // Called by ControllerStack on supervisory activation to avoid output bumps.
+        void bumplessInit(double u_target, double error) override;
 
     private:
         PIDParams p_;

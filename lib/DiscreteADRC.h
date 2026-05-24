@@ -5,24 +5,28 @@
 // Active Disturbance Rejection Controller - 2nd-order Linear ADRC (LADRC).
 //
 // Models the controlled plant as a double integrator with unknown total disturbance:
-//   ÿ = f(y, ẏ, d, t) + b₀.u    (b₀ is an approximate input gain)
+//   y = f(y, ydot, d, t) + b0.u    (b0 is an approximate input gain)
 //
 // A 3rd-order Extended State Observer (ESO) estimates:
-//   z₁ approx = y          (output)
-//   z₂ approx = ẏ          (rate)
-//   z₃ approx = f(...)       (total disturbance - lumped unknown dynamics + external)
+//   z1 approx = y          (output)
+//   z2 approx = ydot          (rate)
+//   z3 approx = f(...)       (total disturbance - lumped unknown dynamics + external)
 //
-// ESO (bandwidth-parameterised, forward Euler, bandwidth omega₀):
-//   z₁[k+1] = z₁[k] + Ts.(z₂[k] + beta₁.epsilon[k])
-//   z₂[k+1] = z₂[k] + Ts.(z₃[k] + beta₂.epsilon[k] + b₀.u[k])
-//   z₃[k+1] = z₃[k] + Ts.beta₃.epsilon[k]
-//   epsilon[k]    = y[k] - z₁[k]   (observer error)
+// ESO (bandwidth-parameterised, backward Euler, bandwidth omega0):
+// Discrete update solves (I - Ts.Ae) z_new = z + Ts.(Be_eps.eps + Be_u.u)
+// where Ae = [[0,1,0],[0,0,1],[0,0,0]] (nilpotent).  The analytical inverse of
+// (I - Ts.Ae) is [[1,Ts,Ts^2],[0,1,Ts],[0,0,1]], yielding:
+//   z3[k+1] = z3[k] + Ts.beta3.epsilon[k]
+//   z2[k+1] = z2[k] + Ts.(beta2.epsilon[k] + b0.u[k]) + Ts.z3[k+1]
+//   z1[k+1] = z1[k] + Ts.beta1.epsilon[k]              + Ts.z2[k+1]
+//   epsilon[k] = y[k] - z1[k]  (observer error, using old z1 - semi-implicit)
 //
-//   beta₁ = 3omega₀,  beta₂ = 3omega₀^2,  beta₃ = omega₀^3   (characteristic poly (s+omega₀)^3)
+// A-stable: stable for all omega0.Ts > 0 (unlike the prior forward-Euler scheme).
+//   beta1 = 3omega0,  beta2 = 3omega0^2,  beta3 = omega0^3   (characteristic poly (s+omega0)^3)
 //
 // PD control + disturbance cancellation (bandwidth omega_c):
-//   u₀[k]  = omega_c^2.(r[k] - z₁[k]) - 2omega_c.z₂[k]
-//   u[k]   = (u₀[k] - z₃[k]) / b₀
+//   u0[k]  = omega_c^2.(r[k] - z1[k]) - 2omega_c.z2[k]
+//   u[k]   = (u0[k] - z3[k]) / b0
 //
 // IMPORTANT: compute(y) takes the raw plant output y (NOT the error).
 //            Call setReference(r) before each step or use computeTracking(y,r).
@@ -36,7 +40,7 @@ namespace ctrl
     {
         double omega_o = 20.0; // ESO bandwidth     [rad/s] - typically 3-10* omega_c
         double omega_c = 5.0;  // Controller BW     [rad/s]
-        double b0 = 1.0;       // Approximate plant input gain (b₀ = Km/J for motors)
+        double b0 = 1.0;       // Approximate plant input gain (b0 = Km/J for motors)
         double uMin = -1e9;
         double uMax = 1e9;
     };
@@ -60,7 +64,7 @@ namespace ctrl
         void setParams(const ADRCParams &p);
         const ADRCParams &params() const { return p_; }
 
-        // ESO state estimates: [z₁, z₂, z₃]
+        // ESO state estimates: [z1, z2, z3]
         const Eigen::Vector3d &esoState() const { return z_; }
 
     private:

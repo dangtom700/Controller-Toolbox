@@ -21,7 +21,7 @@ int main()
     const double Ts = 0.05;
 
     // ---- Plant G(s) = 1/(s+0.2) -> ZOH ----
-    // G(z^-¹) approx = (0.00995) / (1 - 0.99z^-¹)
+    // G(z^-^1) approx = (0.00995) / (1 - 0.99z^-^1)
     ctrl::TransferFunction tf({ 0.0, 0.00995 }, { 1.0, -0.990 }, Ts);
     ctrl::StateSpace plant = ctrl::tf2ss(tf);
 

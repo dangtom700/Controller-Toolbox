@@ -125,7 +125,7 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
     // ------------------------------------------------------------------
     // Step 4: extract C and A from shift invariance of Gamma
     //   C     = Gamma[:p, :]            (p * n)
-    //   A approx = Gamma_up† * Gamma_down      (n * n, least squares)
+    //   A approx = Gamma_up^T * Gamma_down      (n * n, least squares)
     //   Gamma_up   = Gamma[:(i-1)*p, :]
     //   Gamma_down = Gamma[p:, :]
     // ------------------------------------------------------------------
@@ -134,7 +134,7 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
     const Eigen::MatrixXd Gamma_up   = Gamma.topRows((i - 1) * p);
     const Eigen::MatrixXd Gamma_down = Gamma.bottomRows((i - 1) * p);
 
-    // A = Gamma_up† * Gamma_down  (n * n)
+    // A = Gamma_up^T * Gamma_down  (n * n)
     const Eigen::MatrixXd A =
         Gamma_up.colPivHouseholderQr().solve(Gamma_down);
 
@@ -142,7 +142,7 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
     // Step 5: least-squares regression for B and D.
     //
     // Reconstruct the state sequence from the data and the observability
-    // matrix: X_hat[:, k] = Gamma† * Yf_col[:, k] (truncated future output
+    // matrix: X_hat[:, k] = Gamma^T * Yf_col[:, k] (truncated future output
     // stacked in a column).
     //
     // From x[k+1] = A*x[k] + B*u[k]  and  y[k] = C*x[k] + D*u[k]:
@@ -177,13 +177,56 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
         Lhs_B.col(k)   = x_k1  - A * x_k;
     }
 
-    // Solve D: (p * m) = Lhs_D * Phi_BD†
+    // Solve D: (p * m) = Lhs_D * Phi_BD^T
     const Eigen::MatrixXd D =
         (Phi_BD.colPivHouseholderQr().solve(Lhs_D.transpose())).transpose();
 
-    // Solve B: (n * m) = Lhs_B * Phi_BD†
+    // Solve B: (n * m) = Lhs_B * Phi_BD^T
     const Eigen::MatrixXd B =
         (Phi_BD.colPivHouseholderQr().solve(Lhs_B.transpose())).transpose();
+
+    // ------------------------------------------------------------------
+    // Step 6: Stochastic realisation - estimate Kalman gain K and
+    //         innovation covariance Lambda from the residuals.
+    //
+    //   Innovation:        epsilon[k]  = y[k] - C x^[k] - D u[k]          (p * T)
+    //   State residual:    eta[k]  = x^[k+1] - A x^[k] - B u[k]        (n * T)
+    //
+    //   Kalman gain (LS):  K = eta * epsilon^^T  such that  eta approx = K epsilon
+    //                      K = (Sigma eta epsilon') (Sigma epsilon epsilon')^{-1}
+    //
+    //   Innovation cov:    Lambda = (1/T) Sigma epsilon[k] epsilon[k]'
+    //
+    // K can be passed directly to KalmanFilter / DiscreteLQG to eliminate
+    // manual Q/R tuning after identification.
+    // ------------------------------------------------------------------
+    {
+        Eigen::MatrixXd eps(p, T);          // innovations
+        Eigen::MatrixXd eta(n_order, T);    // state residuals
+
+        for (int k = 0; k < T; ++k)
+        {
+            const Eigen::VectorXd u_k  = U.col(i + k);
+            const Eigen::VectorXd x_k  = X_hat.col(k);
+            const Eigen::VectorXd x_k1 = X_hat.col(k + 1);
+            const Eigen::VectorXd y_k  = Y.col(i + k);
+
+            eps.col(k) = y_k  - C * x_k  - D * u_k;
+            eta.col(k) = x_k1 - A * x_k  - B * u_k;
+        }
+
+        // Lambda = (1/T) epsilon epsilon'
+        const Eigen::MatrixXd innov_cov = (eps * eps.transpose()) / static_cast<double>(T);
+
+        // K = (eta epsilon') (epsilon epsilon')^{-1} = (eta epsilon') Lambda^{-1} / T  - but Lambda already divided by T,
+        // so K = (1/T) eta epsilon' * (Lambda)^{-1}.  Use LDLT to solve (epsilon epsilon')^{-1}.
+        const Eigen::MatrixXd ee = eps * eps.transpose();       // p * p
+        const Eigen::MatrixXd ne = eta * eps.transpose();       // n * p
+        const Eigen::MatrixXd K_est = ee.ldlt().solve(ne.transpose()).transpose(); // n * p
+
+        res.kalmanGain = K_est;
+        res.innovCov   = innov_cov;
+    }
 
     // ------------------------------------------------------------------
     // Pack result

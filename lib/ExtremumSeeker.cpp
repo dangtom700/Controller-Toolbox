@@ -17,15 +17,15 @@ namespace ctrl
     //   y_h[k]  = alpha_h.(y_h[k-1] + y[k] - y[k-1])
     //
     // Demodulate by multiplying with reference dither sin(omega_p.k.Ts):
-    //   ξ[k] = y_h[k] . sin(omega_p.k.Ts)
-    //   After LPF: ĝ approx = J'(θ).a/2   (gradient of cost w.r.t. operating point)
+    //   xi[k] = y_h[k] . sin(omega_p.k.Ts)
+    //   After LPF: ghat approx = J'(theta).a/2   (gradient of cost w.r.t. operating point)
     //
     // LPF (backward Euler first-order):
     //   alpha_l     = omega_l.Ts / (1 + omega_l.Ts)
-    //   ĝ[k]   = (1-alpha_l).ĝ[k-1] + alpha_l.ξ[k]
+    //   ghat[k]   = (1-alpha_l).ghat[k-1] + alpha_l.xi[k]
     //
     // Operating-point update (gradient descent / ascent):
-    //   θ[k+1] = θ[k] - sign . k_int . Ts . ĝ[k]
+    //   theta[k+1] = theta[k] - sign . k_int . Ts . ghat[k]
     // ---------------------------------------------------------------------------
     double ExtremumSeeker::compute(double y)
     {

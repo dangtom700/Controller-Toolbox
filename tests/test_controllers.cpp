@@ -92,7 +92,7 @@ void test_plant_model()
     test::check(plant.outputSize() == 1, "Plant has 1 output");
 
     // DC gain approx = 1 for G(s)=1/(s^2+1.5s+1).
-    // The pre-discretised TF uses rounded coefficients, so DC gain ≈ 0.9.
+    // The pre-discretised TF uses rounded coefficients, so DC gain approx = 0.9.
     auto Acl = Eigen::MatrixXd::Identity(2, 2) - plant.A;
     double dc = (plant.C * Acl.inverse() * plant.B + plant.D)(0, 0);
     test::check(std::abs(dc - 1.0) < 0.15, "DC gain approx 1.0 (rounded TF coeffs)");
@@ -304,7 +304,7 @@ void test_mpc()
     mpc.reset();
     test::check(std::abs(mpc.compute(0.0)) < 1e-6, "MPC: reset restores zero state");
 
-    // Closed-loop tracking — use a longer prediction horizon for this slow plant
+    // Closed-loop tracking - use a longer prediction horizon for this slow plant
     {
         ctrl::MPCParams mp_track = mp;
         mp_track.Np    = 50;
@@ -438,7 +438,7 @@ void test_smc()
 
     // Closed-loop convergence.
     // SMC convention: compute(y - ref) (output-minus-reference), not the standard r-y.
-    // Positive output-error (y>ref) → negative surface → positive u for positive-gain plant.
+    // Positive output-error (y>ref) -> negative surface -> positive u for positive-gain plant.
     {
         ctrl::DiscreteSMC smc2(sp, Ts);
         auto plant = make_plant();
@@ -573,7 +573,7 @@ void test_esc()
         ep2.perturbAmp = 0.0;
         ctrl::ExtremumSeeker esc3(ep2, Ts);
         for (int k = 0; k < 100; ++k)
-            esc3.compute(0.0); // zero cost → zero HPF output → zero gradient
+            esc3.compute(0.0); // zero cost -> zero HPF output -> zero gradient
         test::check(std::abs(esc3.currentEstimate()) < 0.01,
                     "ESC: zero perturbation -> theta stays near 0");
     }
@@ -983,7 +983,7 @@ void test_c2d()
     test::check(std::abs(sys_zoh.Ts - 0.01) < 1e-12, "c2d ZOH: Ts set correctly");
     test::check(sys_zoh.stateSize() == 2, "c2d ZOH: state size preserved");
 
-    // ZOH: DC gain preserved — C*(I-A)^-1*B + D == 1.0
+    // ZOH: DC gain preserved - C*(I-A)^-1*B + D == 1.0
     {
         Eigen::MatrixXd Acl = Eigen::MatrixXd::Identity(2, 2) - sys_zoh.A;
         double dc = (sys_zoh.C * Acl.inverse() * sys_zoh.B + sys_zoh.D)(0, 0);
@@ -1025,7 +1025,7 @@ void test_rls()
     test::check(rls0.sampleCount() == 0,      "RLS: initial sampleCount == 0");
 
     // Convergence on ARX(1,1): plant y[k] = 0.8*y[k-1] + 0.5*u[k-1]
-    // RLS convention: y[k] = -a1*y[k-1] + b1*u[k-1]  => true θ = [a1,b1] = [-0.8, 0.5]
+    // RLS convention: y[k] = -a1*y[k-1] + b1*u[k-1]  => true theta = [a1,b1] = [-0.8, 0.5]
     ctrl::RecursiveLeastSquares rls1(1, 1, Ts, 0.98, 1e4);
     {
         double y_prev = 0.0, u_prev = 0.0;

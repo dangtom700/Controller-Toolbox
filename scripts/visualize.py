@@ -272,14 +272,14 @@ def plot_esc_convergence(data, out_dir):
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 4))
 
-    axes[0].plot(t, theta, lw=1.2, color="#9467bd", label="θ (estimate)")
-    axes[0].axhline(1.0, ls="--", color="gray", lw=0.8, label="Optimum (θ*=1)")
-    axes[0].set_xlabel("Time (s)"); axes[0].set_ylabel("θ")
+    axes[0].plot(t, theta, lw=1.2, color="#9467bd", label="theta (estimate)")
+    axes[0].axhline(1.0, ls="--", color="gray", lw=0.8, label="Optimum (theta*=1)")
+    axes[0].set_xlabel("Time (s)"); axes[0].set_ylabel("theta")
     axes[0].set_title("ESC - operating point convergence")
     axes[0].legend(fontsize=8); axes[0].grid(True, ls="--", alpha=0.3)
 
     cost = [e**2 for e in err]
-    axes[1].plot(t, cost, lw=1.0, color="#ff7f0e", label="J = (θ-1)^2")
+    axes[1].plot(t, cost, lw=1.0, color="#ff7f0e", label="J = (theta-1)^2")
     axes[1].set_xlabel("Time (s)"); axes[1].set_ylabel("Cost J")
     axes[1].set_title("ESC - cost convergence")
     axes[1].legend(fontsize=8); axes[1].grid(True, ls="--", alpha=0.3)

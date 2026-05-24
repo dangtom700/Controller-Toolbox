@@ -173,7 +173,7 @@ The following areas have measurable performance deficiencies that should be addr
 
 **File:** `lib/SystemAnalysis.cpp`  
 **Impact:** Approximately 10 000 eigenvalue evaluations per `calculateMargins()` call. For a 4-state system, each evaluation is O(64) FLOPs; for an 8-state system, O(512). Total: several million FLOPs per call - acceptable offline, but prohibitive in an adaptive gain-scheduling loop that calls it at each parameter update.  
-**Recommendation:** Replace the uniform grid search with a bisection algorithm. Starting from coarse bracket points that bound the crossover frequencies, bisection converges in O(log₂(10 000) approx = 13) evaluations, reducing the cost by ~700*. The result should also be cached and invalidated only when the plant model changes.
+**Recommendation:** Replace the uniform grid search with a bisection algorithm. Starting from coarse bracket points that bound the crossover frequencies, bisection converges in O(log2(10 000) approx = 13) evaluations, reducing the cost by ~700*. The result should also be cached and invalidated only when the plant model changes.
 
 ---
 
@@ -188,7 +188,7 @@ The following areas have measurable performance deficiencies that should be addr
 ### 3.3 `DiscreteMPC` - Full Condensed Matrix Rebuild on Any Parameter Change
 
 **File:** `lib/DiscreteMPC.cpp`  
-**Impact:** `buildCondensedMatrices()` recomputes the prediction matrices `F` and `Φ` (which depend on the plant model) and the Hessian `H` (which depends on Q and R weights) in a single monolithic rebuild. Adaptive MPC that updates only Q/R weights at runtime triggers a full rebuild unnecessarily.  
+**Impact:** `buildCondensedMatrices()` recomputes the prediction matrices `F` and `Phi` (which depend on the plant model) and the Hessian `H` (which depends on Q and R weights) in a single monolithic rebuild. Adaptive MPC that updates only Q/R weights at runtime triggers a full rebuild unnecessarily.  
 **Recommendation:** Decompose the rebuild into two independent methods: `rebuildPredictionMatrices()` (called when the state-space model changes) and `rebuildCostMatrix()` (called when Q or R changes). This halves the work for the common case of weight adaptation.
 
 ---
@@ -235,7 +235,7 @@ Provide a `SimSensor` / `SimActuator` pair backed by `PlantModel` for testing, a
 ### P1 - Algorithm Completeness
 
 **Fractional Delay in `SmithPredictor`**  
-The current implementation supports only integer dead-times (`delay_steps` = integer multiple of `Ts`). Many real processes have non-integer delays. Add a Padé approximation option: for a fractional delay `L = k.Ts + delta`, the fractional part `delta` is approximated by a first- or second-order Padé filter, and `k` integer steps are handled by the circular buffer.
+The current implementation supports only integer dead-times (`delay_steps` = integer multiple of `Ts`). Many real processes have non-integer delays. Add a Pade approximation option: for a fractional delay `L = k.Ts + delta`, the fractional part `delta` is approximated by a first- or second-order Pade filter, and `k` integer steps are handled by the circular buffer.
 
 **DARE Warm-Start and Convergence Fallback in `DiscreteLQR`**  
 After fixing bug 2.3, expose the last iterate `P` as a warm-start hint for subsequent `solveDARE()` calls (e.g., during adaptive weight updates). When the plant changes slowly, the previous solution is near the new one, and warm-starting can reduce iteration count by 10-100*.
@@ -274,8 +274,8 @@ The following mathematical errors and documentation gaps were identified and ful
 
 **Files:** `lib/DiscreteMPC.cpp`, `lib/DiscreteMPC.h`  
 **Severity:** High - systematically incorrect control action  
-**Description:** The condensed prediction used `Y = F.x + Φ.ΔU`, omitting the `G_u.u_prev` offset. For an incremental MPC formulation (ΔU decision variables), the output prediction must include the cumulative step-response matrix `G_u` applied to the previous input to correctly account for the u_prev baseline. Without it, the gradient is computed from the wrong prediction error, producing a biased optimal move.  
-**Fix:** Added `Gu_` matrix (`Np.p * m`) computed as the cumulative step response `G_u(i) = Σ_{j=0}^{i} C.A^j.B`. The prediction error in `computeRef()` is now:
+**Description:** The condensed prediction used `Y = F.x + Phi.DeltaU`, omitting the `G_u.u_prev` offset. For an incremental MPC formulation (DeltaU decision variables), the output prediction must include the cumulative step-response matrix `G_u` applied to the previous input to correctly account for the u_prev baseline. Without it, the gradient is computed from the wrong prediction error, producing a biased optimal move.  
+**Fix:** Added `Gu_` matrix (`Np.p * m`) computed as the cumulative step response `G_u(i) = Sigma_{j=0}^{i} C.A^j.B`. The prediction error in `computeRef()` is now:
 ```cpp
 pred_err_.noalias() = F_ * x + Gu_ * u_prev_ - R_stack_;
 ```
@@ -311,7 +311,7 @@ u[k] = Kp.e[k] + I[k] + D[k]
 
 **Files:** `lib/SmithPredictor.cpp`, `lib/SmithPredictor.h`  
 **Severity:** Low - incorrect feedthrough term in Smith correction  
-**Description:** The delay-free model output `ŷ[k] = C.x^ + D.u` was evaluated with `D.zeros` instead of `D.u_prev`. For plants with a non-zero D matrix, the Smith correction term `ŷ_now - ŷ_delayed` was wrong, degrading dead-time compensation accuracy.  
+**Description:** The delay-free model output `yhat[k] = C.x^ + D.u` was evaluated with `D.zeros` instead of `D.u_prev`. For plants with a non-zero D matrix, the Smith correction term `yhat_now - yhat_delayed` was wrong, degrading dead-time compensation accuracy.  
 **Fix:** Added `u_prev_` member (zero-initialized in constructor, updated each step after computing u). `y_now` is now:
 ```cpp
 const double y_now = (model_.C * x_model_ + model_.D * u_prev_)(0);

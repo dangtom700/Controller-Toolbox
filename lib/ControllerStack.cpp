@@ -55,7 +55,10 @@ namespace ctrl
         switch (mode_)
         {
         // ----------------------------------------------------------------
-        // Supervisory: first eligible controller wins
+        // Supervisory: first eligible controller wins.
+        // On a controller switch, bumplessInit() is called on the incoming
+        // controller so its first compute() returns approx = lastOutput_, preventing
+        // an output bump at the transition.
         // ----------------------------------------------------------------
         case StackMode::Supervisory:
         {
@@ -68,11 +71,14 @@ namespace ctrl
                                 e.activationCondition(error, lastOutput_);
                 if (eligible)
                 {
+                    if (e.name != prevActiveName_)
+                        e.controller->bumplessInit(lastOutput_, error);
                     out = e.controller->compute(error);
                     activeName_ = e.name;
                     break;
                 }
             }
+            prevActiveName_ = activeName_;
             break;
         }
 
@@ -127,6 +133,7 @@ namespace ctrl
             e.controller->reset();
         lastOutput_ = 0.0;
         activeName_.clear();
+        prevActiveName_.clear();
     }
 
 } // namespace ctrl

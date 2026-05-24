@@ -68,7 +68,7 @@ def _verify(t: np.ndarray, u: np.ndarray) -> bool:
     print(f"  Seed       : {SEED}")
     print(f"  Mean       : {mean_u:+.6f}   [{'PASS' if mean_ok  else 'FAIL'}]  (|mean| < 0.05)")
     print(f"  Variance   : {var_u:.4f}     [{'PASS' if var_ok   else 'FAIL'}]  (expected {expected_var:.4f})")
-    print(f"  Lag-1 corr : {lag1_corr:.4f}  [{'PASS' if acorr_ok else 'WARN'}]  (|ρ₁| < 0.15)")
+    print(f"  Lag-1 corr : {lag1_corr:.4f}  [{'PASS' if acorr_ok else 'WARN'}]  (|rho1| < 0.15)")
     return mean_ok and var_ok
 
 

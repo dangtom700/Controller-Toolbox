@@ -16,14 +16,14 @@ namespace ctrl
         if (d_ > 0) y_buf_.assign(d_, 0.0);
     }
 
-    // Modified error:  e_sp = (r-y) + (ŷ_now - ŷ_delayed)
-    //                        = error + ŷ_now - ŷ_now[k-d]
+    // Modified error:  e_sp = (r-y) + (yhat_now - yhat_delayed)
+    //                        = error + yhat_now - yhat_now[k-d]
     //
     // The correction term removes the delay from the error signal presented to
     // the inner controller, giving it an effectively delay-free closed loop.
     double SmithPredictor::compute(double error)
     {
-        // Current model output ŷ[k] from the delay-free plant model (uses u[k-1] for D term)
+        // Current model output yhat[k] from the delay-free plant model (uses u[k-1] for D term)
         const double y_now = (model_.C * x_model_ + model_.D * u_prev_)(0);
 
         // d-step delayed model output - read oldest slot from the circular buffer

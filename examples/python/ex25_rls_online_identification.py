@@ -38,7 +38,7 @@ y = np.zeros(STEPS)
 for k in range(STEPS):
     y[k] = ss_step(plant, u[k])
 
-# RLS state: θ = [a1, a2, b1, b2]
+# RLS state: theta = [a1, a2, b1, b2]
 n_params = 4
 theta = np.zeros(n_params)
 P     = 1e4 * np.eye(n_params)

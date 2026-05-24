@@ -303,7 +303,7 @@ class ExtremumSeeker:
 
 # ---------------------------------------------------------------------------
 # SmithPredictor  (lib/SmithPredictor.h)
-# Modified error = (r-y) + (ŷ_model - ŷ_model_delayed)
+# Modified error = (r-y) + (yhat_model - yhat_model_delayed)
 # Inner controller is DiscretePID
 # ---------------------------------------------------------------------------
 class SmithPredictor:

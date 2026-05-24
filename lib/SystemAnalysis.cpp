@@ -227,38 +227,71 @@ namespace ctrl
 
     double SystemAnalysis::calculateHInfinityNorm(const StateSpace &sys)
     {
-        // Grid-based search for peak singular value over frequency
-        double w_min = 1e-3;
-        double w_max = M_PI / sys.Ts;
-        int num_points = 2000;
+        // Step 1: coarse logarithmic grid to locate the approximate peak frequency.
+        const double w_min      = 1e-3;
+        const double w_max      = M_PI / sys.Ts;
+        const int    num_points = 500;
 
-        int n = sys.A.rows();
-        Eigen::MatrixXcd I = Eigen::MatrixXcd::Identity(n, n);
-        Eigen::MatrixXcd Ac = sys.A.cast<std::complex<double>>();
-        Eigen::MatrixXcd Bc = sys.B.cast<std::complex<double>>();
-        Eigen::MatrixXcd Cc = sys.C.cast<std::complex<double>>();
-        Eigen::MatrixXcd Dc = sys.D.cast<std::complex<double>>();
+        const int n = sys.A.rows();
+        const Eigen::MatrixXcd I  = Eigen::MatrixXcd::Identity(n, n);
+        const Eigen::MatrixXcd Ac = sys.A.cast<std::complex<double>>();
+        const Eigen::MatrixXcd Bc = sys.B.cast<std::complex<double>>();
+        const Eigen::MatrixXcd Cc = sys.C.cast<std::complex<double>>();
+        const Eigen::MatrixXcd Dc = sys.D.cast<std::complex<double>>();
+
+        // Evaluate max singular value at frequency w (log-domain: w in natural frequency)
+        auto evalSV = [&](double w) -> double
+        {
+            const std::complex<double> z = std::polar(1.0, w * sys.Ts);
+            const Eigen::MatrixXcd G = Cc * (z * I - Ac).inverse() * Bc + Dc;
+            Eigen::JacobiSVD<Eigen::MatrixXcd> svd(G);
+            return svd.singularValues()(0);
+        };
 
         double peak_mag = 0.0;
+        int    peak_i   = 0;
+        std::vector<double> grid_w(num_points);
 
         for (int i = 0; i < num_points; ++i)
         {
-            double w = w_min * std::pow(w_max / w_min, static_cast<double>(i) / (num_points - 1));
-            std::complex<double> z = std::polar(1.0, w * sys.Ts);
+            grid_w[i] = w_min * std::pow(w_max / w_min, static_cast<double>(i) / (num_points - 1));
+            const double sv = evalSV(grid_w[i]);
+            if (sv > peak_mag) { peak_mag = sv; peak_i = i; }
+        }
 
-            Eigen::MatrixXcd resolvent = (z * I - Ac).inverse();
-            Eigen::MatrixXcd G = Cc * resolvent * Bc + Dc;
+        // Step 2: golden-section search in the log-frequency bracket around the grid peak.
+        // This refines the grid lower bound to the true (or near-true) Hinf norm in O(50) evals.
+        const double phi = (std::sqrt(5.0) - 1.0) * 0.5; // golden ratio reciprocal
+        double a = (peak_i > 0)             ? grid_w[peak_i - 1] : w_min;
+        double b = (peak_i < num_points - 1) ? grid_w[peak_i + 1] : w_max;
 
-            // Max singular value is the induced 2-norm of the matrix
-            Eigen::JacobiSVD<Eigen::MatrixXcd> svd(G);
-            double max_sv = svd.singularValues()(0);
+        // Use log-domain for better numerical behaviour across wide frequency ranges.
+        double la = std::log(a), lb_w = std::log(b);
+        double lc = lb_w - phi * (lb_w - la);
+        double ld = la  + phi * (lb_w - la);
+        double fc = evalSV(std::exp(lc));
+        double fd = evalSV(std::exp(ld));
 
-            if (max_sv > peak_mag)
+        const int gs_iters = 60; // typically reduces interval by phi^60 ~ 1e-13
+        for (int k = 0; k < gs_iters; ++k)
+        {
+            if (fc < fd)
             {
-                peak_mag = max_sv;
+                la = lc;
+                lc = ld; fc = fd;
+                ld = la + phi * (lb_w - la);
+                fd = evalSV(std::exp(ld));
+            }
+            else
+            {
+                lb_w = ld;
+                ld = lc; fd = fc;
+                lc = lb_w - phi * (lb_w - la);
+                fc = evalSV(std::exp(lc));
             }
         }
-        return peak_mag;
+        const double refined = std::max(fc, fd);
+        return std::max(peak_mag, refined); // take the best of grid and refined peak
     }
 
 } // namespace ctrl

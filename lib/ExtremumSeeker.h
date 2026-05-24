@@ -10,11 +10,11 @@
 //
 // Signal chain per sample k:
 //   1. Dither:        d[k]     = a . sin(2pi.f_p.k.Ts)
-//   2. Plant input:   u[k]     = θ[k] + d[k]
+//   2. Plant input:   u[k]     = theta[k] + d[k]
 //   3. HPF on y:      y_h[k]   (removes DC/slow bias)
-//   4. Demodulate:    ξ[k]     = y_h[k] . sin(2pi.f_p.k.Ts)
-//   5. LPF:           ĝ[k]     (gradient estimate - low-frequency content only)
-//   6. Integrate:     θ[k+1]   = θ[k] - sign . k_int . Ts . ĝ[k]
+//   4. Demodulate:    xi[k]     = y_h[k] . sin(2pi.f_p.k.Ts)
+//   5. LPF:           ghat[k]     (gradient estimate - low-frequency content only)
+//   6. Integrate:     theta[k+1]   = theta[k] - sign . k_int . Ts . ghat[k]
 //        sign = -1 for minimum seeking, +1 for maximum seeking
 //
 // Dither frequency must satisfy: plant bandwidth << f_p << 1/(Ts . N_filter)
@@ -51,7 +51,7 @@ namespace ctrl
         void setParams(const ExtremumSeekerParams &p) { p_ = p; }
         const ExtremumSeekerParams &params() const { return p_; }
 
-        // Current operating-point estimate θ (without dither).
+        // Current operating-point estimate theta (without dither).
         double currentEstimate() const { return theta_; }
 
     private:

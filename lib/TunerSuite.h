@@ -41,7 +41,7 @@
 //  it accepts a runtime CtrlKind tag and NEVER blocks compilation.
 //
 //  Ref: cheatsheet/tuning_methods.md;
-//       Åström & Hägglund (2006); Bryson & Ho (1975); Gao (2003).
+//       Astrom & Hagglund (2006); Bryson & Ho (1975); Gao (2003).
 // ============================================================
 namespace ctrl
 {

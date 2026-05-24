@@ -37,7 +37,7 @@ The identified model is rarely in the exact form your control method needs:
 - Convert continuous \leftrightarrow discrete (with proper sampling time selection).
 - Model reduction (balanced truncation, Hankel norm) to get a low-order design model.
 - Augmentation with disturbance models (integrators for offset-free tracking, ARIMA for MPC).
-- Delay approximation (Padé, or exact state augmentation for MPC).
+- Delay approximation (Pade, or exact state augmentation for MPC).
 - Uncertainty representation (extracting multiplicative/additive weight for Hinf).
 
 *This bridge between identification and controller design is often messy and iterative.*

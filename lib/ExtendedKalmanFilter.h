@@ -9,8 +9,8 @@
 //   y[k]   = h(x[k], u[k]) + v[k],   v ~ N(0, R_noise)
 //
 // EKF linearises around the current estimate at each step:
-//   F[k] = ∂f/∂x |_(x^[k|k], u[k])    - state Jacobian  (n*n)
-//   H[k] = ∂h/∂x |_(x^[k+1|k], u[k])  - observation Jacobian (p*n)
+//   F[k] = df/dx |_(x^[k|k], u[k])    - state Jacobian  (n*n)
+//   H[k] = dh/dx |_(x^[k+1|k], u[k])  - observation Jacobian (p*n)
 //
 // Predict:
 //   x^[k+1|k]   = f(x^[k|k], u[k])
@@ -43,8 +43,8 @@ public:
     // p:       measurement dimension
     // f:       process function  x[k+1] = f(x[k], u[k])
     // h:       measurement function  y[k] = h(x[k], u[k])
-    // Fjac:    Jacobian ∂f/∂x (n*n) evaluated at (x^, u)
-    // Hjac:    Jacobian ∂h/∂x (p*n) evaluated at (x^_pred, u)
+    // Fjac:    Jacobian df/dx (n*n) evaluated at (x^, u)
+    // Hjac:    Jacobian dh/dx (p*n) evaluated at (x^_pred, u)
     // Q_noise: process noise covariance (n*n, PSD)
     // R_noise: measurement noise covariance (p*p, PD)
     // Ts:      sample time [s]
@@ -75,7 +75,7 @@ public:
     double sampleTime()                 const { return Ts_; }
 
     // Central-difference numerical Jacobian (eps = 1e-5).
-    // Bind u as a constant to get the ∂f/∂x or ∂h/∂x you need:
+    // Bind u as a constant to get the df/dx or dh/dx you need:
     //   auto Fjac = [&](auto& x, auto& u) {
     //       return EKF::numericalJacobian([&](auto& xx){ return f(xx,u); }, x);
     //   };

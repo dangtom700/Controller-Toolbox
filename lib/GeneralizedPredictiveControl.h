@@ -8,11 +8,11 @@
 // Extends DiscreteMPC with two features aimed at practical deployment:
 //
 //  1. Velocity-form (CARIMA) model - offset-free tracking without a separate
-//     integral state. The augmented state xa = [Δx; y] is propagated with
-//     incremental inputs ΔU, giving a built-in integrating disturbance model.
+//     integral state. The augmented state xa = [Deltax; y] is propagated with
+//     incremental inputs DeltaU, giving a built-in integrating disturbance model.
 //
 //     Augmented state-space (n_a = n + p):
-//       xa[k+1] = Aa.xa[k] + Ba.Δu[k]      Aa = [A, 0; C.A, I]
+//       xa[k+1] = Aa.xa[k] + Ba.Deltau[k]      Aa = [A, 0; C.A, I]
 //       y[k]    = Ca.xa[k]                  Ba = [B; C.B],  Ca = [0, I]
 //
 //  2. Reference trajectory - setpoint is approached along a first-order filter
@@ -21,8 +21,8 @@
 //     alpha = 0: step reference (same as DiscreteMPC).  alpha -> 1: very soft approach.
 //
 // Prediction (condensed form, same QP structure as DiscreteMPC):
-//   Y_pred = Fa.xa[k] + Ga.ΔU
-//   ΔU*    = -(Ga'.Q.Ga + R)^-1 . Ga'.Q.(Fa.xa - R_traj)
+//   Y_pred = Fa.xa[k] + Ga.DeltaU
+//   DeltaU*    = -(Ga'.Q.Ga + R)^-1 . Ga'.Q.(Fa.xa - R_traj)
 //
 // The plant model can be hot-swapped via setPlant() for adaptive GPC
 // (pair with RecursiveLeastSquares::toStateSpace() for a self-tuning loop).
@@ -75,7 +75,7 @@ public:
     void   reset()            override;
     double sampleTime() const override { return Ts_; }
 
-    // Augmented state estimate xa = [Δx; y] (size n+p).
+    // Augmented state estimate xa = [Deltax; y] (size n+p).
     const Eigen::VectorXd &augmentedState() const { return xa_; }
 
 private:
@@ -95,16 +95,23 @@ private:
     Eigen::MatrixXd Qy_, Ru_;
     Eigen::MatrixXd H_;        // pre-built Hessian
 
-    // Per-step pre-allocated work vectors
+    // Pre-allocated work vectors (all sized at buildCondensedMatrices time)
     Eigen::VectorXd Rtraj_;    // reference trajectory stack (Np.p)
     Eigen::VectorXd err_;      // prediction error (Np.p)
-    Eigen::VectorXd grad_;     // gradient (Nu.m)
+    Eigen::VectorXd grad_;     // unconstrained gradient (Nu.m)
     Eigen::VectorXd DeltaU_;   // optimal increments (Nu.m)
+    Eigen::VectorXd grad_k_;   // gradient at current DeltaU_ inside QP loop (Nu.m)
+    Eigen::VectorXd DU_new_;   // proposed update inside QP loop (Nu.m)
+    Eigen::VectorXd lb_;       // per-horizon lower bounds on DeltaU (Nu.m)
+    Eigen::VectorXd ub_;       // per-horizon upper bounds on DeltaU (Nu.m)
+    Eigen::VectorXd cumMin_;   // rolling cumulative lower bound (m)
+    Eigen::VectorXd cumMax_;   // rolling cumulative upper bound (m)
+
+    double          L_;        // max eigenvalue of H_ - Lipschitz constant for QP step
 
     Eigen::VectorXd xa_;       // augmented state estimate
-    Eigen::VectorXd u_prev_;   // u[k-1] (needed for Δu = u - u_prev)
+    Eigen::VectorXd u_prev_;   // u[k-1] (needed for Deltau = u - u_prev)
     double          r_ref_;    // stored setpoint for compute(error) wrapper
-    double          y_prev_;   // y[k-1] for initial Δx computation
 };
 
 } // namespace ctrl

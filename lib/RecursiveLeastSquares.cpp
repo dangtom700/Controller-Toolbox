@@ -15,7 +15,7 @@ namespace ctrl
 
     double RecursiveLeastSquares::update(double y, double u)
     {
-        // Build regressor φ[k] = [-y[k-1],...,-y[k-na], u[k-1],...,u[k-nb]]
+        // Build regressor phi[k] = [-y[k-1],...,-y[k-na], u[k-1],...,u[k-nb]]
         // using the current (pre-update) buffers
         Eigen::VectorXd phi(ntheta_);
         for (int i = 0; i < na_; ++i) phi(i)       = -y_buf_(i);
@@ -24,7 +24,7 @@ namespace ctrl
         // Prediction error
         const double e = y - phi.dot(theta_);
 
-        // Kalman gain: K = P.φ / (lambda + φ'.P.φ)
+        // Kalman gain: K = P.phi / (lambda + phi'.P.phi)
         const Eigen::VectorXd Pphi = P_ * phi;
         const double denom = lambda_ + phi.dot(Pphi);
         const Eigen::VectorXd K = Pphi / denom;
@@ -35,8 +35,21 @@ namespace ctrl
         // Covariance update
         P_ = (P_ - K * Pphi.transpose()) / lambda_;
 
-        // Symmetrise to suppress drift
+        // Symmetrise to suppress numerical drift
         P_ = 0.5 * (P_ + P_.transpose());
+
+        // Trace capping: when lambda < 1 (forgetting active), scalar exponential
+        // forgetting inflates P isotropically - including unexcited directions -
+        // causing parameter drift.  Capping trace(P) at P0_scale * ntheta prevents
+        // runaway covariance growth without introducing directional bias.
+        // Equivalent to "variable-trace" forgetting from Fortescue et al. (1981).
+        if (lambda_ < 1.0)
+        {
+            const double tr     = P_.trace();
+            const double tr_max = P0_scale_ * static_cast<double>(ntheta_);
+            if (tr > tr_max)
+                P_ *= tr_max / tr;
+        }
 
         // Shift buffers: push current y,u to front (index 0 = most recent lag)
         for (int i = na_ - 1; i > 0; --i) y_buf_(i) = y_buf_(i - 1);

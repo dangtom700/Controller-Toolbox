@@ -6,7 +6,7 @@
  *
  * Identification workflow:
  *   1. Read PRBS excitation from CSV (Python-generated) or generate via LFSR.
- *   2. Relay feedback test -> Åström-Hägglund ultimate gain Ku and period Tu.
+ *   2. Relay feedback test -> Astrom-Hagglund ultimate gain Ku and period Tu.
  *   3. Unit-step test -> FOPDT via 28.3%/63.2% tangent method.
  *   4. ARX(2,2) batch LS on PRBS I/O data -> cross-validate NRMSE <= 5%.
  *   5. Apply ALL PID tuning rules (ZN, IMC*3 lambda, Cohen-Coon, NM) to FOPDT.
@@ -165,7 +165,7 @@ static Metrics sim(CtrlFn ctrl_fn, double ref = 1.0) {
 }
 
 // =========================================================================
-// Nelder-Mead (alpha=1, γ=2, ρ=0.5, sigma=0.5)
+// Nelder-Mead (alpha=1, gamma=2, rho=0.5, sigma=0.5)
 // =========================================================================
 static std::vector<double>
 nm(std::function<double(const std::vector<double>&)> f,
@@ -295,8 +295,8 @@ int main() {
         auto fopdt = StepResponseTuner::identify(t_data, y_data, 1.0);
         K_fopdt = fopdt.K; tau_fopdt = fopdt.tau; theta_fopdt = fopdt.theta;
         std::cout << "  K=" << std::setprecision(5) << K_fopdt
-                  << "  τ=" << tau_fopdt << " s"
-                  << "  θ=" << theta_fopdt << " s\n";
+                  << "  tau=" << tau_fopdt << " s"
+                  << "  theta=" << theta_fopdt << " s\n";
     }
 
     // =======================================================================

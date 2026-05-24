@@ -24,7 +24,7 @@
 //            Use setReference(x_ref) before calling compute(y) for IController compat.
 //
 // Ref: Athans (1971) "Role of Decision Theory in Systems Engineering";
-//      MATLAB lqg(), kalman(); Åström "Introduction to Stochastic Control".
+//      MATLAB lqg(), kalman(); Astrom "Introduction to Stochastic Control".
 namespace ctrl
 {
 

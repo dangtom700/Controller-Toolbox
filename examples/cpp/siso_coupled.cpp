@@ -20,7 +20,7 @@
  *   LQR:  Bryson, NM-optimised
  *   SMC:  default params, NM-optimised
  *   ADRC: Gao bandwidth params, NM-optimised
- *   LeadLag: loop-shaping (omegac=2, φ=50^\circ)
+ *   LeadLag: loop-shaping (omegac=2, phi=50^\circ)
  *   Smith Predictor: IMC inner PID + 3-step delay model
  *
  * Cost: J = ISE + 0.1.ITAE + 0.01.\intu^2dt
@@ -137,7 +137,7 @@ static void print_metrics(const std::string &name, const SISOMetrics &m)
 }
 
 // =========================================================================
-// Nelder-Mead (alpha=1, γ=2, ρ=0.5, sigma=0.5 - matches lib/TunerSuite.cpp)
+// Nelder-Mead (alpha=1, gamma=2, rho=0.5, sigma=0.5 - matches lib/TunerSuite.cpp)
 // =========================================================================
 static std::vector<double>
 nelder_mead(std::function<double(const std::vector<double> &)> f,
@@ -352,7 +352,7 @@ int main()
     {
         auto fopdt = identify_fopdt();
         std::cout << "  FOPDT: K=" << std::setprecision(4) << fopdt.K
-                  << " τ=" << fopdt.tau << " θ=" << fopdt.theta << "\n";
+                  << " tau=" << fopdt.tau << " theta=" << fopdt.theta << "\n";
         for (double lam : {0.3, 0.5, 1.0})
         {
             auto res = TunerSuite::imcPID(CtrlKind::PID, fopdt, Ts, lam);
@@ -636,7 +636,7 @@ int main()
     }
 
     // -----------------------------------------------------------------------
-    // E. Lead-Lag - frequency-domain loop shaping (omegac=2 rad/s, φ=50^\circ)
+    // E. Lead-Lag - frequency-domain loop shaping (omegac=2 rad/s, phi=50^\circ)
     // -----------------------------------------------------------------------
     {
         // |G(j.2)| for G(s)=1/(s^2+1.5s+1): |G(j2)| = 1/|((j2)^2+1.5(j2)+1)|
