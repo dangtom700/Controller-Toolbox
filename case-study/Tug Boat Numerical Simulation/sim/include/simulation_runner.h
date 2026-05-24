@@ -3,7 +3,6 @@
 #include "environment.h"
 #include "controllers.h"
 #include "telemetry_logger.h"
-#include "json.hpp"
 #include <string>
 #include <memory>
 

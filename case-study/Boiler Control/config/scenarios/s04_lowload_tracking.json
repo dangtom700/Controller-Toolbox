@@ -1,0 +1,10 @@
+{
+  "id": "s04_lowload_tracking",
+  "description": "Load-step tracking at Low Load: demand +10 bar, +20 MW (op A)",
+  "operating_point": "A",
+  "mode": "tracking",
+  "dx0": [0.0, 0.0, 0.0],
+  "setpoint_dy": [10.0, 20.0, 0.0],
+  "duration_s": 3600,
+  "Ts": 1.0
+}

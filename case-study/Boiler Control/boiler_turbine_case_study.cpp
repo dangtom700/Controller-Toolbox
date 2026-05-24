@@ -103,7 +103,7 @@ void plant_model_data()
     bt.u2 = 0.5f; // Steam control valve position
     bt.u3 = 0.5f; // Feedwater flow valve position
 
-    std::ofstream data_file("boiler_turbine_data.csv");
+    std::ofstream data_file(std::string(PROJECT_DATA_DIR) + "/boiler_turbine_data.csv");
     data_file << "Time,Drum Pressure,Electric Power,Water Level Deviation,u1,u2,u3\n";
 
     for (int i = 0; i < 100; ++i)
@@ -245,7 +245,7 @@ void ss_lqr(const LinearStateSpace &ss, const operating_point &op, const std::st
     dx << 5.0, 3.0, -10.0; // small kick: +5 pressure, +3 power, -10 level
 
     // -- CSV and console output -----------------------------------------------
-    const std::string fname = "lqr_op_" + label + ".csv";
+    const std::string fname = std::string(PROJECT_DATA_DIR) + "/lqr_op_" + label + ".csv";
     std::ofstream f(fname);
     f << "Time,dx1,dx2,dx3,u1,u2,u3\n";
 
@@ -332,7 +332,7 @@ void ss_mpc(const LinearStateSpace &ss, const operating_point &op, const std::st
     dx << 5.0, 3.0, -10.0; // +5 pressure, +3 power, -10 level (same as LQR)
 
     // -- CSV output -----------------------------------------------------------
-    const std::string fname = "mpc_op_" + label + ".csv";
+    const std::string fname = std::string(PROJECT_DATA_DIR) + "/mpc_op_" + label + ".csv";
     std::ofstream f(fname);
     f << "Time,dx1,dx2,dx3,u1,u2,u3\n";
 
@@ -446,7 +446,7 @@ void ss_lqg_kalman(const LinearStateSpace &ss, const operating_point &op, const 
     // Previous valve positions for du tracking
     float u1_prev = op.u1, u2_prev = op.u2, u3_prev = op.u3;
 
-    const std::string fname = "lqg_op_" + label + ".csv";
+    const std::string fname = std::string(PROJECT_DATA_DIR) + "/lqg_op_" + label + ".csv";
     std::ofstream f(fname);
     f << "Time,y1,y2,y3,u1,u2,u3,du1,du2,du3,dx1_est,dx2_est,dx3_est,u1_ideal,u2_ideal,u3_ideal\n";
 
@@ -574,7 +574,7 @@ void ss_PID(const LinearStateSpace &ss, const operating_point &op, const std::st
 
     float u1_prev = op.u1, u2_prev = op.u2, u3_prev = op.u3;
 
-    const std::string fname = "pid_op_" + label + ".csv";
+    const std::string fname = std::string(PROJECT_DATA_DIR) + "/pid_op_" + label + ".csv";
     std::ofstream f(fname);
     f << "Time,y1,y2,y3,u1,u2,u3,du1,du2,du3\n";
 
@@ -664,7 +664,7 @@ void ss_SMC(const LinearStateSpace &ss, const operating_point &op, const std::st
 
     float u1_prev = op.u1, u2_prev = op.u2, u3_prev = op.u3;
 
-    const std::string fname = "smc_op_" + label + ".csv";
+    const std::string fname = std::string(PROJECT_DATA_DIR) + "/smc_op_" + label + ".csv";
     std::ofstream f(fname);
     f << "Time,y1,y2,y3,u1,u2,u3,du1,du2,du3\n";
 
@@ -755,7 +755,7 @@ void ss_extremum_seeker(const LinearStateSpace &ss, const operating_point &op, c
 
     float u3_prev = op.u3;
 
-    const std::string fname = "esc_op_" + label + ".csv";
+    const std::string fname = std::string(PROJECT_DATA_DIR) + "/esc_op_" + label + ".csv";
     std::ofstream f(fname);
     f << "Time,y1,y2,y3,u1,u2,u3,du3,theta\n";
 

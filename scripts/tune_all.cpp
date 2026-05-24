@@ -90,7 +90,7 @@ int main()
     std::cout << "  theta = " << fopdt.theta << " s\n";
 
     // Open output file
-    std::ofstream fout("tuned_params.txt");
+    std::ofstream fout(std::string(PROJECT_DATA_DIR) + "/tuned_params.txt");
     fout << std::fixed << std::setprecision(6);
     fout << "# Tuned controller parameters\n";
     fout << "# Plant: G(s)=1/(s^2+1.5s+1), ZOH Ts=" << Ts << "\n";

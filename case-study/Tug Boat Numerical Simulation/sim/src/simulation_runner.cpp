@@ -1,4 +1,5 @@
 #include "simulation_runner.h"
+#include <nlohmann/json.hpp>
 #include "physics_plant.h"
 #include "thrust_allocator.h"
 #include <fstream>

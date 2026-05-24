@@ -172,7 +172,7 @@ void ex01_relay_autotuner()
     const double r = 1.0;
     const int N    = 400;
 
-    std::ofstream f("ex01_relay_pid.csv");
+    std::ofstream f(std::string(PROJECT_DATA_DIR) + "/ex01_relay_pid.csv");
     f << "Time,y,u,e\n";
 
     std::vector<double> t_vec, y_vec;
@@ -220,7 +220,7 @@ void ex02_c2d_comparison()
     Eigen::VectorXd x_t = Eigen::VectorXd::Zero(2);
     Eigen::VectorXd uv(1); uv << 1.0; // unit step
 
-    std::ofstream f("ex02_c2d.csv");
+    std::ofstream f(std::string(PROJECT_DATA_DIR) + "/ex02_c2d.csv");
     f << "Time,y_zoh,y_tustin\n";
     std::cout << std::setw(8) << "t[s]"
               << std::setw(12) << "y_zoh"
@@ -271,7 +271,7 @@ void ex03_rls_identification()
     double y = 0, y1 = 0, y2 = 0, u1 = 0, u2 = 0;
     int prbs_state = 1;
 
-    std::ofstream f("ex03_rls.csv");
+    std::ofstream f(std::string(PROJECT_DATA_DIR) + "/ex03_rls.csv");
     f << "Time,y,u,e_pred,theta_a1,theta_a2,theta_b1,theta_b2,phase\n";
     std::cout << std::setw(6)  << "k"
               << std::setw(9)  << "a1_est"
@@ -381,7 +381,7 @@ void ex04_n4sid_order_selection()
     double rmse = 0.0;
     prbs = 1;
 
-    std::ofstream f("ex04_n4sid.csv");
+    std::ofstream f(std::string(PROJECT_DATA_DIR) + "/ex04_n4sid.csv");
     f << "Time,y_true,y_id,error\n";
 
     for (int k = 0; k < 200; ++k)
@@ -433,7 +433,7 @@ void ex05_mpc_constrained()
     Eigen::VectorXd dx(3);  dx << 5.0, 3.0, -10.0; // same kick as case study
     const Eigen::VectorXd r_ref = Eigen::VectorXd::Zero(3);
 
-    std::ofstream f("ex05_mpc_constrained.csv");
+    std::ofstream f(std::string(PROJECT_DATA_DIR) + "/ex05_mpc_constrained.csv");
     f << "Time,dx1,dx2,dx3,du1,du2,du3,norm_du\n";
     std::cout << std::setw(6) << "k"
               << std::setw(10) << "dx1"
@@ -510,7 +510,7 @@ void ex06_adaptive_gpc()
     double y = 0.0, u_prev_scalar = 0.0;
     int swap_count = 0;
 
-    std::ofstream f("ex06_adaptive_gpc.csv");
+    std::ofstream f(std::string(PROJECT_DATA_DIR) + "/ex06_adaptive_gpc.csv");
     f << "Time,y,u,r,e,swapped\n";
     std::cout << std::setw(6)  << "k"
               << std::setw(10) << "y"
@@ -634,7 +634,7 @@ void ex07_ekf_nonlinear()
     std::normal_distribution<double> pn(0.0, 0.01);
     std::normal_distribution<double> mn1(0.0, 0.5), mn2(0.0, 1.0), mn3(0.0, 5.0);
 
-    std::ofstream f("ex07_ekf.csv");
+    std::ofstream f(std::string(PROJECT_DATA_DIR) + "/ex07_ekf.csv");
     f << "Time,x1,x2,x3,x1_est,x2_est,x3_est,err1,err2,err3\n";
     std::cout << std::setw(6)  << "k"
               << std::setw(10) << "x1"
@@ -737,7 +737,7 @@ void ex08_ukf_vs_ekf()
     std::normal_distribution<double> pn(0.0, 0.01);
     std::normal_distribution<double> mn1(0.0, 0.5), mn2(0.0, 1.0), mn3(0.0, 5.0);
 
-    std::ofstream f("ex08_ukf_vs_ekf.csv");
+    std::ofstream f(std::string(PROJECT_DATA_DIR) + "/ex08_ukf_vs_ekf.csv");
     f << "Time,x1_true,x1_ekf,x1_ukf,err_ekf,err_ukf\n";
     std::cout << std::setw(6)  << "k"
               << std::setw(12) << "err_ekf_x1"
@@ -820,7 +820,7 @@ void ex09_adrc_disturbance()
     const double r    = 1.0;
     const double dist = 2.0; // step disturbance at t=1 s
 
-    std::ofstream f("ex09_adrc.csv");
+    std::ofstream f(std::string(PROJECT_DATA_DIR) + "/ex09_adrc.csv");
     f << "Time,y_adrc,y_pid,u_adrc,u_pid,d\n";
     std::cout << std::setw(7)  << "t[s]"
               << std::setw(10) << "y_adrc"
@@ -909,7 +909,7 @@ void ex10_smith_predictor()
     const double r = 1.0;
     const int    N = 500;
 
-    std::ofstream f("ex10_smith.csv");
+    std::ofstream f(std::string(PROJECT_DATA_DIR) + "/ex10_smith.csv");
     f << "Time,y_sp,y_pid\n";
     std::cout << std::setw(7)  << "t[s]"
               << std::setw(10) << "y_smith"
@@ -984,7 +984,7 @@ void ex11_repetitive_control()
     const double r = 1.0;
     const int    N = 4 * N_per; // 4 disturbance periods
 
-    std::ofstream f("ex11_rc.csv");
+    std::ofstream f(std::string(PROJECT_DATA_DIR) + "/ex11_rc.csv");
     f << "Time,e_rc,e_pid,u_rc,u_pid,d\n";
     std::cout << std::setw(7)  << "t[s]"
               << std::setw(10) << "e_rc"
@@ -1088,7 +1088,7 @@ void ex12_supervisory_stack()
     auto y_A     = runController(*pid_A, "PID_A");
     auto y_B     = runController(*pid_B, "PID_B");
 
-    std::ofstream f("ex12_stack.csv");
+    std::ofstream f(std::string(PROJECT_DATA_DIR) + "/ex12_stack.csv");
     f << "Time,y_stack,y_A,y_B\n";
     for (int k = 0; k < 500; ++k)
         f << k*Ts << "," << y_stack[k] << "," << y_A[k] << "," << y_B[k] << "\n";

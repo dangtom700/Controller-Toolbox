@@ -1,0 +1,10 @@
+{
+  "id": "s05_medload_tracking",
+  "description": "Load-step tracking at Medium Load: demand +10 bar, +20 MW (op B)",
+  "operating_point": "B",
+  "mode": "tracking",
+  "dx0": [0.0, 0.0, 0.0],
+  "setpoint_dy": [10.0, 20.0, 0.0],
+  "duration_s": 3600,
+  "Ts": 1.0
+}

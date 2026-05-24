@@ -79,10 +79,15 @@ void PhysicsPlant::step(const Vector3d& tau_main, const Vector3d& tau_env)
 
     X_ += (dt / 6.0) * (k1 + 2.0*k2 + 2.0*k3 + k4);
 
-    // Wrap heading to (-pi, pi]
-    double& psi = X_(2);
-    while (psi >  M_PI) psi -= 2.0 * M_PI;
-    while (psi <= -M_PI) psi += 2.0 * M_PI;
+    // Clamp any Inf/NaN that a diverging controller can produce to keep the
+    // simulation alive. NaN/Inf in psi causes the while-loop wrap to hang.
+    for (int i = 0; i < 6; ++i) {
+        if (!std::isfinite(X_(i)))
+            X_(i) = 0.0;
+    }
+
+    // Wrap heading to (-pi, pi] in O(1) — safe for all finite values.
+    X_(2) = std::remainder(X_(2), 2.0 * M_PI);
 }
 
 } // namespace tug

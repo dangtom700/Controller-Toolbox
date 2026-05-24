@@ -1,0 +1,10 @@
+{
+  "id": "s02_medload_regulation",
+  "description": "Perturbation rejection at Medium Load (op B)",
+  "operating_point": "B",
+  "mode": "regulation",
+  "dx0": [5.0, 3.0, -10.0],
+  "setpoint_dy": [0.0, 0.0, 0.0],
+  "duration_s": 3600,
+  "Ts": 1.0
+}

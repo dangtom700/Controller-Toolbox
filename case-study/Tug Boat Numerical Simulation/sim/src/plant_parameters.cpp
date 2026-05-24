@@ -1,5 +1,5 @@
 #include "plant_parameters.h"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include <fstream>
 #include <cmath>
 #include <stdexcept>

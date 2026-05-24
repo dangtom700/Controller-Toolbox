@@ -4,3 +4,4 @@
 /enhance.bat
 /prompt
 examples/python/utils/__pycache__/
+*.csv

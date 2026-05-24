@@ -69,7 +69,8 @@ for %%T in (
     tune_all
     simulate_all
     realtime_all
-    boiler_turbine_case_study
+    boiler_sim
+    tug_sim
     toolbox_examples
 ) do (
     echo.

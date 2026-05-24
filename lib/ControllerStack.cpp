@@ -71,7 +71,7 @@ namespace ctrl
                                 e.activationCondition(error, lastOutput_);
                 if (eligible)
                 {
-                    if (e.name != prevActiveName_)
+                    if (!prevActiveName_.empty() && e.name != prevActiveName_)
                         e.controller->bumplessInit(lastOutput_, error);
                     out = e.controller->compute(error);
                     activeName_ = e.name;
