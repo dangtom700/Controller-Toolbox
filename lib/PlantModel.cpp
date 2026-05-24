@@ -2,9 +2,32 @@
 #include <algorithm>
 #include <stdexcept>
 #include <unsupported/Eigen/MatrixFunctions>
+#include <cmath>
 
 namespace ctrl
 {
+
+    // ---------------------------------------------------------------------------
+    // StateSpace::validate
+    // ---------------------------------------------------------------------------
+    void StateSpace::validate() const
+    {
+        if (A.rows() != A.cols())
+            throw std::invalid_argument("StateSpace: A must be square (n x n).");
+        const int n = static_cast<int>(A.rows());
+        if (B.rows() != n)
+            throw std::invalid_argument("StateSpace: B must have n rows.");
+        if (C.cols() != n)
+            throw std::invalid_argument("StateSpace: C must have n columns.");
+        const int p = static_cast<int>(C.rows());
+        const int m = static_cast<int>(B.cols());
+        if (D.rows() != p)
+            throw std::invalid_argument("StateSpace: D row count must match C row count (p).");
+        if (D.cols() != m)
+            throw std::invalid_argument("StateSpace: D column count must match B column count (m).");
+        if (Ts < 0.0)
+            throw std::invalid_argument("StateSpace: Ts must be >= 0 (0 = continuous-time).");
+    }
 
     // ---------------------------------------------------------------------------
     // tf2ss - controllable canonical form
@@ -27,8 +50,11 @@ namespace ctrl
 
         // Pad numerator to exactly n+1 coefficients (prepend zeros if shorter).
         std::vector<double> num = tf.num;
-        while (static_cast<int>(num.size()) < n + 1)
-            num.insert(num.begin(), 0.0);
+        if (static_cast<int>(num.size()) < n + 1) {
+            std::vector<double> padded(n + 1 - static_cast<int>(num.size()), 0.0);
+            padded.insert(padded.end(), num.begin(), num.end());
+            num = std::move(padded);
+        }
 
         double d0 = num[0]; // feed-through / direct term = b0
 
@@ -87,27 +113,24 @@ namespace ctrl
 
         const int n = sys.stateSize();
 
-        // ---- Denominator: characteristic polynomial from eigenvalues of A ----
-        // p(z) = Pi_{i=1}^{n} (z - lambda_i),  monic, length n+1, coefficients real.
-        // Using root-to-polynomial expansion; coefficients are real since A is real
-        // (complex eigenvalues come in conjugate pairs).
+        // ---- Denominator: characteristic polynomial via Faddeev-LeVerrier recursion ----
+        // Operates in real arithmetic on A directly; avoids eigenvalue computation
+        // and the catastrophic cancellation of root-product expansion for clustered
+        // or repeated eigenvalues.
+        //
+        // Recurrence (monic, coefficients of z^n + a[1]z^{n-1} + ... + a[n]):
+        //   M_0 = I,  a[k] = -trace(A * M_{k-1}) / k,  M_k = A*M_{k-1} + a[k]*I
+        // At the end, A * M_n = 0  (Cayley-Hamilton check).
         std::vector<double> a(n + 1, 0.0);
         {
-            Eigen::EigenSolver<Eigen::MatrixXd> es(sys.A, false);
-            const Eigen::VectorXcd &ev = es.eigenvalues();
-            std::vector<std::complex<double>> poly = {1.0};
-            for (int i = 0; i < ev.size(); ++i)
+            a[0] = 1.0;
+            Eigen::MatrixXd M = Eigen::MatrixXd::Identity(n, n);
+            for (int k = 1; k <= n; ++k)
             {
-                std::vector<std::complex<double>> tmp(poly.size() + 1, 0.0);
-                for (int j = 0; j < static_cast<int>(poly.size()); ++j)
-                {
-                    tmp[j]     += poly[j];
-                    tmp[j + 1] -= poly[j] * ev(i);
-                }
-                poly = tmp;
+                M = sys.A * M;
+                a[k] = -M.trace() / k;
+                M.diagonal().array() += a[k];
             }
-            for (int k = 0; k <= n; ++k)
-                a[k] = poly[k].real(); // imaginary parts are numerical noise
         }
 
         // ---- Markov parameters: h[0]=D, h[k]=C A^{k-1} B for k=1..n ----

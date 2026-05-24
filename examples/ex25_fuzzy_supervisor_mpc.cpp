@@ -1,6 +1,6 @@
 // ============================================================
 //  ex25_fuzzy_supervisor_mpc.cpp
-//  Application: pH neutralisation reactor — nonlinear plant with
+//  Application: pH neutralisation reactor - nonlinear plant with
 //  FuzzySupervisor driving adaptive MPC re-linearisation.
 //
 //  Plant: Hammerstein model (static nonlinearity + linear dynamics)
@@ -8,8 +8,8 @@
 //    NL gain: k_pH(pH) = 5.0 - 3.0*tanh(2*(pH - 7))
 //    Effective:  G_eff = k_pH(y) * G(s)
 //
-//  The nonlinear gain changes by factor ~3× across the operating range
-//  (pH 4–10), invalidating a single linear MPC model.
+//  The nonlinear gain changes by factor ~3* across the operating range
+//  (pH 4-10), invalidating a single linear MPC model.
 //
 //  Demonstrates:
 //    - Baseline MPC (fixed linearisation at pH 7)
@@ -50,7 +50,7 @@ int main()
     const double Ts  = 2.0;    // 2-second sample
     const double pH0 = 7.0;    // nominal operating point
 
-    // ── Reference trajectory ─────────────────────────────────────────────────
+    // -- Reference trajectory -------------------------------------------------
     // Steps through pH 7 -> 9 -> 5 -> 8 to excite the nonlinearity
     auto refProfile = [](double t) -> double {
         if (t <  60.0) return 7.0;
@@ -59,13 +59,13 @@ int main()
         return 8.0;
     };
 
-    // ── Fixed MPC (linearised at pH 7, never updated) ────────────────────────
+    // -- Fixed MPC (linearised at pH 7, never updated) ------------------------
     ctrl::MPCParams mp;
     mp.Np    = 20;
     mp.Nc    = 5;
     mp.rho_y = 10.0;
     mp.rho_u = 0.01;
-    mp.uMin  = 0.0;   // valve: 0–100%
+    mp.uMin  = 0.0;   // valve: 0-100%
     mp.uMax  = 100.0;
     mp.duMin = -10.0;
     mp.duMax =  10.0;
@@ -74,7 +74,7 @@ int main()
     ctrl::DiscreteMPC mpc_fixed(buildPlantSS(k_nom, Ts), mp);
     ctrl::DiscreteMPC mpc_adapt(buildPlantSS(k_nom, Ts), mp);
 
-    // ── FuzzySupervisor ───────────────────────────────────────────────────────
+    // -- FuzzySupervisor -------------------------------------------------------
     // Fires when |e| > 0.8 pH units AND growing -> relinearise
     ctrl::SupervisorParams sp;
     sp.e_threshold     = 0.8;    // 0.8 pH unit error = "Large"
@@ -83,13 +83,13 @@ int main()
     sp.cooldown_steps  = 15;     // wait 30 s before re-triggering
     ctrl::FuzzySupervisor supervisor(sp, Ts);
 
-    // ── Simulation ────────────────────────────────────────────────────────────
+    // -- Simulation ------------------------------------------------------------
     const int N = 240;   // 480 s total
     double yf = 7.0, ya = 7.0;
     Eigen::VectorXd xf = Eigen::VectorXd::Zero(1);
     Eigen::VectorXd xa = Eigen::VectorXd::Zero(1);
     // Warm-start: steady state of y=7 with no input is handled by gain offset;
-    // for this demo we start at equilibrium (x=7/k_nom·(1-a)/... -> initial y=7
+    // for this demo we start at equilibrium (x=7/k_nom.(1-a)/... -> initial y=7
     // via a precomputed IC).
     xf(0) = 7.0;  // approximate: output ~ state for unity C
     xa(0) = 7.0;
@@ -101,7 +101,7 @@ int main()
         << "relinearize_signal,relinearize_event,k_eff\n";
     csv << std::fixed << std::setprecision(4);
 
-    std::cout << "=== FuzzySupervisor + Adaptive MPC — pH Neutralisation ===\n";
+    std::cout << "=== FuzzySupervisor + Adaptive MPC - pH Neutralisation ===\n";
     std::cout << "  k    t[s]  ref  y_fix  u_fix  y_adp  u_adp  sig   relins\n";
     std::cout << std::string(72, '-') << "\n";
 
@@ -109,7 +109,7 @@ int main()
         double t = k * Ts;
         double r = refProfile(t);
 
-        // ── Fixed MPC ────────────────────────────────────────────────────────
+        // -- Fixed MPC --------------------------------------------------------
         double ef = r - yf;
         double uf = mpc_fixed.compute(ef);
         // True plant response: NL gain applied to linear output
@@ -119,7 +119,7 @@ int main()
         // Offset to keep around operating point pH (add bias so y represents pH)
         yf = y_lin_f;
 
-        // ── Adaptive MPC via FuzzySupervisor ─────────────────────────────────
+        // -- Adaptive MPC via FuzzySupervisor ---------------------------------
         double ea  = r - ya;
         double ua  = mpc_adapt.compute(ea);
 

@@ -2,37 +2,38 @@
 #include "IController.h"
 #include <Eigen/Dense>
 #include <functional>
+#include <optional>
 #include <string>
 #include <vector>
 
 // Mamdani / Takagi-Sugeno fuzzy inference engine.
 //
-// ── Architecture ─────────────────────────────────────────────────────────────
+// -- Architecture -------------------------------------------------------------
 //
-//  1. INPUT VARIABLES  — each partitioned into N linguistic terms.
+//  1. INPUT VARIABLES  - each partitioned into N linguistic terms.
 //     Membership functions:  triangular, trapezoidal, Gaussian, singleton.
 //
-//  2. RULE BASE  — list of if-then rules in the form:
+//  2. RULE BASE  - list of if-then rules in the form:
 //       IF  x1 is A_i  AND  x2 is B_j  ...  THEN  y is C_k
 //     Rules are evaluated using product (t-norm) for AND.
 //
 //  3. INFERENCE METHODS
-//     a) Mamdani   — output fuzzy sets are clipped/scaled, then aggregated.
+//     a) Mamdani   - output fuzzy sets are clipped/scaled, then aggregated.
 //        Defuzzification: Centre of Gravity (CoG) over a discrete universe.
-//     b) Takagi-Sugeno (TS) — consequent is a crisp function of inputs (or
+//     b) Takagi-Sugeno (TS) - consequent is a crisp function of inputs (or
 //        a singleton value per rule).  Defuzzification: weighted average.
 //
-//  4. OUTPUT  — single real value (for SISO use) or vector (MIMO via
+//  4. OUTPUT  - single real value (for SISO use) or vector (MIMO via
 //     multiple FuzzySystem instances, one per output axis).
 //
-// ── SISO IController wrapper ──────────────────────────────────────────────────
+// -- SISO IController wrapper --------------------------------------------------
 //  FuzzyController wraps one FuzzySystem in the IController interface so it can
 //  be used wherever DiscretePID, DiscreteSMC, etc. are used.
 //
-// ── Terminology ───────────────────────────────────────────────────────────────
-//  MF       — membership function
-//  crisp    — ordinary real-valued number (vs. a fuzzy set)
-//  universe — the domain of an input or output variable
+// -- Terminology ---------------------------------------------------------------
+//  MF       - membership function
+//  crisp    - ordinary real-valued number (vs. a fuzzy set)
+//  universe - the domain of an input or output variable
 //
 // Ref: Mamdani & Assilian (1975); Takagi & Sugeno (1985);
 //      Jang, Sun, Mizutani "Neuro-Fuzzy and Soft Computing" (1997);
@@ -48,7 +49,7 @@ namespace ctrl
 // A callable that maps a crisp input to a membership degree in [0, 1].
 using MF = std::function<double(double)>;
 
-// Factory functions — return a properly typed MF.
+// Factory functions - return a properly typed MF.
 // All parameters should match the universe of the variable.
 
 // Triangular:  /\  peaks at c, zero at [a, b]  (a <= c <= b)
@@ -63,7 +64,7 @@ MF mfGaussian(double mean, double sigma);
 // Singleton:  1 at x==value, 0 elsewhere (for TS consequents)
 MF mfSingleton(double value);
 
-// Shoulder functions — open-ended at one side (useful for NL / PL extremes)
+// Shoulder functions - open-ended at one side (useful for NL / PL extremes)
 MF mfShoulderLeft(double a, double b);   // 1 for x<=a, linear 1->0 from a to b
 MF mfShoulderRight(double a, double b);  // linear 0->1 from a to b, 1 for x>=b
 
@@ -73,9 +74,18 @@ MF mfShoulderRight(double a, double b);  // linear 0->1 from a to b, 1 for x>=b
 // ════════════════════════════════════════════════════════════════════════════
 
 struct LinguisticTerm {
-    std::string name;
-    MF          mf;
+    std::string            name;
+    MF                     mf;
+    // Explicit peak location for weighted-average defuzzification.
+    // Set by ltSingleton() automatically; can be set manually for any unimodal MF
+    // when grid-search peak-finding would be ambiguous or too coarse.
+    // When nullopt, defuzzWeightedAvg falls back to a grid search.
+    std::optional<double>  peak;
 };
+
+// Convenience: build a fully specified LinguisticTerm for a TS singleton output.
+// Sets both mf and peak so defuzzWeightedAvg does not rely on grid search.
+LinguisticTerm ltSingleton(const std::string& name, double value);
 
 struct LinguisticVariable {
     std::string                  name;
@@ -108,7 +118,7 @@ struct Rule {
 
 
 // ════════════════════════════════════════════════════════════════════════════
-// FuzzySystem — core inference engine
+// FuzzySystem - core inference engine
 // ════════════════════════════════════════════════════════════════════════════
 
 enum class InferenceMethod { Mamdani, TakagiSugeno };
@@ -128,7 +138,8 @@ public:
 
     // Build the system step by step.
     void addInput (const LinguisticVariable& var);
-    void addOutput(const LinguisticVariable& var);   // one output supported
+    // Only one output variable is supported. Throws std::logic_error on a second call.
+    void addOutput(const LinguisticVariable& var);
     void addRule  (const Rule& rule);
 
     // Evaluate: inputs = crisp values for each input variable (in order).
@@ -147,6 +158,14 @@ private:
     std::vector<LinguisticVariable> outputs_;
     std::vector<Rule>               rules_;
 
+    // Pre-allocated workspace - sized once in addInput/addOutput, reused every evaluate()
+    // call to avoid per-call heap allocation on RT targets. Declared mutable so evaluate()
+    // can fill them without losing const correctness on the logical state of the system.
+    mutable std::vector<std::vector<double>> mu_;        // mu_[i][t] = membership of input i, term t
+    mutable std::vector<double>              strengths_; // per-output-term rule activation strength
+
+    void rebuildWorkspace();
+
     // Activation strength of one rule given pre-fuzzified memberships.
     // mu[i] = vector of memberships for input variable i.
     double ruleStrength(const Rule& r,
@@ -158,7 +177,7 @@ private:
 
 
 // ════════════════════════════════════════════════════════════════════════════
-// FuzzyPD — convenience builder: 5-term PD fuzzy controller for one axis.
+// FuzzyPD - convenience builder: 5-term PD fuzzy controller for one axis.
 //
 // Inputs:  error e,  error-rate de
 // Output:  control effort u
@@ -167,9 +186,9 @@ private:
 // 25-rule Mamdani table (canonical diagonal structure).
 //
 // Scaling:
-//   e_scale  — maps ±e_scale to universe [-1, 1]   before inference
-//   de_scale — maps ±de_scale to universe [-1, 1]  before inference
-//   u_scale  — output on universe [-1, 1] is scaled to ±u_scale
+//   e_scale  - maps +/-e_scale to universe [-1, 1]   before inference
+//   de_scale - maps +/-de_scale to universe [-1, 1]  before inference
+//   u_scale  - output on universe [-1, 1] is scaled to +/-u_scale
 // ════════════════════════════════════════════════════════════════════════════
 
 struct FuzzyPDParams {
@@ -207,11 +226,11 @@ private:
 
 
 // ════════════════════════════════════════════════════════════════════════════
-// FuzzyPID — extends FuzzyPD with a fuzzy integral term.
+// FuzzyPID - extends FuzzyPD with a fuzzy integral term.
 //
 // Architecture: three decoupled fuzzy inference blocks:
-//   u_P = FuzzyPD(e, de)            — proportional + derivative
-//   u_I = k_i * integral(e)         — crisp accumulator with anti-windup
+//   u_P = FuzzyPD(e, de)            - proportional + derivative
+//   u_I = k_i * integral(e)         - crisp accumulator with anti-windup
 //   u   = clamp(u_P + u_I, uMin, uMax)
 //
 // The integral is identical to the PID back-calculation anti-windup scheme
@@ -240,7 +259,7 @@ public:
 
     double lastOutput() const { return u_prev_; }
 
-    // Bumpless init: set integral so next compute(error) ≈ u_target.
+    // Bumpless init: set integral so next compute(error) approx = u_target.
     void bumplessInit(double u_target, double error) override;
 
 private:
@@ -253,7 +272,7 @@ private:
 
 
 // ════════════════════════════════════════════════════════════════════════════
-// FuzzySupervisor — monitors closed-loop performance and decides whether the
+// FuzzySupervisor - monitors closed-loop performance and decides whether the
 // underlying controller's linearised plant model needs to be refreshed.
 //
 // Decision logic (Mamdani fuzzy, 2 inputs -> 1 output):

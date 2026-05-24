@@ -1,28 +1,29 @@
 #pragma once
 #include <atomic>
 #include <array>
+#include <cstdint>
 
-// AtomicParamBuffer<Params> - lock-free double-buffer for controller parameter updates.
+// AtomicParamBuffer<Params> - seqlock-based double-buffer for controller parameter updates.
 //
 // Problem:
 //   A background thread (gain scheduler, auto-tuner, telemetry) needs to push
 //   new parameters to a controller while the real-time thread is inside
-//   compute().  A mutex would stall the RT thread; relaxed atomics allow the
-//   swap to be visible without a lock.
+//   compute().  A mutex would stall the RT thread; this seqlock allows the
+//   RT thread to read without blocking while the writer atomically publishes.
 //
-// Design:
-//   Two copies of Params (bufs_[0] and bufs_[1]).  active_ holds the index of
-//   the current "reader" buffer.  The background writer writes to the inactive
-//   copy, then atomically promotes it.
+// Design - seqlock:
+//   A sequence counter (seq_) is incremented twice per write: once before
+//   (making it odd = "write in progress") and once after (making it even = done).
+//   The reader spins until it sees an even seq_ value that is unchanged across
+//   its entire read.  This is race-free under the C++ memory model.
 //
-//   - read()    (RT thread)   : O(1), no allocation, no blocking.
-//   - publish() (BG thread)   : copies Params into the inactive slot, then
-//                               atomically swaps active_.
+//   Two Params slots (bufs_[]) are retained so the writer can prepare the next
+//   value in the inactive slot before publishing, avoiding a mid-write view.
 //
 // Guarantees:
-//   - Single writer + single reader: lock-free and data-race-free.
-//   - Params must be trivially copyable (struct of doubles, ints, etc.) so
-//     that write to the inactive buffer is never torn by the reader.
+//   - Single writer + single reader: lock-free on the reader side.
+//   - No torn reads: the reader retries if a write overlaps its read window.
+//   - Params must be trivially copyable (struct of doubles, ints, etc.).
 //   - The RT thread may observe the old or the new Params on the step that
 //     publish() fires; it will always observe the new Params on the next step.
 //
@@ -36,11 +37,12 @@
 //   ctrl::AtomicParamBuffer<PIDParams> buf({1.0, 0.1, 0.05});
 //
 //   // RT thread (called at Ts):
-//   const PIDParams& p = buf.read();
+//   PIDParams p = buf.read();
 //   pid.setParams(p);
 //
 //   // Background thread (called on tuner update):
 //   buf.publish({2.0, 0.2, 0.1});
+
 namespace ctrl {
 
 template <typename Params>
@@ -51,35 +53,47 @@ class AtomicParamBuffer {
 
 public:
     explicit AtomicParamBuffer(const Params& initial)
-        : active_(0)
+        : seq_(0), active_(0)
     {
         bufs_[0] = initial;
         bufs_[1] = initial;
     }
 
     // Real-time thread: read the current parameter set.
-    // Returns a const reference to the active buffer - zero copy, no allocation.
-    const Params& read() const
+    // Returns by value (copied out under seqlock protection).
+    // Spins only if a publish() is mid-flight - typically zero retries.
+    Params read() const
     {
-        return bufs_[active_.load(std::memory_order_acquire)];
+        Params result;
+        uint64_t s0, s1;
+        do {
+            s0 = seq_.load(std::memory_order_acquire);
+            if (s0 & 1u) continue;  // writer in progress - spin
+            result = bufs_[active_.load(std::memory_order_acquire)];
+            s1 = seq_.load(std::memory_order_acquire);
+        } while (s0 != s1);
+        return result;
     }
 
     // Background thread: publish a new parameter set.
-    // Writes to the inactive buffer, then atomically makes it the active one.
+    // Writes to the inactive buffer, then atomically promotes it.
     void publish(const Params& p)
     {
+        seq_.fetch_add(1, std::memory_order_release);   // seq becomes odd
         const int inactive = 1 - active_.load(std::memory_order_relaxed);
         bufs_[inactive] = p;
         active_.store(inactive, std::memory_order_release);
+        seq_.fetch_add(1, std::memory_order_release);   // seq becomes even again
     }
 
     // Peek at the last published value (background thread use only).
-    const Params& latest() const
+    Params latest() const
     {
         return bufs_[active_.load(std::memory_order_relaxed)];
     }
 
 private:
+    std::atomic<uint64_t>  seq_;
     std::array<Params, 2>  bufs_;
     std::atomic<int>       active_;
 };

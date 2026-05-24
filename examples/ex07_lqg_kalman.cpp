@@ -22,16 +22,15 @@ int main()
 {
     const double Ts = 0.01;
 
-    // ---- Plant: 2nd-order system (discretised with Euler) ----
+    // ---- Plant: 2nd-order system (discretised with ZOH) ----
     // Continuous: xddot + 0.4xdot + 4x = u  (underdamped, omegan=2, zeta=0.1)
     Eigen::Matrix2d Ac; Ac << 0.0, 1.0, -4.0, -0.4;
     Eigen::Vector2d Bc; Bc << 0.0, 1.0;
     Eigen::RowVector2d Cc; Cc << 1.0, 0.0; // only position measured
     Eigen::MatrixXd Dc(1, 1); Dc << 0.0;
 
-    const Eigen::Matrix2d Ad = Eigen::Matrix2d::Identity() + Ts * Ac;
-    const Eigen::Vector2d Bd = Ts * Bc;
-    ctrl::StateSpace plant(Ad, Bd, Cc, Dc, Ts);
+    ctrl::StateSpace plant_c(Ac, Bc, Cc, Dc, 0.0);
+    ctrl::StateSpace plant = ctrl::c2d(plant_c, Ts, ctrl::C2dMethod::ZOH);
 
     // ---- LQR weights (Bryson) ----
     Eigen::Vector2d xmax; xmax << 1.0, 2.0;  // position, velocity
@@ -91,7 +90,7 @@ int main()
 
         // Advance true plant with LQG control + process noise
         Eigen::VectorXd noise(2); noise << proc_noise(rng), proc_noise(rng);
-        x_true = Ad * x_true + Bd * u_lqg(0) + Ts * noise;
+        x_true = plant.A * x_true + plant.B * u_lqg(0) + Ts * noise;
     }
     return 0;
 }

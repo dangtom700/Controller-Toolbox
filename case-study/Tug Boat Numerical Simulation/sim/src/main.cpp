@@ -9,7 +9,7 @@
 
 int main(int argc, char* argv[])
 {
-    // ── Paths ────────────────────────────────────────────────────────────────
+    // -- Paths ----------------------------------------------------------------
     std::string base_dir = (argc > 1) ? argv[1] : ".";
     std::string plant_json    = base_dir + "/config/plant_params.json";
     std::string scenarios_dir = base_dir + "/config/scenarios";
@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 
     std::filesystem::create_directories(log_dir);
 
-    // ── Load plant ───────────────────────────────────────────────────────────
+    // -- Load plant -----------------------------------------------------------
     std::cout << "Loading plant parameters from: " << plant_json << '\n';
     tug::PlantParameters plant;
     try {
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
     std::cout << "M_re diagonal: " << plant.M_re.diagonal().transpose() << '\n';
     std::cout << "D_re diagonal: " << plant.D_re.diagonal().transpose() << '\n';
 
-    // ── Scenarios ─────────────────────────────────────────────────────────────
+    // -- Scenarios -------------------------------------------------------------
     std::vector<std::string> scenario_files;
     for (auto& entry : std::filesystem::directory_iterator(scenarios_dir)) {
         if (entry.path().extension() == ".json")
@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    // ── Controllers ───────────────────────────────────────────────────────────
+    // -- Controllers -----------------------------------------------------------
     // Build them once; runner calls reset() before each run.
     std::vector<std::unique_ptr<tug::ControllerBase>> controllers;
     controllers.push_back(std::make_unique<tug::PIDController>(plant));
@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
     controllers.push_back(std::make_unique<tug::FuzzyPIDController>(plant));
     controllers.push_back(std::make_unique<tug::FuzzySupervised_MPC>(plant));
 
-    // ── Run all (scenario x controller) pairs ─────────────────────────────────
+    // -- Run all (scenario x controller) pairs ---------------------------------
     int total = static_cast<int>(scenario_files.size() * controllers.size());
     int done  = 0;
     std::cout << "\nRunning " << total << " simulations ("

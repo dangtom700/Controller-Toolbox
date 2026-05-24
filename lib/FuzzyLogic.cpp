@@ -7,6 +7,10 @@
 namespace ctrl
 {
 
+// Named constants - avoids magic literals scattered through inference code.
+static constexpr int kCoGResolutionDefault   = 101; // CoG grid points (FuzzyPD/Supervisor default)
+static constexpr int kTSPeakSearchResolution =  51; // fallback grid for WA peak search (non-singleton terms)
+
 // ════════════════════════════════════════════════════════════════════════════
 // Membership function factories
 // ════════════════════════════════════════════════════════════════════════════
@@ -43,6 +47,11 @@ MF mfSingleton(double value)
     return [value](double x) -> double {
         return (std::abs(x - value) < 1e-9) ? 1.0 : 0.0;
     };
+}
+
+LinguisticTerm ltSingleton(const std::string& name, double value)
+{
+    return LinguisticTerm{name, mfSingleton(value), value};
 }
 
 MF mfShoulderLeft(double a, double b)
@@ -88,8 +97,30 @@ int LinguisticVariable::termIndex(const std::string& termName) const
 // FuzzySystem
 // ════════════════════════════════════════════════════════════════════════════
 
-void FuzzySystem::addInput(const LinguisticVariable& var)  { inputs_.push_back(var);  }
-void FuzzySystem::addOutput(const LinguisticVariable& var) { outputs_.push_back(var); }
+void FuzzySystem::rebuildWorkspace()
+{
+    mu_.resize(inputs_.size());
+    for (std::size_t i = 0; i < inputs_.size(); ++i)
+        mu_[i].resize(inputs_[i].terms.size(), 0.0);
+    if (!outputs_.empty())
+        strengths_.assign(outputs_[0].terms.size(), 0.0);
+}
+
+void FuzzySystem::addInput(const LinguisticVariable& var)
+{
+    inputs_.push_back(var);
+    rebuildWorkspace();
+}
+
+void FuzzySystem::addOutput(const LinguisticVariable& var)
+{
+    if (!outputs_.empty())
+        throw std::logic_error("FuzzySystem: only one output variable is supported. "
+                               "Use separate FuzzySystem instances for MIMO outputs.");
+    outputs_.push_back(var);
+    rebuildWorkspace();
+}
+
 void FuzzySystem::addRule(const Rule& rule)                { rules_.push_back(rule);  }
 
 double FuzzySystem::ruleStrength(const Rule& r,
@@ -109,30 +140,31 @@ double FuzzySystem::evaluate(const std::vector<double>& inputs) const
     if (outputs_.empty())
         throw std::logic_error("FuzzySystem::evaluate: no output variable defined");
 
-    // Fuzzify all inputs
-    std::vector<std::vector<double>> mu;
-    mu.reserve(inputs_.size());
-    for (std::size_t i = 0; i < inputs_.size(); ++i)
-        mu.push_back(inputs_[i].fuzzify(inputs[i]));
+    // Fuzzify all inputs - fill pre-allocated workspace mu_ in-place (no heap alloc)
+    for (std::size_t i = 0; i < inputs_.size(); ++i) {
+        const auto& terms = inputs_[i].terms;
+        for (std::size_t t = 0; t < terms.size(); ++t)
+            mu_[i][t] = std::clamp(terms[t].mf(inputs[i]), 0.0, 1.0);
+    }
 
-    // Fire all rules — collect activation strengths per output term
-    int nTerms = static_cast<int>(outputs_[0].terms.size());
-    std::vector<double> strengths(nTerms, 0.0);
+    // Fire all rules - accumulate activation strengths per output term (max aggregation)
+    const int nTerms = static_cast<int>(outputs_[0].terms.size());
+    std::fill(strengths_.begin(), strengths_.end(), 0.0);
 
     for (auto& rule : rules_) {
-        double w = ruleStrength(rule, mu);
+        double w = ruleStrength(rule, mu_);
         int tidx = rule.consequent_term_idx;
         if (tidx >= 0 && tidx < nTerms)
-            strengths[tidx] = std::max(strengths[tidx], w); // max aggregation
+            strengths_[tidx] = std::max(strengths_[tidx], w);
     }
 
     // Defuzzify
     double result = 0.0;
     if (params.inference == InferenceMethod::TakagiSugeno ||
         params.defuzz    == DefuzzMethod::WeightedAverage)
-        result = defuzzWeightedAvg(strengths);
+        result = defuzzWeightedAvg(strengths_);
     else
-        result = defuzzCoG(strengths);
+        result = defuzzCoG(strengths_);
 
     return std::clamp(result, params.uMin, params.uMax);
 }
@@ -157,7 +189,7 @@ double FuzzySystem::defuzzCoG(const std::vector<double>& strengths) const
         num += x * agg;
         den += agg;
     }
-    if (den < 1e-12) return (lo + hi) * 0.5;  // no rules fired — return centre
+    if (den < 1e-12) return (lo + hi) * 0.5;  // no rules fired - return centre
     return num / den;
 }
 
@@ -167,17 +199,20 @@ double FuzzySystem::defuzzWeightedAvg(const std::vector<double>& strengths) cons
     const auto& out = outputs_[0];
     double num = 0.0, den = 0.0;
     for (int t = 0; t < static_cast<int>(out.terms.size()); ++t) {
-        // For TS/singleton consequents the "centre" of the term is the MF's peak.
-        // We sample at the midpoint of the universe for each term as a fallback,
-        // but for singletons the MF encodes the exact value directly.
-        double centre = (out.lo + out.hi) * 0.5;
-        // Find approximate peak by grid search
-        int M = 51;
-        double best_mu = 0.0;
-        for (int k = 0; k < M; ++k) {
-            double x  = out.lo + k * (out.hi - out.lo) / (M - 1);
-            double mu = out.terms[t].mf(x);
-            if (mu > best_mu) { best_mu = mu; centre = x; }
+        double centre;
+        if (out.terms[t].peak.has_value()) {
+            // Exact peak provided (singletons, or explicitly set TS terms) - no grid search.
+            centre = out.terms[t].peak.value();
+        } else {
+            // Fall back to grid search for continuous Mamdani-style output terms.
+            centre = (out.lo + out.hi) * 0.5;
+            constexpr int M = kTSPeakSearchResolution;
+            double best_mu = 0.0;
+            for (int k = 0; k < M; ++k) {
+                double x  = out.lo + k * (out.hi - out.lo) / (M - 1);
+                double mu = out.terms[t].mf(x);
+                if (mu > best_mu) { best_mu = mu; centre = x; }
+            }
         }
         num += strengths[t] * centre;
         den += strengths[t];
@@ -218,7 +253,7 @@ void FuzzyPD::buildSystem()
     sys_ = FuzzySystem{};
     sys_.params.inference       = InferenceMethod::Mamdani;
     sys_.params.defuzz          = DefuzzMethod::CoG;
-    sys_.params.cog_resolution  = 101;
+    sys_.params.cog_resolution  = kCoGResolutionDefault;
     sys_.params.uMin = -1.0;
     sys_.params.uMax =  1.0;
 
@@ -256,7 +291,7 @@ FuzzyPD::FuzzyPD(const FuzzyPDParams& p, double sampleTime)
 void FuzzyPD::setParams(const FuzzyPDParams& p)
 {
     p_ = p;
-    // Rebuild not needed — scaling is applied externally before evaluate()
+    // Rebuild not needed - scaling is applied externally before evaluate()
 }
 
 double FuzzyPD::compute(double error)
@@ -327,9 +362,12 @@ void FuzzyPID::reset()
 void FuzzyPID::bumplessInit(double u_target, double error)
 {
     pd_block_.reset();
-    u_prev_    = u_target;
-    integral_  = u_target - pd_block_.params().u_scale; // coarse; P+D ≈ 0 at rest
-    (void)error;
+    // Estimate PD contribution at this error with de=0 (first call after reset).
+    double u_pd_est = pd_block_.compute(error);
+    pd_block_.reset();  // restore clean derivative state (e_prev_=0)
+    // Set integral so that u_pd_est + integral_ approx = u_target on the next compute().
+    integral_ = u_target - u_pd_est;
+    u_prev_   = u_target;
 }
 
 
@@ -342,7 +380,7 @@ void FuzzySupervisor::buildSystem()
     sys_ = FuzzySystem{};
     sys_.params.inference      = InferenceMethod::Mamdani;
     sys_.params.defuzz         = DefuzzMethod::CoG;
-    sys_.params.cog_resolution = 51;
+    sys_.params.cog_resolution = kTSPeakSearchResolution;
     sys_.params.uMin = 0.0;
     sys_.params.uMax = 1.0;
 

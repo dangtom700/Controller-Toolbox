@@ -23,9 +23,8 @@ int main()
     Eigen::Vector2d Bc; Bc << 0.0, 1.0;
     Eigen::RowVector2d Cc; Cc << 1.0, 0.0;
     Eigen::MatrixXd Dc(1,1); Dc << 0.0;
-    const Eigen::Matrix2d Ad = Eigen::Matrix2d::Identity() + Ts * Ac;
-    const Eigen::Vector2d Bd = Ts * Bc;
-    ctrl::StateSpace plant(Ad, Bd, Cc, Dc, Ts);
+    ctrl::StateSpace plant_c(Ac, Bc, Cc, Dc, 0.0);
+    ctrl::StateSpace plant = ctrl::c2d(plant_c, Ts, ctrl::C2dMethod::ZOH);
 
     // ---- ADRC tuning ----
     ctrl::ADRCParams ap;

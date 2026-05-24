@@ -1,6 +1,6 @@
 // ============================================================
 //  ex26_fuzzy_ts_gain_scheduler.cpp
-//  Application: Inverted pendulum balancing — Takagi-Sugeno (TS)
+//  Application: Inverted pendulum balancing - Takagi-Sugeno (TS)
 //  fuzzy gain scheduler that blends two linear PID controllers
 //  tuned at different operating points.
 //
@@ -29,7 +29,7 @@
 #include <iostream>
 #include <cmath>
 
-// ── True nonlinear pendulum (Euler integration) ───────────────────────────────
+// -- True nonlinear pendulum (Euler integration) -------------------------------
 struct Pendulum {
     double g  = 9.81;
     double l  = 0.5;    // m
@@ -51,7 +51,7 @@ int main()
 {
     const double Ts = 0.005;   // 5 ms control loop
 
-    // ── TS FuzzySystem — 1 input (|theta|), 2 singleton outputs (w1, w2) ─────
+    // -- TS FuzzySystem - 1 input (|theta|), 2 singleton outputs (w1, w2) -----
     // We build TWO separate TS systems (one per weight) for clarity.
     // Near_Zero: Gaussian centred at 0, sigma=0.15 rad
     // Large:     Gaussian centred at 0.35 rad, sigma=0.15 rad
@@ -76,12 +76,12 @@ int main()
         // (and vice versa for the second weight system)
         if (centre < 0.1) {
             // Weight for PID_1 (upright): high when Near_Zero fires
-            vout.terms.push_back({"w1_hi", ctrl::mfSingleton(1.0)});
-            vout.terms.push_back({"w1_lo", ctrl::mfSingleton(0.0)});
+            vout.terms.push_back(ctrl::ltSingleton("w1_hi", 1.0));
+            vout.terms.push_back(ctrl::ltSingleton("w1_lo", 0.0));
         } else {
             // Weight for PID_2 (tilted): high when Large fires
-            vout.terms.push_back({"w2_lo", ctrl::mfSingleton(0.0)});
-            vout.terms.push_back({"w2_hi", ctrl::mfSingleton(1.0)});
+            vout.terms.push_back(ctrl::ltSingleton("w2_lo", 0.0));
+            vout.terms.push_back(ctrl::ltSingleton("w2_hi", 1.0));
         }
         sys.addOutput(vout);
 
@@ -96,25 +96,25 @@ int main()
     ctrl::FuzzySystem sys_w1 = buildWeightSys(0.0);   // weight for PID_1
     ctrl::FuzzySystem sys_w2 = buildWeightSys(0.35);  // weight for PID_2
 
-    // ── PID_1: upright-regime (tuned via pole placement, tau_c = 0.08 s) ─────
+    // -- PID_1: upright-regime (tuned via pole placement, tau_c = 0.08 s) -----
     ctrl::PIDParams p1;
     p1.Kp = 18.0; p1.Ki = 5.0; p1.Kd = 2.5;
     p1.N  = 80.0; p1.Kb = 1.0;
     p1.uMin = -15.0; p1.uMax = 15.0;
     ctrl::DiscretePID pid1(p1, Ts);
 
-    // ── PID_2: large-angle recovery (aggressive proportional) ────────────────
+    // -- PID_2: large-angle recovery (aggressive proportional) ----------------
     ctrl::PIDParams p2;
     p2.Kp = 40.0; p2.Ki = 2.0; p2.Kd = 5.0;
     p2.N  = 80.0; p2.Kb = 1.0;
     p2.uMin = -15.0; p2.uMax = 15.0;
     ctrl::DiscretePID pid2(p2, Ts);
 
-    // ── Single PID baseline (pid1 gains, no scheduling) ─────────────────────
+    // -- Single PID baseline (pid1 gains, no scheduling) ---------------------
     ctrl::DiscretePID pid_baseline(p1, Ts);
 
-    // ── Pendulum instances ───────────────────────────────────────────────────
-    const double theta0 = 0.4;   // rad — large initial tilt
+    // -- Pendulum instances ---------------------------------------------------
+    const double theta0 = 0.4;   // rad - large initial tilt
     Pendulum pend_ts, pend_base;
     pend_ts.theta = pend_base.theta = theta0;
 
@@ -122,7 +122,7 @@ int main()
     csv << "t,theta_ts,theta_dot_ts,u_ts,theta_base,u_base,w1,w2\n";
     csv << std::fixed << std::setprecision(5);
 
-    std::cout << "=== TS Fuzzy Gain Scheduler — Inverted Pendulum ===\n";
+    std::cout << "=== TS Fuzzy Gain Scheduler - Inverted Pendulum ===\n";
     std::cout << "   k     t[s]  theta_ts   u_ts    w1     theta_base  u_base\n";
     std::cout << std::string(70, '-') << "\n";
 
@@ -132,7 +132,7 @@ int main()
     for (int k = 0; k < N; ++k) {
         double t = k * Ts;
 
-        // ── TS-scheduled controller ───────────────────────────────────────────
+        // -- TS-scheduled controller -------------------------------------------
         double abs_th = std::abs(pend_ts.theta);
         double w1 = sys_w1.evaluate({std::clamp(abs_th, 0.0, 0.5)});
         double w2 = sys_w2.evaluate({std::clamp(abs_th, 0.0, 0.5)});
@@ -147,7 +147,7 @@ int main()
 
         pend_ts.step(u_ts, Ts);
 
-        // ── Baseline single PID ───────────────────────────────────────────────
+        // -- Baseline single PID -----------------------------------------------
         double u_base = pid_baseline.compute(ref - pend_base.theta);
         u_base = std::clamp(u_base, -15.0, 15.0);
         pend_base.step(u_base, Ts);

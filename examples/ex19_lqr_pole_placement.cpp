@@ -12,12 +12,11 @@ int main()
 {
     const double Ts = 0.05;
 
-    // Plant: 1/(s^2 + 1) oscillator -> discretised
+    // Plant: 1/(s^2 + 1) oscillator -> discretised with ZOH
     Eigen::Matrix2d Ac; Ac << 0.0, 1.0, -1.0, 0.0;
     Eigen::Vector2d Bc; Bc << 0.0, 1.0;
-    Eigen::Matrix2d Ad = Eigen::Matrix2d::Identity() + Ts * Ac;
-    Eigen::Vector2d Bd = Ts * Bc;
-    ctrl::StateSpace plant(Ad, Bd, Eigen::RowVector2d(1,0), Eigen::MatrixXd::Zero(1,1), Ts);
+    ctrl::StateSpace plant_c(Ac, Bc, Eigen::RowVector2d(1,0), Eigen::MatrixXd::Zero(1,1), 0.0);
+    ctrl::StateSpace plant = ctrl::c2d(plant_c, Ts, ctrl::C2dMethod::ZOH);
 
     // Desired continuous poles: -2 +/- 2j
     // Discrete poles: z = exp(s * Ts)

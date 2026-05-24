@@ -51,7 +51,9 @@ namespace ctrl
         explicit DiscreteMPC(const StateSpace &plant, const MPCParams &params);
 
         // IController wrapper (SISO convenience).
-        // Reconstructs reference as r = y_hat + error and calls computeRef internally.
+        // Reconstructs reference as r = y_hat + error where y_hat = C*x_hat + D*u_prev.
+        // Valid for D = 0 plants. For D != 0 the feedthrough term uses u[k-1], which is
+        // one step stale; use computeRef() directly and supply the current r explicitly.
         double compute(double error) override;
 
         // Full MIMO interface: optimise u[k] given current state and reference vector.
@@ -86,6 +88,7 @@ namespace ctrl
         Eigen::MatrixXd Qy_;  // (Np.p) * (Np.p)
         Eigen::MatrixXd Ru_;  // (Nc.m) * (Nc.m)
         double          L_;   // max eigenvalue of H_ - Lipschitz constant for QP step
+        Eigen::LDLT<Eigen::MatrixXd> ldlt_; // pre-factored H_, refreshed in buildCondensedMatrices()
 
         // Pre-allocated work vectors - eliminate per-step heap allocation in computeRef()
         Eigen::VectorXd R_stack_;  // Np.p

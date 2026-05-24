@@ -15,16 +15,16 @@ from pathlib import Path
 
 Ts = 2.0
 
-# ── Nonlinear gain ────────────────────────────────────────────────────────────
+# -- Nonlinear gain ------------------------------------------------------------
 def ph_gain(y): return 5.0 - 3.0*np.tanh(2.0*(y - 7.0))
 
-# ── Linear first-order plant (scaled by k) ────────────────────────────────────
+# -- Linear first-order plant (scaled by k) ------------------------------------
 def build_plant(k):
     a = np.exp(-Ts/30.0)
     b = k*(1-a)
     return a, b   # y[k+1] = a*y[k] + b*u[k]
 
-# ── Simple unconstrained SISO MPC (batch QP, no constraints for Python demo) ──
+# -- Simple unconstrained SISO MPC (batch QP, no constraints for Python demo) --
 class MPC:
     def __init__(self, a, b, Np=20, Nc=5, rho_y=10.0, rho_u=0.01):
         self.Np, self.Nc = Np, Nc
@@ -61,7 +61,7 @@ class MPC:
         self.u_prev = u
         return u
 
-# ── Fuzzy Supervisor (Python re-implementation matching FuzzyLogic.h) ─────────
+# -- Fuzzy Supervisor (Python re-implementation matching FuzzyLogic.h) ---------
 def gauss(mean, sigma, x): return np.exp(-0.5*((x-mean)/(sigma+1e-12))**2)
 
 def trap(a, b, c, d, x):
@@ -76,13 +76,13 @@ def tri(a, c, b, x):
 def sh_r(a, b, x): return 0.0 if x<=a else (1.0 if x>=b else (x-a)/(b-a+1e-12))
 
 def supervisor_signal(err_n, trend_n):
-    # Input 1: error_norm [0, 1.5] — 3 terms
+    # Input 1: error_norm [0, 1.5] - 3 terms
     mu_e = [
         trap(0, 0, 0.25, 0.45, err_n),                    # Small
         tri(0.30, 0.50, 0.70, err_n),                      # Medium
         sh_r(0.60, 0.90, err_n),                           # Large
     ]
-    # Input 2: trend [-1, 1] — 3 terms
+    # Input 2: trend [-1, 1] - 3 terms
     mu_t = [
         sh_r(-1.5, -0.1, -trend_n),                        # Decreasing (mirror)
         tri(-0.3, 0.0, 0.3, trend_n),                      # Steady
@@ -102,7 +102,7 @@ def supervisor_signal(err_n, trend_n):
     den = sum(strengths) + 1e-12
     return float(num/den)
 
-# ── Simulation ────────────────────────────────────────────────────────────────
+# -- Simulation ----------------------------------------------------------------
 def ref_fn(t):
     if t <  60: return 7.0
     if t < 180: return 9.0
@@ -164,7 +164,7 @@ np.savetxt(out, rows, delimiter=",",
            comments="", fmt="%.4f")
 print(f"Saved: {out}  |  total re-linearisations: {relinearise_count}")
 
-# ── Plot ─────────────────────────────────────────────────────────────────────
+# -- Plot ---------------------------------------------------------------------
 fig, axes = plt.subplots(3, 1, figsize=(11, 9), sharex=True)
 ts = rows[:,0]
 
@@ -172,7 +172,7 @@ axes[0].plot(ts, rows[:,1], 'k--', lw=1.2, label='Reference')
 axes[0].plot(ts, rows[:,2], 'r',   lw=1.5, label='MPC fixed')
 axes[0].plot(ts, rows[:,4], 'b',   lw=1.5, label='MPC adaptive')
 axes[0].set_ylabel('pH'); axes[0].legend(); axes[0].grid(True, alpha=0.4)
-axes[0].set_title('pH Neutralisation — Fixed vs Adaptive (FuzzySupervisor) MPC')
+axes[0].set_title('pH Neutralisation - Fixed vs Adaptive (FuzzySupervisor) MPC')
 
 axes[1].plot(ts, rows[:,3], 'r',   lw=1.5, label='Fixed')
 axes[1].plot(ts, rows[:,5], 'b',   lw=1.5, label='Adaptive')
@@ -183,7 +183,7 @@ axes[2].axhline(SIGNAL_THRESHOLD, color='k', ls=':', lw=1, label='Threshold')
 evts = ts[rows[:,7].astype(bool)]
 for ev in evts:
     axes[2].axvline(ev, color='orange', alpha=0.8, lw=1.2)
-axes[2].set_ylabel('Signal [0–1]'); axes[2].set_xlabel('Time [s]')
+axes[2].set_ylabel('Signal [0-1]'); axes[2].set_xlabel('Time [s]')
 axes[2].legend(); axes[2].grid(True, alpha=0.4)
 
 plt.tight_layout()

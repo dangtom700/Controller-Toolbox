@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from scipy.signal import cont2discrete
 from pathlib import Path
 
-# ── Plant ─────────────────────────────────────────────────────────────────────
+# -- Plant ---------------------------------------------------------------------
 Ts  = 5.0   # s
 # Ac = [-1/200  0; 1/60  -1/60], Bc = [1/200; 0], Cc = [0 1]
 Ac = np.array([[-1/200, 0], [1/60, -1/60]])
@@ -26,7 +26,7 @@ def plant_step(x, u, A=Ad, B=Bd, C=Cd, D=Dd):
     y  = float((C @ xn).flat[0])
     return xn, y
 
-# ── FuzzyPD (Mamdani, 5 terms, CoG) ─────────────────────────────────────────
+# -- FuzzyPD (Mamdani, 5 terms, CoG) -----------------------------------------
 def tri(a, c, b, x):
     if x <= a or x >= b: return 0.0
     if x <= c: return (x-a)/(c-a+1e-12)
@@ -82,7 +82,7 @@ def fuzzy_pd(e, de, e_scale=2.0, de_scale=0.2, u_scale=3.0,
     u_n = (xs * agg).sum() / (denom + 1e-12)
     return float(np.clip(u_n * u_scale, u_min, u_max))
 
-# ── PID (backward Euler with anti-windup) ────────────────────────────────────
+# -- PID (backward Euler with anti-windup) ------------------------------------
 class PID:
     def __init__(self, Kp, Ki, Kd, N, Kb, umin, umax, Ts):
         self.Kp, self.Ki, self.Kd = Kp, Ki, Kd
@@ -103,14 +103,14 @@ class PID:
 
 pid = PID(1.8, 0.006, 40.0, 5.0, 1.0, 0.0, 3.0, Ts)
 
-# ── Simulation ────────────────────────────────────────────────────────────────
+# -- Simulation ----------------------------------------------------------------
 N   = 200
 ref = 22.0
 # Steady-state at y=20 with u=0: x_ss = -(A-I)^-1 * B * 0 = 0, so just start at 0
 # and let the controller drive from 20->22.  Offset y by 20 as initial output.
 yf  = 0.0; xf = np.zeros((2, 1))
 yp  = 0.0; xp = np.zeros((2, 1))
-# Represent temperature as delta from 20°C; setpoint becomes ref=2
+# Represent temperature as delta from 20^\circC; setpoint becomes ref=2
 ref_delta = 2.0
 e_prev_f  = 0.0
 
@@ -141,14 +141,14 @@ for k in range(N):
 
 ts = np.array(ts)
 
-# ── Save CSV ─────────────────────────────────────────────────────────────────
+# -- Save CSV -----------------------------------------------------------------
 out = Path(__file__).parent.parent / "data" / "ex23_fuzzy_temperature.csv"
 header = "t,ref,y_fuzzy,u_fuzzy,y_pid,u_pid,disturbance"
 data = np.column_stack([ts, refs, yfs, ufs, yps, ups, dists])
 np.savetxt(out, data, delimiter=",", header=header, comments="", fmt="%.4f")
 print(f"Saved: {out}")
 
-# ── Plot ─────────────────────────────────────────────────────────────────────
+# -- Plot ---------------------------------------------------------------------
 fig, axes = plt.subplots(2, 1, figsize=(10, 7), sharex=True)
 ax1, ax2 = axes
 
@@ -156,9 +156,9 @@ ax1.plot(ts, refs, 'k--', lw=1.2, label='Reference')
 ax1.plot(ts, yfs,  'b',   lw=1.5, label='FuzzyPD')
 ax1.plot(ts, yps,  'r--', lw=1.5, label='PID')
 ax1.axvspan(300, ts[-1], alpha=0.08, color='orange', label='Disturbance')
-ax1.set_ylabel('Temperature [°C]')
+ax1.set_ylabel('Temperature [^\circC]')
 ax1.legend(); ax1.grid(True, alpha=0.4)
-ax1.set_title('HVAC Temperature Control — FuzzyPD vs PID')
+ax1.set_title('HVAC Temperature Control - FuzzyPD vs PID')
 
 ax2.plot(ts, ufs, 'b',   lw=1.5, label='FuzzyPD output')
 ax2.plot(ts, ups, 'r--', lw=1.5, label='PID output')

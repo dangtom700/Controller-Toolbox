@@ -18,7 +18,7 @@ PlantParameters PlantParameters::fromJson(const std::string& path)
 
     PlantParameters p{};
 
-    // ── Barge ────────────────────────────────────────────────────────────────
+    // -- Barge ----------------------------------------------------------------
     auto& b   = cfg["barge"];
     auto& bam = b["added_mass"];
     auto& bld = b["linear_damping"];
@@ -58,7 +58,7 @@ PlantParameters PlantParameters::fromJson(const std::string& path)
     p.Cv   = bcc["Cv"].get<double>();
     p.Cpsi = bcc["Cpsi"].get<double>();
 
-    // ── Tugs ─────────────────────────────────────────────────────────────────
+    // -- Tugs -----------------------------------------------------------------
     auto& t   = cfg["tugs"];
     auto& tam = t["added_mass"];
     auto& tld = t["linear_damping"];
@@ -87,11 +87,11 @@ PlantParameters PlantParameters::fromJson(const std::string& path)
         };
     }
 
-    // ── Fluid ─────────────────────────────────────────────────────────────────
+    // -- Fluid -----------------------------------------------------------------
     p.rho_air   = cfg["fluid"]["rho_air"].get<double>();
     p.rho_water = cfg["fluid"]["rho_water"].get<double>();
 
-    // ── Wave ─────────────────────────────────────────────────────────────────
+    // -- Wave -----------------------------------------------------------------
     auto& w   = cfg["wave"];
     p.Hs        = w["Hs_m"].get<double>();
     p.Tp        = w["Tp_s"].get<double>();
@@ -100,7 +100,7 @@ PlantParameters PlantParameters::fromJson(const std::string& path)
     p.drift_y   = w["drift_coeff_y"].get<double>();
     p.drift_psi = w["drift_coeff_psi"].get<double>();
 
-    // ── Simulation ────────────────────────────────────────────────────────────
+    // -- Simulation ------------------------------------------------------------
     p.dt       = cfg["simulation"]["dt_s"].get<double>();
     p.duration = cfg["simulation"]["duration_s"].get<double>();
 

@@ -6,9 +6,9 @@ using namespace Eigen;
 
 namespace tug {
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Helpers
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 // Body-frame error: e = R^T(psi) * (eta_ref - eta)
 static Vector3d bodyError(const Vector3d& ref, const Matrix<double,6,1>& state)
@@ -30,7 +30,7 @@ static Vector3d bodyError(const Vector3d& ref, const Matrix<double,6,1>& state)
     return e;
 }
 
-// ── PID gains (Bryson's method, see doc 04_controller_choices.md) ─────────────
+// -- PID gains (Bryson's method, see doc 04_controller_choices.md) -------------
 static ctrl::PIDParams pidParamsFor(int axis)
 {
     ctrl::PIDParams p;
@@ -53,7 +53,7 @@ static ctrl::PIDParams pidParamsFor(int axis)
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Mode 1 — PID
+// Mode 1 - PID
 // ═══════════════════════════════════════════════════════════════════════════
 
 PIDController::PIDController(const PlantParameters& p)
@@ -79,7 +79,7 @@ void PIDController::reset()
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Mode 2 — KF-PID
+// Mode 2 - KF-PID
 // ═══════════════════════════════════════════════════════════════════════════
 
 ctrl::StateSpace KFPIDController::buildPlantSS() const
@@ -88,7 +88,7 @@ ctrl::StateSpace KFPIDController::buildPlantSS() const
     // Continuous: M_re * nu_dot = -D_re * nu  ->  nu_dot = -M_re^-1 * D_re * nu
     // State: [x, y, psi, u, v, r]
     // A_c = [0_{3x3}  I_{3x3}; 0_{3x3}  -M_re_inv * D_re]
-    // B_c = [0_{3x3}; M_re_inv]  (control = tau_c in N/N·m)
+    // B_c = [0_{3x3}; M_re_inv]  (control = tau_c in N/N.m)
     int n = 6, m = 3;
     MatrixXd Ac = MatrixXd::Zero(n, n);
     MatrixXd Bc = MatrixXd::Zero(n, m);
@@ -156,7 +156,7 @@ void KFPIDController::reset()
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Mode 3 — SMC (paper Eqs. 24-27)
+// Mode 3 - SMC (paper Eqs. 24-27)
 // ═══════════════════════════════════════════════════════════════════════════
 
 SMCController::SMCController(const PlantParameters& p)
@@ -192,7 +192,7 @@ Vector3d SMCController::compute(const Vector3d& ref,
     // Sliding surface: s = e_dot + Lambda*e + Ki_s * integral
     Vector3d s = e_dot + Lambda_.cwiseProduct(e) + Ki_s_.cwiseProduct(integral_);
 
-    // Equivalent control — model cancellation (paper Eq. 26):
+    // Equivalent control - model cancellation (paper Eq. 26):
     //   tau_eq = -M_re * Lambda * e_dot + D_re * nu + C_rb * nu
     // Note: C_rb contribution is small at low speed; include D_re * nu for fidelity.
     // The sign here is NEGATIVE Lambda*e_dot (drives s->0).
@@ -215,7 +215,7 @@ void SMCController::reset()
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Mode 4 — MPC (decoupled per-axis, linearised about zero velocity)
+// Mode 4 - MPC (decoupled per-axis, linearised about zero velocity)
 // ═══════════════════════════════════════════════════════════════════════════
 
 ctrl::StateSpace MPCController::buildAxisSS(int axis) const
@@ -286,7 +286,7 @@ void MPCController::reset()
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Mode 5 — ESC (model-free, per-axis IAE gradient descent)
+// Mode 5 - ESC (model-free, per-axis IAE gradient descent)
 // ═══════════════════════════════════════════════════════════════════════════
 
 ESCController::ESCController(const PlantParameters& p)
@@ -329,14 +329,14 @@ void ESCController::reset()
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Mode 6 — FuzzyPID  (three independent FuzzyPID loops, one per axis)
+// Mode 6 - FuzzyPID  (three independent FuzzyPID loops, one per axis)
 // ═══════════════════════════════════════════════════════════════════════════
 
 // Scaling rationale:
 //   Surge/sway error up to ~50 m is "large"  -> e_scale = 25 m
 //   Error rate up to ~1 m/s is "large"        -> de_scale = 0.5 m/s
-//   Output universe [-1,1] maps to ±TAU_XY_MAX -> u_scale = 2e6 N
-//   Yaw: error up to ~0.5 rad, rate ~0.02 rad/s, output ±5e7 N·m
+//   Output universe [-1,1] maps to +/-TAU_XY_MAX -> u_scale = 2e6 N
+//   Yaw: error up to ~0.5 rad, rate ~0.02 rad/s, output +/-5e7 N.m
 
 static ctrl::FuzzyPIDParams fuzzyPIDParamsFor(int axis, double dt)
 {
@@ -389,7 +389,7 @@ void FuzzyPIDController::reset()
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// FuzzySupervised_MPC — MPC with fuzzy re-linearisation supervisor
+// FuzzySupervised_MPC - MPC with fuzzy re-linearisation supervisor
 // ═══════════════════════════════════════════════════════════════════════════
 
 // Build a per-axis 2-state SS model linearised about operating velocity nu.
@@ -406,7 +406,7 @@ ctrl::StateSpace FuzzySupervised_MPC::buildAxisSS(int axis,
 
     // Velocity-dependent Coriolis correction (off-diagonal coupling onto axis)
     // For surge (0): C_rb couples  -(m-Yvd)*v  into yaw, but on the surge axis
-    // the effective additional drag ≈ (m-Yvd)*|v| / m  (linearisation point)
+    // the effective additional drag approx = (m-Yvd)*|v| / m  (linearisation point)
     // For sway  (1): (m-Xud)*|u|/m correction
     // For yaw   (2): no first-order Coriolis correction needed (already in D_re)
     double d_extra = 0.0;
@@ -477,7 +477,7 @@ Vector3d FuzzySupervised_MPC::compute(const Vector3d& ref,
     Vector3d tau;
 
     for (int axis = 0; axis < 3; ++axis) {
-        // Supervisor check — uses absolute error for this axis
+        // Supervisor check - uses absolute error for this axis
         decisions_[axis] = supervisors_[axis].update(std::abs(e(axis)));
 
         if (decisions_[axis].relinearize)

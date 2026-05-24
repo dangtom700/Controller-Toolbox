@@ -1,4 +1,5 @@
 #include "KalmanFilter.h"
+#include <optional>
 
 namespace ctrl
 {
@@ -56,12 +57,11 @@ namespace ctrl
 
     void KalmanFilter::step(const Eigen::VectorXd &y,
                             const Eigen::VectorXd &u_prev,
-                            const Eigen::VectorXd &u_current)
+                            std::optional<std::reference_wrapper<const Eigen::VectorXd>> u_current)
     {
         predict(u_prev);
-        // Pass u_current to update() for the D.u innovation term.
-        // When u_current is empty (default), fall back to u_prev - correct for D = 0.
-        update(y, u_current.size() > 0 ? u_current : u_prev);
+        // Use u_current for the D.u innovation term when provided; fall back to u_prev for D=0 plants.
+        update(y, u_current.has_value() ? u_current->get() : u_prev);
     }
 
     void KalmanFilter::reset()

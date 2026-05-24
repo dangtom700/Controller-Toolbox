@@ -55,7 +55,7 @@ Vector3d Environment::windLoad(const Vector3d& nu) const
     double Vwx =  cond_.wind_speed * std::cos(cond_.wind_bearing); // world +x component
     double Vwy =  cond_.wind_speed * std::sin(cond_.wind_bearing);
 
-    // Relative wind (body frame) — subtract vessel velocity u,v
+    // Relative wind (body frame) - subtract vessel velocity u,v
     double Vrel_u = Vwx - nu(0); // surge relative
     double Vrel_v = Vwy - nu(1); // sway  relative
     double U_wr = std::sqrt(Vrel_u * Vrel_u + Vrel_v * Vrel_v);

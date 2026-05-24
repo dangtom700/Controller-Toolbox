@@ -16,7 +16,7 @@ namespace tug {
 struct TickData {
     double t;
     Eigen::Matrix<double,6,1> state;   // [x,y,psi,u,v,r]
-    Eigen::Vector3d tau_c;             // commanded (N, N·m)
+    Eigen::Vector3d tau_c;             // commanded (N, N.m)
     std::array<double, NUM_TUGS> T;    // per-tug thrusts (N)
     Eigen::Vector3d ref;               // target [x,y,psi]
     int sat_count;                     // saturations this step

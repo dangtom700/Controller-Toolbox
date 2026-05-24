@@ -3,18 +3,18 @@ project(TugBoatSim CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# ── Paths ─────────────────────────────────────────────────────────────────────
+# -- Paths ---------------------------------------------------------------------
 set(TOOLBOX_DIR "${CMAKE_SOURCE_DIR}/../../lib")
 set(SIM_INC     "${CMAKE_SOURCE_DIR}/sim/include")
 set(SIM_SRC     "${CMAKE_SOURCE_DIR}/sim/src")
 
-# ── Eigen (header-only) ───────────────────────────────────────────────────────
+# -- Eigen (header-only) -------------------------------------------------------
 find_package(Eigen3 3.4 REQUIRED NO_MODULE)
 
-# ── nlohmann/json (header-only, single file expected at sim/include/json.hpp) ─
-# Drop nlohmann/json.hpp into sim/include/ — no CMake package needed.
+# -- nlohmann/json (header-only, single file expected at sim/include/json.hpp) -
+# Drop nlohmann/json.hpp into sim/include/ - no CMake package needed.
 
-# ── Toolbox sources ───────────────────────────────────────────────────────────
+# -- Toolbox sources -----------------------------------------------------------
 # Only the .cpp files we actually need (not the full toolbox).
 set(TOOLBOX_SRCS
     ${TOOLBOX_DIR}/DiscretePID.cpp
@@ -28,7 +28,7 @@ set(TOOLBOX_SRCS
     ${TOOLBOX_DIR}/RecursiveLeastSquares.cpp
 )
 
-# ── Simulation sources ────────────────────────────────────────────────────────
+# -- Simulation sources --------------------------------------------------------
 set(SIM_SRCS
     ${SIM_SRC}/plant_parameters.cpp
     ${SIM_SRC}/environment.cpp

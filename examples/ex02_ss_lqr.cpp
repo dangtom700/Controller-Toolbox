@@ -8,7 +8,7 @@
 //    L.di/dt = -Km.omega - R.i + V
 //    y = omega  (angular velocity)
 //
-//  Discretised with Euler forward at Ts = 0.001 s.
+//  Discretised with ZOH at Ts = 0.001 s.
 //
 //  MATLAB equivalent:
 //    A = [-b/J  Km/J; -Km/L  -R/L];  B = [0; 1/L];
@@ -31,7 +31,7 @@ int main()
     const double L = 0.5;    // armature inductance [H]
     const double Ts = 0.001; // sample time [s]
 
-    // ---- Continuous A, B; discretise with Euler forward ----
+    // ---- Continuous A, B; discretise with ZOH ----
     Eigen::Matrix2d Ac;
     Ac << -b / J, Km / J,
         -Km / L, -R / L;
@@ -42,10 +42,8 @@ int main()
     Eigen::MatrixXd Dc(1, 1);
     Dc << 0.0;
 
-    const Eigen::Matrix2d Ad = Eigen::Matrix2d::Identity() + Ts * Ac;
-    const Eigen::Vector2d Bd = Ts * Bc;
-
-    ctrl::StateSpace plant(Ad, Bd, Cc, Dc, Ts);
+    ctrl::StateSpace plant_c(Ac, Bc, Cc, Dc, 0.0);
+    ctrl::StateSpace plant = ctrl::c2d(plant_c, Ts, ctrl::C2dMethod::ZOH);
     std::cout << "Motor state-space (discrete, Ts=" << Ts << "):\n"
               << "A =\n"
               << plant.A << "\nB =\n"

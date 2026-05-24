@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-# ── Pendulum parameters ───────────────────────────────────────────────────────
+# -- Pendulum parameters -------------------------------------------------------
 g=9.81; l=0.5; m=0.1; b_fric=0.05
 
 def pend_step(theta, theta_dot, F, dt):
@@ -20,7 +20,7 @@ def pend_step(theta, theta_dot, F, dt):
     theta_n     = theta + theta_dot_n*dt
     return theta_n, theta_dot_n
 
-# ── PID (backward Euler) ──────────────────────────────────────────────────────
+# -- PID (backward Euler) ------------------------------------------------------
 class PID:
     def __init__(self, Kp, Ki, Kd, N, umin, umax, Ts):
         self.Kp,self.Ki,self.Kd,self.N=Kp,Ki,Kd,N
@@ -37,7 +37,7 @@ class PID:
 
 Ts = 0.005
 
-# ── TS weights using Gaussian MFs ────────────────────────────────────────────
+# -- TS weights using Gaussian MFs --------------------------------------------
 def gauss(mean, sigma, x): return np.exp(-0.5*((x-mean)/(sigma+1e-12))**2)
 
 def ts_weights(abs_theta):
@@ -46,17 +46,17 @@ def ts_weights(abs_theta):
     s  = w1 + w2 + 1e-12
     return w1/s, w2/s
 
-# ── Controllers ───────────────────────────────────────────────────────────────
+# -- Controllers ---------------------------------------------------------------
 pid1 = PID(18.0, 5.0, 2.5, 80.0, -15, 15, Ts)   # upright
 pid2 = PID(40.0, 2.0, 5.0, 80.0, -15, 15, Ts)   # large-angle recovery
 pid_base = PID(18.0, 5.0, 2.5, 80.0, -15, 15, Ts)
 
-# ── Separate PID instances for independent compute calls ─────────────────────
+# -- Separate PID instances for independent compute calls ---------------------
 # (pid1 and pid2 states must not be shared between w-scaled calls)
 pid1b = PID(18.0, 5.0, 2.5, 80.0, -15, 15, Ts)
 pid2b = PID(40.0, 2.0, 5.0, 80.0, -15, 15, Ts)
 
-theta0 = 0.4   # rad — large initial tilt
+theta0 = 0.4   # rad - large initial tilt
 theta_ts, dtheta_ts = theta0, 0.0
 theta_base, dtheta_base = theta0, 0.0
 
@@ -88,7 +88,7 @@ np.savetxt(out, rows, delimiter=",",
            comments="", fmt="%.5f")
 print(f"Saved: {out}")
 
-# ── Plot ─────────────────────────────────────────────────────────────────────
+# -- Plot ---------------------------------------------------------------------
 ts = rows[:,0]
 fig, axes = plt.subplots(3, 1, figsize=(11, 8), sharex=True)
 
@@ -97,15 +97,15 @@ axes[0].plot(ts, np.degrees(rows[:,4]), 'r--', lw=1.5, label='Single PID')
 axes[0].axhline(0, color='k', ls=':', lw=1)
 axes[0].set_ylabel('Angle [deg]')
 axes[0].legend(); axes[0].grid(True, alpha=0.4)
-axes[0].set_title('Inverted Pendulum — TS Fuzzy Gain Scheduler vs Fixed PID (θ₀ = 0.4 rad)')
+axes[0].set_title('Inverted Pendulum - TS Fuzzy Gain Scheduler vs Fixed PID (theta0 = 0.4 rad)')
 
 axes[1].plot(ts, rows[:,3], 'b',   lw=1.5, label='TS FuzzyPID')
 axes[1].plot(ts, rows[:,5], 'r--', lw=1.5, label='Single PID')
 axes[1].set_ylabel('Force F [N]')
 axes[1].legend(); axes[1].grid(True, alpha=0.4)
 
-axes[2].plot(ts, rows[:,6], 'b',   lw=1.5, label='w₁ (upright PID)')
-axes[2].plot(ts, rows[:,7], 'orange', lw=1.5, label='w₂ (recovery PID)')
+axes[2].plot(ts, rows[:,6], 'b',   lw=1.5, label='w1 (upright PID)')
+axes[2].plot(ts, rows[:,7], 'orange', lw=1.5, label='w2 (recovery PID)')
 axes[2].set_ylabel('TS weight')
 axes[2].set_xlabel('Time [s]')
 axes[2].legend(); axes[2].grid(True, alpha=0.4)

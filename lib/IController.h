@@ -1,5 +1,6 @@
 #pragma once
 #include <Eigen/Dense>
+#include <stdexcept>
 
 // Abstract interface for all discrete-time controllers.
 // All implementations operate at a fixed sample time Ts and are called once per step.
@@ -17,11 +18,17 @@ namespace ctrl
         // For optimisation-based controllers (ESC): signal = plant output y[k] (cost to extremize)
         virtual double compute(double signal) = 0;
 
-        // MIMO interface: default wraps compute(signal(0)) and returns a 1-vector.
-        // Override in MIMO controllers (DiscreteMPC, DiscreteLQR, etc.) for full vectorisation.
+        // MIMO interface - override in MIMO controllers (DiscreteMPC, DiscreteLQR, etc.).
+        // The default throws std::logic_error rather than silently truncating a multi-element
+        // signal to its first element, which would produce wrong results without any warning.
+        // SISO controllers that are never called through this interface are unaffected.
         virtual Eigen::VectorXd computeVec(const Eigen::VectorXd &signal)
         {
-            return Eigen::VectorXd::Constant(1, compute(signal(0)));
+            if (signal.size() == 1)
+                return Eigen::VectorXd::Constant(1, compute(signal(0)));
+            throw std::logic_error(
+                "IController::computeVec: MIMO signal passed to a SISO controller. "
+                "Override computeVec() in MIMO subclasses.");
         }
 
         // Reset all internal states (integrators, delay buffers, estimators).

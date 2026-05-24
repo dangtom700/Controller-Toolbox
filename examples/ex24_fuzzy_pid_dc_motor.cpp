@@ -3,8 +3,8 @@
 //  Application: DC motor speed control with load torque step.
 //
 //  Plant: armature-controlled DC motor
-//    G(s) = Km / (s(τ_m s + 1))   [rad/s / V]
-//    Km = 100 rad/s/V,  τ_m = 0.05 s
+//    G(s) = Km / (s(tau_m s + 1))   [rad/s / V]
+//    Km = 100 rad/s/V,  tau_m = 0.05 s
 //  Discretised at Ts = 0.002 s (ZOH).
 //
 //  Demonstrates:
@@ -23,7 +23,7 @@ int main()
 {
     const double Ts = 0.002;
 
-    // ── Plant: Km/(s(τ s+1)) -> state: [omega, i_a] linearised
+    // -- Plant: Km/(s(tau s+1)) -> state: [omega, i_a] linearised
     // Simplified: integrating second-order in velocity form
     // G(s) = 100/(s(0.05s+1))  ->  TF numerator/denominator
     // Discrete approximation at Ts=0.002 via bilinear (just use tf2ss+c2d)
@@ -32,9 +32,9 @@ int main()
                                       std::exp(-Ts/0.05)}, Ts);
     ctrl::StateSpace plant = ctrl::tf2ss(tf);
 
-    const double U_MAX = 12.0;   // voltage rail ±12 V
+    const double U_MAX = 12.0;   // voltage rail +/-12 V
 
-    // ── FuzzyPID ─────────────────────────────────────────────────────────────
+    // -- FuzzyPID -------------------------------------------------------------
     // e_scale  = 30 rad/s  (large error for this motor)
     // de_scale = 500 rad/s^2 (max angular acceleration)
     // u_scale  = 10 V      (maps fuzzy output to volts)
@@ -50,7 +50,7 @@ int main()
     fp.uMax        =  U_MAX;
     ctrl::FuzzyPID fuzzy(fp, Ts);
 
-    // ── Baseline PID (velocity form, same limits) ─────────────────────────────
+    // -- Baseline PID (velocity form, same limits) -----------------------------
     ctrl::PIDParams pp;
     pp.Kp  = 0.18;
     pp.Ki  = 3.6;
@@ -61,7 +61,7 @@ int main()
     pp.uMax =  U_MAX;
     ctrl::DiscretePID pid(pp, Ts);
 
-    // ── Speed reference profile ───────────────────────────────────────────────
+    // -- Speed reference profile -----------------------------------------------
     auto ref = [](double t) -> double {
         if (t < 0.5)  return 0.0;
         if (t < 1.0)  return 100.0 * (t - 0.5) / 0.5;   // ramp up
@@ -70,7 +70,7 @@ int main()
         return 50.0;
     };
 
-    // ── Simulation ────────────────────────────────────────────────────────────
+    // -- Simulation ------------------------------------------------------------
     const int N = 2500;  // 5 s at 500 Hz
     double yf = 0.0, yp = 0.0;
     Eigen::VectorXd xf = Eigen::VectorXd::Zero(plant.stateSize());
@@ -80,7 +80,7 @@ int main()
     csv << "t,ref,y_fuzzy,u_fuzzy,y_pid,u_pid,sat_fuzzy,sat_pid\n";
     csv << std::fixed << std::setprecision(5);
 
-    std::cout << "=== FuzzyPID vs PID — DC Motor Speed Control ===\n";
+    std::cout << "=== FuzzyPID vs PID - DC Motor Speed Control ===\n";
     std::cout << "   k     t[s]   ref     y_fuzzy  u_fuzzy   y_pid   u_pid\n";
     std::cout << std::string(67, '-') << "\n";
 

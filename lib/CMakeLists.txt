@@ -27,6 +27,8 @@ add_library(controller_toolbox STATIC
     RepetitiveController.cpp
     GeneralizedPredictiveControl.cpp
     SubspaceID.cpp
+    # Fuzzy inference engine (2026-05-23)
+    FuzzyLogic.cpp
 )
 
 # lib/ is the public include root: consumers write  #include "ControllerToolbox.h"

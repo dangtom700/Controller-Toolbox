@@ -9,7 +9,7 @@
 
 using json = nlohmann::json;
 
-// ── ScenarioConfig ────────────────────────────────────────────────────────────
+// -- ScenarioConfig ------------------------------------------------------------
 
 tug::EnvConditions ScenarioConfig::toEnvConditions() const
 {
@@ -47,7 +47,7 @@ ScenarioConfig ScenarioConfig::fromJson(const std::string& path)
     return s;
 }
 
-// ── Simulation loop ───────────────────────────────────────────────────────────
+// -- Simulation loop -----------------------------------------------------------
 
 void runSimulation(const tug::PlantParameters& plant,
                    const ScenarioConfig&        scenario,
@@ -56,7 +56,7 @@ void runSimulation(const tug::PlantParameters& plant,
 {
     const double dt       = plant.dt;
     const double duration = (scenario.duration > 0.0) ? scenario.duration : plant.duration;
-    const int    N_steps  = static_cast<int>(duration / dt);
+    const int    N_steps  = static_cast<int>(std::lround(duration / dt));
 
     Eigen::Vector3d ref(scenario.ref_x,
                         scenario.ref_y,

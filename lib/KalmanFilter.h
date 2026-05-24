@@ -1,6 +1,7 @@
 #pragma once
 #include "PlantModel.h"
 #include <Eigen/Dense>
+#include <optional>
 
 // Discrete-time Linear Kalman Filter (LKF).
 //
@@ -46,11 +47,11 @@ namespace ctrl
         // Combined predict + update (most common usage pattern).
         // u_prev:    control input applied at k-1 (used in the predict step).
         // u_current: control input applied at k   (used in the innovation D.u term).
-        //            Defaults to u_prev when omitted - correct for D = 0 plants.
-        //            For D != 0 pass the actual current input to avoid a one-step bias.
+        //            Defaults to std::nullopt, which falls back to u_prev - correct for D = 0 plants.
+        //            For D != 0, pass the actual current input to avoid a one-step feedthrough bias.
         void step(const Eigen::VectorXd &y,
                   const Eigen::VectorXd &u_prev,
-                  const Eigen::VectorXd &u_current = Eigen::VectorXd());
+                  std::optional<std::reference_wrapper<const Eigen::VectorXd>> u_current = std::nullopt);
 
         void reset();
 

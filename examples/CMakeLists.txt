@@ -30,7 +30,7 @@ add_example(ex21_boiler_turbine_case_study)
 add_example(ex22_full_pipeline_robustness)
 add_example(example_pid_feedback)
 
-# Fuzzy logic examples (ex23–ex26)
+# Fuzzy logic examples (ex23-ex26)
 add_example(ex23_fuzzy_pd_temperature)
 add_example(ex24_fuzzy_pid_dc_motor)
 add_example(ex25_fuzzy_supervisor_mpc)

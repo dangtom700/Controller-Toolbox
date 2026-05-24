@@ -30,8 +30,8 @@ namespace ctrl
                          double sampleTime)
             : num(std::move(numerator)), den(std::move(denominator)), Ts(sampleTime)
         {
-            if (den.empty() || den[0] == 0.0)
-                throw std::invalid_argument("TransferFunction: denominator must be monic (den[0]=1).");
+            if (den.empty() || std::abs(den[0] - 1.0) > 1e-9)
+                throw std::invalid_argument("TransferFunction: denominator must be monic (den[0] = 1).");
         }
 
         int order() const { return static_cast<int>(den.size()) - 1; }
@@ -59,11 +59,16 @@ namespace ctrl
                    double sampleTime)
             : A(std::move(a)), B(std::move(b)), C(std::move(c)), D(std::move(d)), Ts(sampleTime)
         {
+            validate();
         }
 
         int stateSize() const { return static_cast<int>(A.rows()); }
         int inputSize() const { return static_cast<int>(B.cols()); }
         int outputSize() const { return static_cast<int>(C.rows()); }
+
+        // Throw std::invalid_argument if any matrix dimension is inconsistent.
+        // Called automatically by the constructor; call manually after modifying matrices directly.
+        void validate() const;
     };
 
     // ---------------------------------------------------------------------------

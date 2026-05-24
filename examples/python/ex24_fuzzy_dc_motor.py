@@ -6,14 +6,14 @@ Plant: armature-controlled DC motor
   G(s) = 100 / (s(0.05s + 1))   [rad/s / V]
   Discretised at Ts = 0.002 s (ZOH).
 
-FuzzyPID vs DiscretePID — speed ramp tracking with voltage saturation (±12 V).
+FuzzyPID vs DiscretePID - speed ramp tracking with voltage saturation (+/-12 V).
 """
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import cont2discrete, lti, dlsim
 from pathlib import Path
 
-# ── Plant: integrating second-order ──────────────────────────────────────────
+# -- Plant: integrating second-order ------------------------------------------
 Ts   = 0.002
 Km   = 100.0
 tau  = 0.05
@@ -34,7 +34,7 @@ def plant_step(x, u):
 
 U_MAX = 12.0
 
-# ── FuzzyPD kernel (same engine as ex23) ─────────────────────────────────────
+# -- FuzzyPD kernel (same engine as ex23) -------------------------------------
 def tri(a, c, b, x):
     if x <= a or x >= b: return 0.0
     return (x-a)/(c-a+1e-12) if x <= c else (b-x)/(b-c+1e-12)
@@ -137,7 +137,7 @@ np.savetxt(out, rows, delimiter=",",
            comments="", fmt="%.5f")
 print(f"Saved: {out}")
 
-# ── Plot ─────────────────────────────────────────────────────────────────────
+# -- Plot ---------------------------------------------------------------------
 fig, axes = plt.subplots(3, 1, figsize=(11, 8), sharex=True)
 ts = rows[:,0]
 
@@ -146,7 +146,7 @@ axes[0].plot(ts, rows[:,2], 'b',   lw=1.5, label='FuzzyPID')
 axes[0].plot(ts, rows[:,4], 'r--', lw=1.5, label='PID')
 axes[0].set_ylabel('Speed [rad/s]')
 axes[0].legend(); axes[0].grid(True, alpha=0.4)
-axes[0].set_title('DC Motor Speed Control — FuzzyPID vs PID')
+axes[0].set_title('DC Motor Speed Control - FuzzyPID vs PID')
 
 axes[1].plot(ts, rows[:,3], 'b',   lw=1.5, label='FuzzyPID')
 axes[1].plot(ts, rows[:,5], 'r--', lw=1.5, label='PID')

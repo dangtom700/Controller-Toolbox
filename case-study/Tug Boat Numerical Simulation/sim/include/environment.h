@@ -18,7 +18,7 @@ struct EnvConditions {
     double wind_bearing;  // rad, direction wind comes FROM (world frame)
     double current_speed; // m/s
     double current_bearing; // rad, direction current flows TO (world frame)
-    double Hs;            // significant wave height (m)  — overrides plant_params if > 0
+    double Hs;            // significant wave height (m)  - overrides plant_params if > 0
     double Tp;            // peak period (s)
 };
 

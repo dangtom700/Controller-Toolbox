@@ -21,8 +21,6 @@
 #include <memory>
 #include <algorithm>
 
-using namespace ctrl;
-
 static constexpr double Ts = 0.05;
 static constexpr int SIM_STEPS = 400; // 20 seconds
 static constexpr double REF_STEP = 1.0;
@@ -31,7 +29,7 @@ static constexpr double REF_STEP = 1.0;
 // 1. Black Box True Plant Generator
 // ---------------------------------------------------------------------------
 // Nominal true plant: 3rd order, G(s) = 2.0 / ((0.5s + 1)(0.2s + 1)(0.1s + 1))
-StateSpace make_true_plant(double gain_scale = 1.0, double time_scale = 1.0)
+ctrl::StateSpace make_true_plant(double gain_scale = 1.0, double time_scale = 1.0)
 {
     double K = 2.0 * gain_scale;
     double tau = 0.5 * time_scale;
@@ -54,15 +52,15 @@ StateSpace make_true_plant(double gain_scale = 1.0, double time_scale = 1.0)
     while (den.size() < num_v.size())
         den.push_back(0.0);
 
-    TransferFunction tf(num_v, den, Ts);
-    return tf2ss(tf);
+    ctrl::TransferFunction tf(num_v, den, Ts);
+    return ctrl::tf2ss(tf);
 }
 
 // ---------------------------------------------------------------------------
 // 2. FOPDT to StateSpace Conversion
 // ---------------------------------------------------------------------------
 // Converts identified FOPDT (K, tau, theta) to a discrete StateSpace model
-StateSpace fopdt_to_ss(const StepResponseTuner::FOPDTModel &m)
+ctrl::StateSpace fopdt_to_ss(const ctrl::StepResponseTuner::FOPDTModel &m)
 {
     int d = std::max(0, static_cast<int>(std::round(m.theta / Ts)));
     double a = std::exp(-Ts / m.tau);
@@ -88,7 +86,7 @@ StateSpace fopdt_to_ss(const StepResponseTuner::FOPDTModel &m)
     }
     C(0, 0) = 1.0;
 
-    return StateSpace(A, B, C, D, Ts);
+    return ctrl::StateSpace(A, B, C, D, Ts);
 }
 
 // ---------------------------------------------------------------------------
@@ -104,7 +102,7 @@ struct SimMetrics
 };
 
 template <typename T>
-SimMetrics evaluate_controller(T *ctrl, StateSpace plant)
+SimMetrics evaluate_controller(T *ctrl, ctrl::StateSpace plant)
 {
     SimMetrics metrics;
     Eigen::VectorXd x = Eigen::VectorXd::Zero(plant.stateSize());
@@ -160,7 +158,7 @@ int main()
 
     // --- STEP 1: Generate Data from Black Box Plant ---
     std::cout << "[1] Simulating open-loop step response of black-box plant...\n";
-    StateSpace true_plant = make_true_plant();
+    ctrl::StateSpace true_plant = make_true_plant();
     std::vector<double> t_data, y_data;
     Eigen::VectorXd x_ol = Eigen::VectorXd::Zero(true_plant.stateSize());
     Eigen::VectorXd u_ol(1);
@@ -169,28 +167,28 @@ int main()
     for (int k = 0; k < 200; ++k)
     {
         t_data.push_back(k * Ts);
-        y_data.push_back(ssStep(true_plant, x_ol, u_ol)(0));
+        y_data.push_back(ctrl::ssStep(true_plant, x_ol, u_ol)(0));
     }
 
     // --- STEP 2: System Identification ---
     std::cout << "[2] Performing System Identification (FOPDT)...\n";
-    auto fopdt = StepResponseTuner::identify(t_data, y_data, 1.0);
+    auto fopdt = ctrl::StepResponseTuner::identify(t_data, y_data, 1.0);
     std::cout << "    Identified Model: K=" << fopdt.K << ", tau=" << fopdt.tau << ", theta=" << fopdt.theta << "\n\n";
 
-    StateSpace nominal_plant = fopdt_to_ss(fopdt);
+    ctrl::StateSpace nominal_plant = fopdt_to_ss(fopdt);
 
     // --- STEP 3: Controller Design ---
     std::cout << "[3] Designing Controllers based on nominal model...\n";
 
     // 1. PID (AMIGO tuning for robustness)
-    PIDParams pid_p = StepResponseTuner::computePIDParams(fopdt, Ts, PIDTuningRule::AMIGO);
+    ctrl::PIDParams pid_p = ctrl::StepResponseTuner::computePIDParams(fopdt, Ts, ctrl::PIDTuningRule::AMIGO);
     pid_p.uMin = -5.0;
     pid_p.uMax = 5.0;
-    DiscretePID ctrl_pid(pid_p, Ts);
+    ctrl::DiscretePID ctrl_pid(pid_p, Ts);
 
     // 2. MPC (Auto-tuned horizon)
-    auto mpc_rec = MPCHorizonTuner::recommend(nominal_plant, Ts);
-    MPCParams mpc_p;
+    auto mpc_rec = ctrl::MPCHorizonTuner::recommend(nominal_plant, Ts);
+    ctrl::MPCParams mpc_p;
     mpc_p.Np = mpc_rec.Np;
     mpc_p.Nc = mpc_rec.Nc;
     mpc_p.rho_y = mpc_rec.rho_y;
@@ -199,26 +197,26 @@ int main()
     mpc_p.uMax = 5.0;
     mpc_p.duMin = -0.5;
     mpc_p.duMax = 0.5;
-    DiscreteMPC ctrl_mpc(nominal_plant, mpc_p);
+    ctrl::DiscreteMPC ctrl_mpc(nominal_plant, mpc_p);
 
     // 3. ADRC (Robust by design)
-    ADRCParams adrc_p;
+    ctrl::ADRCParams adrc_p;
     adrc_p.b0 = fopdt.K / fopdt.tau;  // Rough estimate of critical gain
     adrc_p.omega_c = 2.0 / fopdt.tau; // Bandwidth
     adrc_p.omega_o = 5.0 * adrc_p.omega_c;
     adrc_p.uMin = -5.0;
     adrc_p.uMax = 5.0;
-    DiscreteADRC ctrl_adrc(adrc_p, Ts);
+    ctrl::DiscreteADRC ctrl_adrc(adrc_p, Ts);
 
     // 4. LQG (LQR + Kalman Filter)
-    LQRParams lqr_p = LQRWeightTuner::brysonMethod(
+    ctrl::LQRParams lqr_p = ctrl::LQRWeightTuner::brysonMethod(
         Eigen::VectorXd::Constant(nominal_plant.stateSize(), 0.5),
         Eigen::VectorXd::Constant(1, 5.0));
     lqr_p.Q = Eigen::MatrixXd::Identity(nominal_plant.stateSize(), nominal_plant.stateSize());
 
     Eigen::MatrixXd Q_noise = Eigen::MatrixXd::Identity(nominal_plant.stateSize(), nominal_plant.stateSize()) * 0.01;
     Eigen::MatrixXd R_noise = Eigen::MatrixXd::Identity(nominal_plant.outputSize(), nominal_plant.outputSize()) * 0.1;
-    DiscreteLQG ctrl_lqg(nominal_plant, lqr_p, Q_noise, R_noise);
+    ctrl::DiscreteLQG ctrl_lqg(nominal_plant, lqr_p, Q_noise, R_noise);
 
     // --- STEP 4 & 5: Monte Carlo Robustness Estimation ---
     std::cout << "\n[4 & 5] Running Monte Carlo Tolerance Analysis (N=50, +/- 20% uncertainty)...\n";
@@ -238,7 +236,7 @@ int main()
     {
         double g_scale = dist(rng);
         double t_scale = dist(rng);
-        StateSpace pert_plant = make_true_plant(g_scale, t_scale);
+        ctrl::StateSpace pert_plant = make_true_plant(g_scale, t_scale);
 
         auto m_pid = evaluate_controller(&ctrl_pid, pert_plant);
         if (m_pid.Stable)

@@ -147,7 +147,7 @@ cmake --build build --target docs
 
 27 single-file programs numbered `ex01_*` through `ex26_*` plus `example_pid_feedback`. Each demonstrates one controller or composition pattern (see [examples/CMakeLists.txt](examples/CMakeLists.txt) for the full enumeration). The `examples/cpp/` subdirectory contains MIMO / coupled-plant scenarios (`mimo_known`, `mimo_unknown`, `siso_coupled`, `siso_unknown`).
 
-The fuzzy examples `ex23`–`ex26` cover four distinct application domains:
+The fuzzy examples `ex23`-`ex26` cover four distinct application domains:
 
 | Example | Application | Fuzzy element |
 |---------|-------------|---------------|
@@ -156,15 +156,15 @@ The fuzzy examples `ex23`–`ex26` cover four distinct application domains:
 | `ex25_fuzzy_supervisor_mpc` | pH neutralisation (nonlinear) | `FuzzySupervisor` driving adaptive MPC |
 | `ex26_fuzzy_ts_gain_scheduler` | Inverted pendulum balancing | Hand-built TS `FuzzySystem` blending two PIDs |
 
-Companion Python scripts in `examples/python/` (ex23–ex26) generate identical data via self-contained Python implementations and produce comparison plots saved to `examples/data/`.
+Companion Python scripts in `examples/python/` (ex23-ex26) generate identical data via self-contained Python implementations and produce comparison plots saved to `examples/data/`.
 
 The Python folder `examples/python/` mirrors many of the C++ demos for cross-validation against `python-control`.
 
 ### 3.3 Case Study (`case-study/`)
 
-**Boiler-Turbine:** [boiler_turbine_case_study.cpp](case-study/boiler_turbine_case_study.cpp) — a 3×3 nonlinear Bell-Åström boiler-turbine model with linearisation, then LQR / MPC / LQG / PID / SMC / Extremum-Seeker comparison across three operating points (Low / Medium / High Load). See [case-study/verdict_boiler_turbine.md](case-study/verdict_boiler_turbine.md) for the analysis verdict.
+**Boiler-Turbine:** [boiler_turbine_case_study.cpp](case-study/boiler_turbine_case_study.cpp) - a 3*3 nonlinear Bell-Astrom boiler-turbine model with linearisation, then LQR / MPC / LQG / PID / SMC / Extremum-Seeker comparison across three operating points (Low / Medium / High Load). See [case-study/verdict_boiler_turbine.md](case-study/verdict_boiler_turbine.md) for the analysis verdict.
 
-**Tug Boat Numerical Simulation:** [`case-study/Tug Boat Numerical Simulation/`](case-study/Tug%20Boat%20Numerical%20Simulation/) — a 3-DOF marine vessel simulation (Li et al. 2026, Ocean Engineering 357) running 7 controllers across 4 environmental scenarios (28 runs total). Controllers: PID, KF-PID, SMC, MPC, ESC, FuzzyPID, FuzzySup-MPC. Uses the full Toolbox including `FuzzyLogic`, `KalmanFilter`, `DiscreteMPC`, `DiscreteSMC`, `ExtremumSeeker`, and `PlantModel`. Outputs CSV telemetry for Python post-processing. See the planning documents in that folder for mathematical model detail.
+**Tug Boat Numerical Simulation:** [`case-study/Tug Boat Numerical Simulation/`](case-study/Tug%20Boat%20Numerical%20Simulation/) - a 3-DOF marine vessel simulation (Li et al. 2026, Ocean Engineering 357) running 7 controllers across 4 environmental scenarios (28 runs total). Controllers: PID, KF-PID, SMC, MPC, ESC, FuzzyPID, FuzzySup-MPC. Uses the full Toolbox including `FuzzyLogic`, `KalmanFilter`, `DiscreteMPC`, `DiscreteSMC`, `ExtremumSeeker`, and `PlantModel`. Outputs CSV telemetry for Python post-processing. See the planning documents in that folder for mathematical model detail.
 
 ### 3.4 Tests (`tests/`)
 
@@ -252,7 +252,7 @@ for (int k = 0; k < N; ++k) {
 ### 4.5 Fuzzy PID and Fuzzy Supervisor
 
 ```cpp
-// ── FuzzyPID (HVAC, motor, marine — any axis needing smooth nonlinear P+D+I) ──
+// -- FuzzyPID (HVAC, motor, marine - any axis needing smooth nonlinear P+D+I) --
 ctrl::FuzzyPIDParams fp;
 fp.pd.e_scale  = 2.0;      // error value considered "large"  (plant-specific units)
 fp.pd.de_scale = 0.2;      // error rate considered "large"   (units/s)
@@ -264,7 +264,7 @@ ctrl::FuzzyPID fuzzy(fp, Ts);
 
 double u = fuzzy.compute(r - y);   // call once per sample step
 
-// ── FuzzySupervisor (adaptive MPC re-linearisation trigger) ──────────────────
+// -- FuzzySupervisor (adaptive MPC re-linearisation trigger) ------------------
 ctrl::SupervisorParams sp;
 sp.e_threshold      = 5.0;   // |error| at which "Large" fires
 sp.trend_threshold  = 0.5;   // d|e|/dt at which "Increasing" fires
@@ -276,7 +276,7 @@ ctrl::SupervisorDecision dec = supervisor.update(std::abs(r - y));
 if (dec.relinearize)
     mpc.setPlant(reLinearise(current_state));   // adapt MPC model
 
-// ── Custom FuzzySystem (Takagi-Sugeno gain scheduling) ───────────────────────
+// -- Custom FuzzySystem (Takagi-Sugeno gain scheduling) -----------------------
 ctrl::FuzzySystem sys;
 sys.params.inference = ctrl::InferenceMethod::TakagiSugeno;
 sys.params.defuzz    = ctrl::DefuzzMethod::WeightedAverage;
@@ -313,7 +313,8 @@ double u = stack->compute(error);
 ctrl::AtomicParamBuffer<ctrl::PIDParams> buf(pp_initial);
 
 // Real-time thread:
-pid.setParams(buf.read());                  // O(1), lock-free
+auto p = buf.read();                        // seqlock-protected copy - no blocking
+pid.setParams(p);
 double u = pid.compute(error);
 
 // Background thread (tuner):
@@ -436,20 +437,20 @@ The fuzzy module provides a self-contained Mamdani / Takagi-Sugeno inference eng
 | `mfTrapezoidal` | `(a, b, c, d)` | Trapezoid: ramps up `[a,b]`, flat `[b,c]`, ramps down `[c,d]` |
 | `mfGaussian` | `(mean, sigma)` | `exp(-0.5*((x-mean)/sigma)^2)` |
 | `mfSingleton` | `(value)` | 1 only at `x == value` (for TS consequents) |
-| `mfShoulderLeft` | `(a, b)` | 1 for `x <= a`, linear 1→0 from `a` to `b` |
-| `mfShoulderRight` | `(a, b)` | 0 for `x <= a`, linear 0→1 from `a` to `b` |
+| `mfShoulderLeft` | `(a, b)` | 1 for `x <= a`, linear 1->0 from `a` to `b` |
+| `mfShoulderRight` | `(a, b)` | 0 for `x <= a`, linear 0->1 from `a` to `b` |
 
 All factories return `ctrl::MF = std::function<double(double)>` capturing parameters by value.
 
 ##### `LinguisticVariable`
 - Holds `name`, universe `[lo, hi]`, and a `std::vector<LinguisticTerm>` (name + MF pairs).
-- `fuzzify(x)` → `std::vector<double>` of membership degrees (clamped to `[0,1]`).
-- `termIndex(name)` → int (-1 if not found).
+- `fuzzify(x)` -> `std::vector<double>` of membership degrees (clamped to `[0,1]`).
+- `termIndex(name)` -> int (-1 if not found).
 
 ##### `FuzzySystem`
 - **Purpose:** Core inference engine supporting both Mamdani and TS inference on a single output variable.
 - **Build:** `addInput(var)`, `addOutput(var)`, `addRule(rule)`.
-- **Evaluate:** `evaluate(inputs) -> double` — fuzzifies all inputs, fires all rules (product AND, max aggregation), defuzzifies.
+- **Evaluate:** `evaluate(inputs) -> double` - fuzzifies all inputs, fires all rules (product AND, max aggregation), defuzzifies.
 - **Params (`FuzzySystemParams`):** `inference` (Mamdani/TakagiSugeno), `defuzz` (CoG/WeightedAverage), `cog_resolution` (101 default), `uMin/uMax`.
 - **CoG defuzz:** discrete grid of `cog_resolution` points over the output universe; each point takes the max over all clipped output MFs; weighted centroid.
 - **TS/WeightedAverage defuzz:** strength-weighted sum over the peak location of each output term (grid-searched at 51 points).
@@ -458,7 +459,7 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 ##### `FuzzyPD` (implements `IController`)
 - **Purpose:** Convenience Mamdani PD controller for one axis; builds its own `FuzzySystem` automatically from the canonical 5-term partition `{NL, NS, ZE, PS, PL}` with 25-rule diagonal rule table.
 - **Parameters (`FuzzyPDParams`):** `e_scale` (normalises error to `[-1,1]`), `de_scale` (normalises error rate), `u_scale` (scales output back to physical units), `uMin/uMax`.
-- **Inputs:** `compute(error)` — normalises `e` and `de = (e - e_prev)/Ts`, runs inference, scales and clamps output.
+- **Inputs:** `compute(error)` - normalises `e` and `de = (e - e_prev)/Ts`, runs inference, scales and clamps output.
 - **Methods:** `compute(e)`, `reset()`, `setParams(p)`, `params()`, `lastOutput()`, `sampleTime()`.
 
 ##### `FuzzyPID` (implements `IController`)
@@ -469,7 +470,7 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 
 ##### `FuzzySupervisor`
 - **Purpose:** Monitors a closed-loop error channel and returns a `SupervisorDecision` indicating whether the underlying controller's linearised plant model should be refreshed.
-- **Inputs:** `update(abs_error)` — called once per step with the scalar absolute error for this axis.
+- **Inputs:** `update(abs_error)` - called once per step with the scalar absolute error for this axis.
 - **Output (`SupervisorDecision`):** `relinearize_signal` [0,1], `relinearize` (bool, thresholded with cooldown), `error_norm`, `trend`.
 - **Internal logic:** 9-rule Mamdani system with 2 inputs (normalised error magnitude, normalised error trend) and 1 output (re-linearisation signal). A configurable cooldown prevents rapid oscillatory triggering.
 - **Parameters (`SupervisorParams`):** `e_threshold` (error at which term "Large" fires), `trend_threshold` (d|e|/dt at which "Increasing" fires), `signal_threshold` (threshold for boolean `relinearize`), `cooldown_steps`.
@@ -547,9 +548,12 @@ Standalone heuristics; each exposes `tuneImpl(...)` (unchecked) and `tuneFor<C>(
 ### 5.7 Real-Time Utilities & HAL
 
 #### `AtomicParamBuffer<Params>` ([AtomicParamBuffer.h](lib/AtomicParamBuffer.h))
-- **Purpose:** Lock-free double-buffered parameter handoff between a background tuner and the real-time control thread. Single-writer / single-reader.
+- **Purpose:** Seqlock-based double-buffered parameter handoff between a background tuner and the real-time control thread. Single-writer / single-reader, data-race-free under the C++ memory model.
 - **Constraint:** `Params` must be `std::is_trivially_copyable<Params>::value == true` (plain-old-data struct).
-- **API:** `read()` (RT thread, O(1), no allocation), `publish(p)` (background thread, atomic store).
+- **API:**
+  - `Params read()` - RT thread. Returns a copy protected by the seqlock. Spins only if a `publish()` is mid-flight (typically zero retries).
+  - `void publish(const Params& p)` - background thread. Writes to inactive slot, then atomically promotes it. Increments seqlock counter twice.
+  - `Params latest()` - background thread only; non-seqlock-protected peek at the active slot.
 
 #### HAL ([lib/hal/HAL.h](lib/hal/HAL.h))
 Bundles `ISensor`, `IActuator`, `SimPlant`, `SimSensor`, `SimActuator` for closed-loop simulation against a `StateSpace` plant. Suitable as a stand-in for real hardware drivers when developing/testing.

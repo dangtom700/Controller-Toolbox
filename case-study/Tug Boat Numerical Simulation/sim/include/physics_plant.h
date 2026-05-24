@@ -16,7 +16,7 @@ public:
     explicit PhysicsPlant(const PlantParameters& p);
 
     // Advance one step.
-    // tau_main: output of thrust allocator (body frame, N and N·m)
+    // tau_main: output of thrust allocator (body frame, N and N.m)
     // tau_env:  wind + current + wave drift (body frame)
     void step(const Eigen::Vector3d& tau_main,
               const Eigen::Vector3d& tau_env);
@@ -42,7 +42,7 @@ private:
     // Rotation matrix R(psi)
     static Eigen::Matrix3d R(double psi);
 
-    // Coriolis–centripetal matrix C(nu) for barge rigid body
+    // Coriolis-centripetal matrix C(nu) for barge rigid body
     Eigen::Matrix3d C_rb(const Eigen::Vector3d& nu) const;
 };
 

@@ -85,7 +85,7 @@
 ---
 
 ### 7. Intelligent and Soft-Computing Control
-- **Fuzzy Logic Control** (Mamdani, Takagi-Sugeno) — **implemented: `FuzzyLogic.h`** (`FuzzySystem`, `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor`)
+- **Fuzzy Logic Control** (Mamdani, Takagi-Sugeno) - **implemented: `FuzzyLogic.h`** (`FuzzySystem`, `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor`)
 - **Neuro-Fuzzy Control (ANFIS)**
 - **Neural Network Control** (off-line trained, model-inverse)
 - **Adaptive Neural Network Control** (online learning)
@@ -121,7 +121,7 @@
 ---
 
 ### 10. Hybrid / Mixed Control Architectures (mixtures)
-- **Fuzzy-PID** (Fuzzy gain scheduling, Fuzzy-tuned PID) — **implemented: `FuzzyPID`** in `FuzzyLogic.h`
+- **Fuzzy-PID** (Fuzzy gain scheduling, Fuzzy-tuned PID) - **implemented: `FuzzyPID`** in `FuzzyLogic.h`
 - **Neuro-PID**
 - **Sliding Mode + PID** (SM-PID, reaching-law based)
 - **Fuzzy Sliding Mode Control**

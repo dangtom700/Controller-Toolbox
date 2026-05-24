@@ -18,26 +18,26 @@ struct TugStation {
 };
 
 struct PlantParameters {
-    // ── Barge generalised mass (rigid-body + added mass, 3x3) ──────────────
+    // -- Barge generalised mass (rigid-body + added mass, 3x3) --------------
     Eigen::Matrix3d M_b;
     Eigen::Matrix3d D_b;   // linear damping
 
-    // ── Per-tug scalars ────────────────────────────────────────────────────
+    // -- Per-tug scalars ----------------------------------------------------
     double m_tug;                       // displacement (kg)
     Eigen::Vector3d added_tug;          // [Xu_dot, Yv_dot, Nr_dot] (kg)
-    Eigen::Vector3d damp_tug;           // [Xu, Yv, Nr] (N·s/m or N·m·s/rad)
+    Eigen::Vector3d damp_tug;           // [Xu, Yv, Nr] (N.s/m or N.m.s/rad)
     double T_min;                       // minimum thrust per tug (N)
     double T_max;                       // maximum thrust per tug (N)
     double dT_max;                      // rate limit per tug per step (N)
 
     std::array<TugStation, NUM_TUGS> stations;
 
-    // ── Reconstructed system matrices ─────────────────────────────────────
+    // -- Reconstructed system matrices -------------------------------------
     Eigen::Matrix3d M_re;   // M_b + sum M_tilde_i
     Eigen::Matrix3d M_re_inv;
     Eigen::Matrix3d D_re;   // D_b + sum D_tilde_i
 
-    // ── Environment ───────────────────────────────────────────────────────
+    // -- Environment -------------------------------------------------------
     double rho_air;
     double rho_water;
     // Barge above-waterline areas
@@ -50,13 +50,13 @@ struct PlantParameters {
     double beam;            // m
     double draft;           // m
 
-    // ── Wave (JONSWAP 2-component) ─────────────────────────────────────────
+    // -- Wave (JONSWAP 2-component) -----------------------------------------
     double Hs;
     double Tp;
     double gamma_j;
     double drift_x, drift_y, drift_psi;
 
-    // ── Simulation ─────────────────────────────────────────────────────────
+    // -- Simulation ---------------------------------------------------------
     double dt;
     double duration;
 

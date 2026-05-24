@@ -23,13 +23,13 @@
 // state = [x, y, psi, u, v, r]   (measured or filtered)
 //
 // Output is the body-frame generalised force command BEFORE saturation.
-// Saturation to [-2e6, 2e6] N and [-5e7, 5e7] N·m is applied in the runner.
+// Saturation to [-2e6, 2e6] N and [-5e7, 5e7] N.m is applied in the runner.
 
 namespace tug {
 
-// ── Output saturation limits ─────────────────────────────────────────────────
+// -- Output saturation limits -------------------------------------------------
 static constexpr double TAU_XY_MAX  = 2.0e6;   // N
-static constexpr double TAU_PSI_MAX = 5.0e7;   // N·m
+static constexpr double TAU_PSI_MAX = 5.0e7;   // N.m
 
 inline Eigen::Vector3d saturateTau(const Eigen::Vector3d& tau)
 {
@@ -39,7 +39,7 @@ inline Eigen::Vector3d saturateTau(const Eigen::Vector3d& tau)
         std::clamp(tau(2), -TAU_PSI_MAX, TAU_PSI_MAX));
 }
 
-// ── Base class ────────────────────────────────────────────────────────────────
+// -- Base class ----------------------------------------------------------------
 class ControllerBase {
 public:
     virtual ~ControllerBase() = default;
@@ -49,7 +49,7 @@ public:
     virtual std::string name() const = 0;
 };
 
-// ── Mode 1: PID Baseline ──────────────────────────────────────────────────────
+// -- Mode 1: PID Baseline ------------------------------------------------------
 class PIDController : public ControllerBase {
 public:
     explicit PIDController(const PlantParameters& p);
@@ -62,7 +62,7 @@ private:
     std::array<ctrl::DiscretePID, 3> pids_;  // x, y, psi
 };
 
-// ── Mode 2: Kalman Filter + PID ───────────────────────────────────────────────
+// -- Mode 2: Kalman Filter + PID -----------------------------------------------
 class KFPIDController : public ControllerBase {
 public:
     explicit KFPIDController(const PlantParameters& p);
@@ -79,7 +79,7 @@ private:
     ctrl::StateSpace buildPlantSS() const;
 };
 
-// ── Mode 3: Sliding Mode Controller ──────────────────────────────────────────
+// -- Mode 3: Sliding Mode Controller ------------------------------------------
 // Implements paper Eqs. (24-27): sliding surface with integral, equivalent
 // control (model-cancellation), and switching control with boundary layer.
 class SMCController : public ControllerBase {
@@ -102,7 +102,7 @@ private:
     static double sat(double s, double phi);
 };
 
-// ── Mode 4: Model Predictive Control ─────────────────────────────────────────
+// -- Mode 4: Model Predictive Control -----------------------------------------
 class MPCController : public ControllerBase {
 public:
     explicit MPCController(const PlantParameters& p);
@@ -118,7 +118,7 @@ private:
     ctrl::StateSpace buildAxisSS(int axis) const;
 };
 
-// ── Mode 5: Extremum Seeking Control ─────────────────────────────────────────
+// -- Mode 5: Extremum Seeking Control -----------------------------------------
 // Model-free gradient descent on per-axis IAE cost.
 class ESCController : public ControllerBase {
 public:
@@ -133,7 +133,7 @@ private:
     Eigen::Vector3d e_prev_;
 };
 
-// ── Mode 6: Fuzzy PID Controller ─────────────────────────────────────────────
+// -- Mode 6: Fuzzy PID Controller ---------------------------------------------
 // Three independent FuzzyPID loops (one per axis) using the Toolbox's
 // ctrl::FuzzyPID.  Each loop runs a 25-rule Mamdani FuzzyPD block plus a
 // crisp integral accumulator with back-calculation anti-windup.
@@ -152,7 +152,7 @@ private:
     std::array<ctrl::FuzzyPID, 3> fuzzy_pids_;  // x, y, psi
 };
 
-// ── Fuzzy Supervisor + MPC  ───────────────────────────────────────────────────
+// -- Fuzzy Supervisor + MPC  ---------------------------------------------------
 // Wraps the MPC controller and attaches a per-axis FuzzySupervisor.
 // At each step the supervisor evaluates whether the closed-loop error magnitude
 // and its trend indicate that the MPC's internal linearised plant model has
@@ -184,7 +184,7 @@ private:
     // One MPC per axis (same structure as MPCController)
     std::array<std::unique_ptr<ctrl::DiscreteMPC>, 3> mpcs_;
 
-    // One FuzzySupervisor per axis — they watch independent error channels
+    // One FuzzySupervisor per axis - they watch independent error channels
     std::array<ctrl::FuzzySupervisor, 3> supervisors_;
 
     // Last decisions (for logging / diagnostics)

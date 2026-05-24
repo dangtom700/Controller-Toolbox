@@ -64,6 +64,9 @@ namespace ctrl
         // Lipschitz constant = max eigenvalue of H (used as gradient-projection step 1/L)
         L_ = H_.selfadjointView<Eigen::Upper>().eigenvalues().maxCoeff();
 
+        // Pre-factor H_ once; reused every computeRef() call without re-factorisation.
+        ldlt_ = H_.ldlt();
+
         // Pre-allocate work vectors so computeRef() is allocation-free per step
         R_stack_.resize(Np * p);
         pred_err_.resize(Np * p);
@@ -140,12 +143,11 @@ namespace ctrl
             }
         }
 
-        // Warm-start: clamped unconstrained optimum
-        const auto ldlt = H_.ldlt();
-        if (ldlt.info() != Eigen::Success)
+        // Warm-start: clamped unconstrained optimum (ldlt_ pre-factored in buildCondensedMatrices)
+        if (ldlt_.info() != Eigen::Success)
             return u_prev_; // degenerate Hessian - hold previous input
 
-        DeltaU_ = (-ldlt.solve(grad_)).cwiseMax(lb_).cwiseMin(ub_);
+        DeltaU_ = (-ldlt_.solve(grad_)).cwiseMax(lb_).cwiseMin(ub_);
 
         // Gradient projection: DU <- clamp(DU - (1/L)*(H*DU + g), lb_, ub_)
         // All temporaries (grad_k_, DU_new_) are pre-allocated members - no per-iter alloc.
