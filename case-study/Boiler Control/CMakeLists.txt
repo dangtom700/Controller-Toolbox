@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.16)
+
+add_executable(boiler_turbine_case_study boiler_turbine_case_study.cpp)
+target_link_libraries(boiler_turbine_case_study PRIVATE controller_toolbox)
+target_compile_features(boiler_turbine_case_study PRIVATE cxx_std_17)

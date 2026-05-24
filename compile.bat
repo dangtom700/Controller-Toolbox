@@ -70,6 +70,7 @@ for %%T in (
     simulate_all
     realtime_all
     boiler_turbine_case_study
+    toolbox_examples
 ) do (
     echo.
     echo ----------------------------------------------------------
