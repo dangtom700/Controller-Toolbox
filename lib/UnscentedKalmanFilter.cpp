@@ -1,4 +1,5 @@
 #include "UnscentedKalmanFilter.h"
+#include <iostream>
 #include <stdexcept>
 
 namespace ctrl
@@ -21,11 +22,29 @@ namespace ctrl
 
         // Scaled UT parameters
         lambda_ = alpha * alpha * (n + kappa) - n;
+
+        // Guard: (n + lambda) must be positive for the Cholesky sqrt in sigmaPoints()
+        // to be well-defined. Equivalent condition: alpha^2*(n+kappa) > 0.
+        if (n + lambda_ <= 0.0)
+            throw std::invalid_argument(
+                "[UnscentedKalmanFilter] n + lambda <= 0: sigma point spread is invalid. "
+                "Increase alpha or set kappa >= 0. "
+                "Typical values: alpha=1e-3, kappa=0 or kappa=3-n.");
+
         const int L = 2 * n + 1;
         Wm_.resize(L);
         Wc_.resize(L);
         Wm_(0) = lambda_ / (n + lambda_);
         Wc_(0) = lambda_ / (n + lambda_) + (1.0 - alpha * alpha + beta);
+
+        // Warn when Wc(0) < 0: the zeroth covariance weight is negative, which is
+        // mathematically valid in the sigma-point formulation but can cause P to lose
+        // positive-semidefiniteness numerically. Consider increasing beta or alpha.
+        if (Wc_(0) < 0.0)
+            std::cerr << "[UnscentedKalmanFilter] WARNING: Wc(0) = " << Wc_(0)
+                      << " < 0. Predicted covariance may lose PSD. "
+                      << "Consider increasing beta (default 2) or alpha.\n";
+
         const double w_rest = 0.5 / (n + lambda_);
         for (int i = 1; i < L; ++i)
             Wm_(i) = Wc_(i) = w_rest;

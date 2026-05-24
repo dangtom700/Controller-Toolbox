@@ -102,7 +102,9 @@ namespace ctrl
         Eigen::VectorXd cumMin_;   // m     - rolling cumulative lower bound (bound construction)
         Eigen::VectorXd cumMax_;   // m     - rolling cumulative upper bound (bound construction)
 
-        void buildCondensedMatrices();
+        void buildPredictionMatrices(); // depends on plant model (A, B, C)
+        void buildCostMatrix();         // depends on weights (rho_y, rho_u) and Phi_
+        void buildCondensedMatrices();  // calls both — used by constructor and setPlant()
     };
 
 } // namespace ctrl

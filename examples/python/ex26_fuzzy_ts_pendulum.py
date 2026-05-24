@@ -82,7 +82,7 @@ for k in range(N):
     rows.append([t, theta_ts, dtheta_ts, u_ts, theta_base, u_base, w1, w2])
 
 rows = np.array(rows)
-out = Path(__file__).parent.parent / "data" / "ex26_fuzzy_ts_pendulum.csv"
+out = Path(__file__).parent.parent.parent / "data" / "ex26_fuzzy_ts_pendulum.csv"
 np.savetxt(out, rows, delimiter=",",
            header="t,theta_ts,theta_dot_ts,u_ts,theta_base,u_base,w1,w2",
            comments="", fmt="%.5f")
@@ -111,5 +111,5 @@ axes[2].set_xlabel('Time [s]')
 axes[2].legend(); axes[2].grid(True, alpha=0.4)
 
 plt.tight_layout()
-fig.savefig(Path(__file__).parent.parent / "data" / "ex26_fuzzy_ts_pendulum.png", dpi=150)
+fig.savefig(Path(__file__).parent.parent.parent / "data" / "ex26_fuzzy_ts_pendulum.png", dpi=150)
 plt.show()

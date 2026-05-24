@@ -734,12 +734,12 @@ int main()
     // =========================================================================
     // Save CSV
     // =========================================================================
-    std::ofstream f("siso_coupled_results.csv");
+    std::ofstream f(std::string(PROJECT_DATA_DIR) + "/siso_coupled_results.csv");
     f << "method,ISE,ITAE,energy,overshoot_pct,settle_time,J\n";
     for (size_t i = 0; i < results.size(); ++i)
         f << labels[i] << "," << results[i].ISE << "," << results[i].ITAE << ","
           << results[i].energy << "," << results[i].overshoot_pct << ","
           << results[i].settle_time << "," << results[i].J << "\n";
-    std::cout << "\n  Results saved -> siso_coupled_results.csv\n";
+    std::cout << "\n  Results saved -> " << PROJECT_DATA_DIR << "/siso_coupled_results.csv\n";
     return 0;
 }

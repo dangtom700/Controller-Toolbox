@@ -76,7 +76,7 @@ int main()
     Eigen::VectorXd xf = Eigen::VectorXd::Zero(plant.stateSize());
     Eigen::VectorXd xp = Eigen::VectorXd::Zero(plant.stateSize());
 
-    std::ofstream csv("data/ex24_fuzzy_dc_motor.csv");
+    std::ofstream csv(std::string(PROJECT_DATA_DIR) + "/ex24_fuzzy_dc_motor.csv");
     csv << "t,ref,y_fuzzy,u_fuzzy,y_pid,u_pid,sat_fuzzy,sat_pid\n";
     csv << std::fixed << std::setprecision(5);
 

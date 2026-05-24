@@ -142,7 +142,7 @@ for k in range(N):
 ts = np.array(ts)
 
 # -- Save CSV -----------------------------------------------------------------
-out = Path(__file__).parent.parent / "data" / "ex23_fuzzy_temperature.csv"
+out = Path(__file__).parent.parent.parent / "data" / "ex23_fuzzy_temperature.csv"
 header = "t,ref,y_fuzzy,u_fuzzy,y_pid,u_pid,disturbance"
 data = np.column_stack([ts, refs, yfs, ufs, yps, ups, dists])
 np.savetxt(out, data, delimiter=",", header=header, comments="", fmt="%.4f")
@@ -167,5 +167,5 @@ ax2.set_xlabel('Time [s]')
 ax2.legend(); ax2.grid(True, alpha=0.4)
 
 plt.tight_layout()
-fig.savefig(Path(__file__).parent.parent / "data" / "ex23_fuzzy_temperature.png", dpi=150)
+fig.savefig(Path(__file__).parent.parent.parent / "data" / "ex23_fuzzy_temperature.png", dpi=150)
 plt.show()

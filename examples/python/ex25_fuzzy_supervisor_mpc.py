@@ -157,7 +157,7 @@ for k in range(N):
     rows.append([t, r, yf, uf, ya, ua, sig, int(did_relin), k_t_a])
 
 rows = np.array(rows)
-out = Path(__file__).parent.parent / "data" / "ex25_fuzzy_supervisor_mpc.csv"
+out = Path(__file__).parent.parent.parent / "data" / "ex25_fuzzy_supervisor_mpc.csv"
 np.savetxt(out, rows, delimiter=",",
            header="t,ref,y_mpc_fixed,u_mpc_fixed,y_mpc_adapt,u_mpc_adapt,"
                   "relinearize_signal,relinearize_event,k_eff",
@@ -187,5 +187,5 @@ axes[2].set_ylabel('Signal [0-1]'); axes[2].set_xlabel('Time [s]')
 axes[2].legend(); axes[2].grid(True, alpha=0.4)
 
 plt.tight_layout()
-fig.savefig(Path(__file__).parent.parent / "data" / "ex25_fuzzy_supervisor_mpc.png", dpi=150)
+fig.savefig(Path(__file__).parent.parent.parent / "data" / "ex25_fuzzy_supervisor_mpc.png", dpi=150)
 plt.show()

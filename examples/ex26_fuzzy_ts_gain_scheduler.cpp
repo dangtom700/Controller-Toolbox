@@ -118,7 +118,7 @@ int main()
     Pendulum pend_ts, pend_base;
     pend_ts.theta = pend_base.theta = theta0;
 
-    std::ofstream csv("data/ex26_fuzzy_ts_pendulum.csv");
+    std::ofstream csv(std::string(PROJECT_DATA_DIR) + "/ex26_fuzzy_ts_pendulum.csv");
     csv << "t,theta_ts,theta_dot_ts,u_ts,theta_base,u_base,w1,w2\n";
     csv << std::fixed << std::setprecision(5);
 
@@ -128,6 +128,11 @@ int main()
 
     const int N = 2000;   // 10 s
     const double ref = 0.0;  // upright
+
+    // Weight threshold below which a PID's integral is frozen to prevent
+    // windup while the controller is effectively inactive.
+    static constexpr double W_FREEZE = 0.05;
+    double w1_prev = 1.0, w2_prev = 0.0;   // track previous weights for bumpless init
 
     for (int k = 0; k < N; ++k) {
         double t = k * Ts;
@@ -141,9 +146,27 @@ int main()
         w1 /= wsum; w2 /= wsum;
 
         double e_ts = ref - pend_ts.theta;
-        double u1   = pid1.compute(e_ts);
-        double u2   = pid2.compute(e_ts);
+
+        // Freeze the integral of a low-weight PID to prevent windup while it is
+        // inactive.  When its weight recovers above the threshold, call bumplessInit
+        // so its first compute() returns close to the current blended output rather
+        // than injecting a pre-wound integral spike.
+        double u_ts_prev = std::clamp(w1_prev * pid1.lastOutput() +
+                                      w2_prev * pid2.lastOutput(), -15.0, 15.0);
+
+        if (w1 <= W_FREEZE) {
+            // pid1 is dormant: keep it synchronised without advancing its integral
+            pid1.bumplessInit(u_ts_prev, e_ts);
+        }
+        if (w2 <= W_FREEZE) {
+            pid2.bumplessInit(u_ts_prev, e_ts);
+        }
+
+        double u1 = (w1 > W_FREEZE) ? pid1.compute(e_ts) : pid1.lastOutput();
+        double u2 = (w2 > W_FREEZE) ? pid2.compute(e_ts) : pid2.lastOutput();
+
         double u_ts = std::clamp(w1 * u1 + w2 * u2, -15.0, 15.0);
+        w1_prev = w1; w2_prev = w2;
 
         pend_ts.step(u_ts, Ts);
 
@@ -167,6 +190,6 @@ int main()
                       << std::setw(9)  << u_base << "\n";
     }
 
-    std::cout << "\nResults saved to data/ex26_fuzzy_ts_pendulum.csv\n";
+    std::cout << "\nResults saved to " << PROJECT_DATA_DIR << "/ex26_fuzzy_ts_pendulum.csv\n";
     return 0;
 }

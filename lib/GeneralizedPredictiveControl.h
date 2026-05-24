@@ -94,6 +94,7 @@ private:
     Eigen::MatrixXd Ga_;       // (Np.p) * (Nu.m)
     Eigen::MatrixXd Qy_, Ru_;
     Eigen::MatrixXd H_;        // pre-built Hessian
+    Eigen::LDLT<Eigen::MatrixXd> ldlt_; // pre-factored H_, refreshed in buildCondensedMatrices()
 
     // Pre-allocated work vectors (all sized at buildCondensedMatrices time)
     Eigen::VectorXd Rtraj_;    // reference trajectory stack (Np.p)

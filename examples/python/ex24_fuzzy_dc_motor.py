@@ -131,7 +131,7 @@ for k in range(N):
     rows.append([t, r, yf, uf, yp, up, sat_f, sat_p])
 
 rows = np.array(rows)
-out = Path(__file__).parent.parent / "data" / "ex24_fuzzy_dc_motor.csv"
+out = Path(__file__).parent.parent.parent / "data" / "ex24_fuzzy_dc_motor.csv"
 np.savetxt(out, rows, delimiter=",",
            header="t,ref,y_fuzzy,u_fuzzy,y_pid,u_pid,sat_fuzzy,sat_pid",
            comments="", fmt="%.5f")
@@ -162,5 +162,5 @@ axes[2].set_xlabel('Time [s]')
 axes[2].legend(); axes[2].grid(True, alpha=0.4)
 
 plt.tight_layout()
-fig.savefig(Path(__file__).parent.parent / "data" / "ex24_fuzzy_dc_motor.png", dpi=150)
+fig.savefig(Path(__file__).parent.parent.parent / "data" / "ex24_fuzzy_dc_motor.png", dpi=150)
 plt.show()

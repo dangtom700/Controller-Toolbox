@@ -86,6 +86,9 @@ namespace ctrl
 
         // Lipschitz constant for gradient-projection QP step (1/L = safe step size)
         L_ = H_.selfadjointView<Eigen::Upper>().eigenvalues().maxCoeff();
+
+        // Pre-factor H_ once; reused every computeRef() call without re-factorisation.
+        ldlt_ = H_.ldlt();
     }
 
     double GeneralizedPredictiveController::computeRef(double y, double r)
@@ -108,9 +111,7 @@ namespace ctrl
         err_.noalias()  = Fa_ * xa_ - Rtraj_;
         grad_.noalias() = Ga_.transpose() * (Qy_ * err_);
 
-        // Warm-start: clamped unconstrained solution
-        const auto ldlt = H_.ldlt();
-        if (ldlt.info() != Eigen::Success)
+        if (ldlt_.info() != Eigen::Success)
             return u_prev_(0); // degenerate Hessian - hold previous input
 
         // Build rolling worst-case tightened bounds - same strategy as DiscreteMPC.
@@ -130,7 +131,7 @@ namespace ctrl
             }
         }
 
-        DeltaU_ = (-ldlt.solve(grad_)).cwiseMax(lb_).cwiseMin(ub_);
+        DeltaU_ = (-ldlt_.solve(grad_)).cwiseMax(lb_).cwiseMin(ub_);
 
         // Gradient projection: DU <- clamp(DU - (1/L)*(H*DU + g), lb_, ub_)
         const double alpha = 1.0 / L_;

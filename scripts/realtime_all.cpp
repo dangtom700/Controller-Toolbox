@@ -171,7 +171,7 @@ RTResult run_realtime_error(const std::string &name,
     res.y_final = y;
 
     // Write CSV
-    std::string fname = "rt_" + name + ".csv";
+    std::string fname = std::string(PROJECT_DATA_DIR) + "/rt_" + name + ".csv";
     std::ofstream f(fname);
     f << std::fixed << std::setprecision(6);
     f << "t,y,error,u\n";
@@ -300,7 +300,7 @@ int main()
         res.stats = stats;
         res.y_final = y;
 
-        std::ofstream f("rt_lqr.csv");
+        std::ofstream f(std::string(PROJECT_DATA_DIR) + "/rt_lqr.csv");
         f << "t,y,error,u\n";
         for (int k = 0; k < N_STEP; ++k)
             f << std::fixed << std::setprecision(6)
@@ -421,7 +421,7 @@ int main()
         res.stats = stats;
         res.y_final = y;
 
-        std::ofstream f("rt_adrc.csv");
+        std::ofstream f(std::string(PROJECT_DATA_DIR) + "/rt_adrc.csv");
         f << "t,y,error,u\n";
         for (int k = 0; k < N_STEP; ++k)
             f << std::fixed << std::setprecision(6)
@@ -497,7 +497,7 @@ int main()
     std::cout << std::string(72, '-') << "\n";
 
     // Write RT summary CSV
-    std::ofstream fsum("rt_summary.csv");
+    std::ofstream fsum(std::string(PROJECT_DATA_DIR) + "/rt_summary.csv");
     fsum << "controller,y_final,avg_compute_us,max_jitter_us,missed_steps\n";
 
     for (auto &r : all_results)
@@ -517,7 +517,7 @@ int main()
     }
 
     std::cout << std::string(72, '=') << "\n";
-    std::cout << "  rt_summary.csv written.  Individual: rt_<name>.csv\n";
+    std::cout << "  " << PROJECT_DATA_DIR << "/rt_summary.csv written.  Individual: " << PROJECT_DATA_DIR << "/rt_<name>.csv\n";
 
     return 0;
 }

@@ -22,9 +22,9 @@ int main()
     std::normal_distribution<double> input_noise(0.0, 0.2); // process noise on u
     std::normal_distribution<double> meas_noise(0.0, 0.05); // measurement noise on y
 
-    std::ofstream out("sysid_data.csv");
+    std::ofstream out(std::string(PROJECT_DATA_DIR) + "/sysid_data.csv");
     if (!out) {
-        std::cerr << "Failed to open sysid_data.csv\n";
+        std::cerr << "Failed to open " << PROJECT_DATA_DIR << "/sysid_data.csv\n";
         return 1;
     }
 
@@ -56,6 +56,6 @@ int main()
             << t << "," << u_actual << "," << y_meas << "\n";
     }
 
-    std::cout << "Done! Saved to sysid_data.csv\n";
+    std::cout << "Done! Saved to " << PROJECT_DATA_DIR << "/sysid_data.csv\n";
     return 0;
 }

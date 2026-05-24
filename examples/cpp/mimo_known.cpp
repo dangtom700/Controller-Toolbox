@@ -22,7 +22,7 @@
  *   - System equations and RGA printed to stdout
  *   - Per-method table: ISE_y1, ISE_y2, ITAE_y1, ITAE_y2, E_u1, E_u2, OS[%], J
  *   - Pareto-optimal method identified (lowest J)
- *   - All results saved to examples/data/mimo_known_results.csv
+ *   - All results saved to data/mimo_known_results.csv (PROJECT_DATA_DIR)
  *
  * Build: see examples/cpp/CMakeLists.txt
  * Run:   ./mimo_known
@@ -565,7 +565,7 @@ int main() {
     }
 
     // Save CSV
-    std::string out_path = "mimo_known_results.csv";
+    std::string out_path = std::string(PROJECT_DATA_DIR) + "/mimo_known_results.csv";
     save_csv(out_path, labels, results);
 
     return 0;

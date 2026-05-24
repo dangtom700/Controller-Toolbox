@@ -64,12 +64,14 @@ int main()
     double y_f = 20.0, y_p = 20.0;
     Eigen::VectorXd xf = Eigen::VectorXd::Zero(plant.stateSize());
     Eigen::VectorXd xp = Eigen::VectorXd::Zero(plant.stateSize());
-    // Warm-start state to initial temperature of 20^\circC
-    // (output = C*x = x(1) for this SS, so x1 = 20 satisfies y=20 at steady state)
-    xf(1) = 20.0 * (1.0 + 1.0/200 * 60);  // approximate steady state
+    // Warm-start: steady state at y = 20 degC with u = 0.
+    // C = [0, 1] so output = x(1). At thermal equilibrium with u=0 both states
+    // equal the ambient temperature. Here we set the measured air temperature
+    // state directly; the wall-temperature state (x(0)) also starts at 20.
+    xf(0) = 20.0; xf(1) = 20.0;
     xp    = xf;
 
-    std::ofstream csv("data/ex23_fuzzy_temperature.csv");
+    std::ofstream csv(std::string(PROJECT_DATA_DIR) + "/ex23_fuzzy_temperature.csv");
     csv << "t,ref,y_fuzzy,u_fuzzy,y_pid,u_pid,disturbance\n";
     csv << std::fixed << std::setprecision(4);
 
@@ -83,19 +85,17 @@ int main()
 
         // FuzzyPD
         double uf = fuzzy.compute(ref - y_f);
-        uf = std::clamp(uf + dist, 0.0, 3.0);
 
         // PID
         double up = pid.compute(ref - y_p);
-        up = std::clamp(up + dist, 0.0, 3.0);
 
-        Eigen::VectorXd uvf(1); uvf << uf;
-        Eigen::VectorXd uvp(1); uvp << up;
+        // Disturbance enters as an additive plant input so both controllers see it
+        // as a persistent error and their integrals / anti-windup engage correctly.
+        Eigen::VectorXd uvf(1); uvf << std::clamp(uf + dist, 0.0, 3.0);
+        Eigen::VectorXd uvp(1); uvp << std::clamp(up + dist, 0.0, 3.0);
 
-        y_f = ctrl::ssStep(plant, xf, uvf)(0) + 20.0 * std::exp(-t / 200.0) * 0.0;
+        y_f = ctrl::ssStep(plant, xf, uvf)(0);
         y_p = ctrl::ssStep(plant, xp, uvp)(0);
-        // Note: initial offset handled by warm-started x vector above.
-        // ssStep returns temperature relative to zero; actual output is y_f directly.
 
         csv << t << "," << ref << "," << y_f << "," << uf << ","
             << y_p << "," << up << "," << (dist != 0 ? 1 : 0) << "\n";

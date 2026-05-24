@@ -1,6 +1,7 @@
 #include "DiscreteMPC.h"
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 namespace ctrl
 {
@@ -8,25 +9,31 @@ namespace ctrl
     DiscreteMPC::DiscreteMPC(const StateSpace &plant, const MPCParams &params)
         : plant_(plant), p_(params), Ts_(plant.Ts)
     {
+        if (plant.D.norm() > 1e-12)
+            std::cerr << "[DiscreteMPC] WARNING: plant.D != 0. The compute(error) SISO "
+                         "wrapper reconstructs the reference as r = C*x + D*u_prev + error, "
+                         "which uses u[k-1] for the D*u term (one step stale). "
+                         "For D != 0 plants, use computeRef(x, r) directly and supply "
+                         "the current reference explicitly.\n";
+
         x_hat_ = Eigen::VectorXd::Zero(plant_.stateSize());
         u_prev_ = Eigen::VectorXd::Zero(plant_.inputSize());
         buildCondensedMatrices();
     }
 
     // ---------------------------------------------------------------------------
-    // Build condensed prediction matrices F and Phi.
+    // buildPredictionMatrices — plant-dependent only (A, B, C).
+    // Call when the state-space model changes (setPlant).
     //
     //   F(i.p : (i+1).p, :) = C . A^{i+1}        i = 0...Np-1
-    //   Phi(i.p, j.m)          = C . A^{i-j} . B   j <= i, 0 otherwise
-    //
-    // Then precompute the Hessian:
-    //   H = (Phi'.Q_y.Phi + R_u)
+    //   Phi(i.p, j.m)        = C . A^{i-j} . B    j <= i, 0 otherwise
+    //   Gu(i,:)              = Sigma_{j=0}^{i} C.A^j.B
     // ---------------------------------------------------------------------------
-    void DiscreteMPC::buildCondensedMatrices()
+    void DiscreteMPC::buildPredictionMatrices()
     {
-        const int n = plant_.stateSize();
-        const int m = plant_.inputSize();
-        const int p = plant_.outputSize();
+        const int n  = plant_.stateSize();
+        const int m  = plant_.inputSize();
+        const int p  = plant_.outputSize();
         const int Np = p_.Np;
         const int Nc = p_.Nc;
 
@@ -48,11 +55,24 @@ namespace ctrl
             for (int j = 0; j <= std::min(i, Nc - 1); ++j)
                 Phi_.block(i * p, j * m, p, m) = plant_.C * Apow[i - j] * plant_.B;
 
-        // G_u: (Np.p) * m  - G_u(i) = Sigma_{j=0}^{i} C.A^j.B  (cumulative step response)
+        // Gu: (Np.p) * m  - cumulative step response for u_prev offset
         Gu_.resize(Np * p, m);
-        Gu_.block(0, 0, p, m) = plant_.C * plant_.B; // j=0: C.A^0.B = C.B
+        Gu_.block(0, 0, p, m) = plant_.C * plant_.B;
         for (int i = 1; i < Np; ++i)
             Gu_.block(i * p, 0, p, m) = Gu_.block((i - 1) * p, 0, p, m) + plant_.C * Apow[i] * plant_.B;
+    }
+
+    // ---------------------------------------------------------------------------
+    // buildCostMatrix — weight-dependent only (rho_y, rho_u).
+    // Requires Phi_ to be current. Call after buildPredictionMatrices or
+    // whenever rho_y / rho_u change.
+    // ---------------------------------------------------------------------------
+    void DiscreteMPC::buildCostMatrix()
+    {
+        const int m  = plant_.inputSize();
+        const int p  = plant_.outputSize();
+        const int Np = p_.Np;
+        const int Nc = p_.Nc;
 
         // Weight matrices
         Qy_ = p_.rho_y * Eigen::MatrixXd::Identity(Np * p, Np * p);
@@ -61,7 +81,7 @@ namespace ctrl
         // Precompute Hessian (positive definite for rho_u > 0)
         H_ = Phi_.transpose() * Qy_ * Phi_ + Ru_;
 
-        // Lipschitz constant = max eigenvalue of H (used as gradient-projection step 1/L)
+        // Lipschitz constant = max eigenvalue of H (gradient-projection step 1/L)
         L_ = H_.selfadjointView<Eigen::Upper>().eigenvalues().maxCoeff();
 
         // Pre-factor H_ once; reused every computeRef() call without re-factorisation.
@@ -78,6 +98,13 @@ namespace ctrl
         ub_.resize(Nc * m);
         cumMin_.resize(m);
         cumMax_.resize(m);
+    }
+
+    // Full rebuild — plant model + cost matrices. Used by constructor and setPlant().
+    void DiscreteMPC::buildCondensedMatrices()
+    {
+        buildPredictionMatrices();
+        buildCostMatrix();
     }
 
     // IController wrapper - reconstructs reference from error and delegates to computeRef.
@@ -176,8 +203,14 @@ namespace ctrl
 
     void DiscreteMPC::setParams(const MPCParams &p)
     {
+        const bool horizon_changed = (p.Np != p_.Np) || (p.Nc != p_.Nc);
         p_ = p;
-        buildCondensedMatrices();
+        // Horizon changes affect F_, Phi_, Gu_ — full rebuild required.
+        // Weight-only changes (rho_y, rho_u) only need to rebuild H_, L_, ldlt_.
+        if (horizon_changed)
+            buildCondensedMatrices();
+        else
+            buildCostMatrix();
     }
 
     void DiscreteMPC::setPlant(const StateSpace &plant)

@@ -84,19 +84,28 @@ int main()
     ctrl::FuzzySupervisor supervisor(sp, Ts);
 
     // -- Simulation ------------------------------------------------------------
+    // Hammerstein model: the true plant is the NOMINAL linear dynamics (fixed A,
+    // single consistent state vector) with a nonlinear static output gain k_pH(y).
+    // The nonlinearity scales the output AFTER state propagation, not the model
+    // matrices — re-creating StateSpace every step would break state continuity.
     const int N = 240;   // 480 s total
-    double yf = 7.0, ya = 7.0;
+
+    // Nominal linear plant used for state integration (k=k_nom, fixed)
+    ctrl::StateSpace base_plant = buildPlantSS(k_nom, Ts);
+    // State vectors — propagated consistently against the single base_plant
     Eigen::VectorXd xf = Eigen::VectorXd::Zero(1);
     Eigen::VectorXd xa = Eigen::VectorXd::Zero(1);
-    // Warm-start: steady state of y=7 with no input is handled by gain offset;
-    // for this demo we start at equilibrium (x=7/k_nom.(1-a)/... -> initial y=7
-    // via a precomputed IC).
-    xf(0) = 7.0;  // approximate: output ~ state for unity C
-    xa(0) = 7.0;
+
+    // Steady-state IC: at u=0, y=7 → x = y/(k_nom*(1-a)) for first-order ZOH
+    // i.e. C*x = 1*x, B=k_nom*(1-a), so x_ss = y_ss / (k_nom*(1-a_disc)) * ...
+    // Simpler: just start x=0 and let the sim settle — or pre-solve:
+    // y_ss = C*(I-A)^-1*B*u_ss  with u_ss=0 => x_ss=0, y_ss=0.
+    // We'll bias the output by pH0=7 additively to represent absolute pH.
+    double yf = pH0, ya = pH0;   // absolute pH outputs
 
     int relinearize_count = 0;
 
-    std::ofstream csv("data/ex25_fuzzy_supervisor_mpc.csv");
+    std::ofstream csv(std::string(PROJECT_DATA_DIR) + "/ex25_fuzzy_supervisor_mpc.csv");
     csv << "t,ref,y_mpc_fixed,u_mpc_fixed,y_mpc_adapt,u_mpc_adapt,"
         << "relinearize_signal,relinearize_event,k_eff\n";
     csv << std::fixed << std::setprecision(4);
@@ -112,32 +121,39 @@ int main()
         // -- Fixed MPC --------------------------------------------------------
         double ef = r - yf;
         double uf = mpc_fixed.compute(ef);
-        // True plant response: NL gain applied to linear output
-        double k_true_f = phGain(yf);
-        double y_lin_f  = ctrl::ssStep(buildPlantSS(k_true_f, Ts), xf,
-                                        Eigen::VectorXd::Constant(1, uf))(0);
-        // Offset to keep around operating point pH (add bias so y represents pH)
-        yf = y_lin_f;
+
+        // Hammerstein true response: advance linear state, then apply NL output gain.
+        // x[k+1] = A*x[k] + B*u[k]  (base_plant, k_nom embedded in B)
+        // y_lin[k] = C*x[k]          (relative to nominal op-point)
+        // y_true[k] = pH0 + k_pH(yf)/k_nom * y_lin[k]  (scaled output)
+        {
+            Eigen::VectorXd uv(1); uv << uf;
+            double y_lin_f = ctrl::ssStep(base_plant, xf, uv)(0);
+            double k_eff_f = phGain(yf);
+            yf = pH0 + (k_eff_f / k_nom) * y_lin_f;
+        }
 
         // -- Adaptive MPC via FuzzySupervisor ---------------------------------
-        double ea  = r - ya;
-        double ua  = mpc_adapt.compute(ea);
+        double ea = r - ya;
+        double ua = mpc_adapt.compute(ea);
 
         ctrl::SupervisorDecision dec = supervisor.update(std::abs(ea));
         bool did_relin = false;
 
         if (dec.relinearize) {
-            // Re-linearise the MPC model at the current operating pH
             double k_op = phGain(ya);
             mpc_adapt.setPlant(buildPlantSS(k_op, Ts));
             ++relinearize_count;
             did_relin = true;
         }
 
-        double k_true_a = phGain(ya);
-        double y_lin_a  = ctrl::ssStep(buildPlantSS(k_true_a, Ts), xa,
-                                        Eigen::VectorXd::Constant(1, ua))(0);
-        ya = y_lin_a;
+        double k_true_a;
+        {
+            Eigen::VectorXd uv(1); uv << ua;
+            double y_lin_a = ctrl::ssStep(base_plant, xa, uv)(0);
+            k_true_a = phGain(ya);
+            ya = pH0 + (k_true_a / k_nom) * y_lin_a;
+        }
 
         csv << t << "," << r << ","
             << yf << "," << uf << ","

@@ -3,6 +3,10 @@ project(ControllerToolbox CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Absolute path to the root data/ directory, injected as a compile definition so
+# all CSV-generating binaries write to the same place regardless of CWD at runtime.
+add_compile_definitions(PROJECT_DATA_DIR="${CMAKE_SOURCE_DIR}/data")
+
 add_subdirectory(lib)
 add_subdirectory(tests)
 add_subdirectory(examples)

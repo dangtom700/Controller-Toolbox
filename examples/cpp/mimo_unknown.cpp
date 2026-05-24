@@ -369,22 +369,22 @@ int main() {
     // Save results
     // =====================================================================
     {
-        std::ofstream of("mimo_unknown_results.csv");
+        std::ofstream of(std::string(PROJECT_DATA_DIR) + "/mimo_unknown_results.csv");
         of << "step,y1,y2,u1,u2\n";
         for (int k = 0; k < SIM_STEPS; ++k)
             of << k*Ts << "," << Y_cl(k,0) << "," << Y_cl(k,1) << ","
                << U_cl(k,0) << "," << U_cl(k,1) << "\n";
-        std::cout << "\n  Closed-loop trajectory -> mimo_unknown_results.csv\n";
+        std::cout << "\n  Closed-loop trajectory -> " << PROJECT_DATA_DIR << "/mimo_unknown_results.csv\n";
     }
     {
-        std::ofstream of("mimo_unknown_id.csv");
+        std::ofstream of(std::string(PROJECT_DATA_DIR) + "/mimo_unknown_id.csv");
         of << "channel,NRMSE_pct,K,tau,theta,Kp,Ki,Kd\n";
         of << std::fixed << std::setprecision(6)
            << "y1," << nrmse[0]*100 << "," << f11.K << "," << f11.tau << "," << f11.theta
            << "," << Kp1 << "," << Ki1 << "," << Kd1 << "\n"
            << "y2," << nrmse[1]*100 << "," << f22.K << "," << f22.tau << "," << f22.theta
            << "," << Kp2 << "," << Ki2 << "," << Kd2 << "\n";
-        std::cout << "  Identification report -> mimo_unknown_id.csv\n";
+        std::cout << "  Identification report -> " << PROJECT_DATA_DIR << "/mimo_unknown_id.csv\n";
     }
     std::cout << "\n  VALIDATION SUMMARY:\n"
               << "    NRMSE y1: " << nrmse[0]*100 << "% " << (pass_y1?"[PASS]":"[FAIL]") << "\n"

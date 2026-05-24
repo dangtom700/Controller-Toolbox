@@ -119,7 +119,7 @@ SimResult run_error_based(const std::string &name,
 // ---------------------------------------------------------------------------
 static void write_csv(const SimResult &r)
 {
-    std::string fname = "sim_" + r.name + ".csv";
+    std::string fname = std::string(PROJECT_DATA_DIR) + "/sim_" + r.name + ".csv";
     std::ofstream f(fname);
     f << std::fixed << std::setprecision(6);
     f << "t,y,error,u\n";
@@ -522,7 +522,7 @@ int main()
     std::cout << std::string(70, '-') << "\n";
 
     // Write summary CSV
-    std::ofstream fsum("sim_summary.csv");
+    std::ofstream fsum(std::string(PROJECT_DATA_DIR) + "/sim_summary.csv");
     fsum << "controller,ISE,overshoot_pct,t_settle_s,y_final\n";
 
     for (auto &r : all_results)
@@ -537,7 +537,7 @@ int main()
              << r.settling << "," << r.y.back() << "\n";
     }
     std::cout << std::string(70, '=') << "\n";
-    std::cout << "  sim_summary.csv written.\n";
+    std::cout << "  " << PROJECT_DATA_DIR << "/sim_summary.csv written.\n";
 
     return 0;
 }

@@ -553,7 +553,7 @@ int main() {
     // Save CSV
     // =======================================================================
     {
-        std::ofstream of("siso_unknown_results.csv");
+        std::ofstream of(std::string(PROJECT_DATA_DIR) + "/siso_unknown_results.csv");
         of << "method,ISE,ITAE,energy,OS_pct,settle_time,J,fuzzy_score,fuzzy_grade\n";
         for (size_t i=0; i<labels.size(); ++i) {
             auto fr = fuzzy_score(results[i]);
@@ -564,7 +564,7 @@ int main() {
                << results[i].settle_time << "," << results[i].J  << ","
                << fr.score          << "," << fr.grade            << "\n";
         }
-        std::cout << "\n  Results saved -> siso_unknown_results.csv\n";
+        std::cout << "\n  Results saved -> " << PROJECT_DATA_DIR << "/siso_unknown_results.csv\n";
     }
     return 0;
 }
