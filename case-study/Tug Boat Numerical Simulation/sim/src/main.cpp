@@ -10,7 +10,10 @@
 int main(int argc, char* argv[])
 {
     // -- Paths ----------------------------------------------------------------
-    std::string base_dir = (argc > 1) ? argv[1] : ".";
+#ifndef TUG_SIM_SOURCE_DIR
+#define TUG_SIM_SOURCE_DIR "."
+#endif
+    std::string base_dir = (argc > 1) ? argv[1] : TUG_SIM_SOURCE_DIR;
     std::string plant_json    = base_dir + "/config/plant_params.json";
     std::string scenarios_dir = base_dir + "/config/scenarios";
     std::string log_dir       = base_dir + "/logs";

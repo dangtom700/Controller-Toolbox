@@ -5,3 +5,4 @@ target_link_libraries(toolbox_examples PRIVATE controller_toolbox)
 target_compile_features(toolbox_examples PRIVATE cxx_std_17)
 
 add_subdirectory("Boiler Control")
+add_subdirectory("Tug Boat Numerical Simulation")
