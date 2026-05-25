@@ -50,8 +50,11 @@ namespace ctrl
         computeCoeffs();
     }
 
-    // Phase of C(jomega) = K.(jomega+z_c)/(jomega+p_c)
-    // \angleC(jomega) = atan2(omega, z_c) - atan2(omega, p_c)  [radians]
+    // Phase of continuous C(s) = K*(s+z_c)/(s+p_c) evaluated at s = j*omega:
+    //   arg[C(j*omega)] = atan(omega/z_c) - atan(omega/p_c)  [radians]
+    // Note: this uses the continuous-time formula. The actual discrete-time phase
+    // (from the Tustin coefficients b0, b1, a1) will differ near the Nyquist frequency
+    // due to frequency warping. For frequencies << 1/Ts, the two agree well.
     double DiscreteLeadLag::phaseAt(double omega) const
     {
         return std::atan2(omega, p_.continuousZero) - std::atan2(omega, p_.continuousPole);

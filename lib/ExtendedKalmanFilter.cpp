@@ -22,6 +22,9 @@ namespace ctrl
 
     void ExtendedKalmanFilter::predict(const Eigen::VectorXd &u)
     {
+        // Linearise f around x^[k|k] to get the state Jacobian F = df/dx.
+        // F is used only for the covariance propagation P = F*P*F' + Q; the
+        // state itself is propagated through the exact nonlinear function f.
         const Eigen::MatrixXd F = Fjac_(x_hat_, u);
         x_hat_ = f_(x_hat_, u);
         P_ = F * P_ * F.transpose() + Q_;
@@ -30,6 +33,8 @@ namespace ctrl
     void ExtendedKalmanFilter::update(const Eigen::VectorXd &y,
                                       const Eigen::VectorXd &u)
     {
+        // Linearise h around x^[k+1|k] (the post-predict estimate) to get H = dh/dx.
+        // H is evaluated at the predicted state, which is the current x_hat_ after predict().
         const Eigen::MatrixXd H = Hjac_(x_hat_, u);
 
         Eigen::MatrixXd R_safe = R_;
@@ -68,6 +73,10 @@ namespace ctrl
         const Eigen::VectorXd &x,
         double eps)
     {
+        // Central-difference approximation: J(:,i) = (f(x+eps*ei) - f(x-eps*ei)) / (2*eps)
+        // Error is O(eps^2) vs O(eps) for forward-difference. Default eps=1e-5 gives
+        // ~1e-10 truncation error for smooth functions. Scale eps with |x(i)| for
+        // states with very large or very small magnitudes (not done here for simplicity).
         const Eigen::VectorXd f0 = func(x);
         const int nx = x.size();
         const int ny = f0.size();

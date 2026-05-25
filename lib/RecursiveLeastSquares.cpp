@@ -17,23 +17,29 @@ namespace ctrl
     double RecursiveLeastSquares::update(double y, double u)
     {
         // Build regressor phi[k] = [-y[k-1],...,-y[k-na], u[k-1],...,u[k-nb]]
-        // using the current (pre-update) buffers
+        // using the current (pre-update) buffers. Negative sign on y terms because
+        // the ARX model is y[k] = -a1*y[k-1] - ... + b1*u[k-1] + ..., so theta = [a1,...,b1,...].
         Eigen::VectorXd phi(ntheta_);
         for (int i = 0; i < na_; ++i) phi(i)       = -y_buf_(i);
         for (int i = 0; i < nb_; ++i) phi(na_ + i) =  u_buf_(i);
 
-        // Prediction error
+        // A-posteriori prediction error: e = y - phi'*theta_{k-1}
         const double e = y - phi.dot(theta_);
 
-        // Kalman gain: K = P.phi / (lambda + phi'.P.phi)
+        // RLS Kalman gain: K = P*phi / (lambda + phi'*P*phi)
+        // Denominator is always > 0 (lambda > 0, phi'*P*phi >= 0, P is PSD).
         const Eigen::VectorXd Pphi = P_ * phi;
         const double denom = lambda_ + phi.dot(Pphi);
         const Eigen::VectorXd K = Pphi / denom;
 
-        // Parameter update
+        // Parameter update: theta = theta + K*e  (standard gradient-descent step)
         theta_ += K * e;
 
-        // Covariance update
+        // Covariance update: P = (P - K*phi'*P) / lambda
+        // The division by lambda is the forgetting mechanism — it inflates P at each step,
+        // giving more weight to recent data. Equivalent to using a sliding data window of
+        // effective length ~ 1/(1-lambda). Without it (lambda=1), this is standard LS and
+        // P shrinks monotonically (no tracking of time-varying parameters).
         P_ = (P_ - K * Pphi.transpose()) / lambda_;
 
         // Symmetrise to suppress numerical drift
@@ -97,9 +103,12 @@ namespace ctrl
                 ") > na (" + std::to_string(na_) + "). ARX models require nb <= na. "
                 "Increase na or reduce nb.");
 
-        // num is [0, b1,...,bnb] zero-padded to length na_+1 to align polynomial degrees
+        // ARX B-polynomial: B(z^{-1}) = b1*z^{-1} + b2*z^{-2} + ...
+        // There is no z^0 (direct feedthrough) term — input delay of at least one step.
+        // TransferFunction expects num[0] = b0 (the z^0 coefficient). We must prepend 0.
+        // Without this: tf2ss would set D = b1 and corrupt the C vector.
         Eigen::VectorXd num_e = Eigen::VectorXd::Zero(na_ + 1);
-        num_e.segment(1, nb_) = theta_.segment(na_, nb_);
+        num_e.segment(1, nb_) = theta_.segment(na_, nb_); // [0, b1, b2, ..., b_nb, 0, ...]
 
         const Eigen::VectorXd den_e = denominator();
 

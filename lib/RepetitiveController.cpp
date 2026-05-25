@@ -19,20 +19,25 @@ namespace ctrl
     {
         const int N = p_.periodSteps;
 
-        // Read the stored correction from one period ago (read before write)
+        // v_buf_ is a circular buffer of length N holding one full period of corrections.
+        // buf_idx_ always points to the slot that holds v[k-N] (the value from exactly
+        // one period ago). Read before write so v_prev = v[k-N] correctly.
         const double v_prev = v_buf_[buf_idx_];
 
-        // Learning update: v[k] = Q.v[k-N] + Krc.e[k]
+        // Learning law: v[k] = Q*v[k-N] + Krc*e[k]
+        // Q < 1: exponential forgetting — previous period's correction decays;
+        //        adds robustness when the disturbance period is slightly uncertain.
+        // Q = 1: perfect memory — converges to exact cancellation of any periodic disturbance
+        //        with period N*Ts, but is sensitive to model error.
         v_now_ = p_.Q * v_prev + p_.Krc * error;
 
-        // Write updated correction back into the same slot (replaces k-N with k)
+        // Overwrite the same slot: v_buf_[buf_idx_] becomes v[k] for use N steps later.
         v_buf_[buf_idx_] = v_now_;
         buf_idx_ = (buf_idx_ + 1) % N;
 
-        // Base controller output
+        // Base controller output (stabilises the loop independently of the repetitive term)
         const double u_base = inner_->compute(error);
 
-        // Combined output, clamped
         return std::max(p_.uMin, std::min(p_.uMax, u_base + v_now_));
     }
 

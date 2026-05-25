@@ -89,7 +89,11 @@ namespace ctrl
             const Eigen::MatrixXd L_new = Lk * Z1;
 
             const double err = (X_new - X).norm() / (1.0 + X.norm());
-            X  = X_new;
+            // Enforce symmetry at each iteration: the Riccati solution is symmetric by
+            // construction, but each matrix multiply introduces O(eps_mach) asymmetry.
+            // Without this, X can drift asymmetric over 30-50 iterations, which causes
+            // LDLT on S = R + B'*P*B to report NumericalIssue on near-rank-deficient systems.
+            X  = 0.5 * (X_new + X_new.transpose());
             Gk = G_new;
             Lk = L_new;
 

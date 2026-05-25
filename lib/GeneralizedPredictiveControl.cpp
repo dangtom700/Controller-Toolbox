@@ -97,13 +97,17 @@ namespace ctrl
         const int Np = p_.Np;
         const int Nu = p_.Nu;
 
-        // Build reference trajectory: y*[k+j] = alpha^j.y + (1-alpha^j).r
-        // i=0 gives the one-step-ahead target y*[k+1] (consistent with the GPC horizon).
-        double alpha_j = p_.alpha;
+        // Reference trajectory: y*[k+j] = alpha^j * y[k] + (1 - alpha^j) * r
+        // At j=1: y* = alpha*y + (1-alpha)*r  — one step toward r, starting from y[k].
+        // As j -> inf: y* -> r  (setpoint is reached asymptotically).
+        // alpha = 0: step reference (same as DiscreteMPC — jump immediately to r).
+        // alpha -> 1: very slow approach — reduces overshoot but slows disturbance rejection.
+        // Typical: alpha = exp(-Ts/tau_ref) where tau_ref is the desired approach time constant.
+        double alpha_j = p_.alpha; // alpha^1 for j=1
         for (int i = 0; i < Np; ++i)
         {
             Rtraj_(i) = alpha_j * y + (1.0 - alpha_j) * r;
-            alpha_j  *= p_.alpha;
+            alpha_j  *= p_.alpha; // alpha^{j+1} for next step
         }
 
         // Gradient at DeltaU = 0: g = Ga'.Qy.(Fa.xa - Rtraj)
@@ -147,12 +151,18 @@ namespace ctrl
                 break;
         }
 
-        // Apply first control increment and enforce absolute u bounds
+        // Apply first control increment and enforce absolute u bounds.
         Eigen::VectorXd du = DeltaU_.head(m);
         Eigen::VectorXd u  = (u_prev_ + du).cwiseMax(p_.uMin).cwiseMin(p_.uMax);
-        du = u - u_prev_; // recompute Deltau after u-saturation for state update
+        // Recompute du after saturation so the augmented state is advanced with the
+        // ACTUAL increment applied, not the unconstrained optimal. Without this, the
+        // velocity-form integrator in xa drifts from the real plant state during saturation.
+        du = u - u_prev_;
 
-        // Advance augmented state: xa[k+1] = Aa.xa + Ba.Deltau
+        // Advance augmented state: xa[k+1] = Aa*xa + Ba*Deltau
+        // xa = [Deltax; y] accumulates the integrated output in its lower p entries.
+        // This built-in integrating action is what eliminates steady-state offset
+        // without a separate integrator state (the CARIMA model advantage).
         xa_ = Aa_ * xa_ + Ba_ * du;
 
         u_prev_ = u;

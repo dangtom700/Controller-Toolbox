@@ -39,8 +39,11 @@ namespace ctrl
     Eigen::MatrixXd SystemAnalysis::solveDiscreteLyapunov(const Eigen::MatrixXd &A,
                                                           const Eigen::MatrixXd &Q)
     {
-        // Solves A * P * A^T - P + Q = 0 by vectorizing:
-        // (I - A \otimes A) vec(P) = vec(Q)
+        // Vectorisation approach: apply vec() to both sides of A*P*A' - P + Q = 0.
+        // Using the Kronecker identity vec(A*P*A') = (A⊗A)*vec(P):
+        //   (A⊗A - I) * vec(P) = -vec(Q)  =>  (I - A⊗A) * vec(P) = vec(Q)
+        // Solve this n^2 x n^2 linear system for vec(P), then reshape.
+        // Cost: O(n^6) — suitable for small systems only (n <= ~15-20).
         int n = A.rows();
         if (n != A.cols() || n != Q.rows() || n != Q.cols())
         {

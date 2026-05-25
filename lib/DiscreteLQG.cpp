@@ -25,17 +25,24 @@ namespace ctrl
     }
 
     // Full step: KF predict -> KF update -> LQR control.
+    //
+    // Causal ordering note: the Kalman update uses u_prev as its u_current argument.
+    // KalmanFilter::update() uses u_current only in the D*u feedthrough term of the
+    // innovation (y - C*x^ - D*u). Since u[k] has not been computed yet at update
+    // time, u[k-1] is the only available approximation. For D=0 plants (the standard
+    // case for ZOH-discretised models) the D*u term is zero and this has no effect.
+    // The constructor warns when D!=0; avoid D!=0 plants with LQG if accuracy matters.
     Eigen::VectorXd DiscreteLQG::step(const Eigen::VectorXd &y,
                                       const Eigen::VectorXd &u_prev,
                                       const Eigen::VectorXd &x_ref)
     {
-        // 1. Kalman predict using previous control
+        // 1. Predict: x^[k|k-1] = A*x^[k-1|k-1] + B*u[k-1]
         kf_->predict(u_prev);
 
-        // 2. Kalman update using current measurement
+        // 2. Update: x^[k|k] from y[k]. u_prev is used for the D*u term — see note above.
         kf_->update(y, u_prev);
 
-        // 3. LQR feedback on estimated state
+        // 3. LQR feedback on corrected state estimate
         const Eigen::VectorXd &xhat = kf_->state();
         Eigen::VectorXd ref = x_ref.size() == plant_.stateSize() ? x_ref : x_ref_;
 

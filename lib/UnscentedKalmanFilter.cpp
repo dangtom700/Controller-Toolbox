@@ -127,10 +127,23 @@ namespace ctrl
         const Eigen::MatrixXd K = Pxy * ldlt.solve(Eigen::MatrixXd::Identity(p_, p_));
 
         x_hat_ += K * (y - y_hat);
+
+        // Covariance update: P = P - K*Syy*K'
+        // Unlike the linear KF (which uses the numerically superior Joseph form),
+        // the UKF Joseph form requires an explicit H matrix that does not exist here —
+        // H is replaced by the sigma-point cross-covariance Pxy/Syy.  The raw
+        // subtraction is the standard UKF formula (Wan & Van der Merwe 2000, eq. 26).
+        // Round-off in this subtraction can cause P to lose PSD on large measurement
+        // updates; the eigenvalue floor below catches this case.
         P_ -= K * Syy * K.transpose();
 
-        // Symmetrise to suppress floating-point drift
+        // Enforce PSD: symmetrise first, then clamp any negative eigenvalue to zero.
+        // Symmetrisation alone is insufficient — a negative diagonal entry survives it.
         P_ = 0.5 * (P_ + P_.transpose());
+        Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig(P_);
+        if (eig.eigenvalues().minCoeff() < 0.0)
+            P_ += (-eig.eigenvalues().minCoeff() + 1e-10) *
+                  Eigen::MatrixXd::Identity(n_, n_);
     }
 
     void UnscentedKalmanFilter::step(const Eigen::VectorXd &y,

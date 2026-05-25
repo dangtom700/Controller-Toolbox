@@ -194,7 +194,13 @@ namespace ctrl
         const Eigen::VectorXd du = DeltaU_.head(m);
         const Eigen::VectorXd u  = (u_prev_ + du).cwiseMax(p_.uMin).cwiseMin(p_.uMax);
 
-        // Advance open-loop state estimate (used by compute() wrapper next step)
+        // Advance open-loop state estimate (used by compute() wrapper next step).
+        // This is a pure-prediction step with no measurement correction. For plants
+        // with model mismatch, persistent disturbances, or integrating modes, x_hat_
+        // will drift away from the real plant state over time. Call setState() with an
+        // external observer estimate (e.g., KalmanFilter::state()) before each step to
+        // avoid this. The compute(error) wrapper is only reliable for D=0, well-matched
+        // models without significant unmeasured disturbances.
         x_hat_  = plant_.A * x + plant_.B * u;
         u_prev_ = u;
 

@@ -54,8 +54,14 @@ namespace ctrl
         double computeTracking(double y, double r);
 
         // IController wrapper: signal = error = r - y  (standard IController contract).
-        // Call setReference(r) once per cycle before compute(error).
+        //
+        // IMPORTANT: call setReference(r) once per cycle BEFORE calling compute(error).
+        // If setReference() is not called, r_ defaults to 0 and this method will drive
+        // the plant output to zero regardless of the intended setpoint — a silent wrong
+        // answer that is hard to diagnose inside a ControllerStack.
+        //
         // Internally recovers y = r_ - error and delegates to computeTracking(y, r_).
+        // Prefer computeTracking(y, r) directly whenever y and r are independently available.
         double compute(double error) override;
 
         void setReference(double r) { r_ = r; }

@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controller Toolbox — Technical Reference</title>
+<style>
+  :root {
+    --bg: #0f1117; --bg2: #181c27; --bg3: #1e2333;
+    --border: #2a3050; --accent: #4e9af1; --accent2: #7ecfba;
+    --warn: #f0c060; --danger: #e05c5c; --ok: #60d080;
+    --text: #c8d0e4; --muted: #6a7590; --code-bg: #141824;
+    --head: #e8eaf6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.6 'Segoe UI', system-ui, sans-serif; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Layout */
+  #wrap { display: flex; min-height: 100vh; }
+  #sidebar {
+    width: 240px; min-width: 240px; background: var(--bg2);
+    border-right: 1px solid var(--border); padding: 16px 0;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  #sidebar h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); padding: 10px 18px 4px; }
+  #sidebar a { display: block; padding: 5px 18px; color: var(--text); font-size: 13px;
+    border-left: 2px solid transparent; }
+  #sidebar a:hover, #sidebar a.active { color: var(--accent); border-left-color: var(--accent);
+    background: rgba(78,154,241,.07); text-decoration: none; }
+  #main { flex: 1; padding: 40px 48px; max-width: 1100px; }
+
+  /* Typography */
+  h1 { font-size: 28px; color: var(--head); margin-bottom: 6px; }
+  h2 { font-size: 20px; color: var(--head); margin: 44px 0 12px;
+    border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  h3 { font-size: 15px; color: var(--accent2); margin: 28px 0 8px; }
+  h4 { font-size: 13px; color: var(--warn); margin: 16px 0 4px; }
+  p  { margin-bottom: 10px; }
+
+  /* Code */
+  code { font: 12.5px/1.5 'Cascadia Code', 'Fira Code', monospace;
+    background: var(--code-bg); color: #a8d8a8; padding: 1px 5px; border-radius: 3px; }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 14px 16px; overflow-x: auto; margin: 10px 0 16px; }
+  pre code { background: none; padding: 0; color: #c0d8f0; font-size: 12.5px; }
+
+  /* Tables */
+  .tbl-wrap { overflow-x: auto; margin: 10px 0 20px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th { background: var(--bg3); color: var(--head); padding: 8px 12px;
+    text-align: left; border: 1px solid var(--border); font-weight: 600; }
+  td { padding: 7px 12px; border: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+
+  /* Cards */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 18px 20px; margin: 14px 0; }
+  .card-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 14px 0; }
+  .card-sm { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;
+    padding: 12px 14px; flex: 1; min-width: 200px; }
+  .card-sm h4 { margin-top: 0; }
+
+  /* Badges */
+  .badge { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 10px;
+    font-weight: 600; margin-left: 6px; vertical-align: middle; }
+  .b-ok   { background: rgba(96,208,128,.15); color: var(--ok); border: 1px solid rgba(96,208,128,.3); }
+  .b-warn { background: rgba(240,192,96,.15);  color: var(--warn); border: 1px solid rgba(240,192,96,.3); }
+  .b-err  { background: rgba(224,92,92,.15);   color: var(--danger); border: 1px solid rgba(224,92,92,.3); }
+  .b-info { background: rgba(78,154,241,.15);  color: var(--accent); border: 1px solid rgba(78,154,241,.3); }
+
+  /* Callouts */
+  .note { background: rgba(78,154,241,.08); border-left: 3px solid var(--accent);
+    padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 13px; }
+  .warn-box { background: rgba(240,192,96,.08); border-left: 3px solid var(--warn);
+    padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 13px; }
+  .danger-box { background: rgba(224,92,92,.08); border-left: 3px solid var(--danger);
+    padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 13px; }
+
+  /* Math */
+  .math { font-family: 'Cambria Math', Georgia, serif; font-style: italic; color: #b0d4f8; }
+
+  /* Section anchors */
+  .anchor { scroll-margin-top: 20px; }
+
+  /* Subsection divider */
+  .ctrl-block { border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px 20px; margin: 12px 0; background: var(--bg3); }
+  .ctrl-block h3 { margin-top: 0; }
+
+  /* Parameter table shorthand */
+  .param-name { color: #7ecfba; font-family: monospace; font-size: 12.5px; }
+  .param-type { color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+
+<!-- ── Sidebar ──────────────────────────────────────────────────── -->
+<nav id="sidebar">
+  <h2>Controller Toolbox</h2>
+  <a href="#overview">Overview</a>
+  <a href="#architecture">Architecture</a>
+  <a href="#quickstart">Quick Start</a>
+  <h2>Controllers</h2>
+  <a href="#pid">PID</a>
+  <a href="#lqr">LQR</a>
+  <a href="#lqg">LQG</a>
+  <a href="#mpc">MPC</a>
+  <a href="#gpc">GPC</a>
+  <a href="#adrc">ADRC</a>
+  <a href="#smc">SMC</a>
+  <a href="#leadlag">Lead-Lag</a>
+  <a href="#smith">Smith Predictor</a>
+  <a href="#repetitive">Repetitive</a>
+  <a href="#esc">Extremum Seeking</a>
+  <a href="#hinf">H-infinity</a>
+  <a href="#fuzzy">Fuzzy Logic</a>
+  <h2>Estimation</h2>
+  <a href="#kf">Kalman Filter</a>
+  <a href="#ekf">EKF</a>
+  <a href="#ukf">UKF</a>
+  <h2>Identification</h2>
+  <a href="#rls">RLS</a>
+  <a href="#subspace">SubspaceID</a>
+  <h2>Tuning</h2>
+  <a href="#tuners">Tuner Suite</a>
+  <a href="#traits">Controller Traits</a>
+  <h2>Composition</h2>
+  <a href="#stack">Controller Stack</a>
+  <a href="#plant">Plant Model</a>
+  <h2>Analysis</h2>
+  <a href="#sysanalysis">System Analysis</a>
+  <a href="#metrics">Metrics</a>
+  <h2>Reference</h2>
+  <a href="#gaps">Algorithm Gaps</a>
+  <a href="#numerics">Numerics Notes</a>
+  <a href="#known-issues">Known Issues</a>
+</nav>
+
+<!-- ── Main ─────────────────────────────────────────────────────── -->
+<main id="main">
+
+<h1>Controller Toolbox</h1>
+<p style="color:var(--muted);margin-bottom:24px">
+  Discrete-time control library &mdash; C++17 &middot; Eigen 3.4 &middot; 20+ controllers &middot; 8 tuning families
+</p>
+
+<!-- ────────────────────────────────────── OVERVIEW -->
+<h2 id="overview" class="anchor">Overview</h2>
+<p>
+  A single-include, header+source C++ library for discrete-time control design, system identification,
+  state estimation, and robust synthesis. All controllers derive from a common <code>IController</code>
+  interface and can be freely composed via <code>ControllerStack</code>.
+</p>
+<div class="card-row">
+  <div class="card-sm"><h4>Controllers</h4>PID &middot; LQR &middot; LQG &middot; MPC &middot; GPC &middot; ADRC &middot; SMC &middot; LeadLag &middot; Smith &middot; Repetitive &middot; ESC &middot; H&#8734; &middot; Fuzzy</div>
+  <div class="card-sm"><h4>Estimation</h4>Kalman (KF) &middot; Extended KF (EKF) &middot; Unscented KF (UKF)</div>
+  <div class="card-sm"><h4>Identification</h4>Recursive Least Squares (RLS) &middot; N4SID / MOESP subspace ID</div>
+  <div class="card-sm"><h4>Tuning</h4>Relay ZN &middot; IMC &middot; Cohen-Coon &middot; AMIGO &middot; Bryson &middot; Nelder-Mead &middot; Loop-shaping &middot; Kalman noise</div>
+</div>
+
+<!-- ────────────────────────────────────── ARCHITECTURE -->
+<h2 id="architecture" class="anchor">Architecture</h2>
+<pre><code>IController (abstract)
+ ├── DiscretePID
+ ├── LQRAdapter          (wraps DiscreteLQR)
+ ├── DiscreteMPC
+ ├── GeneralizedPredictiveController
+ ├── DiscreteADRC
+ ├── DiscreteSMC / SuperTwistingSMC
+ ├── DiscreteLeadLag
+ ├── SmithPredictor      (wraps any IController)
+ ├── RepetitiveController (wraps any IController)
+ ├── ExtremumSeeker
+ ├── DiscreteHinf
+ └── ControllerStack     (Supervisory | Additive | Weighted)
+
+Stand-alone (not IController):
+ DiscreteLQR, DiscreteLQG
+ KalmanFilter, ExtendedKalmanFilter, UnscentedKalmanFilter
+ RecursiveLeastSquares, SubspaceID (n4sid)
+ SystemAnalysis, MetricsAnalyzer, TunerSuite</code></pre>
+
+<div class="note">
+  Single include: <code>#include "ControllerToolbox.h"</code> pulls in all classes.
+  Only <code>Eigen/Dense</code> and <code>unsupported/Eigen/MatrixFunctions</code> (for ZOH c2d) are required externally.
+</div>
+
+<!-- ────────────────────────────────────── QUICK START -->
+<h2 id="quickstart" class="anchor">Quick Start</h2>
+<pre><code>#include "ControllerToolbox.h"
+
+// 1. Define plant: G(s) = 1/(s+1), ZOH @ Ts=0.01s
+ctrl::StateSpace G_c({ {-1},{1},{1},{0}, 0.0 });       // continuous-time
+ctrl::StateSpace G_d = ctrl::c2d(G_c, 0.01);           // discrete ZOH
+
+// 2. Tune PID (relay test or step response)
+ctrl::StepResponseTuner::FOPDTModel m{ .K=1, .tau=1, .theta=0 };
+ctrl::PIDParams pp = ctrl::StepResponseTuner::computePIDParamsFor&lt;ctrl::DiscretePID&gt;(
+                         m, 0.01, ctrl::PIDTuningRule::IMC);
+
+// 3. Create controller
+ctrl::DiscretePID pid(pp, 0.01);
+
+// 4. Run loop
+double r = 1.0, y = 0.0;
+ctrl::Eigen::VectorXd x = Eigen::VectorXd::Zero(1);
+for (int k = 0; k &lt; 500; ++k) {
+    double u = pid.compute(r - y);
+    y = ctrl::ssStep(G_d, x, Eigen::VectorXd::Constant(1, u))(0);
+}
+
+// 5. Extract metrics
+// ... collect t_data, y_data ...
+auto m = ctrl::MetricsAnalyzer::calculate(t_data, y_data, r);
+</code></pre>
+
+<!-- ────────────────────────────────────── PID -->
+<h2 id="pid" class="anchor">DiscretePID</h2>
+<div class="ctrl-block">
+<h3>Algorithm</h3>
+<p>ISA parallel form with backward-Euler integrator and backward-Euler derivative filter:</p>
+<pre><code>alpha  = 1 / (1 + N*Ts)
+d[k]   = alpha*d[k-1] + Kd*N*alpha*(e[k] - e[k-1])         // derivative filter
+I[k]   = I[k-1] + Ki*Ts*e[k] + Kb*(u_sat[k-1] - u_unsat[k-1])  // anti-windup
+u[k]   = Kp*e[k] + I[k] + d[k]                              // unsaturated output
+u_sat  = clamp(u, uMin, uMax)</code></pre>
+<h4>Anti-windup</h4>
+<p>Back-calculation: when output saturates, the integral term is corrected by <code>Kb*(u_sat - u_unsat)</code>. Set <code>Kb=0</code> to disable.</p>
+<h4>Bumpless transfer</h4>
+<p><code>bumplessInit(u_target, error)</code> pre-loads the integral so the first <code>compute()</code> returns approximately <code>u_target</code>. Called automatically by <code>ControllerStack</code> on supervisory switching.</p>
+<h3>Parameters <span class="badge b-info">PIDParams</span></h3>
+<div class="tbl-wrap"><table>
+<tr><th>Field</th><th>Default</th><th>Meaning</th></tr>
+<tr><td class="param-name">Kp</td><td>1.0</td><td>Proportional gain</td></tr>
+<tr><td class="param-name">Ki</td><td>0.0</td><td>Integral gain (<code>Ki = Kp/Ti</code>)</td></tr>
+<tr><td class="param-name">Kd</td><td>0.0</td><td>Derivative gain (<code>Kd = Kp*Td</code>)</td></tr>
+<tr><td class="param-name">N</td><td>100</td><td>Derivative filter pole [rad/s]. Higher = less filtering.</td></tr>
+<tr><td class="param-name">uMin / uMax</td><td>±1e9</td><td>Output saturation limits</td></tr>
+<tr><td class="param-name">Kb</td><td>1.0</td><td>Anti-windup back-calculation gain (0 = disabled)</td></tr>
+</table></div>
+<h3>Tuning methods</h3>
+<p>
+  <code>RelayAutoTuner</code> &middot;
+  <code>StepResponseTuner</code> (IMC, ZN, Cohen-Coon, AMIGO) &middot;
+  <code>ZieglerNicholsTuner</code> &middot;
+  <code>CohenCoonTuner</code>
+</p>
+</div>
+
+<!-- ────────────────────────────────────── LQR -->
+<h2 id="lqr" class="anchor">DiscreteLQR</h2>
+<div class="ctrl-block">
+<h3>Algorithm</h3>
+<p>Solves the Discrete Algebraic Riccati Equation (DARE) offline via the <em>doubling algorithm</em> (Pappas-Laub-Sandell 1980):</p>
+<pre><code>P_inf = A'*P*A - (A'*P*B)*(R + B'*P*B)^{-1}*(B'*P*A) + Q
+K*    = (R + B'*P*B)^{-1} * B'*P*A
+u[k]  = -K* * (x[k] - x_ref) + u_ff</code></pre>
+<p>The doubling algorithm converges quadratically (doubles correct digits per iteration); 30–50 iterations suffice for double precision, versus thousands for value iteration. Symmetry of P is enforced at every iteration to prevent LDLT failure on near-rank-deficient systems.</p>
+<h4>Pre-solve checks</h4>
+<ul>
+<li>PBH stabilisability: <code>(A,B)</code> — warns if any unstable mode is uncontrollable.</li>
+<li>PBH detectability: <code>(A,Q)</code> — warns if any unstable mode has zero Q penalty.</li>
+</ul>
+<div class="warn-box">
+  <code>DiscreteLQR</code> expects full state feedback. For output feedback (partial or noisy observations), use <code>DiscreteLQG</code> which adds a Kalman filter.
+</div>
+<h3>Parameters <span class="badge b-info">LQRParams</span></h3>
+<div class="tbl-wrap"><table>
+<tr><th>Field</th><th>Meaning</th></tr>
+<tr><td class="param-name">Q</td><td>State cost matrix (n×n, PSD). Increase Q[i,i] to tighten control of state i.</td></tr>
+<tr><td class="param-name">R</td><td>Control cost matrix (m×m, PD). Increase R[j,j] to limit input j.</td></tr>
+</table></div>
+<h3>Bryson's rule (starting point)</h3>
+<pre><code>Q[i,i] = 1 / max_state_deviation[i]^2
+R[j,j] = 1 / max_control_effort[j]^2</code></pre>
+<pre><code>auto weights = ctrl::LQRWeightTuner::brysonMethodFor&lt;ctrl::DiscreteLQR&gt;(xmax, umax);</code></pre>
+</div>
+
+<!-- ────────────────────────────────────── LQG -->
+<h2 id="lqg" class="anchor">DiscreteLQG</h2>
+<div class="ctrl-block">
+<h3>Algorithm</h3>
+<p>Combines <code>DiscreteLQR</code> and <code>KalmanFilter</code> under the separation principle:</p>
+<pre><code>// Each step:
+kf.predict(u[k-1])              // x^[k|k-1] = A*x^[k-1] + B*u[k-1]
+kf.update(y[k], u[k-1])         // x^[k|k] from measurement (D=0 assumed)
+u[k] = -K* * (x^[k|k] - x_ref)</code></pre>
+<div class="warn-box">
+  <strong>Causal constraint:</strong> <code>u[k]</code> is not yet available when the Kalman update runs. For <code>D=0</code> plants (standard ZOH discretisation) this is exact — the <code>D*u</code> term vanishes. For <code>D≠0</code> plants, the update uses <code>u[k-1]</code> as an approximation; the constructor warns about this.
+</div>
+<h3>Separation principle</h3>
+<p>LQR weights <code>(Q,R)</code> and Kalman noise weights <code>(Q_noise, R_noise)</code> can be tuned independently:</p>
+<pre><code>auto lqr_w = ctrl::LQRWeightTuner::brysonMethodFor&lt;ctrl::DiscreteLQG&gt;(xmax, umax);
+auto kf_w  = ctrl::KalmanWeightTuner::fromNoiseFor&lt;ctrl::DiscreteLQG&gt;(proc_noise, meas_noise);</code></pre>
+</div>
+
+<!-- ────────────────────────────────────── MPC -->
+<h2 id="mpc" class="anchor">DiscreteMPC</h2>
+<div class="ctrl-block">
+<h3>Condensed QP formulation</h3>
+<pre><code>// Prediction: Y_pred = F*x + Gu*u_prev + Phi*DeltaU
+// Cost:  min  ||Y_pred - R||^2_Qy  +  ||DeltaU||^2_Ru
+// s.t.   duMin &lt;= DeltaU &lt;= duMax  (per step)
+//        uMin  &lt;= u_prev + sum(DeltaU_0..j) &lt;= uMax  (rolling)</code></pre>
+<p>Solved by <em>gradient projection</em> with step size <code>1/L</code> where <code>L = λ_max(H)</code>. The Hessian <code>H = Phi'*Qy*Phi + Ru</code> is pre-factored via LDLT once at construction (or when horizons change); only the gradient changes each step.</p>
+<div class="warn-box">
+  The <code>compute(error)</code> wrapper reconstructs the reference as <code>r = C*x̂ + error</code> using an open-loop state estimate. This estimate <em>drifts</em> for plants with disturbances, model mismatch, or integrating modes. For reliable closed-loop behaviour, inject a Kalman estimate via <code>setState(kf.state())</code> before each call to <code>computeRef(x, r)</code>.
+</div>
+<h3>Parameters <span class="badge b-info">MPCParams</span></h3>
+<div class="tbl-wrap"><table>
+<tr><th>Field</th><th>Default</th><th>Meaning</th></tr>
+<tr><td class="param-name">Np</td><td>10</td><td>Prediction horizon (steps) ≈ settling time / Ts</td></tr>
+<tr><td class="param-name">Nc</td><td>3</td><td>Control horizon (Nc ≤ Np). Fewer moves = smoother u.</td></tr>
+<tr><td class="param-name">rho_y</td><td>1.0</td><td>Output tracking weight</td></tr>
+<tr><td class="param-name">rho_u</td><td>0.1</td><td>Move suppression weight. Increase to slow down u changes.</td></tr>
+<tr><td class="param-name">uMin / uMax</td><td>±1e9</td><td>Hard input bounds</td></tr>
+<tr><td class="param-name">duMin / duMax</td><td>±1e9</td><td>Hard increment bounds</td></tr>
+<tr><td class="param-name">qpMaxIter</td><td>200</td><td>Gradient-projection iteration limit</td></tr>
+<tr><td class="param-name">qpTol</td><td>1e-8</td><td>Convergence tolerance ‖ΔU_new − ΔU‖∞</td></tr>
+</table></div>
+</div>
+
+<!-- ────────────────────────────────────── GPC -->
+<h2 id="gpc" class="anchor">GeneralizedPredictiveController (GPC)</h2>
+<div class="ctrl-block">
+<h3>CARIMA velocity-form model</h3>
+<p>Augments the plant state as <span class="math">x_a = [Δx; y]</span> so the integrating disturbance model is built in — no separate integral state is needed to reject step disturbances.</p>
+<pre><code>Aa = [A, 0; C*A, I]   Ba = [B; C*B]   Ca = [0, I]</code></pre>
+<h3>Reference trajectory</h3>
+<pre><code>y*[k+j] = alpha^j * y[k] + (1 - alpha^j) * r    (j = 1..Np)</code></pre>
+<p><code>alpha=0</code>: step reference (same as MPC). <code>alpha → 1</code>: slow first-order approach. Typical: <code>alpha = exp(-Ts/tau_ref)</code>.</p>
+<div class="note">
+  GPC is better than standard MPC for processes with integrating or near-integrating dynamics (level control, velocity ramps). The velocity-form model handles offset without separate integral tuning.
+</div>
+</div>
+
+<!-- ────────────────────────────────────── ADRC -->
+<h2 id="adrc" class="anchor">DiscreteADRC (LADRC)</h2>
+<div class="ctrl-block">
+<h3>3rd-order Extended State Observer (ESO)</h3>
+<p>Models the plant as a double integrator with unknown <em>total disturbance</em> <span class="math">f</span>:</p>
+<pre><code>y = f(y, ẏ, d, t) + b0*u    // b0 = approximate input gain</code></pre>
+<p>ESO estimates <span class="math">z₁≈y, z₂≈ẏ, z₃≈f</span>. Bandwidth-parameterised:</p>
+<pre><code>beta1 = 3*omega_o   beta2 = 3*omega_o^2   beta3 = omega_o^3</code></pre>
+<p>Discretised with <strong>backward Euler</strong> (A-stable for all <code>omega_o*Ts &gt; 0</code>):</p>
+<pre><code>z3_new = z3 + Ts*beta3*eps
+z2_new = z2 + Ts*(beta2*eps + b0*u_prev) + Ts*z3_new
+z1_new = z1 + Ts*beta1*eps              + Ts*z2_new
+u0 = omega_c^2*(r - z1) - 2*omega_c*z2
+u  = (u0 - z3) / b0</code></pre>
+<div class="warn-box">
+  When using the <code>IController::compute(error)</code> wrapper: you <strong>must</strong> call <code>setReference(r)</code> before each <code>compute()</code> call. If omitted, <code>r_</code> defaults to 0 and the controller will drive the plant output to zero regardless of setpoint. Use <code>computeTracking(y, r)</code> directly when possible.
+</div>
+<h3>Parameters <span class="badge b-info">ADRCParams</span></h3>
+<div class="tbl-wrap"><table>
+<tr><th>Field</th><th>Typical</th><th>Meaning</th></tr>
+<tr><td class="param-name">omega_o</td><td>3–10× omega_c</td><td>ESO bandwidth [rad/s]. Must satisfy omega_o*Ts ≪ 1 for accuracy.</td></tr>
+<tr><td class="param-name">omega_c</td><td>~BW of desired loop</td><td>Controller bandwidth [rad/s]</td></tr>
+<tr><td class="param-name">b0</td><td>plant input gain</td><td>Approximate gain <em>b</em> in <span class="math">ÿ = f + b·u</span>. For motors: <code>b0 = Km/J</code>.</td></tr>
+</table></div>
+</div>
+
+<!-- ────────────────────────────────────── SMC -->
+<h2 id="smc" class="anchor">DiscreteSMC / SuperTwistingSMC</h2>
+<div class="ctrl-block">
+<h3>Sliding surface</h3>
+<pre><code>s[k] = c_e*e[k] + c_de*(e[k] - e[k-1])</code></pre>
+<h3>DiscreteSMC — boundary-layer (1st order)</h3>
+<pre><code>u[k] = -K * sat(s[k] / phi)
+sat(x) = x       if |x| ≤ 1    // PD inside boundary layer
+sat(x) = sign(x) if |x| > 1    // relay switching outside</code></pre>
+<p><code>phi → 0</code>: ideal chattering SMC. <code>phi</code> large: smooth PD approximation.</p>
+<h3>SuperTwistingSMC — 2nd order (no chattering)</h3>
+<pre><code>u[k]   = v[k] - K1*|s|^0.5 * sign(s)    // power term
+v[k+1] = v[k] - K2*Ts * sign(s)          // integral term (Euler)</code></pre>
+<p>Sufficient gain condition: <code>K1 &gt; 0</code>, <code>K2 &gt; K1²/4</code>. Keep <code>K2*Ts ≪ K1</code> to limit discretisation error.</p>
+<h3>Note on c_de</h3>
+<p><code>c_de</code> absorbs the sample time. To match a continuous-time sliding-surface slope <span class="math">λ</span> [1/s], set <code>c_de = lambda * Ts</code>.</p>
+</div>
+
+<!-- ────────────────────────────────────── Lead-Lag -->
+<h2 id="leadlag" class="anchor">DiscreteLeadLag</h2>
+<div class="ctrl-block">
+<h3>Algorithm</h3>
+<p>Tustin discretisation of <span class="math">C(s) = K·(s+z_c)/(s+p_c)</span>:</p>
+<pre><code>b0 = K*(2/Ts + z_c) / (2/Ts + p_c)
+b1 = K*(z_c - 2/Ts) / (2/Ts + p_c)
+a1 = (p_c - 2/Ts)   / (2/Ts + p_c)
+y[k] = b0*u[k] + b1*u[k-1] - a1*y[k-1]</code></pre>
+<p>Lead (<code>p_c &gt; z_c</code>): adds positive phase, improves phase margin. Lag (<code>p_c &lt; z_c</code>): boosts low-frequency gain.</p>
+<div class="note">
+  <code>phaseAt(omega)</code> uses the continuous-time formula. Accuracy degrades near the Nyquist frequency due to Tustin frequency warping.
+</div>
+</div>
+
+<!-- ────────────────────────────────────── SMITH -->
+<h2 id="smith" class="anchor">SmithPredictor</h2>
+<div class="ctrl-block">
+<h3>Algorithm</h3>
+<p>Compensates for pure integer dead-time <span class="math">d</span> steps:</p>
+<pre><code>e_sp[k] = (r[k] - y[k]) + (ŷ[k] - ŷ[k-d])    // modified error
+u[k]    = inner.compute(e_sp[k])
+ŷ updated via delay-free model P0 with u[k]</code></pre>
+<div class="warn-box">
+  <strong>Model must be delay-free:</strong> pass the plant model <em>without</em> the dead-time lag. The predictor adds the delay compensation internally.
+</div>
+<div class="note">
+  For fractional dead-times (theta not a multiple of Ts), round to the nearest integer and apply a first-order Padé approximant to the fractional remainder. This is not currently built in; implement it externally or absorb the error into the inner controller tuning.
+</div>
+<p>Use <code>setModel()</code> to hot-swap the internal model for adaptive Smith predictors (e.g., paired with RLS identification).</p>
+</div>
+
+<!-- ────────────────────────────────────── REPETITIVE -->
+<h2 id="repetitive" class="anchor">RepetitiveController</h2>
+<div class="ctrl-block">
+<h3>Learning law</h3>
+<pre><code>v[k]  = Q * v[k-N] + Krc * e[k]    // circular buffer of length N
+u[k]  = u_base[k] + v[k]           // plug-in addition</code></pre>
+<p><code>v_buf_</code> stores one full period of corrections. Each slot is overwritten by the current step's updated correction, ready to be read <code>N</code> steps later.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Q</th><th>Effect</th></tr>
+<tr><td>1.0</td><td>Perfect memory — converges to exact cancellation; zero robustness margin to period mismatch</td></tr>
+<tr><td>0.95–0.99</td><td>Exponential forgetting — slightly slower convergence, tolerates period uncertainty</td></tr>
+</table></div>
+<p><strong>Stability condition</strong> (sufficient, SISO): <code>Q / |1 + L(e^jω)P(e^jω)| &lt; 1</code> for all ω.</p>
+</div>
+
+<!-- ────────────────────────────────────── ESC -->
+<h2 id="esc" class="anchor">ExtremumSeeker</h2>
+<div class="ctrl-block">
+<h3>Signal chain</h3>
+<pre><code>d[k]   = a * sin(phase)               // dither
+u[k]   = theta[k] + d[k]             // plant input
+y_h[k] = HPF(y[k])                   // remove DC
+xi[k]  = y_h[k] * sin(phase)         // coherent demodulation
+ĝ[k]   = LPF(xi[k])                 // gradient estimate
+theta += sign * k_int * ĝ * Ts       // integrate toward extremum</code></pre>
+<p>Phase accumulates as <code>phase = fmod(phase + 2π*fp*Ts, 2π)</code>, preventing floating-point drift at large step counts.</p>
+<div class="warn-box">
+  Frequency separation requirement: <span class="math">ω_plant ≪ ω_p ≪ 1/(Ts·N_filter)</span>. If the dither frequency is too close to the plant bandwidth, the gradient estimate is corrupted.
+</div>
+</div>
+
+<!-- ────────────────────────────────────── HINF -->
+<h2 id="hinf" class="anchor">DiscreteHinf</h2>
+<div class="ctrl-block">
+<h3>DGKF two-Riccati synthesis</h3>
+<p>Synthesises K(z) minimising <span class="math">‖F_l(P,K)‖∞ &lt; γ</span> via bisection on γ.</p>
+<pre><code>// 1. Build augmented plant (MixedSensitivity for S/KS/T design)
+auto P = ctrl::MixedSensitivity::build(G, W1, W2, W3);
+
+// 2. Synthesise
+ctrl::HinfParams hp; hp.gammaInit = 5.0; hp.gammaTol = 0.01;
+auto result = ctrl::DiscreteHinf::solve(P, hp);
+
+// 3. Use controller
+if (result.feasible) {
+    ctrl::DiscreteHinf K(result);
+    double u = K.compute(y_measurement);
+}</code></pre>
+<div class="danger-box">
+  <strong>D22 constraint:</strong> the standard DGKF formulas assume <code>D22 = 0</code>. If the generalised plant has nonzero <code>D22</code>, the synthesised controller is incorrect. <code>MixedSensitivity::build()</code> guarantees <code>D22 = 0</code> for the standard S/KS/T problem. For custom plant constructions, verify <code>P.D22.isZero(1e-12)</code>.
+</div>
+<h3>Weight design guidelines</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Weight</th><th>Purpose</th><th>Typical shape</th></tr>
+<tr><td class="param-name">W1</td><td>Tracking / disturbance rejection</td><td>High gain at low freq, rolls off above ω_B</td></tr>
+<tr><td class="param-name">W2</td><td>Control effort</td><td>Constant <code>1/u_max</code> or high-pass</td></tr>
+<tr><td class="param-name">W3</td><td>Robustness at high freq</td><td>Rolls up above ω_T to limit T</td></tr>
+</table></div>
+</div>
+
+<!-- ────────────────────────────────────── FUZZY -->
+<h2 id="fuzzy" class="anchor">Fuzzy Logic</h2>
+<div class="ctrl-block">
+<h3>Inference types</h3>
+<p><strong>Mamdani:</strong> rule consequents are fuzzy sets; defuzzification via centre-of-gravity (101-point grid). <strong>Takagi-Sugeno:</strong> consequents are crisp functions/singletons; defuzzification via weighted average (no grid needed).</p>
+<h3>Pre-built controllers</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Class</th><th>Description</th></tr>
+<tr><td class="param-name">FuzzyPD</td><td>Mamdani 5-term PD (NB/NM/Z/PM/PB on e and de)</td></tr>
+<tr><td class="param-name">FuzzyPID</td><td>FuzzyPD + conventional integral with anti-windup</td></tr>
+<tr><td class="param-name">FuzzySupervisor</td><td>Mamdani supervisor that outputs a mode-switch signal (e.g., triggers MPC relinearisation)</td></tr>
+<tr><td class="param-name">FuzzyTS (Takagi-Sugeno)</td><td>Gain scheduling via T-S interpolation of multiple linear models</td></tr>
+</table></div>
+</div>
+
+<!-- ────────────────────────────────────── KF -->
+<h2 id="kf" class="anchor">KalmanFilter (Linear)</h2>
+<div class="ctrl-block">
+<h3>Update equations (Joseph form)</h3>
+<pre><code>// Predict
+x^[k|k-1] = A*x^[k-1] + B*u[k-1]
+P[k|k-1]  = A*P*A' + Q
+
+// Update
+S   = C*P*C' + R            // innovation covariance
+Kf  = P*C' * S^{-1}         // Kalman gain (solved via LDLT)
+x^  += Kf * (y - C*x^ - D*u)
+// Joseph form (numerically superior to basic form):
+P   = (I-Kf*C)*P*(I-Kf*C)' + Kf*R*Kf'</code></pre>
+<p>The Joseph form maintains positive-semidefiniteness even with round-off, unlike the standard <code>(I-KC)*P</code> update.</p>
+<div class="note">
+  For D=0 plants, pass the same <code>u</code> as both <code>u_prev</code> and <code>u_current</code> in <code>step()</code>. For D≠0 plants, pass the actual current control input to avoid a one-step stale feedthrough bias.
+</div>
+</div>
+
+<!-- ────────────────────────────────────── EKF -->
+<h2 id="ekf" class="anchor">ExtendedKalmanFilter (EKF)</h2>
+<div class="ctrl-block">
+<h3>Key difference from KF</h3>
+<p>Linearises nonlinear <span class="math">f</span> and <span class="math">h</span> at each step. State propagation uses the <em>exact</em> nonlinear function; only the <em>covariance</em> uses the Jacobian:</p>
+<pre><code>F[k] = df/dx|_{x^[k|k],u[k]}     // for P predict
+H[k] = dh/dx|_{x^[k+1|k],u[k]}   // for Kalman gain</code></pre>
+<p>Jacobians can be supplied analytically or computed automatically via central-difference:</p>
+<pre><code>auto Fjac = [&](const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
+    return ctrl::ExtendedKalmanFilter::numericalJacobian(
+        [&](const Eigen::VectorXd& xx){ return f(xx, u); }, x);
+};</code></pre>
+<div class="warn-box">
+  Numerical Jacobians cost <code>2n</code> function evaluations each step. For real-time systems with n &gt; 10, derive analytical Jacobians.
+</div>
+</div>
+
+<!-- ────────────────────────────────────── UKF -->
+<h2 id="ukf" class="anchor">UnscentedKalmanFilter (UKF)</h2>
+<div class="ctrl-block">
+<h3>No Jacobians required</h3>
+<p>Propagates <code>2n+1</code> sigma points through the exact nonlinear functions, capturing mean and covariance to 3rd order (vs. EKF's 1st order). Better accuracy for highly nonlinear systems.</p>
+<pre><code>lambda = alpha^2*(n+kappa) - n
+X_0 = x^,   X_i = x^ ± sqrt((n+lambda)*P)_i  (i=1..n)</code></pre>
+<div class="warn-box">
+  <strong>Covariance PSD:</strong> the UKF covariance update <code>P -= K*Syy*K'</code> can lose positive-semidefiniteness with round-off (unlike the linear KF's Joseph form). A negative-eigenvalue floor is applied automatically after each update step.
+</div>
+<h3>Parameters</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Param</th><th>Default</th><th>Effect</th></tr>
+<tr><td class="param-name">alpha</td><td>1e-3</td><td>Sigma-point spread. Smaller = tighter cluster around mean.</td></tr>
+<tr><td class="param-name">beta</td><td>2.0</td><td>Prior distribution; 2 is optimal for Gaussian.</td></tr>
+<tr><td class="param-name">kappa</td><td>0.0</td><td>Secondary scaling; use 0 or 3-n.</td></tr>
+</table></div>
+</div>
+
+<!-- ────────────────────────────────────── RLS -->
+<h2 id="rls" class="anchor">RecursiveLeastSquares (RLS)</h2>
+<div class="ctrl-block">
+<h3>ARX online identification</h3>
+<pre><code>// ARX model: y[k] = -a1*y[k-1] - ... + b1*u[k-1] + ...
+phi[k] = [-y[k-1],...,-y[k-na], u[k-1],...,u[k-nb]]'
+// RLS update:
+K     = P*phi / (lambda + phi'*P*phi)    // Kalman gain
+e     = y - phi'*theta                   // a-posteriori error
+theta += K*e                             // parameter update
+P     = (P - K*phi'*P) / lambda          // covariance — /lambda is forgetting</code></pre>
+<p>The <code>/ lambda</code> in the covariance update is not a typo: it inflates P at each step, giving more weight to recent data. With <code>lambda=1</code>, P monotonically shrinks (standard LS — no tracking).</p>
+<div class="warn-box">
+  <code>toTransferFunction()</code> prepends <code>b0=0</code> to the numerator (ARX has no direct feedthrough). The output <code>D</code> matrix of the resulting state-space will always be zero for a pure delay-≥1 ARX model.
+</div>
+<h3>Practical choices</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Use case</th><th>lambda</th></tr>
+<tr><td>Time-invariant plant</td><td>1.0</td></tr>
+<tr><td>Slowly varying plant</td><td>0.97–0.99</td></tr>
+<tr><td>Fast-changing plant</td><td>0.90–0.95</td></tr>
+</table></div>
+</div>
+
+<!-- ────────────────────────────────────── SUBSPACE -->
+<h2 id="subspace" class="anchor">SubspaceID (N4SID / MOESP)</h2>
+<div class="ctrl-block">
+<h3>Algorithm steps</h3>
+<pre><code>1. Build 2i-block Hankel matrices Z from (Y, U)
+2. Thin LQ decomposition of Z → extract block L32 (oblique projection)
+3. SVD(L32) → system order n, extended observability matrix Gamma
+4. C = Gamma[:p, :],   A from shift-invariance of Gamma (LS)
+5. B, D from state-sequence regression (LS)
+6. Kalman gain K and innovation covariance from residuals</code></pre>
+<h3>Order selection</h3>
+<pre><code>// Run with large n first, inspect singular values:
+auto res = ctrl::n4sid(Y, U, 20, i_horizon, Ts);
+int n = ctrl::suggestOrder(res.singularValues);   // automatic elbow detection
+res  = ctrl::n4sid(Y, U, n, i_horizon, Ts);       // rerun with chosen order</code></pre>
+<h3>Using the identified Kalman gain</h3>
+<pre><code>// Skip manual Q/R tuning — use what n4sid extracted:
+ctrl::KalmanFilter kf(res.model.value(), /*Q=*/res.kalmanGain * res.innovCov * res.kalmanGain.transpose(),
+                                          /*R=*/res.innovCov);</code></pre>
+</div>
+
+<!-- ────────────────────────────────────── TUNERS -->
+<h2 id="tuners" class="anchor">Tuner Suite</h2>
+<div class="ctrl-block">
+<h3>Compile-time enforcement (<code>ControllerTuner.h</code>)</h3>
+<p>All <code>tuneFor&lt;C&gt;()</code> wrappers trigger a <code>static_assert</code> for incompatible controller/tuner pairs. The error message names the correct tuner to use.</p>
+<pre><code>// Compile error if C is not DiscretePID:
+ctrl::ZieglerNicholsTuner::tuneFor&lt;ctrl::DiscreteLQR&gt;(input); // ERROR
+
+// Correct:
+ctrl::LQRWeightTuner::brysonMethodFor&lt;ctrl::DiscreteLQR&gt;(xmax, umax); // OK</code></pre>
+<h3>Runtime dispatch (<code>TunerSuite.h</code>)</h3>
+<p>Accepts <code>CtrlKind</code> enum at runtime and emits soft warnings for partial matches:</p>
+<pre><code>ctrl::TunerSuite ts;
+auto res = ts.relayZN(ctrl::CtrlKind::PID, plant, Ts);
+if (res.warned) std::clog &lt;&lt; res.warning;
+if (res.success) pid.setParams(res.pidParams);</code></pre>
+<div class="tbl-wrap"><table>
+<tr><th>Tuner</th><th>For</th><th>Notes</th></tr>
+<tr><td class="param-name">RelayAutoTuner</td><td>PID</td><td>Online relay test; extracts Ku, Tu automatically</td></tr>
+<tr><td class="param-name">StepResponseTuner</td><td>PID</td><td>FOPDT fit; IMC, ZN, Cohen-Coon, AMIGO rules</td></tr>
+<tr><td class="param-name">ZieglerNicholsTuner</td><td>PID</td><td>Classic ZN from (Ku, Tu); aggressive, 25% overshoot</td></tr>
+<tr><td class="param-name">CohenCoonTuner</td><td>PID</td><td>Better than ZN for high dead-time (θ/τ ∈ [0.1, 1.0])</td></tr>
+<tr><td class="param-name">LQRWeightTuner</td><td>LQR, LQG</td><td>Bryson's rule; pole-placement hint (soft warning for LQG)</td></tr>
+<tr><td class="param-name">MPCHorizonTuner</td><td>MPC</td><td>Estimates settling time → recommends Np, Nc, ρ</td></tr>
+<tr><td class="param-name">LoopShapingTuner</td><td>LeadLag</td><td>Crossover freq + phase lead → LeadLag parameters</td></tr>
+<tr><td class="param-name">KalmanWeightTuner</td><td>LQG</td><td>Noise σ → Qf, Rf diagonal matrices</td></tr>
+</table></div>
+</div>
+
+<!-- ────────────────────────────────────── TRAITS -->
+<h2 id="traits" class="anchor">ControllerTraits</h2>
+<p>Compile-time metadata mapping each controller class to the tuning strategies it supports. Prevents mis-tuning at compile time. To register a new controller, add a <code>ctrl::ControllerTraits&lt;YourType&gt;</code> specialisation in <code>lib/ControllerTraits.h</code>.</p>
+
+<!-- ────────────────────────────────────── STACK -->
+<h2 id="stack" class="anchor">ControllerStack</h2>
+<div class="ctrl-block">
+<h3>Modes</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Mode</th><th>Behaviour</th><th>Use for</th></tr>
+<tr><td class="param-name">Supervisory</td><td>First eligible controller wins</td><td>Gain scheduling, mode switching, fallback chains</td></tr>
+<tr><td class="param-name">Additive</td><td>Sum all enabled controllers</td><td>Cascade (fast inner PID + slow outer MPC trim)</td></tr>
+<tr><td class="param-name">Weighted</td><td>Normalised weighted average</td><td>Blended transitions, fuzzy membership weighting</td></tr>
+</table></div>
+<div class="warn-box">
+  <strong>Weighted mode normalisation:</strong> if an entry's <code>activationCondition</code> returns false, its weight is excluded from the denominator. A controller with weight 0.3 that is the only active entry produces <em>full</em> authority output (0.3/0.3 = 1.0), not 30%. This is intentional for fallback chains; for a static blend, set all conditions to <code>nullptr</code>.
+</div>
+<h3>Bumpless transfer (Supervisory mode)</h3>
+<p>On controller switch, <code>bumplessInit(lastOutput, error)</code> is called on the incoming controller. <code>DiscretePID</code> pre-loads its integral; other controllers may override <code>bumplessInit()</code> as needed.</p>
+</div>
+
+<!-- ────────────────────────────────────── PLANT -->
+<h2 id="plant" class="anchor">Plant Model</h2>
+<div class="ctrl-block">
+<h3>TransferFunction</h3>
+<pre><code>// H(z^{-1}) = (b0 + b1*z^{-1} + ...) / (1 + a1*z^{-1} + ...)
+// den[0] must == 1 (monic)
+ctrl::TransferFunction tf({ {b0,b1,...}, {1,a1,...}, Ts });</code></pre>
+<h3>StateSpace</h3>
+<pre><code>ctrl::StateSpace ss(A, B, C, D, Ts);  // Ts=0 for continuous-time</code></pre>
+<h3>Utilities</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Function</th><th>Description</th></tr>
+<tr><td class="param-name">tf2ss(tf)</td><td>Transfer function → controllable canonical form state-space</td></tr>
+<tr><td class="param-name">ss2tf(ss)</td><td>SISO state-space → transfer function (Faddeev-LeVerrier characteristic poly)</td></tr>
+<tr><td class="param-name">c2d(ss_c, Ts, ZOH)</td><td>Continuous → discrete ZOH (exact via matrix exponential)</td></tr>
+<tr><td class="param-name">c2d(ss_c, Ts, Tustin)</td><td>Bilinear transform, O(Ts²) frequency warping</td></tr>
+<tr><td class="param-name">c2d(ss_c, Ts, TustinPrewarped, w0)</td><td>Exact match at ω₀ [rad/s]</td></tr>
+<tr><td class="param-name">ssStep(ss, x, u)</td><td>Advance one discrete step in-place; returns y[k]</td></tr>
+</table></div>
+</div>
+
+<!-- ────────────────────────────────────── ANALYSIS -->
+<h2 id="sysanalysis" class="anchor">System Analysis</h2>
+<div class="ctrl-block">
+<div class="tbl-wrap"><table>
+<tr><th>Method</th><th>Description</th></tr>
+<tr><td class="param-name">getPoles(sys)</td><td>Eigenvalues of A</td></tr>
+<tr><td class="param-name">isDiscreteStable(sys)</td><td>True iff all |λ| &lt; 1 (strict stability)</td></tr>
+<tr><td class="param-name">solveDiscreteLyapunov(A, Q)</td><td>Solves A·P·A'−P+Q=0 via Kronecker vectorisation. O(n⁶) — use for n≤20.</td></tr>
+<tr><td class="param-name">getFrequencyResponse(sys, freqs)</td><td>G(e^{jωTs}) at each ω. SISO only.</td></tr>
+<tr><td class="param-name">calculateMargins(sys)</td><td>Gain/phase margins via coarse grid + bisection. Phase continuously unwrapped.</td></tr>
+<tr><td class="param-name">calculateHInfinityNorm(sys)</td><td>Peak max singular value. Coarse grid + golden-section refinement.</td></tr>
+</table></div>
+</div>
+
+<!-- ────────────────────────────────────── METRICS -->
+<h2 id="metrics" class="anchor">Metrics Analyzer</h2>
+<div class="ctrl-block">
+<pre><code>auto m = ctrl::MetricsAnalyzer::calculate(t_data, y_data, reference, finalValueWindow);
+// m.riseTime       — 10%→90% [s]; -1 if not reached
+// m.settlingTime   — ±2% band [s]; -1 if not settled within data window
+// m.peakOvershoot  — (y_max - y_final) / y_final * 100 [%]
+// m.steadyStateError — |reference - y_final|</code></pre>
+</div>
+
+<!-- ────────────────────────────────────── GAPS -->
+<h2 id="gaps" class="anchor">Algorithm Gap Analysis</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Feature</th><th>Status</th><th>Notes</th></tr>
+<tr><td>Explicit MPC (mp-QP)</td><td class="badge b-warn">Out of scope</td><td>Exponential region count; online QP is preferred</td></tr>
+<tr><td>Adaptive / self-tuning (MRAC, IFT, VRFT)</td><td class="badge b-warn">Out of scope</td><td>Use RLS + TunerSuite as building blocks</td></tr>
+<tr><td>Tube MPC / robust MPC</td><td class="badge b-warn">Out of scope</td><td>Requires external convex solver</td></tr>
+<tr><td>Continuous-time H∞ synthesis</td><td class="badge b-warn">Not implemented</td><td>Only discrete-time DGKF is available</td></tr>
+<tr><td>Fractional-order dead-time (Smith)</td><td class="badge b-warn">Not implemented</td><td>Padé approximant for fractional Ts remainder; integer only</td></tr>
+<tr><td>UKF augmented noise model</td><td class="badge b-warn">Additive only</td><td>State-dependent / multiplicative noise requires augmented sigma points</td></tr>
+<tr><td>MPC output constraints (y bounds)</td><td class="badge b-warn">Not implemented</td><td>Only u and Δu are constrained; y constraints need extra QP rows</td></tr>
+<tr><td>Distributed / multi-agent control</td><td class="badge b-warn">Out of scope</td><td>Single-agent by design</td></tr>
+<tr><td>Non-convex optimisation (GA, PSO)</td><td class="badge b-warn">Out of scope</td><td>Use Optuna / DEAP externally</td></tr>
+</table></div>
+
+<!-- ────────────────────────────────────── NUMERICS -->
+<h2 id="numerics" class="anchor">Numerics Notes</h2>
+<div class="card">
+<h3 style="margin-top:0">DARE symmetry</h3>
+<p>The LQR doubling algorithm enforces <code>X = 0.5*(X+X')</code> at every iteration to suppress asymmetry drift. Without this, <code>LDLT</code> on the Schur complement can fail with <code>NumericalIssue</code> on near-rank-deficient plants.</p>
+</div>
+<div class="card">
+<h3>Joseph-form covariance</h3>
+<p>Both KF and EKF use <code>P = (I-KC)*P*(I-KC)' + K*R*K'</code>. The UKF uses <code>P -= K*Syy*K'</code> (unavoidable — no explicit H matrix), with an eigenvalue floor applied afterward to maintain PSD.</p>
+</div>
+<div class="card">
+<h3>RLS numerator prepend</h3>
+<p>ARX models have no direct feedthrough (B-polynomial starts at z⁻¹). <code>toTransferFunction()</code> prepends <code>b₀=0</code> before passing to <code>tf2ss()</code>. Without this, <code>tf2ss</code> would interpret <code>b₁</code> as the D term.</p>
+</div>
+<div class="card">
+<h3>Innovation covariance floor</h3>
+<p>All Kalman-family update steps clamp <code>R.diagonal() = R.diagonal().cwiseMax(1e-12)</code> before computing the Schur complement, preventing near-singular <code>S</code> when measurement noise is unrealistically small.</p>
+</div>
+
+<!-- ────────────────────────────────────── KNOWN ISSUES -->
+<h2 id="known-issues" class="anchor">Known Issues (as of 2026-05-26)</h2>
+<div class="tbl-wrap"><table>
+<tr><th>#</th><th>Issue</th><th>Severity</th><th>File</th></tr>
+<tr>
+  <td>1</td>
+  <td>UKF covariance can go non-PSD without eigenvalue floor (now applied, but worth monitoring in long runs)</td>
+  <td><span class="badge b-warn">Medium</span></td>
+  <td>UnscentedKalmanFilter.cpp:130</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>DiscreteADRC::compute()</code> silent wrong answer if <code>setReference()</code> not called before use in ControllerStack</td>
+  <td><span class="badge b-warn">Low</span></td>
+  <td>DiscreteADRC.h — documented</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>DiscreteMPC::compute(error)</code> open-loop state drift for disturbance-affected or integrating plants</td>
+  <td><span class="badge b-warn">Low-Med</span></td>
+  <td>DiscreteMPC.cpp — documented; use <code>setState()</code></td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>DiscreteHinf temporarily excluded from single-include ControllerToolbox.h</td>
+  <td><span class="badge b-info">Info</span></td>
+  <td>ControllerToolbox.h — see docs/bug_report_2026_05_25.md P.S.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td>SubspaceID B/D regression test has 50% DC-gain tolerance (not a tight correctness check)</td>
+  <td><span class="badge b-info">Info</span></td>
+  <td>test_controllers.cpp — tracked in bug_report_2026_05_25.md §2.3</td>
+</tr>
+</table></div>
+
+<p style="margin-top:40px;color:var(--muted);font-size:12px">
+  Generated 2026-05-26 &middot; Controller Toolbox &middot; C++17 / Eigen 3.4
+</p>
+
+</main>
+</div>
+</body>
+</html>

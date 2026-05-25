@@ -141,19 +141,21 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
     // ------------------------------------------------------------------
     // Step 5: least-squares regression for B and D.
     //
-    // Reconstruct the state sequence from the data and the observability
-    // matrix: X_hat[:, k] = Gamma^T * Yf_col[:, k] (truncated future output
-    // stacked in a column).
+    // Reconstruct approximate state sequence X_hat (n * s) from the
+    // extended observability matrix Gamma and the future output block Yf:
+    //   Gamma * X_hat approx= Yf   =>   X_hat = Gamma^+ * Yf
     //
-    // From x[k+1] = A*x[k] + B*u[k]  and  y[k] = C*x[k] + D*u[k]:
+    // This uses the shift-invariance of Gamma (its rows are C, CA, CA^2, ...)
+    // to invert the observability map. The approximation is exact in the
+    // noise-free case; in practice it inherits the SVD truncation error from Step 3.
     //
-    //   [y[k] - C.x[k]] = D . u[k]
-    //   [x[k+1] - A.x[k]] = B . u[k]
+    // Given X_hat, solve two separate LS problems:
+    //   y[k] = C*x[k] + D*u[k]   =>  (y[k] - C*x[k]) = D*u[k]   -> solve for D
+    //   x[k+1] = A*x[k] + B*u[k] =>  (x[k+1] - A*x[k]) = B*u[k] -> solve for B
     //
-    // Stack these over k = 0..s-1 and solve in least squares.
+    // The U column index i+k aligns with the future-block start at position i in the
+    // original data, so the regression uses the same time index as X_hat.
     // ------------------------------------------------------------------
-    // Solve Gamma * X_hat = Yf directly; avoids forming the explicit pseudoinverse
-    // (i*p * i*p matrix) and is cheaper for large i.
     const Eigen::MatrixXd X_hat = Gamma.colPivHouseholderQr().solve(Yf); // n * s
 
     // Build regression: stack y[k] = C*x[k] + D*u[k] over k=0..s-2

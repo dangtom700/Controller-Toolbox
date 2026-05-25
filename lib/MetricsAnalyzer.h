@@ -6,18 +6,25 @@ namespace ctrl
 
     struct TimeDomainMetrics
     {
-        double riseTime;         // Time to go from 10% to 90% of final value
-        double settlingTime;     // Time after which response stays within 2% of final value
-        double peakOvershoot;    // Maximum percentage over the final value
-        double steadyStateError; // Absolute error at the final recorded time
+        double riseTime;         // 10%-to-90% rise time [s]; -1 if not reached
+        double settlingTime;     // time to enter and stay within ±2% of final value [s]; -1 if not settled
+        double peakOvershoot;    // (y_max - y_final) / y_final * 100 [%]; 0 if no overshoot
+        double steadyStateError; // |reference - y_final| at end of data [same units as y]
     };
 
     class MetricsAnalyzer
     {
     public:
-        // Automatically extracts time-domain metrics from step response data.
-        // reference: The target step value (e.g., 1.0)
-        // finalValueWindow: The number of trailing samples to average for the final "settled" value
+        // Extract standard step-response metrics from time-series data.
+        //
+        // t_data:           time vector [s], strictly increasing
+        // y_data:           output vector, same length as t_data
+        // reference:        target steady-state value (used for 10/90% thresholds and SSE)
+        // finalValueWindow: number of trailing samples averaged for the final settled value;
+        //                   increase for noisy data, decrease for short records
+        //
+        // riseTime and settlingTime return -1.0 when the response does not cross the
+        // threshold within the provided data window.
         static TimeDomainMetrics calculate(const std::vector<double> &t_data,
                                            const std::vector<double> &y_data,
                                            double reference = 1.0,
