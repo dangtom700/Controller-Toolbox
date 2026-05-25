@@ -29,9 +29,10 @@ namespace ctrl
     // ---------------------------------------------------------------------------
     double ExtremumSeeker::compute(double y)
     {
-        step_++;
-        const double t = static_cast<double>(step_) * Ts_;
-        const double omega = 2.0 * M_PI * p_.perturbFreq;
+        // Advance phase accumulator — stays bounded in [0, 2pi) for arbitrarily long runs,
+        // avoiding the floating-point precision loss of step_ * Ts_ at large step counts
+        // and the 32-bit overflow of a long counter on embedded targets.
+        phase_ = std::fmod(phase_ + 2.0 * M_PI * p_.perturbFreq * Ts_, 2.0 * M_PI);
 
         // HPF
         const double wh = 2.0 * M_PI * p_.hpfCutoff;
@@ -40,8 +41,8 @@ namespace ctrl
         hpf_state_ = y_h;
         y_prev_ = y;
 
-        // Demodulate
-        const double demod = y_h * std::sin(omega * t);
+        // Demodulate using the same phase_ as the dither — coherent demodulation
+        const double demod = y_h * std::sin(phase_);
 
         // LPF
         const double wl = 2.0 * M_PI * p_.lpfCutoff;
@@ -53,12 +54,12 @@ namespace ctrl
         theta_ += sign * p_.integGain * lpf_state_ * Ts_;
 
         // Return operating point plus dither signal
-        return theta_ + p_.perturbAmp * std::sin(omega * t);
+        return theta_ + p_.perturbAmp * std::sin(phase_);
     }
 
     void ExtremumSeeker::reset()
     {
-        step_ = 0;
+        phase_ = 0.0;
         theta_ = 0.0;
         hpf_state_ = 0.0;
         lpf_state_ = 0.0;

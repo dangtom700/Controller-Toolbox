@@ -43,6 +43,11 @@ namespace ctrl
         // Access the wrapped inner controller for runtime tuning.
         IController &innerController() { return *inner_; }
 
+        // Replace the internal delay-free plant model and dead-time length at runtime.
+        // Resets model state and output buffer (equivalent to calling reset()).
+        // Use when the plant dynamics change (e.g., adaptive Smith Predictor).
+        void setModel(const StateSpace &delayModel, int delaySteps);
+
     private:
         std::shared_ptr<IController> inner_;
         StateSpace model_;

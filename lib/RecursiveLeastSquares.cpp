@@ -1,4 +1,5 @@
 #include "RecursiveLeastSquares.h"
+#include <stdexcept>
 
 namespace ctrl
 {
@@ -87,10 +88,18 @@ namespace ctrl
 
     TransferFunction RecursiveLeastSquares::toTransferFunction() const
     {
-        // num is [0, b1,...,bnb] padded/trimmed to length na_+1 to align degrees
+        // ARX models require nb <= na so the transfer function B(z)/A(z) is proper.
+        // If nb > na the extra B coefficients cannot be represented in the returned
+        // TransferFunction without adding improper (non-causal) terms.
+        if (nb_ > na_)
+            throw std::logic_error(
+                "RecursiveLeastSquares::toTransferFunction: nb (" + std::to_string(nb_) +
+                ") > na (" + std::to_string(na_) + "). ARX models require nb <= na. "
+                "Increase na or reduce nb.");
+
+        // num is [0, b1,...,bnb] zero-padded to length na_+1 to align polynomial degrees
         Eigen::VectorXd num_e = Eigen::VectorXd::Zero(na_ + 1);
-        const int copy_len = std::min(nb_, na_);
-        num_e.segment(1, copy_len) = theta_.segment(na_, copy_len);
+        num_e.segment(1, nb_) = theta_.segment(na_, nb_);
 
         const Eigen::VectorXd den_e = denominator();
 

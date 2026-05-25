@@ -57,7 +57,7 @@ namespace ctrl
     private:
         ExtremumSeekerParams p_;
         double Ts_;
-        long step_;
+        double phase_;     // dither phase accumulator [rad], wrapped to [0, 2pi)
         double theta_;     // operating-point integrator state
         double hpf_state_; // HPF IIR state (backward-Euler first-order)
         double lpf_state_; // LPF IIR state (backward-Euler first-order)

@@ -37,6 +37,7 @@ namespace ctrl
     class DiscreteADRC;
     class DiscreteLeadLag;
     class SmithPredictor;
+    class DiscreteHinf;
 
     // -- Category tags ---------------------------------------------
     namespace tag
@@ -68,6 +69,9 @@ namespace ctrl
         struct DeadTimeComp
         {
         }; // SmithPredictor
+        struct RobustControl
+        {
+        }; // DiscreteHinf
     } // namespace tag
 
     // -- Compile-time warning stubs --------------------------------
@@ -230,6 +234,23 @@ namespace ctrl
         static constexpr bool supports_lqr_tuning = false;
         static constexpr bool supports_mpc_tuning = false;
         static constexpr bool supports_freq_tuning = false;
+        static constexpr bool supports_kalman_tuning = false;
+    };
+
+    // -- DiscreteHinf ----------------------------------------------
+    // H-inf parameters (gamma) are found by the DGKF bisection synthesis;
+    // performance weights W1/W2/W3 encode the design objectives.
+    // There is no classical auto-tuner; use MixedSensitivity::build() and
+    // DiscreteHinf::solve() directly to synthesise the controller.
+    template <>
+    struct ControllerTraits<DiscreteHinf>
+    {
+        using category = tag::RobustControl;
+        static constexpr const char *name = "DiscreteHinf";
+        static constexpr bool supports_heuristic_pid = false;
+        static constexpr bool supports_lqr_tuning    = false;
+        static constexpr bool supports_mpc_tuning    = false;
+        static constexpr bool supports_freq_tuning   = false; // design via weights, not loop-shaping tuner
         static constexpr bool supports_kalman_tuning = false;
     };
 

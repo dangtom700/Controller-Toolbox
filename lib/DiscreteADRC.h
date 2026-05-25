@@ -28,8 +28,8 @@
 //   u0[k]  = omega_c^2.(r[k] - z1[k]) - 2omega_c.z2[k]
 //   u[k]   = (u0[k] - z3[k]) / b0
 //
-// IMPORTANT: compute(y) takes the raw plant output y (NOT the error).
-//            Call setReference(r) before each step or use computeTracking(y,r).
+// IController::compute(error) follows the standard contract (error = r - y).
+// For the full interface use computeTracking(y, r) directly.
 //
 // Ref: Han "From PID to Active Disturbance Rejection Control" (2009);
 //      Gao "Scaling and bandwidth-parameterization based controller tuning" (2003).
@@ -53,9 +53,10 @@ namespace ctrl
         // Full interface: y = plant output (measurement), r = reference.
         double computeTracking(double y, double r);
 
-        // IController wrapper: signal = plant output y (NOT error).
-        // Call setReference(r) once per cycle BEFORE compute(y).
-        double compute(double y) override;
+        // IController wrapper: signal = error = r - y  (standard IController contract).
+        // Call setReference(r) once per cycle before compute(error).
+        // Internally recovers y = r_ - error and delegates to computeTracking(y, r_).
+        double compute(double error) override;
 
         void setReference(double r) { r_ = r; }
         void reset() override;

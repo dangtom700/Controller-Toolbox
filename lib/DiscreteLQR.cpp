@@ -169,6 +169,15 @@ namespace ctrl
                                          const Eigen::VectorXd &x_ref,
                                          const Eigen::VectorXd &u_ff) const
     {
+        if (x_ref.size() != 0 && x_ref.size() != n_)
+            throw std::invalid_argument(
+                "DiscreteLQR::compute: x_ref has wrong size (" +
+                std::to_string(x_ref.size()) + "), expected 0 or " + std::to_string(n_));
+        if (u_ff.size() != 0 && u_ff.size() != m_)
+            throw std::invalid_argument(
+                "DiscreteLQR::compute: u_ff has wrong size (" +
+                std::to_string(u_ff.size()) + "), expected 0 or " + std::to_string(m_));
+
         Eigen::VectorXd xe = x;
         if (x_ref.size() == n_)
             xe -= x_ref;

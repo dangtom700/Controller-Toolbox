@@ -43,8 +43,10 @@ COPY scripts/    scripts/
 COPY case-study/ case-study/
 
 # Configure and build everything in Release.
+# Note: --parallel is omitted because Ninja already parallelises by default.
+# Using --parallel without a count can OOM-kill the build on resource-constrained hosts.
 RUN cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
- && cmake --build build --parallel
+ && cmake --build build
 
 # Smoke-test: run CTest as part of the image build so a broken commit fails fast.
 RUN ctest --test-dir build --output-on-failure

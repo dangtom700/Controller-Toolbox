@@ -79,3 +79,4 @@
 #include "GeneralizedPredictiveControl.h"// GPC  - velocity-form MPC with reference trajectory (CARIMA)
 #include "SubspaceID.h"                  // N4SID - batch subspace state-space identification (MOESP)
 #include "FuzzyLogic.h"                  // Fuzzy - Mamdani/TS inference, FuzzyPD, FuzzyPID, FuzzySupervisor
+#include "DiscreteHinf.h"               // H-inf - DGKF 2-Riccati synthesis, Mixed-Sensitivity S/KS/T design

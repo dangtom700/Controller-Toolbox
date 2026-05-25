@@ -19,7 +19,18 @@
 //   Use for: inner/outer cascade (fast PID + slow MPC trim), complementary power splitting.
 //
 // StackMode::Weighted
-//   Weighted sum of all enabled entries: u = Sigma w_i . u_i(e)
+//   Normalised weighted average of all enabled, gate-passing entries:
+//     u = (Sigma w_i . u_i(e)) / (Sigma w_i)   over active, gate-passing entries only.
+//   Note: the denominator is the sum of *active and gate-passing* weights, not all
+//   stated weights.  If an entry's activationCondition returns false, its weight is
+//   excluded from the denominator, so the remaining controllers automatically "fill" the
+//   full output range.  Set all activationConditions to nullptr for a static blend.
+//
+//   Example — two controllers with weights [0.7, 0.3]:
+//     Both active:   u = (0.7*u0 + 0.3*u1) / (0.7 + 0.3) = 0.7*u0 + 0.3*u1
+//     Entry 0 gates out: u = (0.3*u1) / (0.3) = u1   (entry 1 gets full authority)
+//   This means "weight" is a relative preference, not a fixed gain.
+//
 //   Use for: blended controller transitions, fuzzy membership weighting.
 //
 // Ref: Astrom "Control System Design" Ch 9 (Gain Scheduling);

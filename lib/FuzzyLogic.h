@@ -80,7 +80,7 @@ struct LinguisticTerm {
     // Set by ltSingleton() automatically; can be set manually for any unimodal MF
     // when grid-search peak-finding would be ambiguous or too coarse.
     // When nullopt, defuzzWeightedAvg falls back to a grid search.
-    std::optional<double>  peak;
+    std::optional<double>  peak = std::nullopt;
 };
 
 // Convenience: build a fully specified LinguisticTerm for a TS singleton output.

@@ -152,10 +152,9 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
     //
     // Stack these over k = 0..s-1 and solve in least squares.
     // ------------------------------------------------------------------
-    const Eigen::MatrixXd Gamma_pinv =
-        Gamma.colPivHouseholderQr().solve(Eigen::MatrixXd::Identity(i * p, i * p));
-    // X_hat: n * s  - state estimates
-    const Eigen::MatrixXd X_hat = Gamma_pinv * Yf;
+    // Solve Gamma * X_hat = Yf directly; avoids forming the explicit pseudoinverse
+    // (i*p * i*p matrix) and is cheaper for large i.
+    const Eigen::MatrixXd X_hat = Gamma.colPivHouseholderQr().solve(Yf); // n * s
 
     // Build regression: stack y[k] = C*x[k] + D*u[k] over k=0..s-2
     // (use s-1 columns so x[k+1] exists)

@@ -76,9 +76,13 @@ namespace ctrl
         return u;
     }
 
-    double DiscreteADRC::compute(double y)
+    // IController contract: signal = error = r - y.
+    // Recover y from the stored reference and the error so computeTracking() receives
+    // the raw plant output it expects.  This keeps the ESO semantics intact while making
+    // compute() composable inside ControllerStack without manual sign management.
+    double DiscreteADRC::compute(double error)
     {
-        return computeTracking(y, r_);
+        return computeTracking(r_ - error, r_);
     }
 
     void DiscreteADRC::reset()

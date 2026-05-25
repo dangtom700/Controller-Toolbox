@@ -4,10 +4,9 @@
 #include <algorithm>
 #include <limits>
 #include <iostream>
+#include <stdexcept>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+static constexpr double kPi = 3.14159265358979323846;
 
 namespace ctrl
 {
@@ -89,35 +88,26 @@ namespace ctrl
     std::vector<std::complex<double>> SystemAnalysis::getFrequencyResponse(const StateSpace &sys,
                                                                            const std::vector<double> &freqs)
     {
+        if (sys.C.rows() != 1 || sys.B.cols() != 1)
+            throw std::invalid_argument(
+                "getFrequencyResponse: system must be SISO (C rows=" +
+                std::to_string(sys.C.rows()) + ", B cols=" +
+                std::to_string(sys.B.cols()) + "). For MIMO use calculateHInfinityNorm().");
+
         std::vector<std::complex<double>> response(freqs.size());
-        int n = sys.A.rows();
+        const int n = sys.A.rows();
         Eigen::MatrixXcd I = Eigen::MatrixXcd::Identity(n, n);
 
-        // Convert to complex matrices
-        Eigen::MatrixXcd Ac = sys.A.cast<std::complex<double>>();
-        Eigen::MatrixXcd Bc = sys.B.cast<std::complex<double>>();
-        Eigen::MatrixXcd Cc = sys.C.cast<std::complex<double>>();
-        Eigen::MatrixXcd Dc = sys.D.cast<std::complex<double>>();
+        const Eigen::MatrixXcd Ac = sys.A.cast<std::complex<double>>();
+        const Eigen::MatrixXcd Bc = sys.B.cast<std::complex<double>>();
+        const Eigen::MatrixXcd Cc = sys.C.cast<std::complex<double>>();
+        const Eigen::MatrixXcd Dc = sys.D.cast<std::complex<double>>();
 
         for (size_t i = 0; i < freqs.size(); ++i)
         {
-            // z = e^(j * w * Ts)
-            std::complex<double> z = std::polar(1.0, freqs[i] * sys.Ts);
-
-            // G(z) = C * (zI - A)^-1 * B + D
-            Eigen::MatrixXcd resolvent = (z * I - Ac).inverse();
-            Eigen::MatrixXcd G = Cc * resolvent * Bc + Dc;
-
-            // For SISO
-            if (G.rows() == 1 && G.cols() == 1)
-            {
-                response[i] = G(0, 0);
-            }
-            else
-            {
-                // For MIMO, just return the (0,0) element or handle differently
-                response[i] = G(0, 0);
-            }
+            const std::complex<double> z = std::polar(1.0, freqs[i] * sys.Ts);
+            const Eigen::MatrixXcd G = Cc * (z * I - Ac).inverse() * Bc + Dc;
+            response[i] = G(0, 0);
         }
         return response;
     }
@@ -140,28 +130,34 @@ namespace ctrl
             return G(0, 0);
         };
 
-        auto wrapPhase = [](double p) -> double
-        {
-            while (p > 0.0)   p -= 360.0;
-            while (p < -360.0) p += 360.0;
-            return p;
-        };
-
-        // Step 1: Coarse logarithmic grid to locate crossover brackets (~200 evals)
+        // Step 1: Coarse logarithmic grid to locate crossover brackets (~200 evals).
+        // Phase is unwrapped continuously across consecutive grid points so that
+        // sign-change detection for the -180° crossing works correctly for higher-order
+        // plants and non-minimum-phase systems.
         const double w_min  = 1e-3;
-        const double w_max  = M_PI / sys.Ts;
+        const double w_max  = kPi / sys.Ts;
         const int    coarse = 200;
 
         std::vector<double> fw(coarse), mag(coarse), pha(coarse);
-        for (int i = 0; i < coarse; ++i)
+        pha[0] = std::arg(evalAt(w_min * std::pow(w_max / w_min, 0.0))) * 180.0 / kPi;
+        fw[0]  = w_min;
+        mag[0] = std::abs(evalAt(fw[0]));
+        for (int i = 1; i < coarse; ++i)
         {
             fw[i]  = w_min * std::pow(w_max / w_min, static_cast<double>(i) / (coarse - 1));
             auto g = evalAt(fw[i]);
             mag[i] = std::abs(g);
-            pha[i] = wrapPhase(std::arg(g) * 180.0 / M_PI);
+            // Unwrap: add the smallest possible ±360° shift to keep the phase continuous
+            double raw  = std::arg(g) * 180.0 / kPi;
+            double diff = raw - pha[i - 1];
+            while (diff >  180.0) diff -= 360.0;
+            while (diff < -180.0) diff += 360.0;
+            pha[i] = pha[i - 1] + diff;
         }
 
-        // Step 2: Bisection refinement over each bracket - converges in ~50 evals per crossing
+        // Step 2: Bisection refinement over each bracket - converges in ~50 evals per crossing.
+        // Bisection tracks the unwrapped phase by carrying the last known unwrapped value at
+        // the left endpoint (p_lo) and shifting the midpoint evaluation by ±360° to match.
         const int bisect_iters = 50;
 
         StabilityMargins margins;
@@ -169,6 +165,14 @@ namespace ctrl
         margins.phaseMarginDeg  = std::numeric_limits<double>::infinity();
         margins.wCrossoverGain  = 0.0;
         margins.wCrossoverPhase = 0.0;
+
+        // Helper: unwrap a raw arg() result relative to a reference unwrapped value.
+        auto unwrapRelative = [](double raw_deg, double ref_deg) -> double {
+            double diff = raw_deg - ref_deg;
+            while (diff >  180.0) diff -= 360.0;
+            while (diff < -180.0) diff += 360.0;
+            return ref_deg + diff;
+        };
 
         // Gain margin: locate every phase = -180^\circ crossing; keep worst-case (smallest GM)
         for (int i = 0; i + 1 < coarse; ++i)
@@ -179,17 +183,17 @@ namespace ctrl
             double p_lo = pha[i];
             for (int k = 0; k < bisect_iters; ++k)
             {
-                double mid  = std::sqrt(lo * hi); // geometric midpoint preserves log scale
-                double p_mid = wrapPhase(std::arg(evalAt(mid)) * 180.0 / M_PI);
+                double mid   = std::sqrt(lo * hi); // geometric midpoint preserves log scale
+                double p_mid = unwrapRelative(std::arg(evalAt(mid)) * 180.0 / kPi, p_lo);
                 if ((p_lo - (-180.0)) * (p_mid - (-180.0)) < 0.0)
                     hi = mid;
                 else { lo = mid; p_lo = p_mid; }
             }
-            const double w_cross  = std::sqrt(lo * hi);
+            const double w_cross   = std::sqrt(lo * hi);
             const double mag_cross = std::abs(evalAt(w_cross));
-            const double gm_cand  = (mag_cross >= 1e-300)
-                                        ? -20.0 * std::log10(mag_cross)
-                                        : std::numeric_limits<double>::infinity();
+            const double gm_cand   = (mag_cross >= 1e-300)
+                                         ? -20.0 * std::log10(mag_cross)
+                                         : std::numeric_limits<double>::infinity();
             if (gm_cand < margins.gainMarginDb)
             {
                 margins.gainMarginDb   = gm_cand;
@@ -206,14 +210,17 @@ namespace ctrl
             double m_lo = mag[i];
             for (int k = 0; k < bisect_iters; ++k)
             {
-                double mid  = std::sqrt(lo * hi);
+                double mid   = std::sqrt(lo * hi);
                 double m_mid = std::abs(evalAt(mid));
                 if ((m_lo - 1.0) * (m_mid - 1.0) < 0.0)
                     hi = mid;
                 else { lo = mid; m_lo = m_mid; }
             }
+            // Find the unwrapped phase at the crossing by locating the bracket in the
+            // coarse grid and unwrapping relative to the left grid neighbour.
             const double w_cross    = std::sqrt(lo * hi);
-            const double phase_cross = wrapPhase(std::arg(evalAt(w_cross)) * 180.0 / M_PI);
+            const double phase_raw  = std::arg(evalAt(w_cross)) * 180.0 / kPi;
+            const double phase_cross = unwrapRelative(phase_raw, pha[i]);
             const double pm_cand    = 180.0 + phase_cross;
             if (pm_cand < margins.phaseMarginDeg)
             {
@@ -229,7 +236,7 @@ namespace ctrl
     {
         // Step 1: coarse logarithmic grid to locate the approximate peak frequency.
         const double w_min      = 1e-3;
-        const double w_max      = M_PI / sys.Ts;
+        const double w_max      = kPi / sys.Ts;
         const int    num_points = 500;
 
         const int n = sys.A.rows();

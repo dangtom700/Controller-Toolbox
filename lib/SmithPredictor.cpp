@@ -62,4 +62,14 @@ namespace ctrl
         }
     }
 
+    void SmithPredictor::setModel(const StateSpace &delayModel, int delaySteps)
+    {
+        model_ = delayModel;
+        d_     = delaySteps;
+        x_model_ = Eigen::VectorXd::Zero(model_.stateSize());
+        u_prev_  = Eigen::VectorXd::Zero(model_.inputSize());
+        y_buf_.assign(d_ > 0 ? d_ : 0, 0.0);
+        buf_head_ = 0;
+    }
+
 } // namespace ctrl

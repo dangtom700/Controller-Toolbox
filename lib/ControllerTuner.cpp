@@ -169,7 +169,7 @@ namespace ctrl
     }
 
     PIDParams StepResponseTuner::computePIDParams(const FOPDTModel &m,
-                                                  double Ts,
+                                                  double /*Ts*/,
                                                   PIDTuningRule rule,
                                                   double lambda)
     {
@@ -278,7 +278,6 @@ namespace ctrl
 
     double MPCHorizonTuner::estimateSettlingTime(const StateSpace &plant, int maxSteps)
     {
-        const int p = plant.outputSize();
         const int m = plant.inputSize();
 
         Eigen::VectorXd x = Eigen::VectorXd::Zero(plant.stateSize());

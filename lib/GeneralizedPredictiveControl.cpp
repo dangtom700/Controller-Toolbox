@@ -93,7 +93,6 @@ namespace ctrl
 
     double GeneralizedPredictiveController::computeRef(double y, double r)
     {
-        const int p  = plant_.outputSize();
         const int m  = plant_.inputSize();
         const int Np = p_.Np;
         const int Nu = p_.Nu;
