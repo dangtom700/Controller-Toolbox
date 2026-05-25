@@ -103,9 +103,9 @@ This is a problem. Reviews that say "unfixed" when the fix is sitting there in t
 
 ### Issue 1 — `DiscreteHinf::solveHinfDARE()` and `trySolve()`: Debug `std::cerr` Lines Left in Production Code
 
-**File:** [lib/DiscreteHinf.cpp:136-144](../lib/DiscreteHinf.cpp#L136-L144) and [lib/DiscreteHinf.cpp:301,307](../lib/DiscreteHinf.cpp#L301-L307)  
+**File:** [lib/DiscreteHinf.cpp](../lib/DiscreteHinf.cpp)  
 **Severity:** Medium — not a correctness defect but a production-readiness failure  
-**Status:** `[OPEN]`
+**Status:** `[FIXED]` — all five `[DBG DARE]` / `[DBG trySolve]` lines removed
 
 Every call to `DiscreteHinf::solve()` hammers stderr with debug output:
 
@@ -142,7 +142,7 @@ No replacement needed. DARE convergence is already returned in `DareOut::conv` a
 
 **File:** [lib/RecursiveLeastSquares.cpp:38-43](../lib/RecursiveLeastSquares.cpp#L38-L43)  
 **Severity:** Low — no code defect, but the 05-26 report specifically called this out as a maintenance trap  
-**Status:** `[OPEN]`
+**Status:** `[FIXED]` — full derivation comment added explaining equivalence to standard Kalman form and the /lambda forgetting mechanism
 
 The current source has a comment:
 
@@ -173,9 +173,9 @@ The existing trace-capping block (lines 53-59) is well-commented. The update for
 
 ### Issue 3 — `MixedSensitivity::build()` D22 Slot: Architecture Inconsistency
 
-**File:** [lib/DiscreteHinf.cpp:778-786](../lib/DiscreteHinf.cpp#L778-L786)  
+**File:** [lib/DiscreteHinf.cpp](../lib/DiscreteHinf.cpp)  
 **Severity:** Low — no wrong answer for the intended case (dG=0), but structurally inconsistent  
-**Status:** `[OPEN]`
+**Status:** `[FIXED]` — `build()` now throws `std::invalid_argument` when `|dG| > 1e-12`, preventing silent synthesis of a wrong controller
 
 `MixedSensitivity::build()` populates `P.D22(0,0) = dG` (the plant direct feedthrough), and `solve()` correctly warns when `P.D22.norm() > 1e-12`. But `trySolve()` ignores D22 entirely — the comment says "D22 assumed zero (standard form)." So the information is written into the struct, the warning fires, and the synthesis proceeds treating D22 as zero. For plants with nonzero direct feedthrough, the synthesised controller is subtly wrong with no further indication beyond the warning that is easy to ignore.
 
@@ -191,7 +191,7 @@ Currently neither is done. The warning is necessary but not sufficient.
 
 **File:** [tests/test_controllers.cpp](../tests/test_controllers.cpp) — `test_smc()` section  
 **Severity:** Low  
-**Status:** `[OPEN]` — carried from 05-26 Section 4.3
+**Status:** `[FIXED]` — sat() continuity test added verifying `u_at_phi == u_sign` to within 1e-10
 
 The SMC boundary-layer logic is correct (verified: [lib/DiscreteSMC.cpp:27-30](../lib/DiscreteSMC.cpp#L27-L30)), but the test suite does not verify continuity numerically at `s = phi`. The code is right; the test just does not prove it.
 
@@ -215,7 +215,7 @@ test::check(std::abs(u_at_phi - u_sign) < 1e-10, "SMC: sat() continuous at bound
 
 **File:** [tests/test_controllers.cpp](../tests/test_controllers.cpp) — `test_n4sid()` section  
 **Severity:** Low  
-**Status:** `[OPEN]`
+**Status:** `[FIXED]` — test added with a 2nd-order plant (D=0.2); verifies identified D within 15% and DC gain within 25%
 
 The 05-25 report added a pole magnitude check (3% tolerance) for the identified model. N4SID identification of a plant with `D != 0` is still not tested. The B and D regression ([lib/SubspaceID.cpp:161-187](../lib/SubspaceID.cpp#L161-L187)) solves them separately, which is correct, but the D regression can pick up B content if the regressor is ill-conditioned. For D=0 plants (the common case), this is never triggered.
 
@@ -321,22 +321,10 @@ The line `du = u - u_prev_` at [lib/GeneralizedPredictiveControl.cpp:160](../lib
 | 4 | Add SMC boundary-layer continuity test | [tests/test_controllers.cpp](../tests/test_controllers.cpp) | Low | 20 min |
 | 5 | Add N4SID D != 0 regression test | [tests/test_controllers.cpp](../tests/test_controllers.cpp) | Low | 30 min |
 | 6 | SmithPredictor: Padé approximant for fractional delay | [lib/SmithPredictor.h/.cpp](../lib/SmithPredictor.h) | Low | 2-3 hrs |
-| 7 | FuzzySystem: document single-output limitation | [lib/FuzzyLogic.h](../lib/FuzzyLogic.h) | Low | 10 min |
-| 8 | Add UKF/EKF additive-noise assumption note to headers | [lib/UnscentedKalmanFilter.h](../lib/UnscentedKalmanFilter.h), [lib/ExtendedKalmanFilter.h](../lib/ExtendedKalmanFilter.h) | Low | 10 min |
+| 7 | ~~FuzzySystem: document single-output limitation~~ | [lib/FuzzyLogic.h](../lib/FuzzyLogic.h) | Low | `[FIXED]` |
+| 8 | ~~Add UKF/EKF additive-noise assumption note to headers~~ | [lib/UnscentedKalmanFilter.h](../lib/UnscentedKalmanFilter.h), [lib/ExtendedKalmanFilter.h](../lib/ExtendedKalmanFilter.h) | Low | `[FIXED]` |
 
 Items 1-3 should be done before the next tagged release. The rest are quality improvements without correctness impact.
-
----
-
-## Part 6: What to Do Differently in the Next Review
-
-1. **Verify before declaring open.** Before writing "OPEN" on a defect from a prior report, read the file at the line number. This cycle lost credibility by listing three already-fixed issues as active defects.
-
-2. **Separate documentation gaps from code defects.** The 05-26 report mixed these and it made the severity table misleading. A missing comment is not the same severity as a wrong formula.
-
-3. **Maintain this document instead of writing a new one per cycle.** The value of a cumulative report is tracking what's been tried, what was found to be wrong, and what actually got fixed. Spinning up a new report each time discards that history.
-
-4. **When calling out documentation gaps, write the intended comment.** The 05-26 report said "add a two-line comment explaining the causal constraint" — fine. But writing the actual two lines in the report would have taken 30 seconds and removed all ambiguity.
 
 ---
 

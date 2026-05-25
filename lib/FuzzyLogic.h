@@ -138,7 +138,10 @@ public:
 
     // Build the system step by step.
     void addInput (const LinguisticVariable& var);
-    // Only one output variable is supported. Throws std::logic_error on a second call.
+    // Only ONE output variable is supported (single-output inference only).
+    // FuzzyPD, FuzzyPID, and FuzzySupervisor share this restriction.
+    // For MIMO fuzzy control, instantiate one FuzzySystem per output channel.
+    // Throws std::logic_error if called more than once.
     void addOutput(const LinguisticVariable& var);
     void addRule  (const Rule& rule);
 

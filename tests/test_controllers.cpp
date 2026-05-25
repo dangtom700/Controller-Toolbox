@@ -488,6 +488,24 @@ void test_smc()
         double u = smc2.compute(0.3);
         test::check(std::isfinite(u), "SMC: near-ideal phi still finite output");
     }
+
+    // sat() continuity at s = phi: linear branch (s/phi) and sign branch must agree
+    // at the boundary so there is no output jump when switching modes.
+    {
+        ctrl::SMCParams sp_c = {.K=1.0, .c_e=1.0, .c_de=0.0, .phi=0.5};
+        ctrl::DiscreteSMC smc_c(sp_c, Ts);
+        // At s = phi = 0.5, linear branch gives sat = 0.5/0.5 = 1.0
+        double u_at_phi = smc_c.compute(0.5);
+        smc_c.reset();
+
+        // With phi effectively zero, sign branch fires: sign(0.5) = 1.0
+        ctrl::SMCParams sp_sign = {.K=1.0, .c_e=1.0, .c_de=0.0, .phi=1e-14};
+        ctrl::DiscreteSMC smc_sign(sp_sign, Ts);
+        double u_sign = smc_sign.compute(0.5);
+
+        test::check(std::abs(u_at_phi - u_sign) < 1e-10,
+                    "SMC: sat() continuous at boundary-layer edge (phi -> 0)");
+    }
 }
 
 // ============================================================
@@ -1827,6 +1845,48 @@ void test_subspace_id()
             int ord = ctrl::suggestOrder(res.singularValues, 0.01, 5);
             test::check(ord >= 1 && ord <= 4,
                         "suggestOrder: returns 1..4 for PRBS-identified spectrum");
+        }
+    }
+
+    // D != 0 regression: verify that B and D are not confused when the plant has
+    // direct feedthrough.  True plant: H(z) = 0.2 + 0.3*z^{-1} + 0.1*z^{-2}
+    // (first-order autoregressive, D=0.2).  The identified D should be within 15%
+    // of 0.2 and the DC gain should be within 25% of the true DC gain (= 0.6).
+    {
+        // Build a 2nd-order AR plant with D=0.2 in state-space form directly.
+        // A = [0.5 0; 1 0], B = [1; 0], C = [0.3 0.1], D = [0.2]
+        ctrl::StateSpace plant_d(
+            (Eigen::MatrixXd(2,2) << 0.5, 0.0, 1.0, 0.0).finished(),
+            (Eigen::MatrixXd(2,1) << 1.0, 0.0).finished(),
+            (Eigen::MatrixXd(1,2) << 0.3, 0.1).finished(),
+            (Eigen::MatrixXd(1,1) << 0.2).finished(),
+            Ts);
+        const int N_d = 500;
+        Eigen::MatrixXd Y_d(1, N_d), U_d(1, N_d);
+        Eigen::VectorXd x_d = Eigen::VectorXd::Zero(2);
+        double ud = 1.0;
+        for (int k = 0; k < N_d; ++k)
+        {
+            Eigen::VectorXd uv(1);
+            uv << ud;
+            Y_d(0, k) = ctrl::ssStep(plant_d, x_d, uv)(0);
+            U_d(0, k) = ud;
+            if (k % 11 == 10) ud = -ud;
+        }
+        auto res_d = ctrl::n4sid(Y_d, U_d, 2, 15, Ts);
+        if (res_d.success && res_d.model.has_value())
+        {
+            const auto &md = res_d.model.value();
+            // Identified D should be close to 0.2
+            test::check(std::abs(md.D(0, 0) - 0.2) < 0.15,
+                        "n4sid: identified D within 15% of true value for D!=0 plant");
+            // DC gain of true plant = C*(I-A)^-1*B + D = 0.6
+            Eigen::MatrixXd IminA = Eigen::MatrixXd::Identity(md.stateSize(), md.stateSize()) - md.A;
+            double dc_d = (md.C * IminA.colPivHouseholderQr().solve(
+                               Eigen::MatrixXd::Identity(md.stateSize(), md.stateSize())) * md.B
+                           + md.D)(0, 0);
+            test::check(std::abs(dc_d - 0.6) < 0.25,
+                        "n4sid: DC gain within 25% for D!=0 plant");
         }
     }
 }

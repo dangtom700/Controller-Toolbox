@@ -8,6 +8,11 @@
 //   x[k+1] = f(x[k], u[k]) + w[k],   w ~ N(0, Q_noise)
 //   y[k]   = h(x[k], u[k]) + v[k],   v ~ N(0, R_noise)
 //
+// NOISE MODEL ASSUMPTION: process and measurement noise are ADDITIVE (as above).
+// For multiplicative or state-dependent noise (e.g. gyroscope scale-factor noise,
+// Poisson photon counts), the EKF must be reformulated with augmented state and
+// noise channels.  That augmented form is NOT implemented here.
+//
 // EKF linearises around the current estimate at each step:
 //   F[k] = df/dx |_(x^[k|k], u[k])    - state Jacobian  (n*n)
 //   H[k] = dh/dx |_(x^[k+1|k], u[k])  - observation Jacobian (p*n)

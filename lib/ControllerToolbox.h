@@ -84,3 +84,5 @@
 #ifndef CTRL_DISABLE_HINF
 #include "DiscreteHinf.h"               // H-inf - DGKF 2-Riccati synthesis, Mixed-Sensitivity S/KS/T design
 #endif
+#include "FunctionApproximator.h"        // Taylor (polynomial) + Pade (rational) data-driven approximation
+                                         //   + padeDelayFilter() for fractional dead-time SmithPredictor

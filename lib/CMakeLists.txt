@@ -31,6 +31,8 @@ add_library(controller_toolbox STATIC
     FuzzyLogic.cpp
     # Discrete-time H-infinity / Mixed-Sensitivity controller (2026-05-24)
     DiscreteHinf.cpp
+    # Data-driven function approximation: Taylor (polynomial) and Pade (rational) (2026-05-25)
+    FunctionApproximator.cpp
 )
 
 # lib/ is the public include root: consumers write  #include "ControllerToolbox.h"

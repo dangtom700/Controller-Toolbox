@@ -8,6 +8,13 @@
 //   x[k+1] = f(x[k], u[k]) + w[k],   w ~ N(0, Q_noise)
 //   y[k]   = h(x[k], u[k]) + v[k],   v ~ N(0, R_noise)
 //
+// NOISE MODEL ASSUMPTION: process and measurement noise are ADDITIVE (as above).
+// For multiplicative or state-dependent noise (e.g. gyroscope scale-factor noise,
+// Poisson photon counts), the correct formulation augments the state vector with the
+// noise channels and propagates augmented sigma points.  That form is NOT implemented
+// here.  If your system requires it, augment the state manually before constructing
+// the filter.
+//
 // Uses the Unscented Transform: propagates 2n+1 deterministically chosen
 // sigma points through the exact nonlinear functions to capture mean and
 // covariance to third order (vs. EKF's first-order linearisation).

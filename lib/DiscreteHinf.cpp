@@ -133,15 +133,12 @@ DiscreteHinf::DareOut DiscreteHinf::solveHinfDARE(
     const int two_n = 2 * n;
     std::vector<int> stable_idx;
     stable_idx.reserve(n);
-    std::cerr << "[DBG DARE] n=" << n << " eigenvalues:";
     for (int i = 0; i < two_n; ++i)
     {
         double mag = std::abs(T(i, i));
-        std::cerr << " " << mag;
         if (mag < 1.0 - 1e-10)
             stable_idx.push_back(i);
     }
-    std::cerr << "\n[DBG DARE] stable_count=" << stable_idx.size() << "\n";
 
     // Need exactly n stable eigenvalues for a unique stabilising solution.
     if (static_cast<int>(stable_idx.size()) != n)
@@ -183,7 +180,6 @@ DiscreteHinf::DareOut DiscreteHinf::solveHinfDARE(
     const Eigen::MatrixXd K = luRbar.inverse() * B.transpose() * X * A;
     const Eigen::MatrixXd resid = A.transpose() * X * A - X + Q - A.transpose() * X * B * K;
     const double dare_res = resid.norm() / (1.0 + X.norm());
-    std::cerr << "[DBG DARE] dare_res=" << dare_res << " X.allFinite=" << X.allFinite() << "\n";
     out.conv = (dare_res < 1e-6) && X.allFinite();
     return out;
 }
@@ -298,14 +294,11 @@ bool DiscreteHinf::trySolve(const GeneralisedPlant &P, double gamma,
 
     // Check R_x invertibility before solving (required for DARE)
     Eigen::FullPivLU<Eigen::MatrixXd> luRx0(Rx);
-    std::cerr << "[DBG trySolve] gamma=" << gamma << " luRx0.isInv=" << luRx0.isInvertible() << "\n";
     if (!luRx0.isInvertible()) return false;
 
     DareOut dx = solveHinfDARE(A, Bcat, Qx, Rx, dareTol, dareMaxIter);
     out.dareConvX  = dx.conv;
     out.dareItersX = dx.iters;
-    std::cerr << "[DBG trySolve] dareConvX=" << dx.conv << " iters=" << dx.iters << "\n";
-
     if (!dx.conv) return false;
 
     const Eigen::MatrixXd &X = dx.X;
@@ -775,15 +768,20 @@ GeneralisedPlant MixedSensitivity::build(const StateSpace &G,
     P.D21(0, 0) = 0.0;  // no direct r -> y feedthrough
     P.D21(0, 1) = 1.0;  // d -> y
 
-    P.D22 = Eigen::MatrixXd::Zero(1, 1);
-    P.D22(0, 0) = dG;   // DG: direct u -> y (plant feedthrough)
+    // Standard DGKF requires D22 = 0.  For plants with direct feedthrough (dG != 0),
+    // a loop-shifting pre-processing step must be applied before calling solve()
+    // (see Skogestad & Postlethwaite Section 9.4).  Passing such a plant directly
+    // would cause trySolve() to synthesise a controller for the wrong problem, since
+    // D22 is silently ignored in the assembly formulas.  We throw here so the caller
+    // learns about the issue at build() time rather than silently getting a wrong K.
+    if (std::abs(dG) > 1e-12)
+        throw std::invalid_argument(
+            "MixedSensitivity::build: plant G has nonzero direct feedthrough (D = " +
+            std::to_string(dG) + ").  The standard DGKF assembly assumes D22=0.  "
+            "Apply loop-shifting to the plant before building the generalised plant, "
+            "or use a plant model with D = 0.");
 
-    // Standard form requires D22 = 0.  If G has nonzero D, the DGKF assumes D22=0,
-    // but MixedSensitivity::build() still records D22 for the caller's information.
-    // DiscreteHinf::trySolve() currently assumes D22=0 in its assembly formulas;
-    // for physical plants where G has no direct feedthrough (dG=0) this is exact.
-    // When dG != 0 a loop-shifting pre-processing step would be needed; we warn via
-    // a runtime check but do not hard-block (the solver may still converge).
+    P.D22 = Eigen::MatrixXd::Zero(1, 1);  // D22 = 0 guaranteed by the check above
 
     return P;
 }

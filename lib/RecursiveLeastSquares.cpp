@@ -36,10 +36,17 @@ namespace ctrl
         theta_ += K * e;
 
         // Covariance update: P = (P - K*phi'*P) / lambda
-        // The division by lambda is the forgetting mechanism - it inflates P at each step,
-        // giving more weight to recent data. Equivalent to using a sliding data window of
-        // effective length ~ 1/(1-lambda). Without it (lambda=1), this is standard LS and
-        // P shrinks monotonically (no tracking of time-varying parameters).
+        //
+        // This is equivalent to (I - K*phi')*P / lambda (the standard Kalman form), since
+        // K*phi'*P = (P*phi/denom)*phi'*P, which equals the result of substituting
+        // K = P*phi/denom into (I - K*phi')*P.  The factored form avoids forming (I - K*phi')
+        // explicitly (one fewer n*n multiply for large theta_).
+        //
+        // The /lambda term inflates P at each step — equivalent to inflating Q in a Kalman
+        // filter — which keeps P from shrinking to zero and freezing theta_.  This gives more
+        // weight to recent data; the effective sliding window length is ~ 1/(1-lambda).
+        // For lambda=1 (no forgetting), P shrinks monotonically and theta_ stops adapting to
+        // time-varying parameters.
         P_ = (P_ - K * Pphi.transpose()) / lambda_;
 
         // Symmetrise to suppress numerical drift
