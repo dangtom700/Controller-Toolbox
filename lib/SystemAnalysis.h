@@ -8,7 +8,7 @@ namespace ctrl
 {
 
     // Results from calculateMargins(). Infinity means the crossing was not found on
-    // the frequency grid [1e-3, pi/Ts] rad/s — a stable system with very high margins
+    // the frequency grid [1e-3, pi/Ts] rad/s - a stable system with very high margins
     // or a critically damped system may legitimately have no phase/gain crossover.
     struct StabilityMargins
     {
@@ -31,7 +31,7 @@ namespace ctrl
 
         // Solves the discrete Lyapunov equation:  A * P * A' - P + Q = 0
         // via Kronecker product vectorisation: (I - A⊗A) * vec(P) = vec(Q).
-        // Complexity: O(n^6) — use only for small systems (n <= 20).
+        // Complexity: O(n^6) - use only for small systems (n <= 20).
         // A must be strictly stable; an unstable A gives a singular (I - A⊗A).
         static Eigen::MatrixXd solveDiscreteLyapunov(const Eigen::MatrixXd &A,
                                                      const Eigen::MatrixXd &Q);
@@ -53,7 +53,7 @@ namespace ctrl
         // Peak H-infinity norm: max over frequency of the largest singular value of G(e^{jwTs}).
         // For SISO plants this equals the peak magnitude. For MIMO it equals the peak
         // induced L2-gain (max singular value). Uses a coarse grid followed by golden-section
-        // search for the peak — typical accuracy is better than 0.1% of the true peak.
+        // search for the peak - typical accuracy is better than 0.1% of the true peak.
         static double calculateHInfinityNorm(const StateSpace &sys);
     };
 

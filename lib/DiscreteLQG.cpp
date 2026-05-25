@@ -39,7 +39,7 @@ namespace ctrl
         // 1. Predict: x^[k|k-1] = A*x^[k-1|k-1] + B*u[k-1]
         kf_->predict(u_prev);
 
-        // 2. Update: x^[k|k] from y[k]. u_prev is used for the D*u term — see note above.
+        // 2. Update: x^[k|k] from y[k]. u_prev is used for the D*u term - see note above.
         kf_->update(y, u_prev);
 
         // 3. LQR feedback on corrected state estimate

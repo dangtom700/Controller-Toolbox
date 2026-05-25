@@ -6,3 +6,4 @@ target_compile_features(toolbox_examples PRIVATE cxx_std_17)
 
 add_subdirectory("Boiler Control")
 add_subdirectory("Tug Boat Numerical Simulation")
+add_subdirectory("Solar-Driven Cooling System with Photovoltaic Evaporative Chimney")

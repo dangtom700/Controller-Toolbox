@@ -1,0 +1,5 @@
+- analytical model of a novel photovoltaic evaporative cooling chimney
+- optimum criteria: grid energy efficiency ratio, condenser water flow rate
+- main disturbance: ambient temperature, realtive hummidity -> panel's effciency & chiller performance
+- the efficiency of the active cooling methodsis primarily affected bythe geometry of the cooling channels as well as their mass flow rates and the type of coolant used
+- robust factor: any environmental and operating conditions

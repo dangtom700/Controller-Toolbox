@@ -7,7 +7,7 @@ namespace ctrl
     struct TimeDomainMetrics
     {
         double riseTime;         // 10%-to-90% rise time [s]; -1 if not reached
-        double settlingTime;     // time to enter and stay within ±2% of final value [s]; -1 if not settled
+        double settlingTime;     // time to enter and stay within +/-2% of final value [s]; -1 if not settled
         double peakOvershoot;    // (y_max - y_final) / y_final * 100 [%]; 0 if no overshoot
         double steadyStateError; // |reference - y_final| at end of data [same units as y]
     };

@@ -98,10 +98,10 @@ namespace ctrl
         const int Nu = p_.Nu;
 
         // Reference trajectory: y*[k+j] = alpha^j * y[k] + (1 - alpha^j) * r
-        // At j=1: y* = alpha*y + (1-alpha)*r  — one step toward r, starting from y[k].
+        // At j=1: y* = alpha*y + (1-alpha)*r  - one step toward r, starting from y[k].
         // As j -> inf: y* -> r  (setpoint is reached asymptotically).
-        // alpha = 0: step reference (same as DiscreteMPC — jump immediately to r).
-        // alpha -> 1: very slow approach — reduces overshoot but slows disturbance rejection.
+        // alpha = 0: step reference (same as DiscreteMPC - jump immediately to r).
+        // alpha -> 1: very slow approach - reduces overshoot but slows disturbance rejection.
         // Typical: alpha = exp(-Ts/tau_ref) where tau_ref is the desired approach time constant.
         double alpha_j = p_.alpha; // alpha^1 for j=1
         for (int i = 0; i < Np; ++i)

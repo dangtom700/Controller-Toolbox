@@ -25,9 +25,9 @@ namespace ctrl
         const double v_prev = v_buf_[buf_idx_];
 
         // Learning law: v[k] = Q*v[k-N] + Krc*e[k]
-        // Q < 1: exponential forgetting — previous period's correction decays;
+        // Q < 1: exponential forgetting - previous period's correction decays;
         //        adds robustness when the disturbance period is slightly uncertain.
-        // Q = 1: perfect memory — converges to exact cancellation of any periodic disturbance
+        // Q = 1: perfect memory - converges to exact cancellation of any periodic disturbance
         //        with period N*Ts, but is sensitive to model error.
         v_now_ = p_.Q * v_prev + p_.Krc * error;
 

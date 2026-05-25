@@ -57,7 +57,7 @@ namespace ctrl
         //
         // IMPORTANT: call setReference(r) once per cycle BEFORE calling compute(error).
         // If setReference() is not called, r_ defaults to 0 and this method will drive
-        // the plant output to zero regardless of the intended setpoint — a silent wrong
+        // the plant output to zero regardless of the intended setpoint - a silent wrong
         // answer that is hard to diagnose inside a ControllerStack.
         //
         // Internally recovers y = r_ - error and delegates to computeTracking(y, r_).

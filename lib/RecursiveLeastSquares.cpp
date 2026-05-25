@@ -36,7 +36,7 @@ namespace ctrl
         theta_ += K * e;
 
         // Covariance update: P = (P - K*phi'*P) / lambda
-        // The division by lambda is the forgetting mechanism — it inflates P at each step,
+        // The division by lambda is the forgetting mechanism - it inflates P at each step,
         // giving more weight to recent data. Equivalent to using a sliding data window of
         // effective length ~ 1/(1-lambda). Without it (lambda=1), this is standard LS and
         // P shrinks monotonically (no tracking of time-varying parameters).
@@ -104,7 +104,7 @@ namespace ctrl
                 "Increase na or reduce nb.");
 
         // ARX B-polynomial: B(z^{-1}) = b1*z^{-1} + b2*z^{-2} + ...
-        // There is no z^0 (direct feedthrough) term — input delay of at least one step.
+        // There is no z^0 (direct feedthrough) term - input delay of at least one step.
         // TransferFunction expects num[0] = b0 (the z^0 coefficient). We must prepend 0.
         // Without this: tf2ss would set D = b1 and corrupt the C vector.
         Eigen::VectorXd num_e = Eigen::VectorXd::Zero(na_ + 1);

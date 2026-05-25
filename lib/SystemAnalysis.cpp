@@ -43,7 +43,7 @@ namespace ctrl
         // Using the Kronecker identity vec(A*P*A') = (A⊗A)*vec(P):
         //   (A⊗A - I) * vec(P) = -vec(Q)  =>  (I - A⊗A) * vec(P) = vec(Q)
         // Solve this n^2 x n^2 linear system for vec(P), then reshape.
-        // Cost: O(n^6) — suitable for small systems only (n <= ~15-20).
+        // Cost: O(n^6) - suitable for small systems only (n <= ~15-20).
         int n = A.rows();
         if (n != A.cols() || n != Q.rows() || n != Q.cols())
         {
