@@ -64,7 +64,7 @@ namespace ctrl
         // Prefer computeTracking(y, r) directly whenever y and r are independently available.
         double compute(double error) override;
 
-        void setReference(double r) { r_ = r; }
+        void setReference(double r) { r_ = r; r_was_set_ = true; }
         void reset() override;
         double sampleTime() const override { return Ts_; }
 
@@ -80,6 +80,7 @@ namespace ctrl
         double r_;                     // stored reference
         Eigen::Vector3d z_;            // ESO state [z1, z2, z3]
         double u_prev_;                // u[k-1] for ESO update
+        bool   r_was_set_;             // guards against compute() without setReference()
         double beta1_, beta2_, beta3_; // observer gains
 
         void updateGains();

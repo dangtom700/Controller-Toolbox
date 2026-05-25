@@ -1,12 +1,13 @@
 #include "DiscreteADRC.h"
 #include <algorithm>
+#include <cassert>
 #include <iostream>
 
 namespace ctrl
 {
 
     DiscreteADRC::DiscreteADRC(const ADRCParams &params, double sampleTime)
-        : p_(params), Ts_(sampleTime), r_(0.0), u_prev_(0.0)
+        : p_(params), Ts_(sampleTime), r_(0.0), r_was_set_(false)
     {
         // Backward-Euler ESO is A-stable: stable for all omega_o * Ts > 0.
         // No stability-limit check needed (unlike the previous Forward-Euler formulation).
@@ -82,6 +83,12 @@ namespace ctrl
     // compute() composable inside ControllerStack without manual sign management.
     double DiscreteADRC::compute(double error)
     {
+        // Guard: if setReference() was never called, r_ == 0 and the controller will
+        // silently drive y to 0 instead of the intended setpoint.
+        assert(r_was_set_ &&
+               "DiscreteADRC::compute() called without setReference(). "
+               "Call setReference(r) once per cycle before compute(error), "
+               "or use computeTracking(y, r) directly.");
         return computeTracking(r_ - error, r_);
     }
 
@@ -90,6 +97,7 @@ namespace ctrl
         z_.setZero();
         u_prev_ = 0.0;
         r_ = 0.0;
+        r_was_set_ = false;
     }
 
 } // namespace ctrl

@@ -79,4 +79,8 @@
 #include "GeneralizedPredictiveControl.h"// GPC  - velocity-form MPC with reference trajectory (CARIMA)
 #include "SubspaceID.h"                  // N4SID - batch subspace state-space identification (MOESP)
 #include "FuzzyLogic.h"                  // Fuzzy - Mamdani/TS inference, FuzzyPD, FuzzyPID, FuzzySupervisor
+// H-inf synthesis requires Eigen's full eigenvalue solver and adds compile-time weight.
+// Define CTRL_DISABLE_HINF to exclude it (e.g., on embedded targets without full Eigen).
+#ifndef CTRL_DISABLE_HINF
 #include "DiscreteHinf.h"               // H-inf - DGKF 2-Riccati synthesis, Mixed-Sensitivity S/KS/T design
+#endif

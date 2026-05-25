@@ -824,6 +824,56 @@ void test_lqg()
     lqg.reset();
     test::no_throw([&]
                    { lqg.compute(0.0); }, "LQG: compute after reset, no throw");
+
+    // Separation principle: as noise decreases, LQG closed-loop poles should converge
+    // toward the LQR poles (the estimator stops limiting performance).
+    // We verify this by checking that the steady-state regulation error is no worse
+    // than pure-state-feedback LQR when Q_noise -> 0 (near-perfect observation).
+    {
+        ctrl::StateSpace plant_sp(
+            (Eigen::MatrixXd(1, 1) << 0.9).finished(),
+            (Eigen::MatrixXd(1, 1) << 1.0).finished(),
+            (Eigen::MatrixXd(1, 1) << 1.0).finished(),
+            (Eigen::MatrixXd(1, 1) << 0.0).finished(),
+            Ts);
+        ctrl::LQRParams lqr_sp;
+        lqr_sp.Q = Eigen::MatrixXd::Identity(1, 1);
+        lqr_sp.R = Eigen::MatrixXd::Identity(1, 1) * 0.1;
+
+        // LQR full-state reference settling
+        ctrl::DiscreteLQR lqr_ref(plant_sp, lqr_sp);
+        Eigen::VectorXd x_lqr(1);
+        x_lqr(0) = 1.0;
+        for (int k = 0; k < 300; ++k)
+        {
+            Eigen::VectorXd u_lqr = lqr_ref.compute(x_lqr, Eigen::VectorXd::Zero(1));
+            ctrl::ssStep(plant_sp, x_lqr, u_lqr);
+        }
+        const double lqr_residual = std::abs(x_lqr(0));
+
+        // LQG with very low process noise: Kalman gain -> perfect observer
+        Eigen::MatrixXd Qn_tiny = Eigen::MatrixXd::Identity(1, 1) * 1e-10;
+        Eigen::MatrixXd Rn_sp   = Eigen::MatrixXd::Identity(1, 1) * 1e-2;
+        ctrl::DiscreteLQG lqg_sp(plant_sp, lqr_sp, Qn_tiny, Rn_sp);
+
+        Eigen::VectorXd x_lqg(1);
+        x_lqg(0) = 1.0;
+        Eigen::VectorXd up_sp(1);
+        up_sp << 0.0;
+        Eigen::VectorXd r_zero_sp = Eigen::VectorXd::Zero(1);
+        for (int k = 0; k < 300; ++k)
+        {
+            Eigen::VectorXd ym(1);
+            ym << (plant_sp.C * x_lqg)(0);
+            up_sp = lqg_sp.step(ym, up_sp, r_zero_sp);
+            ctrl::ssStep(plant_sp, x_lqg, up_sp);
+        }
+        const double lqg_residual = std::abs(x_lqg(0));
+
+        // LQG with near-perfect observer must settle at least as well as LQR (within 10x)
+        test::check(lqg_residual < lqr_residual * 10.0 + 1e-6,
+                    "LQG: separation principle - LQG residual close to LQR with tiny process noise");
+    }
 }
 
 // ============================================================
@@ -1187,6 +1237,26 @@ void test_rls()
         test::no_throw([&]
                        { rls2.toStateSpace(); }, "RLS: toStateSpace no throw");
     }
+
+    // D == 0 for a pure ARX (delay-1) model.
+    // ARX: y[k] = 0.5*y[k-1] + 0.3*u[k-1] has no direct feedthrough (b0 = 0).
+    // toStateSpace() must produce D(0,0) == 0; if the b0=0 prepend is missing,
+    // tf2ss sets D = b1 and the test catches the regression.
+    {
+        ctrl::RecursiveLeastSquares rls3(1, 1, Ts, 0.99, 1e4);
+        double yp3 = 0.0, up3 = 0.0;
+        for (int k = 0; k < 500; ++k)
+        {
+            double y_k = 0.5 * yp3 + 0.3 * up3;
+            double u_k = std::sin(k * 0.3) + std::cos(k * 0.7);
+            rls3.update(y_k, u_k);
+            yp3 = y_k;
+            up3 = u_k;
+        }
+        ctrl::StateSpace ss3 = rls3.toStateSpace();
+        test::check(std::abs(ss3.D(0, 0)) < 1e-4,
+                    "RLS: toStateSpace D==0 for ARX delay-1 model (b0 prepend)");
+    }
 }
 
 // ============================================================
@@ -1348,6 +1418,35 @@ void test_ukf()
         }
         test::check((ukf2.state() - kf.state()).norm() < 0.1,
                     "UKF: matches KF for linear system");
+    }
+
+    // PSD maintenance: covariance must remain positive semidefinite over 200 steps.
+    // Raw subtraction P -= K*Syy*K' can violate PSD under round-off; the eigenvalue
+    // floor in update() must catch this. A Cholesky failure in sigmaPoints() would
+    // produce garbage or throw before this check fires -- catch that too.
+    {
+        ctrl::UnscentedKalmanFilter ukf3(n, p, f, h, Qn, Rn, Ts,
+                                          Eigen::MatrixXd(), 1e-3, 2.0, 0.0);
+        Eigen::VectorXd xs3 = Eigen::VectorXd::Zero(n);
+        xs3(0) = 1.0;
+        bool psd_ok = true;
+        for (int k = 0; k < 200; ++k)
+        {
+            Eigen::VectorXd uk3(1);
+            uk3 << std::sin(k * 0.2) + 0.1 * std::cos(k * 1.7);
+            Eigen::VectorXd ym3 = plt.C * xs3;
+            test::no_throw([&] { ukf3.step(ym3, uk3); },
+                           "UKF PSD: step() no throw at k=" + std::to_string(k));
+            xs3 = plt.A * xs3 + plt.B * uk3;
+
+            Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig(ukf3.covariance());
+            if (eig.eigenvalues().minCoeff() < -1e-9)
+            {
+                psd_ok = false;
+                break;
+            }
+        }
+        test::check(psd_ok, "UKF: covariance P remains PSD over 200 steps");
     }
 }
 
@@ -1737,6 +1836,7 @@ void test_subspace_id()
 // ============================================================
 //  22. DiscreteHinf / MixedSensitivity tests
 // ============================================================
+#ifndef CTRL_DISABLE_HINF
 void test_hinf()
 {
     test::suite("DiscreteHinf");
@@ -2016,6 +2116,7 @@ void test_hinf()
                     "HInf: Y_inf is positive semi-definite");
     }
 }
+#endif // CTRL_DISABLE_HINF
 
 int main()
 {
@@ -2047,7 +2148,9 @@ int main()
     test_gpc();
     test_system_analysis();
     test_subspace_id();
-    // test_hinf(); // Temporarily disable H-infinity tests due to numerical issues in CI
+#ifndef CTRL_DISABLE_HINF
+    test_hinf();
+#endif
 
     test::report();
     return (test::failed == 0) ? 0 : 1;

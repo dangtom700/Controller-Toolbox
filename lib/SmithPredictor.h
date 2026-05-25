@@ -19,6 +19,16 @@
 //   Correction: c    = yhat - z^-^dyhat       (delay-induced error cancelled)
 //
 // Requirements: plant model P0 must represent the delay-FREE dynamics.
+//
+// Limitation - fractional dead times: delaySteps must be a positive integer.
+// If the true dead time theta is not a multiple of Ts, users must round:
+//   delaySteps = std::lround(theta / Ts)
+// For plants where theta falls between 0.5 and 1.5 sample times the rounding
+// error is significant. The standard fix is a first-order Pade approximant for
+// the fractional part (theta_frac = theta - floor(theta/Ts)*Ts):
+//   H_pade(z) approx (1 - 0.5*theta_frac/Ts * z^{-1}) / (1 + 0.5*theta_frac/Ts * z^{-1})
+// Absorb H_pade into P0 before passing to the constructor when sub-sample accuracy matters.
+//
 // Ref: Smith (1957); Astrom & Wittenmark "Computer Controlled Systems" Section 6.4;
 //      MATLAB Smith Predictor example (smithpredict documentation).
 namespace ctrl
