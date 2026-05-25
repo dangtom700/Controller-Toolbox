@@ -104,7 +104,7 @@ namespace ctrl
 
         void buildPredictionMatrices(); // depends on plant model (A, B, C)
         void buildCostMatrix();         // depends on weights (rho_y, rho_u) and Phi_
-        void buildCondensedMatrices();  // calls both — used by constructor and setPlant()
+        void buildCondensedMatrices();  // calls both - used by constructor and setPlant()
     };
 
 } // namespace ctrl

@@ -87,18 +87,18 @@ int main()
     // Hammerstein model: the true plant is the NOMINAL linear dynamics (fixed A,
     // single consistent state vector) with a nonlinear static output gain k_pH(y).
     // The nonlinearity scales the output AFTER state propagation, not the model
-    // matrices — re-creating StateSpace every step would break state continuity.
+    // matrices - re-creating StateSpace every step would break state continuity.
     const int N = 240;   // 480 s total
 
     // Nominal linear plant used for state integration (k=k_nom, fixed)
     ctrl::StateSpace base_plant = buildPlantSS(k_nom, Ts);
-    // State vectors — propagated consistently against the single base_plant
+    // State vectors - propagated consistently against the single base_plant
     Eigen::VectorXd xf = Eigen::VectorXd::Zero(1);
     Eigen::VectorXd xa = Eigen::VectorXd::Zero(1);
 
-    // Steady-state IC: at u=0, y=7 → x = y/(k_nom*(1-a)) for first-order ZOH
+    // Steady-state IC: at u=0, y=7 -> x = y/(k_nom*(1-a)) for first-order ZOH
     // i.e. C*x = 1*x, B=k_nom*(1-a), so x_ss = y_ss / (k_nom*(1-a_disc)) * ...
-    // Simpler: just start x=0 and let the sim settle — or pre-solve:
+    // Simpler: just start x=0 and let the sim settle - or pre-solve:
     // y_ss = C*(I-A)^-1*B*u_ss  with u_ss=0 => x_ss=0, y_ss=0.
     // We'll bias the output by pH0=7 additively to represent absolute pH.
     double yf = pH0, ya = pH0;   // absolute pH outputs

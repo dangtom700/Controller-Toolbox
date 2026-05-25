@@ -86,7 +86,7 @@ void PhysicsPlant::step(const Vector3d& tau_main, const Vector3d& tau_env)
             X_(i) = 0.0;
     }
 
-    // Wrap heading to (-pi, pi] in O(1) — safe for all finite values.
+    // Wrap heading to (-pi, pi] in O(1) - safe for all finite values.
     X_(2) = std::remainder(X_(2), 2.0 * M_PI);
 }
 

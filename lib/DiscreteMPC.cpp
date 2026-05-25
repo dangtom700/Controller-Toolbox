@@ -22,7 +22,7 @@ namespace ctrl
     }
 
     // ---------------------------------------------------------------------------
-    // buildPredictionMatrices — plant-dependent only (A, B, C).
+    // buildPredictionMatrices - plant-dependent only (A, B, C).
     // Call when the state-space model changes (setPlant).
     //
     //   F(i.p : (i+1).p, :) = C . A^{i+1}        i = 0...Np-1
@@ -63,7 +63,7 @@ namespace ctrl
     }
 
     // ---------------------------------------------------------------------------
-    // buildCostMatrix — weight-dependent only (rho_y, rho_u).
+    // buildCostMatrix - weight-dependent only (rho_y, rho_u).
     // Requires Phi_ to be current. Call after buildPredictionMatrices or
     // whenever rho_y / rho_u change.
     // ---------------------------------------------------------------------------
@@ -100,7 +100,7 @@ namespace ctrl
         cumMax_.resize(m);
     }
 
-    // Full rebuild — plant model + cost matrices. Used by constructor and setPlant().
+    // Full rebuild - plant model + cost matrices. Used by constructor and setPlant().
     void DiscreteMPC::buildCondensedMatrices()
     {
         buildPredictionMatrices();
@@ -205,7 +205,7 @@ namespace ctrl
     {
         const bool horizon_changed = (p.Np != p_.Np) || (p.Nc != p_.Nc);
         p_ = p;
-        // Horizon changes affect F_, Phi_, Gu_ — full rebuild required.
+        // Horizon changes affect F_, Phi_, Gu_ - full rebuild required.
         // Weight-only changes (rho_y, rho_u) only need to rebuild H_, L_, ldlt_.
         if (horizon_changed)
             buildCondensedMatrices();

@@ -14,7 +14,7 @@ namespace ctrl
 {
 
 // =============================================================================
-// DiscreteHinf — constructor and runtime
+// DiscreteHinf - constructor and runtime
 // =============================================================================
 
 DiscreteHinf::DiscreteHinf(const HinfResult &result)
@@ -36,7 +36,7 @@ DiscreteHinf::DiscreteHinf(const HinfResult &result)
 
 double DiscreteHinf::compute(double signal)
 {
-    // signal = y[k], the measurement (NOT tracking error — H-inf is output-feedback)
+    // signal = y[k], the measurement (NOT tracking error - H-inf is output-feedback)
     Eigen::VectorXd y(1);
     y(0) = signal;
     return computeVec(y)(0);
@@ -58,7 +58,7 @@ void DiscreteHinf::reset()
 }
 
 // =============================================================================
-// DARE solver — symplectic QZ eigendecomposition for indefinite R
+// DARE solver - symplectic QZ eigendecomposition for indefinite R
 //
 // Solves: A'XA - X - A'XB (R + B'XB)^{-1} B'XA + Q = 0
 //
@@ -189,7 +189,7 @@ DiscreteHinf::DareOut DiscreteHinf::solveHinfDARE(
 }
 
 // =============================================================================
-// trySolve — attempt H-inf synthesis at a fixed gamma
+// trySolve - attempt H-inf synthesis at a fixed gamma
 //
 // Returns true iff all DGKF conditions are satisfied:
 //   (C1) Control DARE for X_inf has a stabilising solution (X_inf >= 0,
@@ -266,7 +266,7 @@ bool DiscreteHinf::trySolve(const GeneralisedPlant &P, double gamma,
     }
 
     // -----------------------------------------------------------------------
-    // Control DARE — full form with D11, D12 (Iglesias & Glover 1991, Eq. 2)
+    // Control DARE - full form with D11, D12 (Iglesias & Glover 1991, Eq. 2)
     //
     // Define the block matrix:
     //   Theta_x = [gamma^2 I_nw   0     ] + [D11' ] [D11 D12]
@@ -292,7 +292,7 @@ bool DiscreteHinf::trySolve(const GeneralisedPlant &P, double gamma,
     Rx.bottomLeftCorner(nu, nw)      =  D12.transpose() * D11;
     Rx.bottomRightCorner(nu, nu)     =  D12.transpose() * D12 - Eigen::MatrixXd::Identity(nu, nu);
 
-    // Q_x = C1'C1  (cross terms D11'C1 enter via the off-diagonal R_x — the
+    // Q_x = C1'C1  (cross terms D11'C1 enter via the off-diagonal R_x - the
     // structured doubling algorithm absorbs them when R_x is fully populated.)
     const Eigen::MatrixXd Qx = C1.transpose() * C1;
 
@@ -317,7 +317,7 @@ bool DiscreteHinf::trySolve(const GeneralisedPlant &P, double gamma,
     if (esX.eigenvalues().minCoeff() < -1e-6) return false;
 
     // -----------------------------------------------------------------------
-    // Filter DARE — full form with D11, D21 (dual of control problem)
+    // Filter DARE - full form with D11, D21 (dual of control problem)
     //
     // R_y = [gamma^2*I_nz + D11*D11',   D11*D21']
     //       [D21*D11',                   D21*D21' - I_ny]
@@ -416,7 +416,7 @@ bool DiscreteHinf::trySolve(const GeneralisedPlant &P, double gamma,
 }
 
 // =============================================================================
-// solve — bisection on gamma to find minimum achievable H-inf norm
+// solve - bisection on gamma to find minimum achievable H-inf norm
 // =============================================================================
 HinfResult DiscreteHinf::solve(const GeneralisedPlant &P, const HinfParams &params)
 {
@@ -447,7 +447,7 @@ HinfResult DiscreteHinf::solve(const GeneralisedPlant &P, const HinfParams &para
 
     // Warn if D22 is nonzero: the DGKF assembly formulas in trySolve() assume D22=0.
     // For plants with direct feedthrough, apply a loop-shifting pre-processing step
-    // before calling solve() (see Skogestad & Postlethwaite §9.4).
+    // before calling solve() (see Skogestad & Postlethwaite Section 9.4).
     if (P.D22.norm() > 1e-12)
         std::cerr << "[DiscreteHinf] WARNING: generalised plant D22 is nonzero (norm="
                   << P.D22.norm() << "). The standard DGKF assembly assumes D22=0. "
@@ -455,7 +455,7 @@ HinfResult DiscreteHinf::solve(const GeneralisedPlant &P, const HinfParams &para
                   << "with a plant that has no direct feedthrough (D=0).\n";
 
     // Gamma bisection: find the smallest gamma in (gammaLo, gammaInit) that is feasible.
-    // gammaLo is set to max(||D11||_2, 1e-4) — the Iglesias-Glover lower bound (Lemma 2.1)
+    // gammaLo is set to max(||D11||_2, 1e-4) - the Iglesias-Glover lower bound (Lemma 2.1)
     // below which no feasible synthesis exists regardless of the DARE solutions.
     double gammaHi  = params.gammaInit;
     double gammaLo;
@@ -510,9 +510,9 @@ HinfResult DiscreteHinf::solve(const GeneralisedPlant &P, const HinfParams &para
 }
 
 // =============================================================================
-// MixedSensitivity — weight factory and generalised plant builder
+// MixedSensitivity - weight factory and generalised plant builder
 //
-// Weight designs follow Skogestad & Postlethwaite Ch. 2–3 (2005).
+// Weight designs follow Skogestad & Postlethwaite Ch. 2-3 (2005).
 // All continuous-time weights are discretised using the Tustin transform.
 // =============================================================================
 
@@ -599,7 +599,7 @@ StateSpace MixedSensitivity::makeW3(double omega_T, double Mt, double eps, doubl
 }
 
 // =============================================================================
-// MixedSensitivity::build — assemble the generalised plant
+// MixedSensitivity::build - assemble the generalised plant
 //
 // Augmented state: xa = [xG; xW1; xW2; xW3]   (n = nG + nW1 + nW2 + nW3)
 //

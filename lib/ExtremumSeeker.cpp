@@ -29,7 +29,7 @@ namespace ctrl
     // ---------------------------------------------------------------------------
     double ExtremumSeeker::compute(double y)
     {
-        // Advance phase accumulator — stays bounded in [0, 2pi) for arbitrarily long runs,
+        // Advance phase accumulator - stays bounded in [0, 2pi) for arbitrarily long runs,
         // avoiding the floating-point precision loss of step_ * Ts_ at large step counts
         // and the 32-bit overflow of a long counter on embedded targets.
         phase_ = std::fmod(phase_ + 2.0 * M_PI * p_.perturbFreq * Ts_, 2.0 * M_PI);
@@ -41,7 +41,7 @@ namespace ctrl
         hpf_state_ = y_h;
         y_prev_ = y;
 
-        // Demodulate using the same phase_ as the dither — coherent demodulation
+        // Demodulate using the same phase_ as the dither - coherent demodulation
         const double demod = y_h * std::sin(phase_);
 
         // LPF

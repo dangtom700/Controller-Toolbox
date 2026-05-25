@@ -38,10 +38,10 @@
 //
 // -- Algorithm ---------------------------------------------------------------
 //
-// Discrete DGKF (Doyle, Glover, Khargonekar & Francis 1989 — discrete version
+// Discrete DGKF (Doyle, Glover, Khargonekar & Francis 1989 - discrete version
 // by Stoorvogel 1992 / Iglesias & Glover 1991):
 //
-//  Assumptions (relaxed form — checked in solve()):
+//  Assumptions (relaxed form - checked in solve()):
 //   (A1) (A, B2) is stabilisable,   (A, C2) is detectable
 //   (A2) D12 has full column rank,  D21 has full row rank
 //   (A3) D22 = 0  (standard form; MixedSensitivity guarantees this)
@@ -161,11 +161,11 @@ struct HinfResult
     int    dareItersY   = 0;
     bool   dareConvX    = false;
     bool   dareConvY    = false;
-    double spectralRadius = 0.0; // rho(X_inf * Y_inf) — must be < gamma^2
+    double spectralRadius = 0.0; // rho(X_inf * Y_inf) - must be < gamma^2
 };
 
 // ---------------------------------------------------------------------------
-// DiscreteHinf — dynamic output-feedback H-inf controller
+// DiscreteHinf - dynamic output-feedback H-inf controller
 //
 // Implements K(z):
 //   xk[k+1] = Ak xk[k] + Bk y[k]
@@ -223,7 +223,7 @@ private:
     double Ts_;
     double gamma_;
 
-    // Core DARE solver (doubling algorithm — same implementation strategy as DiscreteLQR).
+    // Core DARE solver (doubling algorithm - same implementation strategy as DiscreteLQR).
     // Solves: A'XA - X - A'XB(R+B'XB)^{-1}B'XA + Q = 0
     // where R may be indefinite (the gamma-scaled Hamiltonian form).
     // Returns {solution, converged, iterations}.
@@ -242,16 +242,16 @@ private:
 
 
 // =============================================================================
-// MixedSensitivity — Helper that builds a generalised plant for S/KS/T design
+// MixedSensitivity - Helper that builds a generalised plant for S/KS/T design
 //
 // Augments a SISO discrete-time plant G(z) with three weighting transfer
 // functions (as state-space models) to form:
 //
-//   Objective:  ||[ W1(z)·S(z)  ]||
-//               ||[ W2(z)·K(z)S ]||  < gamma
-//               ||[ W3(z)·T(z)  ]||  inf
+//   Objective:  ||[ W1(z).S(z)  ]||
+//               ||[ W2(z).K(z)S ]||  < gamma
+//               ||[ W3(z).T(z)  ]||  inf
 //
-// where S = 1/(1+GK),  T = GK/(1+GK),  KS = K·S.
+// where S = 1/(1+GK),  T = GK/(1+GK),  KS = K.S.
 //
 // -- Weight Guidelines -------------------------------------------------------
 //
@@ -267,7 +267,7 @@ private:
 //
 //   W3 (robustness / unmodelled dynamics):
 //     - Complements S; ensures T rolls off at high frequencies.
-//     - Typical: W3 = (s + omega_B/Mt) / (eps·s + omega_B)
+//     - Typical: W3 = (s + omega_B/Mt) / (eps.s + omega_B)
 //       => rolls up above omega_B with asymptotic gain 1/eps.
 //
 // -- Usage -------------------------------------------------------------------
@@ -299,7 +299,7 @@ public:
     // Weight factory functions (discrete-time, first-order state-space)
     // -----------------------------------------------------------------------
 
-    // W1 — sensitivity weight for tracking/disturbance rejection.
+    // W1 - sensitivity weight for tracking/disturbance rejection.
     //   Low-freq gain  ~ 1/eps  (large, enforces tight tracking at DC)
     //   Crossover at   omega_B  [rad/s]
     //   High-freq gain ~ M      (upper bound on |W1| at high frequencies)
@@ -308,18 +308,18 @@ public:
     //   Continuous: W1(s) = (s/M + omega_B) / (s + omega_B * eps)
     static StateSpace makeW1(double omega_B, double M, double eps, double Ts);
 
-    // W2 — scalar constant weight (flat gain at all frequencies).
+    // W2 - scalar constant weight (flat gain at all frequencies).
     //   Useful for simple actuator-level constraints: set gain = 1/u_max.
     static StateSpace makeW2constant(double gain, double Ts);
 
-    // W2 — first-order high-pass weight for control effort roll-off.
+    // W2 - first-order high-pass weight for control effort roll-off.
     //   Low-freq gain  ~ eps   (allows large low-frequency control)
     //   High-freq gain ~ 1     (limits high-frequency control effort)
     //   Rolloff at     omega_u [rad/s]
     //   Continuous: W2(s) = (s + omega_u * eps) / (s/1 + omega_u)
     static StateSpace makeW2highpass(double omega_u, double eps, double Ts);
 
-    // W3 — complementary-sensitivity weight for robustness.
+    // W3 - complementary-sensitivity weight for robustness.
     //   Low-freq gain  ~ eps   (allows T ~ 1 at low frequencies)
     //   High-freq gain ~ 1/Mt  (forces T rolloff above omega_T)
     //   Continuous: W3(s) = (s + omega_T / Mt) / (eps * s + omega_T)
@@ -333,10 +333,10 @@ public:
     // The augmented state is: xa = [xG; xW1; xW2; xW3]
     //
     // Generalised plant structure:
-    //   Exogenous inputs w = [r; d]  (reference and output disturbance) — nw = 2
-    //   Performance outputs z = [W1*(r-y); W2*u; W3*y]                — nz = 3
-    //   Control input u                                                — nu = 1
-    //   Measurement output y = G*u + d                                — ny = 1
+    //   Exogenous inputs w = [r; d]  (reference and output disturbance) - nw = 2
+    //   Performance outputs z = [W1*(r-y); W2*u; W3*y]                - nz = 3
+    //   Control input u                                                - nu = 1
+    //   Measurement output y = G*u + d                                - ny = 1
     //
     // For a pure reference-tracking design, d is left connected but may be
     // set to zero during simulation.

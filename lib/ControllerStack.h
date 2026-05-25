@@ -26,7 +26,7 @@
 //   excluded from the denominator, so the remaining controllers automatically "fill" the
 //   full output range.  Set all activationConditions to nullptr for a static blend.
 //
-//   Example — two controllers with weights [0.7, 0.3]:
+//   Example - two controllers with weights [0.7, 0.3]:
 //     Both active:   u = (0.7*u0 + 0.3*u1) / (0.7 + 0.3) = 0.7*u0 + 0.3*u1
 //     Entry 0 gates out: u = (0.3*u1) / (0.3) = u1   (entry 1 gets full authority)
 //   This means "weight" is a relative preference, not a fixed gain.

@@ -1,4 +1,4 @@
-# Boiler Control — Full Numerical Simulation: Implementation Plan
+# Boiler Control - Full Numerical Simulation: Implementation Plan
 
 > **Goal:** Restructure the Boiler Control case study into a modular multi-file simulation
 > matching the Tug Boat Numerical Simulation architecture, and expand it to exercise
@@ -6,11 +6,11 @@
 
 ---
 
-## 1. Background — What Already Exists
+## 1. Background - What Already Exists
 
 The current `boiler_turbine_case_study.cpp` is a single monolithic file (~830 lines) that:
 
-- Implements the Bell & Åström (1987) nonlinear boiler-turbine plant  
+- Implements the Bell & Astrom (1987) nonlinear boiler-turbine plant  
 - Linearises around 3 operating points (Low / Medium / High Load)  
 - Runs 6 controller experiments per operating point: LQR, MPC, LQG+Kalman, PID, SMC, ESC  
 
@@ -46,48 +46,48 @@ The current `boiler_turbine_case_study.cpp` is a single monolithic file (~830 li
 
 ```
 case-study/Boiler Control/
-├── CMakeLists.txt                   (updated — links controller_toolbox)
-├── IMPLEMENTATION_PLAN.md           (this file)
-├── config/
-│   ├── plant_params.json            (all physical constants, Ts, valve bounds)
-│   └── scenarios/
-│       ├── s01_lowload_regulation.json
-│       ├── s02_medload_regulation.json
-│       ├── s03_highload_regulation.json
-│       ├── s04_lowload_loadstep.json
-│       ├── s05_medload_loadstep.json
-│       ├── s06_highload_loadstep.json
-│       └── s07_multiop_transition.json
-├── logs/                            (auto-created at runtime)
-├── sim/
-│   ├── include/
-│   │   ├── boiler_plant.h           (BoilerTurbine class + operating points)
-│   │   ├── linearizer.h             (linearize() + LinearStateSpace struct)
-│   │   ├── controllers.h            (ControllerBase + all controller declarations)
-│   │   ├── simulation_runner.h      (ScenarioConfig + runSimulation())
-│   │   └── telemetry_logger.h       (BoilerLogger — CSV + metrics)
-│   └── src/
-│       ├── boiler_plant.cpp
-│       ├── linearizer.cpp
-│       ├── controllers.cpp          (all controller implementations)
-│       ├── simulation_runner.cpp
-│       ├── telemetry_logger.cpp
-│       └── main.cpp
+|-- CMakeLists.txt                   (updated - links controller_toolbox)
+|-- IMPLEMENTATION_PLAN.md           (this file)
+|-- config/
+|   |-- plant_params.json            (all physical constants, Ts, valve bounds)
+|   |-- scenarios/
+|       |-- s01_lowload_regulation.json
+|       |-- s02_medload_regulation.json
+|       |-- s03_highload_regulation.json
+|       |-- s04_lowload_loadstep.json
+|       |-- s05_medload_loadstep.json
+|       |-- s06_highload_loadstep.json
+|       |-- s07_multiop_transition.json
+|-- logs/                            (auto-created at runtime)
+|-- sim/
+|   |-- include/
+|   |   |-- boiler_plant.h           (BoilerTurbine class + operating points)
+|   |   |-- linearizer.h             (linearize() + LinearStateSpace struct)
+|   |   |-- controllers.h            (ControllerBase + all controller declarations)
+|   |   |-- simulation_runner.h      (ScenarioConfig + runSimulation())
+|   |   |-- telemetry_logger.h       (BoilerLogger - CSV + metrics)
+|   |-- src/
+|       |-- boiler_plant.cpp
+|       |-- linearizer.cpp
+|       |-- controllers.cpp          (all controller implementations)
+|       |-- simulation_runner.cpp
+|       |-- telemetry_logger.cpp
+|       |-- main.cpp
 ```
 
 This mirrors the tug boat layout exactly:  
-`plant_parameters` → `boiler_plant` + `linearizer`  
-`environment` → (no equivalent; disturbances are scenario-driven)  
-`physics_plant` → `boiler_plant` (nonlinear ODE stepper)  
-`controllers` → `controllers`  
-`simulation_runner` → `simulation_runner`  
-`telemetry_logger` → `telemetry_logger`
+`plant_parameters` -> `boiler_plant` + `linearizer`  
+`environment` -> (no equivalent; disturbances are scenario-driven)  
+`physics_plant` -> `boiler_plant` (nonlinear ODE stepper)  
+`controllers` -> `controllers`  
+`simulation_runner` -> `simulation_runner`  
+`telemetry_logger` -> `telemetry_logger`
 
 ---
 
 ## 3. Plant Model (`boiler_plant`)
 
-Retain the existing Bell-Åström nonlinear ODE exactly as-is:
+Retain the existing Bell-Astrom nonlinear ODE exactly as-is:
 
 ```
 States  x = [x1, x2, x3]
@@ -106,7 +106,7 @@ Outputs y = [y1, y2, y3]
          y3 = boiler efficiency proxy (nonlinear function of x, u)
 ```
 
-Valve rate limits: |Δu1| ≤ 0.007/step, |Δu2| ≤ 0.02/step, |Δu3| ≤ 0.05/step.
+Valve rate limits: |Deltau1| <= 0.007/step, |Deltau2| <= 0.02/step, |Deltau3| <= 0.05/step.
 
 **Three operating points** (unchanged):
 
@@ -122,9 +122,9 @@ Valve rate limits: |Δu1| ≤ 0.007/step, |Δu2| ≤ 0.02/step, |Δu3| ≤ 0.05/
 
 The Jacobian linearisation already in the code is correct. Two additions:
 
-1. **ZOH discretisation** — replace the current Euler forward (`Ad = I + Ts·Ac`) with
+1. **ZOH discretisation** - replace the current Euler forward (`Ad = I + Ts.Ac`) with
    `ctrl::c2d(plant_c, Ts, ctrl::C2dMethod::ZOH)` via the toolbox for accuracy.
-2. **Gain matrix for output feedback** — compute `Nbar` feedforward matrix
+2. **Gain matrix for output feedback** - compute `Nbar` feedforward matrix
    for setpoint tracking experiments (not just regulation).
 
 Returns a `LinearStateSpace` holding `ctrl::StateSpace` (double, not float).
@@ -153,7 +153,7 @@ For load-step scenarios:
 ```json
 {
   "id":          "s04_lowload_loadstep",
-  "description": "Step demand: Low Load → 120% rated power",
+  "description": "Step demand: Low Load -> 120% rated power",
   "operating_point": "A",
   "mode":        "tracking",
   "setpoint_y":  [10.0, 20.0, 0.0],
@@ -163,9 +163,9 @@ For load-step scenarios:
 ```
 
 Seven scenarios total:
-- s01–s03: perturbation regulation at each operating point (same Δx₀ as existing code)
-- s04–s06: load-step tracking at each operating point
-- s07: multi-operating-point transition (A → B midway through simulation)
+- s01-s03: perturbation regulation at each operating point (same Deltax0 as existing code)
+- s04-s06: load-step tracking at each operating point
+- s07: multi-operating-point transition (A -> B midway through simulation)
 
 ---
 
@@ -189,9 +189,9 @@ Output = control increment `du = [du1, du2, du3]`; absolute valve = `u0 + du`, c
 
 ---
 
-### 6.1 PID — Decentralised SISO (existing, kept)
+### 6.1 PID - Decentralised SISO (existing, kept)
 
-Three independent `ctrl::DiscretePID` loops: `e_y1 → du1`, `e_y2 → du2`, `e_y3 → du3`.
+Three independent `ctrl::DiscretePID` loops: `e_y1 -> du1`, `e_y2 -> du2`, `e_y3 -> du3`.
 
 **Tuning:** `StepResponseTuner::identify()` on each diagonal channel of the linearised model,
 then `StepResponseTuner::computePIDParams(..., PIDTuningRule::IMC)`.  
@@ -199,44 +199,44 @@ Anti-windup: `Kb = 1/Ti`.
 
 ---
 
-### 6.2 LQR — Full-State Feedback (existing, refactored)
+### 6.2 LQR - Full-State Feedback (existing, refactored)
 
 `ctrl::DiscreteLQR` with Bryson weights:  
 `xmax = [5, 10, 1]` (pressure, power, level),  
 `umax = [0.3, 0.3, 0.1]` (valve deviations).
 
 For tracking scenarios: compute feedforward gain  
-`Nbar = -(C·(A_cl - I)⁻¹·B)⁻¹` to eliminate steady-state error.
+`Nbar = -(C.(A_cl - I)^-^1.B)^-^1` to eliminate steady-state error.
 
 ---
 
-### 6.3 MPC — Condensed MIMO QP (existing, refactored)
+### 6.3 MPC - Condensed MIMO QP (existing, refactored)
 
 `ctrl::DiscreteMPC` with `computeRef()` for tracking.
 
 Horizon selection: `ctrl::MPCHorizonTuner::recommend()`, capped at Np=20, Nc=5
 (integrating water-level mode would otherwise request Np=5000).
 
-Separate `uMin`/`uMax` = ±0.5 (valve increment bounds), with absolute valve clamped
+Separate `uMin`/`uMax` = +/-0.5 (valve increment bounds), with absolute valve clamped
 after each step.
 
 ---
 
-### 6.4 LQG — LQR + Linear Kalman Filter (existing, refactored)
+### 6.4 LQG - LQR + Linear Kalman Filter (existing, refactored)
 
 `ctrl::DiscreteLQG` on the nonlinear plant with measurement noise:
 
-| Channel | σ_meas |
+| Channel | sigma_meas |
 |---------|--------|
 | y1 (pressure) | 0.5 bar |
 | y2 (power)    | 1.0 MW  |
 | y3 (efficiency) | 5.0 % |
 
-Process noise covariance Q = 1e-4 · I.
+Process noise covariance Q = 1e-4 . I.
 
 ---
 
-### 6.5 SMC — Decentralised Sliding Mode (existing, refactored)
+### 6.5 SMC - Decentralised Sliding Mode (existing, refactored)
 
 Three `ctrl::DiscreteSMC` loops. Parameters from existing code:
 `c_e=1.0, c_de=0.2, K=0.05, phi=0.3`.
@@ -245,7 +245,7 @@ For tracking scenarios, reference is the non-zero setpoint deviation.
 
 ---
 
-### 6.6 ESC — Extremum Seeking on Efficiency (existing, refactored)
+### 6.6 ESC - Extremum Seeking on Efficiency (existing, refactored)
 
 `ctrl::ExtremumSeeker` on `u3` to maximise `y3` (efficiency proxy) while
 `u1, u2` are regulated by PID to hold `y1, y2` at setpoint.
@@ -254,7 +254,7 @@ Parameters: `perturbAmp=0.005`, `perturbFreq=0.02 Hz`, `seekMinimum=false`.
 
 ---
 
-### 6.7 ADRC — Active Disturbance Rejection Control (new)
+### 6.7 ADRC - Active Disturbance Rejection Control (new)
 
 Three `ctrl::DiscreteADRC` loops (one per output axis).
 
@@ -264,16 +264,16 @@ nonlinear coupling terms without needing a full plant model.
 
 **Tuning per axis:**
 
-| Axis | ω_o (ESO BW) | ω_c (ctrl BW) | b₀ (input gain estimate) |
+| Axis | omega_o (ESO BW) | omega_c (ctrl BW) | b0 (input gain estimate) |
 |------|-------------|--------------|--------------------------|
 | y1 (pressure) | 0.10 rad/s | 0.02 rad/s | 0.9 (Bc[0,0]) |
-| y2 (power)    | 0.05 rad/s | 0.01 rad/s | 0.073·x1^(9/8) |
+| y2 (power)    | 0.05 rad/s | 0.01 rad/s | 0.073.x1^(9/8) |
 | y3 (efficiency) | 0.05 rad/s | 0.01 rad/s | Dc[2,2] |
 
-b₀ estimated from the diagonal of Bc and Dc at each operating point.
+b0 estimated from the diagonal of Bc and Dc at each operating point.
 
 **Why ADRC here:** The boiler is open-loop unstable in some regimes and has significant
-load-dependent gain variation — exactly the scenario ADRC was designed for.
+load-dependent gain variation - exactly the scenario ADRC was designed for.
 
 ---
 
@@ -284,8 +284,8 @@ One `ctrl::DiscreteLeadLag` per output channel, applied as pre-filter to PID
 
 **Design procedure:**  
 1. Identify FOPDT from linearised diagonal channel step response.  
-2. Compute crossover frequency ω_c for 45° phase margin.  
-3. `ctrl::LoopShapingTuner::tuneImpl()` → `ctrl::LeadLagParams`.  
+2. Compute crossover frequency omega_c for 45^\circ phase margin.  
+3. `ctrl::LoopShapingTuner::tuneImpl()` -> `ctrl::LeadLagParams`.  
 4. Cascade output into a proportional gain (no integral; integral is added by the
    downstream PID to handle steady-state).
 
@@ -313,7 +313,7 @@ longest effective response time.
 
 ### 6.10 Generalized Predictive Control (GPC) (new)
 
-`ctrl::GeneralizedPredictiveControl` — a self-tuning GPC that uses `ctrl::RecursiveLeastSquares`
+`ctrl::GeneralizedPredictiveControl` - a self-tuning GPC that uses `ctrl::RecursiveLeastSquares`
 to continuously estimate an ARX model online from closed-loop I/O data, then recomputes
 the GPC control law each step.
 
@@ -325,7 +325,7 @@ This is the only controller in the suite that performs **online system identific
 ARX order:   na=2, nb=2, nc=1   (2nd-order MISO per channel)
 Prediction horizon:  Ny=10
 Control horizon:     Nu=3
-Forgetting factor:   λ=0.98      (tracks slow operating point drift)
+Forgetting factor:   lambda=0.98      (tracks slow operating point drift)
 ```
 
 Why it matters: as the boiler transitions between load regimes (s07 scenario), the ARX model
@@ -337,12 +337,12 @@ automatically adapts, avoiding the need to pre-specify operating-point-dependent
 
 Replace the linear Kalman filter in the LQG design with `ctrl::ExtendedKalmanFilter`.
 
-The EKF linearises the **nonlinear** Bell-Åström plant at each step using the
+The EKF linearises the **nonlinear** Bell-Astrom plant at each step using the
 analytical Jacobian from `linearize()` (already implemented), rather than relying on
 a fixed linearisation at a single operating point.
 
 State dimension: 3 (x1, x2, x3).  
-Measurement: y = [x1, x2, y3(x,u)] — full-state + nonlinear efficiency output.
+Measurement: y = [x1, x2, y3(x,u)] - full-state + nonlinear efficiency output.
 
 The EKF-LQR pairing delivers near-optimal regulation even during large transients where
 the linear KF degrades.
@@ -351,7 +351,7 @@ the linear KF degrades.
 
 ### 6.12 Unscented Kalman Filter + LQR (UKF-LQR) (new)
 
-`ctrl::UnscentedKalmanFilter` — sigma-point propagation through the nonlinear plant.
+`ctrl::UnscentedKalmanFilter` - sigma-point propagation through the nonlinear plant.
 No Jacobian required. Useful for validating EKF accuracy and for regimes where the
 linearised Jacobian is ill-conditioned (near operating point C where x1=140 bar pushes
 against model validity).
@@ -406,31 +406,31 @@ MPC during the `s07_multiop_transition` scenario.
 
 ---
 
-### 6.15 Supervisory Stack — SMC → LQR (new)
+### 6.15 Supervisory Stack - SMC -> LQR (new)
 
 `ctrl::ControllerStack` in `StackMode::Supervisory`:
 
 - **Large error** (||e|| > 5): `ctrl::DiscreteSMC` handles fast nonlinear regime.
-- **Small error** (||e|| ≤ 5): `ctrl::DiscreteLQR` takes over for near-optimal regulation.
+- **Small error** (||e|| <= 5): `ctrl::DiscreteLQR` takes over for near-optimal regulation.
 
 Activation condition per axis independently evaluated.  
 Demonstrates bumpless transfer via `bumplessInit()`.
 
 ---
 
-### 6.16 Additive Stack — PID + Lead-Lag (new)
+### 6.16 Additive Stack - PID + Lead-Lag (new)
 
 `ctrl::ControllerStack` in `StackMode::Additive`:
 
-- Base: `ctrl::DiscretePID` (steady-state tracking, Ki ≠ 0)
+- Base: `ctrl::DiscretePID` (steady-state tracking, Ki != 0)
 - Supplement: `ctrl::DiscreteLeadLag` (transient phase kick)
 
-Weight of Lead-Lag component faded from 1.0 → 0.0 over the first 300 seconds
+Weight of Lead-Lag component faded from 1.0 -> 0.0 over the first 300 seconds
 (transient only).
 
 ---
 
-### 6.17 Weighted Stack — Load-Dependent Blending (new)
+### 6.17 Weighted Stack - Load-Dependent Blending (new)
 
 `ctrl::ControllerStack` in `StackMode::Weighted`:
 
@@ -475,9 +475,9 @@ Accumulated metrics (computed on flush):
 
 | Metric | Formula |
 |--------|---------|
-| IAE_y1/y2/y3 | ∫|e_i| dt |
-| ISE_y1/y2/y3 | ∫e_i² dt |
-| E_valve | Σ(du1²+du2²+du3²)·Ts (control effort) |
+| IAE_y1/y2/y3 | \int|e_i| dt |
+| ISE_y1/y2/y3 | \inte_i^2 dt |
+| E_valve | Sigma(du1^2+du2^2+du3^2).Ts (control effort) |
 | max_overshoot | max(y_i - ref_i) per channel |
 
 Printed to stdout at end of each run (same one-liner format as tug sim).
@@ -500,7 +500,7 @@ for k = 0..N_steps:
     dy = y - y_op                       // deviation from operating point
     du = controller.compute(ref_dy, dy) // controller in deviation space
     u  = clamp(u_op + du, 0, 1)        // absolute valve, clamped
-    bt.applyValveRateLimits(u)         // |Δu| per step constraint
+    bt.applyValveRateLimits(u)         // |Deltau| per step constraint
     bt.update()                         // nonlinear ODE step
     logger.log(...)
 logger.flush()
@@ -516,20 +516,20 @@ For `mode == "regulation"`: `ref_dy = [0,0,0]`, initial state perturbed by `dx0`
 
 ```
 main [base_dir]
-├── Load plant_params.json
-├── Enumerate scenarios/ → sorted vector
-├── Build controller vector (one instance each):
-│   PID, LQR, MPC, LQG, SMC, ESC,
-│   ADRC, LeadLag+PID, SmithPredictor,
-│   GPC+RLS, EKF-LQR, UKF-LQR,
-│   FuzzyPID, FuzzySup-MPC,
-│   SupervisoryStack, AdditiveStack, WeightedStack,
-│   RepetitiveController
-├── Run all (scenario × controller) pairs
-└── Print summary table
+|-- Load plant_params.json
+|-- Enumerate scenarios/ -> sorted vector
+|-- Build controller vector (one instance each):
+|   PID, LQR, MPC, LQG, SMC, ESC,
+|   ADRC, LeadLag+PID, SmithPredictor,
+|   GPC+RLS, EKF-LQR, UKF-LQR,
+|   FuzzyPID, FuzzySup-MPC,
+|   SupervisoryStack, AdditiveStack, WeightedStack,
+|   RepetitiveController
+|-- Run all (scenario * controller) pairs
+|-- Print summary table
 ```
 
-Total matrix: 7 scenarios × 18 controllers = **126 simulation runs**.
+Total matrix: 7 scenarios * 18 controllers = **126 simulation runs**.
 
 ---
 
@@ -579,11 +579,11 @@ The old `boiler_turbine_case_study` target is **removed** from the parent
 | P2 | `telemetry_logger.h/.cpp` | Straightforward port from tug logger |
 | P3 | `simulation_runner.h/.cpp` | Scenario JSON loading + loop |
 | P4 | `config/plant_params.json`, `config/scenarios/*.json` | 7 scenario files |
-| P5 | `controllers.h/.cpp` — Group A | Port PID, LQR, LQG, MPC, SMC, ESC (existing logic, new wrapper) |
-| P6 | `controllers.h/.cpp` — Group B | ADRC, LeadLag+PID, SmithPredictor |
-| P7 | `controllers.h/.cpp` — Group C | GPC+RLS, EKF-LQR, UKF-LQR |
-| P8 | `controllers.h/.cpp` — Group D | FuzzyPID, FuzzySup-MPC |
-| P9 | `controllers.h/.cpp` — Group E | SupervisoryStack, AdditiveStack, WeightedStack, RepetitiveController |
+| P5 | `controllers.h/.cpp` - Group A | Port PID, LQR, LQG, MPC, SMC, ESC (existing logic, new wrapper) |
+| P6 | `controllers.h/.cpp` - Group B | ADRC, LeadLag+PID, SmithPredictor |
+| P7 | `controllers.h/.cpp` - Group C | GPC+RLS, EKF-LQR, UKF-LQR |
+| P8 | `controllers.h/.cpp` - Group D | FuzzyPID, FuzzySup-MPC |
+| P9 | `controllers.h/.cpp` - Group E | SupervisoryStack, AdditiveStack, WeightedStack, RepetitiveController |
 | P10 | `main.cpp`, `CMakeLists.txt` | Wire everything; build + test |
 
 ---
@@ -596,20 +596,20 @@ at operating point B (medium load), it satisfies:
 | Controller | Acceptance criterion |
 |------------|---------------------|
 | PID | y1 error < 1 bar, y2 error < 2 MW after 600 s |
-| LQR / LQG / EKF / UKF | dx → 0 within 300 s |
-| MPC / GPC | dx → 0 within 200 s; no valve saturation sustained > 30 s |
+| LQR / LQG / EKF / UKF | dx -> 0 within 300 s |
+| MPC / GPC | dx -> 0 within 200 s; no valve saturation sustained > 30 s |
 | SMC | Settling within 400 s; chattering amplitude < 0.01 on du |
 | ADRC | Comparable settling to SMC; no manual Jacobian needed |
 | ESC | y3 increases or stays within 2% of optimum within 1000 s |
-| FuzzyPID | y1, y2 errors < 2× PID IAE |
-| Stacks | Active controller switches ≤ 5 times per run |
+| FuzzyPID | y1, y2 errors < 2* PID IAE |
+| Stacks | Active controller switches <= 5 times per run |
 | RepetitiveController | IAE in 2nd period < 50% IAE in 1st period |
 
 ---
 
 ## 13. Key Design Decisions
 
-1. **All controllers work in deviation space** — outputs from the controller are
+1. **All controllers work in deviation space** - outputs from the controller are
    `du`, not absolute `u`. Absolute valve is always `u = clamp(u_op + du, 0, 1)`.
    This means the same controller code works for both regulation (ref=0) and tracking
    (ref=setpoint deviation) without modification.
@@ -620,12 +620,12 @@ at operating point B (medium load), it satisfies:
 
 3. **The nonlinear plant is used for all closed-loop simulations** (not the linearised
    model). The linearised model is only used for controller design (LQR, MPC, LQG weights,
-   ADRC b₀, Lead-Lag frequency design, Smith Predictor model). This keeps the simulation
+   ADRC b0, Lead-Lag frequency design, Smith Predictor model). This keeps the simulation
    realistic and exposes model-plant mismatch.
 
 4. **ZOH discretisation replaces Euler** in the lineariser. This gives more accurate
    discrete eigenvalues especially for the faster pressure dynamics.
 
-5. **The GPC+RLS controller does not use the linearised model** at all — it identifies
+5. **The GPC+RLS controller does not use the linearised model** at all - it identifies
    its own ARX model online from closed-loop data, making it the most self-sufficient
    controller in the suite.

@@ -132,7 +132,7 @@ namespace ctrl
 
         // Step 1: Coarse logarithmic grid to locate crossover brackets (~200 evals).
         // Phase is unwrapped continuously across consecutive grid points so that
-        // sign-change detection for the -180° crossing works correctly for higher-order
+        // sign-change detection for the -180^\circ crossing works correctly for higher-order
         // plants and non-minimum-phase systems.
         const double w_min  = 1e-3;
         const double w_max  = kPi / sys.Ts;
@@ -147,7 +147,7 @@ namespace ctrl
             fw[i]  = w_min * std::pow(w_max / w_min, static_cast<double>(i) / (coarse - 1));
             auto g = evalAt(fw[i]);
             mag[i] = std::abs(g);
-            // Unwrap: add the smallest possible ±360° shift to keep the phase continuous
+            // Unwrap: add the smallest possible +/-360^\circ shift to keep the phase continuous
             double raw  = std::arg(g) * 180.0 / kPi;
             double diff = raw - pha[i - 1];
             while (diff >  180.0) diff -= 360.0;
@@ -157,7 +157,7 @@ namespace ctrl
 
         // Step 2: Bisection refinement over each bracket - converges in ~50 evals per crossing.
         // Bisection tracks the unwrapped phase by carrying the last known unwrapped value at
-        // the left endpoint (p_lo) and shifting the midpoint evaluation by ±360° to match.
+        // the left endpoint (p_lo) and shifting the midpoint evaluation by +/-360^\circ to match.
         const int bisect_iters = 50;
 
         StabilityMargins margins;

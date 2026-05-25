@@ -1552,7 +1552,7 @@ void test_system_analysis()
     {
         auto plant = make_plant();
         ctrl::StabilityMargins m = ctrl::SystemAnalysis::calculateMargins(plant);
-        // PM > 0 or infinite (infinite means the open-loop gain never reaches 1.0 — even
+        // PM > 0 or infinite (infinite means the open-loop gain never reaches 1.0 - even
         // better than a finite PM).  Both are valid for a stable well-damped plant.
         test::check(m.phaseMarginDeg > 0.0 || m.phaseMarginDeg == std::numeric_limits<double>::infinity(),
                     "SystemAnalysis: PM > 0 (or inf) for stable minimum-phase plant");
@@ -1772,7 +1772,7 @@ void test_hinf()
                         "HInf: W2constant DC gain = 0.2");
         }
 
-        // W1 DC gain ~ 1/eps (= 1000 for eps=1e-3) — check it's large
+        // W1 DC gain ~ 1/eps (= 1000 for eps=1e-3) - check it's large
         {
             // Compute DC gain analytically: H(z=1) = C*(I-A)^{-1}*B + D
             double A_w1 = W1.A(0, 0), B_w1 = W1.B(0, 0), C_w1 = W1.C(0, 0), D_w1 = W1.D(0, 0);
@@ -1929,7 +1929,7 @@ void test_hinf()
         test::check(std::isfinite(y_plant),
                     "HInf: closed-loop output is finite after 500 steps (full augmented sim)");
         // The synthesised controller should regulate y toward r=1.
-        // Use a generous tolerance — the achieved gamma and weight tuning govern exact steady-state.
+        // Use a generous tolerance - the achieved gamma and weight tuning govern exact steady-state.
         test::check(std::abs(y_plant - ref) < 0.5,
                     "HInf: closed-loop output converges toward reference (augmented plant sim)");
     }
