@@ -54,29 +54,23 @@ SmithPredictor::SmithPredictor(std::shared_ptr<IController> inner,
                                const StateSpace &delayModel,
                                double theta,
                                double Ts)
-    : inner_(std::move(inner)), model_(delayModel), Ts_(Ts)
-{
-    if (theta < 0.0)
-        throw std::invalid_argument("SmithPredictor: theta must be >= 0.");
-    if (std::abs(Ts - delayModel.Ts) > 1e-12)
-        throw std::invalid_argument(
-            "SmithPredictor: Ts must match delayModel.Ts.");
-
-    d_ = static_cast<int>(std::floor(theta / Ts));
-    const double theta_frac = theta - d_ * Ts;
-
-    if (theta_frac > 1e-12)
-    {
-        has_frac_    = true;
-        frac_filter_ = padeDelayFilter(theta_frac, Ts);
-    }
-    else
-    {
-        has_frac_    = false;
-        frac_filter_ = makeIdentityFilter(Ts);
-    }
-    initBuffers();
-}
+    : SmithPredictor(
+          std::move(inner),
+          delayModel,
+          [&]() -> int {
+              if (theta < 0.0)
+                  throw std::invalid_argument("SmithPredictor: theta must be >= 0.");
+              if (std::abs(Ts - delayModel.Ts) > 1e-12)
+                  throw std::invalid_argument(
+                      "SmithPredictor: Ts must match delayModel.Ts.");
+              return static_cast<int>(std::floor(theta / Ts));
+          }(),
+          [&]() -> StateSpace {
+              const int d = static_cast<int>(std::floor(theta / Ts));
+              const double tf = theta - d * Ts;
+              return tf > 1e-12 ? padeDelayFilter(tf, Ts) : makeIdentityFilter(Ts);
+          }())
+{}
 
 // ── compute ──────────────────────────────────────────────────────────────────
 

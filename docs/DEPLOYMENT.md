@@ -183,6 +183,60 @@ internal stack for small matrices (which is stack-allocated for `Matrix<double,N
 
 Add a 2* safety margin for OS/RTOS frame overhead and nested function calls.
 
+### AtomicParamBuffer — Lock-Free Parameter Updates
+
+Controllers whose gains are updated at runtime (gain scheduling, auto-tuning, operator override)
+face a race between the RT control thread calling `compute()` and the background thread writing
+new parameters.  A mutex stalls the RT thread.  `AtomicParamBuffer<Params>` solves this with a
+seqlock: the RT thread never blocks, the writer never corrupts a partially-read struct.
+
+**Pattern:**
+```cpp
+#include "AtomicParamBuffer.h"
+
+// Shared between RT and background threads:
+ctrl::AtomicParamBuffer<ctrl::PIDParams> param_buf({.Kp=1.0, .Ki=0.1, .Kd=0.0,
+                                                     .N=10.0, .uMin=-10.0, .uMax=10.0});
+ctrl::DiscretePID pid(param_buf.read(), Ts);
+
+// ── RT thread (every Ts) ──────────────────────────────────────────────────────
+void control_loop_tick() {
+    ctrl::PIDParams p = param_buf.read();   // zero-copy seqlock read; no blocking
+    pid.setParams(p);
+    double u = pid.compute(ref - y);
+    actuator.write(u);
+}
+
+// ── Background thread (tuner, scheduler, operator UI) ────────────────────────
+void on_new_gains(double Kp, double Ki) {
+    ctrl::PIDParams p = param_buf.latest();   // read current
+    p.Kp = Kp;
+    p.Ki = Ki;
+    param_buf.publish(p);                    // atomic publish; RT thread sees it next step
+}
+```
+
+**Guarantees:**
+- Single writer + single reader: fully lock-free on the reader side.
+- No torn reads: the reader retries automatically if a publish overlaps its read window
+  (typically zero retries; a publish takes ~5 ns).
+- `Params` must be trivially copyable — plain structs of `double`/`int`/`float` qualify.
+  `std::string`, `std::vector`, or pointer members are not allowed (compile-time `static_assert`).
+
+**When to use vs. not use:**
+| Scenario | Use AtomicParamBuffer? |
+|----------|----------------------|
+| Tuner output -> controller in separate threads | Yes |
+| Operator gain override from UI thread | Yes |
+| All parameter changes happen before the RT loop starts | No — just pass params at construction |
+| Multiple background threads write parameters concurrently | No — wrap `publish()` with a mutex; the reader-side remains lock-free |
+| MIMO controllers where `setPlant()` rebuilds matrices | No — matrix rebuild is not atomic; pause the RT loop during model updates |
+
+**Applies to:** all controllers that expose `setParams()` — `DiscretePID`, `DiscreteMPC`,
+`DiscreteLQR`, `DiscreteLeadLag`, `DiscreteSMC`, `DiscreteADRC`.
+
+---
+
 ### RTOS Considerations
 
 **Task priority:** The control task should run at the highest real-time priority in the RTOS.
@@ -310,8 +364,17 @@ destabilize the predictor for lightly damped plants.
 **Fix:** Measure the transport delay experimentally (step test, cross-correlation) and ensure
 `delaySteps = round(L / Ts)` where `L` is the measured delay in seconds.
 
-For non-integer `L / Ts` (fractional delay), a first-order Pade approximation in the inner model
-is recommended - not yet implemented in this toolbox.
+For non-integer `L / Ts` (fractional delay), use the convenience constructor that accepts the
+full dead time in seconds.  It automatically splits `theta` into an integer buffer delay and a
+first-order Padé filter for the sub-sample remainder:
+
+```cpp
+// theta = 0.73 s, Ts = 0.5 s  ->  d=1 integer step + Pade for 0.23 s remainder
+ctrl::SmithPredictor sp(inner, G0, /*theta=*/0.73, /*Ts=*/0.5);
+```
+
+Or build the fractional filter explicitly via `ctrl::padeDelayFilter(theta_frac, Ts)` from
+`FunctionApproximator.h` and pass it as the fourth constructor argument.
 
 ---
 

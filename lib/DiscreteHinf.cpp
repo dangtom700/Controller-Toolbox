@@ -58,31 +58,28 @@ void DiscreteHinf::reset()
 }
 
 // =============================================================================
-// DARE solver - symplectic QZ eigendecomposition for indefinite R
+// DARE solver - symplectic pencil generalised eigenvalue method for indefinite R
 //
 // Solves: A'XA - X - A'XB (R + B'XB)^{-1} B'XA + Q = 0
 //
-// The H-inf DARE has an indefinite R (gamma-scaled diagonal blocks with a
-// -I_nu corner), so the standard positive-definite doubling iteration diverges.
-// Instead we form the 2n x 2n symplectic pencil (M, L):
+// The H-inf DARE has an indefinite R (gamma-scaled diagonal blocks), so the
+// standard positive-definite doubling iteration diverges.  The Hamiltonian
+// approach forms G = B*Rinv*B', which amplifies ill-conditioning when R is
+// near-singular (as occurs at gamma close to gamma_opt).  Instead we use the
+// symplectic pencil (M, N) which defers the R^{-1} product until the
+// eigenvector solve — never forming B*Rinv*B' explicitly:
 //
-//   M = [A + B*Rinv*D',   -B*Rinv*B']
-//       [-Q + D*Rinv*D',  A' - D*Rinv*B']
+//   M = [ A,  0 ]     N = [ I,  B*Rinv*B' ]
+//       [-Q,  I ]         [ 0,  A'        ]
 //
-//   (where D = R^{-1} is folded in via the full form without D cross-terms,
-//    equivalently for Q_x = C1'C1 and Bcat = [B1,B2]:)
-//
-//   M = [A,          -Bcat*Rinv*Bcat']
-//       [-Q,          A'             ]
-//
-// This is the standard discrete-time Hamiltonian; X is recovered from the
-// stable invariant subspace (eigenvalues inside the unit disc).
-//
-// The 2n eigenvalue problem is solved via Eigen's complex Schur decomposition.
-// Eigenvalues inside the unit disk select the stable subspace; X = V21 * V11^{-1}.
+// The generalised eigenvalue problem M*v = lambda * N*v has 2n eigenvalues
+// in reciprocal pairs (lambda, 1/lambda).  We select the n eigenvalues with
+// |lambda| < 1 (stable subspace) and recover X = V2 * V1^{-1} from the
+// corresponding eigenvectors partitioned as [V1; V2].
 //
 // Ref: Laub (1979) "A Schur method for solving algebraic Riccati equations";
-//      Pappas, Laub, Sandell (1980); Lancaster & Rodman "Algebraic Riccati Eq."
+//      Van Dooren (1981) "A generalised eigenvalue approach for solving
+//      Riccati equations"; Lancaster & Rodman "Algebraic Riccati Equations".
 // =============================================================================
 DiscreteHinf::DareOut DiscreteHinf::solveHinfDARE(
     const Eigen::MatrixXd &A,
@@ -105,38 +102,44 @@ DiscreteHinf::DareOut DiscreteHinf::solveHinfDARE(
         return out;
     }
     const Eigen::MatrixXd Rinv = luR.inverse();
-    const Eigen::MatrixXd G    = B * Rinv * B.transpose(); // n x n, possibly indefinite
 
-    // Discrete-time Hamiltonian matrix H (2n x 2n):
-    //   H = [A,  -G  ]
-    //       [-Q,  A' ]
-    Eigen::MatrixXd H(2 * n, 2 * n);
-    H.topLeftCorner(n, n)     =  A;
-    H.topRightCorner(n, n)    = -G;
-    H.bottomLeftCorner(n, n)  = -Q;
-    H.bottomRightCorner(n, n) =  A.transpose();
+    // Symplectic pencil (M, N):
+    //   M = [ A,  0 ]     N = [ I,  B*Rinv*B' ]
+    //       [-Q,  I ]         [ 0,  A'        ]
+    //
+    // B*Rinv*B' is computed here once; it is n x n and indefinite for H-inf R.
+    const Eigen::MatrixXd BRinvBt = B * Rinv * B.transpose();
 
-    // Complex Schur decomposition: H = U T U*  where T is upper triangular.
-    // Eigenvalues of T are eigenvalues of H.
-    // For a stable DARE solution we need n eigenvalues strictly inside the unit disk.
-    Eigen::ComplexSchur<Eigen::MatrixXd> schur(H);
-    if (schur.info() != Eigen::Success)
+    Eigen::MatrixXd M = Eigen::MatrixXd::Zero(2 * n, 2 * n);
+    Eigen::MatrixXd N = Eigen::MatrixXd::Zero(2 * n, 2 * n);
+
+    M.topLeftCorner(n, n)     =  A;
+    M.bottomLeftCorner(n, n)  = -Q;
+    M.bottomRightCorner(n, n) =  Eigen::MatrixXd::Identity(n, n);
+
+    N.topLeftCorner(n, n)     =  Eigen::MatrixXd::Identity(n, n);
+    N.topRightCorner(n, n)    =  BRinvBt;
+    N.bottomRightCorner(n, n) =  A.transpose();
+
+    // Generalised eigenvalue problem: M v = lambda N v.
+    // Eigen's GeneralizedEigenSolver works with real matrices and returns
+    // complex eigenvalue/eigenvector pairs — correct for the indefinite case.
+    Eigen::GeneralizedEigenSolver<Eigen::MatrixXd> ges(M, N);
+    if (ges.info() != Eigen::Success)
     {
         out.X = Eigen::MatrixXd::Zero(n, n);
         return out;
     }
 
-    const auto &U = schur.matrixU(); // 2n x 2n unitary
-    const auto &T = schur.matrixT(); // 2n x 2n upper triangular
+    const auto &evals = ges.eigenvalues();   // complex (2n,)
+    const auto &evecs = ges.eigenvectors();  // complex (2n, 2n)
 
-    // Collect indices of eigenvalues inside the unit disk (|lambda| < 1).
-    const int two_n = 2 * n;
+    // Select the n eigenvectors whose eigenvalue has |lambda| < 1 (stable subspace).
     std::vector<int> stable_idx;
     stable_idx.reserve(n);
-    for (int i = 0; i < two_n; ++i)
+    for (int i = 0; i < 2 * n; ++i)
     {
-        double mag = std::abs(T(i, i));
-        if (mag < 1.0 - 1e-10)
+        if (std::abs(evals(i)) < 1.0 - 1e-10)
             stable_idx.push_back(i);
     }
 
@@ -147,13 +150,12 @@ DiscreteHinf::DareOut DiscreteHinf::solveHinfDARE(
         return out;
     }
 
-    // Extract the stable invariant subspace columns from U.
-    // Partition U into [V1; V2] where V1, V2 are n x n blocks.
+    // Build the stable subspace matrix and partition into [V1; V2] (each n x n).
     Eigen::MatrixXcd V1(n, n), V2(n, n);
     for (int j = 0; j < n; ++j)
     {
-        V1.col(j) = U.col(stable_idx[j]).head(n);
-        V2.col(j) = U.col(stable_idx[j]).tail(n);
+        V1.col(j) = evecs.col(stable_idx[j]).head(n);
+        V2.col(j) = evecs.col(stable_idx[j]).tail(n);
     }
 
     // X = real(V2 * V1^{-1})
@@ -168,7 +170,7 @@ DiscreteHinf::DareOut DiscreteHinf::solveHinfDARE(
     out.X = X_c.real();
     out.X = 0.5 * (out.X + out.X.transpose()); // enforce symmetry
 
-    // Verify the DARE residual to confirm convergence.
+    // Verify the DARE residual: ||A'XA - X + Q - A'XB * (R+B'XB)^{-1} * B'XA|| / (1+||X||)
     const Eigen::MatrixXd &X = out.X;
     const Eigen::MatrixXd Rbar = R + B.transpose() * X * B;
     Eigen::FullPivLU<Eigen::MatrixXd> luRbar(Rbar);
@@ -177,7 +179,7 @@ DiscreteHinf::DareOut DiscreteHinf::solveHinfDARE(
         out.X = Eigen::MatrixXd::Zero(n, n);
         return out;
     }
-    const Eigen::MatrixXd K = luRbar.inverse() * B.transpose() * X * A;
+    const Eigen::MatrixXd K     = luRbar.inverse() * B.transpose() * X * A;
     const Eigen::MatrixXd resid = A.transpose() * X * A - X + Q - A.transpose() * X * B * K;
     const double dare_res = resid.norm() / (1.0 + X.norm());
     out.conv = (dare_res < 1e-6) && X.allFinite();
@@ -345,7 +347,27 @@ bool DiscreteHinf::trySolve(const GeneralisedPlant &P, double gamma,
     if (esY.eigenvalues().minCoeff() < -1e-6) return false;
 
     // -----------------------------------------------------------------------
-    // Condition (C3): spectral radius of X * Y < gamma^2
+    // Condition (C3): spectral radius of X_inf * Y_inf < gamma^2
+    //
+    // WHY this condition is required (DGKF Theorem 3.1 coupling condition):
+    //   The central H-infinity controller is assembled as:
+    //     Z_inf = (I - Y_inf * X_inf / gamma^2)^{-1}
+    //   which requires (I - Y_inf * X_inf / gamma^2) to be invertible.
+    //   This matrix is invertible if and only if none of its eigenvalues are zero,
+    //   i.e., none of the eigenvalues of (Y_inf * X_inf / gamma^2) equal 1,
+    //   i.e., no eigenvalue of Y_inf * X_inf equals gamma^2,
+    //   i.e., rho(X_inf * Y_inf) < gamma^2  (since X_inf*Y_inf and Y_inf*X_inf
+    //   share the same nonzero eigenvalues).
+    //
+    //   Geometrically: C3 measures the "coupling" between the control and filter
+    //   Riccati solutions.  When X_inf and Y_inf are both small (plant easy to
+    //   control and observe), rho(XY) << gamma^2 easily.  As gamma approaches
+    //   gamma_opt from above, rho(XY) -> gamma^2 from below; at gamma = gamma_opt,
+    //   C3 holds with equality (infimum).  For gamma < gamma_opt, C3 fails —
+    //   Z_inf becomes singular and the controller assembly is undefined.
+    //
+    // Ref: Doyle, Glover, Khargonekar, Francis (1989) IEEE TAC 34(8), Theorem 3;
+    //      Stoorvogel (1992) "The H-infinity Control Problem", Lemma 3.1 condition (iii).
     // -----------------------------------------------------------------------
     const Eigen::MatrixXd XY = Xs * Ys;
     Eigen::EigenSolver<Eigen::MatrixXd> esXY(XY);

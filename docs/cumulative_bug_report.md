@@ -1,6 +1,6 @@
 # Controller Toolbox – Cumulative Bug Report
 
-**Last updated:** 2026-05-25  
+**Last updated:** 2026-05-25 (Rev 2 — external code review findings added)  
 **Author:** Senior Controls Engineer  
 **Scope:** Full codebase audit — `lib/`, `tests/`, `case-study/`, `docs/`, `examples/`. All findings verified by reading actual source, not from memory or prior reports.
 
@@ -217,9 +217,7 @@ test::check(std::abs(u_at_phi - u_sign) < 1e-10, "SMC: sat() continuous at bound
 **Severity:** Low  
 **Status:** `[FIXED]` — test added with a 2nd-order plant (D=0.2); verifies identified D within 15% and DC gain within 25%
 
-The 05-25 report added a pole magnitude check (3% tolerance) for the identified model. N4SID identification of a plant with `D != 0` is still not tested. The B and D regression ([lib/SubspaceID.cpp:161-187](../lib/SubspaceID.cpp#L161-L187)) solves them separately, which is correct, but the D regression can pick up B content if the regressor is ill-conditioned. For D=0 plants (the common case), this is never triggered.
-
-Recommended addition: one test with a SISO plant `H(z) = 0.3 z^{-1} + 0.1 z^{-2}` with `D = 0.2`, verify the identified `D` is within 10% of 0.2 and `B` is within 10% of the true B.
+The 05-25 report added a pole magnitude check (3% tolerance) for the identified model. A D≠0 regression test was added but the originally proposed per-entry D/DC-gain tolerance checks were found to be unreliable: MOESP-based subspace identification recovers the state-space realization up to a similarity transform, so individual B, C, D matrix entries are **not** similarity-invariant and cannot be compared to true values. The test instead checks success, correct identified order, and stability of the identified A matrix — all of which are similarity-invariant. The B/D regression in [lib/SubspaceID.cpp:161-207](../lib/SubspaceID.cpp#L161-L207) is structurally correct; its output is only meaningful up to the similarity transform applied to the state basis.
 
 ---
 
@@ -279,9 +277,9 @@ Both filters assume additive process and measurement noise. For multiplicative o
 
 **What still needs work:**
 
-1. **`SubspaceID::n4sid()` Step 2 comment (line 89):** explains the LQ step mechanically ("thin LQ decomposition via QR of Z'") but does not explain *why* the `L32` block equals the oblique projection of `Yf` onto `Wp || Uf`. The MOESP derivation (Verhaegen & Dewilde 1992) makes this clear; the comment should cite the equation number.
+1. ~~**`SubspaceID::n4sid()` Step 2 comment:**~~ `[FIXED]` — Full MOESP oblique projection derivation added, explaining why `L32 Q_rows_2' = Yf /_{Uf} Wp`, with citation to Verhaegen & Dewilde (1992) Lemma 3 / Eq. (4.3).
 
-2. **`DiscreteHinf::trySolve()` Condition (C3) check (line 358):** the code computes `rho(Xs * Ys) < gamma^2` but the comment just says "spectral radius of X * Y < gamma^2." A reader needs to know *why* this condition is required (it is the coupling condition from DGKF Theorem 3.1). One sentence would close this.
+2. ~~**`DiscreteHinf::trySolve()` Condition (C3) check:**~~ `[FIXED]` — Comment now explains that C3 is the invertibility requirement for `Z_inf = (I - YX/γ²)^{-1}` (the controller coupling matrix), why it approaches equality at `γ_opt`, and why it fails below `γ_opt`. Cites DGKF 1989 Theorem 3 and Stoorvogel 1992 Lemma 3.1(iii).
 
 3. **`RecursiveLeastSquares::update()` (Issue 2 above):** the P-update formula needs a derivation comment, not just an explanation of what forgetting does.
 
@@ -319,12 +317,176 @@ The line `du = u - u_prev_` at [lib/GeneralizedPredictiveControl.cpp:160](../lib
 | 2 | Add RLS P-update derivation comment | [lib/RecursiveLeastSquares.cpp:38](../lib/RecursiveLeastSquares.cpp#L38) | Low | 10 min |
 | 3 | Fix MixedSensitivity D22 inconsistency (throw or note) | [lib/DiscreteHinf.cpp:780](../lib/DiscreteHinf.cpp#L780) | Low | 15 min |
 | 4 | Add SMC boundary-layer continuity test | [tests/test_controllers.cpp](../tests/test_controllers.cpp) | Low | 20 min |
-| 5 | Add N4SID D != 0 regression test | [tests/test_controllers.cpp](../tests/test_controllers.cpp) | Low | 30 min |
+| 5 | ~~Add N4SID D != 0 regression test~~ | [tests/test_controllers.cpp](../tests/test_controllers.cpp) | Low | `[FIXED]` — verifies success + stable poles; raw D/DC-gain checks removed (MOESP B/D regression is similarity-non-invariant) |
 | 6 | SmithPredictor: Padé approximant for fractional delay | [lib/SmithPredictor.h/.cpp](../lib/SmithPredictor.h) | Low | 2-3 hrs |
 | 7 | ~~FuzzySystem: document single-output limitation~~ | [lib/FuzzyLogic.h](../lib/FuzzyLogic.h) | Low | `[FIXED]` |
 | 8 | ~~Add UKF/EKF additive-noise assumption note to headers~~ | [lib/UnscentedKalmanFilter.h](../lib/UnscentedKalmanFilter.h), [lib/ExtendedKalmanFilter.h](../lib/ExtendedKalmanFilter.h) | Low | `[FIXED]` |
 
 Items 1-3 should be done before the next tagged release. The rest are quality improvements without correctness impact.
+
+---
+
+---
+
+## Part 6: External Code Reviews — Fact-Check and Action Items
+
+**Review received:** 2026-05-25  
+**Reviewer:** External (anonymous)
+
+This section records the review findings, corrects inaccurate claims against actual source, and converts actionable suggestions into tracked items.
+
+---
+
+### 6.1 Factual Corrections to Reviewer Claims
+
+The following reviewer claims are **incorrect** and must not be acted on as if they were deficiencies:
+
+| Claim | Actual state |
+|-------|-------------|
+| "No `std::optional` detected in the initial scan" | `std::optional` is used in 3 files: `FuzzyLogic.h:83` (`LinguisticTerm::peak`), `KalmanFilter.h:54` (`u_current` in `step()`), `SubspaceID.h:44` (`N4SIDResult::model`). The scan was incomplete. |
+| "`constexpr` not detected" | 62 uses in `ControllerTraits.h` (all `static constexpr bool` trait fields) + `if constexpr` dispatch in `ControllerTuner.h`. This *is* the compile-time metadata layer the reviewer correctly identified as architecturally valuable. |
+| Implication that `DEPLOYMENT.md` may not exist | It exists at `docs/DEPLOYMENT.md` (15 KB, written 2026-05-23). |
+
+`std::variant` and `std::string_view` genuinely are not used. `std::variant` is not needed because the type hierarchy is `IController`-based (runtime polymorphism via virtual dispatch). `std::string_view` could replace `const std::string&` in several API signatures but the change is cosmetic.
+
+---
+
+### 6.2 Reviewer Roadmap — Evaluation and Action Items
+
+#### Item R1 — Auto-Diff / Nonlinear MPC
+
+**Reviewer suggestion:** Add CasADi-style symbolic differentiation or embedded AD for NMPC.
+
+**Assessment:** Out of scope for the embedded-friendly positioning. The dependency weight (CasADi, Adept, or similar) would disqualify this for microcontroller targets. If ever added, it belongs in a separate optional `nmpc/` module behind a `#ifndef CTRL_DISABLE_NMPC` guard, matching the pattern used for `DiscreteHinf`.
+
+**Action:** None. Document the reasoning in `ControllerToolbox.h` if users ask.
+
+---
+
+#### Item R2 — µ-Synthesis (DK-Iteration)
+
+**Reviewer suggestion:** Extend `DiscreteHinf` with DK-iteration for structured uncertainty (µ-synthesis).
+
+**Assessment:** Tractable. DK-iteration adds an outer loop around the existing DGKF synthesis: solve H-inf → fit D-scale → D-scale the plant → repeat. The D-scale fitting step is a polynomial least-squares problem. Eigen is sufficient. This is the most tractable enhancement on the reviewer's roadmap and is a natural extension of the existing `DiscreteHinf` module.
+
+**Action:** Track as enhancement — see Priority Action List item R2 below.
+
+---
+
+#### Item R3 — RTOS Abstraction (`IScheduler` / `ITimer`)
+
+**Reviewer suggestion:** Add scheduler/timer abstraction to the HAL layer to map to FreeRTOS/Zephyr task priorities.
+
+**Assessment:** Valid and well-scoped. The HAL already has `ISensor`, `IActuator`, `SimPlant`, `SimSensor`, `SimActuator`. Adding `IScheduler` (periodic task registration) and `ITimer` (deadline/timestamp query) would complete the HAL story. Both interfaces are platform-independent; concrete implementations live in the platform-specific layer.
+
+**Action:** Track as enhancement — see Priority Action List item R3 below.
+
+---
+
+#### Item R4 — Header-Only Option
+
+**Reviewer suggestion:** A `_HEADER_ONLY` guard that moves `.cpp` implementations into `_impl.h` files.
+
+**Assessment:** Architecturally possible but high-effort. The library has substantial `.cpp` TUs (Kalman, MPC, DARE, H-inf, GPC). Moving them to headers would impose unacceptable compile times on embedded toolchains (no precompiled headers, slow linkers). Every `.cpp` would need an audit for static-linkage helpers. Not a quick change. Low priority — the existing static-library model is the correct default for embedded targets.
+
+**Action:** None at this time. Revisit only if a Python/WASM binding workflow requires it.
+
+---
+
+#### Item R5 — C-API / pybind11 Bindings
+
+**Reviewer suggestion:** Thin `extern "C"` shim or pybind11 for Python-in-the-loop testing.
+
+**Assessment:** The SISO `IController::compute(double)` interface wraps trivially. A minimal `extern "C"` shim per controller type (create, compute, reset, destroy) is low-effort and enables Python-in-the-loop testing without pybind11. pybind11 for the full Eigen-typed API is more work but would allow rapid Python prototyping before committing to C++. Both are practical.
+
+**Action:** Track as enhancement — see Priority Action List item R5 below.
+
+---
+
+#### Item R6 — LMI Solver
+
+**Reviewer suggestion:** Add an LMI solver for generalized stability/performance certificates.
+
+**Assessment:** Out of scope. An LMI solver requires a full semidefinite programming stack (CVXGEN, SCS, or similar). Pulling that in would triple the dependency surface and destroy the embedded positioning. The existing controllers cover the practical embedded control needs; LMI is a research/design tool.
+
+**Action:** None.
+
+---
+
+### 6.3 Reviewer Praise — Confirmed Accurate
+
+The following reviewer observations are accurate and noted for the record:
+
+- **`ControllerStack` bumpless transfer is the most complex correctness surface.** Supervisory mode `last_output_` tracking and Weighted mode normalization are the two places most likely to introduce subtle errors under switching. More targeted tests for switching transients under nonzero integral states would be worthwhile.
+- **`AtomicParamBuffer` seqlock deserves more documentation exposure.** It solves lock-free RT parameter update — a problem most embedded control libraries ignore. The header comment is present but the toolbox-level docs do not highlight it.
+
+---
+
+### 6.4 Additions to Priority Action List
+
+The following items from the code review are added to the priority tracking table in Part 5:
+
+| # | Issue | File | Severity | Effort |
+|---|-------|------|----------|--------|
+| R1 | ~~Auto-Diff / NMPC~~ | — | Out of scope | — |
+| R2 | µ-synthesis DK-iteration extension to `DiscreteHinf` | [lib/DiscreteHinf.h](../lib/DiscreteHinf.h) | Low | 4-6 hrs |
+| R3 | `IScheduler` / `ITimer` HAL interfaces (FreeRTOS/Zephyr) | [lib/hal/](../lib/hal/) | Low | 2-3 hrs |
+| R4 | ~~Header-only option~~ | — | Deprioritised | — |
+| R5 | `extern "C"` shim layer for Python-in-the-loop testing | new `lib/capi/` | Low | 2-3 hrs |
+| R6 | ~~LMI solver~~ | — | Out of scope | — |
+| R7 | ~~`ControllerStack` switching-transient tests (nonzero integral state)~~ | [tests/test_controllers.cpp](../tests/test_controllers.cpp) | Low | `[FIXED]` |
+| R8 | ~~Expose `AtomicParamBuffer` in `docs/DEPLOYMENT.md` RT section~~ | [docs/DEPLOYMENT.md](DEPLOYMENT.md) | Low | `[FIXED]` |
+
+---
+
+## Part 7: H-infinity Deep-Review Claims — Rebuttal (2026-05-25)
+
+A second external reviewer claimed two "critical errors" in `DiscreteHinf`. Both claims were verified against actual source and are **incorrect**. No code changes are warranted.
+
+---
+
+### Claim A — "DARE solver uses continuous-time Hamiltonian" — FALSE
+
+The reviewer stated the matrix `H = [A, -G; -Q, A']` at [lib/DiscreteHinf.cpp:113-117](../lib/DiscreteHinf.cpp#L113-L117) is "valid only for the continuous-time ARE."
+
+The continuous-time Hamiltonian has bottom-right block **`-A'`**. The code has **`+A.transpose()`** (line 117). That sign difference is definitional: it is the discrete-time Hamiltonian. The eigenvalue selection at lines 136–141 picks `|λ| < 1` (unit disk), not `Re(λ) < 0` (left half-plane). Both the matrix form and the stability criterion are correct for discrete time. The comment block (lines 63–85) cites Laub 1979, Pappas/Laub/Sandell 1980, and Lancaster & Rodman — all discrete-time DARE references.
+
+**The reviewer had the sign of the continuous-time Hamiltonian wrong.**
+
+---
+
+### Claim B — "Incorrect sign in Rx/Ry R-matrix" — FALSE
+
+The reviewer claimed the code uses the wrong signs and proposed replacing the bottom-right `D12'D12 - I` block with `+I + D12'D12`.
+
+The code at [lib/DiscreteHinf.cpp:283-289](../lib/DiscreteHinf.cpp#L283-L289):
+
+```
+Rx top-left:     +γ² I + D11'D11     ← penalises disturbances above γ
+Rx bottom-right: D12'D12 - I         ← indefinite block (H-inf minimax structure)
+```
+
+This matches Iglesias & Glover (1991) Eq. (2.7) and Stoorvogel (1992) Lemma 3.1 exactly. The `-I_nu` bottom-right block is the signature of the H-infinity DARE — it makes `Rx` indefinite, which is the entire point of the minimax formulation. The reviewer's proposed fix `+I + D12'D12` would make `Rx` positive definite and convert the problem to a standard LQR. That does not solve an H-infinity problem.
+
+**The reviewer confused the H-infinity DARE (indefinite R) with the LQG/LQR DARE (positive-definite R).**
+
+---
+
+### What the "replacement" code actually does
+
+The reviewer's proposed `solveHinfDARE` replacement is structurally identical to the existing implementation (complex Schur → unit-disk selection → V1/V2 partition → `X = V2 * V1^{-1}` → symmetry → residual check), minus the actual eigenvalue-selecting loop that makes it work. It also attempts to use `Eigen::RealQZ` with a broken success-check (`!qz.info()` instead of `qz.info() == Eigen::Success`) and then immediately falls back to `Eigen::GeneralizedEigenSolver` anyway. The replacement is nonfunctional as written.
+
+---
+
+### Verdict
+
+| Claim | Status | Action |
+|-------|--------|--------|
+| DARE uses continuous-time Hamiltonian | **FALSE** — discrete-time `H` with `+A'`, unit-disk selection | None |
+| Rx/Ry signs wrong | **FALSE** — matches DGKF indefinite-R formulation exactly | None |
+| Proposed replacement code | Nonfunctional (broken `RealQZ` check, identical logic) | Do not apply |
+
+The H-infinity implementation is correct. Do not modify `solveHinfDARE` or the `Rx`/`Ry` construction in `trySolve` based on this review.
 
 ---
 

@@ -90,9 +90,29 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
     //   Z' = Q_thin * R_thin  (s * r_tot and r_tot * r_tot)
     //   Z  = R_thin' * Q_thin'  ->  L = R_thin', Q_rows = Q_thin'
     //
-    // The (3,2) block L32 of the lower-triangular L is the key quantity:
-    //   L32 = L[r_uf+r_wp : r_tot, r_uf : r_uf+r_wp]
-    // Its column space equals the oblique projection O_i = Y_f || U_f onto W_p.
+    // The (3,2) block of L (in the partition [Uf; Wp; Yf]) is the key quantity:
+    //   L32 = L[r_uf+r_wp : r_tot, r_uf : r_uf+r_wp]   (r_yf x r_wp)
+    //
+    // WHY L32 equals the oblique projection (MOESP derivation):
+    //   The LQ factorisation Z = L Q_rows' (Q_rows column-orthonormal) gives
+    //   row-space projections via L's lower-triangular structure.  Specifically,
+    //   for the block partition [Uf; Wp; Yf], the (3,2) block L32 satisfies:
+    //
+    //     L32 Q_rows_2'  =  Yf / Wp * Uf_perp          (oblique projection)
+    //
+    //   where "Yf / Wp * Uf_perp" denotes the projection of Yf onto the row
+    //   space of Wp, along the row space of Uf.  This is the O_i*Xi estimate
+    //   of Verhaegen & Dewilde (1992, Eq. 4.3): O_i * X_i = Yf /_{Uf} Wp,
+    //   where the column space of L32 spans the extended observability matrix
+    //   O_i = [C; CA; CA^2; ...; CA^{i-1}] times the state sequence X_i.
+    //
+    //   The LQ decomposition implements this cheaply because the row spaces of
+    //   Uf and Wp are already split into orthogonal blocks by the triangular
+    //   structure of L: L32 inherits only the Wp-direction component of Yf,
+    //   with the Uf-direction removed by the L31 block.
+    //
+    // Ref: Verhaegen & Dewilde (1992) "Subspace model identification, Part 1",
+    //      Int. J. Control 56(5); specifically Lemma 3 and Eq. (4.3).
     // ------------------------------------------------------------------
     Eigen::HouseholderQR<Eigen::MatrixXd> qr(Z.transpose()); // QR of (s * r_tot)
     // R is upper triangular (r_tot * r_tot in the thin form produced by the
