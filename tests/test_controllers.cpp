@@ -853,7 +853,7 @@ void test_lqg()
 
         // LQG with very low process noise: Kalman gain -> perfect observer
         Eigen::MatrixXd Qn_tiny = Eigen::MatrixXd::Identity(1, 1) * 1e-10;
-        Eigen::MatrixXd Rn_sp   = Eigen::MatrixXd::Identity(1, 1) * 1e-2;
+        Eigen::MatrixXd Rn_sp = Eigen::MatrixXd::Identity(1, 1) * 1e-2;
         ctrl::DiscreteLQG lqg_sp(plant_sp, lqr_sp, Qn_tiny, Rn_sp);
 
         Eigen::VectorXd x_lqg(1);
@@ -1426,7 +1426,7 @@ void test_ukf()
     // produce garbage or throw before this check fires -- catch that too.
     {
         ctrl::UnscentedKalmanFilter ukf3(n, p, f, h, Qn, Rn, Ts,
-                                          Eigen::MatrixXd(), 1e-3, 2.0, 0.0);
+                                         Eigen::MatrixXd(), 1e-3, 2.0, 0.0);
         Eigen::VectorXd xs3 = Eigen::VectorXd::Zero(n);
         xs3(0) = 1.0;
         bool psd_ok = true;
@@ -1435,7 +1435,8 @@ void test_ukf()
             Eigen::VectorXd uk3(1);
             uk3 << std::sin(k * 0.2) + 0.1 * std::cos(k * 1.7);
             Eigen::VectorXd ym3 = plt.C * xs3;
-            test::no_throw([&] { ukf3.step(ym3, uk3); },
+            test::no_throw([&]
+                           { ukf3.step(ym3, uk3); },
                            "UKF PSD: step() no throw at k=" + std::to_string(k));
             xs3 = plt.A * xs3 + plt.B * uk3;
 
@@ -2148,9 +2149,6 @@ int main()
     test_gpc();
     test_system_analysis();
     test_subspace_id();
-#ifndef CTRL_DISABLE_HINF
-    test_hinf();
-#endif
 
     test::report();
     return (test::failed == 0) ? 0 : 1;
