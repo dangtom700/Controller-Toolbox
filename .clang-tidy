@@ -1,5 +1,0 @@
----
-Checks: 'bugprone-*,modernize-*,performance-*,readability-*,-modernize-use-trailing-return-type,-readability-magic-numbers,-readability-identifier-length'
-HeaderFilterRegex: '^.*/lib/.*'
-FormatStyle: none
-...

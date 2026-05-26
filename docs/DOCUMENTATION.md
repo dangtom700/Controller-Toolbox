@@ -23,7 +23,6 @@ Target audience: control engineers and software developers familiar with discret
 
 ---
 
-<a name="1-setup-and-environment"></a>
 ## 1. Setup and Environment
 
 ### 1.1 Required Dependencies
