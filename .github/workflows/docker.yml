@@ -1,0 +1,64 @@
+name: Docker
+
+on:
+  push:
+    branches: [main]
+    tags:     ["v*"]          # also trigger on version tags (v1.0, v1.1, ...)
+  pull_request:
+    branches: [main]          # build-only on PRs (no push)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write             # needed to push to ghcr.io
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE:    ghcr.io/${{ github.repository_owner }}/controller-toolbox
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Expose docker metadata: tags + labels (OCI standard).
+      # On main push   -> :main, :main-<sha>
+      # On tag v1.1    -> :v1.1, :latest
+      # On PR          -> :pr-42  (not pushed)
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-,format=short
+
+      - name: Log in to ghcr.io
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}   # built-in, no setup needed
+
+      # BuildKit layer cache stored in the GitHub Actions cache.
+      # Warm cache cuts rebuild time from ~4 min to ~40 sec on a clean push.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags:    ${{ steps.meta.outputs.tags }}
+          labels:  ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max

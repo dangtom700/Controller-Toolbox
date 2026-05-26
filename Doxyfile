@@ -71,7 +71,14 @@ EXAMPLE_RECURSIVE      = YES
 # ---------------------------------------------------------------------------
 # Diagrams (requires Graphviz — omit if not installed)
 # ---------------------------------------------------------------------------
-HAVE_DOT               = NO
+HAVE_DOT               = YES
+DOT_IMAGE_FORMAT       = svg
+INTERACTIVE_SVG        = YES
+CLASS_GRAPH            = YES
+COLLABORATION_GRAPH    = NO
+INCLUDE_GRAPH          = NO
+CALL_GRAPH             = NO
+CALLER_GRAPH           = NO
 
 # ---------------------------------------------------------------------------
 # Verbosity
