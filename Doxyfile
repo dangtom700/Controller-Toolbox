@@ -14,8 +14,11 @@ PROJECT_LOGO           =
 # Input
 # ---------------------------------------------------------------------------
 OUTPUT_DIRECTORY       = docs
-INPUT                  = lib README.md docs/DOCUMENTATION.md docs/DEPLOYMENT.md
-FILE_PATTERNS          = *.h *.hpp *.cpp *.md
+INPUT                  = lib \
+                         README.md \
+                         docs/DOCUMENTATION.md \
+                         docs/DEPLOYMENT.md
+FILE_PATTERNS          = *.h *.hpp *.cpp
 RECURSIVE              = YES
 EXCLUDE_PATTERNS       = */build/* */.godot/* */docs/html/*
 
@@ -23,7 +26,7 @@ EXCLUDE_PATTERNS       = */build/* */.godot/* */docs/html/*
 # the developer's local filesystem path (e.g. C:\Users\dangs\...).
 STRIP_FROM_PATH        = .
 
-# Use README.md as the Doxygen landing page if present.
+# Use README.md as the Doxygen landing page.
 USE_MDFILE_AS_MAINPAGE = README.md
 
 # ---------------------------------------------------------------------------
@@ -71,7 +74,8 @@ EXAMPLE_RECURSIVE      = YES
 # ---------------------------------------------------------------------------
 # Diagrams (requires Graphviz — omit if not installed)
 # ---------------------------------------------------------------------------
-HAVE_DOT               = YES
+# Set to YES in CI (Graphviz installed). Set to NO for local runs without Graphviz.
+HAVE_DOT               = NO
 DOT_IMAGE_FORMAT       = svg
 INTERACTIVE_SVG        = YES
 CLASS_GRAPH            = YES

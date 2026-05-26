@@ -21,8 +21,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Doxygen
+      - name: Install Doxygen + Graphviz
         run: sudo apt-get install -y --no-install-recommends doxygen graphviz
+
+      - name: Enable Graphviz diagrams in CI
+        run: sed -i 's/^HAVE_DOT.*=.*/HAVE_DOT = YES/' Doxyfile
 
       - name: Generate docs
         run: doxygen Doxyfile
