@@ -123,6 +123,14 @@ namespace ctrl
     // Only valid for SISO systems (stateSize() >= 1, inputSize() == outputSize() == 1).
     // Throws std::invalid_argument for non-SISO plants.
     //
+    // Convention note: the returned TransferFunction uses the z^{-1} polynomial form
+    // (see struct TransferFunction above).  The denominator is monic: den[0] = 1
+    // (the leading z^n coefficient is normalised to 1).  The coefficient vector is
+    //   den = {1, a1, a2, ..., an}   in z^{-1} powers: 1 + a1*z^{-1} + ... + an*z^{-n}
+    // If you pass this to an external tool that expects the unnormalised form
+    // {a_n, a_{n-1}, ..., a_0} (e.g., MATLAB tf() with explicit denominator vector),
+    // you must reverse the vector and note that the leading coefficient is already 1.
+    //
     // Equivalent MATLAB:  tf(sys)  where sys is a discrete ss object.
     // ---------------------------------------------------------------------------
     TransferFunction ss2tf(const StateSpace &sys);

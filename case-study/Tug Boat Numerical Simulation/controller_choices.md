@@ -201,10 +201,25 @@ $$
 | Parameter | Value |
 |-----------|-------|
 | Dither amplitude $a_d$ | $5\times10^3$ N (position axes), $1\times10^5$ N.m (yaw) |
-| Dither frequency $\omega_d$ | 0.016-0.020 Hz (per axis, staggered) |
+| Dither frequency $\omega_d$ | 0.016 Hz (surge), 0.018 Hz (sway), 0.020 Hz (yaw) |
 | High-pass cutoff | 0.05 rad/s |
 | Low-pass cutoff | 0.02 rad/s |
 | Descent gain $k_\mathrm{esc}$ | -1 per axis |
+
+**Dither frequency selection - coprimality rationale:**
+The three dither frequencies (0.016, 0.018, 0.020 Hz) are intentionally chosen so that
+no frequency is an integer multiple of another. Their pairwise ratios are
+$8:9$, $9:10$, and $8:10 = 4:5$ - all non-integer. This guarantees that the demodulated
+gradient signals for each axis contain no spectral component at another axis's dither
+frequency: the only common harmonic is at $\mathrm{lcm}(0.016, 0.018, 0.020)^{-1}$
+which is well outside the LPF bandwidth. If instead two axes shared a common multiple
+(e.g., 0.016 and 0.032 Hz), the demodulation product of the higher-frequency axis would
+alias directly onto the lower-frequency axis's gradient estimate, producing a persistent
+bias. The 8:9:10 ratio avoids this entirely.
+
+**Caution:** Any modification to these frequencies should preserve the coprimality
+property. Changing one frequency to an integer multiple of another (e.g., 0.016 and
+0.020 -> 0.016 and 0.032) introduces cross-axis gradient bias.
 
 **Toolbox class:** `ExtremumSeeker`.
 

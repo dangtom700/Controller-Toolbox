@@ -674,9 +674,19 @@ Vector3d FuzzySupMPCController::compute(const Vector3d& ref_dy, const Vector3d& 
         }
     }
 
-    // Each MPC channel uses the MIMO system but we pass full dy/ref
+    // Each MPC channel independently optimises its own axis.
+    // Bug fix: was erroneously calling only mpcs_[0] for all three axes.
+    // Each per-axis MPC is a 3-state MIMO controller (all outputs), so we still
+    // call computeRef with the full dy/ref vectors, but use the axis-specific MPC
+    // that has been re-linearised (if triggered) by its own FuzzySupervisor.
     Eigen::VectorXd r_ref = ref_dy;
-    Eigen::VectorXd du    = mpcs_[0].computeRef(dy, r_ref);
+    Eigen::VectorXd du(3);
+    du.setZero();
+    for (int i = 0; i < 3; ++i) {
+        Eigen::VectorXd u_i = mpcs_[i].computeRef(dy, r_ref);
+        // Take only the i-th output of each MPC (the axis this MPC is responsible for)
+        du(i) = u_i(i);
+    }
     return du.head<3>();
 }
 

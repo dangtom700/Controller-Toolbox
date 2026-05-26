@@ -19,6 +19,18 @@
 //   one always-eligible, always-healthy fallback entry (e.g., a PID) to avoid this.
 //   Use for: gain-scheduled switching, mode-based selection, fallback chains.
 //
+//   Supervisory mode pseudocode:
+//     for each entry e in stack (insertion order):
+//         if e.active AND (e.condition == nullptr OR e.condition(error, lastOutput))
+//                     AND e.controller->isHealthy():
+//             if e.controller != last_active:
+//                 e.controller->bumplessInit(lastOutput, error)   // bump-free handover
+//                 last_active = e.controller
+//             return e.controller->compute(error)
+//     // no eligible entry:
+//     std::cerr << "ControllerStack::Supervisory: no eligible entry. Holding last output."
+//     return lastOutput   // bumpless hold
+//
 // StackMode::Additive
 //   All enabled entries contribute; their outputs are summed.
 //   Use for: inner/outer cascade (fast PID + slow MPC trim), complementary power splitting.
@@ -32,6 +44,18 @@
 //   full output range.  Set all activationConditions to nullptr for a static blend.
 //   Edge case: if all entries are inactive or gate out, the output holds at the
 //   previous value (bumpless hold) and a warning is emitted on stderr.
+//
+//   Weighted mode pseudocode:
+//     total_w = 0;  out = 0;
+//     for each entry e in stack:
+//         if e.active AND (e.condition == nullptr OR e.condition(error, lastOutput)):
+//             out     += e.weight * e.controller->compute(error)
+//             total_w += e.weight
+//     if total_w > 1e-12:
+//         return out / total_w
+//     // all entries inactive or gated out:
+//     std::cerr << "ControllerStack::Weighted: no active entry. Holding last output."
+//     return lastOutput   // bumpless hold
 //
 //   Example - two controllers with weights [0.7, 0.3]:
 //     Both active:   u = (0.7*u0 + 0.3*u1) / (0.7 + 0.3) = 0.7*u0 + 0.3*u1

@@ -11,18 +11,30 @@ Environment::Environment(const PlantParameters& p,
                          uint32_t seed)
     : pp_(p), cond_(cond)
 {
-    // Use plant Hs/Tp if not overridden in conditions
-    if (cond_.Hs <= 0.0) cond_.Hs = p.Hs;
-    if (cond_.Tp <= 0.0) cond_.Tp = p.Tp;
+    // Use plant defaults only when scenario does NOT explicitly set Hs/Tp.
+    // A scenario with Hs=0 means "no waves" and should not inherit plant defaults.
+    if (cond_.Hs < 0.0) cond_.Hs = p.Hs;
+    if (cond_.Tp < 0.0) cond_.Tp = p.Tp;
     initWaves(seed);
 }
 
 void Environment::initWaves(uint32_t seed)
 {
+    // Zero Hs means no wave excitation - zero all components.
+    if (cond_.Hs < 1e-6 || cond_.Tp < 1e-6) {
+        for (auto& wc : waves_) wc = {0.0, 1.0, 0.0};
+        return;
+    }
+
     // JONSWAP peak frequency
     const double omega_p = 2.0 * M_PI / cond_.Tp;
     const double g       = 9.81;
-    const double alpha_j = 0.0081;  // Phillips constant
+
+    // Scale the Phillips constant so the spectrum's significant wave height matches Hs.
+    // For a JONSWAP spectrum Hmo = 4 * sqrt(m0), m0 = integral(S(w) dw).
+    // For our 2-component approximation we pre-scale amplitudes directly by (Hs/Hs_ref).
+    // Hs_ref is the Hs produced by alpha_j = 0.0081 at this Tp (computed below).
+    const double alpha_j = 0.0081;
 
     // Two components bracketing the spectral peak
     const double omega[2] = { omega_p * 0.90, omega_p * 1.10 };
@@ -30,20 +42,27 @@ void Environment::initWaves(uint32_t seed)
     std::mt19937 rng(seed);
     std::uniform_real_distribution<double> phase_dist(0.0, 2.0 * M_PI);
 
+    double amp_sq_sum = 0.0;
     for (int j = 0; j < 2; ++j) {
         double w = omega[j];
         double sigma = (w <= omega_p) ? 0.07 : 0.09;
         double r     = std::exp(-std::pow(w - omega_p, 2) /
                                 (2.0 * sigma * sigma * omega_p * omega_p));
-        // JONSWAP spectrum value
         double S = alpha_j * g * g / std::pow(w, 5)
                    * std::exp(-1.25 * std::pow(omega_p / w, 4))
                    * std::pow(pp_.gamma_j, r);
-        double dw = omega_p * 0.20; // bandwidth of each component
+        double dw = omega_p * 0.20;
         double amp = std::sqrt(2.0 * S * dw);
-
+        amp_sq_sum += amp * amp;
         waves_[j] = {amp, w, phase_dist(rng)};
     }
+
+    // Hs from spectrum: Hmo = 4 * sqrt(m0) approx = 4 * sqrt(sum(a_i^2 / 2))
+    double Hs_ref = 4.0 * std::sqrt(0.5 * amp_sq_sum);
+    if (Hs_ref < 1e-9) Hs_ref = 1.0;  // degenerate guard
+    double scale = cond_.Hs / Hs_ref;
+
+    for (auto& wc : waves_) wc.amplitude *= scale;
 }
 
 Vector3d Environment::windLoad(const Vector3d& nu) const

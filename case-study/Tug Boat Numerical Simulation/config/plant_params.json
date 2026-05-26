@@ -56,7 +56,7 @@
       "Nr": 5.0e8
     },
 
-    "thrust_limits_kN":      [200.0, 2500.0],
+    "thrust_limits_kN":      [0.0, 2500.0],
     "thrust_rate_limit_kN_s": 150.0,
 
     "stations": [

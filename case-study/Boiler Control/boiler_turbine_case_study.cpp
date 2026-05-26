@@ -1,3 +1,16 @@
+// WARNING: This file uses forward-Euler discretisation (x[k+1] = x[k] + Ts*f(x[k])).
+// The Bell-Astrom boiler plant has eigenvalues spanning several orders of magnitude
+// (drum pressure dynamics are fast, water-level dynamics are slower).  Forward Euler
+// is A-unstable for any mode with |lambda_c| > 2/Ts.  At Ts = 1 s this means any
+// continuous-time eigenvalue with |lambda| > 2 produces a discrete eigenvalue outside
+// the unit disk - the discrete model is numerically unstable for those modes regardless
+// of the physics.
+//
+// Before using the discrete matrices from this file for control design, verify that
+// all eigenvalues of A_d lie strictly within the unit disk.  The refactored version
+// in sim/ uses ZOH via ctrl::c2d() and is preferred for any control-design purpose.
+// This file is retained for historical reference only.
+
 #include <ControllerToolbox.h>
 #include <cmath>
 #include <iostream>

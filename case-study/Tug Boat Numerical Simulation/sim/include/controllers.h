@@ -47,6 +47,13 @@ public:
                                     const Eigen::Matrix<double,6,1>& state) = 0;
     virtual void reset() = 0;
     virtual std::string name() const = 0;
+
+    // Called after thrust allocation, with the body-frame force actually delivered
+    // to the plant (tau_applied = B * T_clamped).  MPC controllers use this to
+    // correct their internal u_prev_ so x_hat_ stays synchronised with the real
+    // plant even when the allocator saturates or redistributes thrust.
+    // Default is a no-op; only MPC-based controllers override this.
+    virtual void notifyApplied(const Eigen::Vector3d& /*tau_applied*/) {}
 };
 
 // -- Mode 1: PID Baseline ------------------------------------------------------
@@ -110,6 +117,11 @@ public:
                             const Eigen::Matrix<double,6,1>& state) override;
     void reset() override;
     std::string name() const override { return "MPC"; }
+
+    // Feeds the allocator-applied force back to each per-axis DiscreteMPC so
+    // u_prev_ reflects the actual plant input rather than the commanded value.
+    void notifyApplied(const Eigen::Vector3d& tau_applied) override;
+
 private:
     const PlantParameters& pp_;
     // One DiscreteMPC per axis (SISO, decoupled linearized model)
@@ -173,6 +185,8 @@ public:
                             const Eigen::Matrix<double,6,1>& state) override;
     void reset() override;
     std::string name() const override { return "FuzzySup-MPC"; }
+
+    void notifyApplied(const Eigen::Vector3d& tau_applied) override;
 
     // Expose last supervisor decisions for logging
     std::array<ctrl::SupervisorDecision, 3> lastDecisions() const { return decisions_; }

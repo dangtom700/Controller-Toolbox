@@ -38,6 +38,13 @@ ScenarioConfig ScenarioConfig::fromJson(const std::string& path)
         s.transition_to_op  = cfg.value("transition_to_op", "B");
     }
 
+    if (s.mode == "periodic_tracking") {
+        s.has_periodic      = true;
+        auto amp_j = cfg.value("periodic_amp", std::vector<double>{0.0, 0.0, 0.0});
+        s.periodic_amp      = Eigen::Vector3d(amp_j[0], amp_j[1], amp_j[2]);
+        s.periodic_freq_hz  = cfg.value("periodic_freq_hz", 0.005);
+    }
+
     return s;
 }
 
@@ -89,6 +96,15 @@ void runSimulation(const ScenarioConfig& scenario,
                 op_end_ptr->y1 - op_start.y1,
                 op_end_ptr->y2 - op_start.y2,
                 op_end_ptr->y3 - op_start.y3);
+        }
+
+        // Periodic tracking (s08): add sinusoidal component to the base setpoint.
+        // The sinusoid is consistent across all controllers for the same scenario run
+        // (deterministic, no PRNG).  RepetitiveController learns this waveform; PID/MPC
+        // cannot cancel it entirely and will show persistent residual periodic error.
+        if (scenario.has_periodic) {
+            double phase = 2.0 * M_PI * scenario.periodic_freq_hz * t;
+            ref_dy += scenario.periodic_amp * std::sin(phase);
         }
 
         const Eigen::Vector3d u0(cur_op->u1, cur_op->u2, cur_op->u3);

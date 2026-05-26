@@ -73,6 +73,26 @@ namespace ctrl
         // Inject a known state estimate (e.g., from a Kalman filter).
         void setState(const Eigen::VectorXd &x) { x_hat_ = x; }
 
+        // Feed back the actual input applied to the plant when an external actuator
+        // layer (e.g., a thrust allocator or valve saturation block) clips or
+        // redistributes the MPC output before it reaches the plant.
+        //
+        // Without this call, computeRef() advances x_hat_ using the MPC-commanded u
+        // (stored in u_prev_), not the physically applied input.  After several
+        // consecutive saturations x_hat_ drifts silently from the real plant state,
+        // producing confident but wrong predictions.  This is distinct from the
+        // open-loop drift documented at DiscreteMPC.cpp:203 (which is due to missing
+        // measurement feedback); this drift is caused by input mismatch at the actuator.
+        //
+        // Call pattern (each control step, after the allocator):
+        //   VectorXd u_cmd = mpc.computeRef(x, ref);   // MPC command
+        //   VectorXd u_act = allocator.apply(u_cmd);   // actuator may clip
+        //   mpc.setLastApplied(u_act);                 // correct u_prev_ for next step
+        //
+        // If setState() is also called each step with a measurement-corrected estimate,
+        // these two calls together completely close the model-input loop.
+        void setLastApplied(const Eigen::VectorXd &u_applied) { u_prev_ = u_applied; }
+
         // QP solver diagnostics from the most recent computeRef() call.
         // lastQPConverged() returns false when the gradient-projection loop exited
         // at qpMaxIter without satisfying qpTol. In that case lastQPIters() == qpMaxIter

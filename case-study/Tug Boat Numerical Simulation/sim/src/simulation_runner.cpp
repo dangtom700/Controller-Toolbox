@@ -80,12 +80,35 @@ void runSimulation(const tug::PlantParameters& plant,
 
     auto t_wall_start = std::chrono::steady_clock::now();
 
+    // KF and MPC use a linearisation about the zero-velocity equilibrium.
+    // Track the heading accumulated from the linearisation point so we can
+    // warn when the linearisation error is expected to be significant.
+    double psi_linearise = ref(2);  // linearisation point matches the target heading
+    static constexpr double kLinearisationWarnDeg = 15.0;
+    static constexpr double kLinearisationWarnRad = kLinearisationWarnDeg * M_PI / 180.0;
+    bool linearisation_warned = false;
+
     for (int k = 0; k < N_steps; ++k) {
         double t = k * dt;
 
         auto state = dynplant.state();
         auto nu    = dynplant.nu();
         auto eta   = dynplant.eta();
+
+        // Warn once when the heading deviates far enough from the linearisation point
+        // that the KF/MPC linear model predictions become unreliable.
+        // sin(15 deg) ~ 0.26 gives ~26% surge-sway coupling error in R(psi).
+        if (!linearisation_warned) {
+            double dpsi = std::abs(std::remainder(eta(2) - psi_linearise, 2.0 * M_PI));
+            if (dpsi > kLinearisationWarnRad) {
+                std::cerr << "[" << scenario.id << " | " << controller.name() << "] "
+                          << "WARNING: heading deviation " << dpsi * 180.0 / M_PI
+                          << " deg exceeds linearisation validity threshold ("
+                          << kLinearisationWarnDeg << " deg). "
+                          << "KF/MPC predictions will degrade; consider EKF or gain scheduling.\n";
+                linearisation_warned = true;
+            }
+        }
 
         // Environmental disturbances
         Eigen::Vector3d tau_env = env.compute(t, eta, nu);
@@ -98,8 +121,13 @@ void runSimulation(const tug::PlantParameters& plant,
         auto alloc = allocator.allocate(tau_c, T_prev);
         T_prev = alloc.T;
 
-        // Achieved force (body frame)
+        // Achieved force (body frame) - may differ from tau_c if allocator saturated
         Eigen::Vector3d tau_main = allocator.achieved(alloc.T);
+
+        // Feed the actually-applied force back to any MPC controller so its internal
+        // u_prev_ (and thus x_hat_ prediction) stays synchronised with the real plant.
+        // Without this, prolonged allocator saturation causes silent x_hat drift.
+        controller.notifyApplied(tau_main);
 
         // Plant step
         dynplant.step(tau_main, tau_env);
@@ -126,6 +154,7 @@ void runSimulation(const tug::PlantParameters& plant,
               << "  IAE_x=" << logger.IAE_x()
               << "  IAE_y=" << logger.IAE_y()
               << "  IAE_psi=" << logger.IAE_psi()
+              << "  IAE_total=" << logger.IAE_composite()
               << "  E_fuel=" << logger.E_fuel()
               << "  sat=" << logger.sat_total()
               << "  wall=" << wall_ms << " ms"

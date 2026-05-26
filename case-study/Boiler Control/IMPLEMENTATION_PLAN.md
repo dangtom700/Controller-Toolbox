@@ -590,20 +590,86 @@ The old `boiler_turbine_case_study` target is **removed** from the parent
 
 ## 12. Validation Criteria
 
-Each controller is considered correctly implemented when, on the **regulation scenarios**
-at operating point B (medium load), it satisfies:
+A validation plan answers "what does success look like?" for each (controller, scenario) pair.
+Without it, 126 simulation runs produce numbers but no conclusions.
 
-| Controller | Acceptance criterion |
-|------------|---------------------|
-| PID | y1 error < 1 bar, y2 error < 2 MW after 600 s |
-| LQR / LQG / EKF / UKF | dx -> 0 within 300 s |
-| MPC / GPC | dx -> 0 within 200 s; no valve saturation sustained > 30 s |
-| SMC | Settling within 400 s; chattering amplitude < 0.01 on du |
-| ADRC | Comparable settling to SMC; no manual Jacobian needed |
-| ESC | y3 increases or stays within 2% of optimum within 1000 s |
-| FuzzyPID | y1, y2 errors < 2* PID IAE |
-| Stacks | Active controller switches <= 5 times per run |
-| RepetitiveController | IAE in 2nd period < 50% IAE in 1st period |
+### 12.1 ValidationCriteria Struct
+
+The following C++ struct should be added to `simulation_runner.h` alongside `ScenarioConfig`.
+Each scenario JSON may carry a `validation_criteria` block that is loaded into this struct
+and checked programmatically at the end of each run, producing a PASS/FAIL report.
+
+```cpp
+struct ValidationCriteria {
+    // Primary output quality
+    double max_iae_y1_norm = 1e9;   // IAE_y1 / (setpoint_amp * duration_s), fraction
+    double max_iae_y2_norm = 1e9;   // IAE_y2 / (setpoint_amp * duration_s), fraction
+    double max_iae_y3_norm = 1e9;
+
+    // Settling time: time for |e_y1| to stay < settling_band_y1 continuously
+    double settling_band_y1 = 1.0;  // bar
+    double settling_band_y2 = 2.0;  // MW
+    double max_settling_s   = 600.0;// seconds
+
+    // Actuator health
+    double max_valve_excursion = 1.0;   // absolute valve position in [0, 1]
+    double max_sustained_sat_s = 30.0;  // max continuous seconds of valve saturation
+
+    // Chattering (for SMC-based controllers)
+    double max_du_chatter = 0.02;    // max |du| amplitude after settling
+
+    // Periodic scenario (s08): RepetitiveController residual reduction
+    double periodic_iae_reduction_ratio = 0.5; // IAE in period 2 <= ratio * IAE in period 1
+};
+```
+
+### 12.2 Per-Scenario Acceptance Criteria
+
+**Regulation scenarios (s01-s03) - all controllers:**
+
+| Controller | max_iae_y1_norm | max_settling_s | max_sustained_sat_s | Notes |
+|------------|----------------|----------------|---------------------|-------|
+| PID        | 0.20 | 600 | 60 | Reference; looser tolerance |
+| LQR        | 0.15 | 300 | 30 | Optimal for linear plant |
+| LQG        | 0.15 | 300 | 30 | Same as LQR + noise tolerance |
+| MPC        | 0.10 | 200 | 30 | Tighter: horizon gives preview |
+| GPC+RLS    | 0.12 | 250 | 30 | Slightly worse during ID warmup |
+| SMC        | 0.18 | 400 | 30 | max_du_chatter = 0.01 |
+| ADRC       | 0.18 | 400 | 30 | Model-free; comparable to SMC |
+| EKF-LQR    | 0.14 | 300 | 30 | Should match LQR after EKF warmup |
+| UKF-LQR    | 0.14 | 300 | 30 | Same as EKF-LQR |
+| FuzzyPID   | 0.22 | 500 | 60 | Looser; FIS not optimally tuned |
+| FuzzySup-MPC | 0.12 | 250 | 30 | Should match or beat MPC |
+| LeadLag+PID | 0.18 | 500 | 60 | Lead compensates phase, not gain |
+| SmithPredictor | 0.18 | 450 | 45 | Delay compensation helps mostly y2 |
+| SupervisoryStack | 0.16 | 350 | 30 | SMC active initially, PID fallback |
+| AdditiveStack | 0.18 | 400 | 45 | LeadLag fades out over 300 steps |
+| WeightedStack | 0.18 | 400 | 45 | Blend weight varies with x1 |
+| RepetitiveCtrl | 0.20 | 600 | 60 | Shows benefit only on s08 |
+| ESC        | 0.35 | 1000 | 60 | Model-free; slow; y3 focus |
+
+**Load-step tracking scenarios (s04-s06):**
+Same table but `max_settling_s` is measured from the step time, and `max_iae_y1_norm`
+uses the step amplitude as normalisation. Accept 30% looser IAE thresholds than regulation
+(tracking a step is harder than rejecting a perturbation).
+
+**Multi-op transition (s07):**
+Each sub-period (before and after transition_time_s) is evaluated independently using
+the regulation criteria for the respective operating point.
+
+**Periodic load scenario (s08 - RepetitiveController focus):**
+
+| Controller | periodic_iae_reduction_ratio | Note |
+|------------|------------------------------|------|
+| RepetitiveCtrl | 0.05 (period 2 IAE < 5% of period 1) | Learning cancels waveform |
+| MPC        | 0.70 (period 2 IAE < 70% of period 1) | Some rejection via bandwidth |
+| PID        | 0.90 (minimal improvement expected) | No periodic disturbance model |
+
+### 12.3 Implementation Note
+
+The validation check should run inside `runSimulation()` (or a wrapper) and append a
+`PASS` / `FAIL [reason]` line to the console output. This converts "126 runs completed"
+into "126 runs completed, 124 passed, 2 failed [details]" - an actually useful result.
 
 ---
 

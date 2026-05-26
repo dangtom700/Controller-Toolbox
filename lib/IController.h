@@ -46,6 +46,16 @@ namespace ctrl
         //
         // The default is a no-op (e.g., for stateless or non-integrating controllers).
         // Override in controllers that have integral or memory state (PID, MPC, SMC).
+        //
+        // MIMO limitation: this interface is scalar.  For MIMO controllers (e.g.,
+        // DiscreteMPC operating on a vector plant), the bumpless handover is a vector
+        // operation (initialise each input channel to match the corresponding u_target
+        // component).  ControllerStack currently calls bumplessInit with a scalar
+        // (the single composite output from the previous step), which is only meaningful
+        // for the first output channel.  MIMO controllers that need multi-channel
+        // bumpless transfer must implement it outside the IController interface, e.g.,
+        // by calling DiscreteMPC::setState() and DiscreteMPC::setLastApplied() directly
+        // from the switching logic before handing control to the new controller.
         virtual void bumplessInit(double /*u_target*/, double /*error*/) {}
 
         // Health query for supervisory fault-tolerant control.

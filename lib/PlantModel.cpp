@@ -170,8 +170,27 @@ namespace ctrl
 
         if (method == C2dMethod::ZOH)
         {
-            // Embed [Ac Bc; 0 0] * Ts and take matrix exponential.
-            // expm([Ac Bc; 0 0]*Ts) = [Ad Bd; 0 I]
+            // ZOH discretisation via the Van Loan (1978) matrix-exponential embedding.
+            //
+            // For a linear system x' = Ac*x + Bc*u with piecewise-constant input u,
+            // the exact discrete-time equivalent is:
+            //   x[k+1] = Ad*x[k] + Bd*u[k]
+            //   Ad = expm(Ac*Ts),   Bd = (integral_0^Ts expm(Ac*t) dt) * Bc
+            //
+            // Both Ad and Bd are extracted in one shot from the (n+m)*(n+m) augmented
+            // matrix exponential (Van Loan 1978, Eq. 2.4):
+            //   expm([Ac  Bc] * Ts) = [Ad  Bd]
+            //       ([0   0 ]      )   [0   I ]
+            //
+            // This is numerically preferred over Pade-approximant series for stiff Ac
+            // (large spread of eigenvalues): the matrix exponential is computed via
+            // Schur decomposition, which remains stable even when eigenvalues span many
+            // decades (e.g., the Bell-Astrom boiler model where |lambda_fast|/|lambda_slow|
+            // >> 100).  A forward-Euler or Pade approximant at such stiffness ratios
+            // produces discrete eigenvalues outside the unit disk.
+            //
+            // Reference: Van Loan, C.F. (1978). "Computing integrals involving the matrix
+            //   exponential." IEEE Trans. Automat. Control, 23(3):395-404.
             Eigen::MatrixXd M = Eigen::MatrixXd::Zero(n + m, n + m);
             M.topLeftCorner(n, n)  = sys_c.A * Ts;
             M.topRightCorner(n, m) = sys_c.B * Ts;

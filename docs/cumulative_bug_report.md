@@ -828,3 +828,445 @@ For context on where this codebase sits relative to community standards:
 ---
 
 *Part 8 added 2026-05-25. All pre-release items fixed same day.*
+
+---
+
+---
+
+## Part 9: Full-Pass Senior Review - 2026-05-25 (Rev 3)
+
+**Reviewer:** Senior Controls Engineer (second pass, requested by user)
+**Scope:** Full codebase + case-study audit. `lib/`, `tests/`, `examples/`, `case-study/` (all three sub-projects), `docs/`, `cheatsheet/`. Read against actual source, not prior reports.
+**Tone:** Peer-to-peer, informal, critical. Useful over polite.
+**Benchmarks:** python-control, ACADO, CasADi, Kalman-and-Bayesian-Filters-in-Python (Labbe), Eigen documentation conventions.
+**Focus areas requested:** PID tuning, state-space representation, algorithm gap analysis, case-study application quality, performance benchmarking, pseudocode/diagram guidance.
+
+---
+
+### Preamble
+
+Parts 1-8 of this document are accurate. The fixed-item lists are correctly verified against source. This pass adds three things that weren't there before: (1) a detailed review of how the case studies actually use the toolbox, because that's where the rubber meets the road and the gaps that don't show up in unit tests are visible; (2) a fresh look at the PID tuning and state-space subsystems specifically, since those were called out as priority areas; and (3) concrete benchmark recommendations with pseudocode, since the current test suite has no timing harnesses at all.
+
+---
+
+### 1. Case Study Review: Tug Boat Numerical Simulation
+
+This is the most developed case study and the most instructive place to see how the toolbox behaves in a real application. Read against `project_description.md`, `mathematical_models.md`, `controller_choices.md`, and `review_notes.md`.
+
+#### 1.1 The IController Wrapping Pattern Is Correct - But the SMC Wrapper Has a Latent Sign Bug Risk
+
+`controller_choices.md` documents the SMC equivalent control term as:
+
+```
+tau_eq = -M_re * Lambda * ė + D_re * ν + C_re(ν) * ν
+```
+
+`review_notes.md` already flags this: "the GDScript prototype exhibited IAE 500-5000* larger than paper Table 7... root-cause identified as a probable sign error in tau_eq." The C++ implementation hasn't been validated yet against Table 7 (validation is listed as a pre-publication prerequisite, not a completed task). Until that check is done, every performance number from the SMC controller is potentially garbage.
+
+**This is the highest-priority unresolved item in the case study.** Not a toolbox bug - `DiscreteSMC` is correct. The risk is in how `controllers.cpp` constructs the equivalent control term that feeds into `DiscreteSMC`. The sign of `M_re * Lambda * ė` must be subtracted; if it's added, the equivalent control amplifies the tracking error instead of cancelling it.
+
+**Action:** Add a unit test in `test_integration.cpp` (or a dedicated `test_tug_smc_sanity.cpp`) that:
+1. Initialises the tug plant at equilibrium with a 5 m surge offset.
+2. Runs Mode 3 (SMC) for 300 seconds under S2 conditions (90^\circ wind, 5 m/s).
+3. Asserts final IAE_x < threshold consistent with Table 7 +/- 10%.
+
+This test should run as part of CI. If it fails, the sign error has been caught automatically, not discovered post-publication.
+
+---
+
+#### 1.2 Thrust Allocation: Silent Constraint Violation Under MPC Commands
+
+`review_notes.md` (Section 4) correctly identifies the pseudo-inverse thrust allocator as theoretically weak: clamping one tug breaks `BT = tau_c`. What's not noted is the interaction with the MPC controller specifically.
+
+`DiscreteMPC` computes the optimal `tau_c` assuming the plant will receive exactly `tau_c`. If the thrust allocator then clips one or more tugs (because `tau_c` demands more than the per-tug box allows), the actual generalized force applied to the barge is `tau_applied != tau_c`. The MPC's internal model advances `x_hat` using `tau_c` (as recorded in `u_prev_`), not `tau_applied`. After several consecutive saturations, `x_hat` drifts from the real plant state. This is exactly the open-loop drift problem documented in [lib/DiscreteMPC.cpp:198-203] - except here the discrepancy comes from the allocator, not from the MPC's own output saturation.
+
+The practical symptom: MPC looks confident (QP converges, `lastQPConverged() = true`) while the plant has been running on a different input for many steps. You won't catch this from the controller's perspective.
+
+**Mitigation:**
+1. Feed `tau_applied` (the allocator's actual output redistributed back into generalized force space via `B * T_clamped`) back to `DiscreteMPC::setLastApplied(tau_applied)` if such an interface exists, or update `u_prev_` externally. This is standard practice in MPC implementations that sit upstream of a constrained actuator layer.
+2. Alternatively, document the limitation explicitly in the case study simulation runner and log the allocator residual `||tau_applied - tau_c||` per tick for post-hoc diagnosis.
+
+Neither the case study nor the toolbox currently handles this. It should at least be documented in `review_notes.md`.
+
+---
+
+#### 1.3 KF Linearisation Domain: The Problem Is Bigger Than Documented
+
+`review_notes.md` (Section 3) says the linearisation about zero velocity "degrades for heading changes greater than approximately 20^\circ." That number needs a citation or a derivation. The actual threshold depends on the nonlinearity in `R(ψ)` and `C_re(ν)`.
+
+For the barge system, the rotation matrix `R(ψ)` introduces coupling between surge and sway errors as `ψ` deviates from the linearisation point. The cross-coupling term scales as `sin(Deltaψ)`, so for `Deltaψ = 20^\circ` the coupling is `sin(20^\circ) approx = 0.34` - meaning 34% of surge error leaks into sway in the world frame. That's not small. A Kalman filter built on a linearised `A` that ignores this coupling will have systematic prediction errors even at heading deviations much smaller than 20^\circ.
+
+The correct mitigation is already listed (`ExtendedKalmanFilter.h` is available), but the severity of the linearisation error is underplayed. The KF-PID mode should come with a quantitative validity domain in the documentation: "valid for |Deltaψ| < X^\circ where X is derived from maximum tolerable prediction error."
+
+**Action:** Add a linearisation validity check to the simulation runner: if `|ψ - ψ_linearise|` exceeds a configurable threshold (default 15^\circ), log a warning. This is a one-liner in the tick loop and prevents silent model mismatch.
+
+---
+
+#### 1.4 Extremum Seeking: Dither Frequency Below Nyquist Needed
+
+`controller_choices.md` sets ESC dither at 0.016-0.020 Hz (per axis, staggered). The control sample rate is `Deltat = 0.5 s`, giving Nyquist at 1 Hz. The dither is well below Nyquist - fine. But the HPF cutoff is 0.05 rad/s (0.008 Hz) and the LPF is 0.02 rad/s (0.003 Hz). The dither at 0.016 Hz = 0.10 rad/s is above the HPF cutoff - also fine.
+
+What's not checked: the time constant of the closed-loop gradient estimate vs the plant settling time. The ESC update `dtau_nom/dt = -k_esc * ∇^J` drives convergence over a timescale of roughly `1 / (k_esc * a_d^2 * omega_d / 2)`. For the given parameters with `k_esc = 1`, `a_d = 5*10^3 N`, `omega_d = 0.10 rad/s`, the estimate time constant is approximately `2 / (5*10^3)^2 * 0.10 approx = 8*10^-⁸` - which gives unrealistically fast convergence. Something is off with the units or the gain. The "10* longer than PID" claim needs a back-of-envelope check before it goes in the documentation.
+
+More importantly: staggering dither frequencies across axes (0.016, 0.018, 0.020 Hz) is the right call to avoid inter-axis interference. But the frequencies should be chosen such that no dither frequency is an integer multiple of another. `0.016`, `0.018`, `0.020` have ratio 8:9:10, which passes. Document this choice explicitly - it's non-obvious and someone will break it when they "tune" the frequencies.
+
+---
+
+#### 1.5 Weighted IAE Composite Metric: The Heuristic Needs Justification
+
+`review_notes.md` (Section 6) flags the `IAE_total = IAE_x + IAE_y/10 + IAE_ψ` weighting as heuristic and suggests alternatives. The right answer is to use the MPC `Q_mpc` diagonal to derive the weights, since that diagonal already encodes the control designer's relative importance between surge, sway, and yaw tracking. For `Q_mpc = diag[10^3, 10^3, 10^5]`, the natural weighting is:
+
+```
+IAE_total = IAE_x * w_x + IAE_y * w_y + IAE_ψ * w_ψ
+
+where:  w_x = Q_mpc[0,0] / trace(Q_mpc)  = 1000 / 102000 approx = 0.0098
+        w_y = Q_mpc[1,1] / trace(Q_mpc)  = 0.0098
+        w_ψ = Q_mpc[2,2] / trace(Q_mpc)  = 100000 / 102000 approx = 0.980
+```
+
+That puts almost all weight on heading error, which reflects the physical reality that yaw control is the hardest axis (highest moment of inertia, largest added mass effect). The current 1/10 heuristic gives IAE_y one-tenth the weight of IAE_x, with no physical justification. Fix this before any results are published.
+
+---
+
+### 2. Case Study Review: Boiler Control
+
+The current monolith (`boiler_turbine_case_study.cpp`) and the planned refactoring (`IMPLEMENTATION_PLAN.md`) are both worth reviewing independently.
+
+#### 2.1 Monolith: Forward-Euler Discretisation Is Wrong for Stiff Plants
+
+The existing `boiler_turbine_case_study.cpp` linearises around three operating points and discretises via forward Euler: `A_d = I + Ts * A_c`. The Bell-Astrom boiler model has eigenvalues spanning several orders of magnitude (the drum pressure dynamics are fast; the water level dynamics are slower). For a stiff plant, forward Euler is A-unstable for the fast modes unless `Ts < 2/|lambda_max|`. The monolith uses `Ts = 1 s`. If any continuous-time eigenvalue has `|lambda| > 2`, the discrete model will have at least one eigenvalue outside the unit disk regardless of the physics.
+
+`IMPLEMENTATION_PLAN.md` correctly lists ZOH via `ctrl::c2d()` as the discretisation method for the refactored version. That's the right fix. But the monolith is still there and currently gives wrong discrete models for the fast dynamics. This should be noted with a warning comment in the monolith, not silently left as-is.
+
+**Action:** Add a comment block at the top of `boiler_turbine_case_study.cpp`:
+
+```cpp
+// WARNING: This file uses forward-Euler discretisation (A_d = I + Ts*A_c).
+// For the Bell-Astrom plant, this is numerically unstable for Ts > 2/|lambda_max|.
+// The refactored version in sim/ uses ZOH via ctrl::c2d() and is preferred.
+// This file is retained for historical reference only; do not use its discrete
+// models for control design without first checking that all eigenvalues of A_d
+// lie within the unit disk.
+```
+
+---
+
+#### 2.2 IMPLEMENTATION_PLAN.md: 18 Controllers * 7 Scenarios Is a Test Matrix, Not a Validation Plan
+
+The plan lists 126 simulation runs (18 controllers * 7 scenarios) as the deliverable. That's a test matrix, not a validation plan. A validation plan answers: what does success look like for each controller on each scenario? Without acceptance criteria, the 126 runs produce numbers but no conclusions.
+
+For a production-grade case study, each (controller, scenario) pair needs:
+1. A **primary metric** and its pass threshold (e.g., `IAE_pressure < 5% of setpoint * T_sim` for regulation scenarios).
+2. A **control effort bound** (e.g., valve position must remain in [0%, 100%] and slew rate must not exceed spec).
+3. A **stability check** (e.g., output variance must decrease monotonically after the disturbance).
+
+python-control's example gallery does this correctly - each example has an expected output range that is checked programmatically. ACADO does it with convergence residuals per run. This codebase should too.
+
+**Action:** For each scenario in `IMPLEMENTATION_PLAN.md`, add a `validation_criteria` block alongside the `ScenarioConfig`:
+
+```cpp
+struct ValidationCriteria {
+    double max_iae_pressure;   // fraction of setpoint * T_sim
+    double max_valve_excursion; // in [0,1]
+    double settling_time_s;    // time to within 2% of setpoint
+};
+```
+
+This is 15 minutes of struct definition. The payoff is that "run all 126 simulations" becomes "run all 126 simulations and report pass/fail", which is actually useful.
+
+---
+
+#### 2.3 Missing Controller: RepetitiveController for Periodic Load Disturbances
+
+The Bell-Astrom boiler plant is subject to load disturbances that, in a real power plant, are often periodic (grid frequency variations, scheduled load changes). `IMPLEMENTATION_PLAN.md` lists `RepetitiveController` as one of the 18 controllers but gives it no specific scenario.
+
+`RepetitiveController` is exactly the right tool for periodic disturbance rejection: it learns the disturbance waveform over one period and cancels it feed-forward. The boiler case study should have a scenario with a sinusoidal or square-wave load disturbance at a known frequency, not just step disturbances. This would actually demonstrate what `RepetitiveController` does that PID and MPC cannot.
+
+Suggested scenario `s08_periodic_load.json`: sinusoidal steam valve disturbance at 0.05 Hz (matching a hypothetical grid load oscillation). Expected result: `RepetitiveController` achieves near-zero steady-state periodic IAE after one period; PID and MPC show residual periodic error. If this comparison isn't run, the `RepetitiveController` class might as well not exist in the case study.
+
+---
+
+### 3. PID Tuning Subsystem - Detailed Review
+
+#### 3.1 RelayAutoTuner: The Hysteresis Threshold Is Too Loose by Default
+
+`RelayAutoTuner` in `ControllerTuner.h` uses the Astrom-Hagglund relay test to extract the ultimate gain `K_u` and ultimate period `T_u`. The relay threshold (hysteresis) determines how cleanly the limit cycle separates from measurement noise. The default is not documented; from reading the source, it appears to be a fixed absolute value.
+
+The problem: an absolute hysteresis threshold that works for a temperature controller (where signals are in ^\circC) will be either too tight (false crossings, corrupted `K_u` estimate) or too wide (missed crossings, wrong `T_u`) for a pressure controller where signals are in bar or a motor controller where signals are in rpm. The hysteresis should be expressed as a fraction of the expected output range, not an absolute value.
+
+MATLAB's `pidtune()` with relay feedback normalises the relay amplitude relative to the estimated output standard deviation. That's overkill for a toolbox this size, but a simple relative threshold (`hysteresis = 0.02 * (yMax - yMin)`) would be far more robust than an absolute one.
+
+**Action:** In `RelayAutoTunerParams`, add a `bool relative_hysteresis` flag (default `true`) and compute the actual threshold as `hysteresis_frac * estimated_output_range`. Document the default fraction (recommend 0.02-0.05) and explain why.
+
+---
+
+#### 3.2 StepResponseTuner: FOPDT Identification Is Sensitive to Step Timing
+
+`StepResponseTuner` fits a first-order-plus-dead-time (FOPDT) model `K, tau, theta` to a step response. The identification uses a fixed 28.3%/63.2% tangent-intersection method (Smith method variant). This method is sensitive to when the step was applied: if there is pre-step drift or if the measurement is noisy, the 28.3% and 63.2% thresholds are applied to the wrong baseline.
+
+The test in `tests/data/step_response.csv` is clean synthetic data. In a real commissioning workflow, the step response data will have:
+- Pre-step drift (the system wasn't at steady state when the step was applied)
+- Measurement noise (the 28.3% threshold crossing may be ambiguous)
+- Superimposed disturbances (the step response is not the only thing happening)
+
+None of these are tested. `test_tuners_extended.cpp` only tests on the synthetic CSV. Add at minimum:
+1. A noisy step response test (Gaussian noise sigma = 5% of step amplitude): verify the FOPDT parameters are still within 15% of truth.
+2. A pre-step drift test (plant at 10% of step amplitude before step): verify the method correctly removes the initial offset.
+
+Without these, the tuner is only validated for conditions that don't occur in real commissioning.
+
+---
+
+#### 3.3 IMC Rule: The Lambda Parameter Has No Physical Interpretation in the Header
+
+`StepResponseTuner` offers four PID tuning rules: ZN, Tyreus-Luyben, AMIGO, and IMC. The IMC rule requires a user-supplied `lambda` parameter (the desired closed-loop time constant). The header says "lambda > 0, larger = more conservative." That's it.
+
+For IMC, `lambda` has a specific physical meaning: it is the closed-loop time constant of the desired first-order response. A practically useful guideline from Skogestad (2003) is `lambda = max(tau/5, theta)` for robust tuning, or `lambda = tau` for balanced performance/robustness. Neither of these is documented. A user who doesn't know IMC theory will pick `lambda = 1.0` because it's a nice round number and wonder why the resulting controller is too aggressive on a slow plant and too conservative on a fast one.
+
+Add to the header comment for `IMCParams::lambda`:
+
+```
+// IMC closed-loop time constant. Physical interpretation: the closed-loop step response
+// settles to within 63% of setpoint in lambda seconds.
+// Practical guidelines (Skogestad 2003):
+//   - Robust: lambda = max(tau/5, theta)   [conservative, good for model uncertainty]
+//   - Balanced: lambda = tau               [matches open-loop time constant]
+//   - Aggressive: lambda = theta           [fastest achievable without robustness margin]
+// Too small lambda -> controller becomes aggressive -> sensitivity to model error increases.
+```
+
+---
+
+### 4. State-Space Subsystem - Detailed Review
+
+#### 4.1 `PlantModel::c2d()` ZOH via Matrix Exponential: The Implementation Choice Is Not Documented
+
+`PlantModel::c2d()` with `Discretisation::ZOH` computes the matrix exponential `expm([Ac, Bc; 0, 0] * Ts)` to get `Ad, Bd`. This is the Van Loan method (1978) for ZOH discretisation. It's the numerically correct approach - more accurate than the Pade approximant for stiff systems, and exactly correct for linear systems. But the header doesn't say any of this.
+
+A reader who sees `expm(...)` without context might assume it's an approximation, or might replace it with a series expansion thinking they're "simplifying" the code. The DARE doubling derivation in `DiscreteLQR.cpp` is exemplary precisely because it explains *why* the specific algorithm was chosen. The ZOH implementation deserves the same treatment.
+
+**Add to `c2d()` ZOH case:**
+
+```cpp
+// ZOH discretisation via Van Loan (1978) matrix exponential method.
+// Constructs the augmented matrix [Ac, Bc; 0, 0] and takes the matrix exponential,
+// which gives [Ad, Bd; 0, I] exactly (no approximation error for linear time-invariant
+// systems). This is preferred over Pade series for stiff Ac (large spectral radius)
+// because the matrix exponential is computed via Schur decomposition, which is
+// numerically stable even when eigenvalues span many decades.
+// Reference: Van Loan (1978), "Computing integrals involving the matrix exponential",
+// IEEE Trans. Automat. Control, 23(3):395-404.
+```
+
+---
+
+#### 4.2 `ss2tf()` via Faddeev-LeVerrier: The Sign Convention Warning Is Missing
+
+`ss2tf()` uses the Faddeev-LeVerrier recurrence to compute the characteristic polynomial. This is correctly documented as preferable to `\prod(z - lambda_i)` for clustered poles. What's not documented: the denominator polynomial returned by `ss2tf()` follows the convention `z^n + a_{n-1}z^{n-1} + ... + a_0`, with the leading coefficient normalised to 1. If a user passes this to a control design tool that expects the unnormalised form (coefficient vector `[1, a_{n-1}, ..., a_0]`), they get the right answer. But if they pass it to something that expects `[a_n, a_{n-1}, ..., a_0]` (e.g., MATLAB's `tf()` with explicit denominator), they need to know the leading coefficient is already 1.
+
+One sentence in the return-value documentation prevents this. It's the kind of thing that costs an afternoon of debugging when someone interfaces the toolbox with an external tool.
+
+---
+
+#### 4.3 `DiscreteLQG::step()`: The Separation-Principle Comment Understates the Limitation
+
+[lib/DiscreteLQG.cpp:28-34] has a two-paragraph comment explaining the separation principle and causality (fixed in the 05-26 pass, marked `[FIXED]`). Reading the actual comment: it correctly explains that the observer and controller are designed independently. What it doesn't say: the separation principle holds exactly only for linear systems with Gaussian noise. For the boiler-turbine and tug boat systems, both of which are nonlinear, `DiscreteLQG` operates on a linearised model. The separation principle guarantees stability only in the neighborhood of the linearisation point.
+
+This is a design-level limitation, not a code bug. But users who pick `DiscreteLQG` for the nonlinear boiler plant and observe poor performance outside the linearisation region will have no guidance on why. Add one sentence to the `DiscreteLQG` header:
+
+```
+// Note: The separation principle holds exactly only for linear systems. For nonlinear
+// plants, this class linearises the plant model at construction time. Stability and
+// performance guarantees apply only in the neighborhood of the linearisation point.
+// For larger operating regions, consider DiscreteLQG with periodic re-linearisation
+// or ExtendedKalmanFilter + DiscreteLQR as separate components.
+```
+
+---
+
+### 5. Test Coverage Gaps (New This Pass)
+
+These are gaps not covered in Part 8 or earlier sections.
+
+| Gap | Why It Matters | Effort |
+|-----|---------------|--------|
+| SMC case-study S2 IAE validation (Section 1.1 above) | Sign error risk; can corrupt all published results | 1 hr |
+| MPC model mismatch under thrust allocator clamping (Section 1.2) | Silent `x_hat` drift; hard to diagnose without explicit test | 2 hrs |
+| `StepResponseTuner` with noisy + drifting input data (Section 3.2) | Only tested on clean synthetic data | 1 hr |
+| `RelayAutoTuner` with relative hysteresis on heterogeneous-scale plants (Section 3.1) | Default absolute threshold gives wrong `K_u` on extreme-scale plants | 1 hr |
+| `PlantModel::c2d()` ZOH accuracy on stiff plant (`lambda_max/lambda_min > 100`) | Verify matrix-exponential is more accurate than Euler on stiff system | 30 min |
+| `DiscreteLQG` stability outside linearisation region | Expected degradation, but should be quantified | 1 hr |
+| Boiler monolith: `A_d` eigenvalue check for forward-Euler instability (Section 2.1) | Users copy-paste the monolith; they won't know the discrete model is wrong | 30 min |
+
+---
+
+### 6. Performance Benchmarking: Concrete Proposal
+
+Part 8 said "add a `benchmarks/` directory." Here's what that should actually look like.
+
+**Minimum viable benchmark suite:** Three harnesses, each timing a hot loop of 1000 iterations to eliminate cache warm-up effects. Wall-clock via `std::chrono::high_resolution_clock`. Report mean +/- std over 10 independent runs.
+
+**Benchmark 1: MPC solve time vs (Nc, Np)**
+
+```cpp
+// Pseudocode for scripts/bench_mpc.cpp
+for Nc in [3, 5, 10, 20]:
+    for Np in [10, 20, 50, 100]:
+        mpc = DiscreteMPC(plant, {Np, Nc, rho_y=1.0, rho_u=0.1})
+        state = VectorXd::Zero(n)
+        ref   = VectorXd::Ones(n)
+        timer.start()
+        for i in [0..999]:
+            u = mpc.computeRef(state, ref)
+        elapsed = timer.stop() / 1000
+        print(f"Nc={Nc} Np={Np}: {elapsed:.3f} ms/call")
+```
+
+Target: `Nc=20, Np=50` should complete in < 1 ms on a modern CPU at -O2. If it doesn't, the gradient-projection solver is not suitable for RT deployment at that horizon size, and the documentation should say so.
+
+**Benchmark 2: DARE doubling convergence vs plant order n**
+
+```cpp
+// Pseudocode for scripts/bench_lqr.cpp
+for n in [2, 4, 8, 16, 32]:
+    A = random_stable_A(n)       // all eigenvalues |lambda| < 0.95
+    B = random_B(n, m=1)
+    Q = MatrixXd::Identity(n,n)
+    R = MatrixXd::Identity(m,m)
+    timer.start()
+    for i in [0..99]:
+        lqr = DiscreteLQR(A, B, Q, R)
+    elapsed = timer.stop() / 100
+    print(f"n={n}: {elapsed:.2f} ms/DARE, iters={lqr.dareIters()}")
+```
+
+The O(log^2(n)) convergence claim should be visible in the iteration count. If `dareIters()` isn't exposed, add it - it's already stored in `DareResult`.
+
+**Benchmark 3: RLS update cost vs (na, nb)**
+
+```cpp
+// Pseudocode for scripts/bench_rls.cpp
+for na in [2, 4, 8]:
+    for nb in [2, 4, 8]:
+        rls = RecursiveLeastSquares(na, nb, lambda=0.99)
+        phi = VectorXd::Random(na + nb)
+        y   = 1.0
+        timer.start()
+        for i in [0..9999]:
+            rls.update(phi, y)
+        elapsed = timer.stop() / 10000
+        print(f"na={na} nb={nb}: {elapsed:.4f} ms/update")
+```
+
+An RLS update at `na=8, nb=8` should be under 10 mus at -O2. If it's over 100 mus, something is wrong with the matrix operations (likely a missing `noalias()` in the Eigen expression).
+
+---
+
+### 7. Pseudocode and Diagram Requests
+
+The following algorithms would benefit from a diagram or pseudocode block in their headers that does not currently have one. The DARE doubling derivation is the template.
+
+**Priority 1 - `ControllerStack` switching logic:**
+
+```
+// Supervisory mode pseudo-code (add to ControllerStack.h):
+//
+//   for each entry e in stack (insertion order):
+//       if e.enabled AND e.activationCondition() AND e.controller->isHealthy():
+//           if e.controller != last_active_:
+//               e.controller->bumplessInit(lastOutput_, current_error)
+//               last_active_ = e.controller
+//           return e.controller->compute(signal)
+//   // no entry eligible:
+//   emit warning to stderr
+//   return lastOutput_  // hold last valid output
+```
+
+This makes the switching logic reviewable without reading 80 lines of source. Any correctness issue (e.g., the edge case from Section 1.8 of Part 8) is immediately visible.
+
+**Priority 2 - `ExtremumSeeker` dither/demodulate loop:**
+
+```
+// ESC algorithm (add to ExtremumSeeker.h):
+//
+//   dither:       s_k = s_nom + a_d * sin(omega_d * k * Ts)
+//   apply s_k -> plant -> get cost J_k
+//   demodulate:   m_k = J_k * sin(omega_d * k * Ts)       // multiply by reference signal
+//   high-pass:    h_k = HPF(m_k)                        // remove DC
+//   low-pass:     ghat_k = LPF(h_k)                       // gradient estimate
+//   update:       s_nom += -k_esc * ghat_k * Ts
+```
+
+Currently there is no concise description of the ESC algorithm in the header. A reader has to reverse-engineer it from the `compute()` implementation.
+
+**Priority 3 - `SubspaceID::n4sid()` MOESP block diagram:**
+
+The MOESP algorithm proceeds through 5 well-defined steps (Hankel construction -> oblique projection -> SVD -> state-space recovery -> LS refinement). A numbered pseudocode block matching those 5 steps to the corresponding code blocks in `n4sid()` would make the implementation verifiable. The comment added in a prior pass explains the oblique projection step; the other four steps have no pseudocode.
+
+---
+
+### 8. What the Tug Boat Case Study Reveals About the Toolbox's Applied Gaps
+
+Reading the case study as a whole, five toolbox gaps surface that aren't visible from the unit tests alone:
+
+1. **No `setLastApplied()` interface on `DiscreteMPC`.** When an external actuator layer clips the output (thrust allocator, valve saturation, etc.), the MPC needs to be told the actual applied input. This is standard in industrial MPC implementations and missing here. It's not a QP correctness issue; it's a model-input feedback issue.
+
+2. **`IController::computeVec()` signature doesn't carry reference and state separately.** The tug boat controller wrapper has to pack `[ref, state]` into a single vector or use a custom interface. The three-axis tug controllers use `compute(Eigen::Vector3d ref, Eigen::VectorXd state)` - that doesn't fit the standard `IController::computeVec(signal)` signature. The case study ends up implementing its own wrapper class (`ControllerBase` in `controllers.h`) rather than using `IController` directly. This partially defeats the purpose of having a shared interface.
+
+3. **No bumpless transfer test exists for MIMO controllers.** `ControllerStack`'s `bumplessInit()` calls `bumplessInit(u_target, error)` with scalar arguments. For MIMO controllers (like the MPC in the tug boat case), the bumpless initialisation is a vector operation. `IController::bumplessInit()` takes a scalar. Either the MIMO case can't do bumpless transfer, or each controller implements its own vector version outside the interface. Neither option is documented.
+
+4. **`DiscreteADRC` is excluded from the tug boat controller portfolio** (listed as "deferred" in `review_notes.md` Section 8). The stated reason is "strong alternative to SMC for validation." That's exactly why it should be included - ADRC requires no plant model (unlike SMC which requires `M_re, D_re, C_re`), and its ESO would naturally handle the environmental disturbances without explicit disturbance modelling. The fact that it's deferred without a timeline is a missed opportunity.
+
+5. **`ControllerStack` is not used in either case study.** The most architecturally distinctive feature of the toolbox - supervised/additive/weighted controller composition with bumpless transfer - appears in no case study. The boiler `IMPLEMENTATION_PLAN.md` lists `ControllerStack (Supervisory / Additive / Weighted)` as one of the 18 controllers to implement, but this won't be demonstrated until the refactored simulation is built. Until then, the toolbox's most complex feature has zero end-to-end validation in any applied context.
+
+---
+
+### 9. Comparison to Open-Source Community Standards
+
+Where this codebase stands relative to the references cited in Part 8:
+
+| Dimension | This Library | python-control | ACADO | Eigen |
+|-----------|-------------|----------------|-------|-------|
+| Discrete-time throughout | **Yes** | Mixed | **Yes** | N/A |
+| Zero-allocation hot path | **Yes** | No | **Yes** | **Yes** |
+| Algorithm derivation comments | Above average | Poor | Fair | **Excellent** |
+| QP solver status reporting | Partial (added in Part 8) | N/A | **Full** | N/A |
+| Case study coverage | Good (2 complete, 1 planned) | Examples only | Tutorials only | None |
+| Performance benchmarks | **Missing** | Informal | **Formal (CI)** | **Formal** |
+| Bound on linearisation validity | **Missing** | Not applicable | Documented | N/A |
+| C-API / Python bindings | **Missing** | Native Python | MATLAB/Python | pybind11 |
+
+The toolbox is above community average on algorithm correctness and documentation. It's below average on benchmarking and language bindings. The case studies are a genuine differentiator - no other open-source control library of this scope has published applied MIMO case studies in the same repository as the library code.
+
+---
+
+### 10. Priority Action List (Part 9 Additions)
+
+Items from prior parts that remain open are unchanged. New items from this pass:
+
+| # | Issue | File | Severity | Effort |
+|---|-------|------|----------|--------|
+| P9-1 | SMC case-study S2 IAE validation test (sign error risk) | `tests/` or case-study `tests/` | **High** | 1 hr - Sign verified correct in C++ source (review_notes.md updated); quantitative IAE vs Table 7 check still pending |
+| P9-2 | ~~MPC: add `setLastApplied()` interface for external actuator feedback~~ | [lib/DiscreteMPC.h](../lib/DiscreteMPC.h) | Medium | `[FIXED]` - `setLastApplied(u_applied)` added; corrects `u_prev_` when an external actuator layer clips the command |
+| P9-3 | ~~Boiler monolith: add forward-Euler instability warning comment~~ | [case-study/Boiler Control/boiler_turbine_case_study.cpp](../case-study/Boiler%20Control/boiler_turbine_case_study.cpp) | Medium | `[FIXED]` - 12-line warning block added at top of file explaining A-instability risk at Ts=1s |
+| P9-4 | Boiler `IMPLEMENTATION_PLAN.md`: add `ValidationCriteria` struct per scenario | [case-study/Boiler Control/IMPLEMENTATION_PLAN.md](../case-study/Boiler%20Control/IMPLEMENTATION_PLAN.md) | Medium | 30 min |
+| P9-5 | Add KF linearisation validity warning to tug boat sim runner | case-study tug sim runner | Low | 15 min |
+| P9-6 | Fix IAE composite metric weighting (use `Q_mpc` diagonal, not 1/10 heuristic) | [case-study/Tug Boat Numerical Simulation/review_notes.md](../case-study/Tug%20Boat%20Numerical%20Simulation/review_notes.md) + sim runner | Low | 30 min |
+| P9-7 | ~~`ControllerStack` pseudocode block in header~~ | [lib/ControllerStack.h](../lib/ControllerStack.h) | Low | `[FIXED]` - Supervisory and Weighted pseudocode blocks added showing edge-case hold behaviour |
+| P9-8 | ~~`ExtremumSeeker` pseudocode block in header~~ | [lib/ExtremumSeeker.h](../lib/ExtremumSeeker.h) | Low | `[FIXED]` - full algorithm pseudocode with variable-name annotations added |
+| P9-9 | ~~Add Van Loan ZOH derivation comment to `c2d()`~~ | [lib/PlantModel.cpp](../lib/PlantModel.cpp) | Low | `[FIXED]` - Van Loan (1978) derivation added explaining matrix-exponential embedding and why it is preferred over Pade for stiff systems |
+| P9-10 | `StepResponseTuner`: noisy + drifting input tests | [tests/test_tuners_extended.cpp](../tests/test_tuners_extended.cpp) | Low | 1 hr |
+| P9-11 | `RelayAutoTuner`: relative hysteresis threshold | [lib/ControllerTuner.h](../lib/ControllerTuner.h) | Low | 30 min |
+| P9-12 | Add Benchmark suite (`scripts/bench_mpc.cpp`, `bench_lqr.cpp`, `bench_rls.cpp`) | [scripts/](../scripts/) | Low | 3 hrs |
+| P9-13 | ~~`DiscreteLQG` header: add separation-principle scope limitation note~~ | [lib/DiscreteLQG.h](../lib/DiscreteLQG.h) | Low | `[FIXED]` - note added: separation principle holds only for linear systems; guidance for nonlinear plants added |
+| P9-14 | ~~`ss2tf()`: document denominator leading-coefficient normalisation~~ | [lib/PlantModel.h](../lib/PlantModel.h) | Low | `[FIXED]` - monic convention, z^{-1} form, and MATLAB interfacing note added |
+| P9-15 | `SubspaceID::n4sid()`: add numbered pseudocode for all 5 MOESP steps | [lib/SubspaceID.h](../lib/SubspaceID.h) | Low | 30 min |
+| P9-16 | Boiler case study: add `s08_periodic_load` scenario for `RepetitiveController` | [case-study/Boiler Control/IMPLEMENTATION_PLAN.md](../case-study/Boiler%20Control/IMPLEMENTATION_PLAN.md) | Low | 1 hr |
+| P9-17 | ESC dither-frequency coprimality: document why staggered frequencies were chosen | [case-study/Tug Boat Numerical Simulation/controller_choices.md](../case-study/Tug%20Boat%20Numerical%20Simulation/controller_choices.md) | Low | 10 min |
+| P9-18 | ~~`IController` MIMO bumpless transfer: document scalar-arg limitation for MIMO~~ | [lib/IController.h](../lib/IController.h) | Low | `[FIXED]` - scalar-arg MIMO limitation documented; workaround via `setState()`/`setLastApplied()` described |
+
+**P9-1 is the only remaining item with real production risk.** P9-2 is now fixed.
+
+---
+
+*Part 9 added 2026-05-25 (Rev 3). Updated 2026-05-25 (Rev 4): P9-2, P9-3, P9-7, P9-8, P9-9, P9-13, P9-14, P9-18 fixed.*

@@ -38,6 +38,19 @@ public:
     double E_fuel()   const { return E_fuel_; }
     int    sat_total()const { return sat_total_; }
 
+    // Composite IAE weighted by MPC Q_mpc diagonal (w_x=w_y=1e3, w_psi=1e5).
+    // Normalised to trace(Q) so the total is dimensionless and axis-consistent:
+    //   IAE_total = (w_x*IAE_x + w_y*IAE_y + w_psi*IAE_psi) / (w_x + w_y + w_psi)
+    // These weights match MPCController::rho_y[] and encode the relative tracking
+    // importance: yaw is 100x more penalised than surge/sway.
+    static constexpr double kW_x   = 1.0e3;
+    static constexpr double kW_y   = 1.0e3;
+    static constexpr double kW_psi = 1.0e5;
+    double IAE_composite() const {
+        constexpr double total_w = kW_x + kW_y + kW_psi;
+        return (kW_x * IAE_[0] + kW_y * IAE_[1] + kW_psi * IAE_[2]) / total_w;
+    }
+
     void flush();
 
 private:

@@ -37,10 +37,8 @@ void TelemetryLogger::log(const TickData& d)
     // Error relative to reference
     double ex   = d.ref(0) - d.state(0);
     double ey   = d.ref(1) - d.state(1);
-    double epsi = d.ref(2) - d.state(2);
-    // Wrap heading error
-    while (epsi >  M_PI) epsi -= 2.0 * M_PI;
-    while (epsi <= -M_PI) epsi += 2.0 * M_PI;
+    // Wrap heading error to (-pi, pi] in O(1) using std::remainder
+    double epsi = std::remainder(d.ref(2) - d.state(2), 2.0 * M_PI);
 
     // Accumulate metrics
     IAE_[0]   += std::abs(ex)   * dt;

@@ -13,6 +13,16 @@
 // Separation principle: the LQR and Kalman filter can be designed independently
 // and combined without loss of optimality (Wonham 1968).
 //
+// Scope limitation: the separation principle holds exactly only for linear systems
+// with additive Gaussian noise.  For nonlinear plants (e.g., tug-boat dynamics,
+// boiler-turbine), this class linearises the plant model at construction time.
+// Stability and performance guarantees apply only in the neighbourhood of the
+// linearisation point.  For larger operating regions consider:
+//   - DiscreteLQG with periodic re-linearisation (call the constructor at each
+//     operating point and update the gain), or
+//   - ExtendedKalmanFilter + DiscreteLQR used as separate objects, allowing the
+//     Jacobian to be recomputed at each step inside the EKF.
+//
 // Control law:
 //   1. Kalman predict:  x^[k|k-1] from u[k-1]
 //   2. Kalman update:   x^[k|k]   from y[k]

@@ -8,17 +8,31 @@
 // plant output to extract a gradient estimate, then integrates the gradient to
 // converge to the extremum of an unknown static (or slowly varying) cost surface.
 //
-// Signal chain per sample k:
-//   1. Dither:        d[k]     = a . sin(2pi.f_p.k.Ts)
-//   2. Plant input:   u[k]     = theta[k] + d[k]
-//   3. HPF on y:      y_h[k]   (removes DC/slow bias)
-//   4. Demodulate:    xi[k]     = y_h[k] . sin(2pi.f_p.k.Ts)
-//   5. LPF:           ghat[k]     (gradient estimate - low-frequency content only)
-//   6. Integrate:     theta[k+1]   = theta[k] - sign . k_int . Ts . ghat[k]
-//        sign = -1 for minimum seeking, +1 for maximum seeking
+// Algorithm pseudocode (per sample k):
 //
-// Dither frequency must satisfy: plant bandwidth << f_p << 1/(Ts . N_filter)
-// so the plant behaves quasi-statically at the dither frequency.
+//   phase[k]    = phase[k-1] + 2*pi*f_p*Ts          // phase accumulator (mod 2*pi)
+//   dither[k]   = a * sin(phase[k])                  // perturbation signal
+//   u[k]        = theta[k] + dither[k]               // total plant input
+//
+//   // High-pass filter (backward-Euler first-order, cutoff f_hpf):
+//   alpha_h     = 1 / (1 + 2*pi*f_hpf*Ts)
+//   y_h[k]      = alpha_h * (y_h[k-1] + y[k] - y[k-1])   // removes DC/slow drift
+//
+//   // Demodulate: multiply HPF output by reference dither to extract gradient phase
+//   xi[k]       = y_h[k] * sin(phase[k])
+//
+//   // Low-pass filter (backward-Euler first-order, cutoff f_lpf):
+//   alpha_l     = 2*pi*f_lpf*Ts / (1 + 2*pi*f_lpf*Ts)
+//   ghat[k]     = ghat[k-1] + alpha_l * (xi[k] - ghat[k-1])   // gradient estimate
+//
+//   // Gradient-descent (ascent) integration:
+//   sign_dir    = seekMinimum ? -1.0 : +1.0
+//   theta[k+1]  = theta[k] + sign_dir * k_int * Ts * ghat[k]
+//
+// Separation of timescales requirement:
+//   plant settling time << 1/f_p << 1/(f_lpf)
+// so the plant responds quasi-statically to the dither and the LPF cleanly extracts
+// the gradient. Violating this produces a biased gradient estimate and slow/no convergence.
 //
 // Ref: Ariyur & Krstic "Real-Time Optimisation by Extremum-Seeking Control" (2003);
 //      Tan et al. "On non-local stability of ESC" (2006);

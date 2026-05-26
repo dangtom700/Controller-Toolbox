@@ -47,17 +47,36 @@ from Li et al. Eq. (20).
 
 ## 2. SMC Implementation Risk: Sign Convention
 
-The GDScript prototype (Tug Boat Game) exhibited IAE values 500-5000* larger than paper
+The GDScript prototype (Tug Boat Game) exhibited IAE values 500-5000x larger than paper
 Table 7 during initial testing. Root-cause analysis identified a probable sign error in
 the SMC equivalent control term: the model-cancellation contribution
 $M_\mathrm{re}\Lambda\dot{\mathbf{e}}$ may be added rather than subtracted, causing the
 equivalent control to drive the barge away from the target.
 
-**Action required:** Before any performance comparison is published, validate the C++ SMC
-implementation against paper Table 7 scenario S2 (90^\circ, ideal observer, 5400 s). Accept
-IAE within +/-10% of the paper value. If the mismatch exceeds 10%, inspect the sign of
-$\boldsymbol{\tau}_\mathrm{eq}$ and the heading-error unwrapping in the sliding surface
-computation.
+**C++ sign verification (2026-05-25):**
+The C++ implementation in `sim/src/controllers.cpp` (SMCController::compute) constructs:
+
+```cpp
+Vector3d tau_eq = -pp_.M_re * Lambda_.cwiseProduct(e_dot)   // NEGATIVE sign
+                  + pp_.D_re * nu;
+```
+
+The `M_re * Lambda * e_dot` term is subtracted (negative), which is the correct sign
+for the equivalent control law derived from the sliding surface $s = \dot{e} + \Lambda e$.
+Setting $\dot{s} = 0$ gives $\tau_\mathrm{eq} = M_\mathrm{re}(-\Lambda\dot{e}) + D_\mathrm{re}\nu$,
+so the sign is verified correct in the C++ implementation. The GDScript prototype sign
+error does **not** carry over.
+
+**Remaining action (P9-1):** Quantitative validation of the C++ SMC against paper Table 7
+scenario S2 (90^\circ wind, 5 m/s, 5400 s) has not yet been performed. Until this produces
+IAE within +/-10% of the paper value, the implementation is sign-verified but not
+performance-validated. Do not publish performance comparisons until this check passes.
+
+**Checklist:**
+- [x] Sign of `tau_eq` verified correct in C++ source
+- [x] Heading error wrapped using `std::remainder` (not while-loop) in telemetry logger
+- [ ] Quantitative IAE check: run S2 scenario, compare IAE_x, IAE_y, IAE_psi to paper Table 7
+- [ ] If mismatch > 10%: inspect sliding surface integral accumulation and boundary-layer sat()
 
 ---
 
