@@ -131,6 +131,12 @@
   <h2>Composition</h2>
   <a href="#stack">Controller Stack</a>
   <a href="#plant">Plant Model</a>
+  <h2>HAL</h2>
+  <a href="#hal">HAL Overview</a>
+  <a href="#simplant">SimPlant</a>
+  <a href="#safesensor">SafeSensor</a>
+  <a href="#timers">ITimer / StdTimer</a>
+  <a href="#scheduler">IScheduler</a>
   <h2>Analysis</h2>
   <a href="#sysanalysis">System Analysis</a>
   <a href="#metrics">Metrics</a>
@@ -160,6 +166,7 @@
   <div class="card-sm"><h4>Estimation</h4>Kalman (KF) &middot; Extended KF (EKF) &middot; Unscented KF (UKF)</div>
   <div class="card-sm"><h4>Identification</h4>Recursive Least Squares (RLS) &middot; N4SID / MOESP subspace ID</div>
   <div class="card-sm"><h4>Tuning</h4>Relay ZN &middot; IMC &middot; Cohen-Coon &middot; AMIGO &middot; Bryson &middot; Nelder-Mead &middot; Loop-shaping &middot; Kalman noise</div>
+  <div class="card-sm"><h4>HAL / RT</h4>ISensor &middot; IActuator &middot; ITimer &middot; IScheduler &middot; SimPlant &middot; SimSensor &middot; SimActuator &middot; SafeSensor &middot; StdTimer</div>
 </div>
 
 <!-- ────────────────────────────────────── ARCHITECTURE -->
@@ -188,6 +195,16 @@ Stand-alone (not IController):
   Single include: <code>#include "ControllerToolbox.h"</code> pulls in all classes.
   Only <code>Eigen/Dense</code> and <code>unsupported/Eigen/MatrixFunctions</code> (for ZOH c2d) are required externally.
 </div>
+<h3>IController interface</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Method</th><th>Description</th></tr>
+<tr><td class="param-name">compute(signal) → double</td><td>Advance one sample. For tracking: signal = e[k] = r[k]−y[k]. For ESC: signal = y[k].</td></tr>
+<tr><td class="param-name">computeVec(signal) → VectorXd</td><td>MIMO interface. Default delegates to <code>compute()</code> for SISO; MIMO subclasses override.</td></tr>
+<tr><td class="param-name">reset()</td><td>Clear all internal state (integrators, delay buffers, estimators).</td></tr>
+<tr><td class="param-name">sampleTime() → double</td><td>Returns Ts [s].</td></tr>
+<tr><td class="param-name">bumplessInit(u_target, error)</td><td>Pre-load state so first <code>compute()</code> ≈ u_target. Called by ControllerStack on supervisory switch. Default: no-op.</td></tr>
+<tr><td class="param-name">isHealthy() → bool</td><td>Runtime health query. Returns false when last compute produced a suboptimal result (QP non-convergence, DARE failure). Used by ControllerStack for automatic fallback. Default: true.</td></tr>
+</table></div>
 
 <!-- ────────────────────────────────────── QUICK START -->
 <h2 id="quickstart" class="anchor">Quick Start</h2>
@@ -479,13 +496,26 @@ if (result.feasible) {
 <div class="ctrl-block">
 <h3>Inference types</h3>
 <p><strong>Mamdani:</strong> rule consequents are fuzzy sets; defuzzification via centre-of-gravity (101-point grid). <strong>Takagi-Sugeno:</strong> consequents are crisp functions/singletons; defuzzification via weighted average (no grid needed).</p>
+<h3>Membership functions (RT-safe tagged union)</h3>
+<p>The <code>MF</code> type is a plain value-type struct — not <code>std::function</code>. This eliminates heap allocation in the inference hot path, making the fuzzy engine safe for hard-RT use.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Factory</th><th>Shape</th><th>Parameters</th></tr>
+<tr><td class="param-name">mfTriangular(a,c,b)</td><td>/\ peaks at c</td><td>a ≤ c ≤ b</td></tr>
+<tr><td class="param-name">mfTrapezoidal(a,b,c,d)</td><td>/‾\ flat-top [b,c]</td><td>a ≤ b ≤ c ≤ d</td></tr>
+<tr><td class="param-name">mfGaussian(mean,sigma)</td><td>bell curve</td><td>—</td></tr>
+<tr><td class="param-name">mfSingleton(value)</td><td>impulse</td><td>for TS consequents</td></tr>
+<tr><td class="param-name">mfShoulderLeft(a,b)</td><td>1 for x≤a, ramps to 0</td><td>for NL / NB extremes</td></tr>
+<tr><td class="param-name">mfShoulderRight(a,b)</td><td>ramps from 0, 1 for x≥b</td><td>for PL / PB extremes</td></tr>
+</table></div>
+<div class="note">
+  Rule index validation: <code>addRule()</code> validates all antecedent and consequent indices against registered variables, throwing <code>std::out_of_range</code> on typos. This catches mis-wired rule tables at system-build time, before they silently produce zero rule strength at runtime.
+</div>
 <h3>Pre-built controllers</h3>
 <div class="tbl-wrap"><table>
 <tr><th>Class</th><th>Description</th></tr>
-<tr><td class="param-name">FuzzyPD</td><td>Mamdani 5-term PD (NB/NM/Z/PM/PB on e and de)</td></tr>
-<tr><td class="param-name">FuzzyPID</td><td>FuzzyPD + conventional integral with anti-windup</td></tr>
-<tr><td class="param-name">FuzzySupervisor</td><td>Mamdani supervisor that outputs a mode-switch signal (e.g., triggers MPC relinearisation)</td></tr>
-<tr><td class="param-name">FuzzyTS (Takagi-Sugeno)</td><td>Gain scheduling via T-S interpolation of multiple linear models</td></tr>
+<tr><td class="param-name">FuzzyPD</td><td>Mamdani 5-term PD (NL/NS/ZE/PS/PL on e and de), 25 diagonal rules</td></tr>
+<tr><td class="param-name">FuzzyPID</td><td>FuzzyPD + conventional backward-Euler integral with back-calculation anti-windup</td></tr>
+<tr><td class="param-name">FuzzySupervisor</td><td>9-rule Mamdani supervisor: outputs a relinearise signal [0,1] based on error magnitude and trend</td></tr>
 </table></div>
 </div>
 
@@ -622,6 +652,17 @@ if (res.success) pid.setParams(res.pidParams);</code></pre>
 <!-- ────────────────────────────────────── TRAITS -->
 <h2 id="traits" class="anchor">ControllerTraits</h2>
 <p>Compile-time metadata mapping each controller class to the tuning strategies it supports. Prevents mis-tuning at compile time. To register a new controller, add a <code>ctrl::ControllerTraits&lt;YourType&gt;</code> specialisation in <code>lib/ControllerTraits.h</code>.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Controller</th><th>heuristic_pid</th><th>lqr</th><th>mpc</th><th>freq</th><th>kalman</th></tr>
+<tr><td class="param-name">DiscretePID</td><td class="badge b-ok">✓</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td class="param-name">DiscreteLQR</td><td>—</td><td class="badge b-ok">✓</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td class="param-name">DiscreteLQG</td><td>—</td><td class="badge b-ok">✓</td><td>—</td><td>—</td><td class="badge b-ok">✓</td></tr>
+<tr><td class="param-name">DiscreteMPC</td><td>—</td><td>—</td><td class="badge b-ok">✓</td><td>—</td><td>—</td></tr>
+<tr><td class="param-name">GeneralizedPredictiveController</td><td>—</td><td>—</td><td class="badge b-ok">✓</td><td>—</td><td>—</td></tr>
+<tr><td class="param-name">DiscreteLeadLag</td><td>—</td><td>—</td><td>—</td><td class="badge b-ok">✓</td><td>—</td></tr>
+<tr><td class="param-name">RepetitiveController</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td class="param-name">DiscreteSMC, DiscreteADRC, SmithPredictor, ExtremumSeeker, DiscreteHinf</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+</table></div>
 
 <!-- ────────────────────────────────────── STACK -->
 <h2 id="stack" class="anchor">ControllerStack</h2>
@@ -629,10 +670,25 @@ if (res.success) pid.setParams(res.pidParams);</code></pre>
 <h3>Modes</h3>
 <div class="tbl-wrap"><table>
 <tr><th>Mode</th><th>Behaviour</th><th>Use for</th></tr>
-<tr><td class="param-name">Supervisory</td><td>First eligible controller wins</td><td>Gain scheduling, mode switching, fallback chains</td></tr>
+<tr><td class="param-name">Supervisory</td><td>First eligible <em>and healthy</em> controller wins</td><td>Gain scheduling, mode switching, fault-tolerant fallback</td></tr>
 <tr><td class="param-name">Additive</td><td>Sum all enabled controllers</td><td>Cascade (fast inner PID + slow outer MPC trim)</td></tr>
 <tr><td class="param-name">Weighted</td><td>Normalised weighted average</td><td>Blended transitions, fuzzy membership weighting</td></tr>
 </table></div>
+<h3>Fault-tolerant health checking (Supervisory mode)</h3>
+<p>Supervisory mode evaluates <code>isHealthy()</code> on each candidate before selecting it. An entry is skipped (with a <code>stderr</code> warning) if its <code>isHealthy()</code> returns false, and the next eligible entry is tried instead. This enables automatic fallback without any external monitoring code:</p>
+<pre><code>// MPC diverges -> automatically falls back to PID:
+stack.addController(mpc, "MPC",  1.0);   // isHealthy() = false if QP diverged
+stack.addController(pid, "PID",  1.0);   // isHealthy() always true</code></pre>
+<div class="tbl-wrap"><table>
+<tr><th>Controller</th><th><code>isHealthy()</code> condition</th></tr>
+<tr><td class="param-name">DiscreteMPC</td><td>Last QP converged within <code>qpMaxIter</code></td></tr>
+<tr><td class="param-name">GeneralizedPredictiveController</td><td>Last QP converged within <code>p_.qpMaxIter</code></td></tr>
+<tr><td class="param-name">LQRAdapter</td><td>DARE converged at construction</td></tr>
+<tr><td class="param-name">All others</td><td>Always <code>true</code> (default)</td></tr>
+</table></div>
+<div class="warn-box">
+  <strong>Hold-last on no-active-entry:</strong> if every entry is inactive, gates out, or unhealthy, the stack holds its previous output (<code>lastOutput_</code>) and warns on stderr. Ensure at least one always-eligible, always-healthy fallback (e.g., a PID without an activation condition) to prevent this.
+</div>
 <div class="warn-box">
   <strong>Weighted mode normalisation:</strong> if an entry's <code>activationCondition</code> returns false, its weight is excluded from the denominator. A controller with weight 0.3 that is the only active entry produces <em>full</em> authority output (0.3/0.3 = 1.0), not 30%. This is intentional for fallback chains; for a static blend, set all conditions to <code>nullptr</code>.
 </div>
@@ -659,6 +715,110 @@ ctrl::TransferFunction tf({ {b0,b1,...}, {1,a1,...}, Ts });</code></pre>
 <tr><td class="param-name">c2d(ss_c, Ts, TustinPrewarped, w0)</td><td>Exact match at ω₀ [rad/s]</td></tr>
 <tr><td class="param-name">ssStep(ss, x, u)</td><td>Advance one discrete step in-place; returns y[k]</td></tr>
 </table></div>
+</div>
+
+<!-- ────────────────────────────────────── HAL -->
+<h2 id="hal" class="anchor">Hardware Abstraction Layer (HAL)</h2>
+<p>
+  <code>#include "hal/HAL.h"</code> — or include <code>ControllerToolbox.h</code> which pulls it transitively.
+  The HAL separates control logic from hardware by defining abstract interfaces for sensors, actuators, timers, and schedulers.
+  Simulation adapters (<code>SimPlant</code>, <code>SimSensor</code>, <code>SimActuator</code>) implement the same interfaces so code written against the HAL runs unchanged in simulation and on hardware.
+</p>
+<div class="tbl-wrap"><table>
+<tr><th>Interface / Class</th><th>Role</th></tr>
+<tr><td class="param-name">ISensor</td><td>Abstract sensor: <code>read()</code>, <code>isValid()</code>, <code>reset()</code></td></tr>
+<tr><td class="param-name">IActuator</td><td>Abstract actuator: <code>write(u)</code>, <code>lastOutput()</code>, <code>reset()</code></td></tr>
+<tr><td class="param-name">ITimer</td><td>Abstract monotonic clock: <code>nowNs()</code>, <code>elapsedNs(t0)</code></td></tr>
+<tr><td class="param-name">IScheduler</td><td>Abstract periodic task scheduler: <code>setPeriodNs()</code>, <code>start()</code>, <code>stop()</code>, <code>overrunCount()</code></td></tr>
+<tr><td class="param-name">SimPlant</td><td>Discrete-time state-space plant simulator shared by SimSensor / SimActuator (mutex-protected, HIL-safe)</td></tr>
+<tr><td class="param-name">SimSensor</td><td>ISensor backed by SimPlant output</td></tr>
+<tr><td class="param-name">SimActuator</td><td>IActuator that calls SimPlant::step() (NaN-safe, saturating)</td></tr>
+<tr><td class="param-name">SafeSensor</td><td>ISensor decorator: hold-last on fault, rejects NaN/Inf, staleness callback</td></tr>
+<tr><td class="param-name">StdTimer</td><td>ITimer using <code>std::chrono::steady_clock</code> (non-RT; for simulation and tests)</td></tr>
+</table></div>
+
+<!-- SimPlant -->
+<h2 id="simplant" class="anchor">SimPlant</h2>
+<div class="ctrl-block">
+<h3>Closed-loop step pattern</h3>
+<pre><code>ctrl::SimPlant    plant(G_d);
+ctrl::SimSensor   sensor(plant);
+ctrl::SimActuator actuator(plant, -10.0, 10.0);  // u clamped to [-10, 10]
+
+for (int k = 0; k &lt; N; ++k) {
+    double y = sensor.read();           // 1. read y[k] (before step)
+    double u = pid.compute(r - y);      // 2. compute control
+    actuator.write(u);                  // 3. write u[k] -> advances x to x[k+1]
+}</code></pre>
+<div class="warn-box">
+  <strong>Step order matters:</strong> <code>read()</code> must be called <em>before</em> <code>write()</code> in each sample. Reversing the order simulates a one-step computational delay (valid, but must be documented and consistent).
+</div>
+<h3>Thread safety</h3>
+<p><code>step()</code>, <code>output()</code>, <code>setState()</code>, and <code>reset()</code> are all mutex-protected and safe to call from separate threads. This enables HIL setups where the plant runs in a background thread while a logger reads <code>output()</code> concurrently.</p>
+<div class="note">
+  Each method acquires the mutex independently. A <em>read-then-step</em> sequence is not atomic without an external lock — the single-thread simulation pattern above is safe without any extra locking.
+</div>
+</div>
+
+<!-- SafeSensor -->
+<h2 id="safesensor" class="anchor">SafeSensor</h2>
+<div class="ctrl-block">
+<h3>Problem solved</h3>
+<p><code>ISensor::isValid()</code> documents that controllers should freeze on fault, but no controller calls it directly — it only sees a <code>double</code>. A sensor glitch (encoder loss, ADC saturation, CAN timeout) can silently feed NaN or a rail value into a Kalman filter, corrupting the covariance before any guard fires.</p>
+<h3>Behaviour</h3>
+<pre><code>ctrl::SafeSensor safe(my_encoder, /*max_stale_steps=*/50);
+safe.setOnMaxStale([](int n){ alarm.trigger(AlarmCode::SensorFault); });
+
+double y = safe.read();       // hold-last on fault; never NaN or Inf
+if (!safe.isValid())
+    log.warn("sensor fault, using held value");
+double u = pid.compute(r - y);</code></pre>
+<div class="tbl-wrap"><table>
+<tr><th>Behaviour</th><th>Details</th></tr>
+<tr><td>Hold-last on <code>isValid()==false</code></td><td>Returns last accepted reading; never forwards bad sample</td></tr>
+<tr><td>NaN/Inf rejection</td><td>Accepts inner reading only if <code>std::isfinite(v)</code> — hardware can return garbage even when <code>isValid()==true</code></td></tr>
+<tr><td>Staleness counter</td><td><code>staleCount()</code> = consecutive invalid samples; <code>lastValidReading()</code> for diagnostics</td></tr>
+<tr><td>Max-stale callback</td><td>Fires once when <code>staleCount()</code> reaches <code>max_stale_steps</code>; avoids polling in RT loops</td></tr>
+</table></div>
+</div>
+
+<!-- ITimer / StdTimer -->
+<h2 id="timers" class="anchor">ITimer / StdTimer</h2>
+<div class="ctrl-block">
+<h3>Overrun detection pattern</h3>
+<pre><code>ctrl::StdTimer timer;
+const uint64_t period_ns = static_cast&lt;uint64_t&gt;(Ts * 1e9);
+
+for (int k = 0; k &lt; N; ++k) {
+    uint64_t t0 = timer.nowNs();
+    double y = sensor.read();
+    double u = pid.compute(r - y);
+    actuator.write(u);
+    uint64_t dt = timer.elapsedNs(t0);
+    if (dt &gt; period_ns)
+        std::cerr &lt;&lt; "[overrun] " &lt;&lt; dt &lt;&lt; " ns &gt; " &lt;&lt; period_ns &lt;&lt; " ns\n";
+}</code></pre>
+<div class="warn-box">
+  <code>StdTimer</code> uses <code>std::chrono::steady_clock</code> — no jitter guarantee. For hard-RT use, replace with a platform clock: <code>clock_gettime(CLOCK_MONOTONIC)</code> on Linux RT, <code>xTaskGetTickCount()</code> on FreeRTOS.
+</div>
+</div>
+
+<!-- IScheduler -->
+<h2 id="scheduler" class="anchor">IScheduler</h2>
+<div class="ctrl-block">
+<p>Abstract interface for periodic RT task scheduling. Implement against your OS primitives; the controller code only sees <code>IScheduler</code>.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Method</th><th>Description</th></tr>
+<tr><td class="param-name">setPeriodNs(ns)</td><td>Set task period in nanoseconds</td></tr>
+<tr><td class="param-name">setCallback(fn)</td><td>Register the task function to invoke each period</td></tr>
+<tr><td class="param-name">start() / stop()</td><td>Arm / disarm the scheduler</td></tr>
+<tr><td class="param-name">overrunCount()</td><td>Number of periods where execution exceeded the period</td></tr>
+<tr><td class="param-name">tickCount()</td><td>Total periods elapsed since start</td></tr>
+</table></div>
+<div class="note">
+  Platform mappings: Linux RT → <code>timer_create</code> + <code>SCHED_FIFO</code>; FreeRTOS → <code>xTimerCreate</code>; Zephyr → <code>k_timer_init</code>.
+  The HAL ships no concrete implementation — only the interface and the non-RT <code>StdTimer</code> reference.
+</div>
 </div>
 
 <!-- ────────────────────────────────────── ANALYSIS -->
@@ -720,7 +880,7 @@ ctrl::TransferFunction tf({ {b0,b1,...}, {1,a1,...}, Ts });</code></pre>
 </div>
 
 <!-- ────────────────────────────────────── KNOWN ISSUES -->
-<h2 id="known-issues" class="anchor">Known Issues (as of 2026-05-26)</h2>
+<h2 id="known-issues" class="anchor">Known Issues (as of 2026-05-25)</h2>
 <div class="tbl-wrap"><table>
 <tr><th>#</th><th>Issue</th><th>Severity</th><th>File</th></tr>
 <tr>
@@ -756,7 +916,7 @@ ctrl::TransferFunction tf({ {b0,b1,...}, {1,a1,...}, Ts });</code></pre>
 </table></div>
 
 <p style="margin-top:40px;color:var(--muted);font-size:12px">
-  Generated 2026-05-26 &middot; Controller Toolbox &middot; C++17 / Eigen 3.4
+  Generated 2026-05-25 &middot; Controller Toolbox &middot; C++17 / Eigen 3.4
 </p>
 
 </main>

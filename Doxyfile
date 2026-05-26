@@ -2,32 +2,83 @@
 # Generate:  doxygen Doxyfile   (from project root)
 # Output:    docs/html/index.html
 
+# ---------------------------------------------------------------------------
+# Project identity
+# ---------------------------------------------------------------------------
 PROJECT_NAME           = "Controller Toolbox"
-PROJECT_NUMBER         = "1.0"
-PROJECT_BRIEF          = "Discrete-time C++ control library"
+PROJECT_NUMBER         = "1.1"
+PROJECT_BRIEF          = "Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning"
+PROJECT_LOGO           =
 
+# ---------------------------------------------------------------------------
+# Input
+# ---------------------------------------------------------------------------
 OUTPUT_DIRECTORY       = docs
-INPUT                  = lib
-FILE_PATTERNS          = *.h *.hpp
+INPUT                  = lib README.md docs/DOCUMENTATION.md docs/DEPLOYMENT.md
+FILE_PATTERNS          = *.h *.hpp *.cpp *.md
 RECURSIVE              = YES
-EXCLUDE_PATTERNS       = */build/*
+EXCLUDE_PATTERNS       = */build/* */.godot/* */docs/html/*
 
+# Strip absolute paths from all output so the generated HTML does not embed
+# the developer's local filesystem path (e.g. C:\Users\dangs\...).
+STRIP_FROM_PATH        = .
+
+# Use README.md as the Doxygen landing page if present.
+USE_MDFILE_AS_MAINPAGE = README.md
+
+# ---------------------------------------------------------------------------
+# Output formats
+# ---------------------------------------------------------------------------
 GENERATE_HTML          = YES
 GENERATE_LATEX         = NO
 HTML_OUTPUT            = html
 HTML_COLORSTYLE        = LIGHT
 
+# ---------------------------------------------------------------------------
+# Extraction
+# ---------------------------------------------------------------------------
 EXTRACT_ALL            = YES
 EXTRACT_PRIVATE        = NO
 EXTRACT_STATIC         = YES
 
+# ---------------------------------------------------------------------------
+# Comment parsing
+# ---------------------------------------------------------------------------
 JAVADOC_AUTOBRIEF      = YES
 QT_AUTOBRIEF           = YES
 MULTILINE_CPP_IS_BRIEF = YES
+MARKDOWN_SUPPORT       = YES
 
+# ---------------------------------------------------------------------------
+# Language / template support
+# ---------------------------------------------------------------------------
 BUILTIN_STL_SUPPORT    = YES
 TEMPLATE_RELATIONS     = YES
 
+# ---------------------------------------------------------------------------
+# Cross-references and source browsing
+# ---------------------------------------------------------------------------
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+
+# Include the examples directory so \example tags in headers resolve.
+EXAMPLE_PATH           = examples
+EXAMPLE_PATTERNS       = *.cpp
+EXAMPLE_RECURSIVE      = YES
+
+# ---------------------------------------------------------------------------
+# Diagrams (requires Graphviz — omit if not installed)
+# ---------------------------------------------------------------------------
+HAVE_DOT               = NO
+
+# ---------------------------------------------------------------------------
+# Verbosity
+# ---------------------------------------------------------------------------
 QUIET                  = YES
 WARNINGS               = YES
 WARN_IF_UNDOCUMENTED   = NO
+# Suppress unresolvable \ref warnings from markdown hyperlinks in README/docs
+# (standard [text](path) links to .md files and #anchors are not Doxygen entities)
+WARN_IF_DOC_ERROR      = NO

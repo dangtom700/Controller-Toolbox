@@ -3,6 +3,7 @@
 #include <cmath>
 #include <numeric>
 #include <stdexcept>
+#include <string>
 
 namespace ctrl
 {
@@ -12,41 +13,83 @@ static constexpr int kCoGResolutionDefault   = 101; // CoG grid points (FuzzyPD/
 static constexpr int kTSPeakSearchResolution =  51; // fallback grid for WA peak search (non-singleton terms)
 
 // ============================================================================
+// MF::operator() - evaluate the tagged-union membership function at x.
+// No heap allocation; all branches are plain arithmetic.
+// ============================================================================
+
+double MF::operator()(double x) const
+{
+    switch (type) {
+    case Type::Triangular: {
+        // p: [a, c, b]   peaks at c, zero at a and b
+        const double a = p[0], c = p[1], b = p[2];
+        if (x <= a || x >= b) return 0.0;
+        if (x <= c) return (x - a) / (c - a + 1e-12);
+        return (b - x) / (b - c + 1e-12);
+    }
+    case Type::Trapezoidal: {
+        // p: [a, b, c, d]   flat-top [b,c], zero outside [a,d]
+        const double a = p[0], b = p[1], c = p[2], d = p[3];
+        if (x <= a || x >= d) return 0.0;
+        if (x >= b && x <= c) return 1.0;
+        if (x < b)  return (x - a) / (b - a + 1e-12);
+        return (d - x) / (d - c + 1e-12);
+    }
+    case Type::Gaussian: {
+        // p: [mean, sigma]
+        const double z = (x - p[0]) / (p[1] + 1e-12);
+        return std::exp(-0.5 * z * z);
+    }
+    case Type::Singleton: {
+        // p: [value]
+        return (std::abs(x - p[0]) < 1e-9) ? 1.0 : 0.0;
+    }
+    case Type::ShoulderLeft: {
+        // p: [a, b]   1 for x<=a, linear 1->0 from a to b
+        if (x <= p[0]) return 1.0;
+        if (x >= p[1]) return 0.0;
+        return (p[1] - x) / (p[1] - p[0] + 1e-12);
+    }
+    case Type::ShoulderRight: {
+        // p: [a, b]   0 for x<=a, linear 0->1 from a to b, 1 for x>=b
+        if (x <= p[0]) return 0.0;
+        if (x >= p[1]) return 1.0;
+        return (x - p[0]) / (p[1] - p[0] + 1e-12);
+    }
+    }
+    return 0.0; // unreachable - suppresses compiler warning
+}
+
+// ============================================================================
 // Membership function factories
 // ============================================================================
 
 MF mfTriangular(double a, double c, double b)
 {
-    return [a, c, b](double x) -> double {
-        if (x <= a || x >= b) return 0.0;
-        if (x <= c) return (x - a) / (c - a + 1e-12);
-        return (b - x) / (b - c + 1e-12);
-    };
+    MF mf; mf.type = MF::Type::Triangular;
+    mf.p[0] = a; mf.p[1] = c; mf.p[2] = b;
+    return mf;
 }
 
 MF mfTrapezoidal(double a, double b, double c, double d)
 {
-    return [a, b, c, d](double x) -> double {
-        if (x <= a || x >= d) return 0.0;
-        if (x >= b && x <= c) return 1.0;
-        if (x < b)  return (x - a) / (b - a + 1e-12);
-        return (d - x) / (d - c + 1e-12);
-    };
+    MF mf; mf.type = MF::Type::Trapezoidal;
+    mf.p[0] = a; mf.p[1] = b; mf.p[2] = c; mf.p[3] = d;
+    return mf;
 }
 
 MF mfGaussian(double mean, double sigma)
 {
-    return [mean, sigma](double x) -> double {
-        double z = (x - mean) / (sigma + 1e-12);
-        return std::exp(-0.5 * z * z);
-    };
+    MF mf; mf.type = MF::Type::Gaussian;
+    mf.p[0] = mean; mf.p[1] = sigma;
+    return mf;
 }
 
 MF mfSingleton(double value)
 {
-    return [value](double x) -> double {
-        return (std::abs(x - value) < 1e-9) ? 1.0 : 0.0;
-    };
+    MF mf; mf.type = MF::Type::Singleton;
+    mf.p[0] = value;
+    return mf;
 }
 
 LinguisticTerm ltSingleton(const std::string& name, double value)
@@ -56,20 +99,16 @@ LinguisticTerm ltSingleton(const std::string& name, double value)
 
 MF mfShoulderLeft(double a, double b)
 {
-    return [a, b](double x) -> double {
-        if (x <= a) return 1.0;
-        if (x >= b) return 0.0;
-        return (b - x) / (b - a + 1e-12);
-    };
+    MF mf; mf.type = MF::Type::ShoulderLeft;
+    mf.p[0] = a; mf.p[1] = b;
+    return mf;
 }
 
 MF mfShoulderRight(double a, double b)
 {
-    return [a, b](double x) -> double {
-        if (x <= a) return 0.0;
-        if (x >= b) return 1.0;
-        return (x - a) / (b - a + 1e-12);
-    };
+    MF mf; mf.type = MF::Type::ShoulderRight;
+    mf.p[0] = a; mf.p[1] = b;
+    return mf;
 }
 
 

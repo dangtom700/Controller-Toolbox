@@ -10,11 +10,13 @@
 //
 // StackMode::Supervisory
 //   Only one controller is active per step.  Entries are evaluated in insertion order;
-//   the first whose activationCondition returns true is selected.  If no condition is
-//   registered for an entry, that entry is always eligible.
-//   Edge case: if no entry is active and eligible, the output holds at the previous
-//   value (bumpless hold) and a warning is emitted on stderr. Ensure at least one
-//   always-eligible fallback entry (no activationCondition) to avoid this.
+//   the first whose activationCondition returns true AND whose isHealthy() returns true
+//   is selected.  If no condition is registered for an entry, that entry is always eligible.
+//   isHealthy() == false causes the entry to be skipped with a stderr warning, enabling
+//   automatic fallback: e.g., MPC (QP diverged) -> GPC -> PID without manual intervention.
+//   Edge case: if no entry is active, eligible, and healthy, the output holds at the
+//   previous value (bumpless hold) and a warning is emitted on stderr. Ensure at least
+//   one always-eligible, always-healthy fallback entry (e.g., a PID) to avoid this.
 //   Use for: gain-scheduled switching, mode-based selection, fallback chains.
 //
 // StackMode::Additive

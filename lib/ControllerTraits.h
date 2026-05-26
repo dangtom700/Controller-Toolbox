@@ -38,6 +38,8 @@ namespace ctrl
     class DiscreteLeadLag;
     class SmithPredictor;
     class DiscreteHinf;
+    class RepetitiveController;
+    class GeneralizedPredictiveController;
 
     // -- Category tags ---------------------------------------------
     namespace tag
@@ -72,6 +74,12 @@ namespace ctrl
         struct RobustControl
         {
         }; // DiscreteHinf
+        struct Repetitive
+        {
+        }; // RepetitiveController
+        struct GeneralizedPredictive
+        {
+        }; // GeneralizedPredictiveController
     } // namespace tag
 
     // -- Compile-time warning stubs --------------------------------
@@ -251,6 +259,38 @@ namespace ctrl
         static constexpr bool supports_lqr_tuning    = false;
         static constexpr bool supports_mpc_tuning    = false;
         static constexpr bool supports_freq_tuning   = false; // design via weights, not loop-shaping tuner
+        static constexpr bool supports_kalman_tuning = false;
+    };
+
+    // -- RepetitiveController -------------------------------------
+    // Parameters (learning gain, Q-filter) are set from internal model
+    // principle design rules, not from classical auto-tuners.  The inner
+    // baseline controller (typically DiscretePID) should be tuned first.
+    template <>
+    struct ControllerTraits<RepetitiveController>
+    {
+        using category = tag::Repetitive;
+        static constexpr const char *name = "RepetitiveController";
+        static constexpr bool supports_heuristic_pid = false;
+        static constexpr bool supports_lqr_tuning    = false;
+        static constexpr bool supports_mpc_tuning    = false;
+        static constexpr bool supports_freq_tuning   = false;
+        static constexpr bool supports_kalman_tuning = false;
+    };
+
+    // -- GeneralizedPredictiveController --------------------------
+    // GPC is tuned via its own horizon and weight parameters (Np, Nu, rho_y,
+    // rho_u).  These have the same semantics as DiscreteMPC and can be
+    // explored with MPCHorizonTuner if a state-space model is available.
+    template <>
+    struct ControllerTraits<GeneralizedPredictiveController>
+    {
+        using category = tag::GeneralizedPredictive;
+        static constexpr const char *name = "GeneralizedPredictiveController";
+        static constexpr bool supports_heuristic_pid = false;
+        static constexpr bool supports_lqr_tuning    = false;
+        static constexpr bool supports_mpc_tuning    = true; // MPCHorizonTuner - same horizon semantics
+        static constexpr bool supports_freq_tuning   = false;
         static constexpr bool supports_kalman_tuning = false;
     };
 

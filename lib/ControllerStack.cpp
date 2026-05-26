@@ -77,15 +77,20 @@ namespace ctrl
                     continue;
                 bool eligible = !e.activationCondition ||
                                 e.activationCondition(error, lastOutput_);
-                if (eligible)
+                if (!eligible)
+                    continue;
+                if (!e.controller->isHealthy())
                 {
-                    if (!prevActiveName_.empty() && e.name != prevActiveName_)
-                        e.controller->bumplessInit(lastOutput_, error);
-                    out = e.controller->compute(error);
-                    activeName_ = e.name;
-                    found = true;
-                    break;
+                    std::cerr << "[ControllerStack] WARNING: Supervisory mode - skipping \""
+                              << e.name << "\" (isHealthy() == false), trying next entry.\n";
+                    continue;
                 }
+                if (!prevActiveName_.empty() && e.name != prevActiveName_)
+                    e.controller->bumplessInit(lastOutput_, error);
+                out = e.controller->compute(error);
+                activeName_ = e.name;
+                found = true;
+                break;
             }
             if (!found)
                 std::cerr << "[ControllerStack] WARNING: Supervisory mode - no eligible entry "

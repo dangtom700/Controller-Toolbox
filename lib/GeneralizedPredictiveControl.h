@@ -87,6 +87,11 @@ public:
     bool lastQPConverged() const { return last_qp_converged_; }
     int  lastQPIters()     const { return last_qp_iters_; }
 
+    // IController health interface - returns false when the most recent QP exited
+    // at p_.qpMaxIter without converging.  ControllerStack uses this to skip an
+    // unhealthy GPC and fall back to the next eligible entry.
+    bool isHealthy() const override { return last_qp_converged_; }
+
 private:
     void buildCondensedMatrices();
 

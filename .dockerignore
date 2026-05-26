@@ -51,3 +51,16 @@ enhance.bat
 Doxyfile
 html/
 latex/
+
+# Tug Boat Game (Godot project — not part of the C++ CMake build)
+case-study/Tug Boat Game/
+
+# Godot project artifacts (if present elsewhere)
+**/.godot/
+*.import
+*.ctex
+
+# Feedback / memory files not needed in container
+feedback.html
+.claude/
+memory/

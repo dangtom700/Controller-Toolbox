@@ -8,7 +8,16 @@
 #  Build:   docker build -t controller-toolbox .
 #  Run:     docker run --rm controller-toolbox                    # runs test suite
 #           docker run --rm controller-toolbox ex02_ss_lqr        # runs an example
-#           docker run --rm controller-toolbox boiler_turbine_case_study
+#           docker run --rm controller-toolbox tug_sim            # tug-boat case study
+#
+#  What's included:
+#    lib/        — all controllers, filters, HAL interfaces (ISensor, IActuator,
+#                  ITimer, IScheduler, SimPlant, SafeSensor, StdTimer, ...)
+#    tests/      — full unit test suite (CTest)
+#    examples/   — 26+ worked examples
+#    scripts/    — simulate_all, tune_all, realtime_all
+#    case-study/ — Boiler Control, Solar Cooling, Tug Boat Simulation
+#                  (Tug Boat Game Godot project is excluded via .dockerignore)
 # =============================================================================
 
 # ---------- Stage 1: builder -------------------------------------------------

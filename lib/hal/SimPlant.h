@@ -1,6 +1,7 @@
 #pragma once
 #include "../PlantModel.h"
 #include <Eigen/Dense>
+#include <mutex>
 
 // SimPlant - discrete-time plant simulator shared by SimSensor and SimActuator.
 //
@@ -10,17 +11,22 @@
 //
 // Typical closed-loop simulation pattern (one step k):
 //
-//   double y = sensor.read();        // 1. read current output y[k]
+//   double y = sensor.read();             // 1. read current output y[k]
 //   double u = controller.compute(r - y); // 2. compute control action
-//   actuator.write(u);               // 3. write u[k] -> advances plant to x[k+1]
+//   actuator.write(u);                    // 3. write u[k] -> advances plant to x[k+1]
 //
 // The step order matters: read() must be called BEFORE write() in the same
 // sample because write() advances the state.  If the step order is reversed
 // the simulation models a one-step computational delay (which is also valid
 // for hardware - just document the convention and stick to it).
 //
-// Thread safety: not thread-safe.  Use one SimPlant per thread, or guard
-// access with a mutex when stepping from a background thread.
+// Thread safety: step(), setState(), reset(), and output() are all protected
+// by an internal std::mutex and are safe to call from separate threads.
+// This enables Hardware-in-the-Loop (HIL) setups where the plant runs in a
+// background thread while a logger or visualiser reads output() concurrently.
+// Note: each call acquires the mutex independently - a read-then-step sequence
+// is NOT atomic without an external lock.  For simulation-only use from a
+// single thread the mutex overhead is negligible.
 namespace ctrl {
 
 class SimPlant {
@@ -34,9 +40,9 @@ public:
     // The output y[k] is cached internally; call output() after step() to read it.
     void step(double u);
 
-    // Returns the cached output from the last step() call.
+    // Returns the cached output from the last step() call (mutex-protected).
     // On construction (before any step), returns C.x0 + D.0.
-    double output() const { return y_cached_; }
+    double output() const;
 
     // Direct state access - useful for injecting Kalman estimates or
     // for initialising the plant at a non-zero operating point.
@@ -49,12 +55,13 @@ public:
     const StateSpace& model() const { return model_; }
 
 private:
+    mutable std::mutex mu_;        // guards x_, y_cached_
     StateSpace       model_;
     Eigen::VectorXd  x_;           // current state x[k]
     Eigen::VectorXd  x0_;          // initial state (stored for reset)
     double           y_cached_;    // last output - avoids recomputing in output()
 
-    void updateOutput(double u);   // recomputes y_cached_ from current x_ and u
+    void updateOutput(double u);   // recomputes y_cached_ from current x_ and u (caller holds mu_)
 };
 
 } // namespace ctrl

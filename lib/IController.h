@@ -47,6 +47,22 @@ namespace ctrl
         // The default is a no-op (e.g., for stateless or non-integrating controllers).
         // Override in controllers that have integral or memory state (PID, MPC, SMC).
         virtual void bumplessInit(double /*u_target*/, double /*error*/) {}
+
+        // Health query for supervisory fault-tolerant control.
+        //
+        // Returns false when the controller's last compute() call produced a result
+        // that is known to be suboptimal or potentially unsafe:
+        //   - DiscreteLQR:   DARE did not converge at construction.
+        //   - DiscreteMPC:   QP solver exited at qpMaxIter (last step did not converge).
+        //   - GeneralizedPredictiveController: same as MPC.
+        //
+        // ControllerStack (Supervisory mode) checks isHealthy() before selecting an entry:
+        // an unhealthy controller is skipped in favour of the next eligible entry.  This
+        // enables automatic fallback from MPC -> PID when the QP consistently fails.
+        //
+        // The default returns true (healthy) - override only in controllers that have
+        // meaningful runtime health state.
+        virtual bool isHealthy() const { return true; }
     };
 
 } // namespace ctrl

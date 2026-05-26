@@ -226,14 +226,55 @@ void on_new_gains(double Kp, double Ki) {
 **When to use vs. not use:**
 | Scenario | Use AtomicParamBuffer? |
 |----------|----------------------|
-| Tuner output -> controller in separate threads | Yes |
-| Operator gain override from UI thread | Yes |
+| Tuner output -> controller in separate threads | Yes (POD params only - see note below) |
+| Operator gain override from UI thread | Yes (POD params only) |
 | All parameter changes happen before the RT loop starts | No - just pass params at construction |
 | Multiple background threads write parameters concurrently | No - wrap `publish()` with a mutex; the reader-side remains lock-free |
-| MIMO controllers where `setPlant()` rebuilds matrices | No - matrix rebuild is not atomic; pause the RT loop during model updates |
+| `DiscreteMPC::setParams()` with horizon change | **No** - see critical note below |
+| `DiscreteMPC::setPlant()` or `GeneralizedPredictiveController::setPlant()` | **No** - see critical note below |
 
-**Applies to:** all controllers that expose `setParams()` - `DiscretePID`, `DiscreteMPC`,
-`DiscreteLQR`, `DiscreteLeadLag`, `DiscreteSMC`, `DiscreteADRC`.
+**Applies to scalar-params-only controllers:** `DiscretePID`, `DiscreteLeadLag`, `DiscreteSMC`,
+`DiscreteADRC` - these store only POD structs and `setParams()` is a single struct copy, safe to
+combine with `AtomicParamBuffer`.
+
+**CRITICAL - `DiscreteMPC` and `GeneralizedPredictiveController` are NOT safe with
+`AtomicParamBuffer`:**
+
+`setParams()` and `setPlant()` on these controllers rebuild large Eigen matrices (`H_`, `Phi_`,
+`ldlt_`, work vectors).  These rebuilds are neither atomic nor trivially copyable - they involve
+multiple heap allocations, eigenvalue decompositions, and LDLT factorisations.  Calling
+`setParams()` or `setPlant()` from a background thread while the RT thread is inside
+`computeRef()` is a **data race** that will corrupt `H_`, `ldlt_`, or the pre-allocated work
+vectors, producing wrong control outputs with no warning.
+
+**Safe patterns for runtime MPC/GPC model updates:**
+
+Option A - pause the RT loop:
+```cpp
+// Background thread:
+sched->stop();                    // blocks until current tick completes
+mpc.setPlant(new_plant);          // safe: RT thread not running
+sched->start();
+```
+
+Option B - double-buffer the full controller object:
+```cpp
+// Two controller instances; std::atomic pointer swap selects the active one.
+std::atomic<ctrl::DiscreteMPC*> active_mpc{&mpc_a};
+
+// Background thread: update the inactive copy, then swap
+ctrl::DiscreteMPC* inactive = (active_mpc.load() == &mpc_a) ? &mpc_b : &mpc_a;
+inactive->setPlant(new_plant);
+active_mpc.store(inactive, std::memory_order_release);
+
+// RT thread:
+ctrl::DiscreteMPC* mpc = active_mpc.load(std::memory_order_acquire);
+double u = mpc->computeRef(x, r)(0);
+```
+
+Option C - successive linearisation at construction rate:
+Build a new `DiscreteMPC` on the background thread (off the hot path), then swap the pointer.
+Cost is one allocation per linearisation step; acceptable if linearisation rate << sample rate.
 
 ---
 

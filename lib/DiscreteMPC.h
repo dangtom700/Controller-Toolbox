@@ -82,6 +82,11 @@ namespace ctrl
         bool lastQPConverged() const { return last_qp_converged_; }
         int  lastQPIters()     const { return last_qp_iters_; }
 
+        // IController health interface - returns false when the most recent QP exited
+        // at qpMaxIter without converging.  ControllerStack uses this to skip an unhealthy
+        // MPC and fall back to the next eligible entry (e.g., a backup PID).
+        bool isHealthy() const override { return last_qp_converged_; }
+
     private:
         StateSpace plant_;
         MPCParams p_;

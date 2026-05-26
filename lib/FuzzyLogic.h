@@ -1,7 +1,6 @@
 #pragma once
 #include "IController.h"
 #include <Eigen/Dense>
-#include <functional>
 #include <optional>
 #include <string>
 #include <vector>
@@ -46,8 +45,33 @@ namespace ctrl
 // Membership function types
 // ============================================================================
 
-// A callable that maps a crisp input to a membership degree in [0, 1].
-using MF = std::function<double(double)>;
+// MF - value-type tagged-union membership function.
+//
+// Replaces std::function<double(double)> to eliminate heap allocation in the
+// RT inference hot path.  std::function stores closures on the heap for
+// captures > ~16 bytes (implementation-defined small-buffer threshold), making
+// it unsafe for hard-RT use.  MF is a plain struct (sizeof <= 5 doubles) that
+// is trivially copyable and stack-allocatable.
+//
+// Factory functions (mfTriangular, mfTrapezoidal, etc.) return a properly typed
+// MF - the public API is identical to the old std::function interface except
+// that MF is now a concrete value type, not a type-erased callable.
+struct MF {
+    enum class Type {
+        Triangular,    // /\  peaks at p[1]=c, zero at p[0]=a and p[2]=b
+        Trapezoidal,   // /‾\ flat-top from p[1]=b to p[2]=c, zero outside [p[0]=a, p[3]=d]
+        Gaussian,      // exp(-0.5*((x-p[0])/p[1])^2)
+        Singleton,     // 1 at x==p[0], 0 elsewhere
+        ShoulderLeft,  // 1 for x<=p[0], linear 1->0 from p[0]=a to p[1]=b
+        ShoulderRight  // linear 0->1 from p[0]=a to p[1]=b, 1 for x>=p[1]
+    };
+
+    Type   type;
+    double p[4] = {};   // parameters; unused slots are zero
+
+    // Evaluate the MF at x.  Inlined for zero-overhead in evaluate().
+    double operator()(double x) const;
+};
 
 // Factory functions - return a properly typed MF.
 // All parameters should match the universe of the variable.

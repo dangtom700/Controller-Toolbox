@@ -111,6 +111,12 @@ namespace ctrl
         void reset() override {} // LQR is stateless at runtime
         double sampleTime() const override { return lqr_.sampleTime(); }
 
+        // IController health interface - reflects DARE convergence from construction.
+        // If DARE did not converge the gain matrix K_ is an approximate iterate; the
+        // controller still runs but may not be stabilising.  ControllerStack will skip
+        // this entry and fall back to the next eligible entry.
+        bool isHealthy() const override { return lqr_.dareConverged(); }
+
     private:
         DiscreteLQR &lqr_;
         std::function<Eigen::VectorXd()> stateFn_;
