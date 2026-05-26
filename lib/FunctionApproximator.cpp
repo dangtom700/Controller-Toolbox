@@ -6,9 +6,9 @@
 namespace ctrl
 {
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // TaylorApproximator
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 TaylorApproximator::TaylorApproximator(const std::vector<double> &xs,
                                        const std::vector<double> &ys,
@@ -63,21 +63,21 @@ double TaylorApproximator::evaluate(double x) const
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // PadeApproximator
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
-// Linearised Padé fit (Sanathanan-Koerner approach, one iteration).
+// Linearised Pade fit (Sanathanan-Koerner approach, one iteration).
 //
-// We seek P(x)/Q(x) ≈ f(x) with Q(0)=1 (normalised).
+// We seek P(x)/Q(x) approx = f(x) with Q(0)=1 (normalised).
 // Rearranging:  P(x) - f(x)*Q(x) = 0
-//   p₀ + p₁x + … + pₘxᵐ - f(x)*(1 + q₁x + … + qₙxⁿ) = 0
+//   p0 + p1x + ... + p_mx^m - f(x)*(1 + q1x + ... + q_nx^n) = 0
 //
-// Writing the unknown vector as θ = [p₀ … pₘ, q₁ … qₙ]ᵀ, each data point
-// (xᵢ, yᵢ) contributes one row to the linear system A·θ = b where:
-//   A[i, 0..m]   = [1, xᵢ, xᵢ², …, xᵢᵐ]
-//   A[i, m+1..m+n] = [-yᵢ·xᵢ, -yᵢ·xᵢ², …, -yᵢ·xᵢⁿ]
-//   b[i]         = yᵢ   (the Q(0)=1 constant term absorbs yᵢ)
+// Writing the unknown vector as theta = [p0 ... p_m, q1 ... q_n]ᵀ, each data point
+// (x_i, y_i) contributes one row to the linear system A.theta = b where:
+//   A[i, 0..m]   = [1, x_i, x_i^2, ..., x_i^m]
+//   A[i, m+1..m+n] = [-y_i.x_i, -y_i.x_i^2, ..., -y_i.x_i^n]
+//   b[i]         = y_i   (the Q(0)=1 constant term absorbs y_i)
 //
 // This is solved in the least-squares sense via QR.
 
@@ -94,7 +94,7 @@ PadeApproximator::PadeApproximator(const std::vector<double> &xs,
     const int unknowns = (num_degree + 1) + den_degree; // p's + q's (q0=1 fixed)
     if (N <= unknowns)
         throw std::invalid_argument(
-            "PadeApproximator: underdetermined system — need more data points than unknowns "
+            "PadeApproximator: underdetermined system - need more data points than unknowns "
             "(have " + std::to_string(N) + ", need > " + std::to_string(unknowns) + ").");
 
     const int m = num_degree;
@@ -164,7 +164,7 @@ double PadeApproximator::evaluate(double x) const
     if (std::abs(Q) < 1e-300)
         throw std::domain_error(
             "PadeApproximator::evaluate: denominator Q(x) is zero at x = " +
-            std::to_string(x) + " — pole in evaluation domain.");
+            std::to_string(x) + " - pole in evaluation domain.");
 
     return P / Q;
 }
@@ -186,7 +186,7 @@ bool PadeApproximator::hasPoleInDomain(double x_lo, double x_hi, int n_pts) cons
     for (int i = 1; i < n_pts; ++i)
     {
         double Q_curr = evalQ(x_lo + i * dx);
-        if (Q_prev * Q_curr < 0.0) return true; // sign change → real root
+        if (Q_prev * Q_curr < 0.0) return true; // sign change -> real root
         Q_prev = Q_curr;
     }
     return false;
@@ -196,7 +196,7 @@ StateSpace PadeApproximator::toDiscreteFilter(double Ts) const
 {
     if (numDegree() != 1 || denDegree() != 1)
         throw std::logic_error(
-            "PadeApproximator::toDiscreteFilter: only [1/1] Padé supported. "
+            "PadeApproximator::toDiscreteFilter: only [1/1] Pade supported. "
             "Got [" + std::to_string(numDegree()) + "/" + std::to_string(denDegree()) + "].");
 
     // Rational function in x-domain: (p0 + p1*x) / (1 + q1*x)
@@ -217,9 +217,9 @@ StateSpace PadeApproximator::toDiscreteFilter(double Ts) const
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// padeDelayFilter — fractional dead-time first-order Padé filter
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// padeDelayFilter - fractional dead-time first-order Pade filter
+// -----------------------------------------------------------------------------
 
 StateSpace padeDelayFilter(double theta_frac, double Ts)
 {
@@ -232,13 +232,13 @@ StateSpace padeDelayFilter(double theta_frac, double Ts)
 
     if (theta_frac < 1e-12)
     {
-        // No fractional delay — return unity static gain (D=1, no dynamics).
+        // No fractional delay - return unity static gain (D=1, no dynamics).
         Eigen::MatrixXd A(1,1), B(1,1), C(1,1), D(1,1);
         A(0,0)=0.0; B(0,0)=0.0; C(0,0)=0.0; D(0,0)=1.0;
         return StateSpace(A, B, C, D, Ts);
     }
 
-    // Continuous [1/1] Padé approximant of e^{-theta_frac * s}:
+    // Continuous [1/1] Pade approximant of e^{-theta_frac * s}:
     //   H_c(s) = (1 - (theta_frac/2)*s) / (1 + (theta_frac/2)*s)
     //
     // Discretise with Tustin (bilinear) transform:  s = (2/Ts)*(z-1)/(z+1)
@@ -246,7 +246,7 @@ StateSpace padeDelayFilter(double theta_frac, double Ts)
     //
     //   H(z) = (1 - r*(z-1)/(z+1)) / (1 + r*(z-1)/(z+1))
     //        = ((z+1) - r*(z-1)) / ((z+1) + r*(z-1))
-    //        = ((1-r)*z + (1+r)) … wait — let me expand cleanly:
+    //        = ((1-r)*z + (1+r)) ... wait - let me expand cleanly:
     //
     //  Numerator:    (z+1) - r*(z-1) = z(1-r) + (1+r)
     //  Denominator:  (z+1) + r*(z-1) = z(1+r) + (1-r)

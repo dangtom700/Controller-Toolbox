@@ -67,7 +67,7 @@ void DiscreteHinf::reset()
 // approach forms G = B*Rinv*B', which amplifies ill-conditioning when R is
 // near-singular (as occurs at gamma close to gamma_opt).  Instead we use the
 // symplectic pencil (M, N) which defers the R^{-1} product until the
-// eigenvector solve — never forming B*Rinv*B' explicitly:
+// eigenvector solve - never forming B*Rinv*B' explicitly:
 //
 //   M = [ A,  0 ]     N = [ I,  B*Rinv*B' ]
 //       [-Q,  I ]         [ 0,  A'        ]
@@ -123,7 +123,7 @@ DiscreteHinf::DareOut DiscreteHinf::solveHinfDARE(
 
     // Generalised eigenvalue problem: M v = lambda N v.
     // Eigen's GeneralizedEigenSolver works with real matrices and returns
-    // complex eigenvalue/eigenvector pairs — correct for the indefinite case.
+    // complex eigenvalue/eigenvector pairs - correct for the indefinite case.
     Eigen::GeneralizedEigenSolver<Eigen::MatrixXd> ges(M, N);
     if (ges.info() != Eigen::Success)
     {
@@ -363,7 +363,7 @@ bool DiscreteHinf::trySolve(const GeneralisedPlant &P, double gamma,
     //   Riccati solutions.  When X_inf and Y_inf are both small (plant easy to
     //   control and observe), rho(XY) << gamma^2 easily.  As gamma approaches
     //   gamma_opt from above, rho(XY) -> gamma^2 from below; at gamma = gamma_opt,
-    //   C3 holds with equality (infimum).  For gamma < gamma_opt, C3 fails —
+    //   C3 holds with equality (infimum).  For gamma < gamma_opt, C3 fails -
     //   Z_inf becomes singular and the controller assembly is undefined.
     //
     // Ref: Doyle, Glover, Khargonekar, Francis (1989) IEEE TAC 34(8), Theorem 3;

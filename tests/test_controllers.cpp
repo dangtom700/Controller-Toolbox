@@ -1064,7 +1064,7 @@ void test_stack()
         // PID2: always eligible (no condition)
         stack.addController(pid2, "PID2");
 
-        // Pre-seed lastOutput_ by calling compute once — but we need to inject the
+        // Pre-seed lastOutput_ by calling compute once - but we need to inject the
         // wound-up u_last as the "previous output".  Do this by directly switching:
         // call bumplessInit on pid2 with the known pre-switch state, then verify
         // that pid2->compute(wind_error) stays within Kp2*wind_error of u_last.
@@ -1928,7 +1928,7 @@ void test_subspace_id()
     // MOESP-based B/D regression (the regression inherits the similarity ambiguity
     // from the observability-matrix inversion in Step 5).  The correct check is:
     //   (a) n4sid reports success and a valid model,
-    //   (b) the identified A matrix is stable (poles inside unit disk) — the
+    //   (b) the identified A matrix is stable (poles inside unit disk) - the
     //       eigenvalue structure IS similarity-invariant,
     //   (c) the identified model order matches the requested order.
     {

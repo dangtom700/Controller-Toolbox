@@ -340,6 +340,20 @@ public:
     //
     // For a pure reference-tracking design, d is left connected but may be
     // set to zero during simulation.
+    //
+    // Troubleshooting when solve() returns feasible = false:
+    //   1. Increase gammaInit: start at 10 * ||W1||_inf * ||W3||_inf as a rule of thumb.
+    //   2. Check that W1's crossover frequency is below the plant's open-loop bandwidth.
+    //      A W1 that demands high gain above the plant's roll-off frequency is infeasible.
+    //   3. For non-minimum-phase plants (RHP zeros or excess delay), the achievable
+    //      sensitivity peak S is bounded below by the Poisson integral; even a theoretically
+    //      perfect controller cannot drive ||W1*S||_inf below this bound. Reduce W1 gain
+    //      or relax the crossover requirement. See Skogestad & Postlethwaite Section 6.3.
+    //   4. If W1 and W3 both have high gain in overlapping frequency bands, the design
+    //      objective may be fundamentally infeasible (S + T = 1 sets a hard trade-off).
+    //      Reduce |W1(jw)| * |W3(jw)| to satisfy the S-T complementarity constraint.
+    //   5. If gammaInit is too small (below the achievable gamma), bisection cannot start.
+    //      Increase gammaInit until solve() returns feasible = true, then tighten.
     // -----------------------------------------------------------------------
     static GeneralisedPlant build(const StateSpace &G,
                                   const StateSpace &W1,

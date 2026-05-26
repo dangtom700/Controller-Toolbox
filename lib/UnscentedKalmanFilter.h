@@ -31,6 +31,16 @@
 //
 // Recommended tuning: alpha=1e-3, beta=2 (Gaussian prior), kappa=0.
 //
+// Alpha sensitivity for large state dimensions:
+//   alpha = 1e-3 is the Wan & Van der Merwe default, appropriate for n <= 3.
+//   For larger n, the zeroth covariance weight Wc_0 = lambda/(n+lambda) + (1-alpha^2+beta)
+//   becomes large and negative (e.g., Wc_0 ~ -6e6 for n=6 with alpha=1e-3).
+//   This is mathematically valid but amplifies numerical noise in the covariance update.
+//   For n >= 4, increase alpha toward 0.1..1.0 to keep |Wc_0| within [-n, 0]:
+//     alpha = sqrt((kappa + n) / n)  gives Wc_0 = 0 (minimum noise amplification).
+//   The eigenvalue floor (1e-10*trace(P)) in update() is a backstop, not a substitute
+//   for a well-tuned alpha. Verify Wc_0 is reasonable after construction.
+//
 // Ref: Wan & Van der Merwe, "The Unscented Kalman Filter for Nonlinear
 //      Estimation", Proc. IEEE ASSPCC 2000;
 //      Julier & Uhlmann, "A New Extension of the Kalman Filter" (1997).

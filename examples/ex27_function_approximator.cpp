@@ -6,9 +6,9 @@
 //
 //  Three sections:
 //    A) Taylor (polynomial) fit to  f(x) = sin(x)  on [0, 2]
-//    B) Padé [2/2] fit to  f(x) = 1/(1+x)  on [0, 3]  (true pole at x=-1)
+//    B) Pade [2/2] fit to  f(x) = 1/(1+x)  on [0, 3]  (true pole at x=-1)
 //    C) Smith Predictor with fractional dead-time theta=0.73 s, Ts=0.5 s
-//       (d_int=1, theta_frac=0.23 s) — compare integer-rounded vs Padé.
+//       (d_int=1, theta_frac=0.23 s) - compare integer-rounded vs Pade.
 // ============================================================
 #include "ControllerToolbox.h"
 #include "FunctionApproximator.h"
@@ -17,19 +17,19 @@
 #include <cmath>
 #include <vector>
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Utility: print a small table header
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 static void header(const std::string &title)
 {
-    std::cout << "\n══════════════════════════════════════\n";
+    std::cout << "\n======================================\n";
     std::cout << "  " << title << "\n";
-    std::cout << "══════════════════════════════════════\n";
+    std::cout << "======================================\n";
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Simple plant with fractional dead-time for section C
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 struct FractDelayPlant
 {
     ctrl::StateSpace model;  // delay-free first-order plant
@@ -68,7 +68,7 @@ struct FractDelayPlant
     }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 int main()
 {
     // =========================================================================
@@ -112,7 +112,7 @@ int main()
     }
 
     // =========================================================================
-    // B) Padé [2/2] approximation of f(x) = 1/(1+x) on [0, 3]
+    // B) Pade [2/2] approximation of f(x) = 1/(1+x) on [0, 3]
     // =========================================================================
     header("B) Pade [2/2] fit: f(x) = 1/(1+x) on [0, 3]");
 
@@ -190,7 +190,7 @@ int main()
         pp.Kp = 1.5; pp.Ki = 0.5; pp.Kd = 0.0;
         pp.N  = 10.0; pp.uMin = -10.0; pp.uMax = 10.0;
 
-        // ── Run 1: integer-rounded Smith (d=1, theta_rounded = 0.5 s) ──
+        // -- Run 1: integer-rounded Smith (d=1, theta_rounded = 0.5 s) --
         FractDelayPlant plant1(G0, theta, Ts);
         {
             auto inner = std::make_shared<ctrl::DiscretePID>(pp, Ts);
@@ -214,7 +214,7 @@ int main()
             }
         }
 
-        // ── Run 2: fractional-delay Smith (d=1 + Pade for 0.23 s) ──
+        // -- Run 2: fractional-delay Smith (d=1 + Pade for 0.23 s) --
         FractDelayPlant plant2(G0, theta, Ts);
         {
             auto inner = std::make_shared<ctrl::DiscretePID>(pp, Ts);
@@ -239,7 +239,7 @@ int main()
             }
         }
 
-        // ── Show the Pade filter coefficients ──
+        // -- Show the Pade filter coefficients --
         {
             const double theta_frac = theta - 1 * Ts; // = 0.23 s
             ctrl::StateSpace Hfrac = ctrl::padeDelayFilter(theta_frac, Ts);

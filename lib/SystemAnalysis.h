@@ -30,9 +30,17 @@ namespace ctrl
         static bool isDiscreteStable(const StateSpace &sys);
 
         // Solves the discrete Lyapunov equation:  A * P * A' - P + Q = 0
-        // via Kronecker product vectorisation: (I - A⊗A) * vec(P) = vec(Q).
-        // Complexity: O(n^6) - use only for small systems (n <= 20).
-        // A must be strictly stable; an unstable A gives a singular (I - A⊗A).
+        // via Kronecker product vectorisation: (I - A\otimesA) * vec(P) = vec(Q).
+        // Complexity: O(n^6) due to the n^2 x n^2 linear system - suitable for n <= 10.
+        //   At n=15 this is ~170 million flops; at n=20 it is ~1.6 billion.
+        //   For n > 10, prefer the Bartels-Stewart algorithm (Golub, Nash & Van Loan 1979),
+        //   which reduces complexity to O(n^3) via a Schur decomposition. MATLAB's dlyap()
+        //   uses Bartels-Stewart internally for this reason.
+        //   The Kronecker approach is retained here for simplicity (single Eigen solve,
+        //   no custom Schur loop), but be aware of the performance cliff for larger systems.
+        // A must be strictly stable; an unstable A gives a singular (I - A\otimesA).
+        // Ref: Bartels & Stewart "Solution of the Matrix Equation AX + XB = C" CACM (1972);
+        //      Golub, Nash & Van Loan "A Hessenberg-Schur method for AX+XB=C" IEEE TAC (1979).
         static Eigen::MatrixXd solveDiscreteLyapunov(const Eigen::MatrixXd &A,
                                                      const Eigen::MatrixXd &Q);
 

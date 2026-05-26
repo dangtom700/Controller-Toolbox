@@ -23,7 +23,15 @@ namespace ctrl
         double Kp = 1.0;    // Proportional gain
         double Ki = 0.0;    // Integral gain  (Ki = Kp / Ti)
         double Kd = 0.0;    // Derivative gain (Kd = Kp . Td)
-        double N = 100.0;   // Derivative filter coefficient [rad/s] - higher = less filtering
+        // Derivative filter coefficient N [rad/s] - higher = less filtering (sharper derivative).
+        // The derivative pole is placed at z = 1/(1 + N*Ts) in the backward-Euler discretisation,
+        // corresponding to a continuous-time pole at s = -N. This attenuates derivative action
+        // above N rad/s. Setting N too large causes the derivative to amplify high-frequency noise:
+        //   - Nyquist limit: N < pi / Ts  (e.g., N < 314 rad/s for Ts=0.01s)
+        //   - Practical limit: N < pi / (2 * Ts * omega_c) where omega_c is the closed-loop BW
+        //     (ensures the derivative pole stays below Nyquist with a 2x margin)
+        // The default N=100 is appropriate for many processes; reduce if derivative action is noisy.
+        double N = 100.0;
         double uMin = -1e9; // Lower output saturation limit
         double uMax = 1e9;  // Upper output saturation limit
         double Kb = 1.0;    // Anti-windup back-calculation gain (0 = disabled)

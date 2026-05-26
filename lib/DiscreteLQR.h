@@ -44,6 +44,14 @@ namespace ctrl
     public:
         // Construct and solve DARE for the given plant model and weighting matrices.
         // Warns to stderr if DARE does not converge; uses the best available iterate.
+        //
+        // PBH rank test note: stabilisability and detectability are checked at construction
+        // using Eigen's fullPivLu().rank(), which applies an automatic rank threshold scaled
+        // by max_singular_value * n * epsilon. For plants with eigenvalues very close to the
+        // unit circle (e.g., poles at 0.9999 or 1.0001), this threshold may misdeclassify the
+        // system as non-stabilisable. If you suspect a false PBH failure, tighten the plant
+        // model or manually verify the PBH condition: rank([A - lambda*I, B]) == n for all
+        // |lambda| >= 1.
         DiscreteLQR(const StateSpace &plant, const LQRParams &params);
 
         // Compute u[k] = -K*(x - x_ref) + u_ff.

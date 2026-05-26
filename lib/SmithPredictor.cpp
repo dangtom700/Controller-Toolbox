@@ -7,7 +7,7 @@
 namespace ctrl
 {
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// -- Helpers ------------------------------------------------------------------
 
 // Build a trivial 1-state unity-gain filter (no fractional delay).
 static StateSpace makeIdentityFilter(double Ts)
@@ -26,7 +26,7 @@ void SmithPredictor::initBuffers()
     buf_head_ = 0;
 }
 
-// ── Constructors ─────────────────────────────────────────────────────────────
+// -- Constructors -------------------------------------------------------------
 
 SmithPredictor::SmithPredictor(std::shared_ptr<IController> inner,
                                const StateSpace &delayModel,
@@ -72,11 +72,11 @@ SmithPredictor::SmithPredictor(std::shared_ptr<IController> inner,
           }())
 {}
 
-// ── compute ──────────────────────────────────────────────────────────────────
+// -- compute ------------------------------------------------------------------
 
 // Signal flow:
 //   1. Compute delay-free model output y_model[k] = C*x_model + D*u[k-1]
-//   2. If a Padé fractional filter is active, pass y_model through H_frac:
+//   2. If a Pade fractional filter is active, pass y_model through H_frac:
 //        y_now = H_frac(y_model)    (adds the sub-sample delay to the model)
 //   3. Buffer y_now; read d_-step-old y_now as y_delayed.
 //   4. Modified error: e_sp = error + (y_now - y_delayed)
@@ -129,7 +129,7 @@ double SmithPredictor::compute(double error)
     return u;
 }
 
-// ── reset ────────────────────────────────────────────────────────────────────
+// -- reset --------------------------------------------------------------------
 
 void SmithPredictor::reset()
 {
@@ -144,7 +144,7 @@ void SmithPredictor::reset()
     }
 }
 
-// ── setModel ─────────────────────────────────────────────────────────────────
+// -- setModel -----------------------------------------------------------------
 
 void SmithPredictor::setModel(const StateSpace &delayModel, int delaySteps)
 {

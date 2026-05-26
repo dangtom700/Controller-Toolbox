@@ -12,6 +12,9 @@
 //   Only one controller is active per step.  Entries are evaluated in insertion order;
 //   the first whose activationCondition returns true is selected.  If no condition is
 //   registered for an entry, that entry is always eligible.
+//   Edge case: if no entry is active and eligible, the output holds at the previous
+//   value (bumpless hold) and a warning is emitted on stderr. Ensure at least one
+//   always-eligible fallback entry (no activationCondition) to avoid this.
 //   Use for: gain-scheduled switching, mode-based selection, fallback chains.
 //
 // StackMode::Additive
@@ -25,6 +28,8 @@
 //   stated weights.  If an entry's activationCondition returns false, its weight is
 //   excluded from the denominator, so the remaining controllers automatically "fill" the
 //   full output range.  Set all activationConditions to nullptr for a static blend.
+//   Edge case: if all entries are inactive or gate out, the output holds at the
+//   previous value (bumpless hold) and a warning is emitted on stderr.
 //
 //   Example - two controllers with weights [0.7, 0.3]:
 //     Both active:   u = (0.7*u0 + 0.3*u1) / (0.7 + 0.3) = 0.7*u0 + 0.3*u1

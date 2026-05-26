@@ -73,6 +73,15 @@ namespace ctrl
         // Inject a known state estimate (e.g., from a Kalman filter).
         void setState(const Eigen::VectorXd &x) { x_hat_ = x; }
 
+        // QP solver diagnostics from the most recent computeRef() call.
+        // lastQPConverged() returns false when the gradient-projection loop exited
+        // at qpMaxIter without satisfying qpTol. In that case lastQPIters() == qpMaxIter
+        // and the returned u is the best available (suboptimal) iterate, not the optimum.
+        // Monitor these in production loops: repeated non-convergence indicates qpMaxIter
+        // is too small, qpTol is too tight, or H_ is ill-conditioned (large Np, small rho_u).
+        bool lastQPConverged() const { return last_qp_converged_; }
+        int  lastQPIters()     const { return last_qp_iters_; }
+
     private:
         StateSpace plant_;
         MPCParams p_;
@@ -101,6 +110,9 @@ namespace ctrl
         Eigen::VectorXd ub_;       // Nc.m  - per-horizon upper bounds on DeltaU
         Eigen::VectorXd cumMin_;   // m     - rolling cumulative lower bound (bound construction)
         Eigen::VectorXd cumMax_;   // m     - rolling cumulative upper bound (bound construction)
+
+        bool last_qp_converged_ = true; // false when QP exited at qpMaxIter
+        int  last_qp_iters_     = 0;    // actual iterations used in last computeRef()
 
         void buildPredictionMatrices(); // depends on plant model (A, B, C)
         void buildCostMatrix();         // depends on weights (rho_y, rho_u) and Phi_

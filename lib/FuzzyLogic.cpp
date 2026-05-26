@@ -11,9 +11,9 @@ namespace ctrl
 static constexpr int kCoGResolutionDefault   = 101; // CoG grid points (FuzzyPD/Supervisor default)
 static constexpr int kTSPeakSearchResolution =  51; // fallback grid for WA peak search (non-singleton terms)
 
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 // Membership function factories
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 
 MF mfTriangular(double a, double c, double b)
 {
@@ -73,9 +73,9 @@ MF mfShoulderRight(double a, double b)
 }
 
 
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 // LinguisticVariable
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 
 std::vector<double> LinguisticVariable::fuzzify(double x) const
 {
@@ -93,9 +93,9 @@ int LinguisticVariable::termIndex(const std::string& termName) const
 }
 
 
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 // FuzzySystem
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 
 void FuzzySystem::rebuildWorkspace()
 {
@@ -121,7 +121,40 @@ void FuzzySystem::addOutput(const LinguisticVariable& var)
     rebuildWorkspace();
 }
 
-void FuzzySystem::addRule(const Rule& rule)                { rules_.push_back(rule);  }
+void FuzzySystem::addRule(const Rule& rule)
+{
+    // Validate every antecedent against registered input variables.
+    // A typo in a term name silently produces zero rule strength without this check.
+    for (std::size_t a = 0; a < rule.antecedents.size(); ++a)
+    {
+        const auto& ant = rule.antecedents[a];
+        if (ant.input_idx < 0 || ant.input_idx >= static_cast<int>(inputs_.size()))
+            throw std::out_of_range(
+                "FuzzySystem::addRule: antecedent[" + std::to_string(a) +
+                "] input_idx=" + std::to_string(ant.input_idx) +
+                " is out of range (numInputs=" + std::to_string(inputs_.size()) + ").");
+        if (ant.term_idx < 0 ||
+            ant.term_idx >= static_cast<int>(inputs_[ant.input_idx].terms.size()))
+            throw std::out_of_range(
+                "FuzzySystem::addRule: antecedent[" + std::to_string(a) +
+                "] term_idx=" + std::to_string(ant.term_idx) +
+                " is out of range for input '" + inputs_[ant.input_idx].name +
+                "' (numTerms=" + std::to_string(inputs_[ant.input_idx].terms.size()) + ").");
+    }
+    // Validate consequent against registered output variable.
+    if (outputs_.empty())
+        throw std::logic_error("FuzzySystem::addRule: no output variable registered. "
+                               "Call addOutput() before addRule().");
+    if (rule.consequent_term_idx < 0 ||
+        rule.consequent_term_idx >= static_cast<int>(outputs_[0].terms.size()))
+        throw std::out_of_range(
+            "FuzzySystem::addRule: consequent_term_idx=" +
+            std::to_string(rule.consequent_term_idx) +
+            " is out of range for output '" + outputs_[0].name +
+            "' (numTerms=" + std::to_string(outputs_[0].terms.size()) + ").");
+
+    rules_.push_back(rule);
+}
 
 double FuzzySystem::ruleStrength(const Rule& r,
                                   const std::vector<std::vector<double>>& mu) const
@@ -222,9 +255,9 @@ double FuzzySystem::defuzzWeightedAvg(const std::vector<double>& strengths) cons
 }
 
 
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 // FuzzyPD
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 
 // Canonical 5-term partition on [-1, 1]:  NL, NS, ZE, PS, PL
 // 25-rule diagonal table (same as Mamdani textbook PD table)
@@ -320,9 +353,9 @@ void FuzzyPD::reset()
 }
 
 
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 // FuzzyPID
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 
 FuzzyPID::FuzzyPID(const FuzzyPIDParams& p, double sampleTime)
     : p_(p), Ts_(sampleTime), pd_block_(p.pd, sampleTime)
@@ -371,9 +404,9 @@ void FuzzyPID::bumplessInit(double u_target, double error)
 }
 
 
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 // FuzzySupervisor
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 
 void FuzzySupervisor::buildSystem()
 {

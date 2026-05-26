@@ -131,6 +131,24 @@ REPLACEMENTS = {
     '­': '',   # soft hyphen
     # Micro sign (looks like mu but distinct codepoint)
     'µ': 'mu',      # µ micro sign U+00B5
+    '═': '=',       # ═ box-drawing double horizontal
+    '∏': '\\prod',   # ∏ product symbol
+    '⊗': '\\otimes', # ⊗ tensor product
+    '┐': '|',       # ┐ box-drawing light down and left
+    '┬': '|',       # ┬ box-drawing light vertical and down
+    '┴': '|',       # ┴ box-drawing light vertical and up
+    '├': '|',       # ├ box-drawing light vertical and right
+    '┌': '|',       # ┌ box-drawing light down and right
+    '┘': '|',       # ┘ box-drawing light up and left
+    '┼': '',       # ┼ box-drawing light vertical and horizontal
+    '┬': '',       # ┬ box-drawing light vertical and down
+    '▼': 'v',       # ▼ black down-pointing triangle
+    '┤': '|',       # ┤ box-drawing light vertical and left
+    '▶': '>',       # ▶ black right-pointing triangle
+    '|': '|',       # │ box-drawing light vertical
+    '🟢': '', # 🟢 green circle
+    '✅': '', # ✅ white heavy check mark
+    '❌': '', # ❌ cross mark
 }
 
 _self_basename = os.path.basename(__file__)

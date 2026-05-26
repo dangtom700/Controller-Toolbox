@@ -5,35 +5,35 @@
 #include <string>
 #include <Eigen/Dense>
 
-// FunctionApproximator - data-driven Taylor (polynomial) and Padé (rational)
+// FunctionApproximator - data-driven Taylor (polynomial) and Pade (rational)
 // approximation from a dataset of (x, y) sample pairs.
 //
 // Both backends fit the approximant by solving a linear least-squares problem
-// against the supplied data — no symbolic function required.  This matches
+// against the supplied data - no symbolic function required.  This matches
 // the toolbox's identification-from-data philosophy (same as RLS and N4SID).
 //
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Taylor (polynomial) backend
-// ─────────────────────────────────────────────────────────────────────────────
-//   Fits:  f(x) ≈ P(x) = a₀ + a₁x + a₂x² + … + aₙxⁿ
+// -----------------------------------------------------------------------------
+//   Fits:  f(x) approx = P(x) = a0 + a1x + a2x^2 + ... + a_nx^n
 //
 //   Method: Vandermonde matrix V (rows = data points, cols = powers 0..n),
-//           QR least-squares solve → coefficient vector a.
+//           QR least-squares solve -> coefficient vector a.
 //
 //   Best for: smooth functions away from poles, evaluation at any x, cheap.
 //   Watch out: high-degree polynomials can overfit and oscillate (Runge's
-//              phenomenon).  Keep n ≤ 8 unless you have many data points and
+//              phenomenon).  Keep n <= 8 unless you have many data points and
 //              the function is well-behaved.
 //
-// ─────────────────────────────────────────────────────────────────────────────
-// Padé (rational) backend
-// ─────────────────────────────────────────────────────────────────────────────
-//   Fits:  f(x) ≈ P(x)/Q(x),  deg(P)=m, deg(Q)=n, Q(x)=1+q₁x+…+qₙxⁿ
+// -----------------------------------------------------------------------------
+// Pade (rational) backend
+// -----------------------------------------------------------------------------
+//   Fits:  f(x) approx = P(x)/Q(x),  deg(P)=m, deg(Q)=n, Q(x)=1+q1x+...+q_nx^n
 //   (Q is normalised so that Q(0)=1, avoiding the trivial all-zero solution.)
 //
-//   Method: Rewrite as a linear system in (p₀…pₘ, q₁…qₙ) by moving the
+//   Method: Rewrite as a linear system in (p0...p_m, q1...q_n) by moving the
 //           denominator to the right-hand side:
-//               P(xᵢ) − f(xᵢ)·Q(xᵢ) = 0   for each data point i
+//               P(x_i) - f(x_i).Q(x_i) = 0   for each data point i
 //           Collect into a matrix equation and solve in least-squares sense.
 //           This is the standard Sanathanan-Koerner / linearised approach.
 //
@@ -42,27 +42,27 @@
 //   Watch out: denominator roots can land inside your evaluation domain,
 //              causing division-by-zero.  Use hasPoleInDomain() to check.
 //
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Fractional dead-time helper
-// ─────────────────────────────────────────────────────────────────────────────
-//   padeDelayFilter(theta_frac, Ts) builds a discrete-time first-order Padé
+// -----------------------------------------------------------------------------
+//   padeDelayFilter(theta_frac, Ts) builds a discrete-time first-order Pade
 //   approximant for the fractional-sample dead-time (theta_frac < Ts) and
 //   returns a 1-state StateSpace you can absorb into a SmithPredictor model.
 //
-//   Formula (Tustin-discretised continuous [1,1] Padé):
-//       H_c(s) = (1 - 0.5·theta_frac·s) / (1 + 0.5·theta_frac·s)
-//   This exactly matches the delay e^{-theta_frac·s} to first order.
+//   Formula (Tustin-discretised continuous [1,1] Pade):
+//       H_c(s) = (1 - 0.5.theta_frac.s) / (1 + 0.5.theta_frac.s)
+//   This exactly matches the delay e^{-theta_frac.s} to first order.
 //
 // Ref: Vetter, "Numerical Continuation Methods" (1991);
-//      Baker & Graves-Morris, "Padé Approximants" (1996);
-//      Åström & Wittenmark, "Computer Controlled Systems" Sec. 6.4 (1997).
+//      Baker & Graves-Morris, "Pade Approximants" (1996);
+//      Astrom & Wittenmark, "Computer Controlled Systems" Sec. 6.4 (1997).
 
 namespace ctrl
 {
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // TaylorApproximator
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 class TaylorApproximator
 {
 public:
@@ -90,13 +90,13 @@ private:
 };
 
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // PadeApproximator
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 class PadeApproximator
 {
 public:
-    // Fit a [m/n] Padé rational approximant to data (xs, ys).
+    // Fit a [m/n] Pade rational approximant to data (xs, ys).
     // xs and ys must have the same length; length must be > m + n.
     // Throws std::invalid_argument on dimension mismatch or underdetermined system.
     PadeApproximator(const std::vector<double> &xs,
@@ -125,7 +125,7 @@ public:
     // Returns true (has a pole) if the sign of Q(x) changes anywhere in the interval.
     bool hasPoleInDomain(double x_lo, double x_hi, int n_pts = 1000) const;
 
-    // Convert the [1/1] Padé approximant to a discrete-time StateSpace filter.
+    // Convert the [1/1] Pade approximant to a discrete-time StateSpace filter.
     // Only valid when numDegree()==1 and denDegree()==1.
     // The approximant is treated as a rational function of z^{-1} and converted
     // via the controllable-canonical form.
@@ -139,11 +139,11 @@ private:
 };
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Free function: first-order Padé filter for fractional dead-time
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// Free function: first-order Pade filter for fractional dead-time
+// -----------------------------------------------------------------------------
 //
-// Returns a 1-state discrete StateSpace representing the first-order Padé
+// Returns a 1-state discrete StateSpace representing the first-order Pade
 // approximant of a pure delay e^{-theta_frac * s}, discretised with Tustin:
 //
 //   Continuous:  H(s) = (1 - 0.5*theta_frac*s) / (1 + 0.5*theta_frac*s)
@@ -153,7 +153,7 @@ private:
 // theta_frac must be in (0, Ts).  For theta_frac == 0, returns a unit-gain
 // static gain StateSpace (D=1, no dynamics).
 //
-// Typical use — absorbing a fractional delay into a SmithPredictor model:
+// Typical use - absorbing a fractional delay into a SmithPredictor model:
 //
 //   StateSpace G0 = ...;          // integer-delay-free plant
 //   double theta    = 0.73;       // true dead time [s]

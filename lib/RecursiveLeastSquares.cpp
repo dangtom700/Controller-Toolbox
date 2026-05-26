@@ -42,8 +42,8 @@ namespace ctrl
         // K = P*phi/denom into (I - K*phi')*P.  The factored form avoids forming (I - K*phi')
         // explicitly (one fewer n*n multiply for large theta_).
         //
-        // The /lambda term inflates P at each step — equivalent to inflating Q in a Kalman
-        // filter — which keeps P from shrinking to zero and freezing theta_.  This gives more
+        // The /lambda term inflates P at each step - equivalent to inflating Q in a Kalman
+        // filter - which keeps P from shrinking to zero and freezing theta_.  This gives more
         // weight to recent data; the effective sliding window length is ~ 1/(1-lambda).
         // For lambda=1 (no forgetting), P shrinks monotonically and theta_ stops adapting to
         // time-varying parameters.

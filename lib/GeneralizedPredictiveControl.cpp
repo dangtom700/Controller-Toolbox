@@ -138,18 +138,22 @@ namespace ctrl
 
         // Gradient projection: DU <- clamp(DU - (1/L)*(H*DU + g), lb_, ub_)
         const double alpha = 1.0 / L_;
-        const int    qpMaxIter = 200;
-        const double qpTol     = 1e-8;
-        for (int iter = 0; iter < qpMaxIter; ++iter)
+        last_qp_converged_ = false;
+        int iter = 0;
+        for (; iter < p_.qpMaxIter; ++iter)
         {
             grad_k_.noalias() = H_ * DeltaU_ + grad_;
             DU_new_           = (DeltaU_ - alpha * grad_k_).cwiseMax(lb_).cwiseMin(ub_);
 
             const double delta = (DU_new_ - DeltaU_).cwiseAbs().maxCoeff();
             DeltaU_            = DU_new_;
-            if (delta < qpTol)
+            if (delta < p_.qpTol)
+            {
+                last_qp_converged_ = true;
                 break;
+            }
         }
+        last_qp_iters_ = iter;
 
         // Apply first control increment and enforce absolute u bounds.
         Eigen::VectorXd du = DeltaU_.head(m);

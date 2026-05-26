@@ -44,6 +44,8 @@ struct GPCParams
     double uMax  =  1e9;
     double duMin = -1e9;
     double duMax =  1e9;
+    int    qpMaxIter = 200;  // gradient-projection iteration limit
+    double qpTol     = 1e-8; // convergence tolerance (||Deltax||_inf)
 };
 
 class GeneralizedPredictiveController : public IController
@@ -78,6 +80,13 @@ public:
     // Augmented state estimate xa = [Deltax; y] (size n+p).
     const Eigen::VectorXd &augmentedState() const { return xa_; }
 
+    // QP solver diagnostics from the most recent computeRef() call.
+    // lastQPConverged() returns false when the gradient-projection loop exited
+    // at p_.qpMaxIter without satisfying p_.qpTol. Monitor in production: repeated
+    // non-convergence means qpMaxIter is too small or H_ is ill-conditioned.
+    bool lastQPConverged() const { return last_qp_converged_; }
+    int  lastQPIters()     const { return last_qp_iters_; }
+
 private:
     void buildCondensedMatrices();
 
@@ -109,6 +118,9 @@ private:
     Eigen::VectorXd cumMax_;   // rolling cumulative upper bound (m)
 
     double          L_;        // max eigenvalue of H_ - Lipschitz constant for QP step
+
+    bool last_qp_converged_ = true; // false when QP exited at p_.qpMaxIter
+    int  last_qp_iters_     = 0;    // actual iterations used in last computeRef()
 
     Eigen::VectorXd xa_;       // augmented state estimate
     Eigen::VectorXd u_prev_;   // u[k-1] (needed for Deltau = u - u_prev)

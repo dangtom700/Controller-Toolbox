@@ -42,9 +42,9 @@
 namespace ctrl
 {
 
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 // Membership function types
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 
 // A callable that maps a crisp input to a membership degree in [0, 1].
 using MF = std::function<double(double)>;
@@ -69,9 +69,9 @@ MF mfShoulderLeft(double a, double b);   // 1 for x<=a, linear 1->0 from a to b
 MF mfShoulderRight(double a, double b);  // linear 0->1 from a to b, 1 for x>=b
 
 
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 // Linguistic variable
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 
 struct LinguisticTerm {
     std::string            name;
@@ -101,9 +101,9 @@ struct LinguisticVariable {
 };
 
 
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 // Rule base
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 
 struct Antecedent {
     int input_idx;   // which input variable
@@ -117,9 +117,9 @@ struct Rule {
 };
 
 
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 // FuzzySystem - core inference engine
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 
 enum class InferenceMethod { Mamdani, TakagiSugeno };
 enum class DefuzzMethod    { CoG,     WeightedAverage };
@@ -143,6 +143,11 @@ public:
     // For MIMO fuzzy control, instantiate one FuzzySystem per output channel.
     // Throws std::logic_error if called more than once.
     void addOutput(const LinguisticVariable& var);
+    // Add a rule and validate all indices against registered variables.
+    // Throws std::out_of_range if any antecedent input_idx or term_idx is out of bounds,
+    // or if consequent_term_idx is out of bounds for the registered output variable.
+    // Throws std::logic_error if addOutput() has not been called yet.
+    // This catches typos in term indices before they silently produce zero rule strength.
     void addRule  (const Rule& rule);
 
     // Evaluate: inputs = crisp values for each input variable (in order).
@@ -179,7 +184,7 @@ private:
 };
 
 
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 // FuzzyPD - convenience builder: 5-term PD fuzzy controller for one axis.
 //
 // Inputs:  error e,  error-rate de
@@ -192,7 +197,7 @@ private:
 //   e_scale  - maps +/-e_scale to universe [-1, 1]   before inference
 //   de_scale - maps +/-de_scale to universe [-1, 1]  before inference
 //   u_scale  - output on universe [-1, 1] is scaled to +/-u_scale
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 
 struct FuzzyPDParams {
     double e_scale  = 1.0;    // error normalisation
@@ -228,7 +233,7 @@ private:
 };
 
 
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 // FuzzyPID - extends FuzzyPD with a fuzzy integral term.
 //
 // Architecture: three decoupled fuzzy inference blocks:
@@ -238,7 +243,7 @@ private:
 //
 // The integral is identical to the PID back-calculation anti-windup scheme
 // (Ki * Ts * e + Kb * (u_sat - u_unsat)), keeping it numerically safe.
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 
 struct FuzzyPIDParams {
     FuzzyPDParams pd;           // FuzzyPD tuning (e_scale, de_scale, u_scale)
@@ -274,7 +279,7 @@ private:
 };
 
 
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 // FuzzySupervisor - monitors closed-loop performance and decides whether the
 // underlying controller's linearised plant model needs to be refreshed.
 //
@@ -301,7 +306,7 @@ private:
 //   auto sig = supervisor.update(error_norm, delta_t);
 //   if (sig.relinearize) mpc.setPlant(relinearize(plant, current_state));
 //
-// ════════════════════════════════════════════════════════════════════════════
+// ============================================================================
 
 struct SupervisorParams {
     double e_threshold    = 5.0;   // |e| at which error is considered "Large" (same units as error)

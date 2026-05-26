@@ -1,7 +1,8 @@
 #include "ControllerStack.h"
 #include <algorithm>
-#include <stdexcept>
+#include <iostream>
 #include <numeric>
+#include <stdexcept>
 
 namespace ctrl
 {
@@ -59,10 +60,17 @@ namespace ctrl
         // On a controller switch, bumplessInit() is called on the incoming
         // controller so its first compute() returns approx = lastOutput_, preventing
         // an output bump at the transition.
+        //
+        // Edge case: if no entry is active and eligible, the output holds at
+        // lastOutput_ (bumpless hold). This avoids a silent 0.0 being sent to the
+        // actuator when all conditions fail simultaneously (e.g., a condition array
+        // is not exhaustive). activeName_ is empty in this case.
         // ----------------------------------------------------------------
         case StackMode::Supervisory:
         {
             activeName_.clear();
+            bool found = false;
+            out = lastOutput_; // hold previous output if no entry qualifies
             for (auto &e : entries_)
             {
                 if (!e.active)
@@ -75,9 +83,13 @@ namespace ctrl
                         e.controller->bumplessInit(lastOutput_, error);
                     out = e.controller->compute(error);
                     activeName_ = e.name;
+                    found = true;
                     break;
                 }
             }
+            if (!found)
+                std::cerr << "[ControllerStack] WARNING: Supervisory mode - no eligible entry "
+                             "found. Holding last output " << lastOutput_ << ".\n";
             prevActiveName_ = activeName_;
             break;
         }
@@ -100,7 +112,11 @@ namespace ctrl
         }
 
         // ----------------------------------------------------------------
-        // Weighted: weighted sum of all active controllers
+        // Weighted: normalised weighted sum of all active, gate-passing entries.
+        //
+        // Edge case: if all entries are inactive or gate out, total_w == 0 and
+        // the output holds at lastOutput_ (bumpless hold) to avoid a NaN from 0/0
+        // or a spurious 0.0 being sent to the actuator.
         // ----------------------------------------------------------------
         case StackMode::Weighted:
         {
@@ -119,6 +135,12 @@ namespace ctrl
             }
             if (total_w > 1e-12)
                 out /= total_w;
+            else
+            {
+                out = lastOutput_; // hold last output - no active, gate-passing entry
+                std::cerr << "[ControllerStack] WARNING: Weighted mode - no active, gate-passing "
+                             "entry found. Holding last output " << lastOutput_ << ".\n";
+            }
             break;
         }
         }

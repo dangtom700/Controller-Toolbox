@@ -67,6 +67,21 @@ struct SubspaceIDResult
 //             minimum i = n_order + 1)
 // Ts:         sample time [s]
 //
+// IMPORTANT - Similarity transform:
+//   The returned state-space realization (A, B, C, D) is determined only up to an
+//   arbitrary similarity transform T: A_true = T*A*T^{-1}, B_true = T*B, C_true = C*T^{-1}.
+//   The following quantities ARE similarity-invariant and can be trusted directly:
+//     - Eigenvalues of A  (system poles)
+//     - I/O transfer function G(z) = C*(zI-A)^{-1}*B + D  (frequency response)
+//     - DC gain  C*(I-A)^{-1}*B + D
+//     - Stability (all |lambda(A)| < 1)
+//   The following are NOT similarity-invariant and must NOT be compared to physical values:
+//     - Individual entries of B, C, D
+//     - State norms or covariances
+//   If you need a canonical realization, apply a balancing transformation (e.g., via
+//   Eigen::RealSchur) after identification. For Kalman filter use, prefer the returned
+//   kalmanGain (already in the identified basis) over manual Q/R tuning.
+//
 // Returns a SubspaceIDResult. On failure, result.success = false and result.message
 // describes the cause.
 SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,

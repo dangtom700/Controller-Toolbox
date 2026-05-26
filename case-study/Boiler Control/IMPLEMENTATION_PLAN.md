@@ -18,27 +18,27 @@ The current `boiler_turbine_case_study.cpp` is a single monolithic file (~830 li
 
 | Toolbox component | Current status |
 |---|---|
-| `DiscretePID` | ✅ (decentralised SISO, fixed gains) |
-| `DiscreteLQR` | ✅ |
-| `DiscreteLQG` / `KalmanFilter` | ✅ |
-| `DiscreteMPC` | ✅ |
-| `DiscreteSMC` | ✅ |
-| `ExtremumSeeker` | ✅ |
-| `DiscreteADRC` | ❌ missing |
-| `DiscreteLeadLag` | ❌ missing |
-| `SmithPredictor` | ❌ missing |
-| `GeneralizedPredictiveControl` (GPC) | ❌ missing |
-| `ExtendedKalmanFilter` (EKF) | ❌ missing |
-| `UnscentedKalmanFilter` (UKF) | ❌ missing |
-| `RecursiveLeastSquares` (RLS) | ❌ missing |
-| `ControllerStack` (Supervisory / Additive / Weighted) | ❌ missing |
-| `FuzzyPID` / `FuzzySupervisor` | ❌ missing |
-| `RepetitiveController` | ❌ missing |
-| `SubspaceID` (offline MIMO system ID) | ❌ missing |
-| Modular multi-file architecture | ❌ monolithic |
-| JSON scenario / config files | ❌ hardcoded |
-| Structured telemetry / CSV logging | ❌ ad-hoc per function |
-| Load-tracking (setpoint changes, not just regulation) | ❌ only perturbation rejection |
+| `DiscretePID` |  (decentralised SISO, fixed gains) |
+| `DiscreteLQR` |  |
+| `DiscreteLQG` / `KalmanFilter` |  |
+| `DiscreteMPC` |  |
+| `DiscreteSMC` |  |
+| `ExtremumSeeker` |  |
+| `DiscreteADRC` |  missing |
+| `DiscreteLeadLag` |  missing |
+| `SmithPredictor` |  missing |
+| `GeneralizedPredictiveControl` (GPC) |  missing |
+| `ExtendedKalmanFilter` (EKF) |  missing |
+| `UnscentedKalmanFilter` (UKF) |  missing |
+| `RecursiveLeastSquares` (RLS) |  missing |
+| `ControllerStack` (Supervisory / Additive / Weighted) |  missing |
+| `FuzzyPID` / `FuzzySupervisor` |  missing |
+| `RepetitiveController` |  missing |
+| `SubspaceID` (offline MIMO system ID) |  missing |
+| Modular multi-file architecture |  monolithic |
+| JSON scenario / config files |  hardcoded |
+| Structured telemetry / CSV logging |  ad-hoc per function |
+| Load-tracking (setpoint changes, not just regulation) |  only perturbation rejection |
 
 ---
 

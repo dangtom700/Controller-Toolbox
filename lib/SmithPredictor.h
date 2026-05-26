@@ -40,7 +40,7 @@ namespace ctrl
     class SmithPredictor : public IController
     {
     public:
-        // ── Overload 1 (original): integer delay only ─────────────────────────
+        // -- Overload 1 (original): integer delay only -------------------------
         // inner:       any discrete controller (e.g., DiscretePID)
         // delayModel:  state-space model of the plant WITHOUT the dead-time delay
         // delaySteps:  integer dead-time length in samples d
@@ -48,7 +48,7 @@ namespace ctrl
                        const StateSpace &delayModel,
                        int delaySteps);
 
-        // ── Overload 2: fractional delay support via Padé filter ──────────────
+        // -- Overload 2: fractional delay support via Pade filter --------------
         // inner:            any discrete controller
         // delayModel:       state-space model of the plant WITHOUT dead-time
         // delaySteps:       integer part of dead-time in samples
@@ -59,7 +59,7 @@ namespace ctrl
                        int delaySteps,
                        const StateSpace &fracDelayFilter);
 
-        // ── Overload 3: convenient whole dead-time constructor ────────────────
+        // -- Overload 3: convenient whole dead-time constructor ----------------
         // inner:      any discrete controller
         // delayModel: delay-free plant model
         // theta:      total dead time [s]

@@ -40,7 +40,21 @@ namespace ctrl
     {
         double omega_o = 20.0; // ESO bandwidth     [rad/s] - typically 3-10* omega_c
         double omega_c = 5.0;  // Controller BW     [rad/s]
-        double b0 = 1.0;       // Approximate plant input gain (b0 = Km/J for motors)
+        // Approximate plant input gain b0. The control law u = (u0 - z3) / b0 cancels
+        // the estimated total disturbance z3; if b0 is badly wrong, cancellation degrades
+        // and the ESO can diverge.
+        //
+        // Robustness: ADRC tolerates b0 uncertainty within roughly a factor of 3 for
+        // omega_o >= 5*omega_c (Gao 2003, Section IV). Beyond that, disturbance
+        // cancellation degrades and the ESO can destabilise.
+        //
+        // Practical starting estimates:
+        //   - Motors:             b0 = Km / J           (torque constant / inertia)
+        //   - Integrating plants: b0 = DC_gain / Ts^2
+        //   - Unknown plants:     b0 = 1/tau where tau is the open-loop time constant
+        //
+        // Verify by running open-loop: the step response slope at t=0+ is approx b0*u.
+        double b0 = 1.0;
         double uMin = -1e9;
         double uMax = 1e9;
     };
