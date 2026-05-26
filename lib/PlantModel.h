@@ -148,8 +148,13 @@ namespace ctrl
     // ---------------------------------------------------------------------------
     enum class C2dMethod { ZOH, Tustin, TustinPrewarped };
 
-    StateSpace c2d(const StateSpace &sys_c, double Ts,
-                   C2dMethod method = C2dMethod::ZOH,
+    // Continuous to Discrete conversion using ZOH or Tustin (bilinear).
+    // Prewarped Tustin ensures exact frequency matching at prewarp_freq [rad/s].
+    StateSpace c2d(const StateSpace &sys_c, double Ts, C2dMethod method = C2dMethod::ZOH,
                    double prewarp_freq = 0.0);
+
+    // Minimal realization of a state-space model: removes uncontrollable and unobservable states
+    // using balanced truncation (Ho-Kalman). States with Hankel singular values < tol are removed.
+    StateSpace minreal(const StateSpace &sys, double tol = 1e-6);
 
 } // namespace ctrl

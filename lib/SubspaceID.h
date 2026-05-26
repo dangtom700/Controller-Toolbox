@@ -82,13 +82,17 @@ struct SubspaceIDResult
 //   Eigen::RealSchur) after identification. For Kalman filter use, prefer the returned
 //   kalmanGain (already in the identified basis) over manual Q/R tuning.
 //
+// svd_tol:    tolerance for singular value truncation (e.g. 1e-6). 
+//             If > 0, n_order is capped at the number of SVs > svd_tol.
+//
 // Returns a SubspaceIDResult. On failure, result.success = false and result.message
 // describes the cause.
 SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
                        const Eigen::MatrixXd &U,
                        int n_order,
                        int i_horizon,
-                       double Ts);
+                       double Ts,
+                       double svd_tol = -1.0);
 
 // suggestOrder: automated system-order selection from the singular-value spectrum.
 //

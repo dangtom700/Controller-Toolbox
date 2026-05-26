@@ -155,6 +155,12 @@ namespace ctrl
         }
         last_qp_iters_ = iter;
 
+        if (!last_qp_converged_)
+        {
+            std::clog << "[GPC] WARNING: QP solver reached max iterations (" << p_.qpMaxIter 
+                      << ") without converging. Consider increasing qpMaxIter or relaxing tuning.\n";
+        }
+
         // Apply first control increment and enforce absolute u bounds.
         Eigen::VectorXd du = DeltaU_.head(m);
         Eigen::VectorXd u  = (u_prev_ + du).cwiseMax(p_.uMin).cwiseMin(p_.uMax);

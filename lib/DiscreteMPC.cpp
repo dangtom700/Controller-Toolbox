@@ -196,6 +196,12 @@ namespace ctrl
         }
         last_qp_iters_ = iter;
 
+        if (!last_qp_converged_)
+        {
+            std::clog << "[DiscreteMPC] WARNING: QP solver reached max iterations (" << p_.qpMaxIter 
+                      << ") without converging. Consider increasing qpMaxIter or relaxing tuning.\n";
+        }
+
         // Apply first control increment
         const Eigen::VectorXd du = DeltaU_.head(m);
         const Eigen::VectorXd u  = (u_prev_ + du).cwiseMax(p_.uMin).cwiseMin(p_.uMax);

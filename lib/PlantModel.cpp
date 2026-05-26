@@ -232,4 +232,52 @@ namespace ctrl
         }
     }
 
+    // ---------------------------------------------------------------------------
+    // minreal - minimal realization via balanced truncation (Ho-Kalman)
+    // ---------------------------------------------------------------------------
+    StateSpace minreal(const StateSpace &sys, double tol)
+    {
+        const int n = sys.stateSize();
+        const int m = sys.inputSize();
+        const int p = sys.outputSize();
+
+        if (n == 0) return sys;
+
+        Eigen::MatrixXd Co(n, n * m);
+        Eigen::MatrixXd Ob(n * p, n);
+        
+        Eigen::MatrixXd Apow = Eigen::MatrixXd::Identity(n, n);
+        for (int i = 0; i < n; ++i) {
+            Co.middleCols(i * m, m) = Apow * sys.B;
+            Ob.middleRows(i * p, p) = sys.C * Apow;
+            Apow = sys.A * Apow;
+        }
+
+        Eigen::MatrixXd H = Ob * Co;
+        Eigen::JacobiSVD<Eigen::MatrixXd> svd(H, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        
+        int r = 0;
+        for (int i = 0; i < svd.singularValues().size(); ++i) {
+            if (svd.singularValues()(i) > tol) r++;
+        }
+
+        if (r == n) return sys; // Already minimal
+        if (r == 0) {
+            // Completely unobservable/uncontrollable, return 0 state system
+            return StateSpace(Eigen::MatrixXd::Zero(0, 0), Eigen::MatrixXd::Zero(0, m), Eigen::MatrixXd::Zero(p, 0), sys.D, sys.Ts);
+        }
+
+        Eigen::MatrixXd S_inv_sqrt = svd.singularValues().head(r).cwiseInverse().cwiseSqrt().asDiagonal();
+        Eigen::MatrixXd Ur = svd.matrixU().leftCols(r);
+        Eigen::MatrixXd Vr = svd.matrixV().leftCols(r);
+
+        Eigen::MatrixXd H_shift = Ob * sys.A * Co;
+
+        Eigen::MatrixXd A_min = S_inv_sqrt * Ur.transpose() * H_shift * Vr * S_inv_sqrt;
+        Eigen::MatrixXd B_min = S_inv_sqrt * Ur.transpose() * H.leftCols(m);
+        Eigen::MatrixXd C_min = H.topRows(p) * Vr * S_inv_sqrt;
+
+        return StateSpace(A_min, B_min, C_min, sys.D, sys.Ts);
+    }
+
 } // namespace ctrl

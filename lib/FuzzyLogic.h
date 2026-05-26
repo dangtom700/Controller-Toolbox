@@ -176,7 +176,7 @@ public:
 
     // Evaluate: inputs = crisp values for each input variable (in order).
     // Returns the crisp defuzzified output.
-    double evaluate(const std::vector<double>& inputs) const;
+    double evaluate(const std::vector<double>& inputs);
 
     int numInputs()  const { return static_cast<int>(inputs_.size());  }
     int numOutputs() const { return static_cast<int>(outputs_.size()); }
@@ -191,10 +191,9 @@ private:
     std::vector<Rule>               rules_;
 
     // Pre-allocated workspace - sized once in addInput/addOutput, reused every evaluate()
-    // call to avoid per-call heap allocation on RT targets. Declared mutable so evaluate()
-    // can fill them without losing const correctness on the logical state of the system.
-    mutable std::vector<std::vector<double>> mu_;        // mu_[i][t] = membership of input i, term t
-    mutable std::vector<double>              strengths_; // per-output-term rule activation strength
+    // call to avoid per-call heap allocation on RT targets.
+    std::vector<std::vector<double>> mu_;        // mu_[i][t] = membership of input i, term t
+    std::vector<double>              strengths_; // per-output-term rule activation strength
 
     void rebuildWorkspace();
 

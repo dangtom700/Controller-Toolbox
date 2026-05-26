@@ -30,7 +30,8 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
                        const Eigen::MatrixXd &U,
                        int n_order,
                        int i,
-                       double Ts)
+                       double Ts,
+                       double svd_tol)
 {
     SubspaceIDResult res;
     const int p = Y.rows(); // output dimension
@@ -131,6 +132,18 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
     // ------------------------------------------------------------------
     Eigen::JacobiSVD<Eigen::MatrixXd> svd(L32, Eigen::ComputeThinU | Eigen::ComputeThinV);
     res.singularValues = svd.singularValues();
+
+    if (svd_tol > 0.0)
+    {
+        int valid_rank = 0;
+        for (int k = 0; k < svd.singularValues().size(); ++k)
+        {
+            if (svd.singularValues()(k) > svd_tol)
+                valid_rank++;
+        }
+        if (n_order > valid_rank)
+            n_order = std::max(1, valid_rank); // truncate n_order if it exceeds the number of SVs above tolerance
+    }
 
     if (n_order > svd.singularValues().size())
     {

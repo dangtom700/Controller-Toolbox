@@ -34,7 +34,15 @@ namespace ctrl
         double N = 100.0;
         double uMin = -1e9; // Lower output saturation limit
         double uMax = 1e9;  // Upper output saturation limit
-        double Kb = 1.0;    // Anti-windup back-calculation gain (0 = disabled)
+        // Anti-windup back-calculation gain (0 = disabled, 1 = default).
+        // Recommended tuning range (Astrom & Wittenmark §3.5): 1/Ti <= Kb <= 1/Td
+        //   where Ti = Kp/Ki and Td = Kd/Kp (i.e., Kb in [Ki/Kp, Kp/Kd]).
+        //   - Kb = Ki/Kp  (slow reset): gentle recovery; good for dead-time-dominated plants.
+        //   - Kb = Kp/Kd  (fast reset): fastest recovery; may cause actuator spike on re-entry.
+        //   - Kb = sqrt(Ki*Kp/Kd) is a geometric-mean rule of thumb for balanced reset.
+        //   - Kb = 0: disables anti-windup entirely; use only when saturation cannot occur.
+        //   - Kb = 1.0 (default): reasonable for many processes; may be slow for high-Ki loops.
+        double Kb = 1.0;
     };
 
     class DiscretePID : public IController
@@ -45,6 +53,17 @@ namespace ctrl
 
         // Compute u[k] from tracking error e[k] = r[k] - y[k].
         double compute(double error) override;
+
+        // Derivative-on-Measurement variant: avoids derivative kick when the setpoint steps.
+        // Computes u[k] with the derivative filter applied to -y (plant output) rather than
+        // to the error e = r - y. The proportional and integral terms still use e = r - y.
+        //
+        // Use this overload instead of compute(error) when:
+        //   - The setpoint changes frequently (batch reactors, motion controllers)
+        //   - Large setpoint steps cause unacceptable derivative spikes
+        //
+        // Equivalent MATLAB: DiscretePID block with 'Derivative on measurement' selected.
+        double computeDoM(double y, double r);
 
         void reset() override;
         double sampleTime() const override { return Ts_; }
@@ -65,6 +84,7 @@ namespace ctrl
         double integral_; // accumulated integral I[k]
         double deriv_;    // filtered derivative state d[k-1]
         double e_prev_;   // e[k-1]
+        double y_prev_;   // y[k-1] - for derivative-on-measurement
         double u_prev_;   // u[k-1] - for anti-windup back-calculation
     };
 

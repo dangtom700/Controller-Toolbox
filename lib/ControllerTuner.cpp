@@ -201,6 +201,9 @@ namespace ctrl
             // AMIGO (Astrom & Hagglund 2006) - optimised for robustness
             {
                 const double ratio = m.theta / m.tau;
+                if (ratio < 0.1 || ratio > 10.0) {
+                    std::clog << "[StepResponseTuner] WARNING: AMIGO tuning used outside valid FOPDT ratio range (0.1 < theta/tau < 10.0).\n";
+                }
                 p.Kp = (1.0 / m.K) * (0.2 + 0.45 * m.tau / m.theta);
                 p.Ki = p.Kp * (0.4 * m.theta + 0.8 * m.tau) /
                        (m.theta + 0.1 * m.tau) / (m.tau + 0.8 * m.theta);

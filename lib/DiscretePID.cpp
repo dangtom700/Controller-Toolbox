@@ -54,6 +54,7 @@ namespace ctrl
         integral_ = 0.0;
         deriv_ = 0.0;
         e_prev_ = 0.0;
+        y_prev_ = 0.0;
         u_prev_ = 0.0;
     }
 
@@ -67,6 +68,48 @@ namespace ctrl
         e_prev_   = error;
         u_prev_   = u_target;
         integral_ = u_target - p_.Kp * error;  // absorb P term; D starts from rest
+    }
+
+    // Derivative on measurement: same as compute() but routes the derivative filter
+    // through -y (plant output) instead of e = r - y. This eliminates the derivative
+    // spike that occurs when the setpoint r steps.
+    //
+    // Derivation:
+    //   Standard: d[k] = alpha*d[k-1] + Kd*N*alpha*(e[k] - e[k-1])
+    //   DoM:      d[k] = alpha*d[k-1] - Kd*N*alpha*(y[k] - y[k-1])   <- derivative of -y only
+    //   (sign correct: for a step up in r, y increases, d[k] goes negative = less overshoot)
+    //
+    // Equivalent MATLAB: Discrete PID Controller block, DerivativeFilter on 'Measurement'.
+    double DiscretePID::computeDoM(double y, double r)
+    {
+        const double error = r - y;
+
+        if (!std::isfinite(error) || !std::isfinite(y))
+            return u_prev_;
+
+        // Derivative filter on -y (not on error)
+        const double alpha = 1.0 / (1.0 + p_.N * Ts_);
+        const double d_new = alpha * deriv_ - p_.Kd * p_.N * alpha * (y - y_prev_);
+
+        // Integral: backward Euler on error (unchanged)
+        const double ki_update = p_.Ki * Ts_ * error;
+
+        // Unsaturated output
+        const double u_unsat = p_.Kp * error + (integral_ + ki_update) + d_new;
+
+        // Output saturation
+        const double u_sat = std::max(p_.uMin, std::min(p_.uMax, u_unsat));
+
+        // Integral state update with anti-windup back-calculation
+        integral_ += ki_update + p_.Kb * (u_sat - u_unsat);
+
+        // State updates
+        deriv_  = d_new;
+        e_prev_ = error;
+        y_prev_ = y;
+        u_prev_ = u_sat;
+
+        return u_sat;
     }
 
 } // namespace ctrl

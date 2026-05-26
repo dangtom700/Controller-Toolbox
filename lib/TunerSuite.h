@@ -78,6 +78,10 @@ namespace ctrl
         bool success = false; // false -> parameters are default/invalid
         bool warned = false;  // true  -> soft warning was emitted
         std::string warning;  // diagnostic text (also sent to std::clog)
+
+        // Analytical predictions (available for some tuners)
+        double predictedCrossoverFreq = -1.0; // [rad/s], -1.0 if unknown
+        double predictedDampingRatio = -1.0;  // -1.0 if unknown
     };
 
     struct PIDTuneResult : TuningResultBase

@@ -24,6 +24,13 @@
 //   Y_pred = Fa.xa[k] + Ga.DeltaU
 //   DeltaU*    = -(Ga'.Q.Ga + R)^-1 . Ga'.Q.(Fa.xa - R_traj)
 //
+// Output Constraints Note:
+//   GPC natively enforces bounds on control effort (uMin, uMax) and rate (duMin, duMax).
+//   It does NOT currently support hard constraints on the output trajectory (y_min, y_max).
+//   In predictive control, output constraints often cause infeasibility if disturbances 
+//   push the state outside the feasible region. If you require hard output constraints, 
+//   use DiscreteMPC with a suitable slack-variable formulation instead.
+//
 // The plant model can be hot-swapped via setPlant() for adaptive GPC
 // (pair with RecursiveLeastSquares::toStateSpace() for a self-tuning loop).
 //

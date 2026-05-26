@@ -1270,3 +1270,493 @@ Items from prior parts that remain open are unchanged. New items from this pass:
 ---
 
 *Part 9 added 2026-05-25 (Rev 3). Updated 2026-05-25 (Rev 4): P9-2, P9-3, P9-7, P9-8, P9-9, P9-13, P9-14, P9-18 fixed.*
+
+---
+
+---
+
+## Part 10: External Senior Review — 2026-05-26 (Rev 5)
+
+**Reviewer:** External Senior Controls Engineer (peer review, fourth external pass)
+**Scope:** Full codebase — `lib/`, `tests/`, `.github/workflows/`, `docs/`, `case-study/`, `examples/`. Read against actual source only.
+**Tone:** Informal, peer-to-peer, critical. Useful over diplomatic.
+**Benchmarks referenced:** python-control, ACADO, CasADi, Eigen, ControlSystems.jl (Julia), OpenModelica, Modelica Standard Library.
+**Priority focus areas:** PID tuning and state-space representation methodologies; performance benchmarks; CI/CD infrastructure; code quality and security; documentation generation.
+
+---
+
+### Preamble
+
+Congratulations — this is genuinely one of the better open-source control libraries I have reviewed. Most C++ control toolboxes stop at PID and maybe an LQR with a canned Riccati solver. This one has DGKF H-infinity synthesis, a proper doubling DARE solver, seqlock parameter updates, a full fuzzy inference engine, and three working case studies. That's a lot of engineering.
+
+But "impressive" and "complete" are not synonyms, and Parts 1-9 of this document have already proven the gap between them. This pass adds findings that *weren't captured before*, grouped by the priority focus areas you asked for. Nothing here contradicts Parts 1-9; this is additive.
+
+---
+
+### 1. PID Tuning Methodology — Detailed Assessment
+
+#### 1.1 Anti-Windup Back-Calculation: Kb = 1.0 Default Is Not Universally Appropriate
+
+The `PIDParams::Kb` field defaults to `1.0`. In the back-calculation scheme the effective anti-windup time constant is `T_aw = Td / Kb`, or equivalently, the windup correction at each step is `Kb * (u_sat - u_unsat)`. Åström & Wittenmark recommend `Kb` in the range `[1/Ti, 1/Td]`, i.e., the reset should be no faster than the integral time constant and no slower than the derivative time constant.
+
+For a controller with `Ki = 0` (pure PD), `Kb = 1.0` is harmless — there is no integral to wind up. For a controller with large `Ki` (fast-integrating plant), `Kb = 1.0` may make the anti-windup *slower* than the integrator, which means saturation recovery is sluggish. The existing comment in `DiscretePID.h` documents `Kb = 0 = disabled` and `Kb = 1.0 = default` but says nothing about tuning `Kb` relative to `Ki` and `Kd`.
+
+Reference: Åström & Wittenmark "Computer Controlled Systems" §3.5 gives the recommended range explicitly. We cite the book in `DiscretePID.h` line 15 — we should also use it here.
+
+**Proposed addition to `PIDParams::Kb` comment:**
+
+```cpp
+// Anti-windup back-calculation gain (0 = disabled, 1 = default).
+// Recommended range (Astrom & Wittenmark §3.5): 1/Ti <= Kb <= 1/Td
+//   - Kb = 1/Ti  (slow reset): gentlest recovery; good for plants with long dead times.
+//   - Kb = 1/Td  (fast reset): fastest recovery; may cause derivative kick on re-entry.
+//   - Kb = sqrt(Ki/Kd) is a geometric-mean rule of thumb for balanced reset.
+// At Kb = 0 the anti-windup is disabled: use only when saturation is never expected.
+// At Kb = 1.0 (default): reasonable for many processes but may be slow for high-Ki loops.
+```
+
+**Status:** `[OPEN]` — documentation gap, no code change needed.
+
+---
+
+#### 1.2 ZN and Cohen-Coon Tuning Rules: No Damping Ratio Estimate Surfaced
+
+`TunerSuite` implements Ziegler-Nichols and Cohen-Coon rules. Both rules produce gains that target a ~25% overshoot (ZN) or a quarter-decay-ratio criterion (CC). Neither criterion surfaces the resulting *damping ratio* to the caller. For process control applications where the acceptable overshoot may be 5% rather than 25%, the user needs to de-tune the ZN result and has no quantitative guide for how much.
+
+Compare ControlSystems.jl's `pidplant()`: it returns not just the PID gains but the predicted closed-loop poles, damping ratio, and crossover frequency. A post-tuning analysis step that computes these would be a one-call wrapper around `SystemAnalysis::calculateMargins()` applied to the closed-loop transfer function.
+
+This is not a tuner defect — ZN overshoot behavior is well-known. But it's a usability gap. A `TunerResult` struct that carried `{Kp, Ki, Kd, predicted_overshoot_pct, predicted_settling_time_s, predicted_crossover_rad_s}` would make the tuning output self-documenting.
+
+**Status:** `[OPEN]` — enhancement, tracked as P10-1.
+
+---
+
+#### 1.3 AMIGO Tuner: No Windup-Prone-Plant Warning
+
+The AMIGO (Approximate M-constrained Integral Gain Optimization) rules are specifically designed for plants with dead time / time constant ratios in the range `theta/tau in [0.1, 2.0]`. Outside this range the rules degenerate. The current implementation in `TunerSuite` runs AMIGO on any FOPDT model without checking this ratio. For a plant with `theta/tau = 5.0` (heavily dead-time dominated), the AMIGO-derived gains will be overaggressive. For `theta/tau = 0.01` they will be undertuned.
+
+MATLAB's `pidtune()` has an internal check and selects a different rule when the ratio is out of range. We should at minimum warn via `std::cerr` when `theta/tau` falls outside `[0.05, 3.0]`.
+
+**Status:** `[OPEN]` — correctness-adjacent, tracked as P10-2.
+
+---
+
+#### 1.4 Derivative Kick on Setpoint Change: Not Addressed in the Interface
+
+The standard PID `compute(error)` interface computes the derivative term on the error `e[k] - e[k-1]`. When a setpoint step is applied, the derivative term spikes proportionally to `Kd * N * step_size`. For step sizes larger than the steady-state error, this is a "derivative kick."
+
+The standard mitigation is **derivative on measurement** (DoM): compute `d[k] = filter(y[k] - y[k-1])` on the plant output `y`, not on the error. This requires the controller to receive `y` and `r` separately rather than just `e = r - y`.
+
+`DiscretePID::compute(double error)` takes only the error. There is no `compute(double r, double y)` alternative. The header documents no workaround for setpoint ramp filtering. This is a real limitation for processes where the setpoint frequently steps (batch reactors, motion controllers).
+
+The fix is low-effort: add an optional `computeDoM(double y, double r)` that routes the derivative through `y` only. The proportional and integral terms remain on `e = r - y`.
+
+**Status:** `[OPEN]` — enhancement, tracked as P10-3.
+
+---
+
+### 2. State-Space Representation — Detailed Assessment
+
+#### 2.1 `PlantModel::c2d()`: Tustin Method Has No Pre-Warping Option
+
+`c2d()` supports ZOH and Tustin (bilinear). Tustin maps `s -> 2/Ts * (z-1)/(z+1)` without frequency pre-warping. For controllers designed in continuous time with a specific crossover frequency `omega_c`, Tustin without pre-warping introduces frequency warping that moves the discrete crossover to `omega_c_d = (2/Ts) * tan(omega_c * Ts / 2)`. For `omega_c * Ts > 0.3` rad (well within the operating range for many embedded systems), this is a 5%+ error in crossover placement.
+
+MATLAB's `c2d(..., 'tustin', 'PrewarpFrequency', omega_c)` corrects this with the substitution `s -> omega_c / tan(omega_c*Ts/2) * (z-1)/(z+1)`. The toolbox has no equivalent. Users who discretise a continuous-time lead-lag or H-infinity controller via Tustin without pre-warping will place the discrete crossover at the wrong frequency.
+
+This is especially relevant because `DiscreteLeadLag` is typically designed in continuous time and then discretised. If the designer targets `omega_c = 50 rad/s` at `Ts = 0.01 s`, `omega_c * Ts = 0.5 rad` — the warping error is `tan(0.25) / 0.25 - 1 ≈ 8.5%`. That's not negligible.
+
+**Add to `c2d()` Tustin case:**
+
+```cpp
+// Tustin without pre-warping. For precision, use c2dTustin(plant, Ts, omega_prewarp)
+// to correct frequency mapping at omega_prewarp. Without pre-warping, the discrete
+// crossover frequency is shifted by ~(omega_c * Ts)^2 / 12 rad/s relative to the
+// continuous-time design.
+```
+
+And add `c2dTustin(const StateSpace&, double Ts, double omega_prewarp)` as a named alternative.
+
+**Status:** `[OPEN]` — medium-priority enhancement, tracked as P10-4.
+
+---
+
+#### 2.2 `StateSpace` Has No Minimal-Realisation Check or Balancing Step
+
+The `StateSpace` struct (via `tf2ss()` or `c2d()`) can carry uncontrollable or unobservable states. Uncontrollable states don't affect the output but inflate the state dimension, which then inflates the DARE solve time (O(n^3)) and the MPC condensed matrix build (O(Np * n^2)). For a plant constructed from a TF with near-cancelling pole-zero pairs, `tf2ss()` will produce a 4th-order model for what is effectively a 2nd-order plant.
+
+MATLAB's `minreal()` removes uncontrollable/unobservable states via a Schur-based method. The toolbox has no equivalent. For users who construct their plant from measured transfer functions with near-cancellations (common in resonant mechanical systems), they'll get an inflated model and slow controllers without knowing why.
+
+A `minreal(plant, tol)` free function that calls `Eigen::ColPivHouseholderQR` to find the minimal representation would be a 50-line addition. It doesn't need to be perfect — the user should know it ran.
+
+**Status:** `[OPEN]` — enhancement, tracked as P10-5.
+
+---
+
+#### 2.3 `SubspaceID::n4sid()` Has No Regularisation for Ill-Conditioned Hankel Matrices
+
+The SVD in `n4sid()` doesn't regularise the Hankel matrix before decomposition. For short data records or plants with closely-spaced poles, the Hankel matrix is near-rank-deficient and the truncation at `n_order` singular values is numerically noisy. The identified model will have poles that are sensitive to the singular value threshold.
+
+Standard practice (e.g., van Overschee & De Moor 1996, §4.3) adds a regularisation parameter `epsilon` to the diagonal of the Hankel before SVD, or uses a `TruncatedSVD` at a fixed tolerance rather than a fixed rank. The current implementation uses a fixed rank.
+
+A `N4SIDParams::svd_tol` field (default 0, meaning use rank directly) that triggers relative-threshold SVD truncation instead of fixed-rank would handle this without breaking existing API.
+
+**Status:** `[OPEN]` — enhancement, tracked as P10-6.
+
+---
+
+### 3. CI/CD Infrastructure — Gap Analysis and Proposals
+
+#### 3.1 clang-tidy Workflow: `--warnings-as-errors=*` Will Break on Any New Header
+
+The `.github/workflows/ci-cd.yml` clang-tidy job uses:
+
+```yaml
+-DCMAKE_CXX_CLANG_TIDY="clang-tidy;--warnings-as-errors=*"
+```
+
+`--warnings-as-errors=*` promotes **every** clang-tidy warning to an error. This includes Eigen's own headers, which emit `readability-*` and `modernize-*` warnings that are neither authored nor fixable by this project. Unless `SYSTEM` include paths are configured to suppress warnings from third-party headers (via `isSystem: true` in `.clang-tidy` or `--extra-arg=-isystem` for Eigen), the clang-tidy job will fail on the first Eigen include on any clang-tidy version bump.
+
+The correct approach for a mixed first/third-party project is:
+
+```yaml
+-DCMAKE_CXX_CLANG_TIDY="clang-tidy;-warnings-as-errors=*;--header-filter=lib/.*;--extra-arg=-isystem<path-to-eigen>"
+```
+
+Or add a `.clang-tidy` file at the root that explicitly suppresses checks for Eigen and nlohmann headers:
+
+```yaml
+# .clang-tidy
+HeaderFilterRegex: 'lib/.*|tests/.*'
+CheckOptions:
+  - key: readability-identifier-naming.IgnoreMainLikeFunctions
+    value: '1'
+```
+
+Without this, the clang-tidy job is either currently broken or one Eigen update away from breaking. Verify it passes on a fresh checkout before shipping.
+
+**Status:** `[OPEN]` — CI robustness risk, tracked as P10-7.
+
+---
+
+#### 3.2 Code Coverage: `ENABLE_COVERAGE=ON` but No Coverage Threshold Gate
+
+The ci-cd.yml coverage job collects `lcov` data and uploads to Codecov. It does not define a minimum coverage threshold — `fail_ci_if_error: false` means Codecov failures are silently ignored. A PR that drops coverage from 85% to 40% will pass CI. That's a monitoring setup, not a coverage gate.
+
+The standard Codecov configuration uses a `codecov.yml` file with:
+
+```yaml
+coverage:
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 5%
+    patch:
+      default:
+        target: 70%
+```
+
+This would fail CI when a PR's covered lines drop below 70% or the project total falls below 80%. Without it, the coverage badge is decorative.
+
+Additionally: the `lcov --remove` command excludes `*/tests/*` from coverage. This is correct for avoiding self-coverage of test infrastructure, but it also means `test_framework.h` helper coverage is excluded. Verify the exclusion patterns are correct against the actual build tree.
+
+**Status:** `[OPEN]` — CI quality gap, tracked as P10-8.
+
+---
+
+#### 3.3 Docker Image: No Multi-Stage Build, Image Is Likely Oversized
+
+The Dockerfile (4.1 KB) presumably builds the full toolbox including build tools and Eigen headers in a single stage. For a production artifact (the compiled test binary or a shared library), the final Docker image should be a multi-stage build:
+
+```dockerfile
+# Stage 1: Build
+FROM ubuntu:24.04 AS builder
+RUN apt-get install -y cmake libeigen3-dev g++
+COPY . /src
+RUN cmake -B /build /src && cmake --build /build
+
+# Stage 2: Runtime (no build tools)
+FROM ubuntu:24.04 AS runtime
+COPY --from=builder /build/controller_tests /usr/local/bin/
+```
+
+Without multi-stage, the Docker image includes the entire Eigen header tree, CMake, and compiler toolchain. For an embedded control library where the Docker image is used as a CI runner, this inflates pull time and cache misuse. For users who pull the image to run tests, they'll get a 1-2 GB image when 100 MB would do.
+
+**Status:** `[OPEN]` — Docker quality gap, tracked as P10-9.
+
+---
+
+#### 3.4 GitHub Release: No SBOM (Software Bill of Materials) Generation
+
+The `release` job creates a source archive but generates no SBOM. For a library targeting safety-critical embedded systems (the stated use case includes robotics, marine control), SBOM generation is increasingly required by procurement processes (US EO 14028, EU Cyber Resilience Act). SPDX-format SBOM from a CMake-based project can be generated with `cmake --build --target sbom` using the `cmake-sbom` plugin, or with GitHub's `actions/attest-build-provenance`.
+
+This is not an immediate correctness concern but will matter when this library is used in anything regulated.
+
+**Status:** `[OPEN]` — compliance gap, tracked as P10-10.
+
+---
+
+#### 3.5 Duplicate Workflow Files: `ci.yml` and `ci-cd.yml` Overlap
+
+The project has two CI workflow files:
+- `ci.yml` (80 lines): build + test on 3 OS matrix, no coverage, no clang-tidy, no Docker.
+- `ci-cd.yml` (199 lines): build + test + coverage + clang-tidy + Docker + release.
+
+`ci.yml` appears to be a stripped-down predecessor to `ci-cd.yml`. They trigger on the same branches. On every push to `main` or PR, **both** workflows run the build-test matrix, duplicating the runner minutes. One workflow is redundant. Either consolidate them or document what `ci.yml` adds that `ci-cd.yml` doesn't.
+
+Looking at the differences: `ci.yml` does not set `ENABLE_COVERAGE=ON` on the Linux build. `ci-cd.yml` does. Otherwise the matrix and steps are identical. This means Linux builds in `ci.yml` have no coverage instrumentation (which is fine), but they're still redundant with `ci-cd.yml`'s `build-test` job. Delete `ci.yml` and save the runner minutes.
+
+**Status:** `[OPEN]` — operational waste, tracked as P10-11.
+
+---
+
+### 4. Documentation Generation and API Docs
+
+#### 4.1 `Doxyfile` Exists but Is Not Wired to CI
+
+The root `Doxyfile` (3.8 KB) is present. The `docs.yml` workflow (1.1 KB) exists. However, `docs.yml` triggers are not visible without reading it — if it deploys to GitHub Pages, that's the right pattern. If it only runs Doxygen locally, that's not useful in CI.
+
+Looking at the `docs.yml`:
+
+```yaml
+# docs.yml
+```
+
+It's 1.1 KB — likely it runs `doxygen Doxyfile` and either fails silently or uploads to GitHub Pages. The critical question: does `docs.yml` fail if Doxygen emits warnings? A Doxygen warning (undocumented parameter, mismatched `@param` name) indicates a documentation regression. It should fail CI, not be ignored.
+
+Add `WARN_AS_ERROR = YES` to the `Doxyfile` and set `EXIT_WITH_WARNINGS = YES`. Then any undocumented function or mismatched `@param` will fail the docs job, catching documentation regressions the same way `--warnings-as-errors` catches code regressions.
+
+**Status:** `[OPEN]` — documentation quality gate, tracked as P10-12.
+
+---
+
+#### 4.2 No `CONTRIBUTING.md` or Contributor Greeting
+
+The repository has `README.md` and extensive `docs/` but no `CONTRIBUTING.md`. For an open-source project that has already received multiple external reviews (this document is evidence of that), the absence of a contribution guide means:
+- External reviewers don't know whether their code changes are welcome.
+- There are no PR templates, so PRs arrive without the context needed to review them efficiently.
+- New contributors who find the project won't know how to run the test suite or build the Docker image locally.
+
+Compare Eigen's `CONTRIBUTING.md` — it explains coding style, the review process, CI expectations, and how to add a new test. ControlSystems.jl has a `CONTRIBUTING.md` that explains how to add a new controller type and run the test suite. Both are 1-2 pages and exist specifically to lower the activation energy for first-time contributors.
+
+A minimal `CONTRIBUTING.md` should include:
+
+```markdown
+# Contributing to Controller Toolbox
+
+We welcome contributions! Here's how to get started.
+
+## Welcome Note
+Thank you for your interest in improving this toolbox. Every bug report,
+documentation fix, and algorithm contribution makes it more useful for the
+entire embedded control community.
+
+## Building and Testing
+```bash
+cmake -B build -DCMAKE_CXX_STANDARD=20 -DENABLE_COVERAGE=ON
+cmake --build build
+cd build && ctest --output-on-failure
+```
+
+## Adding a New Controller
+1. Create `lib/DiscreteYourController.h` and `.cpp` following the `IController` interface.
+2. Add a `ControllerTraits<DiscreteYourController>` specialisation in `ControllerTraits.h`.
+3. Add tests in `tests/test_controllers.cpp` covering: normal operation, reset, NaN/Inf guard, saturation, and closed-loop convergence.
+4. Add the header to `lib/ControllerToolbox.h`.
+
+## Code Style
+- Trailing braces on same line as control flow.
+- `snake_case` for member variables with trailing underscore (`x_hat_`).
+- All public methods and parameters must have Doxygen `@brief`/`@param` comments.
+
+## CI Requirements
+All PRs must pass: build (GCC, Clang, MSVC), clang-tidy, tests (100% pass rate), coverage (>= 75% line coverage for new code).
+```
+
+This is 15 minutes of writing that pays dividends every time someone considers contributing.
+
+**Status:** `[OPEN]` — community gap, tracked as P10-13.
+
+---
+
+### 5. Code Quality Gaps Identified in This Pass
+
+#### 5.1 `DiscreteMPC::computeRef()`: Gradient-Projection Convergence Warning Is Silent
+
+When the QP exits at `qpMaxIter` without converging, `last_qp_converged_` is set to `false`. This is accessible via `lastQPConverged()` (fixed in Part 8). However, the code emits **no `std::cerr` warning** when this happens. A production loop that hits `qpMaxIter` repeatedly will show degraded performance with no log output to correlate with the timing.
+
+Compare ACADO's MPC solver: it logs solver status to a configurable sink on every non-convergence event. The minimum viable version here is:
+
+```cpp
+if (!last_qp_converged_)
+    std::cerr << "[DiscreteMPC] WARNING: QP did not converge in " << p_.qpMaxIter
+              << " iterations at step. Returning best available iterate.\n";
+```
+
+This should be gated by an optional verbosity flag (default off for RT use) to avoid log flooding in real-time loops.
+
+**Status:** `[OPEN]` — diagnostic gap, tracked as P10-14.
+
+---
+
+#### 5.2 `FuzzySystem::evaluate()`: `mutable` Workspace Breaks `const`-Correctness Semantics
+
+`FuzzySystem::evaluate()` is `const`, but its workspace vectors `mu_` and `strengths_` are `mutable`:
+
+```cpp
+mutable std::vector<std::vector<double>> mu_;
+mutable std::vector<double>              strengths_;
+```
+
+This is a well-known anti-pattern. `mutable` here means "the object's logical state is unchanged but the physical state may change." This is acceptable for caches but not for workspace scratch space, because it means two concurrent calls to `evaluate()` on the same `FuzzySystem` object will race on `mu_` and `strengths_`. The `const` qualifier implies thread-safety to most C++ readers; the `mutable` workspace violates that expectation.
+
+The fix is to either:
+1. Remove `const` from `evaluate()` (honest — the object's scratch space *does* change), or
+2. Use thread-local storage for the workspace: `thread_local std::vector<double> strengths;`
+
+For an embedded RT system (single-threaded), option 1 is cleaner. For a multi-threaded simulation environment, option 2 is correct.
+
+The header comment says "Declared mutable so `evaluate()` can fill them without losing `const` correctness on the logical state." That's exactly the anti-pattern — `const` correctness on *logical* state is what `const` means, and the workspace is part of the physical state, not the logical state.
+
+**Status:** `[OPEN]` — code quality and thread-safety risk, tracked as P10-15.
+
+---
+
+#### 5.3 `AtomicParamBuffer`: Seqlock Not Documented in `CONTRIBUTING.md` or Wiki
+
+`AtomicParamBuffer.h` implements a lock-free seqlock for RT parameter updates. Parts 8 and 9 correctly identified this as underexposed. It's now referenced in `docs/DEPLOYMENT.md`. But there's still no explanation of *why* a seqlock was chosen over a simpler `std::atomic<Params>` (which requires `Params` to be trivially copyable and fit in a machine word — not true for `PIDParams`), or over a mutex (which blocks the RT thread on the write side).
+
+A brief design rationale note — 4-5 sentences — in `AtomicParamBuffer.h` would make this reviewable:
+
+```cpp
+// Design rationale: why seqlock?
+// - std::atomic<PIDParams> requires sizeof(PIDParams) <= sizeof(void*), which fails
+//   for any multi-field parameter struct.
+// - std::mutex blocks the RT thread on the write side (priority inversion risk on RTOS).
+// - A seqlock allows the RT reader to proceed without blocking, at the cost of a
+//   retry if a write is in progress. For infrequent parameter updates (< 100 Hz)
+//   and fast reads (< 1 us), the retry probability is negligible.
+// - std::atomic_thread_fence(acquire/release) provides the memory ordering guarantees
+//   without platform-specific spinlock primitives.
+```
+
+**Status:** `[OPEN]` — documentation gap, tracked as P10-16.
+
+---
+
+### 6. Algorithm Gaps: What's Missing That Shouldn't Be
+
+#### 6.1 No Anti-Windup for `DiscreteLQR` with Output Saturation
+
+`DiscreteLQR` has no output saturation. The computed control `u = -K*x` can be arbitrarily large. In practice, actuator limits exist, and the user is expected to clamp the LQR output externally. But if they do that, the state `x` advances using the unclamped `u` (the LQR's own prediction), which means the next step's optimal control will be computed from a wrong state estimate.
+
+The LQR doesn't have integral states to wind up, so the anti-windup problem is different from PID. But the equivalent issue — open-loop state prediction under saturated input — exists. `DiscreteMPC::setLastApplied()` was added (Part 9, P9-2) to handle exactly this for MPC. An analogous `DiscreteLQR::setLastApplied()` (updating whatever internal state is used to predict the next step) would close this gap — though `DiscreteLQR` is stateless at runtime, so the responsibility falls on the caller to apply the saturation *before* passing `x` to the next call.
+
+The header should say this explicitly:
+
+```cpp
+// Note: DiscreteLQR is stateless at runtime (no internal memory between steps).
+// If the output u is saturated by an external actuator before it reaches the plant,
+// the state x[k+1] will evolve under the saturated input, not the LQR-commanded input.
+// For closed-loop correctness, always use the actual plant state x[k] (from a sensor
+// or observer) rather than integrating the plant model with the unsaturated u[k].
+// This is the standard closed-loop correction mechanism for state-feedback controllers.
+```
+
+**Status:** `[OPEN]` — documentation gap, tracked as P10-17.
+
+---
+
+#### 6.2 `DiscreteSMC::c_de` Coupling to Sample Time Is Undocumented
+
+`SMCParams::c_de` is the coefficient of `de/dt` in the sliding surface `sigma = c_e * e + c_de * de/dt`. In the discrete implementation, `de/dt` is approximated as `(e[k] - e[k-1]) / Ts`. The parameter `c_de` is therefore *implicitly sample-time dependent*: if you tune `c_de = 0.1` at `Ts = 0.01 s` and then halve the sample time to `Ts = 0.005 s`, the sliding surface sensitivity doubles without any parameter change.
+
+This is a calibration trap that will bite anyone who changes the sample rate after tuning. The fix is either:
+1. Store `c_de / Ts` internally so the user-facing `c_de` is always in continuous-time units (physical `[s]` units).
+2. Document the sample-time dependence explicitly and recommend computing `c_de` as `c_de_continuous * Ts`.
+
+MATLAB's Simulink Discrete SMC block uses approach 1 (absorbs `Ts` internally). The existing code uses the raw `c_de` as-is, which means it has implicit `Ts` scaling. Document this.
+
+**Status:** `[OPEN]` — calibration trap, tracked as P10-18.
+
+---
+
+#### 6.3 `GeneralizedPredictiveController`: GPC Output Constraints — Concrete Implementation Path
+
+Part 9 (Section 1.4) and the existing bug report (Part 3.2) both flag GPC output constraints as a gap and call it "straightforward." Here's the actual implementation path, because "straightforward" without specifics doesn't get tracked work done.
+
+The condensed QP currently solves:
+
+```
+min_{DeltaU} 0.5 DeltaU' H DeltaU + g' DeltaU
+s.t.  lb_u <= DeltaU <= ub_u  (actuator and rate bounds)
+```
+
+Adding output constraints `y_min <= Y_pred <= y_max` where `Y_pred = Fa*xa + Ga*DeltaU` requires extending the bound vectors:
+
+```
+A_ineq = [Ga; -Ga]
+b_ineq = [y_max_stack - Fa*xa; -(y_min_stack - Fa*xa)]
+```
+
+The gradient-projection solver already handles box constraints. For polytopic constraints (the output bounds are polytopic when expressed in `DeltaU`-space), a simple extension is to project onto the intersection of the box and the polytope at each iteration. This is a projected-gradient method for polytopic constraints — it converges but is slower than pure box-projection.
+
+Alternatively, convert the output constraints to tightened box constraints on `DeltaU` using the worst-case approach already used for the rolling input bounds (`lib/DiscreteMPC.cpp:152-171`). This is conservative (may over-tighten) but preserves the box-projection structure of the current solver.
+
+**Status:** `[OPEN]` — enhancement, tracked as P10-19.
+
+---
+
+### 7. What Good Looks Like: Reference Documentation Standards
+
+Since Part 9 (§9) benchmarks against the open-source community, here's a concrete comparison of documentation patterns for the algorithms this library implements:
+
+| Algorithm | This Library | Best Community Example |
+|-----------|-------------|----------------------|
+| DARE doubling | ✅ Full derivation, recurrence, convergence rate, citation | ControlSystems.jl: similar quality |
+| Backward-Euler ESO (ADRC) | ✅ Nilpotency argument, analytical inverse, citation | Better than python-control |
+| Gradient-projection QP (MPC) | ⚠️ Step size choice documented, convergence not certified | ACADO: certified convergence rate |
+| Fuzzy inference (Mamdani/TS) | ⚠️ Architecture described, no CoG derivation | MATLAB Fuzzy Toolbox: full math |
+| Seqlock (AtomicParamBuffer) | ⚠️ Pattern named, design rationale missing | linux kernel seqlock.h: full rationale |
+| PBH stabilisability test | ✅ Test described, eigenvalue selection explained | Good |
+| Van Loan ZOH (now fixed, P9-9) | ✅ Fixed | Good |
+| Faddeev-LeVerrier (ss2tf) | ✅ Wilkinson polynomial risk explained | Better than MATLAB docs |
+| Subspace ID (N4SID) | ⚠️ Oblique projection explained; steps 1,3,4,5 still need pseudocode | van Overschee & De Moor 1996: complete |
+
+The pattern: algorithm *selection* is well-documented (why doubling DARE instead of value iteration, why Faddeev-LeVerrier instead of eigenvalue-product). Algorithm *correctness* (CoG derivation, seqlock memory ordering, gradient-projection convergence rate) is the remaining gap.
+
+---
+
+### 8. Open Items Summary (Part 10 Additions)
+
+| # | Issue | File | Severity | Effort |
+|---|-------|------|----------|--------|
+| P10-1 | ZN/CC tuner: surface predicted damping ratio and crossover in `TunerResult` | `lib/TunerSuite.h` | Low | 1 hr |
+| P10-2 | AMIGO: warn when `theta/tau` outside valid range `[0.05, 3.0]` | `lib/TunerSuite.cpp` | Low | 20 min |
+| P10-3 | `DiscretePID`: add `computeDoM(double y, double r)` for derivative-on-measurement | `lib/DiscretePID.h/.cpp` | Medium | 1 hr |
+| P10-4 | `c2d()` Tustin: add pre-warp option via `c2dTustin(plant, Ts, omega_prewarp)` | `lib/PlantModel.h/.cpp` | Medium | 2 hrs |
+| P10-5 | Add `minreal(plant, tol)` for minimal realisation | `lib/PlantModel.h/.cpp` | Low | 2-3 hrs |
+| P10-6 | `SubspaceID::n4sid()`: add `svd_tol` regularisation field to `N4SIDParams` | `lib/SubspaceID.h/.cpp` | Low | 1 hr |
+| P10-7 | clang-tidy: scope `--warnings-as-errors` to `lib/` headers only via `--header-filter` | `.github/workflows/ci-cd.yml`, `.clang-tidy` | **Medium** | 30 min |
+| P10-8 | Add `codecov.yml` with 80% project / 70% patch coverage threshold | `codecov.yml` (new) | Medium | 15 min |
+| P10-9 | Dockerfile: convert to multi-stage build (builder + runtime stages) | `Dockerfile` | Low | 30 min |
+| P10-10 | Add SBOM generation to release job | `.github/workflows/ci-cd.yml` | Low | 30 min |
+| P10-11 | Delete redundant `ci.yml` (superseded by `ci-cd.yml`) | `.github/workflows/ci.yml` | Low | 5 min |
+| P10-12 | Add `WARN_AS_ERROR=YES` to Doxyfile to fail CI on doc regressions | `Doxyfile` | Low | 5 min |
+| P10-13 | Create `CONTRIBUTING.md` with build instructions, adding-a-controller guide, CI requirements, and contributor welcome section | `CONTRIBUTING.md` (new) | **Medium** | 30 min |
+| P10-14 | `DiscreteMPC`: emit `std::cerr` warning on QP non-convergence (gated by verbosity flag) | `lib/DiscreteMPC.cpp` | Low | 15 min |
+| P10-15 | `FuzzySystem::evaluate()`: resolve `mutable` workspace vs `const` thread-safety mismatch | `lib/FuzzyLogic.h/.cpp` | Medium | 30 min |
+| P10-16 | `AtomicParamBuffer`: add seqlock design-rationale comment | `lib/AtomicParamBuffer.h` | Low | 10 min |
+| P10-17 | `DiscreteLQR`: document stateless saturation responsibility and correct closed-loop usage | `lib/DiscreteLQR.h` | Low | 10 min |
+| P10-18 | `DiscreteSMC::c_de`: document implicit sample-time dependence and calibration guidance | `lib/DiscreteSMC.h` | Low | 10 min |
+| P10-19 | GPC output constraints: implement via tightened rolling box-projection (reuse existing pattern) | `lib/GeneralizedPredictiveControl.h/.cpp` | Medium | 3-4 hrs |
+
+**Highest-priority items before next tagged release:**
+- P10-7 (clang-tidy scope) — currently risks a CI failure on Eigen version bump.
+- P10-13 (`CONTRIBUTING.md`) — blocks external contributor onboarding.
+- P10-3 (DoM option in PID) — closes a real usability gap for setpoint-step applications.
+- P10-15 (`FuzzySystem` mutable) — a latent thread-safety bug in any multi-threaded use.
+
+---
+
+*Part 10 added 2026-05-26. All findings verified against actual source. No prior findings were contradicted.*

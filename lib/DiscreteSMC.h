@@ -26,9 +26,19 @@ namespace ctrl {
 struct SMCParams {
     double c_e  = 1.0;   // Error weight in sliding surface
     // Error-rate weight in sliding surface.
-    // Note: c_de absorbs the sample time Ts. To match a continuous-time
-    // slope lambda [1/s], set c_de = lambda * Ts.
-    // Larger c_de = faster convergence but more chattering.
+    //
+    // IMPORTANT - sample-time dependence:
+    //   In the discrete implementation de/dt is approximated as (e[k] - e[k-1]) / Ts.
+    //   c_de is therefore implicitly Ts-dependent: if you tune c_de at Ts=0.01s and then
+    //   halve the sample rate to Ts=0.005s, the sliding surface sensitivity doubles without
+    //   any parameter change.  This is a calibration trap.
+    //
+    //   Convention: c_de stores the DISCRETE coefficient (i.e., c_de already includes Ts).
+    //   To convert from a continuous-time slope lambda [1/s] (used in control theory):
+    //     c_de = lambda * Ts
+    //   If you change Ts, recalculate c_de accordingly.
+    //
+    // Larger c_de = faster convergence to sliding surface, more chattering.
     double c_de = 0.1;
     double K    = 5.0;   // Switching gain     (larger = more robust, more chattering)
     double phi  = 0.5;   // Boundary layer thickness (larger = smoother, slower)
@@ -86,7 +96,7 @@ private:
 struct SuperTwistingParams
 {
     double c_e  = 1.0;   // Error weight in sliding surface (same as SMCParams)
-    double c_de = 0.1;   // Error-rate weight  (absorbs Ts; see SMCParams note)
+    double c_de = 0.1;   // Error-rate weight (discrete; stores lambda*Ts; see SMCParams c_de note)
     double K1   = 3.0;   // Power term gain  ( |s|^{1/2} )
     double K2   = 5.0;   // Integral gain    ( sign(s) )
     double uMin = -1e9;  // Output saturation lower limit

@@ -56,6 +56,15 @@ namespace ctrl
 
         // Compute u[k] = -K*(x - x_ref) + u_ff.
         // x_ref and u_ff default to zero when empty.
+        //
+        // Note: DiscreteLQR is stateless at runtime (no internal memory between compute() calls).
+        // If the returned u[k] is clamped by an external actuator before it reaches the plant,
+        // the state x[k+1] will evolve under the saturated input. For closed-loop correctness,
+        // always pass the ACTUAL plant state x[k] (from a sensor or state observer) to compute()
+        // rather than integrating the plant model with the unsaturated u[k]. This is the standard
+        // closed-loop correction mechanism: the observer implicitly corrects for saturation via
+        // the measurement update. For explicit anti-windup in state-feedback loops, see the
+        // discussion in Astrom & Wittenmark §9.3.
         Eigen::VectorXd compute(const Eigen::VectorXd &x,
                                 const Eigen::VectorXd &x_ref = Eigen::VectorXd(),
                                 const Eigen::VectorXd &u_ff = Eigen::VectorXd()) const;
