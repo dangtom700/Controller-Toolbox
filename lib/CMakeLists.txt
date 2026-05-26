@@ -38,7 +38,7 @@ add_library(controller_toolbox STATIC
 # lib/ is the public include root: consumers write  #include "ControllerToolbox.h"
 target_include_directories(controller_toolbox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(controller_toolbox PUBLIC Eigen3::Eigen)
-target_compile_features(controller_toolbox PUBLIC cxx_std_17)
+target_compile_features(controller_toolbox PUBLIC cxx_std_20)
 
 # Enable warnings for the library's own translation units (PRIVATE: not forced on consumers).
 target_compile_options(controller_toolbox PRIVATE

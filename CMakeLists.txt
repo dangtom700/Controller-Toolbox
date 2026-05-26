@@ -10,10 +10,12 @@ add_compile_definitions(PROJECT_DATA_DIR="${CMAKE_SOURCE_DIR}/data")
 
 # MSVC does not define M_PI and other POSIX math constants by default.
 # _USE_MATH_DEFINES exposes them from <cmath> on Windows.
-# On GCC/Clang this definition is harmless.
 if(MSVC)
     add_compile_definitions(_USE_MATH_DEFINES)
 endif()
+
+# Global fallback definition of M_PI - safe on all platforms
+add_compile_definitions(M_PI=3.14159265358979323846)
 
 add_subdirectory(lib)
 add_subdirectory(tests)

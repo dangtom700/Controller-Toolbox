@@ -66,23 +66,23 @@
                               //   + LoopShapingTuner, KalmanWeightTuner
 #include "ControllerStack.h"  // Supervisory / Additive / Weighted controller stacks
 #include "TunerSuite.h"       // All tuning methods (runtime soft-warning dispatch, Nelder-Mead)
-#include "MetricsAnalyzer.h"             // Time-domain metric extraction
-#include "SystemAnalysis.h"              // Frequency-domain & stability analysis
+#include "MetricsAnalyzer.h"  // Time-domain metric extraction
+#include "SystemAnalysis.h"   // Frequency-domain & stability analysis
 // #include "hal/HAL.h"                  // ISensor, IActuator, SimPlant, SimSensor, SimActuator
 // #include "AtomicParamBuffer.h"        // Lock-free double-buffer for RT parameter updates
 
 // --- Algorithm gap additions (2026-05-22) ---
-#include "ExtendedKalmanFilter.h"        // EKF  - nonlinear state estimation (analytical/numerical Jacobians)
-#include "UnscentedKalmanFilter.h"       // UKF  - sigma-point nonlinear estimation (no Jacobians)
-#include "RecursiveLeastSquares.h"       // RLS  - online ARX system identification with forgetting factor
-#include "RepetitiveController.h"        // RC   - plug-in periodic disturbance/reference cancellation
-#include "GeneralizedPredictiveControl.h"// GPC  - velocity-form MPC with reference trajectory (CARIMA)
-#include "SubspaceID.h"                  // N4SID - batch subspace state-space identification (MOESP)
-#include "FuzzyLogic.h"                  // Fuzzy - Mamdani/TS inference, FuzzyPD, FuzzyPID, FuzzySupervisor
+#include "ExtendedKalmanFilter.h"         // EKF  - nonlinear state estimation (analytical/numerical Jacobians)
+#include "UnscentedKalmanFilter.h"        // UKF  - sigma-point nonlinear estimation (no Jacobians)
+#include "RecursiveLeastSquares.h"        // RLS  - online ARX system identification with forgetting factor
+#include "RepetitiveController.h"         // RC   - plug-in periodic disturbance/reference cancellation
+#include "GeneralizedPredictiveControl.h" // GPC  - velocity-form MPC with reference trajectory (CARIMA)
+#include "SubspaceID.h"                   // N4SID - batch subspace state-space identification (MOESP)
+#include "FuzzyLogic.h"                   // Fuzzy - Mamdani/TS inference, FuzzyPD, FuzzyPID, FuzzySupervisor
 // H-inf synthesis requires Eigen's full eigenvalue solver and adds compile-time weight.
 // Define CTRL_DISABLE_HINF to exclude it (e.g., on embedded targets without full Eigen).
 #ifndef CTRL_DISABLE_HINF
-#include "DiscreteHinf.h"               // H-inf - DGKF 2-Riccati synthesis, Mixed-Sensitivity S/KS/T design
+#include "DiscreteHinf.h" // H-inf - DGKF 2-Riccati synthesis, Mixed-Sensitivity S/KS/T design
 #endif
-#include "FunctionApproximator.h"        // Taylor (polynomial) + Pade (rational) data-driven approximation
-                                         //   + padeDelayFilter() for fractional dead-time SmithPredictor
+#include "FunctionApproximator.h" // Taylor (polynomial) + Pade (rational) data-driven approximation
+                                  //   + padeDelayFilter() for fractional dead-time SmithPredictor
