@@ -10,13 +10,17 @@ set(SIM_SRCS
     ${SIM_SRC}/main.cpp
 )
 
+find_package(nlohmann_json CONFIG REQUIRED)
 add_executable(boiler_sim ${SIM_SRCS})
 
 target_include_directories(boiler_sim PRIVATE
     ${SIM_INC}
 )
-target_link_libraries(boiler_sim PRIVATE controller_toolbox)
-target_compile_features(boiler_sim PRIVATE cxx_std_17)
+target_link_libraries(boiler_sim PRIVATE
+    controller_toolbox
+    nlohmann_json::nlohmann_json
+)
+target_compile_features(boiler_sim PRIVATE cxx_std_20)
 target_compile_definitions(boiler_sim PRIVATE
     BOILER_SIM_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
 )

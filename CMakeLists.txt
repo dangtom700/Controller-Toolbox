@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(ControllerToolbox CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Absolute path to the root data/ directory, injected as a compile definition so
 # all CSV-generating binaries write to the same place regardless of CWD at runtime.
