@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            c_compiler: gcc
+            cpp_compiler: g++
+          - os: ubuntu-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+          - os: windows-latest
+            c_compiler: cl
+            cpp_compiler: cl
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Eigen (Linux) ───────────────────────────────────────────────────────
+      - name: Install Eigen (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y --no-install-recommends libeigen3-dev ninja-build
+
+      # ── Eigen (Windows) — download 3.4.0 directly; avoids vcpkg version drift ─
+      - name: Install Eigen (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.zip" -OutFile eigen.zip
+          Expand-Archive eigen.zip -DestinationPath C:\eigen
+          cmake -B C:\eigen\eigen-3.4.0\build -S C:\eigen\eigen-3.4.0 `
+                -DCMAKE_INSTALL_PREFIX=C:\eigen\install `
+                -DBUILD_TESTING=OFF
+          cmake --install C:\eigen\eigen-3.4.0\build
+
+      # ── Configure ───────────────────────────────────────────────────────────
+      - name: Configure CMake (Linux)
+        if: runner.os == 'Linux'
+        run: >
+          cmake -B build -G Ninja
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Configure CMake (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: >
+          cmake -B build
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_BUILD_TYPE=Release
+          -DEigen3_DIR=C:/eigen/install/share/eigen3/cmake
+
+      # ── Build ────────────────────────────────────────────────────────────────
+      - name: Build
+        run: cmake --build build --config Release
+
+      # ── Test ─────────────────────────────────────────────────────────────────
+      # --output-on-failure  prints the full log of any failing test
+      # --verbose            prints PASS/FAIL for every test as it runs
+      - name: Test
+        working-directory: build
+        run: ctest --build-config Release --output-on-failure --verbose
