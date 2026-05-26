@@ -28,12 +28,14 @@ jobs:
       - uses: actions/checkout@v4
 
       # ── Eigen (Linux) ───────────────────────────────────────────────────────
-      - name: Install Eigen (Linux)
+      - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get install -y --no-install-recommends libeigen3-dev ninja-build
+        run: sudo apt-get install -y --no-install-recommends libeigen3-dev nlohmann-json3-dev ninja-build
 
-      # ── Eigen (Windows) — download 3.4.0 directly; avoids vcpkg version drift ─
-      - name: Install Eigen (Windows)
+      # ── Eigen + nlohmann/json (Windows) ────────────────────────────────────────
+      # Eigen: download 3.4.0 directly to avoid vcpkg shipping a newer major version.
+      # nlohmann/json: vcpkg is fine here (header-only, no ABI concern).
+      - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
@@ -43,6 +45,7 @@ jobs:
                 -DCMAKE_INSTALL_PREFIX=C:\eigen\install `
                 -DBUILD_TESTING=OFF
           cmake --install C:\eigen\eigen-3.4.0\build
+          vcpkg install nlohmann-json:x64-windows
 
       # ── Configure ───────────────────────────────────────────────────────────
       - name: Configure CMake (Linux)
@@ -62,6 +65,7 @@ jobs:
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_BUILD_TYPE=Release
           -DEigen3_DIR=C:/eigen/install/share/eigen3/cmake
+          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
 
       # ── Build ────────────────────────────────────────────────────────────────
       - name: Build

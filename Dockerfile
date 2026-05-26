@@ -25,12 +25,13 @@ FROM debian:bookworm-slim AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Build toolchain + Eigen 3.4 (Debian Bookworm ships 3.4.0).
+# Build toolchain + Eigen 3.4 + nlohmann/json (Debian Bookworm ships 3.4.0 / 3.11).
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         cmake \
         ninja-build \
         libeigen3-dev \
+        nlohmann-json3-dev \
         ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
