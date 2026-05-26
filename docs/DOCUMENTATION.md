@@ -7,7 +7,7 @@ Target audience: control engineers and software developers familiar with discret
 
 ## Table of Contents
 
-1. [Setup & Environment](#1-setup--environment)
+1. [Setup and Environment](#1-setup-and-environment)
 2. [Compilation Guide](#2-compilation-guide)
 3. [Project Structure](#3-project-structure)
 4. [Usage Guide](#4-usage-guide)
@@ -23,8 +23,8 @@ Target audience: control engineers and software developers familiar with discret
 
 ---
 
-<a name="1-setup--environment"></a>
-## 1. Setup & Environment
+<a name="1-setup-and-environment"></a>
+## 1. Setup and Environment
 
 ### 1.1 Required Dependencies
 

@@ -1,5 +1,6 @@
 #include "GeneralizedPredictiveControl.h"
 #include <algorithm>
+#include <iostream>
 
 namespace ctrl
 {
