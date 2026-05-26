@@ -7,6 +7,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # all CSV-generating binaries write to the same place regardless of CWD at runtime.
 add_compile_definitions(PROJECT_DATA_DIR="${CMAKE_SOURCE_DIR}/data")
 
+# MSVC does not define M_PI and other POSIX math constants by default.
+# _USE_MATH_DEFINES exposes them from <cmath> on Windows.
+# On GCC/Clang this definition is harmless.
+if(MSVC)
+    add_compile_definitions(_USE_MATH_DEFINES)
+endif()
+
 add_subdirectory(lib)
 add_subdirectory(tests)
 add_subdirectory(examples)
