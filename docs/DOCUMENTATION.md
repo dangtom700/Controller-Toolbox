@@ -23,6 +23,7 @@ Target audience: control engineers and software developers familiar with discret
 
 ---
 
+<a name="1-setup--environment"></a>
 ## 1. Setup & Environment
 
 ### 1.1 Required Dependencies
@@ -327,6 +328,7 @@ buf.publish(newly_computed_params);         // atomic swap
 
 > Each entry lists: **Purpose**, **Inputs / parameters**, **Outputs / returns**, and **key methods**. Method signatures are abbreviated for brevity - see the header for full declarations.
 
+<a name="51-core-types-iplantmodel"></a>
 ### 5.1 Core Types ([PlantModel.h](lib/PlantModel.h))
 
 #### `TransferFunction`
@@ -522,6 +524,7 @@ Standalone heuristics; each exposes `tuneImpl(...)` (unchecked) and `tuneFor<C>(
 
 ---
 
+<a name="55-composition--orchestration"></a>
 ### 5.5 Composition & Orchestration
 
 #### `ControllerStack` ([ControllerStack.h](lib/ControllerStack.h))
@@ -533,6 +536,7 @@ Standalone heuristics; each exposes `tuneImpl(...)` (unchecked) and `tuneFor<C>(
 
 ---
 
+<a name="56-analysis--metrics"></a>
 ### 5.6 Analysis & Metrics
 
 #### `MetricsAnalyzer` ([MetricsAnalyzer.h](lib/MetricsAnalyzer.h))
@@ -545,6 +549,7 @@ Standalone heuristics; each exposes `tuneImpl(...)` (unchecked) and `tuneFor<C>(
 
 ---
 
+<a name="57-real-time-utilities--hal"></a>
 ### 5.7 Real-Time Utilities & HAL
 
 #### `AtomicParamBuffer<Params>` ([AtomicParamBuffer.h](lib/AtomicParamBuffer.h))
