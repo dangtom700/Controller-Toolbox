@@ -13,145 +13,132 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
         arch: [x86_64, x86]
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     concurrency:
-      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-${{ matrix.os }}-${{ matrix.arch }}-Linux
+      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-ubuntu-${{ matrix.arch }}
       cancel-in-progress: true
-    
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: true
-    
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-    
-      - name: Install xmake
+
+      - name: Install GCC-13 and multilib
         run: |
-          wget https://xmake.io/shget.text -O - | bash
-          echo "/home/runner/.local/bin" >> $GITHUB_PATH
-    
-      - name: Install latest GCC
-        run: |
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa -y 
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa -y
           sudo apt-get update
-          sudo apt install -y g++-13 gcc-13
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 60 --slave /usr/bin/g++ g++ /usr/bin/g++-13
-          sudo apt-get install -y gcc-13-multilib g++-13-multilib
+          sudo apt-get install -y g++-13 gcc-13 gcc-13-multilib g++-13-multilib
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 60 \
+            --slave /usr/bin/g++ g++ /usr/bin/g++-13
 
       - name: Print GCC version
         run: gcc --version
-    
-      - name: Set xmake package cache path
-        run: echo "XMAKE_PKG_CACHEDIR=$(pwd)/xmake-cache" >> $GITHUB_ENV
-    
-      - name: Retrieve xmake cache for packages
-        uses: actions/cache@v4
-        with:
-          path: xmake-cache
-          key: ${{ matrix.os }}-${{ matrix.arch }}
-    
-      - name: Build with GCC
-        run: |
-          xmake f -v -a ${{ matrix.arch }} --toolchain=gcc -y
-          xmake -vD -y
 
-      - name: Run tests
-        run: |
-          xmake test -v
-    
-      - name: Get target name
-        id: get_target_name
-        run: |
-          targetName=$(grep 'target' xmake.lua | cut -d'"' -f 2)
-          echo "target_name=$targetName" >> $GITHUB_OUTPUT
+      - name: Install Eigen3
+        run: sudo apt-get install -y libeigen3-dev
 
-      - name: Rename executable
-        run: mv "build/linux/${{ matrix.arch }}/release/${{ steps.get_target_name.outputs.target_name }}" "build/linux/${{ matrix.arch }}/release/${{ steps.get_target_name.outputs.target_name }}_${{ matrix.arch }}"
+      - name: Configure (x86_64)
+        if: matrix.arch == 'x86_64'
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_COMPILER=g++-13
+
+      - name: Configure (x86 cross-compile)
+        if: matrix.arch == 'x86'
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_COMPILER=g++-13 \
+            -DCMAKE_CXX_FLAGS="-m32" \
+            -DCMAKE_C_FLAGS="-m32" \
+            -DCMAKE_EXE_LINKER_FLAGS="-m32"
+
+      - name: Build
+        run: cmake --build build --parallel $(nproc)
+
+      - name: Test
+        run: cd build && ctest --output-on-failure
+
+      - name: Package library
+        run: |
+          mkdir -p dist/lib dist/include
+          cp build/lib/libcontroller_toolbox.a dist/lib/
+          cp lib/*.h dist/include/
+          tar czf controller_toolbox_linux_${{ matrix.arch }}.tar.gz -C dist .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: executable-${{ matrix.arch }}
-          path: build/linux/${{ matrix.arch }}/release/${{ steps.get_target_name.outputs.target_name }}_${{ matrix.arch }}
-      
+          name: linux-${{ matrix.arch }}
+          path: controller_toolbox_linux_${{ matrix.arch }}.tar.gz
+
   release:
     needs: build
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Extract version
-        id: extract_version
+        id: version
         run: |
-          VERSION=$(grep 'set_version' xmake.lua | cut -d'"' -f 2)
+          VERSION=$(grep -oP 'project\(ControllerToolbox VERSION \K[0-9]+\.[0-9]+\.[0-9]+' CMakeLists.txt)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Check if tag exists
         id: check_tag
         run: |
           git fetch --tags
-          if git rev-parse ${{ steps.extract_version.outputs.version }} >/dev/null 2>&1; then
-            echo "Tag already exists"
+          if git rev-parse "${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
           else
-            echo "Tag does not exist. Continuing to next step."
             echo "tag_exists=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create Tag
-        id: create_tag
+      - name: Create tag
         if: steps.check_tag.outputs.tag_exists == 'false'
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          git tag -a ${{ steps.extract_version.outputs.version }} -m "Release ${{ steps.extract_version.outputs.version }}"
-          git push origin ${{ steps.extract_version.outputs.version }}
+          git tag -a "${{ steps.version.outputs.version }}" \
+            -m "Release ${{ steps.version.outputs.version }}"
+          git push origin "${{ steps.version.outputs.version }}"
 
-      - name: Generate Changelog
-        id: generate_changelog
+      - name: Generate changelog
         run: |
-          PREVIOUS_TAG=$(git describe --tags --abbrev=0 --match "*.*.*" $(git rev-list --tags --skip=1 --max-count=1))
-          echo "PREVIOUS_TAG=$PREVIOUS_TAG" >> $GITHUB_ENV
-          git log --no-merges --pretty="%h - %s (%an)<br />" $PREVIOUS_TAG..$VERSION > CHANGELOG.md
-
-      - name: Get target name
-        id: get_target_name
-        run: |
-          targetName=$(grep 'target' xmake.lua | cut -d'"' -f 2)
-          echo "target_name=$targetName" >> $GITHUB_OUTPUT
+          PREV=$(git describe --tags --abbrev=0 --match "*.*.*" \
+            $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
+          if [ -n "$PREV" ]; then
+            git log --no-merges --pretty="- %s (%an)" "$PREV"..HEAD > CHANGELOG.md
+          else
+            git log --no-merges --pretty="- %s (%an)" > CHANGELOG.md
+          fi
 
       - name: Download x86_64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: executable-x86_64
+          name: linux-x86_64
 
       - name: Download x86 artifact
         uses: actions/download-artifact@v4
         with:
-          name: executable-x86
+          name: linux-x86
 
-      - name: Display structure of downloaded files
-        run: ls -R
-
-      - name: Create Release and Upload Assets
+      - name: Create release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          fail_on_unmatched_files: true
-          tag_name: ${{ steps.extract_version.outputs.version }}
-          name: Release ${{ steps.extract_version.outputs.version }}
+          tag_name: ${{ steps.version.outputs.version }}
+          name: Release ${{ steps.version.outputs.version }}
           body_path: CHANGELOG.md
+          fail_on_unmatched_files: true
           files: |
-            ${{ steps.get_target_name.outputs.target_name }}_x86_64
-            ${{ steps.get_target_name.outputs.target_name }}_x86
+            controller_toolbox_linux_x86_64.tar.gz
+            controller_toolbox_linux_x86.tar.gz
