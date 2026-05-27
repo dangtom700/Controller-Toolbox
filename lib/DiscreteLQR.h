@@ -15,13 +15,13 @@
  *
  * **DARE (value iteration):**
  * @code
- *   P∞ = AᵀP∞A − (AᵀP∞B)(R + BᵀP∞B)⁻¹(BᵀP∞A) + Q
- *   K* = (R + BᵀP∞B)⁻¹ BᵀP∞A
+ *   Pinf = AᵀPinfA - (AᵀPinfB)(R + BᵀPinfB)^-^1(BᵀPinfA) + Q
+ *   K* = (R + BᵀPinfB)^-^1 BᵀPinfA
  * @endcode
  *
  * **Online control law:**
  * @code
- *   u[k] = −K*·(x[k] − x_ref) + u_ff
+ *   u[k] = -K*.(x[k] - x_ref) + u_ff
  * @endcode
  *
  * For output feedback, reconstruct the full state with an observer (e.g., KalmanFilter)
@@ -41,14 +41,14 @@ namespace ctrl
  */
 struct LQRParams
 {
-    Eigen::MatrixXd Q; ///< State cost (n × n, positive semi-definite). Increase Q_ii to tighten tracking of state i.
-    Eigen::MatrixXd R; ///< Control cost (m × m, positive definite). Increase R_jj to penalise actuator j.
+    Eigen::MatrixXd Q; ///< State cost (n * n, positive semi-definite). Increase Q_ii to tighten tracking of state i.
+    Eigen::MatrixXd R; ///< Control cost (m * m, positive definite). Increase R_jj to penalise actuator j.
 };
 
 /**
  * @brief Discrete-time Linear Quadratic Regulator.
  *
- * Stateless at runtime — no internal memory between compute() calls. Pass the actual
+ * Stateless at runtime - no internal memory between compute() calls. Pass the actual
  * plant state (from a sensor or state observer) to compute() at every step to benefit
  * from closed-loop disturbance rejection.
  */
@@ -65,36 +65,36 @@ public:
      *
      * @note PBH rank test: stabilisability and detectability are checked using
      *       Eigen's fullPivLu().rank() with an automatic threshold scaled by
-     *       max_singular_value × n × ε. For plants with eigenvalues very close to the
+     *       max_singular_value * n * epsilon. For plants with eigenvalues very close to the
      *       unit circle (e.g., 0.9999 or 1.0001), this may produce a false failure.
-     *       If suspected, verify manually: rank([A − λI, B]) == n for all |λ| ≥ 1.
+     *       If suspected, verify manually: rank([A - lambdaI, B]) == n for all |lambda| >= 1.
      */
     DiscreteLQR(const StateSpace &plant, const LQRParams &params);
 
     /**
-     * @brief Compute u[k] = −K*·(x − x_ref) + u_ff.
+     * @brief Compute u[k] = -K*.(x - x_ref) + u_ff.
      *
      * @p x_ref and @p u_ff default to zero when empty (no-argument versions).
      *
-     * @param x     Current state vector x[k] (n × 1).
-     * @param x_ref Reference state x_ref[k] (n × 1). Pass empty for regulation to origin.
-     * @param u_ff  Feed-forward term u_ff[k] (m × 1). Pass empty for zero feed-forward.
-     * @return Control action u[k] (m × 1).
+     * @param x     Current state vector x[k] (n * 1).
+     * @param x_ref Reference state x_ref[k] (n * 1). Pass empty for regulation to origin.
+     * @param u_ff  Feed-forward term u_ff[k] (m * 1). Pass empty for zero feed-forward.
+     * @return Control action u[k] (m * 1).
      *
      * @note If the returned u[k] is clamped by an external actuator, always pass the
      *       *actual* measured state to compute() rather than integrating with the
      *       unsaturated u[k]. The observer's measurement update implicitly corrects for
      *       saturation. For explicit anti-windup in state-feedback loops, see
-     *       Åström & Wittenmark §9.3.
+     *       Astrom & Wittenmark Section 9.3.
      */
     Eigen::VectorXd compute(const Eigen::VectorXd &x,
                             const Eigen::VectorXd &x_ref = Eigen::VectorXd(),
                             const Eigen::VectorXd &u_ff  = Eigen::VectorXd()) const;
 
-    /** @brief Optimal feedback gain matrix K* (m × n). */
+    /** @brief Optimal feedback gain matrix K* (m * n). */
     const Eigen::MatrixXd &gainMatrix()       const { return K_; }
 
-    /** @brief DARE stabilising solution P∞ (n × n). */
+    /** @brief DARE stabilising solution Pinf (n * n). */
     const Eigen::MatrixXd &riccatiSolution()  const { return P_; }
 
     /** @brief @c true if the DARE converged to the requested tolerance. */
@@ -107,14 +107,14 @@ public:
     double sampleTime()      const { return Ts_; }
 
 private:
-    Eigen::MatrixXd K_; ///< Optimal feedback gain (m × n).
-    Eigen::MatrixXd P_; ///< DARE stabilising solution (n × n).
+    Eigen::MatrixXd K_; ///< Optimal feedback gain (m * n).
+    Eigen::MatrixXd P_; ///< DARE stabilising solution (n * n).
     double Ts_;
     int n_, m_;
     bool dare_converged_;
     int  dare_iterations_;
 
-    /** @brief Value-iteration DARE solver — never throws; convergence indicated in result. */
+    /** @brief Value-iteration DARE solver - never throws; convergence indicated in result. */
     static DareResult solveDARE(const Eigen::MatrixXd &A,
                                 const Eigen::MatrixXd &B,
                                 const Eigen::MatrixXd &Q,
@@ -134,8 +134,8 @@ public:
     /**
      * @brief Construct the adapter with state and optional reference providers.
      * @param lqr           The underlying DiscreteLQR solver.
-     * @param stateProvider Callable returning the current state vector x[k] (n × 1).
-     * @param refProvider   Callable returning the reference state x_ref[k] (n × 1);
+     * @param stateProvider Callable returning the current state vector x[k] (n * 1).
+     * @param refProvider   Callable returning the reference state x_ref[k] (n * 1);
      *                      may return an empty vector for regulation to origin.
      */
     LQRAdapter(DiscreteLQR &lqr,
@@ -146,7 +146,7 @@ public:
     }
 
     /**
-     * @brief Compute u[k] — @p signal is ignored; state and reference come from callbacks.
+     * @brief Compute u[k] - @p signal is ignored; state and reference come from callbacks.
      *
      * For MIMO plants (m > 1) this returns only the first element u[0]. A one-shot warning
      * is printed to stderr on the first such call. Use computeVec() to obtain all m inputs.
@@ -172,13 +172,13 @@ public:
     }
 
     /**
-     * @brief MIMO interface — returns the full LQR control vector u[k] (m × 1).
+     * @brief MIMO interface - returns the full LQR control vector u[k] (m * 1).
      *
      * Preferred over compute() for plants with more than one control input. @p signal
      * is ignored; state and reference are obtained from the registered callbacks.
      *
      * @param signal Unused (inherited interface).
-     * @return u[k] = −K*·(x − x_ref) (m × 1).
+     * @return u[k] = -K*.(x - x_ref) (m * 1).
      */
     Eigen::VectorXd computeVec(const Eigen::VectorXd & /*signal*/) override
     {
@@ -188,7 +188,7 @@ public:
         return lqr_.compute(stateFn_(), x_ref);
     }
 
-    /** @brief No-op — DiscreteLQR is stateless at runtime. */
+    /** @brief No-op - DiscreteLQR is stateless at runtime. */
     void reset() override {}
 
     /** @brief Sample time inherited from the underlying LQR. */

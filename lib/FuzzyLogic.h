@@ -10,19 +10,19 @@
  * @brief Mamdani and Takagi-Sugeno fuzzy inference engine with IController wrappers.
  *
  * **Architecture overview:**
- * 1. **Input variables** — each partitioned into N linguistic terms with membership functions
+ * 1. **Input variables** - each partitioned into N linguistic terms with membership functions
  *    (triangular, trapezoidal, Gaussian, singleton, shoulder).
- * 2. **Rule base** — IF-THEN rules of the form: IF x1 is Aᵢ AND x2 is Bⱼ … THEN y is Cₖ.
+ * 2. **Rule base** - IF-THEN rules of the form: IF x1 is A_i AND x2 is B_j ... THEN y is Cₖ.
  *    AND is implemented via the product t-norm.
  * 3. **Inference methods:**
- *    - *Mamdani* — output fuzzy sets are clipped/scaled then aggregated; defuzzified with CoG.
- *    - *Takagi-Sugeno* — consequent is a crisp value per rule; defuzzified via weighted average.
- * 4. **Output** — single real value (SISO) or one FuzzySystem per axis (MIMO).
+ *    - *Mamdani* - output fuzzy sets are clipped/scaled then aggregated; defuzzified with CoG.
+ *    - *Takagi-Sugeno* - consequent is a crisp value per rule; defuzzified via weighted average.
+ * 4. **Output** - single real value (SISO) or one FuzzySystem per axis (MIMO).
  *
  * **IController wrappers:**
- * - FuzzyPD  — 5-term PD controller (25-rule diagonal Mamdani table).
- * - FuzzyPID — FuzzyPD augmented with a crisp integral + back-calculation anti-windup.
- * - FuzzySupervisor — monitors closed-loop performance and triggers plant relinearisation.
+ * - FuzzyPD  - 5-term PD controller (25-rule diagonal Mamdani table).
+ * - FuzzyPID - FuzzyPD augmented with a crisp integral + back-calculation anti-windup.
+ * - FuzzySupervisor - monitors closed-loop performance and triggers plant relinearisation.
  *
  * @see Mamdani & Assilian, "An Experiment in Linguistic Synthesis," Int. J. Man-Machine Studies (1975).
  * @see Takagi & Sugeno, "Fuzzy Identification of Systems," IEEE Trans. SMC (1985).
@@ -32,9 +32,9 @@
 namespace ctrl
 {
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Membership function types
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 /**
  * @brief Value-type tagged-union membership function.
@@ -42,11 +42,11 @@ namespace ctrl
  * Replaces `std::function<double(double)>` to eliminate heap allocation in the
  * RT inference hot path. `std::function` stores closures on the heap for
  * captures > ~16 bytes (implementation-defined SBO threshold), making it unsafe
- * for hard-RT use. MF is a plain struct (sizeof ≤ 5 doubles) that is trivially
+ * for hard-RT use. MF is a plain struct (sizeof <= 5 doubles) that is trivially
  * copyable and stack-allocatable.
  *
  * Use the factory functions (mfTriangular, mfTrapezoidal, etc.) to construct
- * properly typed MF instances — the public API is identical to a callable except
+ * properly typed MF instances - the public API is identical to a callable except
  * that MF is a concrete value type, not a type-erased callable.
  */
 struct MF {
@@ -56,10 +56,10 @@ struct MF {
     enum class Type {
         Triangular,    ///< /\  peaks at p[1]=c, zero at p[0]=a and p[2]=b.
         Trapezoidal,   ///< /‾\ flat-top from p[1]=b to p[2]=c, zero outside [p[0]=a, p[3]=d].
-        Gaussian,      ///< exp(-0.5·((x-p[0])/p[1])²).
+        Gaussian,      ///< exp(-0.5.((x-p[0])/p[1])^2).
         Singleton,     ///< 1 at x == p[0], 0 elsewhere.
-        ShoulderLeft,  ///< 1 for x ≤ p[0], linear 1→0 from p[0]=a to p[1]=b.
-        ShoulderRight  ///< linear 0→1 from p[0]=a to p[1]=b, 1 for x ≥ p[1].
+        ShoulderLeft,  ///< 1 for x <= p[0], linear 1->0 from p[0]=a to p[1]=b.
+        ShoulderRight  ///< linear 0->1 from p[0]=a to p[1]=b, 1 for x >= p[1].
     };
 
     Type   type;
@@ -71,32 +71,32 @@ struct MF {
      * Inlined for zero-overhead in evaluate().
      *
      * @param x Crisp input value.
-     * @return Membership degree ∈ [0, 1].
+     * @return Membership degree \in [0, 1].
      */
     double operator()(double x) const;
 };
 
 /**
  * @brief Triangular membership function: /\  peaks at @p c, zero at @p a and @p b.
- * @param a Left zero-crossing (a ≤ c).
- * @param c Peak (a ≤ c ≤ b).
- * @param b Right zero-crossing (c ≤ b).
+ * @param a Left zero-crossing (a <= c).
+ * @param c Peak (a <= c <= b).
+ * @param b Right zero-crossing (c <= b).
  * @return MF with Type::Triangular.
  */
 MF mfTriangular(double a, double c, double b);
 
 /**
  * @brief Trapezoidal membership function: /‾\ flat-top from @p b to @p c, zero outside [@p a, @p d].
- * @param a Left zero-crossing (a ≤ b).
+ * @param a Left zero-crossing (a <= b).
  * @param b Left shoulder start.
- * @param c Right shoulder start (b ≤ c).
- * @param d Right zero-crossing (c ≤ d).
+ * @param c Right shoulder start (b <= c).
+ * @param d Right zero-crossing (c <= d).
  * @return MF with Type::Trapezoidal.
  */
 MF mfTrapezoidal(double a, double b, double c, double d);
 
 /**
- * @brief Gaussian membership function: exp(-0.5·((x - @p mean) / @p sigma)²).
+ * @brief Gaussian membership function: exp(-0.5.((x - @p mean) / @p sigma)^2).
  * @param mean  Centre of the Gaussian.
  * @param sigma Standard deviation (width). Must be > 0.
  * @return MF with Type::Gaussian.
@@ -114,31 +114,31 @@ MF mfGaussian(double mean, double sigma);
 MF mfSingleton(double value);
 
 /**
- * @brief Left-shoulder membership function: 1 for x ≤ @p a, linear 1→0 from @p a to @p b.
+ * @brief Left-shoulder membership function: 1 for x <= @p a, linear 1->0 from @p a to @p b.
  *
  * Useful for the "Negative Large" (NL) extreme term.
  *
- * @param a Saturation point (full membership for x ≤ a).
+ * @param a Saturation point (full membership for x <= a).
  * @param b Right zero-crossing (a < b).
  * @return MF with Type::ShoulderLeft.
  */
 MF mfShoulderLeft(double a, double b);
 
 /**
- * @brief Right-shoulder membership function: linear 0→1 from @p a to @p b, 1 for x ≥ @p b.
+ * @brief Right-shoulder membership function: linear 0->1 from @p a to @p b, 1 for x >= @p b.
  *
  * Useful for the "Positive Large" (PL) extreme term.
  *
  * @param a Left zero-crossing.
- * @param b Saturation point (full membership for x ≥ b, a < b).
+ * @param b Saturation point (full membership for x >= b, a < b).
  * @return MF with Type::ShoulderRight.
  */
 MF mfShoulderRight(double a, double b);
 
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Linguistic variable
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 /**
  * @brief A named fuzzy term with its membership function and optional peak location.
@@ -193,9 +193,9 @@ struct LinguisticVariable {
 };
 
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Rule base
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 /**
  * @brief One input condition in a fuzzy rule antecedent.
@@ -213,13 +213,13 @@ struct Antecedent {
 struct Rule {
     std::vector<Antecedent> antecedents;       ///< AND-connected input conditions.
     int                     consequent_term_idx; ///< Index of the output term that fires.
-    double                  weight = 1.0;       ///< Optional rule weight ∈ (0, 1].
+    double                  weight = 1.0;       ///< Optional rule weight \in (0, 1].
 };
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// FuzzySystem — core inference engine
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// FuzzySystem - core inference engine
+// -----------------------------------------------------------------------------
 
 /** @brief Inference method selector. */
 enum class InferenceMethod {
@@ -322,17 +322,17 @@ private:
 };
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// FuzzyPD — convenience 5-term PD fuzzy controller
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// FuzzyPD - convenience 5-term PD fuzzy controller
+// -----------------------------------------------------------------------------
 
 /**
  * @brief Tuning parameters for FuzzyPD.
  */
 struct FuzzyPDParams {
-    double e_scale  = 1.0;   ///< Error normalisation: maps ±e_scale to universe [-1, 1].
-    double de_scale = 1.0;   ///< Error-rate normalisation: maps ±de_scale to universe [-1, 1].
-    double u_scale  = 1.0;   ///< Output scaling: universe [-1, 1] → ±u_scale.
+    double e_scale  = 1.0;   ///< Error normalisation: maps +/-e_scale to universe [-1, 1].
+    double de_scale = 1.0;   ///< Error-rate normalisation: maps +/-de_scale to universe [-1, 1].
+    double u_scale  = 1.0;   ///< Output scaling: universe [-1, 1] -> +/-u_scale.
     double uMin     = -1e9;  ///< Hard lower output clamp.
     double uMax     =  1e9;  ///< Hard upper output clamp.
 };
@@ -340,7 +340,7 @@ struct FuzzyPDParams {
 /**
  * @brief 5-term PD fuzzy controller implementing IController.
  *
- * Inputs: error e[k] and error-rate de[k] = (e[k] − e[k−1]) / Ts.
+ * Inputs: error e[k] and error-rate de[k] = (e[k] - e[k-1]) / Ts.
  * Output: control effort u[k].
  *
  * Uses a standard 5-term partition (NL, NS, ZE, PS, PL) with triangular and
@@ -348,8 +348,8 @@ struct FuzzyPDParams {
  *
  * **Scaling:**
  * @code
- *   e_norm  = e  / e_scale   ∈ [-1, 1]
- *   de_norm = de / de_scale  ∈ [-1, 1]
+ *   e_norm  = e  / e_scale   \in [-1, 1]
+ *   de_norm = de / de_scale  \in [-1, 1]
  *   u       = u_norm * u_scale
  * @endcode
  */
@@ -358,13 +358,13 @@ public:
     /**
      * @brief Construct a FuzzyPD with given parameters and sample time.
      * @param p          Scaling and output limit parameters.
-     * @param sampleTime Ts [s]; used to compute error-rate de = (e − e_prev) / Ts.
+     * @param sampleTime Ts [s]; used to compute error-rate de = (e - e_prev) / Ts.
      */
     explicit FuzzyPD(const FuzzyPDParams& p, double sampleTime);
 
     /**
      * @brief Compute u[k] from tracking error e[k].
-     * @param error Tracking error e[k] = r[k] − y[k].
+     * @param error Tracking error e[k] = r[k] - y[k].
      * @return Control effort u[k].
      */
     double compute(double error) override;
@@ -380,7 +380,7 @@ public:
     void                 setParams(const FuzzyPDParams& p);
     const FuzzyPDParams& params()  const { return p_; }
 
-    /** @brief Last computed control output u[k−1]. */
+    /** @brief Last computed control output u[k-1]. */
     double lastOutput() const { return u_prev_; }
 
 private:
@@ -394,9 +394,9 @@ private:
 };
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// FuzzyPID — FuzzyPD augmented with crisp integral + anti-windup
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// FuzzyPID - FuzzyPD augmented with crisp integral + anti-windup
+// -----------------------------------------------------------------------------
 
 /**
  * @brief Tuning parameters for FuzzyPID.
@@ -412,10 +412,10 @@ struct FuzzyPIDParams {
 /**
  * @brief FuzzyPD extended with a crisp integral term and back-calculation anti-windup.
  *
- * Architecture — three decoupled blocks:
+ * Architecture - three decoupled blocks:
  * @code
  *   u_P  = FuzzyPD(e, de)
- *   u_I += Ki * Ts * e  +  Kb * (u_sat − u_unsat)     // back-calculation anti-windup
+ *   u_I += Ki * Ts * e  +  Kb * (u_sat - u_unsat)     // back-calculation anti-windup
  *   u    = clamp(u_P + u_I, uMin, uMax)
  * @endcode
  *
@@ -448,11 +448,11 @@ public:
     void               setParams(const FuzzyPIDParams& p);
     const FuzzyPIDParams& params() const { return p_; }
 
-    /** @brief Last computed control output u[k−1]. */
+    /** @brief Last computed control output u[k-1]. */
     double lastOutput() const { return u_prev_; }
 
     /**
-     * @brief Bumpless initialisation: set integral so next compute(error) ≈ u_target.
+     * @brief Bumpless initialisation: set integral so next compute(error) approx = u_target.
      * @param u_target  Desired initial output.
      * @param error     Current tracking error.
      */
@@ -467,9 +467,9 @@ private:
 };
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// FuzzySupervisor — performance monitor for adaptive relinearisation
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// FuzzySupervisor - performance monitor for adaptive relinearisation
+// -----------------------------------------------------------------------------
 
 /**
  * @brief Tuning parameters for FuzzySupervisor.
@@ -492,7 +492,7 @@ struct SupervisorParams {
  * @brief Output of a FuzzySupervisor::update() call.
  */
 struct SupervisorDecision {
-    double relinearize_signal; ///< Raw fuzzy output ∈ [0, 1].
+    double relinearize_signal; ///< Raw fuzzy output \in [0, 1].
     bool   relinearize;        ///< true when signal > signal_threshold and cooldown has expired.
     double error_norm;         ///< Normalised |e| / e_threshold used as fuzzy input.
     double trend;              ///< Normalised d|e|/dt / trend_threshold used as fuzzy input.
@@ -501,10 +501,10 @@ struct SupervisorDecision {
 /**
  * @brief Fuzzy supervisory monitor that decides when a linearised controller needs re-tuning.
  *
- * Decision logic (2-input → 1-output Mamdani fuzzy system):
+ * Decision logic (2-input -> 1-output Mamdani fuzzy system):
  * - **Input 1:** normalised_error = |e| / e_threshold; terms: Small, Medium, Large.
  * - **Input 2:** error_trend = d|e|/dt / trend_threshold; terms: Decreasing, Steady, Increasing.
- * - **Output:** relinearize_signal ∈ [0, 1]; 0 = no action, 1 = force relinearisation.
+ * - **Output:** relinearize_signal \in [0, 1]; 0 = no action, 1 = force relinearisation.
  *
  * Representative rules (full 9-rule table built internally):
  * @code

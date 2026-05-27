@@ -19,20 +19,20 @@
  * @brief Unified tuner library with runtime soft-warning dispatch across all seven tuning families.
  *
  * Covers all tuning families from the tuning cheatsheet:
- * 1. **Relay / Ziegler-Nichols** → dedicated: PID.
- * 2. **IMC-PID** → dedicated: PID.
- * 3. **Cohen-Coon** → dedicated: PID (high dead-time).
- * 4. **LQR Bryson's Rule** → dedicated: LQR, LQG.
- * 5. **LQG Kalman noise** → dedicated: LQG.
- * 6. **MPC horizon/weight** → dedicated: MPC.
- * 7. **Frequency-domain shaping** → dedicated: LeadLag.
- * 8. **Optimisation-based (Nelder-Mead ISE)** → any controller (generic).
+ * 1. **Relay / Ziegler-Nichols** -> dedicated: PID.
+ * 2. **IMC-PID** -> dedicated: PID.
+ * 3. **Cohen-Coon** -> dedicated: PID (high dead-time).
+ * 4. **LQR Bryson's Rule** -> dedicated: LQR, LQG.
+ * 5. **LQG Kalman noise** -> dedicated: LQG.
+ * 6. **MPC horizon/weight** -> dedicated: MPC.
+ * 7. **Frequency-domain shaping** -> dedicated: LeadLag.
+ * 8. **Optimisation-based (Nelder-Mead ISE)** -> any controller (generic).
  *
  * **Compatibility tiers** (applied at runtime, not compile time):
- * - `IDEAL`    — tuner was designed for this controller; no warning emitted.
- * - `SOFT`     — tuner can produce useful output but the match is imperfect;
+ * - `IDEAL`    - tuner was designed for this controller; no warning emitted.
+ * - `SOFT`     - tuner can produce useful output but the match is imperfect;
  *                a diagnostic is written to `std::clog` and `result.warned == true`.
- * - `FALLBACK` — tuner is not meaningful for this controller; default/zero parameters
+ * - `FALLBACK` - tuner is not meaningful for this controller; default/zero parameters
  *                are returned, `result.success == false`, strong warning emitted.
  *
  * @note The hard compile-time errors (ControllerTraits `static_assert`) in
@@ -41,7 +41,7 @@
  *       accepts a runtime CtrlKind tag and never blocks compilation.
  *
  * @see ControllerTuner.h for compile-time-safe typed wrappers.
- * @see Åström & Hägglund, "Advanced PID Control" (2006).
+ * @see Astrom & Hagglund, "Advanced PID Control" (2006).
  * @see Bryson & Ho, "Applied Optimal Control" (1975).
  * @see Gao, "Active Disturbance Rejection Control," ACC (2003).
  */
@@ -49,9 +49,9 @@
 namespace ctrl
 {
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Runtime controller-type tag
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 /**
  * @brief Runtime controller-type tag for TunerSuite dispatch.
@@ -71,27 +71,27 @@ enum class CtrlKind
 };
 
 /**
- * @brief Human-readable name for a CtrlKind tag — for diagnostic messages.
+ * @brief Human-readable name for a CtrlKind tag - for diagnostic messages.
  * @param k Controller kind.
  * @return Null-terminated string (e.g., "DiscretePID").
  */
 const char *ctrlKindName(CtrlKind k) noexcept;
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Typed result structs
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 /**
  * @brief Base fields shared by all TunerSuite result types.
  */
 struct TuningResultBase
 {
-    bool        success = false;   ///< `false` → parameters are default or invalid.
-    bool        warned  = false;   ///< `true` → a soft warning was emitted to std::clog.
+    bool        success = false;   ///< `false` -> parameters are default or invalid.
+    bool        warned  = false;   ///< `true` -> a soft warning was emitted to std::clog.
     std::string warning;           ///< Diagnostic text (also sent to std::clog when non-empty).
 
-    double predictedCrossoverFreq = -1.0; ///< Predicted gain crossover ωc [rad/s]; −1 if unknown.
-    double predictedDampingRatio  = -1.0; ///< Predicted damping ratio ζ; −1 if unknown.
+    double predictedCrossoverFreq = -1.0; ///< Predicted gain crossover omegac [rad/s]; -1 if unknown.
+    double predictedDampingRatio  = -1.0; ///< Predicted damping ratio zeta; -1 if unknown.
 };
 
 /** @brief Result of a relay/ZN, IMC, or Cohen-Coon tuning call. */
@@ -115,7 +115,7 @@ struct KalmanTuneResult : TuningResultBase
 /** @brief Result of an MPC horizon tuning call. */
 struct MPCTuneResult : TuningResultBase
 {
-    MPCHorizonTuner::Recommendation params{}; ///< Recommended Np, Nc, ρy, ρu.
+    MPCHorizonTuner::Recommendation params{}; ///< Recommended Np, Nc, rhoy, rhou.
 };
 
 /** @brief Result of a loop-shaping lead/lag tuning call. */
@@ -134,9 +134,9 @@ struct OptimTuneResult : TuningResultBase
     int                 evalCount = 0;    ///< Number of cost-function evaluations used.
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // TunerSuite
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 /**
  * @brief Unified collection of all eight tuning strategies with runtime compatibility checking.
@@ -150,12 +150,12 @@ struct OptimTuneResult : TuningResultBase
 class TunerSuite
 {
 public:
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // 1 & 3. Relay Ziegler-Nichols
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
 
     /**
-     * @brief Relay / ZN tuning (cheatsheet §1).
+     * @brief Relay / ZN tuning (cheatsheet Section 1).
      *
      * Compatibility:
      * - IDEAL: PID.
@@ -165,7 +165,7 @@ public:
      * @param target  Runtime controller kind.
      * @param relay   A completed RelayAutoTuner (`isDone() == true`).
      * @param rule    ZN | TyreusLuyben | AMIGO | IMC.
-     * @param lambda  IMC closed-loop time constant (−1 = auto).
+     * @param lambda  IMC closed-loop time constant (-1 = auto).
      * @return PIDTuneResult with default params when success == false.
      */
     static PIDTuneResult relayZN(CtrlKind             target,
@@ -173,12 +173,12 @@ public:
                                  PIDTuningRule         rule   = PIDTuningRule::TyreusLuyben,
                                  double                lambda = -1.0);
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // 2. IMC-PID
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
 
     /**
-     * @brief IMC-PID tuning from a FOPDT model (cheatsheet §2).
+     * @brief IMC-PID tuning from a FOPDT model (cheatsheet Section 2).
      *
      * Compatibility:
      * - IDEAL: PID.
@@ -188,7 +188,7 @@ public:
      * @param target  Runtime controller kind.
      * @param fopdt   FOPDT model from StepResponseTuner::identify().
      * @param Ts      Sample time [s].
-     * @param lambda  Closed-loop BW (−1 = 0.5·τ).
+     * @param lambda  Closed-loop BW (-1 = 0.5.tau).
      * @return PIDTuneResult.
      */
     static PIDTuneResult imcPID(CtrlKind                           target,
@@ -196,14 +196,14 @@ public:
                                 double                              Ts,
                                 double                              lambda = -1.0);
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // 3. Cohen-Coon
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
 
     /**
-     * @brief Cohen-Coon PID tuning (cheatsheet §2 variant).
+     * @brief Cohen-Coon PID tuning (cheatsheet Section 2 variant).
      *
-     * Especially accurate when θ/τ ∈ [0.1, 1.0].
+     * Especially accurate when theta/tau \in [0.1, 1.0].
      *
      * Compatibility:
      * - IDEAL: PID.
@@ -221,35 +221,35 @@ public:
                                    const StepResponseTuner::FOPDTModel &fopdt,
                                    double                              Ts);
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // 4. LQR Bryson's Rule
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
 
     /**
-     * @brief LQR Bryson's rule (cheatsheet §3).
+     * @brief LQR Bryson's rule (cheatsheet Section 3).
      *
      * Compatibility:
      * - IDEAL: LQR, LQG.
-     * - SOFT: MPC (different Q/R convention), SMC (c_e ~ √(Q ratio) hint).
+     * - SOFT: MPC (different Q/R convention), SMC (c_e ~ \sqrt(Q ratio) hint).
      * - FALLBACK: PID, LeadLag, ESC, Smith.
      *
      * @param target  Runtime controller kind.
-     * @param xmax    Maximum acceptable state deviation per channel (n×1).
-     * @param umax    Maximum acceptable control effort per channel (m×1).
+     * @param xmax    Maximum acceptable state deviation per channel (n*1).
+     * @param umax    Maximum acceptable control effort per channel (m*1).
      * @return LQRTuneResult.
      */
     static LQRTuneResult bryson(CtrlKind              target,
                                 const Eigen::VectorXd &xmax,
                                 const Eigen::VectorXd &umax);
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // 5. Kalman noise weights
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
 
     /**
-     * @brief Kalman observer noise weights (cheatsheet §4, observer part).
+     * @brief Kalman observer noise weights (cheatsheet Section 4, observer part).
      *
-     * Uses an isotropic model: Qf = σp²·I, Rf = σm²·I, P0 = Qf.
+     * Uses an isotropic model: Qf = sigmap^2.I, Rf = sigmam^2.I, P0 = Qf.
      *
      * Compatibility:
      * - IDEAL: LQG.
@@ -269,12 +269,12 @@ public:
                                         double   sigmaProcess,
                                         double   sigmaMeas);
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // 6. MPC Horizon / Weight Tuner
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
 
     /**
-     * @brief MPC horizon and weight recommendation (cheatsheet §5).
+     * @brief MPC horizon and weight recommendation (cheatsheet Section 5).
      *
      * Compatibility:
      * - IDEAL: MPC.
@@ -286,7 +286,7 @@ public:
      * @param Ts      Sample time [s].
      * @param rho_y   Output tracking weight (passed through).
      * @param rho_u   Move suppression weight (passed through).
-     * @return MPCTuneResult with recommended Np, Nc, ρy, ρu.
+     * @return MPCTuneResult with recommended Np, Nc, rhoy, rhou.
      */
     static MPCTuneResult mpcHorizon(CtrlKind         target,
                                     const StateSpace &plant,
@@ -294,34 +294,34 @@ public:
                                     double           rho_y = 1.0,
                                     double           rho_u = 0.1);
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // 7. Frequency-domain Loop Shaping
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
 
     /**
-     * @brief Frequency-domain loop shaping (cheatsheet §6).
+     * @brief Frequency-domain loop shaping (cheatsheet Section 6).
      *
      * Compatibility:
      * - IDEAL: LeadLag.
-     * - SOFT: PID (ωc used as a bandwidth / N-filter hint).
+     * - SOFT: PID (omegac used as a bandwidth / N-filter hint).
      * - FALLBACK: LQR, LQG, MPC, SMC, ADRC, ESC.
      *
      * @note @p in.phase_add_deg must be in (0, 90). LoopShapingTuner handles fallback
      *       internally for invalid angles.
      *
      * @param target  Runtime controller kind.
-     * @param in      Loop-shaping inputs (ωc, phase lead, plant gain at ωc).
+     * @param in      Loop-shaping inputs (omegac, phase lead, plant gain at omegac).
      * @return LeadLagTuneResult.
      */
     static LeadLagTuneResult loopShaping(CtrlKind                    target,
                                          const LoopShapingTuner::Input &in);
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // 8. Optimisation-based tuner — Nelder-Mead ISE / ITAE
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
+    // 8. Optimisation-based tuner - Nelder-Mead ISE / ITAE
+    // -------------------------------------------------------------------------
 
     /**
-     * @brief Black-box Nelder-Mead optimisation tuner (cheatsheet §7).
+     * @brief Black-box Nelder-Mead optimisation tuner (cheatsheet Section 7).
      *
      * Applies to **all** controller types. No warnings are emitted regardless of target
      * because this method treats the controller as a black box.
@@ -329,14 +329,14 @@ public:
      * The cost function must:
      * 1. Construct a controller from the parameter vector.
      * 2. Simulate it against the plant (or real hardware).
-     * 3. Return a scalar cost (ISE, IAE, ITAE, …).
+     * 3. Return a scalar cost (ISE, IAE, ITAE, ...).
      *
      * For multi-modal cost surfaces, run multiple restarts with different `x0`.
      *
      * @param target       Runtime controller kind (used for logging only).
-     * @param paramBounds  [{lo, hi}, …] for each scalar parameter.
+     * @param paramBounds  [{lo, hi}, ...] for each scalar parameter.
      * @param costFn       Cost function `double(vector<double>)`.
-     * @param x0           Initial guess; empty → midpoint of each bound.
+     * @param x0           Initial guess; empty -> midpoint of each bound.
      * @param maxEvals     Cost-function evaluation budget.
      * @param tol          Convergence tolerance on simplex size.
      * @return OptimTuneResult with bestParams and bestCost.
@@ -349,9 +349,9 @@ public:
         int                                                           maxEvals = 300,
         double                                                        tol      = 1e-5);
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
     // Cost-function helpers
-    // ─────────────────────────────────────────────────────────────────────────
+    // -------------------------------------------------------------------------
 
     /**
      * @brief Build an ISE cost function for a closed-loop simulation.
@@ -368,7 +368,7 @@ public:
      * @param plant    Discrete-time state-space model.
      * @param ref      Step reference value.
      * @param N        Simulation horizon [steps].
-     * @param factory  Factory `unique_ptr<IController>(vector<double>)` → controller.
+     * @param factory  Factory `unique_ptr<IController>(vector<double>)` -> controller.
      * @return Callable `double(vector<double>)` suitable for optimise().
      */
     static std::function<double(const std::vector<double> &)>
@@ -378,14 +378,14 @@ public:
                 std::function<std::unique_ptr<IController>(const std::vector<double> &)> factory);
 
     /**
-     * @brief Build an ITAE cost function — penalises late errors more than ISE.
+     * @brief Build an ITAE cost function - penalises late errors more than ISE.
      *
-     * ITAE = ∫ t·|e(t)| dt. Otherwise identical interface to makeISECost().
+     * ITAE = \int t.|e(t)| dt. Otherwise identical interface to makeISECost().
      *
      * @param plant    Discrete-time state-space model.
      * @param ref      Step reference value.
      * @param N        Simulation horizon [steps].
-     * @param factory  Factory `unique_ptr<IController>(vector<double>)` → controller.
+     * @param factory  Factory `unique_ptr<IController>(vector<double>)` -> controller.
      * @return Callable `double(vector<double>)` suitable for optimise().
      */
     static std::function<double(const std::vector<double> &)>

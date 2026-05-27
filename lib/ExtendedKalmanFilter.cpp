@@ -75,7 +75,7 @@ namespace ctrl
     {
         // Central-difference: J(:,i) = (f(x+h_i*ei) - f(x-h_i*ei)) / (2*h_i)
         // h_i = eps_scale * max(|x_i|, 1) gives O(eps_scale^2) truncation error regardless
-        // of state magnitude — essential for heterogeneous state vectors (positions, angles,
+        // of state magnitude - essential for heterogeneous state vectors (positions, angles,
         // velocities may differ by orders of magnitude).
         const Eigen::VectorXd f0 = func(x);
         const int nx = x.size();

@@ -2,25 +2,25 @@
 
 /**
  * @file HAL.h
- * @brief Hardware Abstraction Layer — convenience umbrella include.
+ * @brief Hardware Abstraction Layer - convenience umbrella include.
  *
  * Pulls in all HAL interfaces and simulation adapters. Include this header
  * (or `ControllerToolbox.h`) to access the full HAL.
  *
  * **Interfaces:**
- * - ISensor    — abstract sensor (`read`, `isValid`, `reset`).
- * - IActuator  — abstract actuator (`write`, `lastOutput`, `reset`).
- * - ITimer     — abstract monotonic clock (`nowNs`, `elapsedNs`).
- * - IScheduler — abstract periodic task scheduler (`setPeriodNs`, `start`, `stop`, `overrunCount`).
+ * - ISensor    - abstract sensor (`read`, `isValid`, `reset`).
+ * - IActuator  - abstract actuator (`write`, `lastOutput`, `reset`).
+ * - ITimer     - abstract monotonic clock (`nowNs`, `elapsedNs`).
+ * - IScheduler - abstract periodic task scheduler (`setPeriodNs`, `start`, `stop`, `overrunCount`).
  *
  * **Simulation adapters:**
- * - SimPlant    — discrete-time state-space plant simulator.
- * - SimSensor   — ISensor backed by SimPlant.
- * - SimActuator — IActuator backed by SimPlant (NaN-safe, saturating).
- * - SafeSensor  — ISensor decorator that freezes on `isValid() == false`.
- * - StdTimer    — ITimer using `std::chrono::steady_clock` (non-RT; for tests).
+ * - SimPlant    - discrete-time state-space plant simulator.
+ * - SimSensor   - ISensor backed by SimPlant.
+ * - SimActuator - IActuator backed by SimPlant (NaN-safe, saturating).
+ * - SafeSensor  - ISensor decorator that freezes on `isValid() == false`.
+ * - StdTimer    - ITimer using `std::chrono::steady_clock` (non-RT; for tests).
  *
- * **Example — closed-loop simulation with the HAL:**
+ * **Example - closed-loop simulation with the HAL:**
  * @code
  *   ctrl::StateSpace  sys = ctrl::tf2ss(...);
  *   ctrl::SimPlant    plant(sys);

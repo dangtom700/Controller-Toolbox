@@ -98,7 +98,7 @@ namespace ctrl
 
         // 2DOF proportional: acts on (b*r - y) rather than (r - y).
         // b_weight = 1 reduces to standard 1DOF; b_weight = 0 removes the
-        // proportional setpoint kick entirely (Astrom & Hagglund 2006 §8.4).
+        // proportional setpoint kick entirely (Astrom & Hagglund 2006 Section 8.4).
         const double prop_signal = p_.b_weight * r - y;
 
         // Unsaturated output

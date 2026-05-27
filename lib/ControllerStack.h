@@ -8,13 +8,13 @@
 
 /**
  * @file ControllerStack.h
- * @brief Multi-controller orchestration — Supervisory, Additive, and Weighted modes.
+ * @brief Multi-controller orchestration - Supervisory, Additive, and Weighted modes.
  *
  * ControllerStack composes multiple IController instances and dispatches compute() calls
  * according to the selected StackMode. All modes implement bumpless output holding when
  * no entry is eligible.
  *
- * @see Åström, "Control System Design" Ch. 9 (Gain Scheduling).
+ * @see Astrom, "Control System Design" Ch. 9 (Gain Scheduling).
  * @see MATLAB supervisory control patterns.
  */
 
@@ -32,7 +32,7 @@ enum class StackMode
      * Entries are evaluated in insertion order. The first entry whose activationCondition
      * returns @c true **and** whose isHealthy() returns @c true is selected. An unhealthy
      * controller is skipped with a stderr warning, enabling automatic fallback (e.g.,
-     * MPC → GPC → PID when the QP consistently fails).
+     * MPC -> GPC -> PID when the QP consistently fails).
      *
      * On controller change, bumplessInit() is called on the newly selected entry to
      * prevent an output bump.
@@ -56,7 +56,7 @@ enum class StackMode
      * @brief Normalised weighted average of all enabled, gate-passing entries.
      *
      * @code
-     *   u = (Σ wᵢ·uᵢ(e)) / (Σ wᵢ)   over active, gate-passing entries only
+     *   u = (Sigma w_i.u_i(e)) / (Sigma w_i)   over active, gate-passing entries only
      * @endcode
      *
      * The denominator is the sum of *active and gate-passing* weights only. When an entry's
@@ -65,7 +65,7 @@ enum class StackMode
      * to @c nullptr for a static blend.
      *
      * Example with weights [0.7, 0.3]:
-     * - Both active:   u = 0.7·u0 + 0.3·u1
+     * - Both active:   u = 0.7.u0 + 0.3.u1
      * - Entry 0 gates out: u = u1 (entry 1 gets full authority)
      *
      * If all entries are inactive, the output holds and a warning is emitted.
@@ -151,7 +151,7 @@ public:
     /**
      * @brief Update the weight of an entry (Weighted mode only).
      * @param name   Controller name.
-     * @param weight New relative weight (must be ≥ 0).
+     * @param weight New relative weight (must be >= 0).
      */
     void setWeight(const std::string &name, double weight);
 

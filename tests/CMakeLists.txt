@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-# ── Catch2 v3 via FetchContent ─────────────────────────────────────────────
+# -- Catch2 v3 via FetchContent ---------------------------------------------
 include(FetchContent)
 FetchContent_Declare(
     Catch2
@@ -12,17 +12,17 @@ FetchContent_MakeAvailable(Catch2)
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(Catch)
 
-# ── Catch2 pilot test suite ────────────────────────────────────────────────
+# -- Catch2 pilot test suite ------------------------------------------------
 add_executable(test_catch2_pilot test_catch2_pilot.cpp)
 target_link_libraries(test_catch2_pilot PRIVATE controller_toolbox Catch2::Catch2WithMain)
 target_include_directories(test_catch2_pilot PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-# ── Catch2 advanced test suite ────────────────────────────────────────────
+# -- Catch2 advanced test suite --------------------------------------------
 add_executable(test_catch2_advanced test_catch2_advanced.cpp)
 target_link_libraries(test_catch2_advanced PRIVATE controller_toolbox Catch2::Catch2WithMain)
 target_include_directories(test_catch2_advanced PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-# ── Legacy hand-rolled test executables (kept unchanged) ───────────────────
+# -- Legacy hand-rolled test executables (kept unchanged) -------------------
 add_executable(test_controllers test_controllers.cpp)
 target_link_libraries(test_controllers PRIVATE controller_toolbox)
 target_include_directories(test_controllers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

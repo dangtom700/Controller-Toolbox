@@ -9,13 +9,13 @@
  * against hardware or a mathematical plant without modification.
  *
  * **Contract:**
- * - `read()` — returns the most recent measurement as a `double`.
+ * - `read()` - returns the most recent measurement as a `double`.
  *   Must not block longer than one sample period.
  *   Returns the last valid value (never NaN) when data is stale;
  *   check `isValid()` to detect that condition.
- * - `isValid()` — `true` while sensor data is fresh and within hardware limits.
+ * - `isValid()` - `true` while sensor data is fresh and within hardware limits.
  *   Controllers should freeze or fault when this returns `false`.
- * - `reset()` — restores the sensor to its initial state (e.g., clears filters).
+ * - `reset()` - restores the sensor to its initial state (e.g., clears filters).
  */
 
 namespace ctrl {

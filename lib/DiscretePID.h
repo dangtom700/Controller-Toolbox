@@ -9,20 +9,20 @@
  *
  * ISA standard form:
  * @code
- *   u[k] = Kp·e[k] + I[k] + D[k]
+ *   u[k] = Kp.e[k] + I[k] + D[k]
  * @endcode
  *
  * Derivative filter (backward Euler, equivalent to MATLAB 'Filter coefficient' N):
  * @code
- *   d[k] = (1/(1+N·Ts))·d[k-1] + (Kd·N/(1+N·Ts))·(e[k] - e[k-1])
+ *   d[k] = (1/(1+N.Ts)).d[k-1] + (Kd.N/(1+N.Ts)).(e[k] - e[k-1])
  * @endcode
  *
  * Anti-windup via back-calculation:
  * @code
- *   I[k] = I[k-1] + Ki·Ts·e[k] + Kb·(u_sat[k] - u_unsat[k])
+ *   I[k] = I[k-1] + Ki.Ts.e[k] + Kb.(u_sat[k] - u_unsat[k])
  * @endcode
  *
- * @see Åström & Wittenmark, "Computer Controlled Systems" Ch. 3.
+ * @see Astrom & Wittenmark, "Computer Controlled Systems" Ch. 3.
  * @see MATLAB pid(), pidtune(), Simulink Discrete PID Controller block.
  */
 
@@ -36,18 +36,18 @@ struct PIDParams
 {
     double Kp = 1.0; ///< Proportional gain.
     double Ki = 0.0; ///< Integral gain (Ki = Kp / Ti).
-    double Kd = 0.0; ///< Derivative gain (Kd = Kp · Td).
+    double Kd = 0.0; ///< Derivative gain (Kd = Kp . Td).
 
     /**
      * @brief Derivative filter coefficient N [rad/s].
      *
      * Higher N = less filtering (sharper derivative). The derivative pole is placed at
-     * z = 1/(1 + N·Ts) in the backward-Euler discretisation, corresponding to a
-     * continuous-time pole at s = −N. This attenuates derivative action above N rad/s.
+     * z = 1/(1 + N.Ts) in the backward-Euler discretisation, corresponding to a
+     * continuous-time pole at s = -N. This attenuates derivative action above N rad/s.
      *
      * Constraints:
-     * - Nyquist limit: N < π/Ts (e.g., N < 314 rad/s for Ts = 0.01 s).
-     * - Practical limit: N < π/(2·Ts·ωc) where ωc is the closed-loop bandwidth.
+     * - Nyquist limit: N < pi/Ts (e.g., N < 314 rad/s for Ts = 0.01 s).
+     * - Practical limit: N < pi/(2.Ts.omegac) where omegac is the closed-loop bandwidth.
      *
      * The default N = 100 suits many process-control loops; reduce if derivative is noisy.
      */
@@ -59,29 +59,29 @@ struct PIDParams
     /**
      * @brief Anti-windup back-calculation gain (0 = disabled, 1 = default).
      *
-     * Recommended tuning range (Åström & Wittenmark §3.5): Ki/Kp ≤ Kb ≤ Kp/Kd
-     * - `Kb = Ki/Kp` — slow reset; good for dead-time-dominated plants.
-     * - `Kb = Kp/Kd` — fast reset; may cause an actuator spike on re-entry.
-     * - `Kb = sqrt(Ki·Kp/Kd)` — geometric-mean rule of thumb for balanced reset.
-     * - `Kb = 0` — disables anti-windup entirely; use only when saturation cannot occur.
-     * - `Kb = 1.0` (default) — reasonable for many processes; may be slow for high-Ki loops.
+     * Recommended tuning range (Astrom & Wittenmark Section 3.5): Ki/Kp <= Kb <= Kp/Kd
+     * - `Kb = Ki/Kp` - slow reset; good for dead-time-dominated plants.
+     * - `Kb = Kp/Kd` - fast reset; may cause an actuator spike on re-entry.
+     * - `Kb = sqrt(Ki.Kp/Kd)` - geometric-mean rule of thumb for balanced reset.
+     * - `Kb = 0` - disables anti-windup entirely; use only when saturation cannot occur.
+     * - `Kb = 1.0` (default) - reasonable for many processes; may be slow for high-Ki loops.
      */
     double Kb = 1.0;
 
     /**
-     * @brief Two-degree-of-freedom proportional setpoint weight b ∈ [0, 1].
+     * @brief Two-degree-of-freedom proportional setpoint weight b \in [0, 1].
      *
-     * Applied only by computeDoM(y, r): the proportional term acts on (b·r − y) while the
-     * integral term acts on (r − y). This decouples setpoint-tracking bandwidth from
+     * Applied only by computeDoM(y, r): the proportional term acts on (b.r - y) while the
+     * integral term acts on (r - y). This decouples setpoint-tracking bandwidth from
      * disturbance-rejection bandwidth without changing any gains.
      *
-     * Tuning guide (Skogestad 2003 / Åström & Hägglund 2006 §8.4):
-     * - `b = 1.0` (default): standard 1DOF — maximum setpoint gain.
-     * - `b = 0.5`: reduces overshoot ~10–15 % vs b = 1 for ZN-tuned loops.
+     * Tuning guide (Skogestad 2003 / Astrom & Hagglund 2006 Section 8.4):
+     * - `b = 1.0` (default): standard 1DOF - maximum setpoint gain.
+     * - `b = 0.5`: reduces overshoot ~10-15 % vs b = 1 for ZN-tuned loops.
      * - `b = 0.0`: setpoint feed-forward entirely through integrator; no proportional kick.
      *
      * @note Has no effect on compute(error) because that overload receives only the
-     *       pre-computed error (r − y) and cannot separate r from y.
+     *       pre-computed error (r - y) and cannot separate r from y.
      */
     double b_weight = 1.0;
 };
@@ -107,19 +107,19 @@ public:
     explicit DiscretePID(const PIDParams &params, double sampleTime);
 
     /**
-     * @brief Compute u[k] from tracking error e[k] = r[k] − y[k].
+     * @brief Compute u[k] from tracking error e[k] = r[k] - y[k].
      * @param error Current tracking error.
      * @return Saturated control output u[k].
      */
     double compute(double error) override;
 
     /**
-     * @brief Derivative-on-Measurement variant — avoids derivative kick on setpoint steps.
+     * @brief Derivative-on-Measurement variant - avoids derivative kick on setpoint steps.
      *
-     * The derivative filter is applied to −y (plant output) rather than to the error e = r − y.
-     * Proportional and integral terms still use the full error e = r − y.
+     * The derivative filter is applied to -y (plant output) rather than to the error e = r - y.
+     * Proportional and integral terms still use the full error e = r - y.
      * The 2DOF setpoint weight PIDParams::b_weight is applied here: the proportional term
-     * acts on (b·r − y) rather than (r − y).
+     * acts on (b.r - y) rather than (r - y).
      *
      * Prefer this overload when:
      * - The setpoint changes frequently (batch reactors, motion controllers).
@@ -151,11 +151,11 @@ public:
     /** @brief Read-only access to current tuning parameters. */
     const PIDParams &params() const { return p_; }
 
-    /** @brief Control output produced at the previous sample (u[k−1]). */
+    /** @brief Control output produced at the previous sample (u[k-1]). */
     double lastOutput() const { return u_prev_; }
 
     /**
-     * @brief Bumpless initialisation — sets integral so compute(error) returns u_target.
+     * @brief Bumpless initialisation - sets integral so compute(error) returns u_target.
      *
      * Called by ControllerStack (Supervisory mode) on activation to avoid an output bump.
      *
@@ -168,10 +168,10 @@ private:
     PIDParams p_;
     double Ts_;
     double integral_; ///< Accumulated integral I[k].
-    double deriv_;    ///< Filtered derivative state d[k−1].
-    double e_prev_;   ///< Previous error e[k−1].
-    double y_prev_;   ///< Previous measurement y[k−1] (derivative-on-measurement).
-    double u_prev_;   ///< Previous saturated output u[k−1] (anti-windup).
+    double deriv_;    ///< Filtered derivative state d[k-1].
+    double e_prev_;   ///< Previous error e[k-1].
+    double y_prev_;   ///< Previous measurement y[k-1] (derivative-on-measurement).
+    double u_prev_;   ///< Previous saturated output u[k-1] (anti-windup).
 };
 
 } // namespace ctrl

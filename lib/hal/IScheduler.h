@@ -16,7 +16,7 @@
  * The callback signature is `void()`. State required by the control loop
  * should be captured in a lambda or stored externally.
  *
- * **Usage — wiring a PID loop on a 1 ms tick:**
+ * **Usage - wiring a PID loop on a 1 ms tick:**
  * @code
  *   auto sched = platform::makeScheduler();   // platform-specific factory
  *   sched->setPeriodNs(1'000'000);            // 1 ms

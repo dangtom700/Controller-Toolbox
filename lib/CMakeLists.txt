@@ -2,22 +2,22 @@ cmake_minimum_required(VERSION 3.16)
 
 find_package(Eigen3 REQUIRED NO_MODULE)
 
-# ─── Optional module selection ───────────────────────────────────────────────
+# --- Optional module selection -----------------------------------------------
 # All default ON so existing builds are unaffected.
 # Turn OFF to reduce build time or binary size on constrained targets.
 #
-#   cmake .. -DCTRL_ENABLE_HINF=OFF          # exclude H∞ synthesis (heavy Riccati)
+#   cmake .. -DCTRL_ENABLE_HINF=OFF          # exclude Hinf synthesis (heavy Riccati)
 #   cmake .. -DCTRL_ENABLE_SUBSPACE=OFF      # exclude N4SID batch subspace ID
 #   cmake .. -DCTRL_ENABLE_FUZZY=OFF         # exclude FuzzyLogic inference engine
-#   cmake .. -DCTRL_ENABLE_FUNCTION_APPROX=OFF  # exclude polynomial/Padé approximation
+#   cmake .. -DCTRL_ENABLE_FUNCTION_APPROX=OFF  # exclude polynomial/Pade approximation
 #   cmake .. -DCTRL_ENABLE_ADVANCED_KALMAN=OFF  # exclude EKF / UKF (no nonlinear estimation)
-option(CTRL_ENABLE_HINF            "Include discrete H∞ synthesis (DiscreteHinf, MixedSensitivity)" ON)
+option(CTRL_ENABLE_HINF            "Include discrete Hinf synthesis (DiscreteHinf, MixedSensitivity)" ON)
 option(CTRL_ENABLE_SUBSPACE        "Include N4SID subspace identification (SubspaceID)"              ON)
 option(CTRL_ENABLE_FUZZY           "Include Mamdani/TS fuzzy inference (FuzzyLogic)"                ON)
-option(CTRL_ENABLE_FUNCTION_APPROX "Include Taylor/Padé function approximation"                     ON)
+option(CTRL_ENABLE_FUNCTION_APPROX "Include Taylor/Pade function approximation"                     ON)
 option(CTRL_ENABLE_ADVANCED_KALMAN "Include EKF and UKF nonlinear estimators"                        ON)
 
-# ─── Core sources (always compiled) ──────────────────────────────────────────
+# --- Core sources (always compiled) ------------------------------------------
 set(CTRL_CORE_SOURCES
     PlantModel.cpp
     DiscretePID.cpp
@@ -41,7 +41,7 @@ set(CTRL_CORE_SOURCES
     GeneralizedPredictiveControl.cpp
 )
 
-# ─── Optional sources ────────────────────────────────────────────────────────
+# --- Optional sources --------------------------------------------------------
 if(CTRL_ENABLE_ADVANCED_KALMAN)
     list(APPEND CTRL_CORE_SOURCES
         ExtendedKalmanFilter.cpp
@@ -67,7 +67,7 @@ endif()
 
 add_library(controller_toolbox STATIC ${CTRL_CORE_SOURCES})
 
-# ─── Compile definitions reflecting enabled modules ──────────────────────────
+# --- Compile definitions reflecting enabled modules --------------------------
 # Headers use these to conditionally include optional sections.
 if(CTRL_ENABLE_HINF)
     target_compile_definitions(controller_toolbox PUBLIC CTRL_HAS_HINF)

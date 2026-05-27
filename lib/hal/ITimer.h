@@ -53,7 +53,7 @@ public:
      * Handles 64-bit wrap-around correctly.
      *
      * @param t0 Timestamp from a prior nowNs() call.
-     * @return Elapsed time [ns] = nowNs() − t0.
+     * @return Elapsed time [ns] = nowNs() - t0.
      */
     virtual uint64_t elapsedNs(uint64_t t0) const { return nowNs() - t0; }
 };

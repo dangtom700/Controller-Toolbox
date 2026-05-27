@@ -10,12 +10,12 @@
  * layer translates that into the physical or simulated command.
  *
  * **Contract:**
- * - `write(u)` — applies control value @p u to the physical or simulated plant.
- *   Non-finite values (NaN, ±Inf) must be rejected silently; the actuator holds
+ * - `write(u)` - applies control value @p u to the physical or simulated plant.
+ *   Non-finite values (NaN, +/-Inf) must be rejected silently; the actuator holds
  *   its last valid output instead.
- * - `lastOutput()` — returns the most recent value successfully written.
+ * - `lastOutput()` - returns the most recent value successfully written.
  *   Useful for warm-start and bumpless transfer.
- * - `reset()` — drives output to zero and clears internal state.
+ * - `reset()` - drives output to zero and clears internal state.
  */
 
 namespace ctrl {
@@ -30,7 +30,7 @@ public:
     /**
      * @brief Apply a control value to the actuator.
      *
-     * Non-finite values (@p u = NaN or ±Inf) must be silently rejected and the
+     * Non-finite values (@p u = NaN or +/-Inf) must be silently rejected and the
      * last valid output held.
      *
      * @param u Control command to apply.

@@ -5,27 +5,27 @@
 
 /**
  * @file DiscreteMPC.h
- * @brief Discrete-time Model Predictive Controller — condensed incremental QP formulation.
+ * @brief Discrete-time Model Predictive Controller - condensed incremental QP formulation.
  *
  * Minimises a receding-horizon cost over predicted outputs and control moves:
  * @code
- *   J = Σᵢ₌₁ᴺᵖ ρy·‖ŷ[k+i|k] − r‖² + Σⱼ₌₀ᴺᶜ⁻¹ ρu·‖Δu[k+j]‖²
+ *   J = Sigma_i₌1ᴺᵖ rhoy.||yhat[k+i|k] - r||^2 + Sigma_j₌0ᴺᶜ^-^1 rhou.||Deltau[k+j]||^2
  * @endcode
  *
  * **Condensed prediction:**
  * @code
- *   Ŷ = F·x[k] + Gu·u[k−1] + Φ·ΔU
+ *   Ŷ = F.x[k] + Gu.u[k-1] + Phi.DeltaU
  * @endcode
- * where Φ(i,j) = C·A^(i−j)·B (j ≤ i, else 0) and Gu(i) = Σⱼ₌₀ⁱ C·Aʲ·B.
+ * where Phi(i,j) = C.A^(i-j).B (j <= i, else 0) and Gu(i) = Sigma_j₌0ⁱ C.Aʲ.B.
  *
  * **Unconstrained optimum:**
  * @code
- *   ΔU* = −(Φᵀ·Qy·Φ + Ru)⁻¹·Φᵀ·Qy·(F·x[k] − R_stacked)
- *   u[k] = u[k−1] + ΔU*[0:m]
+ *   DeltaU* = -(Phiᵀ.Qy.Phi + Ru)^-^1.Phiᵀ.Qy.(F.x[k] - R_stacked)
+ *   u[k] = u[k-1] + DeltaU*[0:m]
  * @endcode
  *
- * Box constraints on Δu and u are solved via gradient projection (step size 1/L,
- * L = λmax(H), precomputed). Convergence is controlled by MPCParams::qpMaxIter and qpTol.
+ * Box constraints on Deltau and u are solved via gradient projection (step size 1/L,
+ * L = lambdamax(H), precomputed). Convergence is controlled by MPCParams::qpMaxIter and qpTol.
  *
  * @see Camacho & Bordons, "Model Predictive Control" (2007).
  * @see Maciejowski, "Predictive Control with Constraints" (2002).
@@ -41,37 +41,37 @@ namespace ctrl
 struct MPCParams
 {
     int    Np       = 10;    ///< Prediction horizon [steps]. Cover approx. settling time.
-    int    Nc       = 3;     ///< Control horizon [steps], Nc ≤ Np. Fewer = smoother moves.
+    int    Nc       = 3;     ///< Control horizon [steps], Nc <= Np. Fewer = smoother moves.
     /**
-     * @brief Output tracking weight (Qy = ρy·I_{Np·p}).
+     * @brief Output tracking weight (Qy = rhoy.I_{Np.p}).
      *
-     * **Bryson's method starting point:** ρy ≈ 1/e_max², where e_max is the largest
-     * acceptable peak tracking error. Only the *ratio* ρy/ρu drives the response speed —
+     * **Bryson's method starting point:** rhoy approx = 1/e_max^2, where e_max is the largest
+     * acceptable peak tracking error. Only the *ratio* rhoy/rhou drives the response speed -
      * scale both together to adjust absolute weights without changing the optimum.
-     * Larger ρy/ρu → tighter tracking, larger control moves and more noise sensitivity.
+     * Larger rhoy/rhou -> tighter tracking, larger control moves and more noise sensitivity.
      */
     double rho_y    = 1.0;
 
     /**
-     * @brief Move suppression weight (Ru = ρu·I_{Nc·m}).
+     * @brief Move suppression weight (Ru = rhou.I_{Nc.m}).
      *
-     * **Bryson's method starting point:** ρu ≈ 1/Δu_max², where Δu_max is the largest
-     * acceptable incremental control move per sample. Increasing ρu softens actuator
+     * **Bryson's method starting point:** rhou approx = 1/Deltau_max^2, where Deltau_max is the largest
+     * acceptable incremental control move per sample. Increasing rhou softens actuator
      * activity at the cost of slower setpoint response and reduced disturbance rejection.
      */
     double rho_u    = 0.1;
     double uMin     = -1e9;  ///< Hard lower limit on u.
     double uMax     =  1e9;  ///< Hard upper limit on u.
-    double duMin    = -1e9;  ///< Hard lower limit on Δu.
-    double duMax    =  1e9;  ///< Hard upper limit on Δu.
+    double duMin    = -1e9;  ///< Hard lower limit on Deltau.
+    double duMax    =  1e9;  ///< Hard upper limit on Deltau.
     int    qpMaxIter = 200;  ///< Gradient-projection iteration limit.
-    double qpTol     = 1e-8; ///< Convergence tolerance (‖Δx‖∞).
+    double qpTol     = 1e-8; ///< Convergence tolerance (||Deltax||inf).
 };
 
 /**
  * @brief Discrete-time Model Predictive Controller.
  *
- * Prediction matrices F, Φ, and Hessian H are precomputed at construction and whenever the
+ * Prediction matrices F, Phi, and Hessian H are precomputed at construction and whenever the
  * plant or parameters change. Per-step heap allocation is eliminated via pre-allocated work vectors.
  */
 class DiscreteMPC : public IController
@@ -85,22 +85,22 @@ public:
     explicit DiscreteMPC(const StateSpace &plant, const MPCParams &params);
 
     /**
-     * @brief SISO convenience interface — compute u[k] from tracking error.
+     * @brief SISO convenience interface - compute u[k] from tracking error.
      *
-     * Reconstructs the reference as r = ŷ + error where ŷ = C·x̂ + D·u_prev.
-     * Valid for D = 0 plants. For D ≠ 0, the feedthrough term uses u[k−1] (one step stale);
+     * Reconstructs the reference as r = yhat + error where yhat = C.x^ + D.u_prev.
+     * Valid for D = 0 plants. For D != 0, the feedthrough term uses u[k-1] (one step stale);
      * use computeRef() directly and supply the current r explicitly.
      *
-     * @param error Tracking error e[k] = r[k] − y[k].
+     * @param error Tracking error e[k] = r[k] - y[k].
      * @return Control output u[k].
      */
     double compute(double error) override;
 
     /**
-     * @brief Full MIMO interface — optimise u[k] given state and reference vector.
-     * @param x_current Current state vector x[k] (n × 1).
-     * @param r_ref     Reference output vector r[k] (p × 1).
-     * @return Control action u[k] (m × 1).
+     * @brief Full MIMO interface - optimise u[k] given state and reference vector.
+     * @param x_current Current state vector x[k] (n * 1).
+     * @param r_ref     Reference output vector r[k] (p * 1).
+     * @return Control action u[k] (m * 1).
      */
     Eigen::VectorXd computeRef(const Eigen::VectorXd &x_current,
                                const Eigen::VectorXd &r_ref);
@@ -130,7 +130,7 @@ public:
 
     /**
      * @brief Inject a state estimate from an external observer (e.g., Kalman filter).
-     * @param x State estimate x̂[k] (n × 1).
+     * @param x State estimate x^[k] (n * 1).
      */
     void setState(const Eigen::VectorXd &x) { x_hat_ = x; }
 
@@ -140,7 +140,7 @@ public:
      * When an actuator layer clips or redistributes the MPC output before it reaches the plant,
      * call this method after each step so that the next computeRef() uses the physically applied
      * input when advancing the internal state estimate. Without this, repeated saturation causes
-     * x̂ to drift silently from the real plant state.
+     * x^ to drift silently from the real plant state.
      *
      * Typical call pattern (each step, after actuator):
      * @code
@@ -158,7 +158,7 @@ public:
      *
      * @c false means the returned u[k] is the best available suboptimal iterate.
      * Repeated non-convergence indicates qpMaxIter is too small, qpTol is too tight,
-     * or H is ill-conditioned (large Np, small ρu).
+     * or H is ill-conditioned (large Np, small rhou).
      */
     bool lastQPConverged() const { return last_qp_converged_; }
 
@@ -178,21 +178,21 @@ private:
     MPCParams  p_;
     double     Ts_;
     Eigen::VectorXd x_hat_;  ///< Open-loop state estimate.
-    Eigen::VectorXd u_prev_; ///< u[k−1] for incremental form.
+    Eigen::VectorXd u_prev_; ///< u[k-1] for incremental form.
 
-    Eigen::MatrixXd F_;   ///< (Np·p) × n prediction matrix.
-    Eigen::MatrixXd Phi_; ///< (Np·p) × (Nc·m) step-response matrix.
-    Eigen::MatrixXd Gu_;  ///< (Np·p) × m cumulative step-response offset for u_prev.
-    Eigen::MatrixXd H_;   ///< Precomputed Hessian Φᵀ·Qy·Φ + Ru.
-    Eigen::MatrixXd Qy_;  ///< (Np·p) × (Np·p) output cost matrix.
-    Eigen::MatrixXd Ru_;  ///< (Nc·m) × (Nc·m) move suppression cost matrix.
-    double          L_;   ///< λmax(H) — Lipschitz constant for QP step size.
+    Eigen::MatrixXd F_;   ///< (Np.p) * n prediction matrix.
+    Eigen::MatrixXd Phi_; ///< (Np.p) * (Nc.m) step-response matrix.
+    Eigen::MatrixXd Gu_;  ///< (Np.p) * m cumulative step-response offset for u_prev.
+    Eigen::MatrixXd H_;   ///< Precomputed Hessian Phiᵀ.Qy.Phi + Ru.
+    Eigen::MatrixXd Qy_;  ///< (Np.p) * (Np.p) output cost matrix.
+    Eigen::MatrixXd Ru_;  ///< (Nc.m) * (Nc.m) move suppression cost matrix.
+    double          L_;   ///< lambdamax(H) - Lipschitz constant for QP step size.
     /// Pre-factored H_, refreshed exclusively by buildCondensedMatrices().
-    /// NEVER call ldlt_.compute() from outside that function — doing so with a
+    /// NEVER call ldlt_.compute() from outside that function - doing so with a
     /// stale or incorrect matrix silently corrupts every subsequent QP solve.
     Eigen::LDLT<Eigen::MatrixXd> ldlt_;
 
-    // Pre-allocated work vectors — eliminate per-step heap allocation in computeRef().
+    // Pre-allocated work vectors - eliminate per-step heap allocation in computeRef().
     Eigen::VectorXd R_stack_, pred_err_, grad_, DeltaU_, grad_k_, DU_new_, lb_, ub_, cumMin_, cumMax_;
 
     bool last_qp_converged_ = true;

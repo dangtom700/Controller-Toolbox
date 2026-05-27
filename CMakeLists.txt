@@ -23,7 +23,7 @@ add_subdirectory(tests)
 add_subdirectory(examples)
 add_subdirectory(scripts)
 
-# nlohmann/json — required by case-study executables.
+# nlohmann/json - required by case-study executables.
 # Prefer a system/vcpkg installation; fall back to FetchContent so
 # the build works out-of-the-box without pre-installed packages.
 find_package(nlohmann_json CONFIG QUIET)

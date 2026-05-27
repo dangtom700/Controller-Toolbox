@@ -9,9 +9,9 @@
  * @brief IActuator adapter backed by a SimPlant.
  *
  * `write(u)` applies the control input to the plant with two safety guards:
- * - **NaN/Inf rejection** — non-finite values are discarded and the last valid output
+ * - **NaN/Inf rejection** - non-finite values are discarded and the last valid output
  *   is repeated. This mirrors the "hold-last" fail-safe behaviour of real hardware.
- * - **Saturation** — an optional [uMin, uMax] clamp (default: ±∞) is applied before
+ * - **Saturation** - an optional [uMin, uMax] clamp (default: +/-inf) is applied before
  *   forwarding to the plant, mirroring physical actuator limits.
  *
  * `lastOutput()` returns the most recent finite, saturated value actually applied.
@@ -27,8 +27,8 @@ public:
     /**
      * @brief Construct the actuator adapter.
      * @param plant SimPlant instance (must outlive this object).
-     * @param uMin  Lower saturation limit (default: −∞).
-     * @param uMax  Upper saturation limit (default: +∞).
+     * @param uMin  Lower saturation limit (default: -inf).
+     * @param uMax  Upper saturation limit (default: +inf).
      */
     explicit SimActuator(SimPlant& plant,
                          double uMin = -std::numeric_limits<double>::infinity(),

@@ -8,24 +8,24 @@
  *
  * Injects a sinusoidal dither into the plant operating point, demodulates the plant output
  * to extract a gradient estimate, then integrates the gradient to converge to the extremum
- * of an unknown static (or slowly varying) cost surface — **no explicit model required**.
+ * of an unknown static (or slowly varying) cost surface - **no explicit model required**.
  *
  * **Algorithm per sample k:**
  * @code
- *   phase[k] += 2π·fp·Ts                          // phase accumulator (wrapped mod 2π)
- *   u[k]      = θ[k] + a·sin(phase[k])            // operating point + dither
+ *   phase[k] += 2pi.fp.Ts                          // phase accumulator (wrapped mod 2pi)
+ *   u[k]      = theta[k] + a.sin(phase[k])            // operating point + dither
  *
  *   // High-pass filter (backward Euler, removes DC/slow drift):
- *   yh[k]   = αh·(yh[k−1] + y[k] − y[k−1]),   αh = 1/(1 + 2π·fhpf·Ts)
+ *   yh[k]   = alphah.(yh[k-1] + y[k] - y[k-1]),   alphah = 1/(1 + 2pi.fhpf.Ts)
  *
- *   // Demodulate — extract gradient signal:
- *   ξ[k]    = yh[k]·sin(phase[k])
+ *   // Demodulate - extract gradient signal:
+ *   xi[k]    = yh[k].sin(phase[k])
  *
  *   // Low-pass filter (backward Euler, smooths gradient):
- *   ĝ[k]    = ĝ[k−1] + αl·(ξ[k] − ĝ[k−1]),    αl = 2π·flpf·Ts/(1 + 2π·flpf·Ts)
+ *   ghat[k]    = ghat[k-1] + alphal.(xi[k] - ghat[k-1]),    alphal = 2pi.flpf.Ts/(1 + 2pi.flpf.Ts)
  *
  *   // Gradient-descent integration:
- *   θ[k+1]  = θ[k] + sign_dir·kint·Ts·ĝ[k]      // sign_dir = −1 (min) or +1 (max)
+ *   theta[k+1]  = theta[k] + sign_dir.kint.Ts.ghat[k]      // sign_dir = -1 (min) or +1 (max)
  * @endcode
  *
  * @par Separation of timescales requirement
@@ -75,7 +75,7 @@ public:
      * @brief Advance one step of the ESC algorithm.
      *
      * @param signal Plant output y[k] (cost or performance metric, **not** tracking error).
-     * @return Plant input u[k] = operating-point estimate θ[k] + dither a·sin(phase[k]).
+     * @return Plant input u[k] = operating-point estimate theta[k] + dither a.sin(phase[k]).
      */
     double compute(double signal) override;
 
@@ -95,7 +95,7 @@ public:
     const ExtremumSeekerParams &params() const { return p_; }
 
     /**
-     * @brief Current operating-point estimate θ (without dither component).
+     * @brief Current operating-point estimate theta (without dither component).
      *
      * Converges to the extremum of the cost surface as the algorithm runs.
      */
@@ -104,11 +104,11 @@ public:
 private:
     ExtremumSeekerParams p_;
     double Ts_;
-    double phase_;      ///< Dither phase accumulator [rad], wrapped to [0, 2π).
+    double phase_;      ///< Dither phase accumulator [rad], wrapped to [0, 2pi).
     double theta_;      ///< Operating-point integrator state.
     double hpf_state_;  ///< HPF IIR state (backward Euler, first order).
     double lpf_state_;  ///< LPF IIR state (backward Euler, first order).
-    double y_prev_;     ///< y[k−1] for the HPF difference term.
+    double y_prev_;     ///< y[k-1] for the HPF difference term.
 };
 
 } // namespace ctrl

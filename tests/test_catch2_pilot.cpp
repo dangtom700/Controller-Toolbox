@@ -17,9 +17,9 @@
 using Catch::Matchers::WithinRel;
 using Catch::Matchers::WithinAbs;
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Helpers
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 // Build a minimal double-integrator state-space (x = [pos, vel], u = force/mass):
 //   x[k+1] = [1 Ts; 0 1] x[k] + [0.5*Ts^2; Ts] u[k]
@@ -37,9 +37,9 @@ static ctrl::StateSpace makeDoubleIntegrator(double Ts)
     return ctrl::StateSpace{A, B, C, D, Ts};
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // P12-16: LQRAdapter MIMO truncation
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 TEST_CASE("LQRAdapter computeVec returns full control vector", "[lqr][adapter][mimo]")
 {
@@ -82,13 +82,13 @@ TEST_CASE("LQRAdapter computeVec returns full control vector", "[lqr][adapter][m
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// P12-17: EKF numericalJacobian — heterogeneous state magnitudes
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// P12-17: EKF numericalJacobian - heterogeneous state magnitudes
+// -----------------------------------------------------------------------------
 
 TEST_CASE("EKF numericalJacobian is accurate for heterogeneous state magnitudes", "[ekf][jacobian]")
 {
-    // f(x) = [x0^2;  x1]   → analytical J = [2*x0, 0; 0, 1]
+    // f(x) = [x0^2;  x1]   -> analytical J = [2*x0, 0; 0, 1]
     // State has very different scales: x0 ~ 1e3, x1 ~ 1e-3
     Eigen::Vector2d x;
     x << 1000.0, 0.001;
@@ -116,7 +116,7 @@ TEST_CASE("EKF numericalJacobian is accurate for heterogeneous state magnitudes"
 
     SECTION("Scaled eps gives absolute error < 1e-9 for small-state element")
     {
-        // J[1,1] = 1.0 regardless of scale — should be near-exact
+        // J[1,1] = 1.0 regardless of scale - should be near-exact
         REQUIRE_THAT(J_scaled(1, 1), WithinAbs(1.0, 1e-8));
     }
 
@@ -127,9 +127,9 @@ TEST_CASE("EKF numericalJacobian is accurate for heterogeneous state magnitudes"
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// P10-3: DiscretePID::computeDoM — no derivative spike on setpoint step
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// P10-3: DiscretePID::computeDoM - no derivative spike on setpoint step
+// -----------------------------------------------------------------------------
 
 TEST_CASE("DiscretePID::computeDoM suppresses derivative spike on setpoint step", "[pid][dom]")
 {
@@ -145,7 +145,7 @@ TEST_CASE("DiscretePID::computeDoM suppresses derivative spike on setpoint step"
     const double Ts = 0.01;
     ctrl::DiscretePID pid_dom(p, Ts);
 
-    // Step in setpoint r at k=0: r goes from 0 → 1, y stays at 0
+    // Step in setpoint r at k=0: r goes from 0 -> 1, y stays at 0
     const double y = 0.0;
 
     // First call: u_dom should NOT see a large derivative spike
@@ -177,9 +177,9 @@ TEST_CASE("DiscretePID::computeDoM suppresses derivative spike on setpoint step"
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// P11-8: PIDParams::b_weight — reduced proportional kick reduces overshoot
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// P11-8: PIDParams::b_weight - reduced proportional kick reduces overshoot
+// -----------------------------------------------------------------------------
 
 TEST_CASE("PIDParams::b_weight reduces proportional setpoint kick", "[pid][b_weight]")
 {
@@ -237,9 +237,9 @@ TEST_CASE("PIDParams::b_weight reduces proportional setpoint kick", "[pid][b_wei
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// IControllerObserver — basic wiring smoke test
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// IControllerObserver - basic wiring smoke test
+// -----------------------------------------------------------------------------
 
 TEST_CASE("IControllerObserver receives callbacks from DiscretePID", "[observer]")
 {

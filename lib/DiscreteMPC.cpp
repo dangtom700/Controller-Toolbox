@@ -175,7 +175,7 @@ namespace ctrl
         if (ldlt_.info() != Eigen::Success)
             return u_prev_; // degenerate Hessian - hold previous input
 
-        // Gradient projection — all work vectors pre-allocated; zero per-step allocation.
+        // Gradient projection - all work vectors pre-allocated; zero per-step allocation.
         const auto qp = solveGradientProjectionQP(
             H_, grad_, lb_, ub_, ldlt_, L_, p_.qpMaxIter, p_.qpTol,
             DeltaU_, grad_k_, DU_new_);

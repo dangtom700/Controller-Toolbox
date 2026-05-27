@@ -81,7 +81,7 @@ namespace ctrl
         for (int i = 0; i < L; ++i)
             x_hat_.noalias() += Wm_(i) * Xp.col(i);
 
-        // Predicted covariance — outer-product accumulation; noalias() avoids per-iteration temps.
+        // Predicted covariance - outer-product accumulation; noalias() avoids per-iteration temps.
         P_ = Q_;
         for (int i = 0; i < L; ++i)
         {

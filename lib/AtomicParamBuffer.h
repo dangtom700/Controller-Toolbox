@@ -12,7 +12,7 @@
  * A mutex would stall the RT thread; this seqlock allows the RT thread to read without
  * blocking while the writer atomically publishes.
  *
- * **Design — seqlock:**
+ * **Design - seqlock:**
  * A sequence counter `seq_` is incremented twice per write: once before (making it odd =
  * "write in progress") and once after (making it even = done). The reader spins until it
  * sees an even `seq_` value that is unchanged across its entire read. Two `Params` slots
@@ -72,7 +72,7 @@ public:
      * @brief Read the current parameter set (real-time thread).
      *
      * Returns by value under seqlock protection. Spins only if a publish() is
-     * mid-flight — typically zero retries in practice.
+     * mid-flight - typically zero retries in practice.
      *
      * @return Copy of the most recently published Params.
      */
@@ -82,7 +82,7 @@ public:
         uint64_t s0, s1;
         do {
             s0 = seq_.load(std::memory_order_acquire);
-            if (s0 & 1u) continue;  // writer in progress — spin
+            if (s0 & 1u) continue;  // writer in progress - spin
             result = bufs_[active_.load(std::memory_order_acquire)];
             s1 = seq_.load(std::memory_order_acquire);
         } while (s0 != s1);

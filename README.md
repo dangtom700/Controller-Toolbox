@@ -1,6 +1,6 @@
 # Controller Toolbox
 
-A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H∞, Lead-Lag, Smith Predictor, Extremum Seeking, Kalman/EKF/UKF filtering, Fuzzy Logic inference, RLS and N4SID system identification, plus an integrated tuner suite and analysis layer.
+A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, Hinf, Lead-Lag, Smith Predictor, Extremum Seeking, Kalman/EKF/UKF filtering, Fuzzy Logic inference, RLS and N4SID system identification, plus an integrated tuner suite and analysis layer.
 
 Twenty-plus controller implementations, eight tuning families, frequency- and time-domain analysis, controller composition (Supervisory / Additive / Weighted), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.
 

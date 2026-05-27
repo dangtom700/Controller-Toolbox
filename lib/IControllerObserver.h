@@ -9,7 +9,7 @@
  * IController::attachObserver(). The observer is notified on every compute() call with
  * the controller's input signal and the resulting control action.
  *
- * **Usage — logging every output of a PID:**
+ * **Usage - logging every output of a PID:**
  * @code
  *   struct PIDLogger : ctrl::IControllerObserver {
  *       void onCompute(double u, double signal) override {
@@ -58,8 +58,8 @@ public:
      * The default implementation delegates to onCompute() for single-input signals,
      * enabling SISO observers to work transparently with MIMO controllers.
      *
-     * @param u      Control vector produced by the controller (m × 1).
-     * @param signal Input vector passed to computeVec() (n × 1).
+     * @param u      Control vector produced by the controller (m * 1).
+     * @param signal Input vector passed to computeVec() (n * 1).
      */
     virtual void onComputeVec(const Eigen::VectorXd &u, const Eigen::VectorXd &signal)
     {

@@ -17,7 +17,7 @@
  *
  *   double y = sensor.read();        // y[k] = plant output before this step
  *   double u = pid.compute(r - y);
- *   actuator.write(u);               // advances plant → x[k+1]
+ *   actuator.write(u);               // advances plant -> x[k+1]
  * @endcode
  */
 
@@ -47,7 +47,7 @@ public:
     bool   isValid() const override { return true; }
 
     /**
-     * @brief No-op — plant reset is the caller's responsibility.
+     * @brief No-op - plant reset is the caller's responsibility.
      */
     void   reset()         override {}
 

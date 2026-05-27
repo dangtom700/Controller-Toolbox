@@ -3,8 +3,8 @@
  * @brief Advanced Catch2 unit + integration tests for the Controller Toolbox.
  *
  * Coverage targets (all new relative to the legacy hand-rolled suite):
- *   - GradientProjectionQP — direct solver validation
- *   - ControllerStack + IControllerObserver — integration
+ *   - GradientProjectionQP - direct solver validation
+ *   - ControllerStack + IControllerObserver - integration
  *   - DiscreteMPC closed-loop tracking
  *   - GPC vs MPC equivalence (alpha=0)
  *   - KalmanFilter state estimation on a linear system
@@ -23,13 +23,13 @@
 using Catch::Matchers::WithinRel;
 using Catch::Matchers::WithinAbs;
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Shared helpers
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 static constexpr double Ts = 0.01;
 
-// Second-order plant G(s) = 1/(s² + 1.5s + 1), ZOH-discretised.
+// Second-order plant G(s) = 1/(s^2 + 1.5s + 1), ZOH-discretised.
 static ctrl::StateSpace makePlant()
 {
     ctrl::TransferFunction tf(
@@ -52,9 +52,9 @@ static ctrl::StateSpace makeDoubleIntegrator(double ts = Ts)
     return ctrl::StateSpace{A, B, C, D, ts};
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// GradientProjectionQP — direct validation
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// GradientProjectionQP - direct validation
+// -----------------------------------------------------------------------------
 
 TEST_CASE("GradientProjectionQP solves unconstrained QP exactly", "[qp]")
 {
@@ -102,9 +102,9 @@ TEST_CASE("GradientProjectionQP respects active box constraint", "[qp]")
     REQUIRE_THAT(x(0), WithinAbs(-1.0, 1e-8));
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DiscreteMPC — closed-loop step tracking
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// DiscreteMPC - closed-loop step tracking
+// -----------------------------------------------------------------------------
 
 TEST_CASE("DiscreteMPC tracks a unit step reference", "[mpc][integration]")
 {
@@ -154,9 +154,9 @@ TEST_CASE("DiscreteMPC lastQPConverged is true for a well-conditioned problem", 
     REQUIRE(mpc.lastQPIters() > 0);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // GPC vs MPC equivalence when alpha = 0
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 TEST_CASE("GPC with alpha=0 produces same first output as MPC", "[gpc][mpc]")
 {
@@ -189,9 +189,9 @@ TEST_CASE("GPC with alpha=0 produces same first output as MPC", "[gpc][mpc]")
     REQUIRE_THAT(u_mpc, WithinRel(u_gpc, 0.01)); // within 1%
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// KalmanFilter — estimation accuracy on a first-order system
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// KalmanFilter - estimation accuracy on a first-order system
+// -----------------------------------------------------------------------------
 
 TEST_CASE("KalmanFilter converges to true state on a stable first-order plant", "[kalman]")
 {
@@ -249,9 +249,9 @@ TEST_CASE("KalmanFilter covariance is positive semi-definite after updates", "[k
     REQUIRE(eig.eigenvalues().minCoeff() >= -1e-10); // PSD
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DiscreteLQR — closed-loop stability + DareResult fields
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// DiscreteLQR - closed-loop stability + DareResult fields
+// -----------------------------------------------------------------------------
 
 TEST_CASE("DiscreteLQR drives double-integrator state to zero", "[lqr]")
 {
@@ -292,9 +292,9 @@ TEST_CASE("DareResult fields P, converged, iterations are accessible from Discre
     REQUIRE(eig.eigenvalues().minCoeff() >= 0.0); // DARE solution P >= 0
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SuperTwistingSMC — basic tracking
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// SuperTwistingSMC - basic tracking
+// -----------------------------------------------------------------------------
 
 TEST_CASE("SuperTwistingSMC reduces tracking error on a first-order plant", "[smc][super_twisting]")
 {
@@ -303,7 +303,7 @@ TEST_CASE("SuperTwistingSMC reduces tracking error on a first-order plant", "[sm
     p.c_e  = 1.0;
     p.c_de = 0.01;  // = lambda * Ts with lambda=1, Ts=0.01
     p.K1   = 2.0;
-    p.K2   = 3.0;   // K2 > K1^2/4 = 1.0 ✓
+    p.K2   = 3.0;   // K2 > K1^2/4 = 1.0 (check)
     p.uMin = -20.0;
     p.uMax =  20.0;
 
@@ -323,9 +323,9 @@ TEST_CASE("SuperTwistingSMC reduces tracking error on a first-order plant", "[sm
     REQUIRE(std::abs(final_error) < std::abs(initial_error) * 0.05); // error reduced by 95%
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DiscreteLeadLag — phaseAt() returns radians regression guard (P12-21)
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// DiscreteLeadLag - phaseAt() returns radians regression guard (P12-21)
+// -----------------------------------------------------------------------------
 
 TEST_CASE("DiscreteLeadLag::phaseAt() returns radians, not degrees", "[lead_lag][regression]")
 {
@@ -337,20 +337,20 @@ TEST_CASE("DiscreteLeadLag::phaseAt() returns radians, not degrees", "[lead_lag]
 
     ctrl::DiscreteLeadLag ll(p, Ts);
 
-    // At ω = sqrt(zc * pc) = sqrt(10) ≈ 3.16 rad/s, lead phase is maximum.
-    // The analytical max lead angle is arcsin((pc-zc)/(pc+zc)) which is arcsin(9/11)≈54.9°=0.958 rad.
+    // At omega = sqrt(zc * pc) = sqrt(10) approx = 3.16 rad/s, lead phase is maximum.
+    // The analytical max lead angle is arcsin((pc-zc)/(pc+zc)) which is arcsin(9/11)approx =54.9^\circ=0.958 rad.
     const double omega = std::sqrt(p.continuousZero * p.continuousPole);
     const double phase = ll.phaseAt(omega);
 
-    // If this returns degrees, the value would be ~54.9 which would fail the < π test.
-    // If this returns radians, phase < π/2 < π.
-    REQUIRE(phase < std::numbers::pi); // radians: max lead < 90°
+    // If this returns degrees, the value would be ~54.9 which would fail the < pi test.
+    // If this returns radians, phase < pi/2 < pi.
+    REQUIRE(phase < std::numbers::pi); // radians: max lead < 90^\circ
     REQUIRE(phase > 0.0);              // lead: positive phase
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ControllerStack + IControllerObserver — integration test
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// ControllerStack + IControllerObserver - integration test
+// -----------------------------------------------------------------------------
 
 TEST_CASE("ControllerStack fires its own observer on compute()", "[stack][observer][integration]")
 {
@@ -401,9 +401,9 @@ TEST_CASE("ControllerStack fires its own observer on compute()", "[stack][observ
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ControllerStack — Additive mode with multiple controllers
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// ControllerStack - Additive mode with multiple controllers
+// -----------------------------------------------------------------------------
 
 TEST_CASE("ControllerStack Additive mode sums all active controller outputs", "[stack]")
 {
@@ -414,7 +414,7 @@ TEST_CASE("ControllerStack Additive mode sums all active controller outputs", "[
     stack.addController(std::make_shared<ctrl::DiscretePID>(p, Ts), "P1");
     stack.addController(std::make_shared<ctrl::DiscretePID>(p, Ts), "P2");
 
-    // Both controllers: P=1, error=2 → each outputs 2 → sum = 4
+    // Both controllers: P=1, error=2 -> each outputs 2 -> sum = 4
     const double u = stack.compute(2.0);
     REQUIRE_THAT(u, WithinAbs(4.0, 1e-10));
 }
@@ -434,9 +434,9 @@ TEST_CASE("ControllerStack Weighted mode normalises weights correctly", "[stack]
     REQUIRE_THAT(u, WithinAbs(2.0, 1e-10));
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DiscreteSMC — sliding surface convergence
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// DiscreteSMC - sliding surface convergence
+// -----------------------------------------------------------------------------
 
 TEST_CASE("DiscreteSMC sliding surface enters boundary layer", "[smc]")
 {
@@ -463,9 +463,9 @@ TEST_CASE("DiscreteSMC sliding surface enters boundary layer", "[smc]")
     REQUIRE(std::abs(smc.slidingSurface()) < p.phi * 2.0); // within 2x boundary layer
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DiscreteADRC — tracks unit step reference
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// DiscreteADRC - tracks unit step reference
+// -----------------------------------------------------------------------------
 
 TEST_CASE("DiscreteADRC tracks unit step reference on a first-order-like plant", "[adrc]")
 {
@@ -490,9 +490,9 @@ TEST_CASE("DiscreteADRC tracks unit step reference on a first-order-like plant",
     REQUIRE_THAT(y, WithinAbs(1.0, 0.05)); // within 5% of reference
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DiscreteLeadLag — closed-loop phase improvement
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// DiscreteLeadLag - closed-loop phase improvement
+// -----------------------------------------------------------------------------
 
 TEST_CASE("DiscreteLeadLag output is non-trivially filtered", "[lead_lag]")
 {
@@ -514,14 +514,14 @@ TEST_CASE("DiscreteLeadLag output is non-trivially filtered", "[lead_lag]")
     REQUIRE(u_ss > 0.0); // non-zero steady state
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// RecursiveLeastSquares — online identification
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+// RecursiveLeastSquares - online identification
+// -----------------------------------------------------------------------------
 
 TEST_CASE("RecursiveLeastSquares identifies first-order ARX coefficients", "[rls]")
 {
     // True plant: y[k] = 0.8*y[k-1] + 0.2*u[k-1]  ->  ARX: y = -(-0.8)*y_prev + 0.2*u_prev
-    // ARX parameter vector θ = [a1, b1] = [-0.8, 0.2]  (in MATLAB convention)
+    // ARX parameter vector theta = [a1, b1] = [-0.8, 0.2]  (in MATLAB convention)
     // Actually: y[k] + a1*y[k-1] = b1*u[k-1]  ->  a1=-0.8, b1=0.2
     // Standard form: y[k] = phi'[k] * theta  where phi = [-y[k-1], u[k-1]]
     ctrl::RecursiveLeastSquares rls(1, 1, Ts, 0.99);

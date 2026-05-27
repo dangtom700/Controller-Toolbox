@@ -3,7 +3,7 @@
 
 /**
  * @file DiscreteSMC.h
- * @brief Discrete-time Sliding Mode Controllers — first-order SMC and super-twisting SMC.
+ * @brief Discrete-time Sliding Mode Controllers - first-order SMC and super-twisting SMC.
  *
  * @see Utkin, "Sliding Modes in Control and Optimization" (1992).
  * @see Edwards & Spurgeon, "Sliding Mode Control: Theory and Applications" (1998).
@@ -22,32 +22,32 @@ struct SMCParams
     /**
      * @brief Error weight in the sliding surface.
      *
-     * Together with c_de, determines the sliding surface bandwidth. Setting σ = 0 and
+     * Together with c_de, determines the sliding surface bandwidth. Setting sigma = 0 and
      * substituting the discrete derivative gives the continuous convergence rate:
      * @code
-     *   ω_s = c_e · Ts / c_de   [rad/s]
+     *   omega_s = c_e . Ts / c_de   [rad/s]
      * @endcode
-     * Choose c_e and c_de so that ω_s matches the desired closed-loop bandwidth. Larger
-     * c_e relative to c_de → faster convergence but higher sensitivity to noise in e.
+     * Choose c_e and c_de so that omega_s matches the desired closed-loop bandwidth. Larger
+     * c_e relative to c_de -> faster convergence but higher sensitivity to noise in e.
      */
     double c_e  = 1.0;
 
     /**
-     * @brief Error-rate weight in the sliding surface (discrete, stores λ·Ts).
+     * @brief Error-rate weight in the sliding surface (discrete, stores lambda.Ts).
      *
      * @par Sample-time dependence (calibration trap)
-     * The discrete derivative is approximated as (e[k] − e[k−1]) / Ts. Therefore c_de is
+     * The discrete derivative is approximated as (e[k] - e[k-1]) / Ts. Therefore c_de is
      * implicitly Ts-dependent: halving Ts doubles the surface sensitivity without any
      * parameter change.
      *
      * **Convention:** c_de stores the **discrete** coefficient, i.e., c_de already absorbs Ts.
-     * To convert from a continuous-time slope λ [1/s]:
+     * To convert from a continuous-time slope lambda [1/s]:
      * @code
      *   c_de = lambda * Ts
      * @endcode
      * Recalculate c_de whenever Ts changes.
      *
-     * Larger c_de → faster convergence to the sliding surface but more chattering.
+     * Larger c_de -> faster convergence to the sliding surface but more chattering.
      */
     double c_de = 0.1;
 
@@ -62,18 +62,18 @@ struct SMCParams
  *
  * **Sliding surface:**
  * @code
- *   s[k] = c_e·e[k] + c_de·(e[k] − e[k−1])
+ *   s[k] = c_e.e[k] + c_de.(e[k] - e[k-1])
  * @endcode
  *
  * **Control law (sat replaces sign to reduce chattering):**
  * @code
- *   u[k] = −K·sat(s[k] / φ)
- *   sat(x) = x          if |x| ≤ 1   (linear PD inside the boundary layer)
+ *   u[k] = -K.sat(s[k] / phi)
+ *   sat(x) = x          if |x| <= 1   (linear PD inside the boundary layer)
  *   sat(x) = sign(x)    if |x| > 1   (relay switching outside)
  * @endcode
  *
- * Setting φ → 0 recovers ideal relay SMC with chattering.
- * Setting φ large gives a soft PD approximation.
+ * Setting phi -> 0 recovers ideal relay SMC with chattering.
+ * Setting phi large gives a soft PD approximation.
  */
 class DiscreteSMC : public IController
 {
@@ -86,7 +86,7 @@ public:
     explicit DiscreteSMC(const SMCParams &params, double sampleTime);
 
     /**
-     * @brief Compute u[k] from tracking error e[k] = r[k] − y[k].
+     * @brief Compute u[k] from tracking error e[k] = r[k] - y[k].
      * @param error Current tracking error.
      * @return Saturated control output u[k].
      */
@@ -110,7 +110,7 @@ public:
     /**
      * @brief Current sliding surface value s[k].
      *
-     * Useful for monitoring convergence. |s[k]| < φ indicates operation inside the
+     * Useful for monitoring convergence. |s[k]| < phi indicates operation inside the
      * boundary layer (linear PD regime).
      */
     double slidingSurface() const { return s_prev_; }
@@ -118,12 +118,12 @@ public:
 private:
     SMCParams p_;
     double Ts_;
-    double e_prev_; ///< Previous error e[k−1].
-    double s_prev_; ///< Previous sliding surface s[k−1].
-    double u_prev_; ///< Previous output u[k−1].
+    double e_prev_; ///< Previous error e[k-1].
+    double s_prev_; ///< Previous sliding surface s[k-1].
+    double u_prev_; ///< Previous output u[k-1].
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 /**
  * @brief Tuning parameters for SuperTwistingSMC.
@@ -131,9 +131,9 @@ private:
 struct SuperTwistingParams
 {
     double c_e  = 1.0;  ///< Error weight in the sliding surface (same convention as SMCParams).
-    double c_de = 0.1;  ///< Error-rate weight (discrete; stores λ·Ts — see SMCParams::c_de).
+    double c_de = 0.1;  ///< Error-rate weight (discrete; stores lambda.Ts - see SMCParams::c_de).
     double K1   = 3.0;  ///< Power-term gain (|s|^{1/2} component).
-    double K2   = 5.0;  ///< Integral gain (sign(s) component). Must satisfy K2 > K1² / 4.
+    double K2   = 5.0;  ///< Integral gain (sign(s) component). Must satisfy K2 > K1^2 / 4.
     double uMin = -1e9; ///< Output saturation lower limit.
     double uMax =  1e9; ///< Output saturation upper limit.
 };
@@ -146,19 +146,19 @@ struct SuperTwistingParams
  *
  * **Continuous-time super-twisting law (Levant 1993):**
  * @code
- *   u[k]   = v[k] − K₁·|s|^{1/2}·sign(s)
- *   v̇[k]   = −K₂·sign(s)
+ *   u[k]   = v[k] - K1.|s|^{1/2}.sign(s)
+ *   v.[k]   = -K2.sign(s)
  * @endcode
  *
  * **Discrete approximation (Euler integration of v):**
  * @code
- *   s[k]   = c_e·e[k] + c_de·(e[k] − e[k−1])
- *   u[k]   = v[k] − K₁·|s[k]|^{1/2}·sign(s[k])
- *   v[k+1] = v[k] − K₂·Ts·sign(s[k])
+ *   s[k]   = c_e.e[k] + c_de.(e[k] - e[k-1])
+ *   u[k]   = v[k] - K1.|s[k]|^{1/2}.sign(s[k])
+ *   v[k+1] = v[k] - K2.Ts.sign(s[k])
  * @endcode
  *
- * **Gain selection (Moreno & Osorio 2008):** K₁ > 0 and K₂ > K₁²/4 is sufficient for
- * finite-time convergence in continuous time. In discrete time, keep K₂·Ts ≪ K₁ to
+ * **Gain selection (Moreno & Osorio 2008):** K1 > 0 and K2 > K1^2/4 is sufficient for
+ * finite-time convergence in continuous time. In discrete time, keep K2.Ts ≪ K1 to
  * limit discretisation error.
  */
 class SuperTwistingSMC : public IController
@@ -172,7 +172,7 @@ public:
     explicit SuperTwistingSMC(const SuperTwistingParams &params, double sampleTime);
 
     /**
-     * @brief Compute u[k] from tracking error e[k] = r[k] − y[k].
+     * @brief Compute u[k] from tracking error e[k] = r[k] - y[k].
      * @param error Current tracking error.
      * @return Saturated control output u[k].
      */
@@ -195,15 +195,15 @@ public:
 
     /**
      * @brief Current sliding surface value s[k] (for diagnostics).
-     * @return s[k] = c_e·e[k] + c_de·(e[k] − e[k−1]).
+     * @return s[k] = c_e.e[k] + c_de.(e[k] - e[k-1]).
      */
     double slidingSurface() const { return s_prev_; }
 
 private:
     SuperTwistingParams p_;
     double Ts_;
-    double e_prev_; ///< Previous error e[k−1].
-    double s_prev_; ///< Previous sliding surface s[k−1].
+    double e_prev_; ///< Previous error e[k-1].
+    double s_prev_; ///< Previous sliding surface s[k-1].
     double v_;      ///< Integrator state of the super-twisting algorithm.
 };
 

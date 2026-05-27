@@ -7,23 +7,23 @@
 
 /**
  * @file FunctionApproximator.h
- * @brief Data-driven Taylor (polynomial) and Padé (rational) function approximation.
+ * @brief Data-driven Taylor (polynomial) and Pade (rational) function approximation.
  *
  * Both backends fit an approximant by solving a linear least-squares problem against supplied
- * (x, y) sample pairs — no symbolic function is required. This matches the toolbox's
+ * (x, y) sample pairs - no symbolic function is required. This matches the toolbox's
  * identification-from-data philosophy (same as RLS and N4SID).
  *
- * **Taylor (polynomial) backend** — fits f(x) ≈ a₀ + a₁x + … + aₙxⁿ via a Vandermonde
+ * **Taylor (polynomial) backend** - fits f(x) approx = a0 + a1x + ... + a_nx^n via a Vandermonde
  * least-squares system. Best for smooth functions away from poles; watch out for Runge's
- * phenomenon with high degrees (keep n ≤ 8 unless data is very dense and well-behaved).
+ * phenomenon with high degrees (keep n <= 8 unless data is very dense and well-behaved).
  *
- * **Padé (rational) backend** — fits f(x) ≈ P(x)/Q(x) with deg(P) = m, deg(Q) = n,
- * Q(0) = 1, via the linearised Sanathanan–Koerner least-squares approach. Best for
+ * **Pade (rational) backend** - fits f(x) approx = P(x)/Q(x) with deg(P) = m, deg(Q) = n,
+ * Q(0) = 1, via the linearised Sanathanan-Koerner least-squares approach. Best for
  * functions with poles or asymptotes; check hasPoleInDomain() before evaluation to avoid
  * division by zero.
  *
- * @see Baker & Graves-Morris, "Padé Approximants" (1996).
- * @see Åström & Wittenmark, "Computer Controlled Systems" §6.4 (1997).
+ * @see Baker & Graves-Morris, "Pade Approximants" (1996).
+ * @see Astrom & Wittenmark, "Computer Controlled Systems" Section 6.4 (1997).
  */
 
 namespace ctrl
@@ -54,7 +54,7 @@ public:
     double evaluate(double x) const;
 
     /**
-     * @brief Polynomial coefficients a[0…degree]: f(x) = a[0] + a[1]·x + … + a[n]·xⁿ.
+     * @brief Polynomial coefficients a[0...degree]: f(x) = a[0] + a[1].x + ... + a[n].x^n.
      */
     const std::vector<double> &coefficients() const { return coeffs_; }
 
@@ -73,19 +73,19 @@ private:
     double              rmse_;
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 /**
- * @brief Rational function approximator (Padé / Sanathanan–Koerner least squares).
+ * @brief Rational function approximator (Pade / Sanathanan-Koerner least squares).
  *
- * Fits f(x) ≈ P(x)/Q(x), deg(P) = m, deg(Q) = n, Q(0) = 1. The denominator normalisation
+ * Fits f(x) approx = P(x)/Q(x), deg(P) = m, deg(Q) = n, Q(0) = 1. The denominator normalisation
  * avoids the trivial all-zero solution of the unconstrained bilinear problem.
  */
 class PadeApproximator
 {
 public:
     /**
-     * @brief Fit a [m/n] Padé rational approximant to data (xs, ys).
+     * @brief Fit a [m/n] Pade rational approximant to data (xs, ys).
      * @param xs         Input sample vector.
      * @param ys         Output sample vector, same length as xs.
      * @param num_degree Numerator degree m. Require xs.size() > m + n.
@@ -101,17 +101,17 @@ public:
      * @brief Evaluate P(x)/Q(x) at @p x.
      * @param x Evaluation point.
      * @return Approximate f(x).
-     * @throws std::domain_error If Q(x) ≈ 0 (pole near evaluation point).
+     * @throws std::domain_error If Q(x) approx = 0 (pole near evaluation point).
      */
     double evaluate(double x) const;
 
     /**
-     * @brief Numerator coefficients p[0…m]: P(x) = p[0] + p[1]·x + … + p[m]·xᵐ.
+     * @brief Numerator coefficients p[0...m]: P(x) = p[0] + p[1].x + ... + p[m].x^m.
      */
     const std::vector<double> &numerator()   const { return p_; }
 
     /**
-     * @brief Denominator coefficients q[0…n] with q[0] = 1: Q(x) = 1 + q[1]·x + … + q[n]·xⁿ.
+     * @brief Denominator coefficients q[0...n] with q[0] = 1: Q(x) = 1 + q[1].x + ... + q[n].x^n.
      */
     const std::vector<double> &denominator() const { return q_; }
 
@@ -137,9 +137,9 @@ public:
     bool hasPoleInDomain(double x_lo, double x_hi, int n_pts = 1000) const;
 
     /**
-     * @brief Convert a [1/1] Padé approximant to a discrete-time StateSpace filter.
+     * @brief Convert a [1/1] Pade approximant to a discrete-time StateSpace filter.
      *
-     * Treats the approximant as a rational function of z⁻¹ and converts via controllable
+     * Treats the approximant as a rational function of z^-^1 and converts via controllable
      * canonical form.
      *
      * @param Ts Sample time [s].
@@ -149,23 +149,23 @@ public:
     StateSpace toDiscreteFilter(double Ts) const;
 
 private:
-    std::vector<double> p_; ///< Numerator coefficients [p0, p1, …, pm].
-    std::vector<double> q_; ///< Denominator coefficients [1, q1, …, qn].
+    std::vector<double> p_; ///< Numerator coefficients [p0, p1, ..., pm].
+    std::vector<double> q_; ///< Denominator coefficients [1, q1, ..., qn].
     double              rmse_;
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 /**
- * @brief Build a first-order Padé filter for fractional dead-time compensation.
+ * @brief Build a first-order Pade filter for fractional dead-time compensation.
  *
- * Returns a 1-state discrete StateSpace representing e^{−θ_frac·s} to first order,
+ * Returns a 1-state discrete StateSpace representing e^{-theta_frac.s} to first order,
  * discretised via Tustin:
  * @code
- *   Continuous:  H(s) = (1 − 0.5·θ_frac·s) / (1 + 0.5·θ_frac·s)
+ *   Continuous:  H(s) = (1 - 0.5.theta_frac.s) / (1 + 0.5.theta_frac.s)
  * @endcode
  *
- * Typical use — absorbing a fractional delay into a SmithPredictor:
+ * Typical use - absorbing a fractional delay into a SmithPredictor:
  * @code
  *   int    d_int    = static_cast<int>(theta / Ts);   // integer steps
  *   double theta_fr = theta - d_int * Ts;             // sub-sample remainder
@@ -173,10 +173,10 @@ private:
  *   ctrl::SmithPredictor sp(inner, G0, d_int, Hfrac);
  * @endcode
  *
- * @param theta_frac Fractional dead time θ_frac ∈ (0, Ts) [s].
+ * @param theta_frac Fractional dead time theta_frac \in (0, Ts) [s].
  *                   If 0, returns a unit-gain static StateSpace (no dynamics).
  * @param Ts         Sample time [s].
- * @return 1-state discrete StateSpace approximating e^{−θ_frac·s}.
+ * @return 1-state discrete StateSpace approximating e^{-theta_frac.s}.
  */
 StateSpace padeDelayFilter(double theta_frac, double Ts);
 

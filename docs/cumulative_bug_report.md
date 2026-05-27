@@ -1275,10 +1275,10 @@ Items from prior parts that remain open are unchanged. New items from this pass:
 
 ---
 
-## Part 10: External Senior Review — 2026-05-26 (Rev 5)
+## Part 10: External Senior Review - 2026-05-26 (Rev 5)
 
 **Reviewer:** External Senior Controls Engineer (peer review, fourth external pass)
-**Scope:** Full codebase — `lib/`, `tests/`, `.github/workflows/`, `docs/`, `case-study/`, `examples/`. Read against actual source only.
+**Scope:** Full codebase - `lib/`, `tests/`, `.github/workflows/`, `docs/`, `case-study/`, `examples/`. Read against actual source only.
 **Tone:** Informal, peer-to-peer, critical. Useful over diplomatic.
 **Benchmarks referenced:** python-control, ACADO, CasADi, Eigen, ControlSystems.jl (Julia), OpenModelica, Modelica Standard Library.
 **Priority focus areas:** PID tuning and state-space representation methodologies; performance benchmarks; CI/CD infrastructure; code quality and security; documentation generation.
@@ -1287,27 +1287,27 @@ Items from prior parts that remain open are unchanged. New items from this pass:
 
 ### Preamble
 
-Congratulations — this is genuinely one of the better open-source control libraries I have reviewed. Most C++ control toolboxes stop at PID and maybe an LQR with a canned Riccati solver. This one has DGKF H-infinity synthesis, a proper doubling DARE solver, seqlock parameter updates, a full fuzzy inference engine, and three working case studies. That's a lot of engineering.
+Congratulations - this is genuinely one of the better open-source control libraries I have reviewed. Most C++ control toolboxes stop at PID and maybe an LQR with a canned Riccati solver. This one has DGKF H-infinity synthesis, a proper doubling DARE solver, seqlock parameter updates, a full fuzzy inference engine, and three working case studies. That's a lot of engineering.
 
 But "impressive" and "complete" are not synonyms, and Parts 1-9 of this document have already proven the gap between them. This pass adds findings that *weren't captured before*, grouped by the priority focus areas you asked for. Nothing here contradicts Parts 1-9; this is additive.
 
 ---
 
-### 1. PID Tuning Methodology — Detailed Assessment
+### 1. PID Tuning Methodology - Detailed Assessment
 
 #### 1.1 Anti-Windup Back-Calculation: Kb = 1.0 Default Is Not Universally Appropriate
 
-The `PIDParams::Kb` field defaults to `1.0`. In the back-calculation scheme the effective anti-windup time constant is `T_aw = Td / Kb`, or equivalently, the windup correction at each step is `Kb * (u_sat - u_unsat)`. Åström & Wittenmark recommend `Kb` in the range `[1/Ti, 1/Td]`, i.e., the reset should be no faster than the integral time constant and no slower than the derivative time constant.
+The `PIDParams::Kb` field defaults to `1.0`. In the back-calculation scheme the effective anti-windup time constant is `T_aw = Td / Kb`, or equivalently, the windup correction at each step is `Kb * (u_sat - u_unsat)`. Astrom & Wittenmark recommend `Kb` in the range `[1/Ti, 1/Td]`, i.e., the reset should be no faster than the integral time constant and no slower than the derivative time constant.
 
-For a controller with `Ki = 0` (pure PD), `Kb = 1.0` is harmless — there is no integral to wind up. For a controller with large `Ki` (fast-integrating plant), `Kb = 1.0` may make the anti-windup *slower* than the integrator, which means saturation recovery is sluggish. The existing comment in `DiscretePID.h` documents `Kb = 0 = disabled` and `Kb = 1.0 = default` but says nothing about tuning `Kb` relative to `Ki` and `Kd`.
+For a controller with `Ki = 0` (pure PD), `Kb = 1.0` is harmless - there is no integral to wind up. For a controller with large `Ki` (fast-integrating plant), `Kb = 1.0` may make the anti-windup *slower* than the integrator, which means saturation recovery is sluggish. The existing comment in `DiscretePID.h` documents `Kb = 0 = disabled` and `Kb = 1.0 = default` but says nothing about tuning `Kb` relative to `Ki` and `Kd`.
 
-Reference: Åström & Wittenmark "Computer Controlled Systems" §3.5 gives the recommended range explicitly. We cite the book in `DiscretePID.h` line 15 — we should also use it here.
+Reference: Astrom & Wittenmark "Computer Controlled Systems" Section 3.5 gives the recommended range explicitly. We cite the book in `DiscretePID.h` line 15 - we should also use it here.
 
 **Proposed addition to `PIDParams::Kb` comment:**
 
 ```cpp
 // Anti-windup back-calculation gain (0 = disabled, 1 = default).
-// Recommended range (Astrom & Wittenmark §3.5): 1/Ti <= Kb <= 1/Td
+// Recommended range (Astrom & Wittenmark Section 3.5): 1/Ti <= Kb <= 1/Td
 //   - Kb = 1/Ti  (slow reset): gentlest recovery; good for plants with long dead times.
 //   - Kb = 1/Td  (fast reset): fastest recovery; may cause derivative kick on re-entry.
 //   - Kb = sqrt(Ki/Kd) is a geometric-mean rule of thumb for balanced reset.
@@ -1315,7 +1315,7 @@ Reference: Åström & Wittenmark "Computer Controlled Systems" §3.5 gives the r
 // At Kb = 1.0 (default): reasonable for many processes but may be slow for high-Ki loops.
 ```
 
-**Status:** `[OPEN]` — documentation gap, no code change needed.
+**Status:** `[OPEN]` - documentation gap, no code change needed.
 
 ---
 
@@ -1325,9 +1325,9 @@ Reference: Åström & Wittenmark "Computer Controlled Systems" §3.5 gives the r
 
 Compare ControlSystems.jl's `pidplant()`: it returns not just the PID gains but the predicted closed-loop poles, damping ratio, and crossover frequency. A post-tuning analysis step that computes these would be a one-call wrapper around `SystemAnalysis::calculateMargins()` applied to the closed-loop transfer function.
 
-This is not a tuner defect — ZN overshoot behavior is well-known. But it's a usability gap. A `TunerResult` struct that carried `{Kp, Ki, Kd, predicted_overshoot_pct, predicted_settling_time_s, predicted_crossover_rad_s}` would make the tuning output self-documenting.
+This is not a tuner defect - ZN overshoot behavior is well-known. But it's a usability gap. A `TunerResult` struct that carried `{Kp, Ki, Kd, predicted_overshoot_pct, predicted_settling_time_s, predicted_crossover_rad_s}` would make the tuning output self-documenting.
 
-**Status:** `[OPEN]` — enhancement, tracked as P10-1.
+**Status:** `[OPEN]` - enhancement, tracked as P10-1.
 
 ---
 
@@ -1337,7 +1337,7 @@ The AMIGO (Approximate M-constrained Integral Gain Optimization) rules are speci
 
 MATLAB's `pidtune()` has an internal check and selects a different rule when the ratio is out of range. We should at minimum warn via `std::cerr` when `theta/tau` falls outside `[0.05, 3.0]`.
 
-**Status:** `[OPEN]` — correctness-adjacent, tracked as P10-2.
+**Status:** `[OPEN]` - correctness-adjacent, tracked as P10-2.
 
 ---
 
@@ -1351,11 +1351,11 @@ The standard mitigation is **derivative on measurement** (DoM): compute `d[k] = 
 
 The fix is low-effort: add an optional `computeDoM(double y, double r)` that routes the derivative through `y` only. The proportional and integral terms remain on `e = r - y`.
 
-**Status:** `[OPEN]` — enhancement, tracked as P10-3.
+**Status:** `[OPEN]` - enhancement, tracked as P10-3.
 
 ---
 
-### 2. State-Space Representation — Detailed Assessment
+### 2. State-Space Representation - Detailed Assessment
 
 #### 2.1 `PlantModel::c2d()`: Tustin Method Has No Pre-Warping Option
 
@@ -1363,7 +1363,7 @@ The fix is low-effort: add an optional `computeDoM(double y, double r)` that rou
 
 MATLAB's `c2d(..., 'tustin', 'PrewarpFrequency', omega_c)` corrects this with the substitution `s -> omega_c / tan(omega_c*Ts/2) * (z-1)/(z+1)`. The toolbox has no equivalent. Users who discretise a continuous-time lead-lag or H-infinity controller via Tustin without pre-warping will place the discrete crossover at the wrong frequency.
 
-This is especially relevant because `DiscreteLeadLag` is typically designed in continuous time and then discretised. If the designer targets `omega_c = 50 rad/s` at `Ts = 0.01 s`, `omega_c * Ts = 0.5 rad` — the warping error is `tan(0.25) / 0.25 - 1 ≈ 8.5%`. That's not negligible.
+This is especially relevant because `DiscreteLeadLag` is typically designed in continuous time and then discretised. If the designer targets `omega_c = 50 rad/s` at `Ts = 0.01 s`, `omega_c * Ts = 0.5 rad` - the warping error is `tan(0.25) / 0.25 - 1 approx = 8.5%`. That's not negligible.
 
 **Add to `c2d()` Tustin case:**
 
@@ -1376,7 +1376,7 @@ This is especially relevant because `DiscreteLeadLag` is typically designed in c
 
 And add `c2dTustin(const StateSpace&, double Ts, double omega_prewarp)` as a named alternative.
 
-**Status:** `[OPEN]` — medium-priority enhancement, tracked as P10-4.
+**Status:** `[OPEN]` - medium-priority enhancement, tracked as P10-4.
 
 ---
 
@@ -1386,9 +1386,9 @@ The `StateSpace` struct (via `tf2ss()` or `c2d()`) can carry uncontrollable or u
 
 MATLAB's `minreal()` removes uncontrollable/unobservable states via a Schur-based method. The toolbox has no equivalent. For users who construct their plant from measured transfer functions with near-cancellations (common in resonant mechanical systems), they'll get an inflated model and slow controllers without knowing why.
 
-A `minreal(plant, tol)` free function that calls `Eigen::ColPivHouseholderQR` to find the minimal representation would be a 50-line addition. It doesn't need to be perfect — the user should know it ran.
+A `minreal(plant, tol)` free function that calls `Eigen::ColPivHouseholderQR` to find the minimal representation would be a 50-line addition. It doesn't need to be perfect - the user should know it ran.
 
-**Status:** `[OPEN]` — enhancement, tracked as P10-5.
+**Status:** `[OPEN]` - enhancement, tracked as P10-5.
 
 ---
 
@@ -1396,15 +1396,15 @@ A `minreal(plant, tol)` free function that calls `Eigen::ColPivHouseholderQR` to
 
 The SVD in `n4sid()` doesn't regularise the Hankel matrix before decomposition. For short data records or plants with closely-spaced poles, the Hankel matrix is near-rank-deficient and the truncation at `n_order` singular values is numerically noisy. The identified model will have poles that are sensitive to the singular value threshold.
 
-Standard practice (e.g., van Overschee & De Moor 1996, §4.3) adds a regularisation parameter `epsilon` to the diagonal of the Hankel before SVD, or uses a `TruncatedSVD` at a fixed tolerance rather than a fixed rank. The current implementation uses a fixed rank.
+Standard practice (e.g., van Overschee & De Moor 1996, Section 4.3) adds a regularisation parameter `epsilon` to the diagonal of the Hankel before SVD, or uses a `TruncatedSVD` at a fixed tolerance rather than a fixed rank. The current implementation uses a fixed rank.
 
 A `N4SIDParams::svd_tol` field (default 0, meaning use rank directly) that triggers relative-threshold SVD truncation instead of fixed-rank would handle this without breaking existing API.
 
-**Status:** `[OPEN]` — enhancement, tracked as P10-6.
+**Status:** `[OPEN]` - enhancement, tracked as P10-6.
 
 ---
 
-### 3. CI/CD Infrastructure — Gap Analysis and Proposals
+### 3. CI/CD Infrastructure - Gap Analysis and Proposals
 
 #### 3.1 clang-tidy Workflow: `--warnings-as-errors=*` Will Break on Any New Header
 
@@ -1434,13 +1434,13 @@ CheckOptions:
 
 Without this, the clang-tidy job is either currently broken or one Eigen update away from breaking. Verify it passes on a fresh checkout before shipping.
 
-**Status:** `[OPEN]` — CI robustness risk, tracked as P10-7.
+**Status:** `[OPEN]` - CI robustness risk, tracked as P10-7.
 
 ---
 
 #### 3.2 Code Coverage: `ENABLE_COVERAGE=ON` but No Coverage Threshold Gate
 
-The ci-cd.yml coverage job collects `lcov` data and uploads to Codecov. It does not define a minimum coverage threshold — `fail_ci_if_error: false` means Codecov failures are silently ignored. A PR that drops coverage from 85% to 40% will pass CI. That's a monitoring setup, not a coverage gate.
+The ci-cd.yml coverage job collects `lcov` data and uploads to Codecov. It does not define a minimum coverage threshold - `fail_ci_if_error: false` means Codecov failures are silently ignored. A PR that drops coverage from 85% to 40% will pass CI. That's a monitoring setup, not a coverage gate.
 
 The standard Codecov configuration uses a `codecov.yml` file with:
 
@@ -1460,7 +1460,7 @@ This would fail CI when a PR's covered lines drop below 70% or the project total
 
 Additionally: the `lcov --remove` command excludes `*/tests/*` from coverage. This is correct for avoiding self-coverage of test infrastructure, but it also means `test_framework.h` helper coverage is excluded. Verify the exclusion patterns are correct against the actual build tree.
 
-**Status:** `[OPEN]` — CI quality gap, tracked as P10-8.
+**Status:** `[OPEN]` - CI quality gap, tracked as P10-8.
 
 ---
 
@@ -1482,7 +1482,7 @@ COPY --from=builder /build/controller_tests /usr/local/bin/
 
 Without multi-stage, the Docker image includes the entire Eigen header tree, CMake, and compiler toolchain. For an embedded control library where the Docker image is used as a CI runner, this inflates pull time and cache misuse. For users who pull the image to run tests, they'll get a 1-2 GB image when 100 MB would do.
 
-**Status:** `[OPEN]` — Docker quality gap, tracked as P10-9.
+**Status:** `[OPEN]` - Docker quality gap, tracked as P10-9.
 
 ---
 
@@ -1492,7 +1492,7 @@ The `release` job creates a source archive but generates no SBOM. For a library 
 
 This is not an immediate correctness concern but will matter when this library is used in anything regulated.
 
-**Status:** `[OPEN]` — compliance gap, tracked as P10-10.
+**Status:** `[OPEN]` - compliance gap, tracked as P10-10.
 
 ---
 
@@ -1506,7 +1506,7 @@ The project has two CI workflow files:
 
 Looking at the differences: `ci.yml` does not set `ENABLE_COVERAGE=ON` on the Linux build. `ci-cd.yml` does. Otherwise the matrix and steps are identical. This means Linux builds in `ci.yml` have no coverage instrumentation (which is fine), but they're still redundant with `ci-cd.yml`'s `build-test` job. Delete `ci.yml` and save the runner minutes.
 
-**Status:** `[OPEN]` — operational waste, tracked as P10-11.
+**Status:** `[OPEN]` - operational waste, tracked as P10-11.
 
 ---
 
@@ -1514,7 +1514,7 @@ Looking at the differences: `ci.yml` does not set `ENABLE_COVERAGE=ON` on the Li
 
 #### 4.1 `Doxyfile` Exists but Is Not Wired to CI
 
-The root `Doxyfile` (3.8 KB) is present. The `docs.yml` workflow (1.1 KB) exists. However, `docs.yml` triggers are not visible without reading it — if it deploys to GitHub Pages, that's the right pattern. If it only runs Doxygen locally, that's not useful in CI.
+The root `Doxyfile` (3.8 KB) is present. The `docs.yml` workflow (1.1 KB) exists. However, `docs.yml` triggers are not visible without reading it - if it deploys to GitHub Pages, that's the right pattern. If it only runs Doxygen locally, that's not useful in CI.
 
 Looking at the `docs.yml`:
 
@@ -1522,11 +1522,11 @@ Looking at the `docs.yml`:
 # docs.yml
 ```
 
-It's 1.1 KB — likely it runs `doxygen Doxyfile` and either fails silently or uploads to GitHub Pages. The critical question: does `docs.yml` fail if Doxygen emits warnings? A Doxygen warning (undocumented parameter, mismatched `@param` name) indicates a documentation regression. It should fail CI, not be ignored.
+It's 1.1 KB - likely it runs `doxygen Doxyfile` and either fails silently or uploads to GitHub Pages. The critical question: does `docs.yml` fail if Doxygen emits warnings? A Doxygen warning (undocumented parameter, mismatched `@param` name) indicates a documentation regression. It should fail CI, not be ignored.
 
 Add `WARN_AS_ERROR = YES` to the `Doxyfile` and set `EXIT_WITH_WARNINGS = YES`. Then any undocumented function or mismatched `@param` will fail the docs job, catching documentation regressions the same way `--warnings-as-errors` catches code regressions.
 
-**Status:** `[OPEN]` — documentation quality gate, tracked as P10-12.
+**Status:** `[OPEN]` - documentation quality gate, tracked as P10-12.
 
 ---
 
@@ -1537,7 +1537,7 @@ The repository has `README.md` and extensive `docs/` but no `CONTRIBUTING.md`. F
 - There are no PR templates, so PRs arrive without the context needed to review them efficiently.
 - New contributors who find the project won't know how to run the test suite or build the Docker image locally.
 
-Compare Eigen's `CONTRIBUTING.md` — it explains coding style, the review process, CI expectations, and how to add a new test. ControlSystems.jl has a `CONTRIBUTING.md` that explains how to add a new controller type and run the test suite. Both are 1-2 pages and exist specifically to lower the activation energy for first-time contributors.
+Compare Eigen's `CONTRIBUTING.md` - it explains coding style, the review process, CI expectations, and how to add a new test. ControlSystems.jl has a `CONTRIBUTING.md` that explains how to add a new controller type and run the test suite. Both are 1-2 pages and exist specifically to lower the activation energy for first-time contributors.
 
 A minimal `CONTRIBUTING.md` should include:
 
@@ -1575,7 +1575,7 @@ All PRs must pass: build (GCC, Clang, MSVC), clang-tidy, tests (100% pass rate),
 
 This is 15 minutes of writing that pays dividends every time someone considers contributing.
 
-**Status:** `[OPEN]` — community gap, tracked as P10-13.
+**Status:** `[OPEN]` - community gap, tracked as P10-13.
 
 ---
 
@@ -1595,7 +1595,7 @@ if (!last_qp_converged_)
 
 This should be gated by an optional verbosity flag (default off for RT use) to avoid log flooding in real-time loops.
 
-**Status:** `[OPEN]` — diagnostic gap, tracked as P10-14.
+**Status:** `[OPEN]` - diagnostic gap, tracked as P10-14.
 
 ---
 
@@ -1611,22 +1611,22 @@ mutable std::vector<double>              strengths_;
 This is a well-known anti-pattern. `mutable` here means "the object's logical state is unchanged but the physical state may change." This is acceptable for caches but not for workspace scratch space, because it means two concurrent calls to `evaluate()` on the same `FuzzySystem` object will race on `mu_` and `strengths_`. The `const` qualifier implies thread-safety to most C++ readers; the `mutable` workspace violates that expectation.
 
 The fix is to either:
-1. Remove `const` from `evaluate()` (honest — the object's scratch space *does* change), or
+1. Remove `const` from `evaluate()` (honest - the object's scratch space *does* change), or
 2. Use thread-local storage for the workspace: `thread_local std::vector<double> strengths;`
 
 For an embedded RT system (single-threaded), option 1 is cleaner. For a multi-threaded simulation environment, option 2 is correct.
 
-The header comment says "Declared mutable so `evaluate()` can fill them without losing `const` correctness on the logical state." That's exactly the anti-pattern — `const` correctness on *logical* state is what `const` means, and the workspace is part of the physical state, not the logical state.
+The header comment says "Declared mutable so `evaluate()` can fill them without losing `const` correctness on the logical state." That's exactly the anti-pattern - `const` correctness on *logical* state is what `const` means, and the workspace is part of the physical state, not the logical state.
 
-**Status:** `[OPEN]` — code quality and thread-safety risk, tracked as P10-15.
+**Status:** `[OPEN]` - code quality and thread-safety risk, tracked as P10-15.
 
 ---
 
 #### 5.3 `AtomicParamBuffer`: Seqlock Not Documented in `CONTRIBUTING.md` or Wiki
 
-`AtomicParamBuffer.h` implements a lock-free seqlock for RT parameter updates. Parts 8 and 9 correctly identified this as underexposed. It's now referenced in `docs/DEPLOYMENT.md`. But there's still no explanation of *why* a seqlock was chosen over a simpler `std::atomic<Params>` (which requires `Params` to be trivially copyable and fit in a machine word — not true for `PIDParams`), or over a mutex (which blocks the RT thread on the write side).
+`AtomicParamBuffer.h` implements a lock-free seqlock for RT parameter updates. Parts 8 and 9 correctly identified this as underexposed. It's now referenced in `docs/DEPLOYMENT.md`. But there's still no explanation of *why* a seqlock was chosen over a simpler `std::atomic<Params>` (which requires `Params` to be trivially copyable and fit in a machine word - not true for `PIDParams`), or over a mutex (which blocks the RT thread on the write side).
 
-A brief design rationale note — 4-5 sentences — in `AtomicParamBuffer.h` would make this reviewable:
+A brief design rationale note - 4-5 sentences - in `AtomicParamBuffer.h` would make this reviewable:
 
 ```cpp
 // Design rationale: why seqlock?
@@ -1640,7 +1640,7 @@ A brief design rationale note — 4-5 sentences — in `AtomicParamBuffer.h` wou
 //   without platform-specific spinlock primitives.
 ```
 
-**Status:** `[OPEN]` — documentation gap, tracked as P10-16.
+**Status:** `[OPEN]` - documentation gap, tracked as P10-16.
 
 ---
 
@@ -1650,7 +1650,7 @@ A brief design rationale note — 4-5 sentences — in `AtomicParamBuffer.h` wou
 
 `DiscreteLQR` has no output saturation. The computed control `u = -K*x` can be arbitrarily large. In practice, actuator limits exist, and the user is expected to clamp the LQR output externally. But if they do that, the state `x` advances using the unclamped `u` (the LQR's own prediction), which means the next step's optimal control will be computed from a wrong state estimate.
 
-The LQR doesn't have integral states to wind up, so the anti-windup problem is different from PID. But the equivalent issue — open-loop state prediction under saturated input — exists. `DiscreteMPC::setLastApplied()` was added (Part 9, P9-2) to handle exactly this for MPC. An analogous `DiscreteLQR::setLastApplied()` (updating whatever internal state is used to predict the next step) would close this gap — though `DiscreteLQR` is stateless at runtime, so the responsibility falls on the caller to apply the saturation *before* passing `x` to the next call.
+The LQR doesn't have integral states to wind up, so the anti-windup problem is different from PID. But the equivalent issue - open-loop state prediction under saturated input - exists. `DiscreteMPC::setLastApplied()` was added (Part 9, P9-2) to handle exactly this for MPC. An analogous `DiscreteLQR::setLastApplied()` (updating whatever internal state is used to predict the next step) would close this gap - though `DiscreteLQR` is stateless at runtime, so the responsibility falls on the caller to apply the saturation *before* passing `x` to the next call.
 
 The header should say this explicitly:
 
@@ -1663,7 +1663,7 @@ The header should say this explicitly:
 // This is the standard closed-loop correction mechanism for state-feedback controllers.
 ```
 
-**Status:** `[OPEN]` — documentation gap, tracked as P10-17.
+**Status:** `[OPEN]` - documentation gap, tracked as P10-17.
 
 ---
 
@@ -1677,11 +1677,11 @@ This is a calibration trap that will bite anyone who changes the sample rate aft
 
 MATLAB's Simulink Discrete SMC block uses approach 1 (absorbs `Ts` internally). The existing code uses the raw `c_de` as-is, which means it has implicit `Ts` scaling. Document this.
 
-**Status:** `[OPEN]` — calibration trap, tracked as P10-18.
+**Status:** `[OPEN]` - calibration trap, tracked as P10-18.
 
 ---
 
-#### 6.3 `GeneralizedPredictiveController`: GPC Output Constraints — Concrete Implementation Path
+#### 6.3 `GeneralizedPredictiveController`: GPC Output Constraints - Concrete Implementation Path
 
 Part 9 (Section 1.4) and the existing bug report (Part 3.2) both flag GPC output constraints as a gap and call it "straightforward." Here's the actual implementation path, because "straightforward" without specifics doesn't get tracked work done.
 
@@ -1699,28 +1699,28 @@ A_ineq = [Ga; -Ga]
 b_ineq = [y_max_stack - Fa*xa; -(y_min_stack - Fa*xa)]
 ```
 
-The gradient-projection solver already handles box constraints. For polytopic constraints (the output bounds are polytopic when expressed in `DeltaU`-space), a simple extension is to project onto the intersection of the box and the polytope at each iteration. This is a projected-gradient method for polytopic constraints — it converges but is slower than pure box-projection.
+The gradient-projection solver already handles box constraints. For polytopic constraints (the output bounds are polytopic when expressed in `DeltaU`-space), a simple extension is to project onto the intersection of the box and the polytope at each iteration. This is a projected-gradient method for polytopic constraints - it converges but is slower than pure box-projection.
 
 Alternatively, convert the output constraints to tightened box constraints on `DeltaU` using the worst-case approach already used for the rolling input bounds (`lib/DiscreteMPC.cpp:152-171`). This is conservative (may over-tighten) but preserves the box-projection structure of the current solver.
 
-**Status:** `[OPEN]` — enhancement, tracked as P10-19.
+**Status:** `[OPEN]` - enhancement, tracked as P10-19.
 
 ---
 
 ### 7. What Good Looks Like: Reference Documentation Standards
 
-Since Part 9 (§9) benchmarks against the open-source community, here's a concrete comparison of documentation patterns for the algorithms this library implements:
+Since Part 9 (Section 9) benchmarks against the open-source community, here's a concrete comparison of documentation patterns for the algorithms this library implements:
 
 | Algorithm | This Library | Best Community Example |
 |-----------|-------------|----------------------|
-| DARE doubling | ✅ Full derivation, recurrence, convergence rate, citation | ControlSystems.jl: similar quality |
-| Backward-Euler ESO (ADRC) | ✅ Nilpotency argument, analytical inverse, citation | Better than python-control |
+| DARE doubling |  Full derivation, recurrence, convergence rate, citation | ControlSystems.jl: similar quality |
+| Backward-Euler ESO (ADRC) |  Nilpotency argument, analytical inverse, citation | Better than python-control |
 | Gradient-projection QP (MPC) | ⚠️ Step size choice documented, convergence not certified | ACADO: certified convergence rate |
 | Fuzzy inference (Mamdani/TS) | ⚠️ Architecture described, no CoG derivation | MATLAB Fuzzy Toolbox: full math |
 | Seqlock (AtomicParamBuffer) | ⚠️ Pattern named, design rationale missing | linux kernel seqlock.h: full rationale |
-| PBH stabilisability test | ✅ Test described, eigenvalue selection explained | Good |
-| Van Loan ZOH (now fixed, P9-9) | ✅ Fixed | Good |
-| Faddeev-LeVerrier (ss2tf) | ✅ Wilkinson polynomial risk explained | Better than MATLAB docs |
+| PBH stabilisability test |  Test described, eigenvalue selection explained | Good |
+| Van Loan ZOH (now fixed, P9-9) |  Fixed | Good |
+| Faddeev-LeVerrier (ss2tf) |  Wilkinson polynomial risk explained | Better than MATLAB docs |
 | Subspace ID (N4SID) | ⚠️ Oblique projection explained; steps 1,3,4,5 still need pseudocode | van Overschee & De Moor 1996: complete |
 
 The pattern: algorithm *selection* is well-documented (why doubling DARE instead of value iteration, why Faddeev-LeVerrier instead of eigenvalue-product). Algorithm *correctness* (CoG derivation, seqlock memory ordering, gradient-projection convergence rate) is the remaining gap.
@@ -1752,10 +1752,10 @@ The pattern: algorithm *selection* is well-documented (why doubling DARE instead
 | P10-19 | GPC output constraints: implement via tightened rolling box-projection (reuse existing pattern) | `lib/GeneralizedPredictiveControl.h/.cpp` | Medium | 3-4 hrs |
 
 **Highest-priority items before next tagged release:**
-- P10-7 (clang-tidy scope) — currently risks a CI failure on Eigen version bump.
-- P10-13 (`CONTRIBUTING.md`) — blocks external contributor onboarding.
-- P10-3 (DoM option in PID) — closes a real usability gap for setpoint-step applications.
-- P10-15 (`FuzzySystem` mutable) — a latent thread-safety bug in any multi-threaded use.
+- P10-7 (clang-tidy scope) - currently risks a CI failure on Eigen version bump.
+- P10-13 (`CONTRIBUTING.md`) - blocks external contributor onboarding.
+- P10-3 (DoM option in PID) - closes a real usability gap for setpoint-step applications.
+- P10-15 (`FuzzySystem` mutable) - a latent thread-safety bug in any multi-threaded use.
 
 ---
 
@@ -1765,10 +1765,10 @@ The pattern: algorithm *selection* is well-documented (why doubling DARE instead
 
 ---
 
-## Part 11: Senior Developer Review — 2026-05-27 (Rev 6)
+## Part 11: Senior Developer Review - 2026-05-27 (Rev 6)
 
 **Reviewer:** Senior Controls Engineer (fifth external pass)
-**Scope:** Full codebase — `lib/`, `tests/`, `.github/workflows/`, `docs/`, `case-study/`, `examples/`. Read against actual source files only; all workflow findings based on reading `ubuntu.yml`, `windows.yml`, and `doc.yml` directly.
+**Scope:** Full codebase - `lib/`, `tests/`, `.github/workflows/`, `docs/`, `case-study/`, `examples/`. Read against actual source files only; all workflow findings based on reading `ubuntu.yml`, `windows.yml`, and `doc.yml` directly.
 **Tone:** Informal, peer-to-peer, critical. Useful over polite.
 **Benchmarks referenced:** python-control, ACADO, Eigen, ControlSystems.jl, scipy-signal, MATLAB Control Toolbox, OpenModelica, github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python.
 **Priority focus areas (requested):** PID tuning and state-space methodology; performance benchmarks availability; request for diagrams/pseudocode; CI/CD GitHub Workflow enhancements; documentation quality exemplars vs. poor sections.
@@ -1777,7 +1777,7 @@ The pattern: algorithm *selection* is well-documented (why doubling DARE instead
 
 ### Preamble
 
-Parts 1-10 represent a thorough iterative review. This pass adds what wasn't said before — specifically, it goes deep on the CI/CD infrastructure (reading the actual workflow YAML, not summarising from memory), and makes concrete benchmark and diagram proposals for the algorithms that still lack them. It also draws explicit contrasts between the best-documented and worst-documented sections of the library so future contributors have a clear target.
+Parts 1-10 represent a thorough iterative review. This pass adds what wasn't said before - specifically, it goes deep on the CI/CD infrastructure (reading the actual workflow YAML, not summarising from memory), and makes concrete benchmark and diagram proposals for the algorithms that still lack them. It also draws explicit contrasts between the best-documented and worst-documented sections of the library so future contributors have a clear target.
 
 Nothing here contradicts Parts 1-10. New findings only.
 
@@ -1785,11 +1785,11 @@ Nothing here contradicts Parts 1-10. New findings only.
 
 ### 1. CI/CD Infrastructure: What the Actual Workflows Contain
 
-Parts 8 and 10 discussed CI/CD improvements. This section is based on reading `.github/workflows/ubuntu.yml` (157 lines), `.github/workflows/windows.yml` (146 lines), and `.github/workflows/doc.yml` (1 line). Not summaries — the actual YAML.
+Parts 8 and 10 discussed CI/CD improvements. This section is based on reading `.github/workflows/ubuntu.yml` (157 lines), `.github/workflows/windows.yml` (146 lines), and `.github/workflows/doc.yml` (1 line). Not summaries - the actual YAML.
 
 ---
 
-#### 1.1 `doc.yml` Is a Stub — Doxygen Has No CI at All
+#### 1.1 `doc.yml` Is a Stub - Doxygen Has No CI at All
 
 `doc.yml` contains exactly **one line**. It is not a skeleton; it is an empty placeholder. There is no Doxygen invocation, no GitHub Pages deployment, no documentation check of any kind. The `Doxyfile` in the root is a well-configured 3.8 KB document that will never run in CI until this is fixed.
 
@@ -1818,7 +1818,7 @@ jobs:
           # WARN_AS_ERROR = YES must be set in Doxyfile (see P10-12)
           doxygen Doxyfile
           if [ $? -ne 0 ]; then
-            echo "Doxygen failed — undocumented symbols or mismatched @param"
+            echo "Doxygen failed - undocumented symbols or mismatched @param"
             exit 1
           fi
 
@@ -1832,7 +1832,7 @@ jobs:
 
 With `WARN_AS_ERROR = YES` in the `Doxyfile` (tracked P10-12), every undocumented public function or mismatched `@param` tag fails the docs job, catching documentation regressions the same way `-Werror` catches code regressions. The GitHub Pages deploy means the API reference is publicly browsable from every release. Neither of these exist today.
 
-**Status:** `[OPEN]` — tracked as P11-1.
+**Status:** `[OPEN]` - tracked as P11-1.
 
 ---
 
@@ -1846,7 +1846,7 @@ echo "::set-output name=target_name::$targetName"
 echo "::set-output name=version::$VERSION"
 echo "::set-output name=tag_exists::false"
 
-# windows.yml lines 63, 87, 98, 120 — same pattern
+# windows.yml lines 63, 87, 98, 120 - same pattern
 ```
 
 GitHub deprecated `set-output` in September 2022 and now emits a deprecation warning in the Actions log on every run. It will be removed in a future runner update. The replacement is:
@@ -1859,7 +1859,7 @@ echo "tag_exists=false" >> $GITHUB_OUTPUT
 
 This is a 5-minute find-and-replace across both files. Leaving deprecated syntax in CI workflows means every run has warning noise, which makes it harder to spot actual warnings when they appear. Fix before the next tagged release.
 
-**Status:** `[OPEN]` — tracked as P11-2.
+**Status:** `[OPEN]` - tracked as P11-2.
 
 ---
 
@@ -1872,7 +1872,7 @@ Both workflows use v2 of the artifact actions:
 uses: actions/upload-artifact@v2
 uses: actions/download-artifact@v2
 
-# windows.yml lines 69, 122, 127 — same
+# windows.yml lines 69, 122, 127 - same
 ```
 
 `actions/upload-artifact@v2` and `@v2` of the download counterpart reached end-of-life in November 2023. GitHub will start failing these in a future runner deprecation sweep. The current supported version is `@v4`, which also has significantly faster upload/download performance (parallelised chunked transfer vs single-threaded in v2).
@@ -1883,9 +1883,9 @@ uses: actions/upload-artifact@v4
 uses: actions/download-artifact@v4
 ```
 
-Note: `@v4` changed the artifact naming convention — artifacts uploaded with `@v4` must be downloaded with `@v4`, so the upgrade must be applied to both sides simultaneously. Five-minute fix.
+Note: `@v4` changed the artifact naming convention - artifacts uploaded with `@v4` must be downloaded with `@v4`, so the upgrade must be applied to both sides simultaneously. Five-minute fix.
 
-**Status:** `[OPEN]` — tracked as P11-3.
+**Status:** `[OPEN]` - tracked as P11-3.
 
 ---
 
@@ -1929,21 +1929,21 @@ jobs:
 
 This is a 1-hour refactor that eliminates the duplication and sets up the release job as the single place to add compliance artefacts (SBOM, checksums, signatures).
 
-**Status:** `[OPEN]` — tracked as P11-4.
+**Status:** `[OPEN]` - tracked as P11-4.
 
 ---
 
 #### 1.5 No Clang, No Sanitizers, No Static Analysis in Either Workflow
 
-Reading both workflow files confirms: there is no clang build, no AddressSanitizer, no UBSanitizer, no clang-tidy, no cppcheck, no valgrind step anywhere. Parts 8 and 10 flagged the *absence* of a `ci-cd.yml` (that file apparently doesn't exist in the current repo — only `ubuntu.yml` and `windows.yml`). Those parts were reviewing a future version or a different branch. The current state is:
+Reading both workflow files confirms: there is no clang build, no AddressSanitizer, no UBSanitizer, no clang-tidy, no cppcheck, no valgrind step anywhere. Parts 8 and 10 flagged the *absence* of a `ci-cd.yml` (that file apparently doesn't exist in the current repo - only `ubuntu.yml` and `windows.yml`). Those parts were reviewing a future version or a different branch. The current state is:
 
 **Current CI test matrix:**
 | OS | Compiler | ASan | UBSan | clang-tidy | Coverage |
 |----|----------|------|-------|------------|----------|
-| ubuntu-latest | GCC-13 x86_64 | ❌ | ❌ | ❌ | ❌ |
-| ubuntu-latest | GCC-13 x86 | ❌ | ❌ | ❌ | ❌ |
-| windows-2022 | MSVC x64 | ❌ | ❌ | ❌ | ❌ |
-| windows-2022 | MSVC x86 | ❌ | ❌ | ❌ | ❌ |
+| ubuntu-latest | GCC-13 x86_64 |  |  |  |  |
+| ubuntu-latest | GCC-13 x86 |  |  |  |  |
+| windows-2022 | MSVC x64 |  |  |  |  |
+| windows-2022 | MSVC x86 |  |  |  |  |
 
 **Recommended CI matrix additions:**
 
@@ -1962,9 +1962,9 @@ Reading both workflow files confirms: there is no clang build, no AddressSanitiz
     UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
 ```
 
-ASan + UBSan together take roughly 2-3× longer to run than the base test suite. Worth every second for a library targeting safety-critical embedded systems.
+ASan + UBSan together take roughly 2-3* longer to run than the base test suite. Worth every second for a library targeting safety-critical embedded systems.
 
-**Status:** `[OPEN]` — tracked as P11-5 (Clang CI), P11-6 (ASan/UBSan).
+**Status:** `[OPEN]` - tracked as P11-5 (Clang CI), P11-6 (ASan/UBSan).
 
 ---
 
@@ -1991,7 +1991,7 @@ The minimum viable benchmark CI step:
 
 With the artifact upload, benchmark results are retained per commit and can be compared manually. For automated regression detection, `benchmark-action/github-action-benchmark@v1` can plot results over time and fail CI when a metric exceeds a configurable threshold.
 
-**Status:** `[OPEN]` — tracked as P11-7.
+**Status:** `[OPEN]` - tracked as P11-7.
 
 ---
 
@@ -2023,15 +2023,15 @@ The fix is straightforward:
 
 Without this, every setpoint-step application is stuck with the choice between ZN's 25% overshoot and a manually de-tuned controller with degraded disturbance rejection.
 
-**Status:** `[OPEN]` — tracked as P11-8.
+**Status:** `[OPEN]` - tracked as P11-8.
 
 ---
 
 #### 2.2 `RelayAutoTuner`: No Multi-Period Averaging for Noisy Plants
 
-The relay test extracts `Ku` and `Tu` from **a single limit cycle**. For noisy measurements, a single period produces noisy estimates of both the relay amplitude and the period. Standard implementations average over 3-5 complete relay cycles. The Åström-Hägglund (1984) paper explicitly recommends 3-cycle averaging.
+The relay test extracts `Ku` and `Tu` from **a single limit cycle**. For noisy measurements, a single period produces noisy estimates of both the relay amplitude and the period. Standard implementations average over 3-5 complete relay cycles. The Astrom-Hagglund (1984) paper explicitly recommends 3-cycle averaging.
 
-Looking at the relay tuner implementation pattern, if `isDone()` fires after the first complete oscillation, the estimates are the single-cycle values. For a temperature loop with sigma = 1°C and a process variable range of 50°C, the noise-to-amplitude ratio is 2% — borderline. For a pressure loop on a noisy sensor, it could be 10%, giving a 10% error in `Ku` and potentially the wrong tuning rule selection.
+Looking at the relay tuner implementation pattern, if `isDone()` fires after the first complete oscillation, the estimates are the single-cycle values. For a temperature loop with sigma = 1^\circC and a process variable range of 50^\circC, the noise-to-amplitude ratio is 2% - borderline. For a pressure loop on a noisy sensor, it could be 10%, giving a 10% error in `Ku` and potentially the wrong tuning rule selection.
 
 **Proposed addition to `RelayAutoTunerParams`:**
 ```cpp
@@ -2041,19 +2041,19 @@ int n_cycles = 3;  // Number of relay oscillations to average before isDone() fi
 
 This is a small state-machine addition: count complete half-periods, average the accumulated `Ku_i` and `Tu_i` values, report done after `n_cycles` complete periods.
 
-**Status:** `[OPEN]` — tracked as P11-9.
+**Status:** `[OPEN]` - tracked as P11-9.
 
 ---
 
 #### 2.3 `StepResponseTuner` 28.3%/63.2% Method: No Inflection-Point Validation
 
-The tangent-intersection method fits FOPDT by finding the 28.3% and 63.2% crossings of the normalised step response. This is the Smith method (1957), one of the oldest identification techniques in the book. It has a known fragility: the 28.3% crossing assumes the step response has a single inflection point between 0 and 28.3%. For **integrating plants** (type-1 systems), the step response has no asymptote — the 63.2% crossing never occurs. The FOPDT fit diverges.
+The tangent-intersection method fits FOPDT by finding the 28.3% and 63.2% crossings of the normalised step response. This is the Smith method (1957), one of the oldest identification techniques in the book. It has a known fragility: the 28.3% crossing assumes the step response has a single inflection point between 0 and 28.3%. For **integrating plants** (type-1 systems), the step response has no asymptote - the 63.2% crossing never occurs. The FOPDT fit diverges.
 
 There is no guard in the current implementation for this case. An integrating plant fed to `StepResponseTuner` will either loop forever (if the threshold is never crossed) or return nonsense values (if the data record ends before the 63.2% crossing, and the code extrapolates beyond the data bounds).
 
-**Check:** If the step response hasn't crossed 63.2% by `t = 3 * tau_initial_estimate`, the plant is likely integrating. Throw `std::runtime_error("StepResponseTuner: 63.2% threshold not reached — plant may be integrating. Use velocity-form PID or a DIPDT model.")` rather than returning garbage.
+**Check:** If the step response hasn't crossed 63.2% by `t = 3 * tau_initial_estimate`, the plant is likely integrating. Throw `std::runtime_error("StepResponseTuner: 63.2% threshold not reached - plant may be integrating. Use velocity-form PID or a DIPDT model.")` rather than returning garbage.
 
-**Status:** `[OPEN]` — correctness gap for integrating plants, tracked as P11-10.
+**Status:** `[OPEN]` - correctness gap for integrating plants, tracked as P11-10.
 
 ---
 
@@ -2063,7 +2063,7 @@ There is no guard in the current implementation for this case. An integrating pl
 
 #### 3.1 `c2d()` Has No Check That the Resulting `A_d` Is Stable
 
-`PlantModel::c2d()` converts a continuous-time model to discrete time via ZOH or Tustin. It returns a `StateSpace` struct. What it doesn't do: check that `A_d`'s eigenvalues lie inside the unit disk for a stable continuous-time `A_c`. For a stable continuous plant with all eigenvalues in the left-half plane, the ZOH discrete model is always stable — but numerical issues with the matrix exponential for ill-conditioned `A_c * Ts` (very large `||A_c|| * Ts`) can produce eigenvalues slightly outside the unit disk.
+`PlantModel::c2d()` converts a continuous-time model to discrete time via ZOH or Tustin. It returns a `StateSpace` struct. What it doesn't do: check that `A_d`'s eigenvalues lie inside the unit disk for a stable continuous-time `A_c`. For a stable continuous plant with all eigenvalues in the left-half plane, the ZOH discrete model is always stable - but numerical issues with the matrix exponential for ill-conditioned `A_c * Ts` (very large `||A_c|| * Ts`) can produce eigenvalues slightly outside the unit disk.
 
 The Boiler case study monolith warning added in P9-3 addresses forward-Euler instability. But the ZOH version has a subtler risk: for very fast eigenvalues (`|lambda_max| * Ts >> 1`), the matrix exponential may lose precision. A post-conversion check:
 
@@ -2080,13 +2080,13 @@ for (int i = 0; i < eigs.size(); ++i) {
 
 This costs one eigenvalue decomposition per discretisation call, which is offline work. For a stable continuous plant, an unstable `A_d` is always a numerical warning.
 
-**Status:** `[OPEN]` — defensive check, tracked as P11-11.
+**Status:** `[OPEN]` - defensive check, tracked as P11-11.
 
 ---
 
 #### 3.2 `DiscreteLQG` Has No Re-Linearisation Pattern Shown in Examples
 
-Part 9, Section 4.3 noted that the separation principle holds only near the linearisation point. The fix — "use `DiscreteLQG` with periodic re-linearisation or `ExtendedKalmanFilter + DiscreteLQR`" — was added to the header. What wasn't done: show this pattern in the `examples/` directory.
+Part 9, Section 4.3 noted that the separation principle holds only near the linearisation point. The fix - "use `DiscreteLQG` with periodic re-linearisation or `ExtendedKalmanFilter + DiscreteLQR`" - was added to the header. What wasn't done: show this pattern in the `examples/` directory.
 
 The standard re-linearisation loop looks like:
 
@@ -2109,7 +2109,7 @@ The standard re-linearisation loop looks like:
 
 The `setPlant()` method exists (added per P9-2 for MPC; LQG has an analogous one). The pattern is valid. A concrete example file would make this approach accessible to users without having to derive it from first principles.
 
-**Status:** `[OPEN]` — example gap, tracked as P11-12.
+**Status:** `[OPEN]` - example gap, tracked as P11-12.
 
 ---
 
@@ -2118,28 +2118,28 @@ The `setPlant()` method exists (added per P9-2 for MPC; LQG has an analogous one
 Part 9 proposed benchmark harnesses. Here is an honest assessment of what currently exists versus what is needed.
 
 **Current state:**
-- `scripts/realtime_all.cpp` — exists, measures wall-clock compute time for all controllers in a loop, prints raw numbers. Not integrated into CI, no baseline stored, no regression detection.
+- `scripts/realtime_all.cpp` - exists, measures wall-clock compute time for all controllers in a loop, prints raw numbers. Not integrated into CI, no baseline stored, no regression detection.
 - No `benchmarks/` directory.
 - No comparison against expected outcomes. The "sub-millisecond MPC" claim in DEPLOYMENT.md has no supporting data in the repository.
 
 **What "available for comparison" means in practice:**
 
-The DEPLOYMENT.md stack-size estimates (64 bytes for PID, 256 bytes for ADRC, etc.) are the closest thing to a performance specification in the entire codebase. They are static analysis estimates, not measured values. There are no timing guarantees of the form "on a Cortex-M4 at 168 MHz, `DiscreteMPC` with `Nc=3, Np=10` completes in < X µs" anywhere in the documentation.
+The DEPLOYMENT.md stack-size estimates (64 bytes for PID, 256 bytes for ADRC, etc.) are the closest thing to a performance specification in the entire codebase. They are static analysis estimates, not measured values. There are no timing guarantees of the form "on a Cortex-M4 at 168 MHz, `DiscreteMPC` with `Nc=3, Np=10` completes in < X mus" anywhere in the documentation.
 
 **Minimum viable benchmark specification (what should exist before any production deployment claim):**
 
 | Metric | Target | Measurement Method |
 |--------|--------|-------------------|
 | `DiscretePID::compute()` | < 500 ns at -O2 on x86-64 | Cycle counter over 100k iterations |
-| `DiscreteMPC::computeRef()` Nc=3, Np=10 | < 200 µs at -O2 on x86-64 | `std::chrono::high_resolution_clock` |
+| `DiscreteMPC::computeRef()` Nc=3, Np=10 | < 200 mus at -O2 on x86-64 | `std::chrono::high_resolution_clock` |
 | `DiscreteMPC::computeRef()` Nc=20, Np=50 | < 1 ms at -O2 on x86-64 | Same |
 | `DiscreteLQR` DARE solve, n=6 | < 5 ms at -O2 on x86-64 | Same |
-| `RecursiveLeastSquares::update()` na=4, nb=4 | < 5 µs at -O2 on x86-64 | Same |
-| `UnscentedKalmanFilter::predict() + update()` n=6 | < 50 µs at -O2 on x86-64 | Same |
+| `RecursiveLeastSquares::update()` na=4, nb=4 | < 5 mus at -O2 on x86-64 | Same |
+| `UnscentedKalmanFilter::predict() + update()` n=6 | < 50 mus at -O2 on x86-64 | Same |
 
-None of these numbers are currently guaranteed or measured. The `scripts/realtime_all.cpp` file could be the starting point — extend it with structured output, CI integration, and baseline storage, and it becomes a regression detector instead of a diagnostic script.
+None of these numbers are currently guaranteed or measured. The `scripts/realtime_all.cpp` file could be the starting point - extend it with structured output, CI integration, and baseline storage, and it becomes a regression detector instead of a diagnostic script.
 
-**Status:** `[OPEN]` — tracked as P11-13 (benchmark CI integration). Part 9 P9-12 proposed the files; this item tracks making them CI-integrated with stored baselines.
+**Status:** `[OPEN]` - tracked as P11-13 (benchmark CI integration). Part 9 P9-12 proposed the files; this item tracks making them CI-integrated with stored baselines.
 
 ---
 
@@ -2170,36 +2170,36 @@ The QP solver in `DiscreteMPC::computeRef()` is the most complex algorithm in th
 // For ill-conditioned H (large kappa), consider increasing qpMaxIter or regularising H.
 ```
 
-This makes the convergence rate visible — a user who sees convergence failures and doesn't know why now has the convergence-rate formula `O(kappa(H))` to guide diagnosis.
+This makes the convergence rate visible - a user who sees convergence failures and doesn't know why now has the convergence-rate formula `O(kappa(H))` to guide diagnosis.
 
-**Status:** `[OPEN]` — tracked as P11-14.
+**Status:** `[OPEN]` - tracked as P11-14.
 
 ---
 
 #### 5.2 `RecursiveLeastSquares` Information-Matrix Flow: Diagram Requested
 
-The RLS update is a 4-step process: regressor `phi` → innovation `epsilon` → Kalman gain `K` → P update → theta update. The comment at line 38-43 explains the P update formula but gives no overview of the algorithm flow. A simple ASCII flow diagram would help readers orient themselves:
+The RLS update is a 4-step process: regressor `phi` -> innovation `epsilon` -> Kalman gain `K` -> P update -> theta update. The comment at line 38-43 explains the P update formula but gives no overview of the algorithm flow. A simple ASCII flow diagram would help readers orient themselves:
 
 ```
 // RLS Algorithm Flow (add to RecursiveLeastSquares.h):
 //
-//  phi[k]  ──→  epsilon[k] = y[k] - phi'*theta[k-1]       (prediction error)
-//           ├──→  denom = lambda + phi'*P[k-1]*phi          (denominator)
-//           └──→  K[k] = P[k-1]*phi / denom                (Kalman gain)
+//  phi[k]  --->  epsilon[k] = y[k] - phi'*theta[k-1]       (prediction error)
+//           |--->  denom = lambda + phi'*P[k-1]*phi          (denominator)
+//           |--->  K[k] = P[k-1]*phi / denom                (Kalman gain)
 //
-//  K[k], phi[k], lambda ──→  P[k] = (P[k-1] - K*phi'*P[k-1]) / lambda
+//  K[k], phi[k], lambda --->  P[k] = (P[k-1] - K*phi'*P[k-1]) / lambda
 //                                    (covariance update with forgetting)
 //
-//  K[k], epsilon[k]  ──→  theta[k] = theta[k-1] + K[k] * epsilon[k]
+//  K[k], epsilon[k]  --->  theta[k] = theta[k-1] + K[k] * epsilon[k]
 //                                    (parameter update)
 //
-// P[k] grows when lambda < 1 (forgetting inflates uncertainty → faster adaptation)
-// P[k] shrinks when phi is persistently exciting → theta converges
+// P[k] grows when lambda < 1 (forgetting inflates uncertainty -> faster adaptation)
+// P[k] shrinks when phi is persistently exciting -> theta converges
 ```
 
 This is the kind of thing that makes a 20-minute code review take 5 minutes instead.
 
-**Status:** `[OPEN]` — tracked as P11-15.
+**Status:** `[OPEN]` - tracked as P11-15.
 
 ---
 
@@ -2231,12 +2231,12 @@ The `DiscreteHinf::solve()` method orchestrates a bisection over gamma, calling 
 //   (C1) DARE for X converges (stable Hamiltonian eigenvalues inside unit disk)
 //   (C2) DARE for Y converges
 //   (C3) spectral radius of X*Y < gamma^2  (coupling matrix is invertible)
-// Failure at (C3) near gamma* is expected — it's the fundamental gamma lower bound.
+// Failure at (C3) near gamma* is expected - it's the fundamental gamma lower bound.
 ```
 
 This makes the bisection logic reviewable without reading 200 lines of source. More importantly, it explains condition (C3), which is the non-obvious failure mode that users hit when gamma doesn't converge.
 
-**Status:** `[OPEN]` — tracked as P11-16.
+**Status:** `[OPEN]` - tracked as P11-16.
 
 ---
 
@@ -2248,21 +2248,21 @@ This is a direct comparison of documentation quality within the codebase, with o
 
 #### 6.1 Best-in-Class Sections
 
-**[lib/DiscreteLQR.cpp:40-57](../lib/DiscreteLQR.cpp#L40-L57) — DARE Doubling Derivation**
+**[lib/DiscreteLQR.cpp:40-57](../lib/DiscreteLQR.cpp#L40-L57) - DARE Doubling Derivation**
 
 The gold standard in this codebase. Shows the recurrence `A_k+1 = A_k * M_k^{-1} * A_k`, names all variables, states convergence rate O(log^2(n)), cites Anderson & Moore. A reviewer can independently verify correctness against the paper without running the code. This is at the level of Eigen's `LLT` vs `LDLT` guidance or ControlSystems.jl's documented solver choices.
 
-Compare to: python-control's `dare()` — zero mathematical comments. You'd need to read Laub 1979 to understand what it's doing. This codebase is objectively better.
+Compare to: python-control's `dare()` - zero mathematical comments. You'd need to read Laub 1979 to understand what it's doing. This codebase is objectively better.
 
-**[lib/DiscreteADRC.cpp:31-50](../lib/DiscreteADRC.cpp#L31-L50) — Backward-Euler ESO Nilpotency Argument**
+**[lib/DiscreteADRC.cpp:31-50](../lib/DiscreteADRC.cpp#L31-L50) - Backward-Euler ESO Nilpotency Argument**
 
 Shows why `(I - Ts * A_e)^{-1}` is available analytically because `A_e^3 = 0`. Proves A-stability for all `omega_o * Ts > 0`. Separates the proof into the nilpotent structure and the A-stability consequence. This is better than anything in python-control's state-estimator documentation and comparable to Labbe's UKF derivation in Kalman-and-Bayesian-Filters-in-Python.
 
-**[lib/DiscreteMPC.cpp:75-105](../lib/DiscreteMPC.cpp#L75-L105) — Prediction Matrix Derivation**
+**[lib/DiscreteMPC.cpp:75-105](../lib/DiscreteMPC.cpp#L75-L105) - Prediction Matrix Derivation**
 
-Derives `F`, `Phi`, `Gu` from the recurrence `y[k+i] = C*A^i*x + Σ C*A^j*B*u[k+i-j-1]`, with dimension annotations throughout. Users who know condensed MPC formulations can verify directly; users who don't have a roadmap to the derivation. Above average for the field.
+Derives `F`, `Phi`, `Gu` from the recurrence `y[k+i] = C*A^i*x + Sigma C*A^j*B*u[k+i-j-1]`, with dimension annotations throughout. Users who know condensed MPC formulations can verify directly; users who don't have a roadmap to the derivation. Above average for the field.
 
-**[docs/DEPLOYMENT.md](DEPLOYMENT.md) — Zero-Allocation Checklist and AtomicParamBuffer Pattern**
+**[docs/DEPLOYMENT.md](DEPLOYMENT.md) - Zero-Allocation Checklist and AtomicParamBuffer Pattern**
 
 The stack-size estimates, pre-allocation discipline, and seqlock description are production-grade documentation. No other open-source C++ control library of this scope has equivalent embedded deployment guidance. This is a genuine differentiator.
 
@@ -2270,13 +2270,13 @@ The stack-size estimates, pre-allocation discipline, and seqlock description are
 
 #### 6.2 Worst-in-Class Sections
 
-**[lib/SystemAnalysis.h](../lib/SystemAnalysis.h) — `solveDiscreteLyapunov()` (addressed in Part 8, 2.2, but still merits naming here)**
+**[lib/SystemAnalysis.h](../lib/SystemAnalysis.h) - `solveDiscreteLyapunov()` (addressed in Part 8, 2.2, but still merits naming here)**
 
-The comment "O(n^6) — use only for small systems (n <= 20)" tells you the cost but not the derivation, not why Kronecker product vectorisation is the approach, and not that Bartels-Stewart O(n^3) exists as an alternative. The fix is documented in Part 8.2.2 and tracked; it is named here as the reference for "worst documentation in the library."
+The comment "O(n^6) - use only for small systems (n <= 20)" tells you the cost but not the derivation, not why Kronecker product vectorisation is the approach, and not that Bartels-Stewart O(n^3) exists as an alternative. The fix is documented in Part 8.2.2 and tracked; it is named here as the reference for "worst documentation in the library."
 
-**[lib/FuzzyLogic.h](../lib/FuzzyLogic.h) — Mamdani CoG Formula**
+**[lib/FuzzyLogic.h](../lib/FuzzyLogic.h) - Mamdani CoG Formula**
 
-The Centre-of-Gravity defuzzification over a 101-point discrete grid has no comment explaining why 101 points (the Shannon-Nyquist basis for a [0,1] output range at 0.01 resolution?), no comment on the tradeoff between grid resolution and computation, and no reference. The CoG integral formula `∫ z*µ(z)dz / ∫ µ(z)dz` isn't written anywhere in the code or comments. A new contributor modifying the defuzzification method has no way to verify they haven't broken the CoG formula without running examples.
+The Centre-of-Gravity defuzzification over a 101-point discrete grid has no comment explaining why 101 points (the Shannon-Nyquist basis for a [0,1] output range at 0.01 resolution?), no comment on the tradeoff between grid resolution and computation, and no reference. The CoG integral formula `\int z*mu(z)dz / \int mu(z)dz` isn't written anywhere in the code or comments. A new contributor modifying the defuzzification method has no way to verify they haven't broken the CoG formula without running examples.
 
 Contrast: MATLAB Fuzzy Logic Toolbox documents the CoG formula explicitly in the `defuzz()` reference, with the discrete approximation and a note on convergence as the grid size increases.
 
@@ -2292,14 +2292,14 @@ The pattern across the library is that algorithm *selection* is well-documented 
 
 | Algorithm | Selection documented | Derivation documented | Formula stated | Grid/parameter rationale |
 |-----------|---------------------|----------------------|----------------|--------------------------|
-| DARE doubling | ✅ | ✅ | ✅ | ✅ |
-| ESO backward-Euler | ✅ | ✅ | ✅ | ✅ |
-| MPC prediction matrices | ✅ | ✅ | ✅ | ⚠️ |
-| Gradient-projection QP | ✅ | ❌ | ❌ | ❌ |
-| Mamdani CoG | ❌ | ❌ | ❌ | ❌ |
-| Seqlock (AtomicParam) | ✅ | ⚠️ | N/A | N/A |
-| H-inf bisection loop | ✅ | ⚠️ | ✅ | ⚠️ |
-| RLS update | ✅ | ⚠️ | ✅ | N/A |
+| DARE doubling |  |  |  |  |
+| ESO backward-Euler |  |  |  |  |
+| MPC prediction matrices |  |  |  | ⚠️ |
+| Gradient-projection QP |  |  |  |  |
+| Mamdani CoG |  |  |  |  |
+| Seqlock (AtomicParam) |  | ⚠️ | N/A | N/A |
+| H-inf bisection loop |  | ⚠️ |  | ⚠️ |
+| RLS update |  | ⚠️ |  | N/A |
 
 The "Formula stated" and "Derivation documented" columns for QP and CoG are the highest-priority gaps.
 
@@ -2314,11 +2314,11 @@ Based on reading the actual workflow YAML files, here is a concrete, prioritised
 | Item | File | Change |
 |------|------|--------|
 | P11-2: Replace deprecated `::set-output` | `ubuntu.yml`, `windows.yml` | `echo "key=val" >> $GITHUB_OUTPUT` |
-| P11-3: Upgrade to `actions/upload-artifact@v4` | both files | `@v2` → `@v4` throughout |
+| P11-3: Upgrade to `actions/upload-artifact@v4` | both files | `@v2` -> `@v4` throughout |
 | P10-12: Add `WARN_AS_ERROR = YES` to Doxyfile | `Doxyfile` | One-line change |
 | P10-11: Delete redundant `ci.yml` | `.github/workflows/ci.yml` | Delete file (if it exists) |
 
-**Tier 2: 30 minutes – 2 hours, next sprint**
+**Tier 2: 30 minutes - 2 hours, next sprint**
 
 | Item | File | Change |
 |------|------|--------|
@@ -2361,10 +2361,10 @@ Based on reading the actual workflow YAML files, here is a concrete, prioritised
 | P11-16 | `DiscreteHinf`: add DGKF outer-bisection pseudocode to header | `lib/DiscreteHinf.h` | Low | 25 min |
 
 **Highest-priority items before next tagged release:**
-- P11-2, P11-3 (deprecated workflow syntax / EOL artifact actions) — current workflows emit warnings on every run and will break on a future runner update. Five-minute fix with no risk.
-- P11-6 (ASan/UBSan) — a library targeting safety-critical embedded systems must be validated with memory safety instrumentation.
-- P11-10 (`StepResponseTuner` integrating plant guard) — silent wrong-answer risk for a common plant type.
-- P11-1 (`doc.yml`) — the API documentation infrastructure is in place (Doxyfile, inline comments); it just needs a working workflow to publish it.
+- P11-2, P11-3 (deprecated workflow syntax / EOL artifact actions) - current workflows emit warnings on every run and will break on a future runner update. Five-minute fix with no risk.
+- P11-6 (ASan/UBSan) - a library targeting safety-critical embedded systems must be validated with memory safety instrumentation.
+- P11-10 (`StepResponseTuner` integrating plant guard) - silent wrong-answer risk for a common plant type.
+- P11-1 (`doc.yml`) - the API documentation infrastructure is in place (Doxyfile, inline comments); it just needs a working workflow to publish it.
 
 ---
 
@@ -2378,7 +2378,7 @@ For the `CONTRIBUTING.md` tracked as P10-13, the welcome note should set the ton
 ## Welcome
 
 Thank you for looking at this project. The goal is a discrete-time C++ control
-library that works correctly in resource-constrained, real-time environments —
+library that works correctly in resource-constrained, real-time environments -
 the kind of environments where "it works in simulation" is not the same as
 "it works on the target." If you've ever debugged a Kalman filter divergence at
 3am, your contributions here are especially welcome.
@@ -2390,8 +2390,8 @@ if they have any real-time allocation considerations. The DARE doubling derivati
 
 Bug reports with reproducible test cases are gold. PRs that add missing test coverage
 for existing algorithms are welcome even without a new feature attached. Documentation
-improvements — especially filling in the "formula stated" gaps in the table in
-`docs/cumulative_bug_report.md` Part 11, Section 6.3 — are needed and appreciated.
+improvements - especially filling in the "formula stated" gaps in the table in
+`docs/cumulative_bug_report.md` Part 11, Section 6.3 - are needed and appreciated.
 ```
 
 This establishes what the project values (mathematical correctness, RT safety, algorithmic documentation), names the documentation standard explicitly, and lowers the activation energy for bug reports and documentation PRs, which are often the most actionable contributions.
@@ -2404,7 +2404,7 @@ This establishes what the project values (mathematical correctness, RT safety, a
 
 ---
 
-## Part 12: Senior Developer Review — 2026-05-27 (Rev 7)
+## Part 12: Senior Developer Review - 2026-05-27 (Rev 7)
 
 **Reviewer:** Senior Controls Engineer (sixth external pass, same-day as Part 11)
 **Scope:** Full `lib/` source audit with emphasis on five focus areas explicitly requested: (1) modularisation of controller components, (2) Catch2 automated testing, (3) inline comments that explain physical meaning behind mathematical formulations, (4) design pattern applicability (Strategy, Observer), (5) performance profiling and real-time optimisation. Additional: source-verified status corrections for two P10/P11 items that the code already satisfies.
@@ -2415,7 +2415,7 @@ This establishes what the project values (mathematical correctness, RT safety, a
 
 ### Preamble
 
-Parts 1-11 represent a thorough iterative audit. This pass adds five specific analysis tracks that earlier passes didn't prioritise, plus two source-verified corrections that will save someone from re-implementing features that already exist. Read this as additive — nothing contradicts the prior eleven parts.
+Parts 1-11 represent a thorough iterative audit. This pass adds five specific analysis tracks that earlier passes didn't prioritise, plus two source-verified corrections that will save someone from re-implementing features that already exist. Read this as additive - nothing contradicts the prior eleven parts.
 
 The two corrections come first because acting on a wrong status tag costs more effort than a bug fix.
 
@@ -2427,23 +2427,23 @@ Two open items from Parts 10 and 11 are **already implemented** in the current s
 
 ---
 
-#### 0.1 P10-3: `DiscretePID::computeDoM()` — Already Implemented
+#### 0.1 P10-3: `DiscretePID::computeDoM()` - Already Implemented
 
-**Claim in Part 10:** "add `computeDoM(double y, double r)` for derivative-on-measurement — Medium — 1 hr."
+**Claim in Part 10:** "add `computeDoM(double y, double r)` for derivative-on-measurement - Medium - 1 hr."
 
-**Actual state:** `computeDoM()` is declared at [lib/DiscretePID.h:134](../lib/DiscretePID.h#L134) and fully implemented at [lib/DiscretePID.cpp:83-118](../lib/DiscretePID.cpp#L83-L118). The implementation routes the derivative filter through `−y` (not error), applies the 2DOF setpoint weight `b_weight` to the proportional term, and performs back-calculation anti-windup. The header Doxygen block is comprehensive — it explains when to prefer this overload (batch reactors, motion controllers), the MATLAB equivalent, and the sign convention.
+**Actual state:** `computeDoM()` is declared at [lib/DiscretePID.h:134](../lib/DiscretePID.h#L134) and fully implemented at [lib/DiscretePID.cpp:83-118](../lib/DiscretePID.cpp#L83-L118). The implementation routes the derivative filter through `-y` (not error), applies the 2DOF setpoint weight `b_weight` to the proportional term, and performs back-calculation anti-windup. The header Doxygen block is comprehensive - it explains when to prefer this overload (batch reactors, motion controllers), the MATLAB equivalent, and the sign convention.
 
-**P10-3 status: `[FIXED]`** — not a future work item.
+**P10-3 status: `[FIXED]`** - not a future work item.
 
 ---
 
-#### 0.2 P11-8: 2DOF Setpoint Weight `b_weight` in `PIDParams` — Already Implemented
+#### 0.2 P11-8: 2DOF Setpoint Weight `b_weight` in `PIDParams` - Already Implemented
 
-**Claim in Part 11:** "add 2DOF setpoint weight `b` to `PIDParams` and `TunerSuite` — Medium — 1.5 hrs."
+**Claim in Part 11:** "add 2DOF setpoint weight `b` to `PIDParams` and `TunerSuite` - Medium - 1.5 hrs."
 
-**Actual state:** `PIDParams::b_weight = 1.0` exists at [lib/DiscretePID.h:86-87](../lib/DiscretePID.h#L86-L87) with a complete Doxygen comment explaining the Skogestad/Åström & Hägglund tuning guidance, the effect on setpoint gain, and the interaction with `computeDoM()`. The `computeDoM()` implementation uses it on line [lib/DiscretePID.cpp:100](../lib/DiscretePID.cpp#L100): `const double prop_signal = p_.b_weight * r - y;`.
+**Actual state:** `PIDParams::b_weight = 1.0` exists at [lib/DiscretePID.h:86-87](../lib/DiscretePID.h#L86-L87) with a complete Doxygen comment explaining the Skogestad/Astrom & Hagglund tuning guidance, the effect on setpoint gain, and the interaction with `computeDoM()`. The `computeDoM()` implementation uses it on line [lib/DiscretePID.cpp:100](../lib/DiscretePID.cpp#L100): `const double prop_signal = p_.b_weight * r - y;`.
 
-**P11-8 status: `[FIXED]`** — not a future work item.
+**P11-8 status: `[FIXED]`** - not a future work item.
 
 ---
 
@@ -2488,7 +2488,7 @@ The corresponding umbrella header `ControllerToolbox.h` already has `#ifndef CTR
 
 A PID + Kalman build would be roughly 60 KB smaller than the full library. That matters on a 256 KB flash target.
 
-**Status:** `[OPEN]` — tracked as P12-1.
+**Status:** `[OPEN]` - tracked as P12-1.
 
 ---
 
@@ -2496,7 +2496,7 @@ A PID + Kalman build would be roughly 60 KB smaller than the full library. That 
 
 `DiscreteMPC::computeRef()` and `GeneralizedPredictiveControl::computeRef()` both implement the same projected-gradient QP loop: initialise from warm start, compute gradient, apply step `1/L`, clip to box, check convergence. The loop structure, variable names, and convergence check are structurally identical across the two files.
 
-This is code duplication. When the solver was improved (adding `last_qp_converged_` and `last_qp_iters_` per Part 8, Issue 1.1), the change had to be applied in two places. The next improvement (adding verbosity-gated warnings per P10-14) will again require two edits. Any future change to the QP solver — adding a momentum term, switching to Frank-Wolfe, or adding constraint softening — will require synchronised changes to both files with no compile-time guarantee they stay in sync.
+This is code duplication. When the solver was improved (adding `last_qp_converged_` and `last_qp_iters_` per Part 8, Issue 1.1), the change had to be applied in two places. The next improvement (adding verbosity-gated warnings per P10-14) will again require two edits. Any future change to the QP solver - adding a momentum term, switching to Frank-Wolfe, or adding constraint softening - will require synchronised changes to both files with no compile-time guarantee they stay in sync.
 
 The correct fix is extraction:
 
@@ -2534,7 +2534,7 @@ GPQPResult solveBoxQP(const Eigen::MatrixXd &H,
 
 With this extracted, `DiscreteMPC` and `GeneralizedPredictiveControl` both call `solveBoxQP()` and store the returned `GPQPResult`. The solver is independently testable, independently improvable, and the two MPC/GPC implementations stay in sync automatically.
 
-**Status:** `[OPEN]` — tracked as P12-2. Effort: 2-3 hrs (extract, test, update both callers).
+**Status:** `[OPEN]` - tracked as P12-2. Effort: 2-3 hrs (extract, test, update both callers).
 
 ---
 
@@ -2542,30 +2542,30 @@ With this extracted, `DiscreteMPC` and `GeneralizedPredictiveControl` both call 
 
 `ControllerTraits.h` contains two conceptually separate concerns:
 
-1. **Static metadata** — `constexpr bool` fields declaring which tuners are compatible with which controllers, and `[[deprecated]]` markers for soft incompatibilities. This is pure type-level information; it has no runtime cost.
+1. **Static metadata** - `constexpr bool` fields declaring which tuners are compatible with which controllers, and `[[deprecated]]` markers for soft incompatibilities. This is pure type-level information; it has no runtime cost.
 
-2. **Tuner dispatch** — `if constexpr` branches that call the appropriate tuner implementation based on the controller type. This is a dispatch mechanism.
+2. **Tuner dispatch** - `if constexpr` branches that call the appropriate tuner implementation based on the controller type. This is a dispatch mechanism.
 
 Mixing these makes `ControllerTraits.h` a dependency sink: anything that needs the static metadata (e.g., a new tuner) must include the full dispatch logic and therefore all tuner headers. In practice, `ControllerTraits.h` likely includes `ControllerTuner.h` directly, which pulls in all eight tuner families.
 
 The correct separation:
 
 ```
-lib/ControllerTraits.h       — pure metadata (constexpr bool fields, static_assert guards)
-lib/ControllerTuner.h        — tuner dispatch (if constexpr, calls ControllerTraits for checks)
+lib/ControllerTraits.h       - pure metadata (constexpr bool fields, static_assert guards)
+lib/ControllerTuner.h        - tuner dispatch (if constexpr, calls ControllerTraits for checks)
 ```
 
 `ControllerTraits.h` should have zero implementation dependencies. `ControllerTuner.h` depends on both `ControllerTraits.h` and the individual tuner headers. This is already roughly the structure; the gap is whether there are any implementation details leaking into `ControllerTraits.h` that should be in `ControllerTuner.h`.
 
 **Action:** Verify the include graph. If `ControllerTraits.h` currently includes anything other than standard headers and individual controller headers (e.g., if it includes `TunerSuite.h`), move those includes to `ControllerTuner.h`.
 
-**Status:** `[OPEN]` — tracked as P12-3. Effort: 30 min (include graph audit + cleanup).
+**Status:** `[OPEN]` - tracked as P12-3. Effort: 30 min (include graph audit + cleanup).
 
 ---
 
 ### 2. Automated Testing: The Case for Catch2
 
-The custom `tests/test_framework.h` implements four functions: `test::check()`, `test::throws()`, `test::no_throw()`, and `test::suite()`. This is functional and sufficient for the current test suite. The argument for Catch2 is not correctness — the existing tests are correct — it is the **development velocity** impact of better tooling.
+The custom `tests/test_framework.h` implements four functions: `test::check()`, `test::throws()`, `test::no_throw()`, and `test::suite()`. This is functional and sufficient for the current test suite. The argument for Catch2 is not correctness - the existing tests are correct - it is the **development velocity** impact of better tooling.
 
 ---
 
@@ -2582,7 +2582,7 @@ You don't know whether `y_final` was `1.03` (mild overshoot) or `0.50` (integrat
 ```cpp
 REQUIRE(y_final == Approx(1.0).margin(0.02));
 // Output: FAILED: y_final == Approx(1.0).margin(0.02)
-//   with expansion: 0.503125 == Approx(1.0 ± 0.02)
+//   with expansion: 0.503125 == Approx(1.0 +/- 0.02)
 ```
 
 The actual value is printed automatically. This cuts the debugging cycle for a failing test from "run with extra logging" to "read the failure message."
@@ -2623,7 +2623,7 @@ FetchContent_MakeAvailable(Catch2)
 include(Catch)
 ```
 
-**Step 2 (1 hr):** Create `tests/test_catch2_pilot.cpp` for one controller (recommend `DiscretePID` — the best-defined tests). This becomes the template for future migration.
+**Step 2 (1 hr):** Create `tests/test_catch2_pilot.cpp` for one controller (recommend `DiscretePID` - the best-defined tests). This becomes the template for future migration.
 
 **Step 3 (ongoing):** Migrate one test function per PR. The old `test_controllers.cpp` remains valid; new tests go into Catch2 files. CI runs both.
 
@@ -2642,7 +2642,7 @@ This keeps CI green throughout and avoids a "big bang" rewrite. The pilot file d
 static constexpr double Ts = 0.01;
 static ctrl::StateSpace make_plant() { /* same as current */ }
 
-TEST_CASE("DiscretePID — pure proportional response", "[pid]") {
+TEST_CASE("DiscretePID - pure proportional response", "[pid]") {
     ctrl::PIDParams p;
     p.Kp = 2.5; p.Ki = 0.0; p.Kd = 0.0;
     ctrl::DiscretePID pid(p, Ts);
@@ -2664,7 +2664,7 @@ TEST_CASE("DiscretePID — pure proportional response", "[pid]") {
     }
 }
 
-TEST_CASE("DiscretePID — closed-loop convergence", "[pid][integration]") {
+TEST_CASE("DiscretePID - closed-loop convergence", "[pid][integration]") {
     ctrl::PIDParams p;
     p.Kp = 2.0; p.Ki = 1.0; p.Kd = 0.1; p.N = 20.0;
     ctrl::DiscretePID pid(p, Ts);
@@ -2683,19 +2683,19 @@ TEST_CASE("DiscretePID — closed-loop convergence", "[pid][integration]") {
 }
 ```
 
-**Status:** `[OPEN]` — tracked as P12-4 (FetchContent setup + pilot test), P12-5 (ongoing migration). Effort: P12-4 is 3 hrs; P12-5 is 1-2 hrs per test function.
+**Status:** `[OPEN]` - tracked as P12-4 (FetchContent setup + pilot test), P12-5 (ongoing migration). Effort: P12-4 is 3 hrs; P12-5 is 1-2 hrs per test function.
 
 ---
 
 ### 3. Inline Comments: Physical Meaning Behind Mathematical Formulations
 
-The DARE doubling derivation ([lib/DiscreteLQR.cpp:40-57]) and the ESO nilpotency argument ([lib/DiscreteADRC.cpp:31-50]) are the exemplary standards for this codebase. The gap is not missing *mathematical* comments — those are generally present. The gap is missing *physical interpretation* comments that connect the formula to what it means in engineering terms.
+The DARE doubling derivation ([lib/DiscreteLQR.cpp:40-57]) and the ESO nilpotency argument ([lib/DiscreteADRC.cpp:31-50]) are the exemplary standards for this codebase. The gap is not missing *mathematical* comments - those are generally present. The gap is missing *physical interpretation* comments that connect the formula to what it means in engineering terms.
 
 ---
 
-#### 3.1 DARE Solution P∞: Physical Meaning Absent
+#### 3.1 DARE Solution Pinf: Physical Meaning Absent
 
-The DARE solver in `DiscreteLQR` computes `P∞`, the stabilising solution to the Riccati equation. The comment says "stabilising solution" — correct mathematically. What it doesn't say: `P∞(i,j)` is the minimum steady-state LQR cost accumulated when starting from state `eᵢ` with a unit perturbation in direction `eⱼ`. Equivalently, `xᵀ P∞ x` is the **optimal cost-to-go from state x**. This physical meaning connects `P∞` to intuition about which states are "expensive to regulate."
+The DARE solver in `DiscreteLQR` computes `Pinf`, the stabilising solution to the Riccati equation. The comment says "stabilising solution" - correct mathematically. What it doesn't say: `Pinf(i,j)` is the minimum steady-state LQR cost accumulated when starting from state `e_i` with a unit perturbation in direction `e_j`. Equivalently, `xᵀ Pinf x` is the **optimal cost-to-go from state x**. This physical meaning connects `Pinf` to intuition about which states are "expensive to regulate."
 
 **Add to `solveDARE()` return comment:**
 
@@ -2713,9 +2713,9 @@ This is one paragraph. It connects the abstract Riccati solution to engineering 
 
 #### 3.2 MPC Cost Weights `rho_y` and `rho_u`: Unit Mismatch Not Documented
 
-`MPCParams::rho_y` and `rho_u` are documented as scalar weights on the output tracking error and move suppression cost respectively. What's missing: these weights are **not dimensionless**. The tracking cost `rho_y * ||y - r||²` has units of `rho_y * [output_units]²`. The move cost `rho_u * ||Δu||²` has units of `rho_u * [input_units]²`. For the cost to make physical sense (trading off equally scaled quantities), the ratio `rho_y / rho_u` must account for the dimensional mismatch.
+`MPCParams::rho_y` and `rho_u` are documented as scalar weights on the output tracking error and move suppression cost respectively. What's missing: these weights are **not dimensionless**. The tracking cost `rho_y * ||y - r||^2` has units of `rho_y * [output_units]^2`. The move cost `rho_u * ||Deltau||^2` has units of `rho_u * [input_units]^2`. For the cost to make physical sense (trading off equally scaled quantities), the ratio `rho_y / rho_u` must account for the dimensional mismatch.
 
-For a temperature controller with output in °C and input in %, `rho_y * 1°C² = rho_u * 1%²` requires `rho_u/rho_y = (1°C/1%)² = (1/100)²` if a 1% actuator move is considered equivalent to a 1°C tracking error. The current default `rho_y = 1.0, rho_u = 0.1` implies the designer is willing to accept 0.316 °C of tracking error in exchange for reducing actuator moves by 1%, which may not be the intent.
+For a temperature controller with output in ^\circC and input in %, `rho_y * 1^\circC^2 = rho_u * 1%^2` requires `rho_u/rho_y = (1^\circC/1%)^2 = (1/100)^2` if a 1% actuator move is considered equivalent to a 1^\circC tracking error. The current default `rho_y = 1.0, rho_u = 0.1` implies the designer is willing to accept 0.316 ^\circC of tracking error in exchange for reducing actuator moves by 1%, which may not be the intent.
 
 Bryson's method from `LQRWeightTuner::brysonMethod()` handles this automatically (normalises by max acceptable state deviation squared). The same philosophy should be documented for `MPCParams`:
 
@@ -2725,11 +2725,11 @@ Bryson's method from `LQRWeightTuner::brysonMethod()` handles this automatically
 //   - Set rho_u = 1 / (max_acceptable_input_move)^2
 //   - This follows Bryson's rule: the ratio rho_y/rho_u encodes the physical
 //     trade-off in physically consistent units.
-// Example: temperature control, max error = 2°C, max move = 5%:
+// Example: temperature control, max error = 2^\circC, max move = 5%:
 //   rho_y = 1/4, rho_u = 1/25  (ratio rho_y/rho_u = 25/4 = 6.25)
 ```
 
-**Status:** `[OPEN]` — documentation gap, tracked as P12-6.
+**Status:** `[OPEN]` - documentation gap, tracked as P12-6.
 
 ---
 
@@ -2738,47 +2738,47 @@ Bryson's method from `LQRWeightTuner::brysonMethod()` handles this automatically
 `UnscentedKalmanFilter` exposes `alpha`, `beta`, `kappa` tuning parameters. The header now has sizing guidance for `alpha` (fixed in Part 8, Issue 1.7). What it lacks: the physical meaning of `beta` and `kappa`.
 
 - `beta`: **encodes the prior distribution's kurtosis**. For a Gaussian prior, `beta = 2` is optimal (it cancels the 4th-order error term in the covariance update). For a fat-tailed distribution (Student-t or uniform), increasing `beta` partially compensates. Decreasing `beta` below 2 under-weights the zeroth sigma point's contribution to the covariance update.
-- `kappa`: **adjusts the total spread of sigma points** via `lambda = alpha² * (n + kappa) - n`. The choice `kappa = 0` or `kappa = 3 - n` (so that `n + kappa = 3`, matching the 3rd moment of a Gaussian) are the standard rules. The header says nothing about what `kappa = 0` implies or when to prefer `3 - n`.
+- `kappa`: **adjusts the total spread of sigma points** via `lambda = alpha^2 * (n + kappa) - n`. The choice `kappa = 0` or `kappa = 3 - n` (so that `n + kappa = 3`, matching the 3rd moment of a Gaussian) are the standard rules. The header says nothing about what `kappa = 0` implies or when to prefer `3 - n`.
 
 A reader who tunes `beta = 0` because "it seemed to converge faster in my tests" has no documentation telling them they've broken the covariance update optimality for Gaussian noise.
 
 **Add to `UnscentedKalmanFilter` constructor parameters:**
 
 ```cpp
-// beta [default: 2.0]  — Prior distribution kurtosis parameter.
+// beta [default: 2.0]  - Prior distribution kurtosis parameter.
 //   For Gaussian noise: beta = 2 is optimal (cancels 4th-order sigma-point approximation error).
 //   For heavy-tailed distributions: increase beta toward 3-4.
 //   DO NOT set beta < 2 without understanding the covariance update bias this introduces.
 //
-// kappa [default: 0.0] — Secondary sigma-point spread parameter.
+// kappa [default: 0.0] - Secondary sigma-point spread parameter.
 //   Rule of thumb: kappa = 0 for most applications.
 //   Alternative: kappa = 3 - n (keeps n + kappa = 3, matching Gaussian 3rd moment).
 //   For n >= 4, kappa = 3 - n goes negative; the spread lambda = alpha^2*(n+kappa)-n
 //   can become very small. Verify lambda > 0 when using kappa = 3-n for large n.
 ```
 
-**Status:** `[OPEN]` — documentation gap, tracked as P12-7.
+**Status:** `[OPEN]` - documentation gap, tracked as P12-7.
 
 ---
 
 #### 3.4 SMC Sliding Surface Coefficients: The Physical Ratio Is the Desired Bandwidth
 
-`SMCParams::c_e` and `c_de` define the sliding surface `σ = c_e * e + c_de * ė`. The ratio `c_de / c_e` has a physical meaning: it is the reciprocal of the desired closed-loop bandwidth (in rad/s) when the system is on the sliding surface. On the surface, `σ = 0` means `ė = -(c_e/c_de) * e`, which is exponential decay with time constant `c_de/c_e`. The "sliding bandwidth" is `ωs = c_e / c_de`.
+`SMCParams::c_e` and `c_de` define the sliding surface `sigma = c_e * e + c_de * ė`. The ratio `c_de / c_e` has a physical meaning: it is the reciprocal of the desired closed-loop bandwidth (in rad/s) when the system is on the sliding surface. On the surface, `sigma = 0` means `ė = -(c_e/c_de) * e`, which is exponential decay with time constant `c_de/c_e`. The "sliding bandwidth" is `omegas = c_e / c_de`.
 
 This is actionable tuning guidance. Instead of choosing `c_e` and `c_de` independently by trial and error, a practitioner can:
-1. Choose the desired sliding-mode bandwidth `ωs` (typically 5-10× the disturbance frequency).
-2. Set `c_e = 1.0` (normalised) and `c_de = 1/ωs`.
+1. Choose the desired sliding-mode bandwidth `omegas` (typically 5-10* the disturbance frequency).
+2. Set `c_e = 1.0` (normalised) and `c_de = 1/omegas`.
 
 No existing comment connects the ratio `c_e/c_de` to the sliding bandwidth. ControlSystems.jl's SMC tutorial makes this connection explicit. We should too.
 
 **Add to `SMCParams` field comments:**
 
 ```cpp
-// c_e [default: 1.0]   — Sliding surface tracking coefficient.
-// c_de [default: 0.1]  — Sliding surface rate coefficient.
+// c_e [default: 1.0]   - Sliding surface tracking coefficient.
+// c_de [default: 0.1]  - Sliding surface rate coefficient.
 //
 // Physical interpretation of the ratio:
-//   omega_s = c_e / c_de  [rad/s]  — bandwidth of exponential decay ON the sliding surface.
+//   omega_s = c_e / c_de  [rad/s]  - bandwidth of exponential decay ON the sliding surface.
 //
 // When sigma = c_e*e + c_de*edot = 0, the system obeys  edot = -(c_e/c_de)*e,
 // so the error decays as exp(-omega_s * t). Choose omega_s 3-10x the disturbance
@@ -2788,7 +2788,7 @@ No existing comment connects the ratio `c_e/c_de` to the sliding bandwidth. Cont
 //   c_e = 1.0, c_de = 0.1  (omega_s = 10 rad/s)
 ```
 
-**Status:** `[OPEN]` — documentation gap, tracked as P12-8.
+**Status:** `[OPEN]` - documentation gap, tracked as P12-8.
 
 ---
 
@@ -2797,8 +2797,8 @@ No existing comment connects the ratio `c_e/c_de` to the sliding bandwidth. Cont
 `KalmanFilter` takes `Qf` (process noise covariance) and `Rf` (measurement noise covariance) as constructor arguments. The header correctly describes these as noise covariance matrices. What it doesn't say: the **steady-state Kalman gain is determined by the ratio Q/R**, not their individual magnitudes. Doubling both Q and R simultaneously changes nothing about the filter's behaviour.
 
 More specifically:
-- Increasing `Qf(i,i)` relative to `Rf`: the filter trusts measurements more → faster state tracking, more noise sensitivity.
-- Increasing `Rf(j,j)` relative to `Qf`: the filter trusts the prediction more → smoother estimates, slower disturbance response.
+- Increasing `Qf(i,i)` relative to `Rf`: the filter trusts measurements more -> faster state tracking, more noise sensitivity.
+- Increasing `Rf(j,j)` relative to `Qf`: the filter trusts the prediction more -> smoother estimates, slower disturbance response.
 - The innovation normalised residual `(y - C*x_hat)' * S^{-1} * (y - C*x_hat)` (where `S = C*P*C' + R`) should follow a chi-squared distribution with `p` degrees of freedom at steady state. If the actual distribution has a much larger mean, Q is underestimated. If smaller, Q is overestimated. This is the NEES (Normalised Estimation Error Squared) consistency test.
 
 The EKF and UKF headers have no mention of NEES consistency testing. `KalmanWeightTuner::isotropic()` is the only tuning aid provided. For users who are seeing divergence or overconfident estimates, there is no guidance on how to diagnose Q/R miscalibration.
@@ -2818,10 +2818,10 @@ The EKF and UKF headers have no mention of NEES consistency testing. `KalmanWeig
 // If E[eps] >> p: Qf is too small (filter overconfident in its model).
 // If E[eps] << p: Rf is too small (filter overconfident in its measurements).
 // See Bar-Shalom, Li & Kirubarajan "Estimation with Applications to Tracking and
-// Navigation" §5.4 for the full NEES derivation.
+// Navigation" Section 5.4 for the full NEES derivation.
 ```
 
-**Status:** `[OPEN]` — documentation gap, tracked as P12-9.
+**Status:** `[OPEN]` - documentation gap, tracked as P12-9.
 
 ---
 
@@ -2831,11 +2831,11 @@ The EKF and UKF headers have no mention of NEES consistency testing. `KalmanWeig
 
 #### 4.1 What Already Exists (and Is Good)
 
-**Strategy Pattern — `IController`.** The abstract interface with `compute()`, `reset()`, `sampleTime()`, `bumplessInit()`, and `isHealthy()` is a textbook Strategy pattern. Controllers are interchangeable at runtime without the calling code knowing their type. `ControllerStack` exploits this correctly. The documentation doesn't name the pattern explicitly — that's fine; naming it adds no value for users who need to write code.
+**Strategy Pattern - `IController`.** The abstract interface with `compute()`, `reset()`, `sampleTime()`, `bumplessInit()`, and `isHealthy()` is a textbook Strategy pattern. Controllers are interchangeable at runtime without the calling code knowing their type. `ControllerStack` exploits this correctly. The documentation doesn't name the pattern explicitly - that's fine; naming it adds no value for users who need to write code.
 
-**Composite Pattern — `ControllerStack`.** `ControllerStack` holds a collection of `shared_ptr<IController>` entries and aggregates their outputs (Supervisory: pick one; Additive: sum; Weighted: weighted sum). This is a Composite. It's well-implemented and the bumpless-transfer logic is the hardest part, already done correctly.
+**Composite Pattern - `ControllerStack`.** `ControllerStack` holds a collection of `shared_ptr<IController>` entries and aggregates their outputs (Supervisory: pick one; Additive: sum; Weighted: weighted sum). This is a Composite. It's well-implemented and the bumpless-transfer logic is the hardest part, already done correctly.
 
-**Prototype Pattern — `PIDParams`, `MPCParams`, etc.** The parameter structs are value types with default constructors. Creating a modified copy is `auto p2 = p1; p2.Kp *= 2;`. This is the Prototype pattern informally. It works.
+**Prototype Pattern - `PIDParams`, `MPCParams`, etc.** The parameter structs are value types with default constructors. Creating a modified copy is `auto p2 = p1; p2.Kp *= 2;`. This is the Prototype pattern informally. It works.
 
 ---
 
@@ -2888,11 +2888,11 @@ private:
 };
 ```
 
-Each controller's `compute()` calls `notifyObserver(signal, result)` before returning. In production (observer is null), `notifyObserver` is a branch-predicted null check — typically one instruction. In commissioning, a concrete observer logs to a ring buffer, CSV file, or network socket.
+Each controller's `compute()` calls `notifyObserver(signal, result)` before returning. In production (observer is null), `notifyObserver` is a branch-predicted null check - typically one instruction. In commissioning, a concrete observer logs to a ring buffer, CSV file, or network socket.
 
 This pattern is used in embedded frameworks like LCM (Lightweight Communications and Marshalling) and in production MPC frameworks like Acados. It's the right design for a library that wants to be instrumentable without modification.
 
-**Status:** `[OPEN]` — tracked as P12-10. Effort: 2 hrs (interface + update all ~15 compute() implementations to call notifyObserver).
+**Status:** `[OPEN]` - tracked as P12-10. Effort: 2 hrs (interface + update all ~15 compute() implementations to call notifyObserver).
 
 ---
 
@@ -2903,7 +2903,7 @@ Constructing a `DiscreteMPC` correctly requires: a plant model (must be discrete
 A `MPCBuilder` would enforce these invariants at configuration time:
 
 ```cpp
-// Example API sketch — not necessarily this exact interface
+// Example API sketch - not necessarily this exact interface
 ctrl::DiscreteMPC mpc = ctrl::MPCBuilder()
     .withPlant(plant)           // sets Ts from plant
     .withHorizons(20, 5)        // Np=20, Nc=5; throws if Nc > Np
@@ -2914,11 +2914,11 @@ ctrl::DiscreteMPC mpc = ctrl::MPCBuilder()
     .build();                   // validates all constraints, throws if invalid
 ```
 
-The Builder also makes the configuration readable — the named methods are self-documenting in a way that `ctrl::DiscreteMPC mpc(plant, {20, 5, 1.0, 0.1, -5, 5, -1, 1, 200, 1e-8})` is not.
+The Builder also makes the configuration readable - the named methods are self-documenting in a way that `ctrl::DiscreteMPC mpc(plant, {20, 5, 1.0, 0.1, -5, 5, -1, 1, 200, 1e-8})` is not.
 
-This is a quality-of-life addition. The existing constructor is fine. The builder adds no new capability — it just makes misconfiguration a compile-time or early construction error rather than a runtime assert in `buildCondensedMatrices()`.
+This is a quality-of-life addition. The existing constructor is fine. The builder adds no new capability - it just makes misconfiguration a compile-time or early construction error rather than a runtime assert in `buildCondensedMatrices()`.
 
-**Status:** `[OPEN]` — tracked as P12-11. Effort: 2 hrs per controller. Recommend starting with `DiscreteMPC` as the most parameter-rich.
+**Status:** `[OPEN]` - tracked as P12-11. Effort: 2 hrs per controller. Recommend starting with `DiscreteMPC` as the most parameter-rich.
 
 ---
 
@@ -2928,7 +2928,7 @@ The case studies use `nlohmann/json` for scenario configuration. Scenario JSON f
 
 A `ControllerFactory::fromJSON(json j)` that returns a `shared_ptr<IController>` would centralise this pattern. It's not necessary for the library core, but it would make the case studies significantly cleaner and would be useful for any application that loads controller configuration at runtime (embedded systems with configuration over CAN, for example).
 
-**Status:** `[OPEN]` — tracked as P12-12. Low priority; case study quality improvement.
+**Status:** `[OPEN]` - tracked as P12-12. Low priority; case study quality improvement.
 
 ---
 
@@ -2938,19 +2938,19 @@ A `ControllerFactory::fromJSON(json j)` that returns a `shared_ptr<IController>`
 
 #### 5.1 Eigen `noalias()`: Not Annotated in Critical Paths
 
-Eigen expression templates perform alias analysis at compile time. When assigning to an Eigen object that appears on both sides of an expression (e.g., `P = A * P * A.transpose() + Q`), Eigen conservatively allocates a temporary for the result before writing back. For matrices used in hot loops (Kalman predict, MPC gradient update), this extra temporary costs one extra heap allocation per call — contradicting the "zero-allocation steady state" claim.
+Eigen expression templates perform alias analysis at compile time. When assigning to an Eigen object that appears on both sides of an expression (e.g., `P = A * P * A.transpose() + Q`), Eigen conservatively allocates a temporary for the result before writing back. For matrices used in hot loops (Kalman predict, MPC gradient update), this extra temporary costs one extra heap allocation per call - contradicting the "zero-allocation steady state" claim.
 
 The fix is `noalias()`: `P.noalias() = A * P * A.transpose() + Q;` when the assignment is guaranteed alias-free (i.e., `A` and `Q` don't alias `P`).
 
 **Critical locations to audit:**
-- `KalmanFilter::predict()` — `P = A*P*A' + Q` (all three distinct objects; noalias is safe)
-- `UnscentedKalmanFilter::predict()` — covariance update in the sigma-point propagation loop
-- `DiscreteMPC::buildPredictionMatrices()` — `F_` and `Phi_` construction loops (offline but relevant if called from `setPlant()`)
-- `GeneralizedPredictiveControl::computeRef()` — gradient update `grad_ = H_ * DeltaU_ + g_` (already a named variable but check noalias)
+- `KalmanFilter::predict()` - `P = A*P*A' + Q` (all three distinct objects; noalias is safe)
+- `UnscentedKalmanFilter::predict()` - covariance update in the sigma-point propagation loop
+- `DiscreteMPC::buildPredictionMatrices()` - `F_` and `Phi_` construction loops (offline but relevant if called from `setPlant()`)
+- `GeneralizedPredictiveControl::computeRef()` - gradient update `grad_ = H_ * DeltaU_ + g_` (already a named variable but check noalias)
 
 The audit is a `grep -r "\.noalias()"` to find where it's already used, then a review of the remaining Eigen assignments in hot-path code.
 
-**Status:** `[OPEN]` — tracked as P12-13. Effort: 1 hr audit + fixes.
+**Status:** `[OPEN]` - tracked as P12-13. Effort: 1 hr audit + fixes.
 
 ---
 
@@ -2962,17 +2962,17 @@ The gap between "we measured it once" and "we catch regressions" is large. Makin
 
 1. **Emit machine-readable output** (JSON or CSV) instead of human-readable lines.
 2. **Store a baseline** in `scripts/benchmarks/baseline.json` committed to the repository.
-3. **Add a comparison step** in CI that fails if any metric exceeds 2× the stored baseline.
+3. **Add a comparison step** in CI that fails if any metric exceeds 2* the stored baseline.
 
 The measurement itself already exists. The infrastructure around it does not.
 
-**Status:** `[OPEN]` — tracked as P12-14 (same goal as P9-12 and P11-13, but more specific: turn the existing script into a regression harness rather than proposing new scripts from scratch).
+**Status:** `[OPEN]` - tracked as P12-14 (same goal as P9-12 and P11-13, but more specific: turn the existing script into a regression harness rather than proposing new scripts from scratch).
 
 ---
 
 #### 5.3 LDLT Factorisation: No Comment That It Is Cached
 
-`DiscreteMPC` pre-factorises `H_` into `ldlt_` once per `buildCondensedMatrices()` call and uses `ldlt_.solve()` in `computeRef()`. This is the correct RT design — factorisation is O(n³), solve is O(n²). But the header comment on `ldlt_` says:
+`DiscreteMPC` pre-factorises `H_` into `ldlt_` once per `buildCondensedMatrices()` call and uses `ldlt_.solve()` in `computeRef()`. This is the correct RT design - factorisation is O(n^3), solve is O(n^2). But the header comment on `ldlt_` says:
 
 ```cpp
 Eigen::LDLT<Eigen::MatrixXd> ldlt_; ///< Pre-factored H_, refreshed in buildCondensedMatrices().
@@ -2991,13 +2991,13 @@ Eigen::LDLT<Eigen::MatrixXd> ldlt_; ///< Pre-factored H_, refreshed in buildCond
 
 Same pattern applies to `GeneralizedPredictiveControl` which also caches an LDLT factorisation.
 
-**Status:** `[OPEN]` — documentation gap, tracked as P12-15.
+**Status:** `[OPEN]` - documentation gap, tracked as P12-15.
 
 ---
 
 #### 5.4 `LQRAdapter::compute()` Silently Truncates MIMO Control Vectors
 
-`LQRAdapter::compute(double /*signal*/)` always returns `lqr_.compute(stateFn_(), x_ref)(0)` — the first element of the LQR control vector. For a MIMO plant with `m = 2` or `m = 3` inputs (e.g., the tug boat with three tugboat actuators), this silently discards control inputs 1..m-1. The other actuators receive zero input, and the plant operates with degraded control.
+`LQRAdapter::compute(double /*signal*/)` always returns `lqr_.compute(stateFn_(), x_ref)(0)` - the first element of the LQR control vector. For a MIMO plant with `m = 2` or `m = 3` inputs (e.g., the tug boat with three tugboat actuators), this silently discards control inputs 1..m-1. The other actuators receive zero input, and the plant operates with degraded control.
 
 This is not caught by any test: the test suite uses a SISO plant for the `LQRAdapter` test. A user who constructs a `LQRAdapter` for their MIMO plant, adds it to a `ControllerStack`, and observes poor performance will have no indication that the problem is in the adapter.
 
@@ -3020,7 +3020,7 @@ double compute(double /*signal*/) override {
 
 The `static bool warned` pattern gives a one-time warning without log flooding. Better long-term: override `computeVec()` in `LQRAdapter` to return the full control vector.
 
-**Status:** `[OPEN]` — silent data loss, tracked as P12-16.
+**Status:** `[OPEN]` - silent data loss, tracked as P12-16.
 
 ---
 
@@ -3036,7 +3036,7 @@ static Eigen::MatrixXd numericalJacobian(std::function<Eigen::VectorXd(const Eig
 
 For state vectors with heterogeneous units, a fixed epsilon is inappropriate:
 - State in km (satellite orbit): `1e-5 km = 1 cm`. Relative perturbation = `1e-8` for typical orbit state. Fine.
-- State in m/s (slow velocity): `1e-5 m/s` when velocity is `0.001 m/s`. Relative perturbation = `10`. This is a 1000% perturbation — the finite difference is evaluating the Jacobian at a completely different operating point.
+- State in m/s (slow velocity): `1e-5 m/s` when velocity is `0.001 m/s`. Relative perturbation = `10`. This is a 1000% perturbation - the finite difference is evaluating the Jacobian at a completely different operating point.
 
 The standard fix is scaled epsilon: `eps_i = 1e-4 * max(|x_i|, 1.0)`. This gives a relative perturbation of roughly `1e-4` across all state magnitudes, which is in the numerically well-behaved range for central differences.
 
@@ -3054,7 +3054,7 @@ static Eigen::MatrixXd numericalJacobian(
 
 This is a non-breaking change (default value preserves the existing API for callers who don't pass `eps_scale`). The behaviour change is that states with magnitude > 1 get a larger absolute perturbation, which is more accurate.
 
-**Status:** `[OPEN]` — numerical correctness gap for heterogeneous-unit state vectors, tracked as P12-17.
+**Status:** `[OPEN]` - numerical correctness gap for heterogeneous-unit state vectors, tracked as P12-17.
 
 ---
 
@@ -3079,9 +3079,9 @@ int p_; // output dimension
 
 These are short identifiers borrowed from control theory notation. They're correct for domain experts but opaque for someone unfamiliar with the notation. They also collide: `p_` is used as a dimension in some classes and as a `PIDParams` member in `DiscretePID`. A reader who grep-searches `p_` will find both uses and need context to distinguish them.
 
-**Recommendation:** Rename the dimension variables to `n_states_`, `n_inputs_`, `n_outputs_` throughout. This is a rename, not a logic change, and the renamed versions are self-documenting without the overhead of a comment. The `p_` naming collision with `PIDParams` is the highest-risk instance — fix it first.
+**Recommendation:** Rename the dimension variables to `n_states_`, `n_inputs_`, `n_outputs_` throughout. This is a rename, not a logic change, and the renamed versions are self-documenting without the overhead of a comment. The `p_` naming collision with `PIDParams` is the highest-risk instance - fix it first.
 
-**Status:** `[OPEN]` — tracked as P12-18. Effort: 1 hr global rename. Risk: low (pure rename, no logic change).
+**Status:** `[OPEN]` - tracked as P12-18. Effort: 1 hr global rename. Risk: low (pure rename, no logic change).
 
 ---
 
@@ -3091,7 +3091,7 @@ These are short identifiers borrowed from control theory notation. They're corre
 
 This is a minor inconsistency, but it suggests these types were written independently rather than from a shared design. If `DareOut` is ever promoted to public API (e.g., for mu-synthesis DK-iteration per P10-19), the naming conflict will need resolution. Consolidate now to `DareResult` with `{P, converged, iterations}` and use it in both places.
 
-**Status:** `[OPEN]` — tracked as P12-19. Effort: 20 min rename.
+**Status:** `[OPEN]` - tracked as P12-19. Effort: 20 min rename.
 
 ---
 
@@ -3110,7 +3110,7 @@ The existing test suite is strong (154 unit tests + 19 integration tests). These
 | `RecursiveLeastSquares` with an integrating plant signal | Verifies that the forgetting factor prevents covariance collapse | 30 min |
 | `c2d()` ZOH on a stiff plant (lambda_max/lambda_min > 100) | Verifies matrix exponential accuracy vs forward-Euler | 30 min |
 
-**Status:** All `[OPEN]` — tracked collectively as P12-20. Individual effort estimates above.
+**Status:** All `[OPEN]` - tracked collectively as P12-20. Individual effort estimates above.
 
 ---
 
@@ -3120,17 +3120,17 @@ The existing test suite is strong (154 unit tests + 19 integration tests). These
 
 #### Best: `DiscretePID::PIDParams::Kb` Documentation
 
-The Åström & Wittenmark §3.5 reference, the three tuning rules (`Kb = Ki/Kp`, `Kb = Kp/Kd`, `Kb = sqrt(Ki*Kp/Kd)`), and the explanation of what "slow reset" and "fast reset" mean physically is genuinely excellent applied documentation. A practitioner can read this and make an informed choice without opening the textbook. The recommended range is given in terms of the other PID parameters, not as an abstract number. This is the pattern every parameter documentation should follow.
+The Astrom & Wittenmark Section 3.5 reference, the three tuning rules (`Kb = Ki/Kp`, `Kb = Kp/Kd`, `Kb = sqrt(Ki*Kp/Kd)`), and the explanation of what "slow reset" and "fast reset" mean physically is genuinely excellent applied documentation. A practitioner can read this and make an informed choice without opening the textbook. The recommended range is given in terms of the other PID parameters, not as an abstract number. This is the pattern every parameter documentation should follow.
 
 Compare to MATLAB's `pid()` help: it says "specify the anti-windup back-calculation gain" with no tuning guidance whatsoever. This codebase is better.
 
 #### Worst: `DiscreteLeadLag::phaseAt()` Return Value
 
-`phaseAt(double omega)` computes the phase of the lead/lag compensator at frequency `omega`. The return value is in **radians**, with no documentation stating this. A user who calls `phaseAt(10.0)` and gets `0.436` does not know whether to multiply by `180/pi` (if they want degrees) or not. The test at [tests/test_controllers.cpp:392](../tests/test_controllers.cpp#L392) checks `phase > 0.0` — it never checks the actual value or units.
+`phaseAt(double omega)` computes the phase of the lead/lag compensator at frequency `omega`. The return value is in **radians**, with no documentation stating this. A user who calls `phaseAt(10.0)` and gets `0.436` does not know whether to multiply by `180/pi` (if they want degrees) or not. The test at [tests/test_controllers.cpp:392](../tests/test_controllers.cpp#L392) checks `phase > 0.0` - it never checks the actual value or units.
 
 One word in the return-value documentation fixes this: `@return Phase angle [rad] of the compensator at @p omega.`
 
-**Status:** `[OPEN]` — tracked as P12-21.
+**Status:** `[OPEN]` - tracked as P12-21.
 
 ---
 
@@ -3161,14 +3161,14 @@ One word in the return-value documentation fixes this: `@return Phase angle [rad
 | P12-21 | `DiscreteLeadLag::phaseAt()`: document return units as `[rad]` | `lib/DiscreteLeadLag.h` | Low | 2 min |
 
 **Status corrections from prior parts:**
-- **P10-3 `[FIXED]`** — `computeDoM()` already implemented at [lib/DiscretePID.cpp:83-118](../lib/DiscretePID.cpp#L83-L118).
-- **P11-8 `[FIXED]`** — `PIDParams::b_weight` already implemented at [lib/DiscretePID.h:86-87](../lib/DiscretePID.h#L86-L87) with full Skogestad/Åström & Hägglund documentation.
+- **P10-3 `[FIXED]`** - `computeDoM()` already implemented at [lib/DiscretePID.cpp:83-118](../lib/DiscretePID.cpp#L83-L118).
+- **P11-8 `[FIXED]`** - `PIDParams::b_weight` already implemented at [lib/DiscretePID.h:86-87](../lib/DiscretePID.h#L86-L87) with full Skogestad/Astrom & Hagglund documentation.
 
 **Highest-priority items before next tagged release:**
-- P12-16 (`LQRAdapter` MIMO truncation) — silent data loss; can cause hard-to-diagnose MIMO control failure.
-- P12-17 (`numericalJacobian` scaled epsilon) — numerical correctness failure for heterogeneous-unit state vectors.
-- P12-10 (Observer pattern) — enables telemetry and commissioning tools without modifying controller source.
-- P12-1 (module selection CMake) — embedded footprint reduction; needed before any MCU deployment claim.
+- P12-16 (`LQRAdapter` MIMO truncation) - silent data loss; can cause hard-to-diagnose MIMO control failure.
+- P12-17 (`numericalJacobian` scaled epsilon) - numerical correctness failure for heterogeneous-unit state vectors.
+- P12-10 (Observer pattern) - enables telemetry and commissioning tools without modifying controller source.
+- P12-1 (module selection CMake) - embedded footprint reduction; needed before any MCU deployment claim.
 
 ---
 

@@ -22,7 +22,7 @@ public:
     virtual ~IController() = default;
 
     /**
-     * @brief Advance one sample step — scalar SISO interface.
+     * @brief Advance one sample step - scalar SISO interface.
      *
      * - Tracking controllers (PID, MPC, LQR-adapter): @p signal = e[k] = r[k] - y[k]
      * - Optimisation-based controllers (ESC): @p signal = plant output y[k] (cost to extremize)
@@ -33,7 +33,7 @@ public:
     virtual double compute(double signal) = 0;
 
     /**
-     * @brief Advance one sample step — vector MIMO interface.
+     * @brief Advance one sample step - vector MIMO interface.
      *
      * The default implementation delegates to compute() when @p signal has exactly one element,
      * and throws std::logic_error for multi-element signals to prevent silent truncation.
@@ -64,7 +64,7 @@ public:
     virtual double sampleTime() const = 0;
 
     /**
-     * @brief Bumpless initialisation — prepares the controller for smooth activation.
+     * @brief Bumpless initialisation - prepares the controller for smooth activation.
      *
      * Called by ControllerStack (Supervisory mode) when this controller is newly selected,
      * so its first compute() call returns @p u_target at the current @p error without a bump.
@@ -92,7 +92,7 @@ public:
      *
      * ControllerStack (Supervisory mode) checks isHealthy() before selecting an entry;
      * an unhealthy controller is skipped in favour of the next eligible entry, enabling
-     * automatic fallback: MPC → GPC → PID when the QP consistently fails.
+     * automatic fallback: MPC -> GPC -> PID when the QP consistently fails.
      *
      * The default returns @c true. Override only in controllers with meaningful runtime
      * health state.
@@ -101,7 +101,7 @@ public:
      */
     virtual bool isHealthy() const { return true; }
 
-    // ── Observer (telemetry) ────────────────────────────────────────────────
+    // -- Observer (telemetry) ------------------------------------------------
 
     /**
      * @brief Attach a telemetry observer.

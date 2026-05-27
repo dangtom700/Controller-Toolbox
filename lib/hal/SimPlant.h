@@ -15,11 +15,11 @@
  * @code
  *   double y = sensor.read();              // 1. read current output y[k]
  *   double u = controller.compute(r - y);  // 2. compute control action
- *   actuator.write(u);                     // 3. write u[k] → advances plant to x[k+1]
+ *   actuator.write(u);                     // 3. write u[k] -> advances plant to x[k+1]
  * @endcode
  *
  * `read()` must be called **before** `write()` in the same sample, because `write()`
- * advances the state. Reversing the order models a one-step computational delay —
+ * advances the state. Reversing the order models a one-step computational delay -
  * which is valid for hardware; just document the convention.
  *
  * **Thread safety:** `step()`, `setState()`, `reset()`, and `output()` are all
@@ -47,7 +47,7 @@ public:
                       const Eigen::VectorXd&  x0 = Eigen::VectorXd());
 
     /**
-     * @brief Advance one sample: x[k+1] = A·x[k] + B·u[k], y[k] = C·x[k] + D·u[k].
+     * @brief Advance one sample: x[k+1] = A.x[k] + B.u[k], y[k] = C.x[k] + D.u[k].
      *
      * The output y[k] is cached internally; call output() after step() to read it.
      *
@@ -58,7 +58,7 @@ public:
     /**
      * @brief Return the cached output from the last step() call.
      *
-     * On construction (before any step), returns C·x0 + D·0.
+     * On construction (before any step), returns C.x0 + D.0.
      *
      * @return y[k] (mutex-protected).
      */
@@ -89,7 +89,7 @@ private:
     StateSpace       model_;
     Eigen::VectorXd  x_;        ///< Current state x[k].
     Eigen::VectorXd  x0_;       ///< Initial state (stored for reset()).
-    double           y_cached_; ///< Last output — avoids recomputing in output().
+    double           y_cached_; ///< Last output - avoids recomputing in output().
 
     void updateOutput(double u); ///< Recomputes y_cached_ from current x_ and u (caller holds mu_).
 };

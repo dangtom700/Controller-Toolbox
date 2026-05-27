@@ -8,11 +8,11 @@
  * @file RepetitiveController.h
  * @brief Discrete-time Plug-in Repetitive Controller (RC).
  *
- * Cancels periodic references and disturbances with known period T = N·Ts by wrapping
+ * Cancels periodic references and disturbances with known period T = N.Ts by wrapping
  * any existing IController (base) and adding a learned periodic correction:
  *
  * @code
- *   v[k]  = Q·v[k−N] + Krc·e[k]   (repetitive learning law)
+ *   v[k]  = Q.v[k-N] + Krc.e[k]   (repetitive learning law)
  *   u[k]  = u_base[k] + v[k]       (plug-in addition to base controller output)
  * @endcode
  *
@@ -22,7 +22,7 @@
  *
  * **Stability condition (sufficient, SISO linear base):**
  * The closed loop with the base controller must be stable, and
- * Q / |1 + L(e^jω)·P(e^jω)| < 1 for all ω (internal model robustness test).
+ * Q / |1 + L(e^jomega).P(e^jomega)| < 1 for all omega (internal model robustness test).
  *
  * @code
  * // Typical usage
@@ -43,9 +43,9 @@ namespace ctrl
  */
 struct RepetitiveParams
 {
-    int    periodSteps = 100;  ///< Period N in samples (T = N·Ts).
-    double Krc         = 0.5;  ///< Learning gain. Small = slow but stable. Typical: 0.3–0.8.
-    double Q           = 0.98; ///< Forgetting/robustness factor ∈ (0, 1]. Typical: 0.95–1.0.
+    int    periodSteps = 100;  ///< Period N in samples (T = N.Ts).
+    double Krc         = 0.5;  ///< Learning gain. Small = slow but stable. Typical: 0.3-0.8.
+    double Q           = 0.98; ///< Forgetting/robustness factor \in (0, 1]. Typical: 0.95-1.0.
     double uMin        = -1e9; ///< Output saturation lower limit.
     double uMax        =  1e9; ///< Output saturation upper limit.
 };

@@ -8,7 +8,7 @@
  * @brief ISensor decorator that enforces the isValid() contract via hold-last semantics.
  *
  * **Problem:** `ISensor::isValid()` documents that controllers should freeze when it
- * returns `false`, but no controller calls `isValid()` — it only receives a `double`.
+ * returns `false`, but no controller calls `isValid()` - it only receives a `double`.
  * A sensor glitch (encoder loss, CAN timeout, ADC saturation) can silently feed NaN,
  * 0.0, or a rail value into the estimator, corrupting Kalman covariance and MPC state
  * estimates before any guard fires.
@@ -57,7 +57,7 @@ public:
     /**
      * @brief Return the inner sensor's reading, or the last valid value when invalid.
      *
-     * Also rejects non-finite inner values (NaN, ±Inf) even when `isValid() == true`.
+     * Also rejects non-finite inner values (NaN, +/-Inf) even when `isValid() == true`.
      * Increments the stale counter on any rejected sample.
      *
      * @return Most recent valid (finite) measurement. Never NaN or Inf.
@@ -84,7 +84,7 @@ public:
      * @brief Reflects the inner sensor's validity.
      *
      * `true` = the inner sensor reports fresh data. Does NOT indicate whether
-     * `last_valid_` is still trustworthy — check `staleCount()` or the
+     * `last_valid_` is still trustworthy - check `staleCount()` or the
      * `onMaxStale` callback for that.
      *
      * @return `inner_->isValid()`.

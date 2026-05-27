@@ -13,9 +13,9 @@
  * and combined without loss of optimality (Wonham 1968).
  *
  * **Control law per step:**
- * 1. Kalman predict: x̂[k|k−1] from u[k−1]
- * 2. Kalman update: x̂[k|k] from y[k]
- * 3. LQR control: u[k] = −K·(x̂[k|k] − x_ref)
+ * 1. Kalman predict: x^[k|k-1] from u[k-1]
+ * 2. Kalman update: x^[k|k] from y[k]
+ * 3. LQR control: u[k] = -K.(x^[k|k] - x_ref)
  *
  * @par Scope limitation
  * The separation principle holds exactly only for linear systems with additive Gaussian noise.
@@ -29,7 +29,7 @@
  *          or use the full step() method directly.
  *
  * @see Athans (1971), "Role of Decision Theory in Systems Engineering".
- * @see MATLAB lqg(), kalman(); Åström, "Introduction to Stochastic Control".
+ * @see MATLAB lqg(), kalman(); Astrom, "Introduction to Stochastic Control".
  */
 
 namespace ctrl
@@ -44,13 +44,13 @@ public:
     /**
      * @brief Construct the LQG controller.
      *
-     * @param plant   Discrete-time model (A, B, C, D, Ts). If D ≠ 0, a warning is printed:
-     *                the Kalman innovation uses u[k−1] for the D·u feedthrough term (one step stale).
+     * @param plant   Discrete-time model (A, B, C, D, Ts). If D != 0, a warning is printed:
+     *                the Kalman innovation uses u[k-1] for the D.u feedthrough term (one step stale).
      *                Use D = 0 for noise-free feedthrough accuracy.
      * @param lqr_p   LQR cost weights Q (state) and R (control).
-     * @param Q_noise Process noise covariance (n × n, positive semi-definite).
-     * @param R_noise Measurement noise covariance (p × p, positive definite).
-     * @param P0      Initial Kalman error covariance (n × n). Defaults to identity when empty.
+     * @param Q_noise Process noise covariance (n * n, positive semi-definite).
+     * @param R_noise Measurement noise covariance (p * p, positive definite).
+     * @param P0      Initial Kalman error covariance (n * n). Defaults to identity when empty.
      */
     DiscreteLQG(const StateSpace &plant,
                 const LQRParams &lqr_p,
@@ -61,10 +61,10 @@ public:
     /**
      * @brief Full step: update Kalman filter with (y, u_prev), then apply LQR toward x_ref.
      *
-     * @param y     Plant output measurement y[k] (p × 1).
-     * @param u_prev Control input applied at the previous step u[k−1] (m × 1).
-     * @param x_ref  Reference state x_ref[k] (n × 1). Pass empty for regulation to origin.
-     * @return Control action u[k] (m × 1).
+     * @param y     Plant output measurement y[k] (p * 1).
+     * @param u_prev Control input applied at the previous step u[k-1] (m * 1).
+     * @param x_ref  Reference state x_ref[k] (n * 1). Pass empty for regulation to origin.
+     * @return Control action u[k] (m * 1).
      */
     Eigen::VectorXd step(const Eigen::VectorXd &y,
                          const Eigen::VectorXd &u_prev,
@@ -83,13 +83,13 @@ public:
 
     /**
      * @brief Set the reference state for the next compute() call (IController compat).
-     * @param x_ref Reference state vector (n × 1).
+     * @param x_ref Reference state vector (n * 1).
      */
     void setReference(const Eigen::VectorXd &x_ref) { x_ref_ = x_ref; }
 
     /**
      * @brief Set the previous control input for the next compute() call (IController compat).
-     * @param u Previous control input u[k−1] (m × 1).
+     * @param u Previous control input u[k-1] (m * 1).
      */
     void setUPrev(const Eigen::VectorXd &u) { u_prev_ = u; }
 
@@ -99,10 +99,10 @@ public:
     /** @brief Sample time Ts [s]. */
     double sampleTime() const { return lqr_->sampleTime(); }
 
-    /** @brief Current Kalman state estimate x̂[k|k]. */
+    /** @brief Current Kalman state estimate x^[k|k]. */
     const Eigen::VectorXd &stateEstimate() const { return kf_->state(); }
 
-    /** @brief Optimal LQR feedback gain matrix K* (m × n). */
+    /** @brief Optimal LQR feedback gain matrix K* (m * n). */
     const Eigen::MatrixXd &gainMatrix()    const { return lqr_->gainMatrix(); }
 
 private:
