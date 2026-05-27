@@ -1,5 +1,6 @@
 #include "PlantModel.h"
 #include <algorithm>
+#include <iostream>
 #include <stdexcept>
 #include <unsupported/Eigen/MatrixFunctions>
 #include <cmath>
@@ -155,6 +156,30 @@ namespace ctrl
     }
 
     // ---------------------------------------------------------------------------
+    // c2d internal helper: warn when a discrete A matrix has eigenvalues outside
+    // the unit disk despite a stable continuous-time plant.  This can happen when
+    // ||Ac|| * Ts is large (stiff system + coarse sample time) or when the matrix
+    // exponential loses precision for ill-conditioned Ac.
+    // ---------------------------------------------------------------------------
+    static void checkDiscreteStability(const Eigen::MatrixXd &Ad, const char *context)
+    {
+        const auto eigs = Ad.eigenvalues();
+        for (int i = 0; i < eigs.size(); ++i)
+        {
+            if (std::abs(eigs[i]) >= 1.0 + 1e-9)
+            {
+                std::cerr << "[PlantModel::" << context << "] WARNING: A_d eigenvalue "
+                          << eigs[i] << " (|lambda| = " << std::abs(eigs[i])
+                          << ") lies outside the unit disk.\n"
+                          << "  This may indicate numerical loss of precision in the matrix "
+                             "exponential (ZOH)\n"
+                          << "  or a bilinear transform of a marginally stable plant (Tustin).\n"
+                          << "  Check that Ts << 1 / |lambda_max(Ac)| for all fast modes.\n";
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------------------
     // c2d
     // ---------------------------------------------------------------------------
     StateSpace c2d(const StateSpace &sys_c, double Ts, C2dMethod method,
@@ -198,7 +223,9 @@ namespace ctrl
 
             const Eigen::MatrixXd Ad = eM.topLeftCorner(n, n);
             const Eigen::MatrixXd Bd = eM.topRightCorner(n, m);
-            return StateSpace(Ad, Bd, sys_c.C, sys_c.D, Ts);
+            StateSpace result(Ad, Bd, sys_c.C, sys_c.D, Ts);
+            checkDiscreteStability(result.A, "c2d (ZOH)");
+            return result;
         }
         else // Tustin or TustinPrewarped
         {
@@ -228,7 +255,10 @@ namespace ctrl
             const Eigen::PartialPivLU<Eigen::MatrixXd> lu(Im);
             const Eigen::MatrixXd Ad = lu.solve(Ip);
             const Eigen::MatrixXd Bd = lu.solve(sys_c.B * (2.0 * alpha)); // Bd = (2 alpha)*(I-alpha*A)^{-1}*B
-            return StateSpace(Ad, Bd, sys_c.C, sys_c.D, Ts);
+            StateSpace result(Ad, Bd, sys_c.C, sys_c.D, Ts);
+            checkDiscreteStability(result.A, method == C2dMethod::TustinPrewarped
+                                             ? "c2d (TustinPrewarped)" : "c2d (Tustin)");
+            return result;
         }
     }
 

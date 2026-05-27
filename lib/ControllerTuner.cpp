@@ -158,7 +158,20 @@ namespace ctrl
         }
 
         if (!got283 || !got632)
-            throw std::runtime_error("StepResponseTuner: output did not reach 63.2 % of steady state.");
+        {
+            // Integrating (type-1) plants have no finite steady state: the step
+            // response ramps indefinitely and never crosses the y_inf thresholds
+            // computed from output.back().  If the 63.2 % crossing is absent, the
+            // plant is likely integrating or the data record is too short.
+            // For integrating plants use a velocity-form PID or fit a DIPDT model
+            // (integrating plus dead time) rather than FOPDT.
+            throw std::runtime_error(
+                "StepResponseTuner: output did not reach 63.2 % of steady state. "
+                "If the step response is still rising at the end of the data record, "
+                "the plant may be integrating (type-1). FOPDT identification requires "
+                "a finite steady-state value. For integrating plants, use a DIPDT "
+                "model or a velocity-form (incremental) PID structure.");
+        }
 
         // Process-reaction-curve method (Astrom & Hagglund):
         //   tau = 1.5.(t63.2 - t28.3),   theta = t63.2 - tau

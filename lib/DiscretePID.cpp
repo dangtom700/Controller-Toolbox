@@ -94,8 +94,13 @@ namespace ctrl
         // Integral: backward Euler on error (unchanged)
         const double ki_update = p_.Ki * Ts_ * error;
 
+        // 2DOF proportional: acts on (b*r - y) rather than (r - y).
+        // b_weight = 1 reduces to standard 1DOF; b_weight = 0 removes the
+        // proportional setpoint kick entirely (Astrom & Hagglund 2006 §8.4).
+        const double prop_signal = p_.b_weight * r - y;
+
         // Unsaturated output
-        const double u_unsat = p_.Kp * error + (integral_ + ki_update) + d_new;
+        const double u_unsat = p_.Kp * prop_signal + (integral_ + ki_update) + d_new;
 
         // Output saturation
         const double u_sat = std::max(p_.uMin, std::min(p_.uMax, u_unsat));

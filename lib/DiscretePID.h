@@ -43,6 +43,20 @@ namespace ctrl
         //   - Kb = 0: disables anti-windup entirely; use only when saturation cannot occur.
         //   - Kb = 1.0 (default): reasonable for many processes; may be slow for high-Ki loops.
         double Kb = 1.0;
+        // Two-degree-of-freedom proportional setpoint weight b in [0, 1].
+        //   Applied only by computeDoM(y, r): proportional term acts on (b*r - y) while
+        //   the integral term acts on (r - y).  This decouples setpoint-tracking bandwidth
+        //   from disturbance-rejection bandwidth without changing any gains.
+        //
+        // Tuning guide (Skogestad 2003 / Astrom & Hagglund 2006 §8.4):
+        //   b = 1.0 (default): standard 1DOF — maximum setpoint gain.
+        //   b = 0.5:           reduces overshoot ~10-15 % vs b=1 for ZN-tuned loops.
+        //   b = 0.0:           setpoint feed-forward entirely through integrator;
+        //                      no proportional kick on step — slowest but smoothest.
+        //
+        // Has no effect on compute(error) because that overload receives only the
+        // pre-computed error (r - y) and cannot separate r from y.
+        double b_weight = 1.0;
     };
 
     class DiscretePID : public IController

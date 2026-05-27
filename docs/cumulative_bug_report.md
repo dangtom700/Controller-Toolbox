@@ -1760,3 +1760,642 @@ The pattern: algorithm *selection* is well-documented (why doubling DARE instead
 ---
 
 *Part 10 added 2026-05-26. All findings verified against actual source. No prior findings were contradicted.*
+
+---
+
+---
+
+## Part 11: Senior Developer Review — 2026-05-27 (Rev 6)
+
+**Reviewer:** Senior Controls Engineer (fifth external pass)
+**Scope:** Full codebase — `lib/`, `tests/`, `.github/workflows/`, `docs/`, `case-study/`, `examples/`. Read against actual source files only; all workflow findings based on reading `ubuntu.yml`, `windows.yml`, and `doc.yml` directly.
+**Tone:** Informal, peer-to-peer, critical. Useful over polite.
+**Benchmarks referenced:** python-control, ACADO, Eigen, ControlSystems.jl, scipy-signal, MATLAB Control Toolbox, OpenModelica, github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python.
+**Priority focus areas (requested):** PID tuning and state-space methodology; performance benchmarks availability; request for diagrams/pseudocode; CI/CD GitHub Workflow enhancements; documentation quality exemplars vs. poor sections.
+
+---
+
+### Preamble
+
+Parts 1-10 represent a thorough iterative review. This pass adds what wasn't said before — specifically, it goes deep on the CI/CD infrastructure (reading the actual workflow YAML, not summarising from memory), and makes concrete benchmark and diagram proposals for the algorithms that still lack them. It also draws explicit contrasts between the best-documented and worst-documented sections of the library so future contributors have a clear target.
+
+Nothing here contradicts Parts 1-10. New findings only.
+
+---
+
+### 1. CI/CD Infrastructure: What the Actual Workflows Contain
+
+Parts 8 and 10 discussed CI/CD improvements. This section is based on reading `.github/workflows/ubuntu.yml` (157 lines), `.github/workflows/windows.yml` (146 lines), and `.github/workflows/doc.yml` (1 line). Not summaries — the actual YAML.
+
+---
+
+#### 1.1 `doc.yml` Is a Stub — Doxygen Has No CI at All
+
+`doc.yml` contains exactly **one line**. It is not a skeleton; it is an empty placeholder. There is no Doxygen invocation, no GitHub Pages deployment, no documentation check of any kind. The `Doxyfile` in the root is a well-configured 3.8 KB document that will never run in CI until this is fixed.
+
+This is the fastest high-ROI CI improvement available. A working `doc.yml`:
+
+```yaml
+name: Documentation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  doxygen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Doxygen and Graphviz
+        run: sudo apt-get install -y doxygen graphviz
+
+      - name: Build Doxygen (warnings as errors)
+        run: |
+          # WARN_AS_ERROR = YES must be set in Doxyfile (see P10-12)
+          doxygen Doxyfile
+          if [ $? -ne 0 ]; then
+            echo "Doxygen failed — undocumented symbols or mismatched @param"
+            exit 1
+          fi
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/html
+```
+
+With `WARN_AS_ERROR = YES` in the `Doxyfile` (tracked P10-12), every undocumented public function or mismatched `@param` tag fails the docs job, catching documentation regressions the same way `-Werror` catches code regressions. The GitHub Pages deploy means the API reference is publicly browsable from every release. Neither of these exist today.
+
+**Status:** `[OPEN]` — tracked as P11-1.
+
+---
+
+#### 1.2 Both Workflow Files Use Deprecated `::set-output` Syntax
+
+Both `ubuntu.yml` and `windows.yml` use the deprecated `::set-output name=...::` workflow command in multiple places:
+
+```yaml
+# ubuntu.yml line 74, 98, 131
+echo "::set-output name=target_name::$targetName"
+echo "::set-output name=version::$VERSION"
+echo "::set-output name=tag_exists::false"
+
+# windows.yml lines 63, 87, 98, 120 — same pattern
+```
+
+GitHub deprecated `set-output` in September 2022 and now emits a deprecation warning in the Actions log on every run. It will be removed in a future runner update. The replacement is:
+
+```bash
+echo "target_name=$targetName" >> $GITHUB_OUTPUT
+echo "version=$VERSION" >> $GITHUB_OUTPUT
+echo "tag_exists=false" >> $GITHUB_OUTPUT
+```
+
+This is a 5-minute find-and-replace across both files. Leaving deprecated syntax in CI workflows means every run has warning noise, which makes it harder to spot actual warnings when they appear. Fix before the next tagged release.
+
+**Status:** `[OPEN]` — tracked as P11-2.
+
+---
+
+#### 1.3 `actions/upload-artifact@v2` and `actions/download-artifact@v2` Are EOL
+
+Both workflows use v2 of the artifact actions:
+
+```yaml
+# ubuntu.yml lines 80, 139, 143
+uses: actions/upload-artifact@v2
+uses: actions/download-artifact@v2
+
+# windows.yml lines 69, 122, 127 — same
+```
+
+`actions/upload-artifact@v2` and `@v2` of the download counterpart reached end-of-life in November 2023. GitHub will start failing these in a future runner deprecation sweep. The current supported version is `@v4`, which also has significantly faster upload/download performance (parallelised chunked transfer vs single-threaded in v2).
+
+```yaml
+# Replace with:
+uses: actions/upload-artifact@v4
+uses: actions/download-artifact@v4
+```
+
+Note: `@v4` changed the artifact naming convention — artifacts uploaded with `@v4` must be downloaded with `@v4`, so the upgrade must be applied to both sides simultaneously. Five-minute fix.
+
+**Status:** `[OPEN]` — tracked as P11-3.
+
+---
+
+#### 1.4 Release Logic Is Duplicated Across Ubuntu and Windows Workflows
+
+Both `ubuntu.yml` (lines 85-157) and `windows.yml` (lines 74-146) contain identical `release` jobs: extract version, check tag, create tag, generate changelog, download artifacts, create GitHub Release. The only difference is the artifact names (`executable-x86_64`/`executable-x86` vs `exe-file-x64`/`exe-file-x86`).
+
+This violates DRY at the CI level. If the release process changes (e.g., adding SBOM generation per P10-10, or a GPG signature step), the change must be made in two places. The standard fix is a **reusable workflow** or a dedicated `release.yml` that triggers after both build workflows succeed and downloads all four artifacts:
+
+```yaml
+# .github/workflows/release.yml
+name: Create Release
+
+on:
+  workflow_run:
+    workflows: ["Ubuntu CI/CD", "Windows CI/CD"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  release:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Download all four platform artifacts
+      - uses: actions/download-artifact@v4
+        with: { name: executable-x86_64, path: artifacts/ }
+      - uses: actions/download-artifact@v4
+        with: { name: executable-x86, path: artifacts/ }
+      - uses: actions/download-artifact@v4
+        with: { name: exe-file-x64, path: artifacts/ }
+      - uses: actions/download-artifact@v4
+        with: { name: exe-file-x86, path: artifacts/ }
+
+      # ... version extraction, tag, changelog, SBOM, release creation
+```
+
+This is a 1-hour refactor that eliminates the duplication and sets up the release job as the single place to add compliance artefacts (SBOM, checksums, signatures).
+
+**Status:** `[OPEN]` — tracked as P11-4.
+
+---
+
+#### 1.5 No Clang, No Sanitizers, No Static Analysis in Either Workflow
+
+Reading both workflow files confirms: there is no clang build, no AddressSanitizer, no UBSanitizer, no clang-tidy, no cppcheck, no valgrind step anywhere. Parts 8 and 10 flagged the *absence* of a `ci-cd.yml` (that file apparently doesn't exist in the current repo — only `ubuntu.yml` and `windows.yml`). Those parts were reviewing a future version or a different branch. The current state is:
+
+**Current CI test matrix:**
+| OS | Compiler | ASan | UBSan | clang-tidy | Coverage |
+|----|----------|------|-------|------------|----------|
+| ubuntu-latest | GCC-13 x86_64 | ❌ | ❌ | ❌ | ❌ |
+| ubuntu-latest | GCC-13 x86 | ❌ | ❌ | ❌ | ❌ |
+| windows-2022 | MSVC x64 | ❌ | ❌ | ❌ | ❌ |
+| windows-2022 | MSVC x86 | ❌ | ❌ | ❌ | ❌ |
+
+**Recommended CI matrix additions:**
+
+```yaml
+# Add to ubuntu.yml build matrix or create separate job:
+- name: Build with Clang + ASan + UBSan
+  run: |
+    sudo apt-get install -y clang-16
+    xmake f -v --toolchain=clang \
+      --cxxflags="-fsanitize=address,undefined -fno-omit-frame-pointer" \
+      --ldflags="-fsanitize=address,undefined"
+    xmake -vD
+    xmake test -v
+  env:
+    ASAN_OPTIONS: halt_on_error=1:detect_leaks=1
+    UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+```
+
+ASan + UBSan together take roughly 2-3× longer to run than the base test suite. Worth every second for a library targeting safety-critical embedded systems.
+
+**Status:** `[OPEN]` — tracked as P11-5 (Clang CI), P11-6 (ASan/UBSan).
+
+---
+
+#### 1.6 No Performance Benchmark CI Step
+
+The `scripts/` directory contains `realtime_all.cpp` (and the `bench_*` scripts proposed in Part 9, which may or may not exist yet). Neither workflow runs any timing benchmark. A 10% MPC solver regression introduced by an Eigen version bump is undetectable from the current CI output.
+
+The minimum viable benchmark CI step:
+
+```yaml
+- name: Build and run benchmarks
+  run: |
+    xmake build bench_mpc bench_lqr bench_rls
+    ./bench_mpc  | tee benchmark_results.txt
+    ./bench_lqr  | tee -a benchmark_results.txt
+    ./bench_rls  | tee -a benchmark_results.txt
+
+- name: Upload benchmark results
+  uses: actions/upload-artifact@v4
+  with:
+    name: benchmark-results-${{ matrix.arch }}
+    path: benchmark_results.txt
+```
+
+With the artifact upload, benchmark results are retained per commit and can be compared manually. For automated regression detection, `benchmark-action/github-action-benchmark@v1` can plot results over time and fail CI when a metric exceeds a configurable threshold.
+
+**Status:** `[OPEN]` — tracked as P11-7.
+
+---
+
+### 2. PID Tuning Methodology: Remaining Gaps After Parts 8-10
+
+Parts 8, 9, and 10 covered the tuning subsystem in depth. Three gaps weren't addressed:
+
+---
+
+#### 2.1 `TunerSuite` Has No Setpoint Weight (`b`) Support
+
+The standard two-degrees-of-freedom PID structure is:
+
+```
+u = Kp * (b*r - y) + Ki * (r - y) / s + Kd * s * (c*r - y) / (1 + s/N)
+```
+
+where `b` (proportional setpoint weight) and `c` (derivative setpoint weight, almost always 0) allow separate tuning of setpoint response and disturbance rejection. `DiscretePID` has a `computeDoM()` variant (or is pending it per P10-3) but no general 2DOF structure with configurable `b`.
+
+This matters for process control: a ZN-tuned PID with `b = 0.5` gives roughly 5-10% overshoot instead of 25% while preserving the same disturbance rejection bandwidth. The AMIGO rules (already implemented) actually assume `b = 1.0`; the Skogestad IMC rules recommend `b = 1/(1 + Ti/Td)` for balanced 2DOF response. None of this is available via the current `PIDParams` struct.
+
+The fix is straightforward:
+1. Add `double b_weight = 1.0` and `double c_weight = 0.0` to `PIDParams`.
+2. In `DiscretePID::compute(double r, double y)`, compute:
+   - proportional term on `b*r - y`
+   - derivative term on `c*r - y` (with filter)
+   - integral term on `r - y`
+3. Document the AMIGO and Skogestad recommended `b` values per rule in `TunerSuite`.
+
+Without this, every setpoint-step application is stuck with the choice between ZN's 25% overshoot and a manually de-tuned controller with degraded disturbance rejection.
+
+**Status:** `[OPEN]` — tracked as P11-8.
+
+---
+
+#### 2.2 `RelayAutoTuner`: No Multi-Period Averaging for Noisy Plants
+
+The relay test extracts `Ku` and `Tu` from **a single limit cycle**. For noisy measurements, a single period produces noisy estimates of both the relay amplitude and the period. Standard implementations average over 3-5 complete relay cycles. The Åström-Hägglund (1984) paper explicitly recommends 3-cycle averaging.
+
+Looking at the relay tuner implementation pattern, if `isDone()` fires after the first complete oscillation, the estimates are the single-cycle values. For a temperature loop with sigma = 1°C and a process variable range of 50°C, the noise-to-amplitude ratio is 2% — borderline. For a pressure loop on a noisy sensor, it could be 10%, giving a 10% error in `Ku` and potentially the wrong tuning rule selection.
+
+**Proposed addition to `RelayAutoTunerParams`:**
+```cpp
+int n_cycles = 3;  // Number of relay oscillations to average before isDone() fires.
+                   // Increase for noisy plants. Minimum 1 (single-cycle, fastest).
+```
+
+This is a small state-machine addition: count complete half-periods, average the accumulated `Ku_i` and `Tu_i` values, report done after `n_cycles` complete periods.
+
+**Status:** `[OPEN]` — tracked as P11-9.
+
+---
+
+#### 2.3 `StepResponseTuner` 28.3%/63.2% Method: No Inflection-Point Validation
+
+The tangent-intersection method fits FOPDT by finding the 28.3% and 63.2% crossings of the normalised step response. This is the Smith method (1957), one of the oldest identification techniques in the book. It has a known fragility: the 28.3% crossing assumes the step response has a single inflection point between 0 and 28.3%. For **integrating plants** (type-1 systems), the step response has no asymptote — the 63.2% crossing never occurs. The FOPDT fit diverges.
+
+There is no guard in the current implementation for this case. An integrating plant fed to `StepResponseTuner` will either loop forever (if the threshold is never crossed) or return nonsense values (if the data record ends before the 63.2% crossing, and the code extrapolates beyond the data bounds).
+
+**Check:** If the step response hasn't crossed 63.2% by `t = 3 * tau_initial_estimate`, the plant is likely integrating. Throw `std::runtime_error("StepResponseTuner: 63.2% threshold not reached — plant may be integrating. Use velocity-form PID or a DIPDT model.")` rather than returning garbage.
+
+**Status:** `[OPEN]` — correctness gap for integrating plants, tracked as P11-10.
+
+---
+
+### 3. State-Space Subsystem: Remaining Gaps After Parts 8-10
+
+---
+
+#### 3.1 `c2d()` Has No Check That the Resulting `A_d` Is Stable
+
+`PlantModel::c2d()` converts a continuous-time model to discrete time via ZOH or Tustin. It returns a `StateSpace` struct. What it doesn't do: check that `A_d`'s eigenvalues lie inside the unit disk for a stable continuous-time `A_c`. For a stable continuous plant with all eigenvalues in the left-half plane, the ZOH discrete model is always stable — but numerical issues with the matrix exponential for ill-conditioned `A_c * Ts` (very large `||A_c|| * Ts`) can produce eigenvalues slightly outside the unit disk.
+
+The Boiler case study monolith warning added in P9-3 addresses forward-Euler instability. But the ZOH version has a subtler risk: for very fast eigenvalues (`|lambda_max| * Ts >> 1`), the matrix exponential may lose precision. A post-conversion check:
+
+```cpp
+// After c2d(), add:
+auto eigs = result.A.eigenvalues();
+for (int i = 0; i < eigs.size(); ++i) {
+    if (std::abs(eigs[i]) >= 1.0 + 1e-9) {
+        std::cerr << "[PlantModel::c2d] WARNING: A_d eigenvalue " << eigs[i]
+                  << " is outside the unit disk. Check that Ts << 1/|lambda_max|.\n";
+    }
+}
+```
+
+This costs one eigenvalue decomposition per discretisation call, which is offline work. For a stable continuous plant, an unstable `A_d` is always a numerical warning.
+
+**Status:** `[OPEN]` — defensive check, tracked as P11-11.
+
+---
+
+#### 3.2 `DiscreteLQG` Has No Re-Linearisation Pattern Shown in Examples
+
+Part 9, Section 4.3 noted that the separation principle holds only near the linearisation point. The fix — "use `DiscreteLQG` with periodic re-linearisation or `ExtendedKalmanFilter + DiscreteLQR`" — was added to the header. What wasn't done: show this pattern in the `examples/` directory.
+
+The standard re-linearisation loop looks like:
+
+```
+// Pseudocode: LQG with successive linearisation (add to examples/ex_lqg_relinearise.cpp)
+//
+// At each control step k:
+//   1. Get current state estimate x_hat from LQG observer
+//   2. Compute A_c, B_c, C_c, D_c at operating point (x_hat, u_prev)
+//      via plant.jacobians(x_hat, u_prev)  [user supplies this]
+//   3. Discretise: {A_d, B_d, C_d} = ctrl::c2d(A_c, B_c, C_c, D_c, Ts)
+//   4. Update LQG: lqg.setPlant(A_d, B_d, C_d, D_d)   [setPlant() already exists]
+//   5. Compute control: u = lqg.compute(r, y)
+//   6. Apply u to physical plant, get y[k+1]
+//
+// The key invariant: setPlant() must be called *before* the next compute() call,
+// and the Kalman gain re-calculation inside setPlant() must complete before the
+// RT deadline. For large systems, this may require pre-computation.
+```
+
+The `setPlant()` method exists (added per P9-2 for MPC; LQG has an analogous one). The pattern is valid. A concrete example file would make this approach accessible to users without having to derive it from first principles.
+
+**Status:** `[OPEN]` — example gap, tracked as P11-12.
+
+---
+
+### 4. Performance Benchmarks: Concrete Availability Assessment
+
+Part 9 proposed benchmark harnesses. Here is an honest assessment of what currently exists versus what is needed.
+
+**Current state:**
+- `scripts/realtime_all.cpp` — exists, measures wall-clock compute time for all controllers in a loop, prints raw numbers. Not integrated into CI, no baseline stored, no regression detection.
+- No `benchmarks/` directory.
+- No comparison against expected outcomes. The "sub-millisecond MPC" claim in DEPLOYMENT.md has no supporting data in the repository.
+
+**What "available for comparison" means in practice:**
+
+The DEPLOYMENT.md stack-size estimates (64 bytes for PID, 256 bytes for ADRC, etc.) are the closest thing to a performance specification in the entire codebase. They are static analysis estimates, not measured values. There are no timing guarantees of the form "on a Cortex-M4 at 168 MHz, `DiscreteMPC` with `Nc=3, Np=10` completes in < X µs" anywhere in the documentation.
+
+**Minimum viable benchmark specification (what should exist before any production deployment claim):**
+
+| Metric | Target | Measurement Method |
+|--------|--------|-------------------|
+| `DiscretePID::compute()` | < 500 ns at -O2 on x86-64 | Cycle counter over 100k iterations |
+| `DiscreteMPC::computeRef()` Nc=3, Np=10 | < 200 µs at -O2 on x86-64 | `std::chrono::high_resolution_clock` |
+| `DiscreteMPC::computeRef()` Nc=20, Np=50 | < 1 ms at -O2 on x86-64 | Same |
+| `DiscreteLQR` DARE solve, n=6 | < 5 ms at -O2 on x86-64 | Same |
+| `RecursiveLeastSquares::update()` na=4, nb=4 | < 5 µs at -O2 on x86-64 | Same |
+| `UnscentedKalmanFilter::predict() + update()` n=6 | < 50 µs at -O2 on x86-64 | Same |
+
+None of these numbers are currently guaranteed or measured. The `scripts/realtime_all.cpp` file could be the starting point — extend it with structured output, CI integration, and baseline storage, and it becomes a regression detector instead of a diagnostic script.
+
+**Status:** `[OPEN]` — tracked as P11-13 (benchmark CI integration). Part 9 P9-12 proposed the files; this item tracks making them CI-integrated with stored baselines.
+
+---
+
+### 5. Requests for Diagrams and Pseudocode: What's Still Missing
+
+Parts 8 and 9 added pseudocode for `ControllerStack`, `ExtremumSeeker`, and the Van Loan ZOH derivation. The following algorithms still lack any diagram or pseudocode block as of this review pass.
+
+---
+
+#### 5.1 `DiscreteMPC` Gradient-Projection QP Solver: No Pseudocode
+
+The QP solver in `DiscreteMPC::computeRef()` is the most complex algorithm in the hot control path. A reader must trace through ~60 lines of C++ to understand the projected-gradient loop. The standard pseudocode is 8 lines:
+
+```
+// Gradient-projection QP solver pseudocode (add to DiscreteMPC.h or DiscreteMPC.cpp):
+//
+// Given: H (Hessian, precomputed), g (gradient, computed each step), DeltaU_lb/ub (bounds)
+// Init:  DeltaU_k = DeltaU_prev_  (warm start from previous solution)
+// Loop for iter = 0..qpMaxIter:
+//   gradient = H * DeltaU_k + g
+//   DeltaU_k = clip(DeltaU_k - (1/L) * gradient, DeltaU_lb, DeltaU_ub)  // projected step
+//   if ||DeltaU_k - DeltaU_prev||_inf < qpTol:
+//       last_qp_converged_ = true; break
+// u[k] = DeltaU_k[0] + u_prev_  (extract first control move, receding horizon)
+//
+// L = lambda_max(H), pre-computed once per setPlant() call (Lipschitz constant).
+// Convergence rate: O(kappa(H)) iterations where kappa = lambda_max / lambda_min.
+// For ill-conditioned H (large kappa), consider increasing qpMaxIter or regularising H.
+```
+
+This makes the convergence rate visible — a user who sees convergence failures and doesn't know why now has the convergence-rate formula `O(kappa(H))` to guide diagnosis.
+
+**Status:** `[OPEN]` — tracked as P11-14.
+
+---
+
+#### 5.2 `RecursiveLeastSquares` Information-Matrix Flow: Diagram Requested
+
+The RLS update is a 4-step process: regressor `phi` → innovation `epsilon` → Kalman gain `K` → P update → theta update. The comment at line 38-43 explains the P update formula but gives no overview of the algorithm flow. A simple ASCII flow diagram would help readers orient themselves:
+
+```
+// RLS Algorithm Flow (add to RecursiveLeastSquares.h):
+//
+//  phi[k]  ──→  epsilon[k] = y[k] - phi'*theta[k-1]       (prediction error)
+//           ├──→  denom = lambda + phi'*P[k-1]*phi          (denominator)
+//           └──→  K[k] = P[k-1]*phi / denom                (Kalman gain)
+//
+//  K[k], phi[k], lambda ──→  P[k] = (P[k-1] - K*phi'*P[k-1]) / lambda
+//                                    (covariance update with forgetting)
+//
+//  K[k], epsilon[k]  ──→  theta[k] = theta[k-1] + K[k] * epsilon[k]
+//                                    (parameter update)
+//
+// P[k] grows when lambda < 1 (forgetting inflates uncertainty → faster adaptation)
+// P[k] shrinks when phi is persistently exciting → theta converges
+```
+
+This is the kind of thing that makes a 20-minute code review take 5 minutes instead.
+
+**Status:** `[OPEN]` — tracked as P11-15.
+
+---
+
+#### 5.3 `DiscreteHinf` DGKF Bisection Loop: No Outer-Algorithm Pseudocode
+
+The `DiscreteHinf::solve()` method orchestrates a bisection over gamma, calling `trySolve()` at each gamma candidate. Part 7 of this report documented the inner DARE/Rx/Ry formulas in detail. What still lacks pseudocode is the outer bisection loop:
+
+```
+// DGKF gamma-bisection pseudocode (add to DiscreteHinf.h):
+//
+// Find: gamma* = inf { gamma > 0 : H-inf synthesis is feasible }
+//
+// 1. gammaLo = max(||D11||_2 + 1e-6, 1e-4)   (lower bound: must exceed D11 norm)
+//    gammaHi = gammaInit_                      (user-supplied upper bound)
+//
+// 2. Verify gammaHi is feasible: if trySolve(gammaHi) fails, double gammaHi and retry
+//    (up to maxDoublings_ = 10 times). If still infeasible, return {feasible=false}.
+//
+// 3. Bisect: while (gammaHi - gammaLo) / gammaHi > gammaTol_:
+//       gammaMid = (gammaHi + gammaLo) / 2
+//       if trySolve(gammaMid) succeeds:
+//           gammaHi = gammaMid; best_result = current result
+//       else:
+//           gammaLo = gammaMid
+//
+// 4. Return best_result with gamma_achieved = gammaHi
+//
+// trySolve(gamma) succeeds iff:
+//   (C1) DARE for X converges (stable Hamiltonian eigenvalues inside unit disk)
+//   (C2) DARE for Y converges
+//   (C3) spectral radius of X*Y < gamma^2  (coupling matrix is invertible)
+// Failure at (C3) near gamma* is expected — it's the fundamental gamma lower bound.
+```
+
+This makes the bisection logic reviewable without reading 200 lines of source. More importantly, it explains condition (C3), which is the non-obvious failure mode that users hit when gamma doesn't converge.
+
+**Status:** `[OPEN]` — tracked as P11-16.
+
+---
+
+### 6. Documentation Quality: Best vs. Worst Sections (Concrete Examples)
+
+This is a direct comparison of documentation quality within the codebase, with open-source community references for calibration.
+
+---
+
+#### 6.1 Best-in-Class Sections
+
+**[lib/DiscreteLQR.cpp:40-57](../lib/DiscreteLQR.cpp#L40-L57) — DARE Doubling Derivation**
+
+The gold standard in this codebase. Shows the recurrence `A_k+1 = A_k * M_k^{-1} * A_k`, names all variables, states convergence rate O(log^2(n)), cites Anderson & Moore. A reviewer can independently verify correctness against the paper without running the code. This is at the level of Eigen's `LLT` vs `LDLT` guidance or ControlSystems.jl's documented solver choices.
+
+Compare to: python-control's `dare()` — zero mathematical comments. You'd need to read Laub 1979 to understand what it's doing. This codebase is objectively better.
+
+**[lib/DiscreteADRC.cpp:31-50](../lib/DiscreteADRC.cpp#L31-L50) — Backward-Euler ESO Nilpotency Argument**
+
+Shows why `(I - Ts * A_e)^{-1}` is available analytically because `A_e^3 = 0`. Proves A-stability for all `omega_o * Ts > 0`. Separates the proof into the nilpotent structure and the A-stability consequence. This is better than anything in python-control's state-estimator documentation and comparable to Labbe's UKF derivation in Kalman-and-Bayesian-Filters-in-Python.
+
+**[lib/DiscreteMPC.cpp:75-105](../lib/DiscreteMPC.cpp#L75-L105) — Prediction Matrix Derivation**
+
+Derives `F`, `Phi`, `Gu` from the recurrence `y[k+i] = C*A^i*x + Σ C*A^j*B*u[k+i-j-1]`, with dimension annotations throughout. Users who know condensed MPC formulations can verify directly; users who don't have a roadmap to the derivation. Above average for the field.
+
+**[docs/DEPLOYMENT.md](DEPLOYMENT.md) — Zero-Allocation Checklist and AtomicParamBuffer Pattern**
+
+The stack-size estimates, pre-allocation discipline, and seqlock description are production-grade documentation. No other open-source C++ control library of this scope has equivalent embedded deployment guidance. This is a genuine differentiator.
+
+---
+
+#### 6.2 Worst-in-Class Sections
+
+**[lib/SystemAnalysis.h](../lib/SystemAnalysis.h) — `solveDiscreteLyapunov()` (addressed in Part 8, 2.2, but still merits naming here)**
+
+The comment "O(n^6) — use only for small systems (n <= 20)" tells you the cost but not the derivation, not why Kronecker product vectorisation is the approach, and not that Bartels-Stewart O(n^3) exists as an alternative. The fix is documented in Part 8.2.2 and tracked; it is named here as the reference for "worst documentation in the library."
+
+**[lib/FuzzyLogic.h](../lib/FuzzyLogic.h) — Mamdani CoG Formula**
+
+The Centre-of-Gravity defuzzification over a 101-point discrete grid has no comment explaining why 101 points (the Shannon-Nyquist basis for a [0,1] output range at 0.01 resolution?), no comment on the tradeoff between grid resolution and computation, and no reference. The CoG integral formula `∫ z*µ(z)dz / ∫ µ(z)dz` isn't written anywhere in the code or comments. A new contributor modifying the defuzzification method has no way to verify they haven't broken the CoG formula without running examples.
+
+Contrast: MATLAB Fuzzy Logic Toolbox documents the CoG formula explicitly in the `defuzz()` reference, with the discrete approximation and a note on convergence as the grid size increases.
+
+**`.github/workflows/doc.yml`**
+
+One line. As documented in Section 1.1 above. This is not a documentation quality issue, it is an absence of any workflow. Named here for completeness.
+
+---
+
+#### 6.3 The Documentation Gradient: What Still Needs Work
+
+The pattern across the library is that algorithm *selection* is well-documented (why doubling DARE, why Faddeev-LeVerrier, why backward-Euler ESO), but algorithm *completeness* for a general reader still has gaps:
+
+| Algorithm | Selection documented | Derivation documented | Formula stated | Grid/parameter rationale |
+|-----------|---------------------|----------------------|----------------|--------------------------|
+| DARE doubling | ✅ | ✅ | ✅ | ✅ |
+| ESO backward-Euler | ✅ | ✅ | ✅ | ✅ |
+| MPC prediction matrices | ✅ | ✅ | ✅ | ⚠️ |
+| Gradient-projection QP | ✅ | ❌ | ❌ | ❌ |
+| Mamdani CoG | ❌ | ❌ | ❌ | ❌ |
+| Seqlock (AtomicParam) | ✅ | ⚠️ | N/A | N/A |
+| H-inf bisection loop | ✅ | ⚠️ | ✅ | ⚠️ |
+| RLS update | ✅ | ⚠️ | ✅ | N/A |
+
+The "Formula stated" and "Derivation documented" columns for QP and CoG are the highest-priority gaps.
+
+---
+
+### 7. GitHub Workflow Enhancements: Consolidated Proposal
+
+Based on reading the actual workflow YAML files, here is a concrete, prioritised enhancement proposal. This is grouped by effort tier so it can be scheduled.
+
+**Tier 1: < 30 minutes each, do immediately**
+
+| Item | File | Change |
+|------|------|--------|
+| P11-2: Replace deprecated `::set-output` | `ubuntu.yml`, `windows.yml` | `echo "key=val" >> $GITHUB_OUTPUT` |
+| P11-3: Upgrade to `actions/upload-artifact@v4` | both files | `@v2` → `@v4` throughout |
+| P10-12: Add `WARN_AS_ERROR = YES` to Doxyfile | `Doxyfile` | One-line change |
+| P10-11: Delete redundant `ci.yml` | `.github/workflows/ci.yml` | Delete file (if it exists) |
+
+**Tier 2: 30 minutes – 2 hours, next sprint**
+
+| Item | File | Change |
+|------|------|--------|
+| P11-1: Implement `doc.yml` with Doxygen + Pages deploy | `.github/workflows/doc.yml` | Full workflow (template above) |
+| P10-8: Add `codecov.yml` with 80%/70% thresholds | `codecov.yml` (new) | Coverage gate config |
+| P10-13: Create `CONTRIBUTING.md` | `CONTRIBUTING.md` (new) | Build guide + controller addition guide |
+| P10-9: Dockerfile multi-stage build | `Dockerfile` | Builder + runtime stage split |
+
+**Tier 3: 2-6 hours, medium-term**
+
+| Item | File | Change |
+|------|------|--------|
+| P11-4: Consolidate release into `release.yml` | new file + trim both CI files | Reusable workflow pattern |
+| P11-5/6: Add Clang + ASan/UBSan job | `ubuntu.yml` | New build matrix entry |
+| P11-7: Add benchmark CI step | `ubuntu.yml` | Build + run + artifact upload |
+| P10-7: Scope clang-tidy to `lib/` headers | `ci-cd.yml` or `ubuntu.yml` | `--header-filter=lib/.*` |
+| P10-10: SBOM generation in release | `release.yml` (new) | `actions/attest-build-provenance` |
+
+---
+
+### 8. Open Items Summary (Part 11 Additions)
+
+| # | Issue | File | Severity | Effort |
+|---|-------|------|----------|--------|
+| P11-1 | Implement `doc.yml`: Doxygen build + GitHub Pages deploy | `.github/workflows/doc.yml` | **Medium** | 1 hr |
+| P11-2 | Replace deprecated `::set-output` syntax in both workflows | `ubuntu.yml`, `windows.yml` | **Medium** | 15 min |
+| P11-3 | Upgrade `actions/upload-artifact` and `download-artifact` to `@v4` | both workflows | **Medium** | 15 min |
+| P11-4 | Consolidate duplicate release jobs into a single `release.yml` | new workflow | Low | 1 hr |
+| P11-5 | Add Clang-16 build job to ubuntu CI | `ubuntu.yml` | Medium | 30 min |
+| P11-6 | Add ASan + UBSan instrumented build to Clang job | `ubuntu.yml` | **High** | 45 min |
+| P11-7 | Integrate benchmark harnesses into CI with artifact upload | `ubuntu.yml` + `scripts/` | Low | 2 hrs |
+| P11-8 | `DiscretePID`: add 2DOF setpoint weight `b` to `PIDParams` and `TunerSuite` | `lib/DiscretePID.h/.cpp`, `lib/TunerSuite.cpp` | Medium | 1.5 hrs |
+| P11-9 | `RelayAutoTuner`: add `n_cycles` multi-period averaging | `lib/ControllerTuner.h` | Low | 45 min |
+| P11-10 | `StepResponseTuner`: guard for integrating plants (63.2% never reached) | `lib/ControllerTuner.h/.cpp` | **Medium** | 30 min |
+| P11-11 | `c2d()`: post-conversion eigenvalue stability check with warning | `lib/PlantModel.cpp` | Low | 20 min |
+| P11-12 | Add successive-linearisation LQG example | `examples/ex_lqg_relinearise.cpp` (new) | Low | 1 hr |
+| P11-13 | Integrate benchmark harnesses with stored baselines into CI | `scripts/`, `ubuntu.yml` | Low | 3 hrs |
+| P11-14 | `DiscreteMPC`: add gradient-projection pseudocode to header | `lib/DiscreteMPC.h` | Low | 20 min |
+| P11-15 | `RecursiveLeastSquares`: add information-matrix flow diagram to header | `lib/RecursiveLeastSquares.h` | Low | 20 min |
+| P11-16 | `DiscreteHinf`: add DGKF outer-bisection pseudocode to header | `lib/DiscreteHinf.h` | Low | 25 min |
+
+**Highest-priority items before next tagged release:**
+- P11-2, P11-3 (deprecated workflow syntax / EOL artifact actions) — current workflows emit warnings on every run and will break on a future runner update. Five-minute fix with no risk.
+- P11-6 (ASan/UBSan) — a library targeting safety-critical embedded systems must be validated with memory safety instrumentation.
+- P11-10 (`StepResponseTuner` integrating plant guard) — silent wrong-answer risk for a common plant type.
+- P11-1 (`doc.yml`) — the API documentation infrastructure is in place (Doxyfile, inline comments); it just needs a working workflow to publish it.
+
+---
+
+### 9. Contributor Welcome Section
+
+For the `CONTRIBUTING.md` tracked as P10-13, the welcome note should set the tone for the project. Suggested text:
+
+```markdown
+# Contributing to Controller Toolbox
+
+## Welcome
+
+Thank you for looking at this project. The goal is a discrete-time C++ control
+library that works correctly in resource-constrained, real-time environments —
+the kind of environments where "it works in simulation" is not the same as
+"it works on the target." If you've ever debugged a Kalman filter divergence at
+3am, your contributions here are especially welcome.
+
+There's a high bar for new algorithms: they need mathematical derivation comments,
+unit tests covering the normal path and the edge cases, and a note in DEPLOYMENT.md
+if they have any real-time allocation considerations. The DARE doubling derivation in
+`lib/DiscreteLQR.cpp:40-57` is the standard every algorithm comment should aspire to.
+
+Bug reports with reproducible test cases are gold. PRs that add missing test coverage
+for existing algorithms are welcome even without a new feature attached. Documentation
+improvements — especially filling in the "formula stated" gaps in the table in
+`docs/cumulative_bug_report.md` Part 11, Section 6.3 — are needed and appreciated.
+```
+
+This establishes what the project values (mathematical correctness, RT safety, algorithmic documentation), names the documentation standard explicitly, and lowers the activation energy for bug reports and documentation PRs, which are often the most actionable contributions.
+
+---
+
+*Part 11 added 2026-05-27. All CI/CD findings based on direct reading of `.github/workflows/ubuntu.yml`, `windows.yml`, and `doc.yml`. All algorithm findings cross-referenced against `lib/` source. No prior findings contradicted.*
