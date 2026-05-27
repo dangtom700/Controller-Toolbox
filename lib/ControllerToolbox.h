@@ -50,7 +50,8 @@
  * @note Requires Eigen 3.4+ and C++20.
  */
 
-#include "IController.h"      ///< Abstract controller interface.
+#include "IController.h"         ///< Abstract controller interface.
+#include "IControllerObserver.h" ///< Observer hook for non-intrusive controller telemetry.
 #include "PlantModel.h"       ///< TransferFunction, StateSpace, tf2ss, ssStep, c2d.
 #include "DiscretePID.h"      ///< PID — backward-Euler, derivative filter, anti-windup.
 #include "DiscreteMPC.h"      ///< MPC — condensed receding-horizon QP.
@@ -72,18 +73,34 @@
 // #include "hal/HAL.h"          ///< ISensor, IActuator, SimPlant, SimSensor, SimActuator, SafeSensor, StdTimer.
 // #include "AtomicParamBuffer.h" ///< Lock-free double-buffer for RT parameter updates.
 
-#include "ExtendedKalmanFilter.h"         ///< EKF — nonlinear state estimation (analytical/numerical Jacobians).
-#include "UnscentedKalmanFilter.h"        ///< UKF — sigma-point nonlinear estimation (no Jacobians).
 #include "RecursiveLeastSquares.h"        ///< RLS — online ARX system identification with forgetting factor.
 #include "RepetitiveController.h"         ///< RC  — plug-in periodic disturbance/reference cancellation.
 #include "GeneralizedPredictiveControl.h" ///< GPC — velocity-form MPC with reference trajectory (CARIMA).
-#include "SubspaceID.h"                   ///< N4SID — batch subspace state-space identification (MOESP).
-#include "FuzzyLogic.h"                   ///< Fuzzy — Mamdani/TS inference, FuzzyPD, FuzzyPID, FuzzySupervisor.
+#include "GradientProjectionQP.h"         ///< Shared gradient-projection solver used by MPC and GPC.
 
-#ifndef CTRL_DISABLE_HINF
-#include "DiscreteHinf.h" ///< H∞ — DGKF 2-Riccati synthesis, Mixed-Sensitivity S/KS/T design.
-                          ///< Define CTRL_DISABLE_HINF to exclude on embedded targets without full Eigen.
+// Optional modules — controlled by CTRL_ENABLE_* cmake options (all ON by default).
+// When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,
+// or define CTRL_DISABLE_* (legacy) to suppress them.
+
+#if defined(CTRL_HAS_ADVANCED_KALMAN) || (!defined(CTRL_DISABLE_ADVANCED_KALMAN))
+#include "ExtendedKalmanFilter.h"  ///< EKF — nonlinear state estimation (analytical/numerical Jacobians).
+#include "UnscentedKalmanFilter.h" ///< UKF — sigma-point nonlinear estimation (no Jacobians).
 #endif
 
+#if defined(CTRL_HAS_SUBSPACE) || (!defined(CTRL_DISABLE_SUBSPACE))
+#include "SubspaceID.h" ///< N4SID — batch subspace state-space identification (MOESP).
+#endif
+
+#if defined(CTRL_HAS_FUZZY) || (!defined(CTRL_DISABLE_FUZZY))
+#include "FuzzyLogic.h" ///< Fuzzy — Mamdani/TS inference, FuzzyPD, FuzzyPID, FuzzySupervisor.
+#endif
+
+// H∞ — honour both legacy CTRL_DISABLE_HINF and new CTRL_HAS_HINF / CTRL_DISABLE_HINF2.
+#if (defined(CTRL_HAS_HINF) || !defined(CTRL_DISABLE_HINF))
+#include "DiscreteHinf.h" ///< H∞ — DGKF 2-Riccati synthesis, Mixed-Sensitivity S/KS/T design.
+#endif
+
+#if defined(CTRL_HAS_FUNCTION_APPROX) || (!defined(CTRL_DISABLE_FUNCTION_APPROX))
 #include "FunctionApproximator.h" ///< Taylor (polynomial) + Padé (rational) data-driven approximation.
                                   ///< Includes padeDelayFilter() for fractional dead-time SmithPredictor.
+#endif

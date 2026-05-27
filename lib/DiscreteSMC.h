@@ -19,7 +19,18 @@ namespace ctrl
  */
 struct SMCParams
 {
-    double c_e  = 1.0;  ///< Error weight in the sliding surface.
+    /**
+     * @brief Error weight in the sliding surface.
+     *
+     * Together with c_de, determines the sliding surface bandwidth. Setting σ = 0 and
+     * substituting the discrete derivative gives the continuous convergence rate:
+     * @code
+     *   ω_s = c_e · Ts / c_de   [rad/s]
+     * @endcode
+     * Choose c_e and c_de so that ω_s matches the desired closed-loop bandwidth. Larger
+     * c_e relative to c_de → faster convergence but higher sensitivity to noise in e.
+     */
+    double c_e  = 1.0;
 
     /**
      * @brief Error-rate weight in the sliding surface (discrete, stores λ·Ts).

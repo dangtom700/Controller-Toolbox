@@ -42,8 +42,24 @@ struct MPCParams
 {
     int    Np       = 10;    ///< Prediction horizon [steps]. Cover approx. settling time.
     int    Nc       = 3;     ///< Control horizon [steps], Nc ≤ Np. Fewer = smoother moves.
-    double rho_y    = 1.0;   ///< Output tracking weight  (Qy = ρy·I_{Np·p}).
-    double rho_u    = 0.1;   ///< Move suppression weight (Ru = ρu·I_{Nc·m}).
+    /**
+     * @brief Output tracking weight (Qy = ρy·I_{Np·p}).
+     *
+     * **Bryson's method starting point:** ρy ≈ 1/e_max², where e_max is the largest
+     * acceptable peak tracking error. Only the *ratio* ρy/ρu drives the response speed —
+     * scale both together to adjust absolute weights without changing the optimum.
+     * Larger ρy/ρu → tighter tracking, larger control moves and more noise sensitivity.
+     */
+    double rho_y    = 1.0;
+
+    /**
+     * @brief Move suppression weight (Ru = ρu·I_{Nc·m}).
+     *
+     * **Bryson's method starting point:** ρu ≈ 1/Δu_max², where Δu_max is the largest
+     * acceptable incremental control move per sample. Increasing ρu softens actuator
+     * activity at the cost of slower setpoint response and reduced disturbance rejection.
+     */
+    double rho_u    = 0.1;
     double uMin     = -1e9;  ///< Hard lower limit on u.
     double uMax     =  1e9;  ///< Hard upper limit on u.
     double duMin    = -1e9;  ///< Hard lower limit on Δu.
@@ -171,7 +187,10 @@ private:
     Eigen::MatrixXd Qy_;  ///< (Np·p) × (Np·p) output cost matrix.
     Eigen::MatrixXd Ru_;  ///< (Nc·m) × (Nc·m) move suppression cost matrix.
     double          L_;   ///< λmax(H) — Lipschitz constant for QP step size.
-    Eigen::LDLT<Eigen::MatrixXd> ldlt_; ///< Pre-factored H_, refreshed in buildCondensedMatrices().
+    /// Pre-factored H_, refreshed exclusively by buildCondensedMatrices().
+    /// NEVER call ldlt_.compute() from outside that function — doing so with a
+    /// stale or incorrect matrix silently corrupts every subsequent QP solve.
+    Eigen::LDLT<Eigen::MatrixXd> ldlt_;
 
     // Pre-allocated work vectors — eliminate per-step heap allocation in computeRef().
     Eigen::VectorXd R_stack_, pred_err_, grad_, DeltaU_, grad_k_, DU_new_, lb_, ub_, cumMin_, cumMax_;

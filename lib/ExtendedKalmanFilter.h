@@ -125,7 +125,12 @@ public:
     double sampleTime()                 const { return Ts_; }
 
     /**
-     * @brief Central-difference numerical Jacobian (finite-difference step h = 1e-5).
+     * @brief Central-difference numerical Jacobian with state-scaled step size.
+     *
+     * Per-element step: h_i = eps_scale · max(|x_i|, 1). This avoids near-zero absolute
+     * steps for small-magnitude states and cancellation errors for large-magnitude states.
+     * For heterogeneous state vectors (e.g., [position_m, velocity_m/s, angle_rad]) the
+     * fixed-epsilon approach degrades significantly; this formulation is robust across scales.
      *
      * Use when analytical Jacobians are unavailable or too complex to maintain.
      * Bind u as a constant to obtain ∂f/∂x or ∂h/∂x:
@@ -136,15 +141,16 @@ public:
      *   };
      * @endcode
      *
-     * @param func Scalar-to-vector function to differentiate.
-     * @param x    Point at which to evaluate the Jacobian.
-     * @param eps  Finite-difference step size (default 1e-5).
+     * @param func      Scalar-to-vector function to differentiate.
+     * @param x         Point at which to evaluate the Jacobian.
+     * @param eps_scale Relative step scale (default 1e-4; absolute floor is eps_scale itself
+     *                  when |x_i| < 1). Equivalent to the old fixed-eps when all |x_i| ≈ 1.
      * @return Jacobian matrix (output_dim × input_dim).
      */
     static Eigen::MatrixXd numericalJacobian(
         const std::function<Eigen::VectorXd(const Eigen::VectorXd &)> &func,
         const Eigen::VectorXd &x,
-        double eps = 1e-5);
+        double eps_scale = 1e-4);
 
 private:
     int n_, p_;

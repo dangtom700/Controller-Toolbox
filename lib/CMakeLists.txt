@@ -2,7 +2,23 @@ cmake_minimum_required(VERSION 3.16)
 
 find_package(Eigen3 REQUIRED NO_MODULE)
 
-add_library(controller_toolbox STATIC
+# ─── Optional module selection ───────────────────────────────────────────────
+# All default ON so existing builds are unaffected.
+# Turn OFF to reduce build time or binary size on constrained targets.
+#
+#   cmake .. -DCTRL_ENABLE_HINF=OFF          # exclude H∞ synthesis (heavy Riccati)
+#   cmake .. -DCTRL_ENABLE_SUBSPACE=OFF      # exclude N4SID batch subspace ID
+#   cmake .. -DCTRL_ENABLE_FUZZY=OFF         # exclude FuzzyLogic inference engine
+#   cmake .. -DCTRL_ENABLE_FUNCTION_APPROX=OFF  # exclude polynomial/Padé approximation
+#   cmake .. -DCTRL_ENABLE_ADVANCED_KALMAN=OFF  # exclude EKF / UKF (no nonlinear estimation)
+option(CTRL_ENABLE_HINF            "Include discrete H∞ synthesis (DiscreteHinf, MixedSensitivity)" ON)
+option(CTRL_ENABLE_SUBSPACE        "Include N4SID subspace identification (SubspaceID)"              ON)
+option(CTRL_ENABLE_FUZZY           "Include Mamdani/TS fuzzy inference (FuzzyLogic)"                ON)
+option(CTRL_ENABLE_FUNCTION_APPROX "Include Taylor/Padé function approximation"                     ON)
+option(CTRL_ENABLE_ADVANCED_KALMAN "Include EKF and UKF nonlinear estimators"                        ON)
+
+# ─── Core sources (always compiled) ──────────────────────────────────────────
+set(CTRL_CORE_SOURCES
     PlantModel.cpp
     DiscretePID.cpp
     DiscreteLQR.cpp
@@ -20,20 +36,54 @@ add_library(controller_toolbox STATIC
     MetricsAnalyzer.cpp
     SystemAnalysis.cpp
     hal/SimPlant.cpp
-    # Algorithm gap additions (2026-05-22)
-    ExtendedKalmanFilter.cpp
-    UnscentedKalmanFilter.cpp
     RecursiveLeastSquares.cpp
     RepetitiveController.cpp
     GeneralizedPredictiveControl.cpp
-    SubspaceID.cpp
-    # Fuzzy inference engine (2026-05-23)
-    FuzzyLogic.cpp
-    # Discrete-time H-infinity / Mixed-Sensitivity controller (2026-05-24)
-    DiscreteHinf.cpp
-    # Data-driven function approximation: Taylor (polynomial) and Pade (rational) (2026-05-25)
-    FunctionApproximator.cpp
 )
+
+# ─── Optional sources ────────────────────────────────────────────────────────
+if(CTRL_ENABLE_ADVANCED_KALMAN)
+    list(APPEND CTRL_CORE_SOURCES
+        ExtendedKalmanFilter.cpp
+        UnscentedKalmanFilter.cpp
+    )
+endif()
+
+if(CTRL_ENABLE_SUBSPACE)
+    list(APPEND CTRL_CORE_SOURCES SubspaceID.cpp)
+endif()
+
+if(CTRL_ENABLE_FUZZY)
+    list(APPEND CTRL_CORE_SOURCES FuzzyLogic.cpp)
+endif()
+
+if(CTRL_ENABLE_HINF)
+    list(APPEND CTRL_CORE_SOURCES DiscreteHinf.cpp)
+endif()
+
+if(CTRL_ENABLE_FUNCTION_APPROX)
+    list(APPEND CTRL_CORE_SOURCES FunctionApproximator.cpp)
+endif()
+
+add_library(controller_toolbox STATIC ${CTRL_CORE_SOURCES})
+
+# ─── Compile definitions reflecting enabled modules ──────────────────────────
+# Headers use these to conditionally include optional sections.
+if(CTRL_ENABLE_HINF)
+    target_compile_definitions(controller_toolbox PUBLIC CTRL_HAS_HINF)
+endif()
+if(CTRL_ENABLE_SUBSPACE)
+    target_compile_definitions(controller_toolbox PUBLIC CTRL_HAS_SUBSPACE)
+endif()
+if(CTRL_ENABLE_FUZZY)
+    target_compile_definitions(controller_toolbox PUBLIC CTRL_HAS_FUZZY)
+endif()
+if(CTRL_ENABLE_FUNCTION_APPROX)
+    target_compile_definitions(controller_toolbox PUBLIC CTRL_HAS_FUNCTION_APPROX)
+endif()
+if(CTRL_ENABLE_ADVANCED_KALMAN)
+    target_compile_definitions(controller_toolbox PUBLIC CTRL_HAS_ADVANCED_KALMAN)
+endif()
 
 # lib/ is the public include root: consumers write  #include "ControllerToolbox.h"
 target_include_directories(controller_toolbox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -1,4 +1,5 @@
 #pragma once
+#include "IControllerObserver.h"
 #include <Eigen/Dense>
 #include <stdexcept>
 
@@ -99,6 +100,67 @@ public:
      * @return @c true if the last computation was nominal; @c false if suboptimal.
      */
     virtual bool isHealthy() const { return true; }
+
+    // ── Observer (telemetry) ────────────────────────────────────────────────
+
+    /**
+     * @brief Attach a telemetry observer.
+     *
+     * The observer receives onCompute() / onComputeVec() / onReset() callbacks
+     * after the corresponding methods fire. Only one observer is supported at a
+     * time; attaching a second replaces the first.
+     *
+     * The observer is a non-owning raw pointer and must outlive the controller.
+     * Call detachObserver() before the observer is destroyed.
+     *
+     * @param obs Pointer to the observer; may be @c nullptr to detach.
+     */
+    void attachObserver(IControllerObserver *obs) { observer_ = obs; }
+
+    /** @brief Detach the current observer (if any). */
+    void detachObserver() { observer_ = nullptr; }
+
+    /** @brief @c true if an observer is currently attached. */
+    bool hasObserver() const { return observer_ != nullptr; }
+
+protected:
+    /**
+     * @brief Fire the observer's onCompute() callback (if attached).
+     *
+     * Call this at the end of every compute() override to deliver telemetry.
+     * ControllerStack calls it automatically for controllers dispatched through the stack;
+     * controllers used directly should call it themselves.
+     *
+     * @param u      Computed control action.
+     * @param signal Signal that was passed to compute().
+     */
+    void notifyObserver(double u, double signal) const
+    {
+        if (observer_) observer_->onCompute(u, signal);
+    }
+
+    /**
+     * @brief Fire the observer's onComputeVec() callback (if attached).
+     * @param u      Computed control vector.
+     * @param signal Signal vector that was passed to computeVec().
+     */
+    void notifyObserverVec(const Eigen::VectorXd &u, const Eigen::VectorXd &signal) const
+    {
+        if (observer_) observer_->onComputeVec(u, signal);
+    }
+
+    /**
+     * @brief Fire the observer's onReset() callback (if attached).
+     *
+     * Call this at the end of every reset() override.
+     */
+    void notifyObserverReset() const
+    {
+        if (observer_) observer_->onReset();
+    }
+
+private:
+    IControllerObserver *observer_ = nullptr;
 };
 
 } // namespace ctrl

@@ -48,7 +48,7 @@ namespace ctrl
 
         // State update
         const Eigen::VectorXd innov = y - C * x_hat_ - D * u_current;
-        x_hat_ += Kf * innov;
+        x_hat_.noalias() += Kf * innov;
 
         // Covariance update - Joseph form: P = (I-KC).P.(I-KC)' + K.R.K'
         const Eigen::MatrixXd IKC = Eigen::MatrixXd::Identity(n, n) - Kf * C;

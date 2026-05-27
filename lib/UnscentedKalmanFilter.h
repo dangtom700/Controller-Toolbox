@@ -66,8 +66,11 @@ public:
      * @param Ts      Sample time [s].
      * @param P0      Initial error covariance (n × n). Defaults to identity when empty.
      * @param alpha   Spread of sigma points around the mean (default 1e-3; increase to 0.1–1.0 for n ≥ 4).
-     * @param beta    Prior distribution parameter (default 2.0 for Gaussian).
-     * @param kappa   Secondary scaling parameter (default 0.0; alternatively 3 − n).
+     * @param beta    Prior distribution shape parameter (default 2.0 for Gaussian priors — encodes
+     *                fourth-order kurtosis via Wc₀ += 1 − α² + β; set β = 0 for unknown distributions).
+     * @param kappa   Tertiary scaling parameter (default 0.0; use 3 − n to recover the minimum-variance
+     *                unbiased estimator for Gaussian priors when n ≤ 3; negative λ = α²(n+κ)−n is
+     *                permitted but can push sigma points outside the covariance ellipsoid).
      */
     UnscentedKalmanFilter(int n, int p,
                           std::function<Eigen::VectorXd(const Eigen::VectorXd &,

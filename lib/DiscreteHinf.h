@@ -199,12 +199,12 @@ private:
     double Ts_;
     double gamma_;
 
-    struct DareOut { Eigen::MatrixXd X; bool conv; int iters; };
-    static DareOut solveHinfDARE(const Eigen::MatrixXd &A,
-                                 const Eigen::MatrixXd &B,
-                                 const Eigen::MatrixXd &Q,
-                                 const Eigen::MatrixXd &R,
-                                 double tol, int maxIter);
+    // DareResult is shared with DiscreteLQR (defined in PlantModel.h).
+    static DareResult solveHinfDARE(const Eigen::MatrixXd &A,
+                                    const Eigen::MatrixXd &B,
+                                    const Eigen::MatrixXd &Q,
+                                    const Eigen::MatrixXd &R,
+                                    double tol, int maxIter);
 
     static bool trySolve(const GeneralisedPlant &P, double gamma,
                          double dareTol, int dareMaxIter,

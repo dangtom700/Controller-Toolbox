@@ -1,4 +1,5 @@
 #include "GeneralizedPredictiveControl.h"
+#include "GradientProjectionQP.h"
 #include <algorithm>
 #include <iostream>
 
@@ -135,30 +136,16 @@ namespace ctrl
             }
         }
 
-        DeltaU_ = (-ldlt_.solve(grad_)).cwiseMax(lb_).cwiseMin(ub_);
-
-        // Gradient projection: DU <- clamp(DU - (1/L)*(H*DU + g), lb_, ub_)
-        const double alpha = 1.0 / L_;
-        last_qp_converged_ = false;
-        int iter = 0;
-        for (; iter < p_.qpMaxIter; ++iter)
-        {
-            grad_k_.noalias() = H_ * DeltaU_ + grad_;
-            DU_new_           = (DeltaU_ - alpha * grad_k_).cwiseMax(lb_).cwiseMin(ub_);
-
-            const double delta = (DU_new_ - DeltaU_).cwiseAbs().maxCoeff();
-            DeltaU_            = DU_new_;
-            if (delta < p_.qpTol)
-            {
-                last_qp_converged_ = true;
-                break;
-            }
-        }
-        last_qp_iters_ = iter;
+        // Gradient projection — all work vectors pre-allocated; zero per-step allocation.
+        const auto qp = solveGradientProjectionQP(
+            H_, grad_, lb_, ub_, ldlt_, L_, p_.qpMaxIter, p_.qpTol,
+            DeltaU_, grad_k_, DU_new_);
+        last_qp_converged_ = qp.converged;
+        last_qp_iters_     = qp.iters;
 
         if (!last_qp_converged_)
         {
-            std::clog << "[GPC] WARNING: QP solver reached max iterations (" << p_.qpMaxIter 
+            std::clog << "[GPC] WARNING: QP solver reached max iterations (" << p_.qpMaxIter
                       << ") without converging. Consider increasing qpMaxIter or relaxing tuning.\n";
         }
 

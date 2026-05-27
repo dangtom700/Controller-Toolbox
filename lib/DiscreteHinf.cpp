@@ -81,16 +81,16 @@ void DiscreteHinf::reset()
 //      Van Dooren (1981) "A generalised eigenvalue approach for solving
 //      Riccati equations"; Lancaster & Rodman "Algebraic Riccati Equations".
 // =============================================================================
-DiscreteHinf::DareOut DiscreteHinf::solveHinfDARE(
+DareResult DiscreteHinf::solveHinfDARE(
     const Eigen::MatrixXd &A,
     const Eigen::MatrixXd &B,
     const Eigen::MatrixXd &Q,
     const Eigen::MatrixXd &R,
     double /*tol*/, int /*maxIter*/)
 {
-    DareOut out;
-    out.conv  = false;
-    out.iters = 1;
+    DareResult out;
+    out.converged  = false;
+    out.iterations = 1;
 
     const int n = A.rows();
 
@@ -98,7 +98,7 @@ DiscreteHinf::DareOut DiscreteHinf::solveHinfDARE(
     Eigen::FullPivLU<Eigen::MatrixXd> luR(R);
     if (!luR.isInvertible())
     {
-        out.X = Eigen::MatrixXd::Zero(n, n);
+        out.P = Eigen::MatrixXd::Zero(n, n);
         return out;
     }
     const Eigen::MatrixXd Rinv = luR.inverse();
@@ -127,7 +127,7 @@ DiscreteHinf::DareOut DiscreteHinf::solveHinfDARE(
     Eigen::GeneralizedEigenSolver<Eigen::MatrixXd> ges(M, N);
     if (ges.info() != Eigen::Success)
     {
-        out.X = Eigen::MatrixXd::Zero(n, n);
+        out.P = Eigen::MatrixXd::Zero(n, n);
         return out;
     }
 
@@ -146,7 +146,7 @@ DiscreteHinf::DareOut DiscreteHinf::solveHinfDARE(
     // Need exactly n stable eigenvalues for a unique stabilising solution.
     if (static_cast<int>(stable_idx.size()) != n)
     {
-        out.X = Eigen::MatrixXd::Zero(n, n);
+        out.P = Eigen::MatrixXd::Zero(n, n);
         return out;
     }
 
@@ -162,27 +162,27 @@ DiscreteHinf::DareOut DiscreteHinf::solveHinfDARE(
     Eigen::FullPivLU<Eigen::MatrixXcd> luV1(V1);
     if (!luV1.isInvertible())
     {
-        out.X = Eigen::MatrixXd::Zero(n, n);
+        out.P = Eigen::MatrixXd::Zero(n, n);
         return out;
     }
 
     const Eigen::MatrixXcd X_c = V2 * luV1.inverse();
-    out.X = X_c.real();
-    out.X = 0.5 * (out.X + out.X.transpose()); // enforce symmetry
+    out.P = X_c.real();
+    out.P = 0.5 * (out.P + out.P.transpose()); // enforce symmetry
 
-    // Verify the DARE residual: ||A'XA - X + Q - A'XB * (R+B'XB)^{-1} * B'XA|| / (1+||X||)
-    const Eigen::MatrixXd &X = out.X;
+    // Verify the DARE residual: ||A'PA - P + Q - A'PB * (R+B'PB)^{-1} * B'PA|| / (1+||P||)
+    const Eigen::MatrixXd &X = out.P;
     const Eigen::MatrixXd Rbar = R + B.transpose() * X * B;
     Eigen::FullPivLU<Eigen::MatrixXd> luRbar(Rbar);
     if (!luRbar.isInvertible())
     {
-        out.X = Eigen::MatrixXd::Zero(n, n);
+        out.P = Eigen::MatrixXd::Zero(n, n);
         return out;
     }
     const Eigen::MatrixXd K     = luRbar.inverse() * B.transpose() * X * A;
     const Eigen::MatrixXd resid = A.transpose() * X * A - X + Q - A.transpose() * X * B * K;
     const double dare_res = resid.norm() / (1.0 + X.norm());
-    out.conv = (dare_res < 1e-6) && X.allFinite();
+    out.converged = (dare_res < 1e-6) && X.allFinite();
     return out;
 }
 
@@ -298,12 +298,12 @@ bool DiscreteHinf::trySolve(const GeneralisedPlant &P, double gamma,
     Eigen::FullPivLU<Eigen::MatrixXd> luRx0(Rx);
     if (!luRx0.isInvertible()) return false;
 
-    DareOut dx = solveHinfDARE(A, Bcat, Qx, Rx, dareTol, dareMaxIter);
-    out.dareConvX  = dx.conv;
-    out.dareItersX = dx.iters;
-    if (!dx.conv) return false;
+    DareResult dx = solveHinfDARE(A, Bcat, Qx, Rx, dareTol, dareMaxIter);
+    out.dareConvX  = dx.converged;
+    out.dareItersX = dx.iterations;
+    if (!dx.converged) return false;
 
-    const Eigen::MatrixXd &X = dx.X;
+    const Eigen::MatrixXd &X = dx.P;
     // Symmetrise
     const Eigen::MatrixXd Xs = 0.5 * (X + X.transpose());
 
@@ -334,13 +334,13 @@ bool DiscreteHinf::trySolve(const GeneralisedPlant &P, double gamma,
     Eigen::FullPivLU<Eigen::MatrixXd> luRy0(Ry);
     if (!luRy0.isInvertible()) return false;
 
-    DareOut dy = solveHinfDARE(A.transpose(), Ccat.transpose(), Qy, Ry, dareTol, dareMaxIter);
-    out.dareConvY  = dy.conv;
-    out.dareItersY = dy.iters;
+    DareResult dy = solveHinfDARE(A.transpose(), Ccat.transpose(), Qy, Ry, dareTol, dareMaxIter);
+    out.dareConvY  = dy.converged;
+    out.dareItersY = dy.iterations;
 
-    if (!dy.conv) return false;
+    if (!dy.converged) return false;
 
-    const Eigen::MatrixXd &Y = dy.X;
+    const Eigen::MatrixXd &Y = dy.P;
     const Eigen::MatrixXd Ys = 0.5 * (Y + Y.transpose());
 
     Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> esY(Ys);

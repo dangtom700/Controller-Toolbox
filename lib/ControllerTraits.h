@@ -34,6 +34,7 @@ class DiscreteLQG;
 class DiscreteMPC;
 class ExtremumSeeker;
 class DiscreteSMC;
+class SuperTwistingSMC;
 class DiscreteADRC;
 class DiscreteLeadLag;
 class SmithPredictor;
@@ -207,6 +208,24 @@ struct ControllerTraits<DiscreteSMC>
 {
     using category = tag::SlidingMode;
     static constexpr const char *name = "DiscreteSMC";
+    static constexpr bool supports_heuristic_pid = false;
+    static constexpr bool supports_lqr_tuning    = false;
+    static constexpr bool supports_mpc_tuning    = false;
+    static constexpr bool supports_freq_tuning   = false;
+    static constexpr bool supports_kalman_tuning = false;
+};
+
+/**
+ * @brief Traits for SuperTwistingSMC — same design philosophy as DiscreteSMC.
+ *
+ * Gains K1/K2 are derived from Moreno-Osorio Lyapunov conditions (K2 > K1²/4).
+ * No auto-tuner support; tune by Lyapunov analysis or empirical gain sweep.
+ */
+template <>
+struct ControllerTraits<SuperTwistingSMC>
+{
+    using category = tag::SlidingMode;
+    static constexpr const char *name = "SuperTwistingSMC";
     static constexpr bool supports_heuristic_pid = false;
     static constexpr bool supports_lqr_tuning    = false;
     static constexpr bool supports_mpc_tuning    = false;

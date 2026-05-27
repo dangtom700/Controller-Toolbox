@@ -29,6 +29,18 @@
  *   P[k|k]  = (I − K·C)·P[k|k−1]           (Joseph form for numerical stability)
  * @endcode
  *
+ * @par Tuning Q and R — NEES consistency test
+ * Run the filter in simulation alongside the true state and compute the Normalised Estimation
+ * Error Squared (NEES) at each step:
+ * @code
+ *   ε[k] = (x_true[k] − x̂[k|k])ᵀ · P[k|k]⁻¹ · (x_true[k] − x̂[k|k])
+ * @endcode
+ * A consistent filter has E[ε[k]] ≈ n (state dimension). Diagnostic rules:
+ * - E[ε] >> n → filter overconfident: Q too small or R too large (increase Q or R).
+ * - E[ε] << n → filter underconfident: Q too large or R too small (decrease Q or R).
+ * - E[ε] ≈ n but P diverges → plant–model mismatch; verify A, B, C matrices.
+ *
+ * @see Bar-Shalom, Li & Kirubarajan, "Estimation with Applications" §5.4 (2001).
  * @see Kalman, "A New Approach to Linear Filtering" (1960).
  * @see MATLAB kalman(), kalmd(); Simulink Kalman Filter block.
  */

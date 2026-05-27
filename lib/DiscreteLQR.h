@@ -2,6 +2,7 @@
 #include "IController.h"
 #include "PlantModel.h"
 #include <Eigen/Dense>
+#include <cstdio>
 #include <functional>
 #include <stdexcept>
 
@@ -33,18 +34,7 @@
 namespace ctrl
 {
 
-/**
- * @brief Result returned by the DARE solver.
- *
- * Carries the solution matrix, convergence flag, and iteration count so callers can decide
- * whether to accept an approximate result.
- */
-struct DareResult
-{
-    Eigen::MatrixXd P;         ///< Best available Riccati solution (converged or last iterate).
-    bool            converged; ///< @c true if value iteration reached the tolerance.
-    int             iterations;///< Actual number of iterations performed.
-};
+// DareResult is defined in PlantModel.h (included above) and shared with DiscreteHinf.
 
 /**
  * @brief LQR weighting matrices.
@@ -157,15 +147,45 @@ public:
 
     /**
      * @brief Compute u[k] — @p signal is ignored; state and reference come from callbacks.
+     *
+     * For MIMO plants (m > 1) this returns only the first element u[0]. A one-shot warning
+     * is printed to stderr on the first such call. Use computeVec() to obtain all m inputs.
+     *
      * @param signal Unused (inherited interface).
-     * @return First element of the LQR control vector (SISO extraction).
+     * @return u[0] from the LQR control vector.
      */
     double compute(double /*signal*/) override
     {
         Eigen::VectorXd x_ref;
         if (refFn_)
             x_ref = refFn_();
-        return lqr_.compute(stateFn_(), x_ref)(0);
+        const Eigen::VectorXd u = lqr_.compute(stateFn_(), x_ref);
+        if (u.size() > 1 && !warned_mimo_)
+        {
+            std::fprintf(stderr,
+                "[LQRAdapter] MIMO plant (m=%d): compute() returns u[0] only. "
+                "Call computeVec() to get the full control vector.\n",
+                static_cast<int>(u.size()));
+            warned_mimo_ = true;
+        }
+        return u(0);
+    }
+
+    /**
+     * @brief MIMO interface — returns the full LQR control vector u[k] (m × 1).
+     *
+     * Preferred over compute() for plants with more than one control input. @p signal
+     * is ignored; state and reference are obtained from the registered callbacks.
+     *
+     * @param signal Unused (inherited interface).
+     * @return u[k] = −K*·(x − x_ref) (m × 1).
+     */
+    Eigen::VectorXd computeVec(const Eigen::VectorXd & /*signal*/) override
+    {
+        Eigen::VectorXd x_ref;
+        if (refFn_)
+            x_ref = refFn_();
+        return lqr_.compute(stateFn_(), x_ref);
     }
 
     /** @brief No-op — DiscreteLQR is stateless at runtime. */
@@ -189,6 +209,7 @@ private:
     DiscreteLQR &lqr_;
     std::function<Eigen::VectorXd()> stateFn_;
     std::function<Eigen::VectorXd()> refFn_;
+    mutable bool warned_mimo_ = false; ///< One-shot MIMO truncation warning guard.
 };
 
 } // namespace ctrl

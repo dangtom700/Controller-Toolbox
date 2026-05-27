@@ -46,6 +46,7 @@ namespace ctrl
         e_prev_ = error;
         u_prev_ = u_sat;
 
+        notifyObserver(u_sat, error);
         return u_sat;
     }
 
@@ -56,6 +57,7 @@ namespace ctrl
         e_prev_ = 0.0;
         y_prev_ = 0.0;
         u_prev_ = 0.0;
+        notifyObserverReset();
     }
 
     // Back-calculate the integral state so that compute(error) approx = u_target.

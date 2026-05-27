@@ -151,6 +151,7 @@ namespace ctrl
         }
 
         lastOutput_ = out;
+        notifyObserver(out, error); // fire observer on the composite stack output
         return out;
     }
 
@@ -161,6 +162,7 @@ namespace ctrl
         lastOutput_ = 0.0;
         activeName_.clear();
         prevActiveName_.clear();
+        notifyObserverReset();
     }
 
 } // namespace ctrl

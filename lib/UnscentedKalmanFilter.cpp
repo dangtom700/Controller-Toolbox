@@ -79,14 +79,14 @@ namespace ctrl
         // Predicted mean
         x_hat_.setZero();
         for (int i = 0; i < L; ++i)
-            x_hat_ += Wm_(i) * Xp.col(i);
+            x_hat_.noalias() += Wm_(i) * Xp.col(i);
 
-        // Predicted covariance
+        // Predicted covariance — outer-product accumulation; noalias() avoids per-iteration temps.
         P_ = Q_;
         for (int i = 0; i < L; ++i)
         {
             const Eigen::VectorXd d = Xp.col(i) - x_hat_;
-            P_ += Wc_(i) * d * d.transpose();
+            P_.noalias() += Wc_(i) * d * d.transpose();
         }
     }
 
@@ -104,7 +104,7 @@ namespace ctrl
         // Predicted measurement mean
         Eigen::VectorXd y_hat = Eigen::VectorXd::Zero(p_);
         for (int i = 0; i < L; ++i)
-            y_hat += Wm_(i) * Y.col(i);
+            y_hat.noalias() += Wm_(i) * Y.col(i);
 
         Eigen::MatrixXd R_safe = R_;
         R_safe.diagonal() = R_safe.diagonal().cwiseMax(1e-12);
@@ -116,8 +116,8 @@ namespace ctrl
         {
             const Eigen::VectorXd dx = X.col(i) - x_hat_;
             const Eigen::VectorXd dy = Y.col(i) - y_hat;
-            Syy += Wc_(i) * dy * dy.transpose();
-            Pxy += Wc_(i) * dx * dy.transpose();
+            Syy.noalias() += Wc_(i) * dy * dy.transpose();
+            Pxy.noalias() += Wc_(i) * dx * dy.transpose();
         }
 
         const auto ldlt = Syy.ldlt();
@@ -126,7 +126,7 @@ namespace ctrl
 
         const Eigen::MatrixXd K = Pxy * ldlt.solve(Eigen::MatrixXd::Identity(p_, p_));
 
-        x_hat_ += K * (y - y_hat);
+        x_hat_.noalias() += K * (y - y_hat);
 
         // Covariance update: P = P - K*Syy*K'
         // Unlike the linear KF (which uses the numerically superior Joseph form),
@@ -135,7 +135,7 @@ namespace ctrl
         // subtraction is the standard UKF formula (Wan & Van der Merwe 2000, eq. 26).
         // Round-off in this subtraction can cause P to lose PSD on large measurement
         // updates; the eigenvalue floor below catches this case.
-        P_ -= K * Syy * K.transpose();
+        P_.noalias() -= K * Syy * K.transpose();
 
         // Enforce PSD: symmetrise first, then clamp any negative eigenvalue to zero.
         // Symmetrisation alone is insufficient - a negative diagonal entry survives it.

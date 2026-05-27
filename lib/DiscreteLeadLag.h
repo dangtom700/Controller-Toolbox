@@ -82,7 +82,7 @@ public:
      * Useful for verifying that the compensator provides the intended phase lead/lag.
      *
      * @param omega_rad_s Frequency [rad/s].
-     * @return Phase shift [degrees]. Positive = lead, negative = lag.
+     * @return Phase shift [rad]. Positive = lead, negative = lag.
      */
     double phaseAt(double omega_rad_s) const;
 

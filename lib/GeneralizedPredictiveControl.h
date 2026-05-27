@@ -169,6 +169,9 @@ private:
     Eigen::MatrixXd Ga_;       ///< (Np·p) × (Nu·m) step-response matrix.
     Eigen::MatrixXd Qy_, Ru_;
     Eigen::MatrixXd H_;
+    /// Pre-factored H_, refreshed exclusively by buildCondensedMatrices().
+    /// NEVER call ldlt_.compute() from outside that function — doing so with a
+    /// stale or incorrect matrix silently corrupts every subsequent QP solve.
     Eigen::LDLT<Eigen::MatrixXd> ldlt_;
 
     Eigen::VectorXd Rtraj_, err_, grad_, DeltaU_, grad_k_, DU_new_, lb_, ub_, cumMin_, cumMax_;

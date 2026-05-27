@@ -105,6 +105,20 @@ struct StateSpace
 };
 
 /**
+ * @brief Result returned by Discrete Algebraic Riccati Equation (DARE) solvers.
+ *
+ * Shared between DiscreteLQR (value-iteration doubling) and DiscreteHinf (symplectic
+ * pencil Schur method). Using a common type allows diagnostics code to handle both
+ * without knowing which solver produced the result.
+ */
+struct DareResult
+{
+    Eigen::MatrixXd P;          ///< Best available Riccati solution (converged or last iterate).
+    bool            converged;  ///< @c true if the solver reached its convergence criterion.
+    int             iterations; ///< Number of solver iterations performed.
+};
+
+/**
  * @brief Convert a SISO discrete transfer function to controllable canonical state-space form.
  *
  * Equivalent MATLAB: `[A,B,C,D] = tf2ss(num, den)` applied to the z⁻¹ polynomial.

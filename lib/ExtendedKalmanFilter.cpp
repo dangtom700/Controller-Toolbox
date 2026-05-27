@@ -48,7 +48,7 @@ namespace ctrl
         const Eigen::MatrixXd K =
             P_ * H.transpose() * ldlt.solve(Eigen::MatrixXd::Identity(p_, p_));
 
-        x_hat_ += K * (y - h_(x_hat_, u));
+        x_hat_.noalias() += K * (y - h_(x_hat_, u));
 
         // Joseph form: P = (I-KH).P.(I-KH)' + K.R.K'
         const Eigen::MatrixXd IKH = Eigen::MatrixXd::Identity(n_, n_) - K * H;
@@ -71,12 +71,12 @@ namespace ctrl
     Eigen::MatrixXd ExtendedKalmanFilter::numericalJacobian(
         const std::function<Eigen::VectorXd(const Eigen::VectorXd &)> &func,
         const Eigen::VectorXd &x,
-        double eps)
+        double eps_scale)
     {
-        // Central-difference approximation: J(:,i) = (f(x+eps*ei) - f(x-eps*ei)) / (2*eps)
-        // Error is O(eps^2) vs O(eps) for forward-difference. Default eps=1e-5 gives
-        // ~1e-10 truncation error for smooth functions. Scale eps with |x(i)| for
-        // states with very large or very small magnitudes (not done here for simplicity).
+        // Central-difference: J(:,i) = (f(x+h_i*ei) - f(x-h_i*ei)) / (2*h_i)
+        // h_i = eps_scale * max(|x_i|, 1) gives O(eps_scale^2) truncation error regardless
+        // of state magnitude — essential for heterogeneous state vectors (positions, angles,
+        // velocities may differ by orders of magnitude).
         const Eigen::VectorXd f0 = func(x);
         const int nx = x.size();
         const int ny = f0.size();
@@ -84,9 +84,10 @@ namespace ctrl
         Eigen::VectorXd xp = x, xm = x;
         for (int i = 0; i < nx; ++i)
         {
-            xp(i) = x(i) + eps;
-            xm(i) = x(i) - eps;
-            J.col(i) = (func(xp) - func(xm)) / (2.0 * eps);
+            const double h = eps_scale * std::max(std::abs(x(i)), 1.0);
+            xp(i) = x(i) + h;
+            xm(i) = x(i) - h;
+            J.col(i) = (func(xp) - func(xm)) / (2.0 * h);
             xp(i) = x(i);
             xm(i) = x(i);
         }
