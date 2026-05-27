@@ -8,5 +8,6 @@ var searchData=
   ['addrule_5',['addRule',['../classctrl_1_1FuzzySystem.html#ad8afab5d63d24f72e386ca5b4d5cc443',1,'ctrl::FuzzySystem']]],
   ['ak_6',['Ak',['../classctrl_1_1DiscreteHinf.html#ad0261e4e1e22da4e35df40eb1bcea8c0',1,'ctrl::DiscreteHinf']]],
   ['atomicparambuffer_7',['AtomicParamBuffer',['../classctrl_1_1AtomicParamBuffer.html#a04c7b3038e6c9566683176b59782408f',1,'ctrl::AtomicParamBuffer']]],
-  ['augmentedstate_8',['augmentedState',['../classctrl_1_1GeneralizedPredictiveController.html#a9f5a55b9cbccce5786740f80c70505e4',1,'ctrl::GeneralizedPredictiveController']]]
+  ['attachobserver_8',['attachObserver',['../classctrl_1_1IController.html#abe5b62c21069e869261e870363ee8ab5',1,'ctrl::IController']]],
+  ['augmentedstate_9',['augmentedState',['../classctrl_1_1GeneralizedPredictiveController.html#a9f5a55b9cbccce5786740f80c70505e4',1,'ctrl::GeneralizedPredictiveController']]]
 ];

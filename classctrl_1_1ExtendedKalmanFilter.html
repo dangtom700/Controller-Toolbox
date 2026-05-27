@@ -119,9 +119,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a815d8777c0943cb4e84947a771335253" id="r_a815d8777c0943cb4e84947a771335253"><td class="memItemLeft" align="right" valign="top">static Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#a815d8777c0943cb4e84947a771335253">numericalJacobian</a> (const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x, double eps=1e-5)</td></tr>
-<tr class="memdesc:a815d8777c0943cb4e84947a771335253"><td class="mdescLeft">&#160;</td><td class="mdescRight">Central-difference numerical Jacobian (finite-difference step h = 1e-5).  <br /></td></tr>
-<tr class="separator:a815d8777c0943cb4e84947a771335253"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6bdfea525d975b161d6f1b11a9bffc5a" id="r_a6bdfea525d975b161d6f1b11a9bffc5a"><td class="memItemLeft" align="right" valign="top">static Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#a6bdfea525d975b161d6f1b11a9bffc5a">numericalJacobian</a> (const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x, double eps_scale=1e-4)</td></tr>
+<tr class="memdesc:a6bdfea525d975b161d6f1b11a9bffc5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Central-difference numerical Jacobian with state-scaled step size.  <br /></td></tr>
+<tr class="separator:a6bdfea525d975b161d6f1b11a9bffc5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete-time Extended Kalman Filter. </p>
@@ -253,8 +253,8 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a815d8777c0943cb4e84947a771335253" name="a815d8777c0943cb4e84947a771335253"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a815d8777c0943cb4e84947a771335253">&#9670;&#160;</a></span>numericalJacobian()</h2>
+<a id="a6bdfea525d975b161d6f1b11a9bffc5a" name="a6bdfea525d975b161d6f1b11a9bffc5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6bdfea525d975b161d6f1b11a9bffc5a">&#9670;&#160;</a></span>numericalJacobian()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -278,7 +278,7 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>eps</em> = <code>1e-5</code>&#160;</td>
+          <td class="paramname"><em>eps_scale</em> = <code>1e-4</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -293,17 +293,18 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Central-difference numerical Jacobian (finite-difference step h = 1e-5). </p>
+<p>Central-difference numerical Jacobian with state-scaled step size. </p>
+<p>Per-element step: h_i = eps_scale · max(|x_i|, 1). This avoids near-zero absolute steps for small-magnitude states and cancellation errors for large-magnitude states. For heterogeneous state vectors (e.g., [position_m, velocity_m/s, angle_rad]) the fixed-epsilon approach degrades significantly; this formulation is robust across scales.</p>
 <p>Use when analytical Jacobians are unavailable or too complex to maintain. Bind u as a constant to obtain ∂f/∂x or ∂h/∂x: </p><div class="fragment"><div class="line"><span class="keyword">auto</span> Fjac = [&amp;](<span class="keyword">const</span> Eigen::VectorXd&amp; x, <span class="keyword">const</span> Eigen::VectorXd&amp; u) {</div>
-<div class="line">    <span class="keywordflow">return</span> <a class="code hl_function" href="classctrl_1_1ExtendedKalmanFilter.html#a815d8777c0943cb4e84947a771335253">ExtendedKalmanFilter::numericalJacobian</a>(</div>
+<div class="line">    <span class="keywordflow">return</span> <a class="code hl_function" href="classctrl_1_1ExtendedKalmanFilter.html#a6bdfea525d975b161d6f1b11a9bffc5a">ExtendedKalmanFilter::numericalJacobian</a>(</div>
 <div class="line">        [&amp;](<span class="keyword">const</span> Eigen::VectorXd&amp; xx){ <span class="keywordflow">return</span> f(xx, u); }, x);</div>
 <div class="line">};</div>
-<div class="ttc" id="aclassctrl_1_1ExtendedKalmanFilter_html_a815d8777c0943cb4e84947a771335253"><div class="ttname"><a href="classctrl_1_1ExtendedKalmanFilter.html#a815d8777c0943cb4e84947a771335253">ctrl::ExtendedKalmanFilter::numericalJacobian</a></div><div class="ttdeci">static Eigen::MatrixXd numericalJacobian(const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x, double eps=1e-5)</div><div class="ttdoc">Central-difference numerical Jacobian (finite-difference step h = 1e-5).</div><div class="ttdef"><b>Definition</b> <a href="ExtendedKalmanFilter_8cpp_source.html#l00071">ExtendedKalmanFilter.cpp:71</a></div></div>
+<div class="ttc" id="aclassctrl_1_1ExtendedKalmanFilter_html_a6bdfea525d975b161d6f1b11a9bffc5a"><div class="ttname"><a href="classctrl_1_1ExtendedKalmanFilter.html#a6bdfea525d975b161d6f1b11a9bffc5a">ctrl::ExtendedKalmanFilter::numericalJacobian</a></div><div class="ttdeci">static Eigen::MatrixXd numericalJacobian(const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x, double eps_scale=1e-4)</div><div class="ttdoc">Central-difference numerical Jacobian with state-scaled step size.</div><div class="ttdef"><b>Definition</b> <a href="ExtendedKalmanFilter_8cpp_source.html#l00071">ExtendedKalmanFilter.cpp:71</a></div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">func</td><td>Scalar-to-vector function to differentiate. </td></tr>
     <tr><td class="paramname">x</td><td>Point at which to evaluate the Jacobian. </td></tr>
-    <tr><td class="paramname">eps</td><td>Finite-difference step size (default 1e-5). </td></tr>
+    <tr><td class="paramname">eps_scale</td><td>Relative step scale (default 1e-4; absolute floor is eps_scale itself when |x_i| &lt; 1). Equivalent to the old fixed-eps when all |x_i| ≈ 1. </td></tr>
   </table>
   </dd>
 </dl>

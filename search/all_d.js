@@ -16,5 +16,6 @@ var searchData=
   ['getfrequencyresponse_13',['getFrequencyResponse',['../classctrl_1_1SystemAnalysis.html#a9302c9ab17ea2f1a9bbecbb9c98a9acf',1,'ctrl::SystemAnalysis']]],
   ['getpoles_14',['getPoles',['../classctrl_1_1SystemAnalysis.html#ae9fd5f69fc3911297a2c09a3832dac2b',1,'ctrl::SystemAnalysis']]],
   ['gpcparams_15',['GPCParams',['../structctrl_1_1GPCParams.html',1,'ctrl']]],
-  ['guide_16',['guide',['../md_docs_2DOCUMENTATION.html#autotoc_md31',1,'2. Compilation Guide'],['../md_docs_2DOCUMENTATION.html#autotoc_md46',1,'4. Usage Guide'],['../md_docs_2DEPLOYMENT.html',1,'Controller Toolbox - Deployment Guide']]]
+  ['gradientprojectionqp_2eh_16',['GradientProjectionQP.h',['../GradientProjectionQP_8h.html',1,'']]],
+  ['guide_17',['guide',['../md_docs_2DOCUMENTATION.html#autotoc_md31',1,'2. Compilation Guide'],['../md_docs_2DOCUMENTATION.html#autotoc_md46',1,'4. Usage Guide'],['../md_docs_2DEPLOYMENT.html',1,'Controller Toolbox - Deployment Guide']]]
 ];

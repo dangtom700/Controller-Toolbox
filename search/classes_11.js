@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['zieglernicholstuner_0',['ZieglerNicholsTuner',['../classctrl_1_1ZieglerNicholsTuner.html',1,'ctrl']]]
+  ['unscentedkalmanfilter_0',['UnscentedKalmanFilter',['../classctrl_1_1UnscentedKalmanFilter.html',1,'ctrl']]]
 ];

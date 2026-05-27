@@ -137,7 +137,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keyword">const</span> Eigen::MatrixXd K =</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>            P_ * H.transpose() * ldlt.solve(Eigen::MatrixXd::Identity(p_, p_));</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        x_hat_ += K * (y - h_(x_hat_, u));</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        x_hat_.noalias() += K * (y - h_(x_hat_, u));</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        <span class="comment">// Joseph form: P = (I-KH).P.(I-KH)&#39; + K.R.K&#39;</span></div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <span class="keyword">const</span> Eigen::MatrixXd IKH = Eigen::MatrixXd::Identity(n_, n_) - K * H;</div>
@@ -163,15 +163,15 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
 <div class="foldopen" id="foldopen00071" data-start="{" data-end="}">
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="classctrl_1_1ExtendedKalmanFilter.html#a815d8777c0943cb4e84947a771335253">   71</a></span>    Eigen::MatrixXd <a class="code hl_function" href="classctrl_1_1ExtendedKalmanFilter.html#a815d8777c0943cb4e84947a771335253">ExtendedKalmanFilter::numericalJacobian</a>(</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="classctrl_1_1ExtendedKalmanFilter.html#a6bdfea525d975b161d6f1b11a9bffc5a">   71</a></span>    Eigen::MatrixXd <a class="code hl_function" href="classctrl_1_1ExtendedKalmanFilter.html#a6bdfea525d975b161d6f1b11a9bffc5a">ExtendedKalmanFilter::numericalJacobian</a>(</div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="keyword">const</span> std::function&lt;Eigen::VectorXd(<span class="keyword">const</span> Eigen::VectorXd &amp;)&gt; &amp;func,</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        <span class="keyword">const</span> Eigen::VectorXd &amp;x,</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordtype">double</span> eps)</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordtype">double</span> eps_scale)</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    {</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        <span class="comment">// Central-difference approximation: J(:,i) = (f(x+eps*ei) - f(x-eps*ei)) / (2*eps)</span></div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="comment">// Error is O(eps^2) vs O(eps) for forward-difference. Default eps=1e-5 gives</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <span class="comment">// ~1e-10 truncation error for smooth functions. Scale eps with |x(i)| for</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        <span class="comment">// states with very large or very small magnitudes (not done here for simplicity).</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        <span class="comment">// Central-difference: J(:,i) = (f(x+h_i*ei) - f(x-h_i*ei)) / (2*h_i)</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="comment">// h_i = eps_scale * max(|x_i|, 1) gives O(eps_scale^2) truncation error regardless</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <span class="comment">// of state magnitude — essential for heterogeneous state vectors (positions, angles,</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        <span class="comment">// velocities may differ by orders of magnitude).</span></div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        <span class="keyword">const</span> Eigen::VectorXd f0 = func(x);</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> nx = x.size();</div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> ny = f0.size();</div>
@@ -179,20 +179,21 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        Eigen::VectorXd xp = x, xm = x;</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; nx; ++i)</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        {</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>            xp(i) = x(i) + eps;</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>            xm(i) = x(i) - eps;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>            J.col(i) = (func(xp) - func(xm)) / (2.0 * eps);</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>            xp(i) = x(i);</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>            xm(i) = x(i);</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        }</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        <span class="keywordflow">return</span> J;</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    }</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>            <span class="keyword">const</span> <span class="keywordtype">double</span> h = eps_scale * std::max(std::abs(x(i)), 1.0);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>            xp(i) = x(i) + h;</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>            xm(i) = x(i) - h;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>            J.col(i) = (func(xp) - func(xm)) / (2.0 * h);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>            xp(i) = x(i);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>            xm(i) = x(i);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        }</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="keywordflow">return</span> J;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    }</div>
 </div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aExtendedKalmanFilter_8h_html"><div class="ttname"><a href="ExtendedKalmanFilter_8h.html">ExtendedKalmanFilter.h</a></div><div class="ttdoc">Discrete-time Extended Kalman Filter (EKF) for nonlinear systems.</div></div>
 <div class="ttc" id="aclassctrl_1_1ExtendedKalmanFilter_html_a43b798ac50195abe1756203113d20b92"><div class="ttname"><a href="classctrl_1_1ExtendedKalmanFilter.html#a43b798ac50195abe1756203113d20b92">ctrl::ExtendedKalmanFilter::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdoc">Reset state estimate to zero and covariance to P0 (or identity).</div><div class="ttdef"><b>Definition</b> <a href="ExtendedKalmanFilter_8cpp_source.html#l00065">ExtendedKalmanFilter.cpp:65</a></div></div>
-<div class="ttc" id="aclassctrl_1_1ExtendedKalmanFilter_html_a815d8777c0943cb4e84947a771335253"><div class="ttname"><a href="classctrl_1_1ExtendedKalmanFilter.html#a815d8777c0943cb4e84947a771335253">ctrl::ExtendedKalmanFilter::numericalJacobian</a></div><div class="ttdeci">static Eigen::MatrixXd numericalJacobian(const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x, double eps=1e-5)</div><div class="ttdoc">Central-difference numerical Jacobian (finite-difference step h = 1e-5).</div><div class="ttdef"><b>Definition</b> <a href="ExtendedKalmanFilter_8cpp_source.html#l00071">ExtendedKalmanFilter.cpp:71</a></div></div>
+<div class="ttc" id="aclassctrl_1_1ExtendedKalmanFilter_html_a6bdfea525d975b161d6f1b11a9bffc5a"><div class="ttname"><a href="classctrl_1_1ExtendedKalmanFilter.html#a6bdfea525d975b161d6f1b11a9bffc5a">ctrl::ExtendedKalmanFilter::numericalJacobian</a></div><div class="ttdeci">static Eigen::MatrixXd numericalJacobian(const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x, double eps_scale=1e-4)</div><div class="ttdoc">Central-difference numerical Jacobian with state-scaled step size.</div><div class="ttdef"><b>Definition</b> <a href="ExtendedKalmanFilter_8cpp_source.html#l00071">ExtendedKalmanFilter.cpp:71</a></div></div>
 <div class="ttc" id="aclassctrl_1_1ExtendedKalmanFilter_html_a9d7d137a0e335bc07912f1c7134afaa8"><div class="ttname"><a href="classctrl_1_1ExtendedKalmanFilter.html#a9d7d137a0e335bc07912f1c7134afaa8">ctrl::ExtendedKalmanFilter::step</a></div><div class="ttdeci">void step(const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u_prev)</div><div class="ttdoc">Combined predict + update — most common usage.</div><div class="ttdef"><b>Definition</b> <a href="ExtendedKalmanFilter_8cpp_source.html#l00058">ExtendedKalmanFilter.cpp:58</a></div></div>
 <div class="ttc" id="aclassctrl_1_1ExtendedKalmanFilter_html_ad718e7997865127cfac7a43acc196c70"><div class="ttname"><a href="classctrl_1_1ExtendedKalmanFilter.html#ad718e7997865127cfac7a43acc196c70">ctrl::ExtendedKalmanFilter::predict</a></div><div class="ttdeci">void predict(const Eigen::VectorXd &amp;u)</div><div class="ttdoc">Prediction step — propagate state through f and inflate covariance with F.</div><div class="ttdef"><b>Definition</b> <a href="ExtendedKalmanFilter_8cpp_source.html#l00023">ExtendedKalmanFilter.cpp:23</a></div></div>
 <div class="ttc" id="aclassctrl_1_1ExtendedKalmanFilter_html_ae3841dcb576b5053ea00c4681f4ca8ff"><div class="ttname"><a href="classctrl_1_1ExtendedKalmanFilter.html#ae3841dcb576b5053ea00c4681f4ca8ff">ctrl::ExtendedKalmanFilter::ExtendedKalmanFilter</a></div><div class="ttdeci">ExtendedKalmanFilter(int n, int p, StateFunc f, MeasFunc h, JacobianFn Fjac, JacobianFn Hjac, const Eigen::MatrixXd &amp;Q_noise, const Eigen::MatrixXd &amp;R_noise, double Ts, const Eigen::MatrixXd &amp;P0=Eigen::MatrixXd())</div><div class="ttdoc">Construct the EKF with nonlinear models and noise statistics.</div><div class="ttdef"><b>Definition</b> <a href="ExtendedKalmanFilter_8cpp_source.html#l00006">ExtendedKalmanFilter.cpp:6</a></div></div>

@@ -111,7 +111,16 @@ Namespaces</h2></td></tr>
 <div class="line">K[k]    = P[k|k−1]·Cᵀ·S⁻¹</div>
 <div class="line">x̂[k|k]  = x̂[k|k−1] + K·(y[k] − C·x̂[k|k−1] − D·u[k])</div>
 <div class="line">P[k|k]  = (I − K·C)·P[k|k−1]           (Joseph form <span class="keywordflow">for</span> numerical stability)</div>
-</div><!-- fragment --><dl class="section see"><dt>See also</dt><dd>Kalman, "A New Approach to Linear Filtering" (1960). </dd>
+</div><!-- fragment --><dl class="section user"><dt>Tuning Q and R — NEES consistency test</dt><dd>Run the filter in simulation alongside the true state and compute the Normalised Estimation Error Squared (NEES) at each step: <div class="fragment"><div class="line">ε[k] = (x_true[k] − x̂[k|k])ᵀ · P[k|k]⁻¹ · (x_true[k] − x̂[k|k])</div>
+</div><!-- fragment --> A consistent filter has E[ε[k]] ≈ n (state dimension). Diagnostic rules:<ul>
+<li>E[ε] &gt;&gt; n → filter overconfident: Q too small or R too large (increase Q or R).</li>
+<li>E[ε] &lt;&lt; n → filter underconfident: Q too large or R too small (decrease Q or R).</li>
+<li>E[ε] ≈ n but P diverges → plant–model mismatch; verify A, B, C matrices.</li>
+</ul>
+</dd></dl>
+<dl class="section see"><dt>See also</dt><dd>Bar-Shalom, Li &amp; Kirubarajan, "Estimation with Applications" §5.4 (2001). </dd>
+<dd>
+Kalman, "A New Approach to Linear Filtering" (1960). </dd>
 <dd>
 MATLAB kalman(), kalmd(); Simulink Kalman Filter block. </dd></dl>
 

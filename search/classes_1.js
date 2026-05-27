@@ -14,5 +14,6 @@ var searchData=
   ['controllertraits_3c_20extremumseeker_20_3e_11',['ControllerTraits&lt; ExtremumSeeker &gt;',['../structctrl_1_1ControllerTraits_3_01ExtremumSeeker_01_4.html',1,'ctrl']]],
   ['controllertraits_3c_20generalizedpredictivecontroller_20_3e_12',['ControllerTraits&lt; GeneralizedPredictiveController &gt;',['../structctrl_1_1ControllerTraits_3_01GeneralizedPredictiveController_01_4.html',1,'ctrl']]],
   ['controllertraits_3c_20repetitivecontroller_20_3e_13',['ControllerTraits&lt; RepetitiveController &gt;',['../structctrl_1_1ControllerTraits_3_01RepetitiveController_01_4.html',1,'ctrl']]],
-  ['controllertraits_3c_20smithpredictor_20_3e_14',['ControllerTraits&lt; SmithPredictor &gt;',['../structctrl_1_1ControllerTraits_3_01SmithPredictor_01_4.html',1,'ctrl']]]
+  ['controllertraits_3c_20smithpredictor_20_3e_14',['ControllerTraits&lt; SmithPredictor &gt;',['../structctrl_1_1ControllerTraits_3_01SmithPredictor_01_4.html',1,'ctrl']]],
+  ['controllertraits_3c_20supertwistingsmc_20_3e_15',['ControllerTraits&lt; SuperTwistingSMC &gt;',['../structctrl_1_1ControllerTraits_3_01SuperTwistingSMC_01_4.html',1,'ctrl']]]
 ];

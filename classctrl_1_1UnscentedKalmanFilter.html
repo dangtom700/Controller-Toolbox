@@ -213,8 +213,8 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
     <tr><td class="paramname">P0</td><td>Initial error covariance (n × n). Defaults to identity when empty. </td></tr>
     <tr><td class="paramname">alpha</td><td>Spread of sigma points around the mean (default 1e-3; increase to 0.1–1.0 for n ≥ 4). </td></tr>
-    <tr><td class="paramname">beta</td><td>Prior distribution parameter (default 2.0 for Gaussian). </td></tr>
-    <tr><td class="paramname">kappa</td><td>Secondary scaling parameter (default 0.0; alternatively 3 − n). </td></tr>
+    <tr><td class="paramname">beta</td><td>Prior distribution shape parameter (default 2.0 for Gaussian priors — encodes fourth-order kurtosis via Wc₀ += 1 − α² + β; set β = 0 for unknown distributions). </td></tr>
+    <tr><td class="paramname">kappa</td><td>Tertiary scaling parameter (default 0.0; use 3 − n to recover the minimum-variance unbiased estimator for Gaussian priors when n ≤ 3; negative λ = α²(n+κ)−n is permitted but can push sigma points outside the covariance ellipsoid). </td></tr>
   </table>
   </dd>
 </dl>
@@ -249,7 +249,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Current error covariance P[k|k] (n × n). </p>
 
-<p class="definition">Definition at line <a class="el" href="UnscentedKalmanFilter_8h_source.html#l00118">118</a> of file <a class="el" href="UnscentedKalmanFilter_8h_source.html">UnscentedKalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="UnscentedKalmanFilter_8h_source.html#l00121">121</a> of file <a class="el" href="UnscentedKalmanFilter_8h_source.html">UnscentedKalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -329,7 +329,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Sample time Ts [s]. </p>
 
-<p class="definition">Definition at line <a class="el" href="UnscentedKalmanFilter_8h_source.html#l00121">121</a> of file <a class="el" href="UnscentedKalmanFilter_8h_source.html">UnscentedKalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="UnscentedKalmanFilter_8h_source.html#l00124">124</a> of file <a class="el" href="UnscentedKalmanFilter_8h_source.html">UnscentedKalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -365,7 +365,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="UnscentedKalmanFilter_8h_source.html#l00112">112</a> of file <a class="el" href="UnscentedKalmanFilter_8h_source.html">UnscentedKalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="UnscentedKalmanFilter_8h_source.html#l00115">115</a> of file <a class="el" href="UnscentedKalmanFilter_8h_source.html">UnscentedKalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -394,7 +394,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Current state estimate x̂[k|k] (n × 1). </p>
 
-<p class="definition">Definition at line <a class="el" href="UnscentedKalmanFilter_8h_source.html#l00115">115</a> of file <a class="el" href="UnscentedKalmanFilter_8h_source.html">UnscentedKalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="UnscentedKalmanFilter_8h_source.html#l00118">118</a> of file <a class="el" href="UnscentedKalmanFilter_8h_source.html">UnscentedKalmanFilter.h</a>.</p>
 
 </div>
 </div>

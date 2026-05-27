@@ -1,22 +1,12 @@
 var searchData=
 [
-  ['safesensor_0',['SafeSensor',['../classctrl_1_1SafeSensor.html',1,'ctrl']]],
-  ['simactuator_1',['SimActuator',['../classctrl_1_1SimActuator.html',1,'ctrl']]],
-  ['simplant_2',['SimPlant',['../classctrl_1_1SimPlant.html',1,'ctrl']]],
-  ['simsensor_3',['SimSensor',['../classctrl_1_1SimSensor.html',1,'ctrl']]],
-  ['slidingmode_4',['SlidingMode',['../structctrl_1_1tag_1_1SlidingMode.html',1,'ctrl::tag']]],
-  ['smcparams_5',['SMCParams',['../structctrl_1_1SMCParams.html',1,'ctrl']]],
-  ['smithpredictor_6',['SmithPredictor',['../classctrl_1_1SmithPredictor.html',1,'ctrl']]],
-  ['stabilitymargins_7',['StabilityMargins',['../structctrl_1_1StabilityMargins.html',1,'ctrl']]],
-  ['stackentry_8',['StackEntry',['../structctrl_1_1StackEntry.html',1,'ctrl']]],
-  ['statefeedback_9',['StateFeedback',['../structctrl_1_1tag_1_1StateFeedback.html',1,'ctrl::tag']]],
-  ['statespace_10',['StateSpace',['../structctrl_1_1StateSpace.html',1,'ctrl']]],
-  ['stdtimer_11',['StdTimer',['../classctrl_1_1StdTimer.html',1,'ctrl']]],
-  ['stepresponsetuner_12',['StepResponseTuner',['../classctrl_1_1StepResponseTuner.html',1,'ctrl']]],
-  ['subspaceidresult_13',['SubspaceIDResult',['../structctrl_1_1SubspaceIDResult.html',1,'ctrl']]],
-  ['supertwistingparams_14',['SuperTwistingParams',['../structctrl_1_1SuperTwistingParams.html',1,'ctrl']]],
-  ['supertwistingsmc_15',['SuperTwistingSMC',['../classctrl_1_1SuperTwistingSMC.html',1,'ctrl']]],
-  ['supervisordecision_16',['SupervisorDecision',['../structctrl_1_1SupervisorDecision.html',1,'ctrl']]],
-  ['supervisorparams_17',['SupervisorParams',['../structctrl_1_1SupervisorParams.html',1,'ctrl']]],
-  ['systemanalysis_18',['SystemAnalysis',['../classctrl_1_1SystemAnalysis.html',1,'ctrl']]]
+  ['recommendation_0',['Recommendation',['../structctrl_1_1MPCHorizonTuner_1_1Recommendation.html',1,'ctrl::MPCHorizonTuner']]],
+  ['recursiveleastsquares_1',['RecursiveLeastSquares',['../classctrl_1_1RecursiveLeastSquares.html',1,'ctrl']]],
+  ['relayautotuner_2',['RelayAutoTuner',['../classctrl_1_1RelayAutoTuner.html',1,'ctrl']]],
+  ['relaytunerconfig_3',['RelayTunerConfig',['../structctrl_1_1RelayTunerConfig.html',1,'ctrl']]],
+  ['repetitive_4',['Repetitive',['../structctrl_1_1tag_1_1Repetitive.html',1,'ctrl::tag']]],
+  ['repetitivecontroller_5',['RepetitiveController',['../classctrl_1_1RepetitiveController.html',1,'ctrl']]],
+  ['repetitiveparams_6',['RepetitiveParams',['../structctrl_1_1RepetitiveParams.html',1,'ctrl']]],
+  ['robustcontrol_7',['RobustControl',['../structctrl_1_1tag_1_1RobustControl.html',1,'ctrl::tag']]],
+  ['rule_8',['Rule',['../structctrl_1_1Rule.html',1,'ctrl']]]
 ];

@@ -37,7 +37,7 @@ var searchData=
   ['adrc_20eso_20instability_20forward_20euler_34',['ADRC ESO Instability (Forward-Euler)',['../md_docs_2DEPLOYMENT.html#autotoc_md139',1,'']]],
   ['adrcparams_35',['ADRCParams',['../structctrl_1_1ADRCParams.html',1,'ctrl']]],
   ['against_20the_20library_36',['2.3 Linking Against the Library',['../md_docs_2DOCUMENTATION.html#autotoc_md34',1,'']]],
-  ['ak_37',['ak',['../classctrl_1_1DiscreteHinf.html#ad0261e4e1e22da4e35df40eb1bcea8c0',1,'ctrl::DiscreteHinf::Ak()'],['../structctrl_1_1HinfResult.html#a1ad747b2a5167abae6f92a1d21b7fcfc',1,'ctrl::HinfResult::Ak']]],
+  ['ak_37',['ak',['../structctrl_1_1HinfResult.html#a1ad747b2a5167abae6f92a1d21b7fcfc',1,'ctrl::HinfResult::Ak'],['../classctrl_1_1DiscreteHinf.html#ad0261e4e1e22da4e35df40eb1bcea8c0',1,'ctrl::DiscreteHinf::Ak()']]],
   ['allocation_20checklist_38',['Zero-Allocation Checklist',['../md_docs_2DEPLOYMENT.html#autotoc_md126',1,'']]],
   ['alpha_39',['alpha',['../structctrl_1_1GPCParams.html#a10fb636e34f7fac3b77bec9ec907cbf0',1,'ctrl::GPCParams']]],
   ['amigo_40',['AMIGO',['../namespacectrl.html#ac903a5a20ba43db1acb05d549374197fa64fa05ea7fba95880b45131928594ae0',1,'ctrl']]],
@@ -53,6 +53,7 @@ var searchData=
   ['atomicparambuffer_20lock_20free_20parameter_20updates_50',['AtomicParamBuffer - Lock-Free Parameter Updates',['../md_docs_2DEPLOYMENT.html#autotoc_md128',1,'']]],
   ['atomicparambuffer_20params_20tt_20a_20href_20lib_20atomicparambuffer_20h_20atomicparambuffer_20h_20a_51',['&lt;tt&gt;AtomicParamBuffer&lt;Params&gt;&lt;/tt&gt; (&lt;a href=&quot;lib/AtomicParamBuffer.h&quot; &gt;AtomicParamBuffer.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md101',1,'']]],
   ['atomicparambuffer_2eh_52',['AtomicParamBuffer.h',['../AtomicParamBuffer_8h.html',1,'']]],
-  ['augmentedstate_53',['augmentedState',['../classctrl_1_1GeneralizedPredictiveController.html#a9f5a55b9cbccce5786740f80c70505e4',1,'ctrl::GeneralizedPredictiveController']]],
-  ['auto_20tuning_20workflow_20relay_20pid_54',['4.2 Auto-Tuning Workflow (Relay -&gt; PID)',['../md_docs_2DOCUMENTATION.html#autotoc_md48',1,'']]]
+  ['attachobserver_53',['attachObserver',['../classctrl_1_1IController.html#abe5b62c21069e869261e870363ee8ab5',1,'ctrl::IController']]],
+  ['augmentedstate_54',['augmentedState',['../classctrl_1_1GeneralizedPredictiveController.html#a9f5a55b9cbccce5786740f80c70505e4',1,'ctrl::GeneralizedPredictiveController']]],
+  ['auto_20tuning_20workflow_20relay_20pid_55',['4.2 Auto-Tuning Workflow (Relay -&gt; PID)',['../md_docs_2DOCUMENTATION.html#autotoc_md48',1,'']]]
 ];

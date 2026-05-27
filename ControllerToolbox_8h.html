@@ -81,6 +81,7 @@ $(function() {
 <p>Discrete-Time Controller Toolbox — umbrella include.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="IController_8h_source.html">IController.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="IControllerObserver_8h_source.html">IControllerObserver.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="DiscreteMPC_8h_source.html">DiscreteMPC.h</a>&quot;</code><br />
@@ -98,11 +99,12 @@ $(function() {
 <code>#include &quot;<a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="MetricsAnalyzer_8h_source.html">MetricsAnalyzer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="SystemAnalysis_8h_source.html">SystemAnalysis.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="UnscentedKalmanFilter_8h_source.html">UnscentedKalmanFilter.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="GradientProjectionQP_8h_source.html">GradientProjectionQP.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="UnscentedKalmanFilter_8h_source.html">UnscentedKalmanFilter.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="SubspaceID_8h_source.html">SubspaceID.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>&quot;</code><br />
@@ -149,11 +151,11 @@ $(function() {
 <div class="ttc" id="aclassctrl_1_1ControllerStack_html"><div class="ttname"><a href="classctrl_1_1ControllerStack.html">ctrl::ControllerStack</a></div><div class="ttdoc">Composite controller that dispatches to multiple IController entries.</div><div class="ttdef"><b>Definition</b> <a href="ControllerStack_8h_source.html#l00112">ControllerStack.h:113</a></div></div>
 <div class="ttc" id="aclassctrl_1_1DiscreteADRC_html"><div class="ttname"><a href="classctrl_1_1DiscreteADRC.html">ctrl::DiscreteADRC</a></div><div class="ttdoc">Discrete-time 2nd-order Linear Active Disturbance Rejection Controller.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteADRC_8h_source.html#l00075">DiscreteADRC.h:76</a></div></div>
 <div class="ttc" id="aclassctrl_1_1DiscreteLQG_html"><div class="ttname"><a href="classctrl_1_1DiscreteLQG.html">ctrl::DiscreteLQG</a></div><div class="ttdoc">Discrete-time LQG controller (LQR + Kalman filter).</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLQG_8h_source.html#l00041">DiscreteLQG.h:42</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DiscreteLQR_html"><div class="ttname"><a href="classctrl_1_1DiscreteLQR.html">ctrl::DiscreteLQR</a></div><div class="ttdoc">Discrete-time Linear Quadratic Regulator.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLQR_8h_source.html#l00065">DiscreteLQR.h:66</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DiscreteLQR_html"><div class="ttname"><a href="classctrl_1_1DiscreteLQR.html">ctrl::DiscreteLQR</a></div><div class="ttdoc">Discrete-time Linear Quadratic Regulator.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLQR_8h_source.html#l00055">DiscreteLQR.h:56</a></div></div>
 <div class="ttc" id="aclassctrl_1_1DiscreteLeadLag_html"><div class="ttname"><a href="classctrl_1_1DiscreteLeadLag.html">ctrl::DiscreteLeadLag</a></div><div class="ttdoc">Discrete Lead-Lag compensator.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLeadLag_8h_source.html#l00046">DiscreteLeadLag.h:47</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DiscreteMPC_html"><div class="ttname"><a href="classctrl_1_1DiscreteMPC.html">ctrl::DiscreteMPC</a></div><div class="ttdoc">Discrete-time Model Predictive Controller.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8h_source.html#l00061">DiscreteMPC.h:62</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DiscreteMPC_html"><div class="ttname"><a href="classctrl_1_1DiscreteMPC.html">ctrl::DiscreteMPC</a></div><div class="ttdoc">Discrete-time Model Predictive Controller.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8h_source.html#l00077">DiscreteMPC.h:78</a></div></div>
 <div class="ttc" id="aclassctrl_1_1DiscretePID_html"><div class="ttname"><a href="classctrl_1_1DiscretePID.html">ctrl::DiscretePID</a></div><div class="ttdoc">Discrete-time PID controller.</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00099">DiscretePID.h:100</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DiscreteSMC_html"><div class="ttname"><a href="classctrl_1_1DiscreteSMC.html">ctrl::DiscreteSMC</a></div><div class="ttdoc">Discrete first-order Sliding Mode Controller with boundary-layer saturation.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8h_source.html#l00067">DiscreteSMC.h:68</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DiscreteSMC_html"><div class="ttname"><a href="classctrl_1_1DiscreteSMC.html">ctrl::DiscreteSMC</a></div><div class="ttdoc">Discrete first-order Sliding Mode Controller with boundary-layer saturation.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8h_source.html#l00078">DiscreteSMC.h:79</a></div></div>
 <div class="ttc" id="aclassctrl_1_1ExtremumSeeker_html"><div class="ttname"><a href="classctrl_1_1ExtremumSeeker.html">ctrl::ExtremumSeeker</a></div><div class="ttdoc">Perturbation-based Extremum Seeking Controller.</div><div class="ttdef"><b>Definition</b> <a href="ExtremumSeeker_8h_source.html#l00064">ExtremumSeeker.h:65</a></div></div>
 <div class="ttc" id="aclassctrl_1_1RelayAutoTuner_html"><div class="ttname"><a href="classctrl_1_1RelayAutoTuner.html">ctrl::RelayAutoTuner</a></div><div class="ttdoc">Åström-Hägglund relay feedback auto-tuner.</div><div class="ttdef"><b>Definition</b> <a href="ControllerTuner_8h_source.html#l00098">ControllerTuner.h:99</a></div></div>
 <div class="ttc" id="aclassctrl_1_1SmithPredictor_html"><div class="ttname"><a href="classctrl_1_1SmithPredictor.html">ctrl::SmithPredictor</a></div><div class="ttdoc">Smith Predictor wrapper for any IController inner loop.</div><div class="ttdef"><b>Definition</b> <a href="SmithPredictor_8h_source.html#l00042">SmithPredictor.h:43</a></div></div>

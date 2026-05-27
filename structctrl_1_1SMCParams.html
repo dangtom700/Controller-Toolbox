@@ -127,11 +127,11 @@ Public Attributes</h2></td></tr>
 <p>Error-rate weight in the sliding surface (discrete, stores λ·Ts). </p>
 <dl class="section user"><dt>Sample-time dependence (calibration trap)</dt><dd>The discrete derivative is approximated as (e[k] − e[k−1]) / Ts. Therefore c_de is implicitly Ts-dependent: halving Ts doubles the surface sensitivity without any parameter change.</dd></dl>
 <p><b>Convention:</b> c_de stores the <b>discrete</b> coefficient, i.e., c_de already absorbs Ts. To convert from a continuous-time slope λ [1/s]: </p><div class="fragment"><div class="line"><a class="code hl_variable" href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c">c_de</a> = lambda * Ts</div>
-<div class="ttc" id="astructctrl_1_1SMCParams_html_a3c1885b64dc2c56ec81a203d812b7f3c"><div class="ttname"><a href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c">ctrl::SMCParams::c_de</a></div><div class="ttdeci">double c_de</div><div class="ttdoc">Error-rate weight in the sliding surface (discrete, stores λ·Ts).</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8h_source.html#l00041">DiscreteSMC.h:41</a></div></div>
+<div class="ttc" id="astructctrl_1_1SMCParams_html_a3c1885b64dc2c56ec81a203d812b7f3c"><div class="ttname"><a href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c">ctrl::SMCParams::c_de</a></div><div class="ttdeci">double c_de</div><div class="ttdoc">Error-rate weight in the sliding surface (discrete, stores λ·Ts).</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8h_source.html#l00052">DiscreteSMC.h:52</a></div></div>
 </div><!-- fragment --><p> Recalculate c_de whenever Ts changes.</p>
 <p>Larger c_de → faster convergence to the sliding surface but more chattering. </p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00041">41</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00052">52</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteSMC_8cpp_source.html#l00019">ctrl::DiscreteSMC::compute()</a>.</p>
 
@@ -150,8 +150,11 @@ Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Error weight in the sliding surface. </p>
+<p>Together with c_de, determines the sliding surface bandwidth. Setting σ = 0 and substituting the discrete derivative gives the continuous convergence rate: </p><div class="fragment"><div class="line">ω_s = <a class="code hl_variable" href="structctrl_1_1SMCParams.html#a1d249bc5108b6f21e2c252ff4b99647a">c_e</a> · Ts / <a class="code hl_variable" href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c">c_de</a>   [rad/s]</div>
+<div class="ttc" id="astructctrl_1_1SMCParams_html_a1d249bc5108b6f21e2c252ff4b99647a"><div class="ttname"><a href="structctrl_1_1SMCParams.html#a1d249bc5108b6f21e2c252ff4b99647a">ctrl::SMCParams::c_e</a></div><div class="ttdeci">double c_e</div><div class="ttdoc">Error weight in the sliding surface.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8h_source.html#l00033">DiscreteSMC.h:33</a></div></div>
+</div><!-- fragment --><p> Choose c_e and c_de so that ω_s matches the desired closed-loop bandwidth. Larger c_e relative to c_de → faster convergence but higher sensitivity to noise in e. </p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00022">22</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00033">33</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteSMC_8cpp_source.html#l00019">ctrl::DiscreteSMC::compute()</a>.</p>
 
@@ -171,7 +174,7 @@ Public Attributes</h2></td></tr>
 
 <p>Switching gain. Larger = more robust, more chattering. </p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00043">43</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00054">54</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteSMC_8cpp_source.html#l00019">ctrl::DiscreteSMC::compute()</a>.</p>
 
@@ -191,7 +194,7 @@ Public Attributes</h2></td></tr>
 
 <p>Boundary-layer thickness. Larger = smoother, slower. </p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00044">44</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00055">55</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteSMC_8cpp_source.html#l00019">ctrl::DiscreteSMC::compute()</a>.</p>
 
@@ -211,7 +214,7 @@ Public Attributes</h2></td></tr>
 
 <p>Output saturation upper limit. </p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00046">46</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00057">57</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteSMC_8cpp_source.html#l00019">ctrl::DiscreteSMC::compute()</a>.</p>
 
@@ -231,7 +234,7 @@ Public Attributes</h2></td></tr>
 
 <p>Output saturation lower limit. </p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00045">45</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00056">56</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteSMC_8cpp_source.html#l00019">ctrl::DiscreteSMC::compute()</a>.</p>
 
