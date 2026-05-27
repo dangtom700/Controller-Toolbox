@@ -12,7 +12,6 @@ set(SIM_SRCS
     ${SIM_SRC}/main.cpp
 )
 
-find_package(nlohmann_json CONFIG REQUIRED)
 add_executable(tug_sim ${SIM_SRCS})
 
 target_include_directories(tug_sim PRIVATE

@@ -26,10 +26,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Eigen3 via vcpkg
+      - name: Install Eigen3 and nlohmann-json via vcpkg
         run: |
           $triplet = if ("${{ matrix.arch }}" -eq "x64") { "x64-windows-static" } else { "x86-windows-static" }
-          vcpkg install "eigen3:$triplet"
+          vcpkg install "eigen3:$triplet" "nlohmann-json:$triplet"
 
       - name: Configure
         run: |

@@ -9,7 +9,6 @@ set(SIM_SRCS
     ${SIM_SRC}/main.cpp
 )
 
-find_package(nlohmann_json CONFIG REQUIRED)
 add_executable(solar_cooling_sim ${SIM_SRCS})
 
 target_include_directories(solar_cooling_sim PRIVATE

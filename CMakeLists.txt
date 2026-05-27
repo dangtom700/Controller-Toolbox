@@ -22,6 +22,23 @@ add_subdirectory(lib)
 add_subdirectory(tests)
 add_subdirectory(examples)
 add_subdirectory(scripts)
+
+# nlohmann/json — required by case-study executables.
+# Prefer a system/vcpkg installation; fall back to FetchContent so
+# the build works out-of-the-box without pre-installed packages.
+find_package(nlohmann_json CONFIG QUIET)
+if(NOT nlohmann_json_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG        v3.11.3
+        GIT_SHALLOW    TRUE
+    )
+    set(JSON_BuildTests OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(nlohmann_json)
+endif()
+
 add_subdirectory(case-study)
 # benchmarks are intentionally excluded from the default build
 
