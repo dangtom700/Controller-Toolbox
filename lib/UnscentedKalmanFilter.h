@@ -2,65 +2,73 @@
 #include <Eigen/Dense>
 #include <functional>
 
-// Discrete-time Unscented Kalman Filter (UKF).
-//
-// Handles nonlinear systems WITHOUT requiring Jacobians:
-//   x[k+1] = f(x[k], u[k]) + w[k],   w ~ N(0, Q_noise)
-//   y[k]   = h(x[k], u[k]) + v[k],   v ~ N(0, R_noise)
-//
-// NOISE MODEL ASSUMPTION: process and measurement noise are ADDITIVE (as above).
-// For multiplicative or state-dependent noise (e.g. gyroscope scale-factor noise,
-// Poisson photon counts), the correct formulation augments the state vector with the
-// noise channels and propagates augmented sigma points.  That form is NOT implemented
-// here.  If your system requires it, augment the state manually before constructing
-// the filter.
-//
-// Uses the Unscented Transform: propagates 2n+1 deterministically chosen
-// sigma points through the exact nonlinear functions to capture mean and
-// covariance to third order (vs. EKF's first-order linearisation).
-//
-// Sigma points (scaled UT, Wan & Van der Merwe 2000):
-//   X_0     = x^
-//   X_i     = x^ + (sqrt((n+lambda).P))_i      i = 1..n
-//   X_{n+i} = x^ - (sqrt((n+lambda).P))_i      i = 1..n
-//   lambda = alpha^2.(n + kappa) - n
-//
-// Weights:
-//   Wm_0 = lambda/(n+lambda),           Wc_0 = lambda/(n+lambda) + (1 - alpha^2 + beta)
-//   Wm_i = Wc_i = 1/(2(n+lambda))  i = 1..2n
-//
-// Recommended tuning: alpha=1e-3, beta=2 (Gaussian prior), kappa=0.
-//
-// Alpha sensitivity for large state dimensions:
-//   alpha = 1e-3 is the Wan & Van der Merwe default, appropriate for n <= 3.
-//   For larger n, the zeroth covariance weight Wc_0 = lambda/(n+lambda) + (1-alpha^2+beta)
-//   becomes large and negative (e.g., Wc_0 ~ -6e6 for n=6 with alpha=1e-3).
-//   This is mathematically valid but amplifies numerical noise in the covariance update.
-//   For n >= 4, increase alpha toward 0.1..1.0 to keep |Wc_0| within [-n, 0]:
-//     alpha = sqrt((kappa + n) / n)  gives Wc_0 = 0 (minimum noise amplification).
-//   The eigenvalue floor (1e-10*trace(P)) in update() is a backstop, not a substitute
-//   for a well-tuned alpha. Verify Wc_0 is reasonable after construction.
-//
-// Ref: Wan & Van der Merwe, "The Unscented Kalman Filter for Nonlinear
-//      Estimation", Proc. IEEE ASSPCC 2000;
-//      Julier & Uhlmann, "A New Extension of the Kalman Filter" (1997).
+/**
+ * @file UnscentedKalmanFilter.h
+ * @brief Discrete-time Unscented Kalman Filter (UKF) for nonlinear systems.
+ *
+ * Handles nonlinear process and measurement models **without Jacobians**:
+ * @code
+ *   x[k+1] = f(x[k], u[k]) + w[k],   w ~ N(0, Q_noise)
+ *   y[k]   = h(x[k], u[k]) + v[k],   v ~ N(0, R_noise)
+ * @endcode
+ *
+ * @par Noise model assumption
+ * Process and measurement noise are **additive** as shown above. For multiplicative or
+ * state-dependent noise, augment the state vector with the noise channels and propagate
+ * augmented sigma points — that form is **not** implemented here.
+ *
+ * The Unscented Transform propagates 2n+1 deterministically chosen sigma points through
+ * the exact nonlinear functions, capturing mean and covariance to **third order** (vs.
+ * EKF's first-order linearisation). No Jacobians are required.
+ *
+ * **Sigma points (scaled UT, Wan & Van der Merwe 2000):**
+ * @code
+ *   X_0     = x̂
+ *   X_i     = x̂ + (√((n+λ)·P))ᵢ       i = 1…n
+ *   X_{n+i} = x̂ − (√((n+λ)·P))ᵢ       i = 1…n
+ *   λ = α²·(n + κ) − n
+ * @endcode
+ *
+ * **Weights:**
+ * @code
+ *   Wm₀ = λ/(n+λ),           Wc₀ = λ/(n+λ) + (1 − α² + β)
+ *   Wmᵢ = Wcᵢ = 1/(2(n+λ))   i = 1…2n
+ * @endcode
+ *
+ * **Recommended tuning:** α = 1e-3, β = 2 (Gaussian prior), κ = 0.
+ *
+ * @par Alpha sensitivity for large state dimensions
+ * For n ≥ 4, α = 1e-3 causes Wc₀ to become large and negative, amplifying numerical noise.
+ * Increase α toward 0.1–1.0 for larger state spaces. Setting α = √((κ + n) / n) gives Wc₀ = 0.
+ * The eigenvalue floor in update() is a backstop, not a substitute for a well-tuned α.
+ *
+ * @see Wan & Van der Merwe, "The UKF for Nonlinear Estimation", Proc. IEEE ASSPCC (2000).
+ * @see Julier & Uhlmann, "A New Extension of the Kalman Filter" (1997).
+ */
+
 namespace ctrl
 {
 
+/**
+ * @brief Discrete-time Unscented Kalman Filter.
+ */
 class UnscentedKalmanFilter
 {
 public:
-    // n:       state dimension
-    // p:       measurement dimension
-    // f:       process function  x[k+1] = f(x[k], u[k])
-    // h:       measurement function  y[k] = h(x[k], u[k])
-    // Q_noise: process noise covariance (n*n, PSD)
-    // R_noise: measurement noise covariance (p*p, PD)
-    // Ts:      sample time [s]
-    // P0:      initial error covariance (n*n, default = I)
-    // alpha:   spread of sigma points around mean (typically 1e-3)
-    // beta:    prior distribution parameter (2 for Gaussian)
-    // kappa:   secondary scaling (0 or 3-n)
+    /**
+     * @brief Construct the UKF with nonlinear models, noise statistics, and UT parameters.
+     * @param n       State dimension.
+     * @param p       Measurement dimension.
+     * @param f       Process function x[k+1] = f(x[k], u[k]).
+     * @param h       Measurement function y[k] = h(x[k], u[k]).
+     * @param Q_noise Process noise covariance (n × n, positive semi-definite).
+     * @param R_noise Measurement noise covariance (p × p, positive definite).
+     * @param Ts      Sample time [s].
+     * @param P0      Initial error covariance (n × n). Defaults to identity when empty.
+     * @param alpha   Spread of sigma points around the mean (default 1e-3; increase to 0.1–1.0 for n ≥ 4).
+     * @param beta    Prior distribution parameter (default 2.0 for Gaussian).
+     * @param kappa   Secondary scaling parameter (default 0.0; alternatively 3 − n).
+     */
     UnscentedKalmanFilter(int n, int p,
                           std::function<Eigen::VectorXd(const Eigen::VectorXd &,
                                                         const Eigen::VectorXd &)> f,
@@ -74,26 +82,49 @@ public:
                           double beta  = 2.0,
                           double kappa = 0.0);
 
-    // Predict: propagate sigma points through f, compute predicted mean/cov.
+    /**
+     * @brief Prediction step — propagate sigma points through f and compute predicted mean/covariance.
+     * @param u Control input u[k].
+     */
     void predict(const Eigen::VectorXd &u);
 
-    // Update: propagate predicted sigmas through h, compute Kalman gain.
+    /**
+     * @brief Update step — propagate predicted sigma points through h and compute Kalman gain.
+     * @param y Measurement y[k].
+     * @param u Control input u[k] (used in measurement function h).
+     */
     void update(const Eigen::VectorXd &y, const Eigen::VectorXd &u);
 
-    // Combined predict + update.
+    /**
+     * @brief Combined predict + update — most common usage.
+     * @param y      Measurement y[k].
+     * @param u_prev Control input u[k−1] (predict step).
+     */
     void step(const Eigen::VectorXd &y, const Eigen::VectorXd &u_prev);
 
+    /** @brief Reset state estimate to zero and covariance to P0 (or identity). */
     void reset();
 
+    /**
+     * @brief Inject an initial state estimate.
+     * @param x0 Initial state vector (n × 1).
+     */
     void setState(const Eigen::VectorXd &x0) { x_hat_ = x0; }
 
+    /** @brief Current state estimate x̂[k|k] (n × 1). */
     const Eigen::VectorXd &state()      const { return x_hat_; }
+
+    /** @brief Current error covariance P[k|k] (n × n). */
     const Eigen::MatrixXd &covariance() const { return P_; }
+
+    /** @brief Sample time Ts [s]. */
     double sampleTime()                 const { return Ts_; }
 
 private:
-    // Compute 2n+1 sigma points from current x^ and P.
-    // Returns matrix of size n x (2n+1); each column is a sigma point.
+    /**
+     * @brief Compute 2n+1 sigma points from the current state estimate and covariance.
+     * @return Matrix of size n × (2n+1); each column is a sigma point.
+     */
     Eigen::MatrixXd sigmaPoints() const;
 
     int n_, p_;
@@ -103,9 +134,8 @@ private:
     Eigen::MatrixXd P_;
     double Ts_;
 
-    // UT weights (pre-computed at construction)
-    double lambda_;
-    Eigen::VectorXd Wm_, Wc_; // (2n+1) weight vectors
+    double lambda_;          ///< UT scaling parameter λ = α²·(n+κ) − n.
+    Eigen::VectorXd Wm_, Wc_; ///< Mean and covariance weights (2n+1), precomputed at construction.
 };
 
 } // namespace ctrl

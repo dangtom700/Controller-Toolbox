@@ -2,102 +2,150 @@
 #include "IController.h"
 #include <Eigen/Dense>
 
-// Active Disturbance Rejection Controller - 2nd-order Linear ADRC (LADRC).
-//
-// Models the controlled plant as a double integrator with unknown total disturbance:
-//   y = f(y, ydot, d, t) + b0.u    (b0 is an approximate input gain)
-//
-// A 3rd-order Extended State Observer (ESO) estimates:
-//   z1 approx = y          (output)
-//   z2 approx = ydot          (rate)
-//   z3 approx = f(...)       (total disturbance - lumped unknown dynamics + external)
-//
-// ESO (bandwidth-parameterised, backward Euler, bandwidth omega0):
-// Discrete update solves (I - Ts.Ae) z_new = z + Ts.(Be_eps.eps + Be_u.u)
-// where Ae = [[0,1,0],[0,0,1],[0,0,0]] (nilpotent).  The analytical inverse of
-// (I - Ts.Ae) is [[1,Ts,Ts^2],[0,1,Ts],[0,0,1]], yielding:
-//   z3[k+1] = z3[k] + Ts.beta3.epsilon[k]
-//   z2[k+1] = z2[k] + Ts.(beta2.epsilon[k] + b0.u[k]) + Ts.z3[k+1]
-//   z1[k+1] = z1[k] + Ts.beta1.epsilon[k]              + Ts.z2[k+1]
-//   epsilon[k] = y[k] - z1[k]  (observer error, using old z1 - semi-implicit)
-//
-// A-stable: stable for all omega0.Ts > 0 (unlike the prior forward-Euler scheme).
-//   beta1 = 3omega0,  beta2 = 3omega0^2,  beta3 = omega0^3   (characteristic poly (s+omega0)^3)
-//
-// PD control + disturbance cancellation (bandwidth omega_c):
-//   u0[k]  = omega_c^2.(r[k] - z1[k]) - 2omega_c.z2[k]
-//   u[k]   = (u0[k] - z3[k]) / b0
-//
-// IController::compute(error) follows the standard contract (error = r - y).
-// For the full interface use computeTracking(y, r) directly.
-//
-// Ref: Han "From PID to Active Disturbance Rejection Control" (2009);
-//      Gao "Scaling and bandwidth-parameterization based controller tuning" (2003).
+/**
+ * @file DiscreteADRC.h
+ * @brief Active Disturbance Rejection Controller — 2nd-order Linear ADRC (LADRC).
+ *
+ * Models the controlled plant as a double integrator with unknown total disturbance:
+ * @code
+ *   ÿ = f(y, ẏ, d, t) + b₀·u     (b₀ is an approximate input gain)
+ * @endcode
+ *
+ * A 3rd-order Extended State Observer (ESO) estimates:
+ * - z₁ ≈ y   (output)
+ * - z₂ ≈ ẏ   (rate)
+ * - z₃ ≈ f(…) (total disturbance — lumped unknown dynamics + external)
+ *
+ * **ESO (backward Euler, bandwidth-parameterised at ω₀):**
+ * @code
+ *   ε[k]    = y[k] − z₁[k]
+ *   z₃[k+1] = z₃[k] + Ts·β₃·ε[k]
+ *   z₂[k+1] = z₂[k] + Ts·(β₂·ε[k] + b₀·u[k]) + Ts·z₃[k+1]
+ *   z₁[k+1] = z₁[k] + Ts·β₁·ε[k]              + Ts·z₂[k+1]
+ * @endcode
+ * where β₁ = 3ω₀, β₂ = 3ω₀², β₃ = ω₀³ (pole at (s + ω₀)³).
+ * This scheme is A-stable for all ω₀·Ts > 0.
+ *
+ * **PD + disturbance cancellation (bandwidth ωc):**
+ * @code
+ *   u₀[k] = ωc²·(r[k] − z₁[k]) − 2ωc·z₂[k]
+ *   u[k]  = (u₀[k] − z₃[k]) / b₀
+ * @endcode
+ *
+ * @see Han, "From PID to Active Disturbance Rejection Control" (2009).
+ * @see Gao, "Scaling and bandwidth-parameterisation based controller tuning" (2003).
+ */
+
 namespace ctrl
 {
 
-    struct ADRCParams
-    {
-        double omega_o = 20.0; // ESO bandwidth     [rad/s] - typically 3-10* omega_c
-        double omega_c = 5.0;  // Controller BW     [rad/s]
-        // Approximate plant input gain b0. The control law u = (u0 - z3) / b0 cancels
-        // the estimated total disturbance z3; if b0 is badly wrong, cancellation degrades
-        // and the ESO can diverge.
-        //
-        // Robustness: ADRC tolerates b0 uncertainty within roughly a factor of 3 for
-        // omega_o >= 5*omega_c (Gao 2003, Section IV). Beyond that, disturbance
-        // cancellation degrades and the ESO can destabilise.
-        //
-        // Practical starting estimates:
-        //   - Motors:             b0 = Km / J           (torque constant / inertia)
-        //   - Integrating plants: b0 = DC_gain / Ts^2
-        //   - Unknown plants:     b0 = 1/tau where tau is the open-loop time constant
-        //
-        // Verify by running open-loop: the step response slope at t=0+ is approx b0*u.
-        double b0 = 1.0;
-        double uMin = -1e9;
-        double uMax = 1e9;
-    };
+/**
+ * @brief Tuning parameters for DiscreteADRC.
+ */
+struct ADRCParams
+{
+    double omega_o = 20.0; ///< ESO bandwidth [rad/s]. Typically 3–10× omega_c.
+    double omega_c =  5.0; ///< Controller bandwidth [rad/s].
 
-    class DiscreteADRC : public IController
-    {
-    public:
-        explicit DiscreteADRC(const ADRCParams &params, double sampleTime);
+    /**
+     * @brief Approximate plant input gain b₀.
+     *
+     * The control law u = (u₀ − z₃)/b₀ cancels the estimated total disturbance z₃;
+     * if b₀ is badly wrong, cancellation degrades and the ESO may diverge.
+     *
+     * Robustness: ADRC tolerates b₀ uncertainty within roughly a factor of 3 for
+     * ω₀ ≥ 5·ωc (Gao 2003, §IV). Beyond that, disturbance cancellation degrades.
+     *
+     * Practical starting estimates:
+     * - Motors:             b₀ = Km / J  (torque constant / inertia)
+     * - Integrating plants: b₀ = DC_gain / Ts²
+     * - Unknown plants:     b₀ = 1/τ where τ is the open-loop time constant
+     *
+     * Verify by running open-loop: the step response slope at t = 0⁺ ≈ b₀·u.
+     */
+    double b0 = 1.0;
 
-        // Full interface: y = plant output (measurement), r = reference.
-        double computeTracking(double y, double r);
+    double uMin = -1e9; ///< Lower output saturation limit.
+    double uMax =  1e9; ///< Upper output saturation limit.
+};
 
-        // IController wrapper: signal = error = r - y  (standard IController contract).
-        //
-        // IMPORTANT: call setReference(r) once per cycle BEFORE calling compute(error).
-        // If setReference() is not called, r_ defaults to 0 and this method will drive
-        // the plant output to zero regardless of the intended setpoint - a silent wrong
-        // answer that is hard to diagnose inside a ControllerStack.
-        //
-        // Internally recovers y = r_ - error and delegates to computeTracking(y, r_).
-        // Prefer computeTracking(y, r) directly whenever y and r are independently available.
-        double compute(double error) override;
+/**
+ * @brief Discrete-time 2nd-order Linear Active Disturbance Rejection Controller.
+ */
+class DiscreteADRC : public IController
+{
+public:
+    /**
+     * @brief Construct with tuning parameters and fixed sample time.
+     * @param params     ADRC tuning (bandwidths, b₀, output limits).
+     * @param sampleTime Sample period Ts [s].
+     */
+    explicit DiscreteADRC(const ADRCParams &params, double sampleTime);
 
-        void setReference(double r) { r_ = r; r_was_set_ = true; }
-        void reset() override;
-        double sampleTime() const override { return Ts_; }
+    /**
+     * @brief Full interface: compute u[k] from plant output y and setpoint r.
+     *
+     * Prefer this overload over compute(error) whenever y and r are independently available.
+     *
+     * @param y Current plant output y[k].
+     * @param r Current setpoint r[k].
+     * @return Saturated control output u[k].
+     */
+    double computeTracking(double y, double r);
 
-        void setParams(const ADRCParams &p);
-        const ADRCParams &params() const { return p_; }
+    /**
+     * @brief IController wrapper: compute u[k] from tracking error e[k] = r − y.
+     *
+     * @warning Call setReference(r) **once per cycle before** calling compute(error).
+     *          If setReference() is not called, r_ defaults to 0 and the controller will
+     *          drive the plant output to zero regardless of the intended setpoint —
+     *          a silent incorrect answer that is hard to diagnose inside a ControllerStack.
+     *
+     * Internally recovers y = r_ − error and delegates to computeTracking(y, r_).
+     *
+     * @param error Tracking error e[k] = r[k] − y[k].
+     * @return Saturated control output u[k].
+     */
+    double compute(double error) override;
 
-        // ESO state estimates: [z1, z2, z3]
-        const Eigen::Vector3d &esoState() const { return z_; }
+    /**
+     * @brief Set the reference for the next compute(error) call.
+     * @param r Setpoint r[k].
+     */
+    void setReference(double r) { r_ = r; r_was_set_ = true; }
 
-    private:
-        ADRCParams p_;
-        double Ts_;
-        double r_;                     // stored reference
-        Eigen::Vector3d z_;            // ESO state [z1, z2, z3]
-        double u_prev_;                // u[k-1] for ESO update
-        bool   r_was_set_;             // guards against compute() without setReference()
-        double beta1_, beta2_, beta3_; // observer gains
+    /** @brief Reset ESO state and stored inputs to zero. */
+    void reset() override;
 
-        void updateGains();
-    };
+    /** @brief Sample time Ts [s]. */
+    double sampleTime() const override { return Ts_; }
+
+    /**
+     * @brief Hot-update tuning parameters and recompute observer gains.
+     * @param p New ADRC parameters.
+     */
+    void setParams(const ADRCParams &p);
+
+    /** @brief Read-only access to current parameters. */
+    const ADRCParams &params() const { return p_; }
+
+    /**
+     * @brief Current ESO state estimates [z₁, z₂, z₃].
+     * @return Vector: z₁ ≈ y, z₂ ≈ ẏ, z₃ ≈ total disturbance.
+     */
+    const Eigen::Vector3d &esoState() const { return z_; }
+
+private:
+    ADRCParams p_;
+    double Ts_;
+    double r_;            ///< Stored reference (set via setReference()).
+    Eigen::Vector3d z_;   ///< ESO state [z₁, z₂, z₃].
+    double u_prev_;       ///< u[k−1] used in ESO state update.
+    bool   r_was_set_;    ///< Guards against compute() without prior setReference().
+    double beta1_, beta2_, beta3_; ///< Observer gains derived from omega_o.
+
+    /** @brief Recompute β₁, β₂, β₃ from the current omega_o. */
+    void updateGains();
+};
 
 } // namespace ctrl

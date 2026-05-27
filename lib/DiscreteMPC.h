@@ -3,145 +3,185 @@
 #include "PlantModel.h"
 #include <Eigen/Dense>
 
-// Discrete-time Model Predictive Controller (condensed incremental QP formulation).
-//
-// Cost: J = Sigma_{i=1}^{Np} rho_y.||y[k+i|k] - r||^2 + Sigma_{j=0}^{Nc-1} rho_u.||Deltau[k+j]||^2
-//
-// Prediction (condensed form):
-//   Y_pred = F.x[k] + G_u.u_prev + Phi.DeltaU
-//   F(i,:)     = C.A^(i+1)                    i = 0,...,Np-1
-//   G_u(i,:)   = Sigma_{j=0}^{i} C.A^j.B         (cumulative step response)
-//   Phi(i,j,:)   = C.A^(i-j).B                  j <= i, else 0
-//
-// Unconstrained optimal solution (receding horizon, apply first move only):
-//   DeltaU* = -(Phi'.Q_y.Phi + R_u)^-^1.Phi'.Q_y.(F.x[k] - R_stacked)
-//   u[k] = u[k-1] + DeltaU*[0:m]
-//
-// Box constraints on Deltau and u are solved via gradient projection (Lipschitz step 1/L,
-// L = max eigenvalue of H, precomputed once).  Bounds for the first control step
-// are tightened to reflect both the Deltau limits and the absolute u limits simultaneously.
-// qpMaxIter / qpTol tune convergence; defaults are adequate for horizons Nc <= 20.
-//
-// Ref: Camacho & Bordons "Model Predictive Control" (2007);
-//      Maciejowski "Predictive Control with Constraints" (2002);
-//      MATLAB mpc(), mpcDesigner.
+/**
+ * @file DiscreteMPC.h
+ * @brief Discrete-time Model Predictive Controller — condensed incremental QP formulation.
+ *
+ * Minimises a receding-horizon cost over predicted outputs and control moves:
+ * @code
+ *   J = Σᵢ₌₁ᴺᵖ ρy·‖ŷ[k+i|k] − r‖² + Σⱼ₌₀ᴺᶜ⁻¹ ρu·‖Δu[k+j]‖²
+ * @endcode
+ *
+ * **Condensed prediction:**
+ * @code
+ *   Ŷ = F·x[k] + Gu·u[k−1] + Φ·ΔU
+ * @endcode
+ * where Φ(i,j) = C·A^(i−j)·B (j ≤ i, else 0) and Gu(i) = Σⱼ₌₀ⁱ C·Aʲ·B.
+ *
+ * **Unconstrained optimum:**
+ * @code
+ *   ΔU* = −(Φᵀ·Qy·Φ + Ru)⁻¹·Φᵀ·Qy·(F·x[k] − R_stacked)
+ *   u[k] = u[k−1] + ΔU*[0:m]
+ * @endcode
+ *
+ * Box constraints on Δu and u are solved via gradient projection (step size 1/L,
+ * L = λmax(H), precomputed). Convergence is controlled by MPCParams::qpMaxIter and qpTol.
+ *
+ * @see Camacho & Bordons, "Model Predictive Control" (2007).
+ * @see Maciejowski, "Predictive Control with Constraints" (2002).
+ * @see MATLAB mpc(), mpcDesigner.
+ */
+
 namespace ctrl
 {
 
-    // Tuning parameters.
-    struct MPCParams
-    {
-        int Np = 10;         // Prediction horizon (steps) - covers approx = settling time
-        int Nc = 3;          // Control horizon  (steps, Nc <= Np) - fewer = smoother
-        double rho_y = 1.0;  // Output tracking weight  (Q_y = rho_y.I_{Np.p})
-        double rho_u = 0.1;  // Move suppression weight (R_u = rho_u.I_{Nc.m})
-        double uMin = -1e9;  // Hard lower limit on u
-        double uMax = 1e9;   // Hard upper limit on u
-        double duMin = -1e9; // Hard lower limit on Deltau
-        double duMax = 1e9;  // Hard upper limit on Deltau
-        int    qpMaxIter = 200;   // Gradient-projection iteration limit
-        double qpTol     = 1e-8;  // Convergence tolerance (||Deltax||_inf)
-    };
+/**
+ * @brief Tuning and horizon parameters for DiscreteMPC.
+ */
+struct MPCParams
+{
+    int    Np       = 10;    ///< Prediction horizon [steps]. Cover approx. settling time.
+    int    Nc       = 3;     ///< Control horizon [steps], Nc ≤ Np. Fewer = smoother moves.
+    double rho_y    = 1.0;   ///< Output tracking weight  (Qy = ρy·I_{Np·p}).
+    double rho_u    = 0.1;   ///< Move suppression weight (Ru = ρu·I_{Nc·m}).
+    double uMin     = -1e9;  ///< Hard lower limit on u.
+    double uMax     =  1e9;  ///< Hard upper limit on u.
+    double duMin    = -1e9;  ///< Hard lower limit on Δu.
+    double duMax    =  1e9;  ///< Hard upper limit on Δu.
+    int    qpMaxIter = 200;  ///< Gradient-projection iteration limit.
+    double qpTol     = 1e-8; ///< Convergence tolerance (‖Δx‖∞).
+};
 
-    class DiscreteMPC : public IController
-    {
-    public:
-        // Construct for the given state-space plant and initial tuning.
-        // Internally pre-computes condensed matrices F, Phi, and the Hessian H.
-        explicit DiscreteMPC(const StateSpace &plant, const MPCParams &params);
+/**
+ * @brief Discrete-time Model Predictive Controller.
+ *
+ * Prediction matrices F, Φ, and Hessian H are precomputed at construction and whenever the
+ * plant or parameters change. Per-step heap allocation is eliminated via pre-allocated work vectors.
+ */
+class DiscreteMPC : public IController
+{
+public:
+    /**
+     * @brief Construct the MPC and precompute condensed prediction matrices.
+     * @param plant  Discrete-time state-space plant (A, B, C, D, Ts).
+     * @param params Horizon and cost parameters.
+     */
+    explicit DiscreteMPC(const StateSpace &plant, const MPCParams &params);
 
-        // IController wrapper (SISO convenience).
-        // Reconstructs reference as r = y_hat + error where y_hat = C*x_hat + D*u_prev.
-        // Valid for D = 0 plants. For D != 0 the feedthrough term uses u[k-1], which is
-        // one step stale; use computeRef() directly and supply the current r explicitly.
-        double compute(double error) override;
+    /**
+     * @brief SISO convenience interface — compute u[k] from tracking error.
+     *
+     * Reconstructs the reference as r = ŷ + error where ŷ = C·x̂ + D·u_prev.
+     * Valid for D = 0 plants. For D ≠ 0, the feedthrough term uses u[k−1] (one step stale);
+     * use computeRef() directly and supply the current r explicitly.
+     *
+     * @param error Tracking error e[k] = r[k] − y[k].
+     * @return Control output u[k].
+     */
+    double compute(double error) override;
 
-        // Full MIMO interface: optimise u[k] given current state and reference vector.
-        Eigen::VectorXd computeRef(const Eigen::VectorXd &x_current,
-                                   const Eigen::VectorXd &r_ref);
+    /**
+     * @brief Full MIMO interface — optimise u[k] given state and reference vector.
+     * @param x_current Current state vector x[k] (n × 1).
+     * @param r_ref     Reference output vector r[k] (p × 1).
+     * @return Control action u[k] (m × 1).
+     */
+    Eigen::VectorXd computeRef(const Eigen::VectorXd &x_current,
+                               const Eigen::VectorXd &r_ref);
 
-        void reset() override;
-        double sampleTime() const override { return Ts_; }
+    /** @brief Reset internal state estimate and previous input to zero. */
+    void reset() override;
 
-        // Recompute condensed matrices when horizons or weights change.
-        void setParams(const MPCParams &p);
-        const MPCParams &params() const { return p_; }
+    /** @brief Sample time Ts [s]. */
+    double sampleTime() const override { return Ts_; }
 
-        // Update the internal plant model for online successive linearization
-        void setPlant(const StateSpace &plant);
+    /**
+     * @brief Update horizon/weight parameters and recompute condensed matrices.
+     * @param p New MPC parameters.
+     */
+    void setParams(const MPCParams &p);
 
-        // Inject a known state estimate (e.g., from a Kalman filter).
-        void setState(const Eigen::VectorXd &x) { x_hat_ = x; }
+    /** @brief Read-only access to current parameters. */
+    const MPCParams &params() const { return p_; }
 
-        // Feed back the actual input applied to the plant when an external actuator
-        // layer (e.g., a thrust allocator or valve saturation block) clips or
-        // redistributes the MPC output before it reaches the plant.
-        //
-        // Without this call, computeRef() advances x_hat_ using the MPC-commanded u
-        // (stored in u_prev_), not the physically applied input.  After several
-        // consecutive saturations x_hat_ drifts silently from the real plant state,
-        // producing confident but wrong predictions.  This is distinct from the
-        // open-loop drift documented at DiscreteMPC.cpp:203 (which is due to missing
-        // measurement feedback); this drift is caused by input mismatch at the actuator.
-        //
-        // Call pattern (each control step, after the allocator):
-        //   VectorXd u_cmd = mpc.computeRef(x, ref);   // MPC command
-        //   VectorXd u_act = allocator.apply(u_cmd);   // actuator may clip
-        //   mpc.setLastApplied(u_act);                 // correct u_prev_ for next step
-        //
-        // If setState() is also called each step with a measurement-corrected estimate,
-        // these two calls together completely close the model-input loop.
-        void setLastApplied(const Eigen::VectorXd &u_applied) { u_prev_ = u_applied; }
+    /**
+     * @brief Replace the internal plant model (successive linearisation).
+     *
+     * Triggers a full recomputation of condensed prediction matrices.
+     * @param plant Updated discrete-time state-space model.
+     */
+    void setPlant(const StateSpace &plant);
 
-        // QP solver diagnostics from the most recent computeRef() call.
-        // lastQPConverged() returns false when the gradient-projection loop exited
-        // at qpMaxIter without satisfying qpTol. In that case lastQPIters() == qpMaxIter
-        // and the returned u is the best available (suboptimal) iterate, not the optimum.
-        // Monitor these in production loops: repeated non-convergence indicates qpMaxIter
-        // is too small, qpTol is too tight, or H_ is ill-conditioned (large Np, small rho_u).
-        bool lastQPConverged() const { return last_qp_converged_; }
-        int  lastQPIters()     const { return last_qp_iters_; }
+    /**
+     * @brief Inject a state estimate from an external observer (e.g., Kalman filter).
+     * @param x State estimate x̂[k] (n × 1).
+     */
+    void setState(const Eigen::VectorXd &x) { x_hat_ = x; }
 
-        // IController health interface - returns false when the most recent QP exited
-        // at qpMaxIter without converging.  ControllerStack uses this to skip an unhealthy
-        // MPC and fall back to the next eligible entry (e.g., a backup PID).
-        bool isHealthy() const override { return last_qp_converged_; }
+    /**
+     * @brief Correct the previous applied input after external actuator saturation.
+     *
+     * When an actuator layer clips or redistributes the MPC output before it reaches the plant,
+     * call this method after each step so that the next computeRef() uses the physically applied
+     * input when advancing the internal state estimate. Without this, repeated saturation causes
+     * x̂ to drift silently from the real plant state.
+     *
+     * Typical call pattern (each step, after actuator):
+     * @code
+     *   auto u_cmd = mpc.computeRef(x, r);   // MPC command
+     *   auto u_act = allocator.apply(u_cmd);  // actuator may clip/redistribute
+     *   mpc.setLastApplied(u_act);            // correct u_prev_ for next step
+     * @endcode
+     *
+     * @param u_applied Actual input applied to the plant at this step.
+     */
+    void setLastApplied(const Eigen::VectorXd &u_applied) { u_prev_ = u_applied; }
 
-    private:
-        StateSpace plant_;
-        MPCParams p_;
-        double Ts_;
-        Eigen::VectorXd x_hat_;  // open-loop state estimate
-        Eigen::VectorXd u_prev_; // u[k-1] for incremental form
+    /**
+     * @brief @c true if the most recent QP converged within qpMaxIter iterations.
+     *
+     * @c false means the returned u[k] is the best available suboptimal iterate.
+     * Repeated non-convergence indicates qpMaxIter is too small, qpTol is too tight,
+     * or H is ill-conditioned (large Np, small ρu).
+     */
+    bool lastQPConverged() const { return last_qp_converged_; }
 
-        // Pre-computed condensed prediction matrices
-        Eigen::MatrixXd F_;   // (Np.p) * n
-        Eigen::MatrixXd Phi_; // (Np.p) * (Nc.m)
-        Eigen::MatrixXd Gu_;  // (Np.p) * m  - cumulative step response for u_prev offset
-        Eigen::MatrixXd H_;   // (Phi'.Q_y.Phi + R_u) - precomputed Hessian
-        Eigen::MatrixXd Qy_;  // (Np.p) * (Np.p)
-        Eigen::MatrixXd Ru_;  // (Nc.m) * (Nc.m)
-        double          L_;   // max eigenvalue of H_ - Lipschitz constant for QP step
-        Eigen::LDLT<Eigen::MatrixXd> ldlt_; // pre-factored H_, refreshed in buildCondensedMatrices()
+    /** @brief Actual gradient-projection iterations used in the most recent computeRef(). */
+    int  lastQPIters()     const { return last_qp_iters_; }
 
-        // Pre-allocated work vectors - eliminate per-step heap allocation in computeRef()
-        Eigen::VectorXd R_stack_;  // Np.p
-        Eigen::VectorXd pred_err_; // Np.p
-        Eigen::VectorXd grad_;     // Nc.m  (Phi'.Qy.pred_err)
-        Eigen::VectorXd DeltaU_;   // Nc.m
-        Eigen::VectorXd grad_k_;   // Nc.m  - gradient at current DeltaU_ inside QP loop
-        Eigen::VectorXd DU_new_;   // Nc.m  - proposed update inside QP loop
-        Eigen::VectorXd lb_;       // Nc.m  - per-horizon lower bounds on DeltaU
-        Eigen::VectorXd ub_;       // Nc.m  - per-horizon upper bounds on DeltaU
-        Eigen::VectorXd cumMin_;   // m     - rolling cumulative lower bound (bound construction)
-        Eigen::VectorXd cumMax_;   // m     - rolling cumulative upper bound (bound construction)
+    /**
+     * @brief Health reflects QP convergence.
+     *
+     * Returns @c false when the most recent QP exited at qpMaxIter without converging.
+     * ControllerStack uses this to fall back to a backup controller (e.g., PID).
+     */
+    bool isHealthy() const override { return last_qp_converged_; }
 
-        bool last_qp_converged_ = true; // false when QP exited at qpMaxIter
-        int  last_qp_iters_     = 0;    // actual iterations used in last computeRef()
+private:
+    StateSpace plant_;
+    MPCParams  p_;
+    double     Ts_;
+    Eigen::VectorXd x_hat_;  ///< Open-loop state estimate.
+    Eigen::VectorXd u_prev_; ///< u[k−1] for incremental form.
 
-        void buildPredictionMatrices(); // depends on plant model (A, B, C)
-        void buildCostMatrix();         // depends on weights (rho_y, rho_u) and Phi_
-        void buildCondensedMatrices();  // calls both - used by constructor and setPlant()
-    };
+    Eigen::MatrixXd F_;   ///< (Np·p) × n prediction matrix.
+    Eigen::MatrixXd Phi_; ///< (Np·p) × (Nc·m) step-response matrix.
+    Eigen::MatrixXd Gu_;  ///< (Np·p) × m cumulative step-response offset for u_prev.
+    Eigen::MatrixXd H_;   ///< Precomputed Hessian Φᵀ·Qy·Φ + Ru.
+    Eigen::MatrixXd Qy_;  ///< (Np·p) × (Np·p) output cost matrix.
+    Eigen::MatrixXd Ru_;  ///< (Nc·m) × (Nc·m) move suppression cost matrix.
+    double          L_;   ///< λmax(H) — Lipschitz constant for QP step size.
+    Eigen::LDLT<Eigen::MatrixXd> ldlt_; ///< Pre-factored H_, refreshed in buildCondensedMatrices().
+
+    // Pre-allocated work vectors — eliminate per-step heap allocation in computeRef().
+    Eigen::VectorXd R_stack_, pred_err_, grad_, DeltaU_, grad_k_, DU_new_, lb_, ub_, cumMin_, cumMax_;
+
+    bool last_qp_converged_ = true;
+    int  last_qp_iters_     = 0;
+
+    void buildPredictionMatrices();
+    void buildCostMatrix();
+    void buildCondensedMatrices();
+};
 
 } // namespace ctrl

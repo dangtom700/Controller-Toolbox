@@ -1,8 +1,8 @@
 # Controller Toolbox
 
-A discrete-time C++17 control library with PID, LQR, LQG, MPC, ADRC, SMC, Lead-Lag, Smith Predictor, Extremum Seeking, Kalman filtering, Fuzzy Logic inference, plus an integrated tuner suite and analysis layer.
+A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H∞, Lead-Lag, Smith Predictor, Extremum Seeking, Kalman/EKF/UKF filtering, Fuzzy Logic inference, RLS and N4SID system identification, plus an integrated tuner suite and analysis layer.
 
-Twelve controller implementations, eight tuning families, frequency- and time-domain analysis, controller composition (Supervisory / Additive / Weighted), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.
+Twenty-plus controller implementations, eight tuning families, frequency- and time-domain analysis, controller composition (Supervisory / Additive / Weighted), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.
 
 ---
 
@@ -16,7 +16,7 @@ cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
 
-Requires **C++17**, **CMake >= 3.16**, and **Eigen >= 3.4**.
+Requires **C++20**, **CMake >= 3.16**, and **Eigen >= 3.4**.
 
 ### Docker build
 
@@ -136,4 +136,4 @@ docker run --rm -it -v "$(pwd):/work" -w /work \
 
 ## Project Status
 
-Twelve controllers implemented and unit-tested. `FuzzyLogic` module added 2026-05-23: Mamdani and Takagi-Sugeno inference engines, `FuzzyPD`, `FuzzyPID`, and `FuzzySupervisor` classes - see [docs/DOCUMENTATION.md Section 5.2](docs/DOCUMENTATION.md). Four fuzzy application examples added (`ex23`-`ex26`). Five earlier math corrections (2026-05-22): MPC condensed prediction formula (`G_u.u_prev` term), PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor D.u_prev feedthrough, and SMC `c_de` Ts-absorption documentation - details in [docs/cumulative_bug_report.md](docs/cumulative_bug_report.md). Real-time deployment guidance in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+Twenty-plus controllers implemented and unit-tested. `FuzzyLogic` module added 2026-05-23: Mamdani and Takagi-Sugeno inference engines, `FuzzyPD`, `FuzzyPID`, and `FuzzySupervisor` classes - see [docs/DOCUMENTATION.md Section 5.2](docs/DOCUMENTATION.md). Four fuzzy application examples added (`ex23`-`ex26`). Five earlier math corrections (2026-05-22): MPC condensed prediction formula (`G_u.u_prev` term), PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor D.u_prev feedthrough, and SMC `c_de` Ts-absorption documentation - details in [docs/cumulative_bug_report.md](docs/cumulative_bug_report.md). Real-time deployment guidance in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).

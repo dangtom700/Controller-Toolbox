@@ -2,77 +2,103 @@
 #include <Eigen/Dense>
 #include <stdexcept>
 
-// Abstract interface for all discrete-time controllers.
-// All implementations operate at a fixed sample time Ts and are called once per step.
-// Ref: MATLAB Control System Toolbox discrete controller pattern.
 namespace ctrl
 {
 
-    class IController
+/**
+ * @brief Abstract interface for all discrete-time controllers.
+ *
+ * All implementations operate at a fixed sample time Ts and are called once per step.
+ * The interface covers both SISO (compute()) and MIMO (computeVec()) controllers,
+ * bumpless initialisation for supervisory switching, and a runtime health query
+ * used by ControllerStack to implement automatic fallback chains.
+ *
+ * @see MATLAB Control System Toolbox discrete controller pattern.
+ */
+class IController
+{
+public:
+    virtual ~IController() = default;
+
+    /**
+     * @brief Advance one sample step — scalar SISO interface.
+     *
+     * - Tracking controllers (PID, MPC, LQR-adapter): @p signal = e[k] = r[k] - y[k]
+     * - Optimisation-based controllers (ESC): @p signal = plant output y[k] (cost to extremize)
+     *
+     * @param signal Tracking error e[k] or plant output y[k], depending on controller type.
+     * @return Control action u[k].
+     */
+    virtual double compute(double signal) = 0;
+
+    /**
+     * @brief Advance one sample step — vector MIMO interface.
+     *
+     * The default implementation delegates to compute() when @p signal has exactly one element,
+     * and throws std::logic_error for multi-element signals to prevent silent truncation.
+     * Override this method in MIMO controllers (DiscreteMPC, DiscreteLQR, etc.).
+     *
+     * @param signal Reference or error vector (n x 1).
+     * @return Control action vector u[k] (m x 1).
+     * @throws std::logic_error If a multi-element signal is passed to a SISO controller.
+     */
+    virtual Eigen::VectorXd computeVec(const Eigen::VectorXd &signal)
     {
-    public:
-        virtual ~IController() = default;
+        if (signal.size() == 1)
+            return Eigen::VectorXd::Constant(1, compute(signal(0)));
+        throw std::logic_error(
+            "IController::computeVec: MIMO signal passed to a SISO controller. "
+            "Override computeVec() in MIMO subclasses.");
+    }
 
-        // Advance one sample step (scalar SISO interface).
-        // For tracking controllers (PID, MPC, LQR-adapter): signal = e[k] = r[k] - y[k]
-        // For optimisation-based controllers (ESC): signal = plant output y[k] (cost to extremize)
-        virtual double compute(double signal) = 0;
+    /**
+     * @brief Reset all internal states (integrators, delay buffers, estimators).
+     */
+    virtual void reset() = 0;
 
-        // MIMO interface - override in MIMO controllers (DiscreteMPC, DiscreteLQR, etc.).
-        // The default throws std::logic_error rather than silently truncating a multi-element
-        // signal to its first element, which would produce wrong results without any warning.
-        // SISO controllers that are never called through this interface are unaffected.
-        virtual Eigen::VectorXd computeVec(const Eigen::VectorXd &signal)
-        {
-            if (signal.size() == 1)
-                return Eigen::VectorXd::Constant(1, compute(signal(0)));
-            throw std::logic_error(
-                "IController::computeVec: MIMO signal passed to a SISO controller. "
-                "Override computeVec() in MIMO subclasses.");
-        }
+    /**
+     * @brief Sample time in seconds.
+     * @return Ts [s].
+     */
+    virtual double sampleTime() const = 0;
 
-        // Reset all internal states (integrators, delay buffers, estimators).
-        virtual void reset() = 0;
+    /**
+     * @brief Bumpless initialisation — prepares the controller for smooth activation.
+     *
+     * Called by ControllerStack (Supervisory mode) when this controller is newly selected,
+     * so its first compute() call returns @p u_target at the current @p error without a bump.
+     *
+     * The default is a no-op; override in controllers that have integral or memory state
+     * (DiscretePID, DiscreteMPC, DiscreteSMC).
+     *
+     * @param u_target The composite output the loop is currently delivering.
+     * @param error    The current tracking error that will be passed to compute().
+     *
+     * @note MIMO limitation: this interface is scalar. For MIMO controllers that need
+     *       multi-channel bumpless transfer, implement it outside IController (e.g., call
+     *       DiscreteMPC::setState() / setLastApplied() directly before handing over).
+     */
+    virtual void bumplessInit(double /*u_target*/, double /*error*/) {}
 
-        // Sample time in seconds.
-        virtual double sampleTime() const = 0;
-
-        // Bumpless initialisation - called by ControllerStack (Supervisory mode) when
-        // this controller is newly selected, so it produces u_target at the current error
-        // without an output bump.
-        //
-        // u_target: the output the composite loop is currently delivering.
-        // error:    the current tracking error passed to compute().
-        //
-        // The default is a no-op (e.g., for stateless or non-integrating controllers).
-        // Override in controllers that have integral or memory state (PID, MPC, SMC).
-        //
-        // MIMO limitation: this interface is scalar.  For MIMO controllers (e.g.,
-        // DiscreteMPC operating on a vector plant), the bumpless handover is a vector
-        // operation (initialise each input channel to match the corresponding u_target
-        // component).  ControllerStack currently calls bumplessInit with a scalar
-        // (the single composite output from the previous step), which is only meaningful
-        // for the first output channel.  MIMO controllers that need multi-channel
-        // bumpless transfer must implement it outside the IController interface, e.g.,
-        // by calling DiscreteMPC::setState() and DiscreteMPC::setLastApplied() directly
-        // from the switching logic before handing control to the new controller.
-        virtual void bumplessInit(double /*u_target*/, double /*error*/) {}
-
-        // Health query for supervisory fault-tolerant control.
-        //
-        // Returns false when the controller's last compute() call produced a result
-        // that is known to be suboptimal or potentially unsafe:
-        //   - DiscreteLQR:   DARE did not converge at construction.
-        //   - DiscreteMPC:   QP solver exited at qpMaxIter (last step did not converge).
-        //   - GeneralizedPredictiveController: same as MPC.
-        //
-        // ControllerStack (Supervisory mode) checks isHealthy() before selecting an entry:
-        // an unhealthy controller is skipped in favour of the next eligible entry.  This
-        // enables automatic fallback from MPC -> PID when the QP consistently fails.
-        //
-        // The default returns true (healthy) - override only in controllers that have
-        // meaningful runtime health state.
-        virtual bool isHealthy() const { return true; }
-    };
+    /**
+     * @brief Health query for supervisory fault-tolerant control.
+     *
+     * Returns @c false when the controller's last compute() call produced a result known to be
+     * suboptimal or potentially unsafe:
+     * - DiscreteLQR: DARE did not converge at construction.
+     * - DiscreteMPC: QP solver hit qpMaxIter (last step did not converge).
+     * - GeneralizedPredictiveControl: same as MPC.
+     *
+     * ControllerStack (Supervisory mode) checks isHealthy() before selecting an entry;
+     * an unhealthy controller is skipped in favour of the next eligible entry, enabling
+     * automatic fallback: MPC → GPC → PID when the QP consistently fails.
+     *
+     * The default returns @c true. Override only in controllers with meaningful runtime
+     * health state.
+     *
+     * @return @c true if the last computation was nominal; @c false if suboptimal.
+     */
+    virtual bool isHealthy() const { return true; }
+};
 
 } // namespace ctrl

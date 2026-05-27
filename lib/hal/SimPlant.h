@@ -3,65 +3,95 @@
 #include <Eigen/Dense>
 #include <mutex>
 
-// SimPlant - discrete-time plant simulator shared by SimSensor and SimActuator.
-//
-// Owns the state-space model and its current state vector.  Both simulation
-// adapters hold a reference to the same SimPlant instance so that sensor
-// readings and actuator commands remain consistent within one sample step.
-//
-// Typical closed-loop simulation pattern (one step k):
-//
-//   double y = sensor.read();             // 1. read current output y[k]
-//   double u = controller.compute(r - y); // 2. compute control action
-//   actuator.write(u);                    // 3. write u[k] -> advances plant to x[k+1]
-//
-// The step order matters: read() must be called BEFORE write() in the same
-// sample because write() advances the state.  If the step order is reversed
-// the simulation models a one-step computational delay (which is also valid
-// for hardware - just document the convention and stick to it).
-//
-// Thread safety: step(), setState(), reset(), and output() are all protected
-// by an internal std::mutex and are safe to call from separate threads.
-// This enables Hardware-in-the-Loop (HIL) setups where the plant runs in a
-// background thread while a logger or visualiser reads output() concurrently.
-// Note: each call acquires the mutex independently - a read-then-step sequence
-// is NOT atomic without an external lock.  For simulation-only use from a
-// single thread the mutex overhead is negligible.
+/**
+ * @file SimPlant.h
+ * @brief Discrete-time plant simulator shared by SimSensor and SimActuator.
+ *
+ * Owns the state-space model and its current state vector. Both simulation adapters
+ * hold a reference to the same SimPlant so that sensor readings and actuator commands
+ * remain consistent within one sample step.
+ *
+ * **Typical closed-loop simulation pattern (one step k):**
+ * @code
+ *   double y = sensor.read();              // 1. read current output y[k]
+ *   double u = controller.compute(r - y);  // 2. compute control action
+ *   actuator.write(u);                     // 3. write u[k] → advances plant to x[k+1]
+ * @endcode
+ *
+ * `read()` must be called **before** `write()` in the same sample, because `write()`
+ * advances the state. Reversing the order models a one-step computational delay —
+ * which is valid for hardware; just document the convention.
+ *
+ * **Thread safety:** `step()`, `setState()`, `reset()`, and `output()` are all
+ * protected by an internal `std::mutex`. This enables Hardware-in-the-Loop (HIL)
+ * setups where the plant runs in a background thread while a logger reads `output()`
+ * concurrently.
+ *
+ * @note A read-then-step sequence is NOT atomic without an external lock. For
+ *       simulation-only use from a single thread the mutex overhead is negligible.
+ */
+
 namespace ctrl {
 
+/**
+ * @brief Thread-safe discrete-time plant simulator.
+ */
 class SimPlant {
 public:
-    // Construct with a discrete-time state-space model.
-    // x0 is optional; defaults to the zero state (plant starts at rest).
+    /**
+     * @brief Construct with a discrete-time state-space model.
+     * @param model  State-space model (A, B, C, D, Ts).
+     * @param x0     Initial state vector. Defaults to the zero state (plant at rest).
+     */
     explicit SimPlant(const StateSpace&       model,
                       const Eigen::VectorXd&  x0 = Eigen::VectorXd());
 
-    // Advance one sample: x[k+1] = A.x[k] + B.u[k],  y[k] = C.x[k] + D.u[k].
-    // The output y[k] is cached internally; call output() after step() to read it.
+    /**
+     * @brief Advance one sample: x[k+1] = A·x[k] + B·u[k], y[k] = C·x[k] + D·u[k].
+     *
+     * The output y[k] is cached internally; call output() after step() to read it.
+     *
+     * @param u Control input for this step.
+     */
     void step(double u);
 
-    // Returns the cached output from the last step() call (mutex-protected).
-    // On construction (before any step), returns C.x0 + D.0.
+    /**
+     * @brief Return the cached output from the last step() call.
+     *
+     * On construction (before any step), returns C·x0 + D·0.
+     *
+     * @return y[k] (mutex-protected).
+     */
     double output() const;
 
-    // Direct state access - useful for injecting Kalman estimates or
-    // for initialising the plant at a non-zero operating point.
-    const Eigen::VectorXd& state()                    const { return x_; }
-    void                   setState(const Eigen::VectorXd& x);
+    /**
+     * @brief Read-only access to the current state x[k].
+     * @return Const reference to the state vector.
+     */
+    const Eigen::VectorXd& state() const { return x_; }
 
-    // Reset to the initial state (zero unless overridden by setState before reset).
+    /**
+     * @brief Inject a state vector (for Kalman initialisation or non-zero operating point).
+     * @param x New state vector.
+     */
+    void setState(const Eigen::VectorXd& x);
+
+    /**
+     * @brief Reset the plant to the initial state (zero unless overridden by setState before reset()).
+     */
     void reset();
 
+    /** @brief Read-only access to the state-space model. */
     const StateSpace& model() const { return model_; }
 
 private:
-    mutable std::mutex mu_;        // guards x_, y_cached_
+    mutable std::mutex mu_;     ///< Guards x_ and y_cached_.
     StateSpace       model_;
-    Eigen::VectorXd  x_;           // current state x[k]
-    Eigen::VectorXd  x0_;          // initial state (stored for reset)
-    double           y_cached_;    // last output - avoids recomputing in output()
+    Eigen::VectorXd  x_;        ///< Current state x[k].
+    Eigen::VectorXd  x0_;       ///< Initial state (stored for reset()).
+    double           y_cached_; ///< Last output — avoids recomputing in output().
 
-    void updateOutput(double u);   // recomputes y_cached_ from current x_ and u (caller holds mu_)
+    void updateOutput(double u); ///< Recomputes y_cached_ from current x_ and u (caller holds mu_).
 };
 
 } // namespace ctrl

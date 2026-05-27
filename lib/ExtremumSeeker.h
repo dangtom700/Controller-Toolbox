@@ -2,80 +2,113 @@
 #include "IController.h"
 #include <cmath>
 
-// Perturbation-based Extremum Seeking Controller (ESC).
-//
-// Injects a sinusoidal dither into the plant operating point, demodulates the
-// plant output to extract a gradient estimate, then integrates the gradient to
-// converge to the extremum of an unknown static (or slowly varying) cost surface.
-//
-// Algorithm pseudocode (per sample k):
-//
-//   phase[k]    = phase[k-1] + 2*pi*f_p*Ts          // phase accumulator (mod 2*pi)
-//   dither[k]   = a * sin(phase[k])                  // perturbation signal
-//   u[k]        = theta[k] + dither[k]               // total plant input
-//
-//   // High-pass filter (backward-Euler first-order, cutoff f_hpf):
-//   alpha_h     = 1 / (1 + 2*pi*f_hpf*Ts)
-//   y_h[k]      = alpha_h * (y_h[k-1] + y[k] - y[k-1])   // removes DC/slow drift
-//
-//   // Demodulate: multiply HPF output by reference dither to extract gradient phase
-//   xi[k]       = y_h[k] * sin(phase[k])
-//
-//   // Low-pass filter (backward-Euler first-order, cutoff f_lpf):
-//   alpha_l     = 2*pi*f_lpf*Ts / (1 + 2*pi*f_lpf*Ts)
-//   ghat[k]     = ghat[k-1] + alpha_l * (xi[k] - ghat[k-1])   // gradient estimate
-//
-//   // Gradient-descent (ascent) integration:
-//   sign_dir    = seekMinimum ? -1.0 : +1.0
-//   theta[k+1]  = theta[k] + sign_dir * k_int * Ts * ghat[k]
-//
-// Separation of timescales requirement:
-//   plant settling time << 1/f_p << 1/(f_lpf)
-// so the plant responds quasi-statically to the dither and the LPF cleanly extracts
-// the gradient. Violating this produces a biased gradient estimate and slow/no convergence.
-//
-// Ref: Ariyur & Krstic "Real-Time Optimisation by Extremum-Seeking Control" (2003);
-//      Tan et al. "On non-local stability of ESC" (2006);
-//      Simulink Extremum Seeking block (MATLAB R2020b+).
+/**
+ * @file ExtremumSeeker.h
+ * @brief Perturbation-based Extremum Seeking Controller (ESC).
+ *
+ * Injects a sinusoidal dither into the plant operating point, demodulates the plant output
+ * to extract a gradient estimate, then integrates the gradient to converge to the extremum
+ * of an unknown static (or slowly varying) cost surface — **no explicit model required**.
+ *
+ * **Algorithm per sample k:**
+ * @code
+ *   phase[k] += 2π·fp·Ts                          // phase accumulator (wrapped mod 2π)
+ *   u[k]      = θ[k] + a·sin(phase[k])            // operating point + dither
+ *
+ *   // High-pass filter (backward Euler, removes DC/slow drift):
+ *   yh[k]   = αh·(yh[k−1] + y[k] − y[k−1]),   αh = 1/(1 + 2π·fhpf·Ts)
+ *
+ *   // Demodulate — extract gradient signal:
+ *   ξ[k]    = yh[k]·sin(phase[k])
+ *
+ *   // Low-pass filter (backward Euler, smooths gradient):
+ *   ĝ[k]    = ĝ[k−1] + αl·(ξ[k] − ĝ[k−1]),    αl = 2π·flpf·Ts/(1 + 2π·flpf·Ts)
+ *
+ *   // Gradient-descent integration:
+ *   θ[k+1]  = θ[k] + sign_dir·kint·Ts·ĝ[k]      // sign_dir = −1 (min) or +1 (max)
+ * @endcode
+ *
+ * @par Separation of timescales requirement
+ * For correct gradient estimation: plant settling time ≪ 1/fp ≪ 1/flpf.
+ * The plant must respond quasi-statically to the dither frequency, and the LPF must cleanly
+ * extract the gradient from the demodulated signal. Violating this causes a biased gradient
+ * estimate and slow or no convergence.
+ *
+ * @see Ariyur & Krstic, "Real-Time Optimisation by Extremum-Seeking Control" (2003).
+ * @see Tan et al., "On non-local stability of ESC" (2006).
+ * @see MATLAB/Simulink Extremum Seeking block (R2020b+).
+ */
+
 namespace ctrl
 {
 
-    struct ExtremumSeekerParams
-    {
-        double perturbAmp = 0.1;  // Dither amplitude  a      - larger = faster, more perturbation
-        double perturbFreq = 1.0; // Dither frequency  f_p [Hz] - well above closed-loop BW
-        double lpfCutoff = 0.1;   // Low-pass filter   f_lpf [Hz] - gradient smoothing
-        double hpfCutoff = 0.05;  // High-pass filter  f_hpf [Hz] - DC removal
-        double integGain = 1.0;   // Gradient integrator gain k_int
-        bool seekMinimum = true;  // true -> seek minimum;  false -> seek maximum
-    };
+/**
+ * @brief Tuning parameters for ExtremumSeeker.
+ */
+struct ExtremumSeekerParams
+{
+    double perturbAmp  = 0.1;  ///< Dither amplitude a. Larger = faster convergence, more perturbation.
+    double perturbFreq = 1.0;  ///< Dither frequency fp [Hz]. Must be well above the closed-loop bandwidth.
+    double lpfCutoff   = 0.1;  ///< Low-pass filter cutoff flpf [Hz] for gradient smoothing.
+    double hpfCutoff   = 0.05; ///< High-pass filter cutoff fhpf [Hz] for DC removal.
+    double integGain   = 1.0;  ///< Gradient integrator gain kint.
+    bool   seekMinimum = true; ///< @c true to seek the minimum; @c false to seek the maximum.
+};
 
-    class ExtremumSeeker : public IController
-    {
-    public:
-        ExtremumSeeker(const ExtremumSeekerParams &params, double sampleTime);
+/**
+ * @brief Perturbation-based Extremum Seeking Controller.
+ *
+ * IController::compute() takes the **plant output** (cost/performance metric) rather than
+ * a tracking error, and returns the **plant input** (operating-point estimate + dither).
+ */
+class ExtremumSeeker : public IController
+{
+public:
+    /**
+     * @brief Construct with tuning parameters and fixed sample time.
+     * @param params     ESC tuning (dither amplitude/frequency, filter cutoffs, integrator gain).
+     * @param sampleTime Sample period Ts [s].
+     */
+    ExtremumSeeker(const ExtremumSeekerParams &params, double sampleTime);
 
-        // signal = plant output y[k] (cost/performance metric, NOT tracking error).
-        // Returns plant input u[k] = operating-point estimate + dither.
-        double compute(double signal) override;
+    /**
+     * @brief Advance one step of the ESC algorithm.
+     *
+     * @param signal Plant output y[k] (cost or performance metric, **not** tracking error).
+     * @return Plant input u[k] = operating-point estimate θ[k] + dither a·sin(phase[k]).
+     */
+    double compute(double signal) override;
 
-        void reset() override;
-        double sampleTime() const override { return Ts_; }
+    /** @brief Reset phase, integrator, filter states, and previous output. */
+    void reset() override;
 
-        void setParams(const ExtremumSeekerParams &p) { p_ = p; }
-        const ExtremumSeekerParams &params() const { return p_; }
+    /** @brief Sample time Ts [s]. */
+    double sampleTime() const override { return Ts_; }
 
-        // Current operating-point estimate theta (without dither).
-        double currentEstimate() const { return theta_; }
+    /**
+     * @brief Hot-update tuning parameters.
+     * @param p New ESC parameters.
+     */
+    void setParams(const ExtremumSeekerParams &p) { p_ = p; }
 
-    private:
-        ExtremumSeekerParams p_;
-        double Ts_;
-        double phase_;     // dither phase accumulator [rad], wrapped to [0, 2pi)
-        double theta_;     // operating-point integrator state
-        double hpf_state_; // HPF IIR state (backward-Euler first-order)
-        double lpf_state_; // LPF IIR state (backward-Euler first-order)
-        double y_prev_;    // y[k-1] for HPF difference term
-    };
+    /** @brief Read-only access to current parameters. */
+    const ExtremumSeekerParams &params() const { return p_; }
+
+    /**
+     * @brief Current operating-point estimate θ (without dither component).
+     *
+     * Converges to the extremum of the cost surface as the algorithm runs.
+     */
+    double currentEstimate() const { return theta_; }
+
+private:
+    ExtremumSeekerParams p_;
+    double Ts_;
+    double phase_;      ///< Dither phase accumulator [rad], wrapped to [0, 2π).
+    double theta_;      ///< Operating-point integrator state.
+    double hpf_state_;  ///< HPF IIR state (backward Euler, first order).
+    double lpf_state_;  ///< LPF IIR state (backward Euler, first order).
+    double y_prev_;     ///< y[k−1] for the HPF difference term.
+};
 
 } // namespace ctrl

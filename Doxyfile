@@ -6,7 +6,7 @@
 # Project identity
 # ---------------------------------------------------------------------------
 PROJECT_NAME           = "Controller Toolbox"
-PROJECT_NUMBER         = "1.1"
+PROJECT_NUMBER         = "1.0.0"
 PROJECT_BRIEF          = "Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning"
 PROJECT_LOGO           =
 

@@ -5,104 +5,132 @@
 #include <optional>
 #include <vector>
 
-// Smith Predictor - compensates for pure integer dead-time in discrete plants.
-//
-// Replaces the dead-time delay in the feedback path with a prediction from
-// an internal model, so the inner controller C(z) sees a delay-free loop.
-//
-// Modified error delivered to the inner controller:
-//   e_sp[k] = (r[k] - y[k]) + (yhat_model[k] - yhat_model[k-d])
-//            = error + (current model output - d-step-delayed model output)
-//
-// Signal-flow equivalent (ref: Smith 1957):
-//   Inner loop: C(z) -> P0(z) . z^{-d}   (plant with delay)
-//   Model:      yhat    = P0(z) . u        (model without delay)
-//   Correction: c    = yhat - z^{-d}.yhat  (delay-induced error cancelled)
-//
-// Requirements: plant model P0 must represent the delay-FREE dynamics.
-//
-// Fractional dead-time support:
-//   If the true dead time theta is not a multiple of Ts, pass the optional
-//   fracDelayFilter argument (a 1-state StateSpace from padeDelayFilter()).
-//   The filter H_frac is connected in series with delayModel so the effective
-//   model is  P0_eff(z) = H_frac(z) . P0(z), matching e^{-theta_frac * s}
-//   to first order without rounding error.
-//
-//   Convenience construction via the whole dead time:
-//     ctrl::SmithPredictor sp(inner, G0, theta, Ts);
-//   This overload splits theta automatically into floor(theta/Ts) integer steps
-//   plus a first-order Pade filter for the remainder.
-//
-// Ref: Smith (1957); Astrom & Wittenmark "Computer Controlled Systems" Sec 6.4.
+/**
+ * @file SmithPredictor.h
+ * @brief Smith Predictor — compensates for pure dead-time in discrete plants.
+ *
+ * Replaces the dead-time delay in the feedback path with a prediction from an internal model,
+ * so the inner controller C(z) sees a delay-free loop.
+ *
+ * **Modified error delivered to the inner controller:**
+ * @code
+ *   e_sp[k] = (r[k] − y[k]) + (ŷ_model[k] − ŷ_model[k−d])
+ *            = error + (current model output − d-step-delayed model output)
+ * @endcode
+ *
+ * **Requirements:** the @p delayModel must represent the delay-**free** plant P₀(z).
+ *
+ * **Fractional dead-time support:**
+ * If the true dead time θ is not an integer multiple of Ts, pass a first-order Padé filter
+ * (from FunctionApproximator::padeDelayFilter()) for the sub-sample remainder. The filter
+ * H_frac is connected in series with the delay model so the effective model is
+ * P₀_eff(z) = H_frac(z)·P₀(z), matching e^{−θ_frac·s} to first order without rounding.
+ *
+ * @see Smith, "Closed control of loops with dead time", Chem. Eng. Prog. 53 (1957).
+ * @see Åström & Wittenmark, "Computer Controlled Systems" §6.4.
+ */
+
 namespace ctrl
 {
 
-    class SmithPredictor : public IController
-    {
-    public:
-        // -- Overload 1 (original): integer delay only -------------------------
-        // inner:       any discrete controller (e.g., DiscretePID)
-        // delayModel:  state-space model of the plant WITHOUT the dead-time delay
-        // delaySteps:  integer dead-time length in samples d
-        SmithPredictor(std::shared_ptr<IController> inner,
-                       const StateSpace &delayModel,
-                       int delaySteps);
+/**
+ * @brief Smith Predictor wrapper for any IController inner loop.
+ *
+ * Three overloaded constructors support integer-only dead time, explicit fractional Padé
+ * filters, and an automatic whole-dead-time constructor that splits θ = floor(θ/Ts)·Ts + θ_frac.
+ */
+class SmithPredictor : public IController
+{
+public:
+    /**
+     * @brief Construct for an integer dead-time delay only.
+     * @param inner      Base stabilising controller (e.g., DiscretePID).
+     * @param delayModel State-space model of the plant **without** the dead-time delay.
+     * @param delaySteps Integer dead-time length in samples d.
+     */
+    SmithPredictor(std::shared_ptr<IController> inner,
+                   const StateSpace &delayModel,
+                   int delaySteps);
 
-        // -- Overload 2: fractional delay support via Pade filter --------------
-        // inner:            any discrete controller
-        // delayModel:       state-space model of the plant WITHOUT dead-time
-        // delaySteps:       integer part of dead-time in samples
-        // fracDelayFilter:  1-state StateSpace from padeDelayFilter(theta_frac, Ts)
-        //                   representing the sub-sample fractional delay.
-        SmithPredictor(std::shared_ptr<IController> inner,
-                       const StateSpace &delayModel,
-                       int delaySteps,
-                       const StateSpace &fracDelayFilter);
+    /**
+     * @brief Construct with explicit fractional Padé filter for sub-sample dead time.
+     * @param inner           Base stabilising controller.
+     * @param delayModel      Delay-free plant model P₀.
+     * @param delaySteps      Integer part of dead time in samples d.
+     * @param fracDelayFilter First-order StateSpace from padeDelayFilter(θ_frac, Ts).
+     */
+    SmithPredictor(std::shared_ptr<IController> inner,
+                   const StateSpace &delayModel,
+                   int delaySteps,
+                   const StateSpace &fracDelayFilter);
 
-        // -- Overload 3: convenient whole dead-time constructor ----------------
-        // inner:      any discrete controller
-        // delayModel: delay-free plant model
-        // theta:      total dead time [s]
-        // Ts:         sample time [s] (must match delayModel.Ts)
-        // Automatically computes delaySteps = floor(theta/Ts) and builds the
-        // first-order Pade filter for the fractional remainder.
-        SmithPredictor(std::shared_ptr<IController> inner,
-                       const StateSpace &delayModel,
-                       double theta,
-                       double Ts);
+    /**
+     * @brief Convenient whole-dead-time constructor — handles fractional remainder automatically.
+     *
+     * Splits θ into floor(θ/Ts) integer steps and builds a first-order Padé filter for
+     * the sub-sample remainder.
+     *
+     * @param inner      Base stabilising controller.
+     * @param delayModel Delay-free plant model.
+     * @param theta      Total dead time θ [s].
+     * @param Ts         Sample time [s] (must match delayModel.Ts).
+     */
+    SmithPredictor(std::shared_ptr<IController> inner,
+                   const StateSpace &delayModel,
+                   double theta,
+                   double Ts);
 
-        // Compute u[k] from closed-loop error e[k] = r[k] - y[k].
-        double compute(double error) override;
+    /**
+     * @brief Compute u[k] from closed-loop error e[k] = r[k] − y[k].
+     * @param error Current tracking error.
+     * @return Control output u[k] from the inner controller operating on the Smith-corrected error.
+     */
+    double compute(double error) override;
 
-        void reset() override;
-        double sampleTime() const override { return Ts_; }
+    /** @brief Reset model state, output buffer, and inner controller. */
+    void reset() override;
 
-        // Access the wrapped inner controller for runtime tuning.
-        IController &innerController() { return *inner_; }
+    /** @brief Sample time Ts [s]. */
+    double sampleTime() const override { return Ts_; }
 
-        // Replace the internal delay-free plant model and dead-time length at runtime.
-        // Resets model state and output buffer (equivalent to calling reset()).
-        void setModel(const StateSpace &delayModel, int delaySteps);
+    /**
+     * @brief Access the wrapped inner controller for runtime tuning.
+     * @return Mutable reference to the inner controller.
+     */
+    IController &innerController() { return *inner_; }
 
-        // Fractional-delay variant of setModel.
-        void setModel(const StateSpace &delayModel, int delaySteps,
-                      const StateSpace &fracDelayFilter);
+    /**
+     * @brief Replace the delay-free plant model and dead-time length at runtime.
+     *
+     * Resets model state and output buffer (equivalent to reset()).
+     * @param delayModel Updated delay-free model.
+     * @param delaySteps New integer dead-time length in samples.
+     */
+    void setModel(const StateSpace &delayModel, int delaySteps);
 
-    private:
-        void initBuffers();
+    /**
+     * @brief Replace the plant model with a fractional delay filter at runtime.
+     * @param delayModel      Updated delay-free model.
+     * @param delaySteps      New integer dead-time length in samples.
+     * @param fracDelayFilter Updated first-order Padé filter for the sub-sample remainder.
+     */
+    void setModel(const StateSpace &delayModel, int delaySteps,
+                  const StateSpace &fracDelayFilter);
 
-        std::shared_ptr<IController>  inner_;
-        StateSpace                    model_;       // delay-free plant model P0
-        int                           d_;           // integer delay steps
-        double                        Ts_;
-        bool                          has_frac_;    // true when a Pade filter is active
-        StateSpace                    frac_filter_; // H_frac state-space (1 state)
-        Eigen::VectorXd               x_frac_;      // state of the fractional filter
+private:
+    void initBuffers();
 
-        Eigen::VectorXd               x_model_;     // internal model state x^
-        Eigen::VectorXd               u_prev_;      // u[k-1] for D.u feedthrough
-        std::vector<double>           y_buf_;       // circular buffer for yhat delay
-        int                           buf_head_;
-    };
+    std::shared_ptr<IController> inner_;
+    StateSpace                   model_;       ///< Delay-free plant model P₀.
+    int                          d_;           ///< Integer delay steps.
+    double                       Ts_;
+    bool                         has_frac_;    ///< @c true when a Padé filter is active.
+    StateSpace                   frac_filter_; ///< H_frac state-space (1 state).
+    Eigen::VectorXd              x_frac_;      ///< State of the fractional Padé filter.
+    Eigen::VectorXd              x_model_;     ///< Internal model state x̂.
+    Eigen::VectorXd              u_prev_;      ///< u[k−1] for D·u feedthrough.
+    std::vector<double>          y_buf_;       ///< Circular buffer for ŷ delay (length d).
+    int                          buf_head_;    ///< Write pointer into y_buf_.
+};
 
 } // namespace ctrl

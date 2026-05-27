@@ -4,65 +4,115 @@
 #include <vector>
 #include <complex>
 
+/**
+ * @file SystemAnalysis.h
+ * @brief Frequency-domain and stability analysis tools for discrete-time state-space systems.
+ */
+
 namespace ctrl
 {
 
-    // Results from calculateMargins(). Infinity means the crossing was not found on
-    // the frequency grid [1e-3, pi/Ts] rad/s - a stable system with very high margins
-    // or a critically damped system may legitimately have no phase/gain crossover.
-    struct StabilityMargins
-    {
-        double gainMarginDb;    // GM in dB: how much gain can increase before instability
-        double phaseMarginDeg;  // PM in degrees: phase above -180 deg at the gain crossover
-        double wCrossoverGain;  // Frequency where |G| = 1 (0 dB), i.e., the phase-margin freq
-        double wCrossoverPhase; // Frequency where phase = -180 deg, i.e., the gain-margin freq
-    };
+/**
+ * @brief Stability margins for a SISO open-loop plant.
+ *
+ * A value of infinity indicates the corresponding frequency crossing was not found on the
+ * evaluation grid — a system with very high margins or a critically damped plant may
+ * legitimately have no phase or gain crossover.
+ */
+struct StabilityMargins
+{
+    double gainMarginDb;    ///< Gain margin GM [dB]: how much loop gain can increase before instability.
+    double phaseMarginDeg;  ///< Phase margin PM [°]: phase above −180° at the gain-crossover frequency.
+    double wCrossoverGain;  ///< Gain-crossover frequency ωc [rad/s] where |G(jωc)| = 1 (0 dB).
+    double wCrossoverPhase; ///< Phase-crossover frequency ωp [rad/s] where ∠G(jωp) = −180°.
+};
 
-    class SystemAnalysis
-    {
-    public:
-        // Returns the poles (eigenvalues of A) of the state-space system.
-        // For discrete-time systems, stability requires all |poles| < 1.
-        static std::vector<std::complex<double>> getPoles(const StateSpace &sys);
+/**
+ * @brief Static analysis utilities for discrete-time state-space systems.
+ */
+class SystemAnalysis
+{
+public:
+    /**
+     * @brief Compute the poles (eigenvalues of A) of a state-space system.
+     *
+     * For discrete-time systems, stability requires all |poles| < 1.
+     *
+     * @param sys Discrete-time state-space model.
+     * @return Vector of poles (eigenvalues of A).
+     */
+    static std::vector<std::complex<double>> getPoles(const StateSpace &sys);
 
-        // Returns true iff all eigenvalues of A satisfy |lambda| < 1 (strict stability).
-        // Marginally stable systems (|lambda| = 1) return false.
-        static bool isDiscreteStable(const StateSpace &sys);
+    /**
+     * @brief Test discrete-time stability.
+     *
+     * Returns @c true iff all eigenvalues of A satisfy |λ| < 1 (strict stability).
+     * Marginally stable systems (|λ| = 1) return @c false.
+     *
+     * @param sys Discrete-time state-space model.
+     * @return @c true if strictly stable.
+     */
+    static bool isDiscreteStable(const StateSpace &sys);
 
-        // Solves the discrete Lyapunov equation:  A * P * A' - P + Q = 0
-        // via Kronecker product vectorisation: (I - A\otimesA) * vec(P) = vec(Q).
-        // Complexity: O(n^6) due to the n^2 x n^2 linear system - suitable for n <= 10.
-        //   At n=15 this is ~170 million flops; at n=20 it is ~1.6 billion.
-        //   For n > 10, prefer the Bartels-Stewart algorithm (Golub, Nash & Van Loan 1979),
-        //   which reduces complexity to O(n^3) via a Schur decomposition. MATLAB's dlyap()
-        //   uses Bartels-Stewart internally for this reason.
-        //   The Kronecker approach is retained here for simplicity (single Eigen solve,
-        //   no custom Schur loop), but be aware of the performance cliff for larger systems.
-        // A must be strictly stable; an unstable A gives a singular (I - A\otimesA).
-        // Ref: Bartels & Stewart "Solution of the Matrix Equation AX + XB = C" CACM (1972);
-        //      Golub, Nash & Van Loan "A Hessenberg-Schur method for AX+XB=C" IEEE TAC (1979).
-        static Eigen::MatrixXd solveDiscreteLyapunov(const Eigen::MatrixXd &A,
-                                                     const Eigen::MatrixXd &Q);
+    /**
+     * @brief Solve the discrete Lyapunov equation A·P·Aᵀ − P + Q = 0.
+     *
+     * Solved via Kronecker product vectorisation: (I − A⊗A)·vec(P) = vec(Q).
+     *
+     * @par Complexity note
+     * O(n⁶) due to the n²×n² linear system — suitable for n ≤ 10. For n > 10, the
+     * Bartels-Stewart algorithm (O(n³) via Schur decomposition) is strongly preferred;
+     * MATLAB's dlyap() uses Bartels-Stewart internally.
+     *
+     * @param A System matrix (must be strictly stable; unstable A gives a singular system).
+     * @param Q Symmetric positive semi-definite matrix (same dimensions as A).
+     * @return Solution P.
+     *
+     * @see Golub, Nash & Van Loan, "A Hessenberg-Schur method for AX+XB=C", IEEE TAC (1979).
+     */
+    static Eigen::MatrixXd solveDiscreteLyapunov(const Eigen::MatrixXd &A,
+                                                  const Eigen::MatrixXd &Q);
 
-        // Frequency response G(e^{j*w*Ts}) at each frequency in freqs [rad/s].
-        // SISO only (1 input, 1 output); throws for MIMO plants.
-        // Uses the direct formula: G(z) = C*(z*I - A)^{-1}*B + D  at z = e^{j*w*Ts}.
-        static std::vector<std::complex<double>> getFrequencyResponse(const StateSpace &sys,
-                                                                      const std::vector<double> &freqs);
+    /**
+     * @brief Compute the frequency response G(e^{jωTs}) at each frequency in @p freqs.
+     *
+     * Uses the direct formula G(z) = C·(z·I − A)⁻¹·B + D at z = e^{jωTs}.
+     * SISO only; throws for MIMO plants.
+     *
+     * @param sys   SISO discrete-time state-space model.
+     * @param freqs Frequency vector [rad/s].
+     * @return Complex frequency response at each frequency (same length as freqs).
+     * @throws std::invalid_argument If the system is not SISO.
+     */
+    static std::vector<std::complex<double>> getFrequencyResponse(const StateSpace &sys,
+                                                                   const std::vector<double> &freqs);
 
-        // Gain and phase margins for a SISO open-loop plant.
-        // Algorithm: coarse logarithmic grid (200 pts) to bracket crossings, then
-        // bisection (50 iterations) for accuracy. Phase is continuously unwrapped
-        // across grid points, so the result is correct for higher-order and
-        // non-minimum-phase plants where the phase can pass through -180 deg multiple times.
-        // Returns the worst-case (smallest) margin when multiple crossings exist.
-        static StabilityMargins calculateMargins(const StateSpace &sys);
+    /**
+     * @brief Compute gain and phase margins for a SISO open-loop plant.
+     *
+     * Algorithm: coarse logarithmic grid (200 points) to bracket crossings, followed by
+     * bisection (50 iterations) for accuracy. Phase is continuously unwrapped across grid
+     * points, so the result is correct for higher-order and non-minimum-phase plants where
+     * phase can cross −180° multiple times. Returns the worst-case (smallest) margin when
+     * multiple crossings exist.
+     *
+     * @param sys SISO discrete-time state-space model.
+     * @return StabilityMargins with GM, PM, and crossover frequencies.
+     */
+    static StabilityMargins calculateMargins(const StateSpace &sys);
 
-        // Peak H-infinity norm: max over frequency of the largest singular value of G(e^{jwTs}).
-        // For SISO plants this equals the peak magnitude. For MIMO it equals the peak
-        // induced L2-gain (max singular value). Uses a coarse grid followed by golden-section
-        // search for the peak - typical accuracy is better than 0.1% of the true peak.
-        static double calculateHInfinityNorm(const StateSpace &sys);
-    };
+    /**
+     * @brief Compute the peak H∞ norm of a state-space model.
+     *
+     * For SISO plants, equals the peak frequency-response magnitude.
+     * For MIMO plants, equals the peak induced L₂-gain (maximum singular value over all frequencies).
+     *
+     * Uses a coarse grid followed by golden-section search; typical accuracy is better than 0.1%.
+     *
+     * @param sys Discrete-time state-space model.
+     * @return Peak H∞ norm.
+     */
+    static double calculateHInfinityNorm(const StateSpace &sys);
+};
 
 } // namespace ctrl
