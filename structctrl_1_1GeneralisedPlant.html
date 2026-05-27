@@ -82,7 +82,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Generalised plant for H∞ synthesis.  
+<p>Generalised plant for Hinf synthesis.  
  <a href="structctrl_1_1GeneralisedPlant.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>&gt;</code></p>
@@ -108,38 +108,38 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:adb7cd7cce7a05f972ecc4c2a3f004306" id="r_adb7cd7cce7a05f972ecc4c2a3f004306"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GeneralisedPlant.html#adb7cd7cce7a05f972ecc4c2a3f004306">A</a></td></tr>
-<tr class="memdesc:adb7cd7cce7a05f972ecc4c2a3f004306"><td class="mdescLeft">&#160;</td><td class="mdescRight">State matrix (n × n).  <br /></td></tr>
+<tr class="memdesc:adb7cd7cce7a05f972ecc4c2a3f004306"><td class="mdescLeft">&#160;</td><td class="mdescRight">State matrix (n * n).  <br /></td></tr>
 <tr class="separator:adb7cd7cce7a05f972ecc4c2a3f004306"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aff78ded1a50781afd341dd44b4028a2f" id="r_aff78ded1a50781afd341dd44b4028a2f"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GeneralisedPlant.html#aff78ded1a50781afd341dd44b4028a2f">B1</a></td></tr>
-<tr class="memdesc:aff78ded1a50781afd341dd44b4028a2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exogenous input matrix (n × nw).  <br /></td></tr>
+<tr class="memdesc:aff78ded1a50781afd341dd44b4028a2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exogenous input matrix (n * nw).  <br /></td></tr>
 <tr class="separator:aff78ded1a50781afd341dd44b4028a2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad898a83f9974d018d600eed531bf4f3f" id="r_ad898a83f9974d018d600eed531bf4f3f"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GeneralisedPlant.html#ad898a83f9974d018d600eed531bf4f3f">B2</a></td></tr>
-<tr class="memdesc:ad898a83f9974d018d600eed531bf4f3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control input matrix (n × nu).  <br /></td></tr>
+<tr class="memdesc:ad898a83f9974d018d600eed531bf4f3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control input matrix (n * nu).  <br /></td></tr>
 <tr class="separator:ad898a83f9974d018d600eed531bf4f3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acc888810f6315566a7ef3b53b6528c17" id="r_acc888810f6315566a7ef3b53b6528c17"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GeneralisedPlant.html#acc888810f6315566a7ef3b53b6528c17">C1</a></td></tr>
-<tr class="memdesc:acc888810f6315566a7ef3b53b6528c17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performance output matrix (nz × n).  <br /></td></tr>
+<tr class="memdesc:acc888810f6315566a7ef3b53b6528c17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performance output matrix (nz * n).  <br /></td></tr>
 <tr class="separator:acc888810f6315566a7ef3b53b6528c17"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad7546293998aa6f781c2f63c5f3ff61b" id="r_ad7546293998aa6f781c2f63c5f3ff61b"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GeneralisedPlant.html#ad7546293998aa6f781c2f63c5f3ff61b">C2</a></td></tr>
-<tr class="memdesc:ad7546293998aa6f781c2f63c5f3ff61b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Measurement output matrix (ny × n).  <br /></td></tr>
+<tr class="memdesc:ad7546293998aa6f781c2f63c5f3ff61b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Measurement output matrix (ny * n).  <br /></td></tr>
 <tr class="separator:ad7546293998aa6f781c2f63c5f3ff61b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9f56e7c4cad2e976feef9a43ead4a689" id="r_a9f56e7c4cad2e976feef9a43ead4a689"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GeneralisedPlant.html#a9f56e7c4cad2e976feef9a43ead4a689">D11</a></td></tr>
-<tr class="memdesc:a9f56e7c4cad2e976feef9a43ead4a689"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exogenous→performance feedthrough (nz × nw).  <br /></td></tr>
+<tr class="memdesc:a9f56e7c4cad2e976feef9a43ead4a689"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exogenous-&gt;performance feedthrough (nz * nw).  <br /></td></tr>
 <tr class="separator:a9f56e7c4cad2e976feef9a43ead4a689"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c2da8f7502d66d70f08971e8b008c35" id="r_a2c2da8f7502d66d70f08971e8b008c35"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GeneralisedPlant.html#a2c2da8f7502d66d70f08971e8b008c35">D12</a></td></tr>
-<tr class="memdesc:a2c2da8f7502d66d70f08971e8b008c35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control→performance feedthrough (nz × nu).  <br /></td></tr>
+<tr class="memdesc:a2c2da8f7502d66d70f08971e8b008c35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control-&gt;performance feedthrough (nz * nu).  <br /></td></tr>
 <tr class="separator:a2c2da8f7502d66d70f08971e8b008c35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe5eb397ca69850658347c97e8154446" id="r_afe5eb397ca69850658347c97e8154446"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GeneralisedPlant.html#afe5eb397ca69850658347c97e8154446">D21</a></td></tr>
-<tr class="memdesc:afe5eb397ca69850658347c97e8154446"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exogenous→measurement feedthrough (ny × nw).  <br /></td></tr>
+<tr class="memdesc:afe5eb397ca69850658347c97e8154446"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exogenous-&gt;measurement feedthrough (ny * nw).  <br /></td></tr>
 <tr class="separator:afe5eb397ca69850658347c97e8154446"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a924f0882e1caa9a0c265f0f5b9e4dfaf" id="r_a924f0882e1caa9a0c265f0f5b9e4dfaf"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GeneralisedPlant.html#a924f0882e1caa9a0c265f0f5b9e4dfaf">D22</a></td></tr>
-<tr class="memdesc:a924f0882e1caa9a0c265f0f5b9e4dfaf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control→measurement feedthrough (ny × nu).  <br /></td></tr>
+<tr class="memdesc:a924f0882e1caa9a0c265f0f5b9e4dfaf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control-&gt;measurement feedthrough (ny * nu).  <br /></td></tr>
 <tr class="separator:a924f0882e1caa9a0c265f0f5b9e4dfaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6627378f5653ce8ca392374bbeee703a" id="r_a6627378f5653ce8ca392374bbeee703a"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GeneralisedPlant.html#a6627378f5653ce8ca392374bbeee703a">Ts</a> = 0.01</td></tr>
 <tr class="memdesc:a6627378f5653ce8ca392374bbeee703a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time [s].  <br /></td></tr>
 <tr class="separator:a6627378f5653ce8ca392374bbeee703a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Generalised plant for H∞ synthesis. </p>
+<div class="textblock"><p>Generalised plant for Hinf synthesis. </p>
 <p>Dimensions: n = state, nw = exogenous inputs, nu = control inputs, nz = performance outputs, ny = measurement outputs. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00065">65</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
@@ -322,7 +322,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>State matrix (n × n). </p>
+<p>State matrix (n * n). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00067">67</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
@@ -342,7 +342,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Exogenous input matrix (n × nw). </p>
+<p>Exogenous input matrix (n * nw). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00068">68</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
@@ -362,7 +362,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Control input matrix (n × nu). </p>
+<p>Control input matrix (n * nu). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00069">69</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
@@ -382,7 +382,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Performance output matrix (nz × n). </p>
+<p>Performance output matrix (nz * n). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00070">70</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
@@ -402,7 +402,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Measurement output matrix (ny × n). </p>
+<p>Measurement output matrix (ny * n). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00071">71</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
@@ -422,7 +422,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Exogenous→performance feedthrough (nz × nw). </p>
+<p>Exogenous-&gt;performance feedthrough (nz * nw). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00072">72</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
@@ -442,7 +442,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Control→performance feedthrough (nz × nu). </p>
+<p>Control-&gt;performance feedthrough (nz * nu). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00073">73</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
@@ -462,7 +462,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Exogenous→measurement feedthrough (ny × nw). </p>
+<p>Exogenous-&gt;measurement feedthrough (ny * nw). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00074">74</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
@@ -482,7 +482,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Control→measurement feedthrough (ny × nu). </p>
+<p>Control-&gt;measurement feedthrough (ny * nu). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00075">75</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 

@@ -89,10 +89,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a7b0ca42c5841475ac18e6c5cb1a3ad4f" id="r_a7b0ca42c5841475ac18e6c5cb1a3ad4f"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1KalmanNoiseParams.html">KalmanNoiseParams</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanWeightTuner.html#a7b0ca42c5841475ac18e6c5cb1a3ad4f">fromNoise</a> (const Eigen::VectorXd &amp;maxProcessNoise, const Eigen::VectorXd &amp;maxMeasNoise)</td></tr>
-<tr class="memdesc:a7b0ca42c5841475ac18e6c5cb1a3ad4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-channel noise: Qf = diag(σ²_process), Rf = diag(σ²_meas) — unchecked.  <br /></td></tr>
+<tr class="memdesc:a7b0ca42c5841475ac18e6c5cb1a3ad4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-channel noise: Qf = diag(sigma^2_process), Rf = diag(sigma^2_meas) - unchecked.  <br /></td></tr>
 <tr class="separator:a7b0ca42c5841475ac18e6c5cb1a3ad4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad8b8a7c1c18590f4f26a0ed5b90464ed" id="r_ad8b8a7c1c18590f4f26a0ed5b90464ed"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1KalmanNoiseParams.html">KalmanNoiseParams</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanWeightTuner.html#ad8b8a7c1c18590f4f26a0ed5b90464ed">isotropic</a> (int nStates, int nOutputs, double sigmaProcess, double sigmaMeas)</td></tr>
-<tr class="memdesc:ad8b8a7c1c18590f4f26a0ed5b90464ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Isotropic (scalar) noise: Qf = σp²·I, Rf = σm²·I — unchecked.  <br /></td></tr>
+<tr class="memdesc:ad8b8a7c1c18590f4f26a0ed5b90464ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Isotropic (scalar) noise: Qf = sigmap^2.I, Rf = sigmam^2.I - unchecked.  <br /></td></tr>
 <tr class="separator:ad8b8a7c1c18590f4f26a0ed5b90464ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6806fc41d16563168bb10280b9334485" id="r_a6806fc41d16563168bb10280b9334485"><td class="memTemplParams" colspan="2">template&lt;typename C &gt; </td></tr>
 <tr class="memitem:a6806fc41d16563168bb10280b9334485"><td class="memTemplItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1KalmanNoiseParams.html">KalmanNoiseParams</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanWeightTuner.html#a6806fc41d16563168bb10280b9334485">fromNoiseFor</a> (const Eigen::VectorXd &amp;maxProcessNoise, const Eigen::VectorXd &amp;maxMeasNoise)</td></tr>
@@ -105,9 +105,9 @@ Static Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Heuristic noise covariance selector for the Kalman observer in <a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a>. </p>
-<p>Provides starting points for Qf (process noise covariance) and Rf (measurement noise covariance) using Bryson-like scaling: Qf = diag(σ²_process), Rf = diag(σ²_meas).</p>
+<p>Provides starting points for Qf (process noise covariance) and Rf (measurement noise covariance) using Bryson-like scaling: Qf = diag(sigma^2_process), Rf = diag(sigma^2_meas).</p>
 <p>The separation principle guarantees the LQR and Kalman gains can be tuned independently; use <a class="el" href="classctrl_1_1LQRWeightTuner.html" title="LQR weight selector for DiscreteLQR and DiscreteLQG.">LQRWeightTuner</a> for the LQR part.</p>
-<dl class="section see"><dt>See also</dt><dd>Bryson &amp; Ho, "Applied Optimal Control" (1975) §14.3. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>Bryson &amp; Ho, "Applied Optimal Control" (1975) Section 14.3. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00629">629</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
@@ -145,11 +145,11 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Per-channel noise: Qf = diag(σ²_process), Rf = diag(σ²_meas) — unchecked. </p>
+<p>Per-channel noise: Qf = diag(sigma^2_process), Rf = diag(sigma^2_meas) - unchecked. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">maxProcessNoise</td><td>Per-channel process noise standard deviation (n×1). </td></tr>
-    <tr><td class="paramname">maxMeasNoise</td><td>Per-channel measurement noise standard deviation (p×1). </td></tr>
+    <tr><td class="paramname">maxProcessNoise</td><td>Per-channel process noise standard deviation (n*1). </td></tr>
+    <tr><td class="paramname">maxMeasNoise</td><td>Per-channel measurement noise standard deviation (p*1). </td></tr>
   </table>
   </dd>
 </dl>
@@ -259,7 +259,7 @@ template&lt;typename C &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Isotropic (scalar) noise: Qf = σp²·I, Rf = σm²·I — unchecked. </p>
+<p>Isotropic (scalar) noise: Qf = sigmap^2.I, Rf = sigmam^2.I - unchecked. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">nStates</td><td>Number of states n. </td></tr>

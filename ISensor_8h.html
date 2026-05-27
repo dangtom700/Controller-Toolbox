@@ -101,9 +101,9 @@ Namespaces</h2></td></tr>
 <div class="textblock"><p>Abstract interface for any measurement source. </p>
 <p>Implementations may wrap a hardware ADC, encoder, CAN-bus signal, or a simulation model (SimSensor). Controllers depend only on ISensor, so the same control code runs against hardware or a mathematical plant without modification.</p>
 <p><b>Contract:</b></p><ul>
-<li><code>read()</code> — returns the most recent measurement as a <code>double</code>. Must not block longer than one sample period. Returns the last valid value (never NaN) when data is stale; check <code>isValid()</code> to detect that condition.</li>
-<li><code>isValid()</code> — <code>true</code> while sensor data is fresh and within hardware limits. Controllers should freeze or fault when this returns <code>false</code>.</li>
-<li><code>reset()</code> — restores the sensor to its initial state (e.g., clears filters). </li>
+<li><code>read()</code> - returns the most recent measurement as a <code>double</code>. Must not block longer than one sample period. Returns the last valid value (never NaN) when data is stale; check <code>isValid()</code> to detect that condition.</li>
+<li><code>isValid()</code> - <code>true</code> while sensor data is fresh and within hardware limits. Controllers should freeze or fault when this returns <code>false</code>.</li>
+<li><code>reset()</code> - restores the sensor to its initial state (e.g., clears filters). </li>
 </ul>
 
 <p class="definition">Definition in file <a class="el" href="ISensor_8h_source.html">ISensor.h</a>.</p>

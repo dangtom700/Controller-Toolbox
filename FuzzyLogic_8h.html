@@ -165,16 +165,16 @@ Functions</h2></td></tr>
 <tr class="memdesc:a3bbf52403d666ffe411d11dc25482996"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trapezoidal membership function: /‾\ flat-top from <code>b</code> to <code>c</code>, zero outside [<code>a</code>, <code>d</code>].  <br /></td></tr>
 <tr class="separator:a3bbf52403d666ffe411d11dc25482996"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b22feed3a0eeddddf10263fa0d8529f" id="r_a0b22feed3a0eeddddf10263fa0d8529f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a0b22feed3a0eeddddf10263fa0d8529f">ctrl::mfGaussian</a> (double mean, double sigma)</td></tr>
-<tr class="memdesc:a0b22feed3a0eeddddf10263fa0d8529f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gaussian membership function: exp(-0.5·((x - <code>mean</code>) / <code>sigma</code>)²).  <br /></td></tr>
+<tr class="memdesc:a0b22feed3a0eeddddf10263fa0d8529f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gaussian membership function: exp(-0.5.  <br /></td></tr>
 <tr class="separator:a0b22feed3a0eeddddf10263fa0d8529f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8cee0db195ae17d833885884e3579f57" id="r_a8cee0db195ae17d833885884e3579f57"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a8cee0db195ae17d833885884e3579f57">ctrl::mfSingleton</a> (double value)</td></tr>
 <tr class="memdesc:a8cee0db195ae17d833885884e3579f57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Singleton membership function: 1 at x == <code>value</code>, 0 elsewhere.  <br /></td></tr>
 <tr class="separator:a8cee0db195ae17d833885884e3579f57"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6da5eb7b6281f23b946aa8d55d7be186" id="r_a6da5eb7b6281f23b946aa8d55d7be186"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a6da5eb7b6281f23b946aa8d55d7be186">ctrl::mfShoulderLeft</a> (double a, double b)</td></tr>
-<tr class="memdesc:a6da5eb7b6281f23b946aa8d55d7be186"><td class="mdescLeft">&#160;</td><td class="mdescRight">Left-shoulder membership function: 1 for x ≤ <code>a</code>, linear 1→0 from <code>a</code> to <code>b</code>.  <br /></td></tr>
+<tr class="memdesc:a6da5eb7b6281f23b946aa8d55d7be186"><td class="mdescLeft">&#160;</td><td class="mdescRight">Left-shoulder membership function: 1 for x &lt;= <code>a</code>, linear 1-&gt;0 from <code>a</code> to <code>b</code>.  <br /></td></tr>
 <tr class="separator:a6da5eb7b6281f23b946aa8d55d7be186"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9df999bbef221d7d1a6f3604e16722c" id="r_ab9df999bbef221d7d1a6f3604e16722c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ab9df999bbef221d7d1a6f3604e16722c">ctrl::mfShoulderRight</a> (double a, double b)</td></tr>
-<tr class="memdesc:ab9df999bbef221d7d1a6f3604e16722c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Right-shoulder membership function: linear 0→1 from <code>a</code> to <code>b</code>, 1 for x ≥ <code>b</code>.  <br /></td></tr>
+<tr class="memdesc:ab9df999bbef221d7d1a6f3604e16722c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Right-shoulder membership function: linear 0-&gt;1 from <code>a</code> to <code>b</code>, 1 for x &gt;= <code>b</code>.  <br /></td></tr>
 <tr class="separator:ab9df999bbef221d7d1a6f3604e16722c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f1dad886251652b6661dd678241730e" id="r_a8f1dad886251652b6661dd678241730e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1LinguisticTerm.html">LinguisticTerm</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a8f1dad886251652b6661dd678241730e">ctrl::ltSingleton</a> (const std::string &amp;name, double value)</td></tr>
 <tr class="memdesc:a8f1dad886251652b6661dd678241730e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a fully specified <a class="el" href="structctrl_1_1LinguisticTerm.html" title="A named fuzzy term with its membership function and optional peak location.">LinguisticTerm</a> for a Takagi-Sugeno singleton output.  <br /></td></tr>
@@ -183,19 +183,19 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Mamdani and Takagi-Sugeno fuzzy inference engine with IController wrappers. </p>
 <p><b>Architecture overview:</b></p><ol type="1">
-<li><b>Input variables</b> — each partitioned into N linguistic terms with membership functions (triangular, trapezoidal, Gaussian, singleton, shoulder).</li>
-<li><b>Rule base</b> — IF-THEN rules of the form: IF x1 is Aᵢ AND x2 is Bⱼ … THEN y is Cₖ. AND is implemented via the product t-norm.</li>
+<li><b>Input variables</b> - each partitioned into N linguistic terms with membership functions (triangular, trapezoidal, Gaussian, singleton, shoulder).</li>
+<li><b>Rule base</b> - IF-THEN rules of the form: IF x1 is A_i AND x2 is B_j ... THEN y is Cₖ. AND is implemented via the product t-norm.</li>
 <li><b>Inference methods:</b><ul>
-<li><em>Mamdani</em> — output fuzzy sets are clipped/scaled then aggregated; defuzzified with CoG.</li>
-<li><em>Takagi-Sugeno</em> — consequent is a crisp value per rule; defuzzified via weighted average.</li>
+<li><em>Mamdani</em> - output fuzzy sets are clipped/scaled then aggregated; defuzzified with CoG.</li>
+<li><em>Takagi-Sugeno</em> - consequent is a crisp value per rule; defuzzified via weighted average.</li>
 </ul>
 </li>
-<li><b>Output</b> — single real value (SISO) or one FuzzySystem per axis (MIMO).</li>
+<li><b>Output</b> - single real value (SISO) or one FuzzySystem per axis (MIMO).</li>
 </ol>
 <p><b>IController wrappers:</b></p><ul>
-<li>FuzzyPD — 5-term PD controller (25-rule diagonal Mamdani table).</li>
-<li>FuzzyPID — FuzzyPD augmented with a crisp integral + back-calculation anti-windup.</li>
-<li>FuzzySupervisor — monitors closed-loop performance and triggers plant relinearisation.</li>
+<li>FuzzyPD - 5-term PD controller (25-rule diagonal Mamdani table).</li>
+<li>FuzzyPID - FuzzyPD augmented with a crisp integral + back-calculation anti-windup.</li>
+<li>FuzzySupervisor - monitors closed-loop performance and triggers plant relinearisation.</li>
 </ul>
 <dl class="section see"><dt>See also</dt><dd>Mamdani &amp; Assilian, "An Experiment in Linguistic Synthesis," Int. J. Man-Machine Studies (1975). </dd>
 <dd>

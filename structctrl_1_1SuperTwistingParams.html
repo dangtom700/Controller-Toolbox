@@ -92,13 +92,13 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:afd3504ce1d4ae3532f0e2bb032894b66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Error weight in the sliding surface (same convention as <a class="el" href="structctrl_1_1SMCParams.html" title="Tuning parameters for DiscreteSMC.">SMCParams</a>).  <br /></td></tr>
 <tr class="separator:afd3504ce1d4ae3532f0e2bb032894b66"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62ce8285bffab84b6a9761bb17e4dc57" id="r_a62ce8285bffab84b6a9761bb17e4dc57"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SuperTwistingParams.html#a62ce8285bffab84b6a9761bb17e4dc57">c_de</a> = 0.1</td></tr>
-<tr class="memdesc:a62ce8285bffab84b6a9761bb17e4dc57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Error-rate weight (discrete; stores λ·Ts — see <a class="el" href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c" title="Error-rate weight in the sliding surface (discrete, stores λ·Ts).">SMCParams::c_de</a>).  <br /></td></tr>
+<tr class="memdesc:a62ce8285bffab84b6a9761bb17e4dc57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Error-rate weight (discrete; stores lambda.Ts - see <a class="el" href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c" title="Error-rate weight in the sliding surface (discrete, stores lambda.Ts).">SMCParams::c_de</a>).  <br /></td></tr>
 <tr class="separator:a62ce8285bffab84b6a9761bb17e4dc57"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a72c3177b49aaecceeeffa5a45d692538" id="r_a72c3177b49aaecceeeffa5a45d692538"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SuperTwistingParams.html#a72c3177b49aaecceeeffa5a45d692538">K1</a> = 3.0</td></tr>
 <tr class="memdesc:a72c3177b49aaecceeeffa5a45d692538"><td class="mdescLeft">&#160;</td><td class="mdescRight">Power-term gain (|s|^{1/2} component).  <br /></td></tr>
 <tr class="separator:a72c3177b49aaecceeeffa5a45d692538"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6c93df7b0bc89c26e0b296d9f5f6a1c" id="r_ad6c93df7b0bc89c26e0b296d9f5f6a1c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SuperTwistingParams.html#ad6c93df7b0bc89c26e0b296d9f5f6a1c">K2</a> = 5.0</td></tr>
-<tr class="memdesc:ad6c93df7b0bc89c26e0b296d9f5f6a1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integral gain (sign(s) component). Must satisfy K2 &gt; K1² / 4.  <br /></td></tr>
+<tr class="memdesc:ad6c93df7b0bc89c26e0b296d9f5f6a1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integral gain (sign(s) component). Must satisfy K2 &gt; K1^2 / 4.  <br /></td></tr>
 <tr class="separator:ad6c93df7b0bc89c26e0b296d9f5f6a1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a866e524ef0399cad048fbf69e88e342f" id="r_a866e524ef0399cad048fbf69e88e342f"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SuperTwistingParams.html#a866e524ef0399cad048fbf69e88e342f">uMin</a> = -1e9</td></tr>
 <tr class="memdesc:a866e524ef0399cad048fbf69e88e342f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output saturation lower limit.  <br /></td></tr>
@@ -124,7 +124,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Error-rate weight (discrete; stores λ·Ts — see <a class="el" href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c" title="Error-rate weight in the sliding surface (discrete, stores λ·Ts).">SMCParams::c_de</a>). </p>
+<p>Error-rate weight (discrete; stores lambda.Ts - see <a class="el" href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c" title="Error-rate weight in the sliding surface (discrete, stores lambda.Ts).">SMCParams::c_de</a>). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00134">134</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 
@@ -184,7 +184,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Integral gain (sign(s) component). Must satisfy K2 &gt; K1² / 4. </p>
+<p>Integral gain (sign(s) component). Must satisfy K2 &gt; K1^2 / 4. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00136">136</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 

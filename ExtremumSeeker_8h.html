@@ -104,21 +104,21 @@ Namespaces</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Perturbation-based Extremum Seeking Controller (ESC). </p>
-<p>Injects a sinusoidal dither into the plant operating point, demodulates the plant output to extract a gradient estimate, then integrates the gradient to converge to the extremum of an unknown static (or slowly varying) cost surface — <b>no explicit model required</b>.</p>
-<p><b>Algorithm per sample k:</b> </p><div class="fragment"><div class="line">phase[k] += 2π·fp·Ts                          <span class="comment">// phase accumulator (wrapped mod 2π)</span></div>
-<div class="line">u[k]      = θ[k] + a·sin(phase[k])            <span class="comment">// operating point + dither</span></div>
+<p>Injects a sinusoidal dither into the plant operating point, demodulates the plant output to extract a gradient estimate, then integrates the gradient to converge to the extremum of an unknown static (or slowly varying) cost surface - <b>no explicit model required</b>.</p>
+<p><b>Algorithm per sample k:</b> </p><div class="fragment"><div class="line">phase[k] += 2pi.fp.Ts                          <span class="comment">// phase accumulator (wrapped mod 2pi)</span></div>
+<div class="line">u[k]      = theta[k] + a.sin(phase[k])            <span class="comment">// operating point + dither</span></div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// High-pass filter (backward Euler, removes DC/slow drift):</span></div>
-<div class="line">yh[k]   = αh·(yh[k−1] + y[k] − y[k−1]),   αh = 1/(1 + 2π·fhpf·Ts)</div>
+<div class="line">yh[k]   = alphah.(yh[k-1] + y[k] - y[k-1]),   alphah = 1/(1 + 2pi.fhpf.Ts)</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">// Demodulate — extract gradient signal:</span></div>
-<div class="line">ξ[k]    = yh[k]·sin(phase[k])</div>
+<div class="line"><span class="comment">// Demodulate - extract gradient signal:</span></div>
+<div class="line">xi[k]    = yh[k].sin(phase[k])</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Low-pass filter (backward Euler, smooths gradient):</span></div>
-<div class="line">ĝ[k]    = ĝ[k−1] + αl·(ξ[k] − ĝ[k−1]),    αl = 2π·flpf·Ts/(1 + 2π·flpf·Ts)</div>
+<div class="line">ghat[k]    = ghat[k-1] + alphal.(xi[k] - ghat[k-1]),    alphal = 2pi.flpf.Ts/(1 + 2pi.flpf.Ts)</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Gradient-descent integration:</span></div>
-<div class="line">θ[k+1]  = θ[k] + sign_dir·kint·Ts·ĝ[k]      <span class="comment">// sign_dir = −1 (min) or +1 (max)</span></div>
+<div class="line">theta[k+1]  = theta[k] + sign_dir.kint.Ts.ghat[k]      <span class="comment">// sign_dir = -1 (min) or +1 (max)</span></div>
 </div><!-- fragment --><dl class="section user"><dt>Separation of timescales requirement</dt><dd>For correct gradient estimation: plant settling time ≪ 1/fp ≪ 1/flpf. The plant must respond quasi-statically to the dither frequency, and the LPF must cleanly extract the gradient from the demodulated signal. Violating this causes a biased gradient estimate and slow or no convergence.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd>Ariyur &amp; Krstic, "Real-Time Optimisation by Extremum-Seeking Control" (2003). </dd>
 <dd>

@@ -104,10 +104,10 @@ Namespaces</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete-time PID controller with derivative filter and back-calculation anti-windup. </p>
 <p>Discretisation: backward Euler for both the integral and derivative filter.</p>
-<p>ISA standard form: </p><div class="fragment"><div class="line">u[k] = Kp·e[k] + I[k] + D[k]</div>
-</div><!-- fragment --><p>Derivative filter (backward Euler, equivalent to MATLAB 'Filter coefficient' N): </p><div class="fragment"><div class="line">d[k] = (1/(1+N·Ts))·d[k-1] + (Kd·N/(1+N·Ts))·(e[k] - e[k-1])</div>
-</div><!-- fragment --><p>Anti-windup via back-calculation: </p><div class="fragment"><div class="line">I[k] = I[k-1] + Ki·Ts·e[k] + Kb·(u_sat[k] - u_unsat[k])</div>
-</div><!-- fragment --><dl class="section see"><dt>See also</dt><dd>Åström &amp; Wittenmark, "Computer Controlled Systems" Ch. 3. </dd>
+<p>ISA standard form: </p><div class="fragment"><div class="line">u[k] = Kp.e[k] + I[k] + D[k]</div>
+</div><!-- fragment --><p>Derivative filter (backward Euler, equivalent to MATLAB 'Filter coefficient' N): </p><div class="fragment"><div class="line">d[k] = (1/(1+N.Ts)).d[k-1] + (Kd.N/(1+N.Ts)).(e[k] - e[k-1])</div>
+</div><!-- fragment --><p>Anti-windup via back-calculation: </p><div class="fragment"><div class="line">I[k] = I[k-1] + Ki.Ts.e[k] + Kb.(u_sat[k] - u_unsat[k])</div>
+</div><!-- fragment --><dl class="section see"><dt>See also</dt><dd>Astrom &amp; Wittenmark, "Computer Controlled Systems" Ch. 3. </dd>
 <dd>
 MATLAB pid(), pidtune(), Simulink Discrete PID Controller block. </dd></dl>
 

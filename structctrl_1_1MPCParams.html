@@ -92,13 +92,13 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:af9281564b038417138f22da60f5708bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prediction horizon [steps]. Cover approx. settling time.  <br /></td></tr>
 <tr class="separator:af9281564b038417138f22da60f5708bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1b1940642dcc9f8473da14ed6ef8be1" id="r_ad1b1940642dcc9f8473da14ed6ef8be1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MPCParams.html#ad1b1940642dcc9f8473da14ed6ef8be1">Nc</a> = 3</td></tr>
-<tr class="memdesc:ad1b1940642dcc9f8473da14ed6ef8be1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control horizon [steps], Nc ≤ Np. Fewer = smoother moves.  <br /></td></tr>
+<tr class="memdesc:ad1b1940642dcc9f8473da14ed6ef8be1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control horizon [steps], Nc &lt;= Np. Fewer = smoother moves.  <br /></td></tr>
 <tr class="separator:ad1b1940642dcc9f8473da14ed6ef8be1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c3f7974ac5c474e68269cba31a14287" id="r_a6c3f7974ac5c474e68269cba31a14287"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MPCParams.html#a6c3f7974ac5c474e68269cba31a14287">rho_y</a> = 1.0</td></tr>
-<tr class="memdesc:a6c3f7974ac5c474e68269cba31a14287"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output tracking weight (Qy = ρy·I_{Np·p}).  <br /></td></tr>
+<tr class="memdesc:a6c3f7974ac5c474e68269cba31a14287"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output tracking weight (Qy = rhoy.I_{Np.p}).  <br /></td></tr>
 <tr class="separator:a6c3f7974ac5c474e68269cba31a14287"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0ed73f900022f389b80f2e14f145705" id="r_af0ed73f900022f389b80f2e14f145705"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MPCParams.html#af0ed73f900022f389b80f2e14f145705">rho_u</a> = 0.1</td></tr>
-<tr class="memdesc:af0ed73f900022f389b80f2e14f145705"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move suppression weight (Ru = ρu·I_{Nc·m}).  <br /></td></tr>
+<tr class="memdesc:af0ed73f900022f389b80f2e14f145705"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move suppression weight (Ru = rhou.I_{Nc.m}).  <br /></td></tr>
 <tr class="separator:af0ed73f900022f389b80f2e14f145705"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae13a552150983b917d5cb57abb45a442" id="r_ae13a552150983b917d5cb57abb45a442"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MPCParams.html#ae13a552150983b917d5cb57abb45a442">uMin</a> = -1e9</td></tr>
 <tr class="memdesc:ae13a552150983b917d5cb57abb45a442"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard lower limit on u.  <br /></td></tr>
@@ -107,16 +107,16 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a97f59d2c640d8eb892747c67825d3cfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard upper limit on u.  <br /></td></tr>
 <tr class="separator:a97f59d2c640d8eb892747c67825d3cfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd6b7302a4bd41fd59268c4c73a079d6" id="r_abd6b7302a4bd41fd59268c4c73a079d6"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MPCParams.html#abd6b7302a4bd41fd59268c4c73a079d6">duMin</a> = -1e9</td></tr>
-<tr class="memdesc:abd6b7302a4bd41fd59268c4c73a079d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard lower limit on Δu.  <br /></td></tr>
+<tr class="memdesc:abd6b7302a4bd41fd59268c4c73a079d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard lower limit on Deltau.  <br /></td></tr>
 <tr class="separator:abd6b7302a4bd41fd59268c4c73a079d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ac4045664a9990c14bb4488563d5891" id="r_a0ac4045664a9990c14bb4488563d5891"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MPCParams.html#a0ac4045664a9990c14bb4488563d5891">duMax</a> = 1e9</td></tr>
-<tr class="memdesc:a0ac4045664a9990c14bb4488563d5891"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard upper limit on Δu.  <br /></td></tr>
+<tr class="memdesc:a0ac4045664a9990c14bb4488563d5891"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard upper limit on Deltau.  <br /></td></tr>
 <tr class="separator:a0ac4045664a9990c14bb4488563d5891"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5fefe6ea4abdd680d991e0dea0ded7f1" id="r_a5fefe6ea4abdd680d991e0dea0ded7f1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MPCParams.html#a5fefe6ea4abdd680d991e0dea0ded7f1">qpMaxIter</a> = 200</td></tr>
 <tr class="memdesc:a5fefe6ea4abdd680d991e0dea0ded7f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gradient-projection iteration limit.  <br /></td></tr>
 <tr class="separator:a5fefe6ea4abdd680d991e0dea0ded7f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a69b1dd9c27d3b993002628dde3cfebad" id="r_a69b1dd9c27d3b993002628dde3cfebad"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MPCParams.html#a69b1dd9c27d3b993002628dde3cfebad">qpTol</a> = 1e-8</td></tr>
-<tr class="memdesc:a69b1dd9c27d3b993002628dde3cfebad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convergence tolerance (‖Δx‖∞).  <br /></td></tr>
+<tr class="memdesc:a69b1dd9c27d3b993002628dde3cfebad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convergence tolerance (||Deltax||inf).  <br /></td></tr>
 <tr class="separator:a69b1dd9c27d3b993002628dde3cfebad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -136,7 +136,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Hard upper limit on Δu. </p>
+<p>Hard upper limit on Deltau. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteMPC_8h_source.html#l00066">66</a> of file <a class="el" href="DiscreteMPC_8h_source.html">DiscreteMPC.h</a>.</p>
 
@@ -156,7 +156,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Hard lower limit on Δu. </p>
+<p>Hard lower limit on Deltau. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteMPC_8h_source.html#l00065">65</a> of file <a class="el" href="DiscreteMPC_8h_source.html">DiscreteMPC.h</a>.</p>
 
@@ -176,7 +176,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Control horizon [steps], Nc ≤ Np. Fewer = smoother moves. </p>
+<p>Control horizon [steps], Nc &lt;= Np. Fewer = smoother moves. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteMPC_8h_source.html#l00044">44</a> of file <a class="el" href="DiscreteMPC_8h_source.html">DiscreteMPC.h</a>.</p>
 
@@ -236,7 +236,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Convergence tolerance (‖Δx‖∞). </p>
+<p>Convergence tolerance (||Deltax||inf). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteMPC_8h_source.html#l00068">68</a> of file <a class="el" href="DiscreteMPC_8h_source.html">DiscreteMPC.h</a>.</p>
 
@@ -256,8 +256,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Move suppression weight (Ru = ρu·I_{Nc·m}). </p>
-<p><b>Bryson's method starting point:</b> ρu ≈ 1/Δu_max², where Δu_max is the largest acceptable incremental control move per sample. Increasing ρu softens actuator activity at the cost of slower setpoint response and reduced disturbance rejection. </p>
+<p>Move suppression weight (Ru = rhou.I_{Nc.m}). </p>
+<p><b>Bryson's method starting point:</b> rhou approx = 1/Deltau_max^2, where Deltau_max is the largest acceptable incremental control move per sample. Increasing rhou softens actuator activity at the cost of slower setpoint response and reduced disturbance rejection. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteMPC_8h_source.html#l00062">62</a> of file <a class="el" href="DiscreteMPC_8h_source.html">DiscreteMPC.h</a>.</p>
 
@@ -275,8 +275,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Output tracking weight (Qy = ρy·I_{Np·p}). </p>
-<p><b>Bryson's method starting point:</b> ρy ≈ 1/e_max², where e_max is the largest acceptable peak tracking error. Only the <em>ratio</em> ρy/ρu drives the response speed — scale both together to adjust absolute weights without changing the optimum. Larger ρy/ρu → tighter tracking, larger control moves and more noise sensitivity. </p>
+<p>Output tracking weight (Qy = rhoy.I_{Np.p}). </p>
+<p><b>Bryson's method starting point:</b> rhoy approx = 1/e_max^2, where e_max is the largest acceptable peak tracking error. Only the <em>ratio</em> rhoy/rhou drives the response speed - scale both together to adjust absolute weights without changing the optimum. Larger rhoy/rhou -&gt; tighter tracking, larger control moves and more noise sensitivity. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteMPC_8h_source.html#l00053">53</a> of file <a class="el" href="DiscreteMPC_8h_source.html">DiscreteMPC.h</a>.</p>
 

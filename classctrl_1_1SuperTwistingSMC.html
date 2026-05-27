@@ -101,7 +101,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a0017d1769280062a47caf49fecf153d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct with tuning parameters and fixed sample time.  <br /></td></tr>
 <tr class="separator:a0017d1769280062a47caf49fecf153d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8d37fd835fc00be3b448042372a5c90c" id="r_a8d37fd835fc00be3b448042372a5c90c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SuperTwistingSMC.html#a8d37fd835fc00be3b448042372a5c90c">compute</a> (double error) override</td></tr>
-<tr class="memdesc:a8d37fd835fc00be3b448042372a5c90c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] from tracking error e[k] = r[k] − y[k].  <br /></td></tr>
+<tr class="memdesc:a8d37fd835fc00be3b448042372a5c90c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] from tracking error e[k] = r[k] - y[k].  <br /></td></tr>
 <tr class="separator:a8d37fd835fc00be3b448042372a5c90c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6ace024e00ad947ca294f939b4db1cc" id="r_ad6ace024e00ad947ca294f939b4db1cc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">reset</a> () override</td></tr>
 <tr class="memdesc:ad6ace024e00ad947ca294f939b4db1cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset previous error, sliding surface, and integrator state v.  <br /></td></tr>
@@ -122,10 +122,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController" id="r_a209dd6532b22278f93430a0757aae4c7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a209dd6532b22278f93430a0757aae4c7">~IController</a> ()=default</td></tr>
 <tr class="separator:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController" id="r_a9d81dd5427e094d72906d54dd5e6548e"><td class="memItemLeft" align="right" valign="top">virtual Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e">computeVec</a> (const Eigen::VectorXd &amp;signal)</td></tr>
-<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step — vector MIMO interface.  <br /></td></tr>
+<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step - vector MIMO interface.  <br /></td></tr>
 <tr class="separator:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController" id="r_a20821745ef7099941a9e9fdb6eeddd07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">bumplessInit</a> (double, double)</td></tr>
-<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation — prepares the controller for smooth activation.  <br /></td></tr>
+<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation - prepares the controller for smooth activation.  <br /></td></tr>
 <tr class="separator:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController" id="r_a2dc30a3b9bfb8b9649cef7218ad9e68b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b">isHealthy</a> () const</td></tr>
 <tr class="memdesc:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Health query for supervisory fault-tolerant control.  <br /></td></tr>
@@ -156,12 +156,12 @@ Additional Inherited Members</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete 2nd-order Sliding Mode Controller (super-twisting algorithm). </p>
 <p>Eliminates chattering without a boundary layer while retaining finite-time convergence and robustness to matched disturbances bounded by a known Lipschitz constant.</p>
-<p><b>Continuous-time super-twisting law (Levant 1993):</b> </p><div class="fragment"><div class="line">u[k]   = v[k] − K₁·|s|^{1/2}·sign(s)</div>
-<div class="line">v̇[k]   = −K₂·sign(s)</div>
-</div><!-- fragment --><p><b>Discrete approximation (Euler integration of v):</b> </p><div class="fragment"><div class="line">s[k]   = c_e·e[k] + c_de·(e[k] − e[k−1])</div>
-<div class="line">u[k]   = v[k] − K₁·|s[k]|^{1/2}·sign(s[k])</div>
-<div class="line">v[k+1] = v[k] − K₂·Ts·sign(s[k])</div>
-</div><!-- fragment --><p><b>Gain selection (Moreno &amp; Osorio 2008):</b> K₁ &gt; 0 and K₂ &gt; K₁²/4 is sufficient for finite-time convergence in continuous time. In discrete time, keep K₂·Ts ≪ K₁ to limit discretisation error. </p>
+<p><b>Continuous-time super-twisting law (Levant 1993):</b> </p><div class="fragment"><div class="line">u[k]   = v[k] - K1.|s|^{1/2}.sign(s)</div>
+<div class="line">v.[k]   = -K2.sign(s)</div>
+</div><!-- fragment --><p><b>Discrete approximation (Euler integration of v):</b> </p><div class="fragment"><div class="line">s[k]   = c_e.e[k] + c_de.(e[k] - e[k-1])</div>
+<div class="line">u[k]   = v[k] - K1.|s[k]|^{1/2}.sign(s[k])</div>
+<div class="line">v[k+1] = v[k] - K2.Ts.sign(s[k])</div>
+</div><!-- fragment --><p><b>Gain selection (Moreno &amp; Osorio 2008):</b> K1 &gt; 0 and K2 &gt; K1^2/4 is sufficient for finite-time convergence in continuous time. In discrete time, keep K2.Ts ≪ K1 to limit discretisation error. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00164">164</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -239,7 +239,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Compute u[k] from tracking error e[k] = r[k] − y[k]. </p>
+<p>Compute u[k] from tracking error e[k] = r[k] - y[k]. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">error</td><td>Current tracking error. </td></tr>
@@ -409,7 +409,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Current sliding surface value s[k] (for diagnostics). </p>
-<dl class="section return"><dt>Returns</dt><dd>s[k] = c_e·e[k] + c_de·(e[k] − e[k−1]). </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>s[k] = c_e.e[k] + c_de.(e[k] - e[k-1]). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00200">200</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 

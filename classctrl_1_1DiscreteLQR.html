@@ -92,13 +92,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a36a13a6e38e680d7ec1fbfebc899e4cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct, run PBH stabilisability/detectability checks, and solve the DARE.  <br /></td></tr>
 <tr class="separator:a36a13a6e38e680d7ec1fbfebc899e4cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af537e64f9d2a4e53e3ce9ea122aa5afa" id="r_af537e64f9d2a4e53e3ce9ea122aa5afa"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQR.html#af537e64f9d2a4e53e3ce9ea122aa5afa">compute</a> (const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;x_ref=Eigen::VectorXd(), const Eigen::VectorXd &amp;u_ff=Eigen::VectorXd()) const</td></tr>
-<tr class="memdesc:af537e64f9d2a4e53e3ce9ea122aa5afa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] = −K*·(x − x_ref) + u_ff.  <br /></td></tr>
+<tr class="memdesc:af537e64f9d2a4e53e3ce9ea122aa5afa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] = -K*.  <br /></td></tr>
 <tr class="separator:af537e64f9d2a4e53e3ce9ea122aa5afa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a105cacaf1eff90674b11f0308f07ad61" id="r_a105cacaf1eff90674b11f0308f07ad61"><td class="memItemLeft" align="right" valign="top">const Eigen::MatrixXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQR.html#a105cacaf1eff90674b11f0308f07ad61">gainMatrix</a> () const</td></tr>
-<tr class="memdesc:a105cacaf1eff90674b11f0308f07ad61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optimal feedback gain matrix K* (m × n).  <br /></td></tr>
+<tr class="memdesc:a105cacaf1eff90674b11f0308f07ad61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optimal feedback gain matrix K* (m * n).  <br /></td></tr>
 <tr class="separator:a105cacaf1eff90674b11f0308f07ad61"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2a21672fede43a7ed0314c781db7a8f" id="r_af2a21672fede43a7ed0314c781db7a8f"><td class="memItemLeft" align="right" valign="top">const Eigen::MatrixXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQR.html#af2a21672fede43a7ed0314c781db7a8f">riccatiSolution</a> () const</td></tr>
-<tr class="memdesc:af2a21672fede43a7ed0314c781db7a8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">DARE stabilising solution P∞ (n × n).  <br /></td></tr>
+<tr class="memdesc:af2a21672fede43a7ed0314c781db7a8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">DARE stabilising solution Pinf (n * n).  <br /></td></tr>
 <tr class="separator:af2a21672fede43a7ed0314c781db7a8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0de8244c86cf4050bc76044631b3ca87" id="r_a0de8244c86cf4050bc76044631b3ca87"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQR.html#a0de8244c86cf4050bc76044631b3ca87">dareConverged</a> () const</td></tr>
 <tr class="memdesc:a0de8244c86cf4050bc76044631b3ca87"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>true</code> if the DARE converged to the requested tolerance.  <br /></td></tr>
@@ -112,7 +112,7 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete-time Linear Quadratic Regulator. </p>
-<p>Stateless at runtime — no internal memory between <a class="el" href="classctrl_1_1DiscreteLQR.html#af537e64f9d2a4e53e3ce9ea122aa5afa" title="Compute u[k] = −K*·(x − x_ref) + u_ff.">compute()</a> calls. Pass the actual plant state (from a sensor or state observer) to <a class="el" href="classctrl_1_1DiscreteLQR.html#af537e64f9d2a4e53e3ce9ea122aa5afa" title="Compute u[k] = −K*·(x − x_ref) + u_ff.">compute()</a> at every step to benefit from closed-loop disturbance rejection. </p>
+<p>Stateless at runtime - no internal memory between <a class="el" href="classctrl_1_1DiscreteLQR.html#af537e64f9d2a4e53e3ce9ea122aa5afa" title="Compute u[k] = -K*.">compute()</a> calls. Pass the actual plant state (from a sensor or state observer) to <a class="el" href="classctrl_1_1DiscreteLQR.html#af537e64f9d2a4e53e3ce9ea122aa5afa" title="Compute u[k] = -K*.">compute()</a> at every step to benefit from closed-loop disturbance rejection. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00055">55</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -151,7 +151,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>PBH rank test: stabilisability and detectability are checked using Eigen's fullPivLu().rank() with an automatic threshold scaled by max_singular_value × n × ε. For plants with eigenvalues very close to the unit circle (e.g., 0.9999 or 1.0001), this may produce a false failure. If suspected, verify manually: rank([A − λI, B]) == n for all |λ| ≥ 1. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>PBH rank test: stabilisability and detectability are checked using Eigen's fullPivLu().rank() with an automatic threshold scaled by max_singular_value * n * epsilon. For plants with eigenvalues very close to the unit circle (e.g., 0.9999 or 1.0001), this may produce a false failure. If suspected, verify manually: rank([A - lambdaI, B]) == n for all |lambda| &gt;= 1. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteLQR_8cpp_source.html#l00137">137</a> of file <a class="el" href="DiscreteLQR_8cpp_source.html">DiscreteLQR.cpp</a>.</p>
 
@@ -192,18 +192,19 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Compute u[k] = −K*·(x − x_ref) + u_ff. </p>
+<p>Compute u[k] = -K*. </p>
+<p>(x - x_ref) + u_ff.</p>
 <p><code>x_ref</code> and <code>u_ff</code> default to zero when empty (no-argument versions).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>Current state vector x[k] (n × 1). </td></tr>
-    <tr><td class="paramname">x_ref</td><td>Reference state x_ref[k] (n × 1). Pass empty for regulation to origin. </td></tr>
-    <tr><td class="paramname">u_ff</td><td>Feed-forward term u_ff[k] (m × 1). Pass empty for zero feed-forward. </td></tr>
+    <tr><td class="paramname">x</td><td>Current state vector x[k] (n * 1). </td></tr>
+    <tr><td class="paramname">x_ref</td><td>Reference state x_ref[k] (n * 1). Pass empty for regulation to origin. </td></tr>
+    <tr><td class="paramname">u_ff</td><td>Feed-forward term u_ff[k] (m * 1). Pass empty for zero feed-forward. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Control action u[k] (m × 1).</dd></dl>
-<dl class="section note"><dt>Note</dt><dd>If the returned u[k] is clamped by an external actuator, always pass the <em>actual</em> measured state to <a class="el" href="classctrl_1_1DiscreteLQR.html#af537e64f9d2a4e53e3ce9ea122aa5afa" title="Compute u[k] = −K*·(x − x_ref) + u_ff.">compute()</a> rather than integrating with the unsaturated u[k]. The observer's measurement update implicitly corrects for saturation. For explicit anti-windup in state-feedback loops, see Åström &amp; Wittenmark §9.3. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Control action u[k] (m * 1).</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>If the returned u[k] is clamped by an external actuator, always pass the <em>actual</em> measured state to <a class="el" href="classctrl_1_1DiscreteLQR.html#af537e64f9d2a4e53e3ce9ea122aa5afa" title="Compute u[k] = -K*.">compute()</a> rather than integrating with the unsaturated u[k]. The observer's measurement update implicitly corrects for saturation. For explicit anti-windup in state-feedback loops, see Astrom &amp; Wittenmark Section 9.3. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteLQR_8cpp_source.html#l00172">172</a> of file <a class="el" href="DiscreteLQR_8cpp_source.html">DiscreteLQR.cpp</a>.</p>
 
@@ -294,7 +295,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Optimal feedback gain matrix K* (m × n). </p>
+<p>Optimal feedback gain matrix K* (m * n). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00095">95</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
@@ -325,7 +326,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>DARE stabilising solution P∞ (n × n). </p>
+<p>DARE stabilising solution Pinf (n * n). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00098">98</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 

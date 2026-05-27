@@ -102,9 +102,9 @@ Namespaces</h2></td></tr>
 <div class="textblock"><p>Abstract interface for any command output. </p>
 <p>Implementations may wrap a DAC, PWM channel, EtherCAT drive, or a simulation plant (SimActuator). Controllers call <code>write()</code> to issue a setpoint; the HAL layer translates that into the physical or simulated command.</p>
 <p><b>Contract:</b></p><ul>
-<li><code>write(u)</code> — applies control value <code>u</code> to the physical or simulated plant. Non-finite values (NaN, ±Inf) must be rejected silently; the actuator holds its last valid output instead.</li>
-<li><code>lastOutput()</code> — returns the most recent value successfully written. Useful for warm-start and bumpless transfer.</li>
-<li><code>reset()</code> — drives output to zero and clears internal state. </li>
+<li><code>write(u)</code> - applies control value <code>u</code> to the physical or simulated plant. Non-finite values (NaN, +/-Inf) must be rejected silently; the actuator holds its last valid output instead.</li>
+<li><code>lastOutput()</code> - returns the most recent value successfully written. Useful for warm-start and bumpless transfer.</li>
+<li><code>reset()</code> - drives output to zero and clears internal state. </li>
 </ul>
 
 <p class="definition">Definition in file <a class="el" href="IActuator_8h_source.html">IActuator.h</a>.</p>

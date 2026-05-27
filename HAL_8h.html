@@ -78,7 +78,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Hardware Abstraction Layer — convenience umbrella include.  
+<p>Hardware Abstraction Layer - convenience umbrella include.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="ISensor_8h_source.html">ISensor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="IActuator_8h_source.html">IActuator.h</a>&quot;</code><br />
@@ -92,22 +92,22 @@ $(function() {
 </div>
 <p><a href="HAL_8h_source.html">Go to the source code of this file.</a></p>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Hardware Abstraction Layer — convenience umbrella include. </p>
-<p>Pulls in all HAL interfaces and simulation adapters. Include this header (or <code><a class="el" href="ControllerToolbox_8h.html" title="Discrete-Time Controller Toolbox — umbrella include.">ControllerToolbox.h</a></code>) to access the full HAL.</p>
+<div class="textblock"><p>Hardware Abstraction Layer - convenience umbrella include. </p>
+<p>Pulls in all HAL interfaces and simulation adapters. Include this header (or <code><a class="el" href="ControllerToolbox_8h.html" title="Discrete-Time Controller Toolbox - umbrella include.">ControllerToolbox.h</a></code>) to access the full HAL.</p>
 <p><b>Interfaces:</b></p><ul>
-<li>ISensor — abstract sensor (<code>read</code>, <code>isValid</code>, <code>reset</code>).</li>
-<li>IActuator — abstract actuator (<code>write</code>, <code>lastOutput</code>, <code>reset</code>).</li>
-<li>ITimer — abstract monotonic clock (<code>nowNs</code>, <code>elapsedNs</code>).</li>
-<li>IScheduler — abstract periodic task scheduler (<code>setPeriodNs</code>, <code>start</code>, <code>stop</code>, <code>overrunCount</code>).</li>
+<li>ISensor - abstract sensor (<code>read</code>, <code>isValid</code>, <code>reset</code>).</li>
+<li>IActuator - abstract actuator (<code>write</code>, <code>lastOutput</code>, <code>reset</code>).</li>
+<li>ITimer - abstract monotonic clock (<code>nowNs</code>, <code>elapsedNs</code>).</li>
+<li>IScheduler - abstract periodic task scheduler (<code>setPeriodNs</code>, <code>start</code>, <code>stop</code>, <code>overrunCount</code>).</li>
 </ul>
 <p><b>Simulation adapters:</b></p><ul>
-<li>SimPlant — discrete-time state-space plant simulator.</li>
-<li>SimSensor — ISensor backed by SimPlant.</li>
-<li>SimActuator — IActuator backed by SimPlant (NaN-safe, saturating).</li>
-<li>SafeSensor — ISensor decorator that freezes on <code>isValid() == false</code>.</li>
-<li>StdTimer — ITimer using <code>std::chrono::steady_clock</code> (non-RT; for tests).</li>
+<li>SimPlant - discrete-time state-space plant simulator.</li>
+<li>SimSensor - ISensor backed by SimPlant.</li>
+<li>SimActuator - IActuator backed by SimPlant (NaN-safe, saturating).</li>
+<li>SafeSensor - ISensor decorator that freezes on <code>isValid() == false</code>.</li>
+<li>StdTimer - ITimer using <code>std::chrono::steady_clock</code> (non-RT; for tests).</li>
 </ul>
-<p><b>Example — closed-loop simulation with the HAL:</b> </p><div class="fragment"><div class="line"><a class="code hl_struct" href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a>  sys = <a class="code hl_function" href="namespacectrl.html#a4f658728be7420e427723b3d0eb389d9">ctrl::tf2ss</a>(...);</div>
+<p><b>Example - closed-loop simulation with the HAL:</b> </p><div class="fragment"><div class="line"><a class="code hl_struct" href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a>  sys = <a class="code hl_function" href="namespacectrl.html#a4f658728be7420e427723b3d0eb389d9">ctrl::tf2ss</a>(...);</div>
 <div class="line"><a class="code hl_class" href="classctrl_1_1SimPlant.html">ctrl::SimPlant</a>    plant(sys);</div>
 <div class="line"><a class="code hl_class" href="classctrl_1_1SafeSensor.html">ctrl::SafeSensor</a>  sensor(plant);           <span class="comment">// freezes last-valid reading on fault</span></div>
 <div class="line"><a class="code hl_class" href="classctrl_1_1SimActuator.html">ctrl::SimActuator</a> actuator(plant, -10.0, 10.0);</div>

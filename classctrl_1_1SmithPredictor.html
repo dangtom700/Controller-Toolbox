@@ -101,13 +101,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ab27b2ade908d0d11ade86d4fae145962"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct for an integer dead-time delay only.  <br /></td></tr>
 <tr class="separator:ab27b2ade908d0d11ade86d4fae145962"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98c957ec63fdaaddd44d0cd376457e83" id="r_a98c957ec63fdaaddd44d0cd376457e83"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SmithPredictor.html#a98c957ec63fdaaddd44d0cd376457e83">SmithPredictor</a> (std::shared_ptr&lt; <a class="el" href="classctrl_1_1IController.html">IController</a> &gt; inner, const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;delayModel, int delaySteps, const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;fracDelayFilter)</td></tr>
-<tr class="memdesc:a98c957ec63fdaaddd44d0cd376457e83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct with explicit fractional Padé filter for sub-sample dead time.  <br /></td></tr>
+<tr class="memdesc:a98c957ec63fdaaddd44d0cd376457e83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct with explicit fractional Pade filter for sub-sample dead time.  <br /></td></tr>
 <tr class="separator:a98c957ec63fdaaddd44d0cd376457e83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad55b544a861fb0a865f3838d0e399244" id="r_ad55b544a861fb0a865f3838d0e399244"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SmithPredictor.html#ad55b544a861fb0a865f3838d0e399244">SmithPredictor</a> (std::shared_ptr&lt; <a class="el" href="classctrl_1_1IController.html">IController</a> &gt; inner, const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;delayModel, double theta, double Ts)</td></tr>
-<tr class="memdesc:ad55b544a861fb0a865f3838d0e399244"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenient whole-dead-time constructor — handles fractional remainder automatically.  <br /></td></tr>
+<tr class="memdesc:ad55b544a861fb0a865f3838d0e399244"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenient whole-dead-time constructor - handles fractional remainder automatically.  <br /></td></tr>
 <tr class="separator:ad55b544a861fb0a865f3838d0e399244"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8644acd3ee741f207e3785b4c47a30ef" id="r_a8644acd3ee741f207e3785b4c47a30ef"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SmithPredictor.html#a8644acd3ee741f207e3785b4c47a30ef">compute</a> (double error) override</td></tr>
-<tr class="memdesc:a8644acd3ee741f207e3785b4c47a30ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] from closed-loop error e[k] = r[k] − y[k].  <br /></td></tr>
+<tr class="memdesc:a8644acd3ee741f207e3785b4c47a30ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] from closed-loop error e[k] = r[k] - y[k].  <br /></td></tr>
 <tr class="separator:a8644acd3ee741f207e3785b4c47a30ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac4244b6f2c02981232c742157cd44fa3" id="r_ac4244b6f2c02981232c742157cd44fa3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SmithPredictor.html#ac4244b6f2c02981232c742157cd44fa3">reset</a> () override</td></tr>
 <tr class="memdesc:ac4244b6f2c02981232c742157cd44fa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset model state, output buffer, and inner controller.  <br /></td></tr>
@@ -128,10 +128,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController" id="r_a209dd6532b22278f93430a0757aae4c7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a209dd6532b22278f93430a0757aae4c7">~IController</a> ()=default</td></tr>
 <tr class="separator:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController" id="r_a9d81dd5427e094d72906d54dd5e6548e"><td class="memItemLeft" align="right" valign="top">virtual Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e">computeVec</a> (const Eigen::VectorXd &amp;signal)</td></tr>
-<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step — vector MIMO interface.  <br /></td></tr>
+<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step - vector MIMO interface.  <br /></td></tr>
 <tr class="separator:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController" id="r_a20821745ef7099941a9e9fdb6eeddd07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">bumplessInit</a> (double, double)</td></tr>
-<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation — prepares the controller for smooth activation.  <br /></td></tr>
+<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation - prepares the controller for smooth activation.  <br /></td></tr>
 <tr class="separator:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController" id="r_a2dc30a3b9bfb8b9649cef7218ad9e68b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b">isHealthy</a> () const</td></tr>
 <tr class="memdesc:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Health query for supervisory fault-tolerant control.  <br /></td></tr>
@@ -161,7 +161,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Smith Predictor wrapper for any <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> inner loop. </p>
-<p>Three overloaded constructors support integer-only dead time, explicit fractional Padé filters, and an automatic whole-dead-time constructor that splits θ = floor(θ/Ts)·Ts + θ_frac. </p>
+<p>Three overloaded constructors support integer-only dead time, explicit fractional Pade filters, and an automatic whole-dead-time constructor that splits theta = floor(theta/Ts).Ts + theta_frac. </p>
 
 <p class="definition">Definition at line <a class="el" href="SmithPredictor_8h_source.html#l00042">42</a> of file <a class="el" href="SmithPredictor_8h_source.html">SmithPredictor.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -249,13 +249,13 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Construct with explicit fractional Padé filter for sub-sample dead time. </p>
+<p>Construct with explicit fractional Pade filter for sub-sample dead time. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">inner</td><td>Base stabilising controller. </td></tr>
-    <tr><td class="paramname">delayModel</td><td>Delay-free plant model P₀. </td></tr>
+    <tr><td class="paramname">delayModel</td><td>Delay-free plant model P0. </td></tr>
     <tr><td class="paramname">delaySteps</td><td>Integer part of dead time in samples d. </td></tr>
-    <tr><td class="paramname">fracDelayFilter</td><td>First-order <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> from padeDelayFilter(θ_frac, Ts). </td></tr>
+    <tr><td class="paramname">fracDelayFilter</td><td>First-order <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> from padeDelayFilter(theta_frac, Ts). </td></tr>
   </table>
   </dd>
 </dl>
@@ -304,13 +304,13 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Convenient whole-dead-time constructor — handles fractional remainder automatically. </p>
-<p>Splits θ into floor(θ/Ts) integer steps and builds a first-order Padé filter for the sub-sample remainder.</p>
+<p>Convenient whole-dead-time constructor - handles fractional remainder automatically. </p>
+<p>Splits theta into floor(theta/Ts) integer steps and builds a first-order Pade filter for the sub-sample remainder.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">inner</td><td>Base stabilising controller. </td></tr>
     <tr><td class="paramname">delayModel</td><td>Delay-free plant model. </td></tr>
-    <tr><td class="paramname">theta</td><td>Total dead time θ [s]. </td></tr>
+    <tr><td class="paramname">theta</td><td>Total dead time theta [s]. </td></tr>
     <tr><td class="paramname">Ts</td><td>Sample time [s] (must match delayModel.Ts). </td></tr>
   </table>
   </dd>
@@ -345,7 +345,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Compute u[k] from closed-loop error e[k] = r[k] − y[k]. </p>
+<p>Compute u[k] from closed-loop error e[k] = r[k] - y[k]. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">error</td><td>Current tracking error. </td></tr>
@@ -530,7 +530,7 @@ Additional Inherited Members</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">delayModel</td><td>Updated delay-free model. </td></tr>
     <tr><td class="paramname">delaySteps</td><td>New integer dead-time length in samples. </td></tr>
-    <tr><td class="paramname">fracDelayFilter</td><td>Updated first-order Padé filter for the sub-sample remainder. </td></tr>
+    <tr><td class="paramname">fracDelayFilter</td><td>Updated first-order Pade filter for the sub-sample remainder. </td></tr>
   </table>
   </dd>
 </dl>

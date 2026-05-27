@@ -106,12 +106,12 @@ Namespaces</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete-time Generalised Predictive Controller (GPC). </p>
 <p>Extends DiscreteMPC with two practical features:</p>
-<p><b>1. Velocity-form (CARIMA) model</b> — offset-free tracking without a separate integral state. The augmented state xₐ = [Δx; y] is propagated with incremental inputs ΔU, giving a built-in integrating disturbance model: </p><div class="fragment"><div class="line">xₐ[k+1] = Aₐ·xₐ[k] + Bₐ·Δu[k]     Aₐ = [A, 0; C·A, I]</div>
-<div class="line">y[k]    = Cₐ·xₐ[k]                  Bₐ = [B; C·B],  Cₐ = [0, I]</div>
-</div><!-- fragment --><p><b>2. Reference trajectory</b> — the setpoint is approached along a first-order filter: </p><div class="fragment"><div class="line">y*[k+j] = αʲ·y[k] + (1−αʲ)·r[k],   α ∈ [0, 1)</div>
+<p><b>1. Velocity-form (CARIMA) model</b> - offset-free tracking without a separate integral state. The augmented state xₐ = [Deltax; y] is propagated with incremental inputs DeltaU, giving a built-in integrating disturbance model: </p><div class="fragment"><div class="line">xₐ[k+1] = Aₐ.xₐ[k] + Bₐ.Deltau[k]     Aₐ = [A, 0; C.A, I]</div>
+<div class="line">y[k]    = Cₐ.xₐ[k]                  Bₐ = [B; C.B],  Cₐ = [0, I]</div>
+</div><!-- fragment --><p><b>2. Reference trajectory</b> - the setpoint is approached along a first-order filter: </p><div class="fragment"><div class="line">y*[k+j] = alphaʲ.y[k] + (1-alphaʲ).r[k],   alpha \in [0, 1)</div>
 </div><!-- fragment --><ul>
-<li>α = 0: step reference (same as DiscreteMPC).</li>
-<li>α → 1: very soft approach; reduces overshoot without derivative weights.</li>
+<li>alpha = 0: step reference (same as DiscreteMPC).</li>
+<li>alpha -&gt; 1: very soft approach; reduces overshoot without derivative weights.</li>
 </ul>
 <p>The plant model can be hot-swapped via setPlant() for adaptive GPC (pair with RecursiveLeastSquares::toStateSpace() for a self-tuning loop).</p>
 <dl class="section note"><dt>Note</dt><dd>Output constraints (y_min, y_max) are <b>not</b> supported. For hard output constraints, use DiscreteMPC with a slack-variable formulation instead.</dd></dl>

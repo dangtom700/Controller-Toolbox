@@ -81,7 +81,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Rational function approximator (Padé / Sanathanan–Koerner least squares).  
+<p>Rational function approximator (Pade / Sanathanan-Koerner least squares).  
  <a href="classctrl_1_1PadeApproximator.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="FunctionApproximator_8h_source.html">FunctionApproximator.h</a>&gt;</code></p>
@@ -89,16 +89,16 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a29bb8876f20cee739fb91815215542ad" id="r_a29bb8876f20cee739fb91815215542ad"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#a29bb8876f20cee739fb91815215542ad">PadeApproximator</a> (const std::vector&lt; double &gt; &amp;xs, const std::vector&lt; double &gt; &amp;ys, int num_degree, int den_degree)</td></tr>
-<tr class="memdesc:a29bb8876f20cee739fb91815215542ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fit a [m/n] Padé rational approximant to data (xs, ys).  <br /></td></tr>
+<tr class="memdesc:a29bb8876f20cee739fb91815215542ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fit a [m/n] Pade rational approximant to data (xs, ys).  <br /></td></tr>
 <tr class="separator:a29bb8876f20cee739fb91815215542ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae16f151cf3ae9a30534696b9ff713fdc" id="r_ae16f151cf3ae9a30534696b9ff713fdc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#ae16f151cf3ae9a30534696b9ff713fdc">evaluate</a> (double x) const</td></tr>
 <tr class="memdesc:ae16f151cf3ae9a30534696b9ff713fdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate P(x)/Q(x) at <code>x</code>.  <br /></td></tr>
 <tr class="separator:ae16f151cf3ae9a30534696b9ff713fdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a690d045d93ba530795c7b5103852d936" id="r_a690d045d93ba530795c7b5103852d936"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; double &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#a690d045d93ba530795c7b5103852d936">numerator</a> () const</td></tr>
-<tr class="memdesc:a690d045d93ba530795c7b5103852d936"><td class="mdescLeft">&#160;</td><td class="mdescRight">Numerator coefficients p[0…m]: P(x) = p[0] + p[1]·x + … + p[m]·xᵐ.  <br /></td></tr>
+<tr class="memdesc:a690d045d93ba530795c7b5103852d936"><td class="mdescLeft">&#160;</td><td class="mdescRight">Numerator coefficients p[0...m]: P(x) = p[0] + p[1].x + ... + p[m].x^m.  <br /></td></tr>
 <tr class="separator:a690d045d93ba530795c7b5103852d936"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3cd7c894c4b8d0762de8183f210026c4" id="r_a3cd7c894c4b8d0762de8183f210026c4"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; double &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#a3cd7c894c4b8d0762de8183f210026c4">denominator</a> () const</td></tr>
-<tr class="memdesc:a3cd7c894c4b8d0762de8183f210026c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Denominator coefficients q[0…n] with q[0] = 1: Q(x) = 1 + q[1]·x + … + q[n]·xⁿ.  <br /></td></tr>
+<tr class="memdesc:a3cd7c894c4b8d0762de8183f210026c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Denominator coefficients q[0...n] with q[0] = 1: Q(x) = 1 + q[1].x + ... + q[n].x^n.  <br /></td></tr>
 <tr class="separator:a3cd7c894c4b8d0762de8183f210026c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a48f445660e01ba2f702ad028855a0083" id="r_a48f445660e01ba2f702ad028855a0083"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#a48f445660e01ba2f702ad028855a0083">numDegree</a> () const</td></tr>
 <tr class="memdesc:a48f445660e01ba2f702ad028855a0083"><td class="mdescLeft">&#160;</td><td class="mdescRight">Numerator degree m.  <br /></td></tr>
@@ -113,12 +113,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ae3ec858ffcd1f787477b850c567886c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check whether Q(x) has a real root inside [x_lo, x_hi].  <br /></td></tr>
 <tr class="separator:ae3ec858ffcd1f787477b850c567886c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abad5a9ee7014f065d0e4992ed91d5ed4" id="r_abad5a9ee7014f065d0e4992ed91d5ed4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#abad5a9ee7014f065d0e4992ed91d5ed4">toDiscreteFilter</a> (double Ts) const</td></tr>
-<tr class="memdesc:abad5a9ee7014f065d0e4992ed91d5ed4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a [1/1] Padé approximant to a discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> filter.  <br /></td></tr>
+<tr class="memdesc:abad5a9ee7014f065d0e4992ed91d5ed4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a [1/1] Pade approximant to a discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> filter.  <br /></td></tr>
 <tr class="separator:abad5a9ee7014f065d0e4992ed91d5ed4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Rational function approximator (Padé / Sanathanan–Koerner least squares). </p>
-<p>Fits f(x) ≈ P(x)/Q(x), deg(P) = m, deg(Q) = n, Q(0) = 1. The denominator normalisation avoids the trivial all-zero solution of the unconstrained bilinear problem. </p>
+<div class="textblock"><p>Rational function approximator (Pade / Sanathanan-Koerner least squares). </p>
+<p>Fits f(x) approx = P(x)/Q(x), deg(P) = m, deg(Q) = n, Q(0) = 1. The denominator normalisation avoids the trivial all-zero solution of the unconstrained bilinear problem. </p>
 
 <p class="definition">Definition at line <a class="el" href="FunctionApproximator_8h_source.html#l00084">84</a> of file <a class="el" href="FunctionApproximator_8h_source.html">FunctionApproximator.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -160,7 +160,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Fit a [m/n] Padé rational approximant to data (xs, ys). </p>
+<p>Fit a [m/n] Pade rational approximant to data (xs, ys). </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">xs</td><td>Input sample vector. </td></tr>
@@ -238,7 +238,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Denominator coefficients q[0…n] with q[0] = 1: Q(x) = 1 + q[1]·x + … + q[n]·xⁿ. </p>
+<p>Denominator coefficients q[0...n] with q[0] = 1: Q(x) = 1 + q[1].x + ... + q[n].x^n. </p>
 
 <p class="definition">Definition at line <a class="el" href="FunctionApproximator_8h_source.html#l00116">116</a> of file <a class="el" href="FunctionApproximator_8h_source.html">FunctionApproximator.h</a>.</p>
 
@@ -270,7 +270,7 @@ Public Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Approximate f(x). </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname">std::domain_error</td><td>If Q(x) ≈ 0 (pole near evaluation point). </td></tr>
+    <tr><td class="paramname">std::domain_error</td><td>If Q(x) approx = 0 (pole near evaluation point). </td></tr>
   </table>
   </dd>
 </dl>
@@ -412,7 +412,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Numerator coefficients p[0…m]: P(x) = p[0] + p[1]·x + … + p[m]·xᵐ. </p>
+<p>Numerator coefficients p[0...m]: P(x) = p[0] + p[1].x + ... + p[m].x^m. </p>
 
 <p class="definition">Definition at line <a class="el" href="FunctionApproximator_8h_source.html#l00111">111</a> of file <a class="el" href="FunctionApproximator_8h_source.html">FunctionApproximator.h</a>.</p>
 
@@ -434,8 +434,8 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Convert a [1/1] Padé approximant to a discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> filter. </p>
-<p>Treats the approximant as a rational function of z⁻¹ and converts via controllable canonical form.</p>
+<p>Convert a [1/1] Pade approximant to a discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> filter. </p>
+<p>Treats the approximant as a rational function of z^-^1 and converts via controllable canonical form.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>

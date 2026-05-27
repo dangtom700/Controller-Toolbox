@@ -107,7 +107,7 @@ Namespaces</h2></td></tr>
 <li>Zephyr: <code>k_timer_init()</code> / <code>k_timer_start()</code>.</li>
 </ul>
 <p>The callback signature is <code>void()</code>. State required by the control loop should be captured in a lambda or stored externally.</p>
-<p><b>Usage — wiring a PID loop on a 1 ms tick:</b> </p><div class="fragment"><div class="line"><span class="keyword">auto</span> sched = platform::makeScheduler();   <span class="comment">// platform-specific factory</span></div>
+<p><b>Usage - wiring a PID loop on a 1 ms tick:</b> </p><div class="fragment"><div class="line"><span class="keyword">auto</span> sched = platform::makeScheduler();   <span class="comment">// platform-specific factory</span></div>
 <div class="line">sched-&gt;setPeriodNs(1&#39;000&#39;000);            <span class="comment">// 1 ms</span></div>
 <div class="line">sched-&gt;setCallback([&amp;]() {</div>
 <div class="line">    <span class="keywordtype">double</span> y = sensor.read();</div>

@@ -101,7 +101,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a6c50a3767e0c08a76090581e6bbca4d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct with tuning parameters and fixed sample time.  <br /></td></tr>
 <tr class="separator:a6c50a3767e0c08a76090581e6bbca4d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a2d1fb5f0d6a93ac17a4374c2a442e0" id="r_a7a2d1fb5f0d6a93ac17a4374c2a442e0"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteSMC.html#a7a2d1fb5f0d6a93ac17a4374c2a442e0">compute</a> (double error) override</td></tr>
-<tr class="memdesc:a7a2d1fb5f0d6a93ac17a4374c2a442e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] from tracking error e[k] = r[k] − y[k].  <br /></td></tr>
+<tr class="memdesc:a7a2d1fb5f0d6a93ac17a4374c2a442e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] from tracking error e[k] = r[k] - y[k].  <br /></td></tr>
 <tr class="separator:a7a2d1fb5f0d6a93ac17a4374c2a442e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a065d02a961f7abaa74fed3af119521b9" id="r_a065d02a961f7abaa74fed3af119521b9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteSMC.html#a065d02a961f7abaa74fed3af119521b9">reset</a> () override</td></tr>
 <tr class="memdesc:a065d02a961f7abaa74fed3af119521b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset previous error, sliding surface, and output.  <br /></td></tr>
@@ -122,10 +122,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController" id="r_a209dd6532b22278f93430a0757aae4c7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a209dd6532b22278f93430a0757aae4c7">~IController</a> ()=default</td></tr>
 <tr class="separator:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController" id="r_a9d81dd5427e094d72906d54dd5e6548e"><td class="memItemLeft" align="right" valign="top">virtual Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e">computeVec</a> (const Eigen::VectorXd &amp;signal)</td></tr>
-<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step — vector MIMO interface.  <br /></td></tr>
+<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step - vector MIMO interface.  <br /></td></tr>
 <tr class="separator:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController" id="r_a20821745ef7099941a9e9fdb6eeddd07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">bumplessInit</a> (double, double)</td></tr>
-<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation — prepares the controller for smooth activation.  <br /></td></tr>
+<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation - prepares the controller for smooth activation.  <br /></td></tr>
 <tr class="separator:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController" id="r_a2dc30a3b9bfb8b9649cef7218ad9e68b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b">isHealthy</a> () const</td></tr>
 <tr class="memdesc:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Health query for supervisory fault-tolerant control.  <br /></td></tr>
@@ -155,11 +155,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete first-order Sliding Mode Controller with boundary-layer saturation. </p>
-<p><b>Sliding surface:</b> </p><div class="fragment"><div class="line">s[k] = c_e·e[k] + c_de·(e[k] − e[k−1])</div>
-</div><!-- fragment --><p><b>Control law (sat replaces sign to reduce chattering):</b> </p><div class="fragment"><div class="line">u[k] = −K·sat(s[k] / φ)</div>
-<div class="line">sat(x) = x          <span class="keywordflow">if</span> |x| ≤ 1   (linear PD inside the boundary layer)</div>
+<p><b>Sliding surface:</b> </p><div class="fragment"><div class="line">s[k] = c_e.e[k] + c_de.(e[k] - e[k-1])</div>
+</div><!-- fragment --><p><b>Control law (sat replaces sign to reduce chattering):</b> </p><div class="fragment"><div class="line">u[k] = -K.sat(s[k] / phi)</div>
+<div class="line">sat(x) = x          <span class="keywordflow">if</span> |x| &lt;= 1   (linear PD inside the boundary layer)</div>
 <div class="line">sat(x) = sign(x)    <span class="keywordflow">if</span> |x| &gt; 1   (relay switching outside)</div>
-</div><!-- fragment --><p>Setting φ → 0 recovers ideal relay SMC with chattering. Setting φ large gives a soft PD approximation. </p>
+</div><!-- fragment --><p>Setting phi -&gt; 0 recovers ideal relay SMC with chattering. Setting phi large gives a soft PD approximation. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00078">78</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -237,7 +237,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Compute u[k] from tracking error e[k] = r[k] − y[k]. </p>
+<p>Compute u[k] from tracking error e[k] = r[k] - y[k]. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">error</td><td>Current tracking error. </td></tr>
@@ -407,7 +407,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Current sliding surface value s[k]. </p>
-<p>Useful for monitoring convergence. |s[k]| &lt; φ indicates operation inside the boundary layer (linear PD regime). </p>
+<p>Useful for monitoring convergence. |s[k]| &lt; phi indicates operation inside the boundary layer (linear PD regime). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00116">116</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 

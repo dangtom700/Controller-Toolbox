@@ -92,13 +92,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a2226c7379bfb4766065bbf77b5599c48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct the UKF with nonlinear models, noise statistics, and UT parameters.  <br /></td></tr>
 <tr class="separator:a2226c7379bfb4766065bbf77b5599c48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc51914e927920bed3e3275ce833af58" id="r_adc51914e927920bed3e3275ce833af58"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1UnscentedKalmanFilter.html#adc51914e927920bed3e3275ce833af58">predict</a> (const Eigen::VectorXd &amp;u)</td></tr>
-<tr class="memdesc:adc51914e927920bed3e3275ce833af58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prediction step — propagate sigma points through f and compute predicted mean/covariance.  <br /></td></tr>
+<tr class="memdesc:adc51914e927920bed3e3275ce833af58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prediction step - propagate sigma points through f and compute predicted mean/covariance.  <br /></td></tr>
 <tr class="separator:adc51914e927920bed3e3275ce833af58"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1a98e133e6a1c0eca2a52ccc5cb7861" id="r_aa1a98e133e6a1c0eca2a52ccc5cb7861"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1UnscentedKalmanFilter.html#aa1a98e133e6a1c0eca2a52ccc5cb7861">update</a> (const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u)</td></tr>
-<tr class="memdesc:aa1a98e133e6a1c0eca2a52ccc5cb7861"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update step — propagate predicted sigma points through h and compute Kalman gain.  <br /></td></tr>
+<tr class="memdesc:aa1a98e133e6a1c0eca2a52ccc5cb7861"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update step - propagate predicted sigma points through h and compute Kalman gain.  <br /></td></tr>
 <tr class="separator:aa1a98e133e6a1c0eca2a52ccc5cb7861"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a188a89fc26cdf430ca0466812bb494ed" id="r_a188a89fc26cdf430ca0466812bb494ed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1UnscentedKalmanFilter.html#a188a89fc26cdf430ca0466812bb494ed">step</a> (const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u_prev)</td></tr>
-<tr class="memdesc:a188a89fc26cdf430ca0466812bb494ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Combined predict + update — most common usage.  <br /></td></tr>
+<tr class="memdesc:a188a89fc26cdf430ca0466812bb494ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Combined predict + update - most common usage.  <br /></td></tr>
 <tr class="separator:a188a89fc26cdf430ca0466812bb494ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aedf33427711a3c97f674fd2abc7ea2f4" id="r_aedf33427711a3c97f674fd2abc7ea2f4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1UnscentedKalmanFilter.html#aedf33427711a3c97f674fd2abc7ea2f4">reset</a> ()</td></tr>
 <tr class="memdesc:aedf33427711a3c97f674fd2abc7ea2f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset state estimate to zero and covariance to P0 (or identity).  <br /></td></tr>
@@ -107,10 +107,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:aa264cbc28167587402127a5e5ac0239f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inject an initial state estimate.  <br /></td></tr>
 <tr class="separator:aa264cbc28167587402127a5e5ac0239f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aabbbbcab951ac2259a158852deaa43a4" id="r_aabbbbcab951ac2259a158852deaa43a4"><td class="memItemLeft" align="right" valign="top">const Eigen::VectorXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1UnscentedKalmanFilter.html#aabbbbcab951ac2259a158852deaa43a4">state</a> () const</td></tr>
-<tr class="memdesc:aabbbbcab951ac2259a158852deaa43a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current state estimate x̂[k|k] (n × 1).  <br /></td></tr>
+<tr class="memdesc:aabbbbcab951ac2259a158852deaa43a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current state estimate x^[k|k] (n * 1).  <br /></td></tr>
 <tr class="separator:aabbbbcab951ac2259a158852deaa43a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20c42956379547047c834a28be1045f0" id="r_a20c42956379547047c834a28be1045f0"><td class="memItemLeft" align="right" valign="top">const Eigen::MatrixXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1UnscentedKalmanFilter.html#a20c42956379547047c834a28be1045f0">covariance</a> () const</td></tr>
-<tr class="memdesc:a20c42956379547047c834a28be1045f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current error covariance P[k|k] (n × n).  <br /></td></tr>
+<tr class="memdesc:a20c42956379547047c834a28be1045f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current error covariance P[k|k] (n * n).  <br /></td></tr>
 <tr class="separator:a20c42956379547047c834a28be1045f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa9041fc4908a821a75606ef055a63539" id="r_aa9041fc4908a821a75606ef055a63539"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1UnscentedKalmanFilter.html#aa9041fc4908a821a75606ef055a63539">sampleTime</a> () const</td></tr>
 <tr class="memdesc:aa9041fc4908a821a75606ef055a63539"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
@@ -208,13 +208,13 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramname">p</td><td>Measurement dimension. </td></tr>
     <tr><td class="paramname">f</td><td>Process function x[k+1] = f(x[k], u[k]). </td></tr>
     <tr><td class="paramname">h</td><td>Measurement function y[k] = h(x[k], u[k]). </td></tr>
-    <tr><td class="paramname">Q_noise</td><td>Process noise covariance (n × n, positive semi-definite). </td></tr>
-    <tr><td class="paramname">R_noise</td><td>Measurement noise covariance (p × p, positive definite). </td></tr>
+    <tr><td class="paramname">Q_noise</td><td>Process noise covariance (n * n, positive semi-definite). </td></tr>
+    <tr><td class="paramname">R_noise</td><td>Measurement noise covariance (p * p, positive definite). </td></tr>
     <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
-    <tr><td class="paramname">P0</td><td>Initial error covariance (n × n). Defaults to identity when empty. </td></tr>
-    <tr><td class="paramname">alpha</td><td>Spread of sigma points around the mean (default 1e-3; increase to 0.1–1.0 for n ≥ 4). </td></tr>
-    <tr><td class="paramname">beta</td><td>Prior distribution shape parameter (default 2.0 for Gaussian priors — encodes fourth-order kurtosis via Wc₀ += 1 − α² + β; set β = 0 for unknown distributions). </td></tr>
-    <tr><td class="paramname">kappa</td><td>Tertiary scaling parameter (default 0.0; use 3 − n to recover the minimum-variance unbiased estimator for Gaussian priors when n ≤ 3; negative λ = α²(n+κ)−n is permitted but can push sigma points outside the covariance ellipsoid). </td></tr>
+    <tr><td class="paramname">P0</td><td>Initial error covariance (n * n). Defaults to identity when empty. </td></tr>
+    <tr><td class="paramname">alpha</td><td>Spread of sigma points around the mean (default 1e-3; increase to 0.1-1.0 for n &gt;= 4). </td></tr>
+    <tr><td class="paramname">beta</td><td>Prior distribution shape parameter (default 2.0 for Gaussian priors - encodes fourth-order kurtosis via Wc0 += 1 - alpha^2 + beta; set beta = 0 for unknown distributions). </td></tr>
+    <tr><td class="paramname">kappa</td><td>Tertiary scaling parameter (default 0.0; use 3 - n to recover the minimum-variance unbiased estimator for Gaussian priors when n &lt;= 3; negative lambda = alpha^2(n+κ)-n is permitted but can push sigma points outside the covariance ellipsoid). </td></tr>
   </table>
   </dd>
 </dl>
@@ -247,7 +247,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Current error covariance P[k|k] (n × n). </p>
+<p>Current error covariance P[k|k] (n * n). </p>
 
 <p class="definition">Definition at line <a class="el" href="UnscentedKalmanFilter_8h_source.html#l00121">121</a> of file <a class="el" href="UnscentedKalmanFilter_8h_source.html">UnscentedKalmanFilter.h</a>.</p>
 
@@ -269,7 +269,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Prediction step — propagate sigma points through f and compute predicted mean/covariance. </p>
+<p>Prediction step - propagate sigma points through f and compute predicted mean/covariance. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">u</td><td>Control input u[k]. </td></tr>
@@ -360,7 +360,7 @@ Public Member Functions</h2></td></tr>
 <p>Inject an initial state estimate. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x0</td><td>Initial state vector (n × 1). </td></tr>
+    <tr><td class="paramname">x0</td><td>Initial state vector (n * 1). </td></tr>
   </table>
   </dd>
 </dl>
@@ -392,7 +392,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Current state estimate x̂[k|k] (n × 1). </p>
+<p>Current state estimate x^[k|k] (n * 1). </p>
 
 <p class="definition">Definition at line <a class="el" href="UnscentedKalmanFilter_8h_source.html#l00118">118</a> of file <a class="el" href="UnscentedKalmanFilter_8h_source.html">UnscentedKalmanFilter.h</a>.</p>
 
@@ -424,11 +424,11 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Combined predict + update — most common usage. </p>
+<p>Combined predict + update - most common usage. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">y</td><td>Measurement y[k]. </td></tr>
-    <tr><td class="paramname">u_prev</td><td>Control input u[k−1] (predict step). </td></tr>
+    <tr><td class="paramname">u_prev</td><td>Control input u[k-1] (predict step). </td></tr>
   </table>
   </dd>
 </dl>
@@ -465,7 +465,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Update step — propagate predicted sigma points through h and compute Kalman gain. </p>
+<p>Update step - propagate predicted sigma points through h and compute Kalman gain. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">y</td><td>Measurement y[k]. </td></tr>

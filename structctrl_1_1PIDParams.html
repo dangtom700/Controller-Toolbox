@@ -95,7 +95,7 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a7b0512d735243a9f654eb2914524111f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integral gain (Ki = Kp / Ti).  <br /></td></tr>
 <tr class="separator:a7b0512d735243a9f654eb2914524111f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c763a8d16f1c88ac493d128abbbd24d" id="r_a4c763a8d16f1c88ac493d128abbbd24d"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDParams.html#a4c763a8d16f1c88ac493d128abbbd24d">Kd</a> = 0.0</td></tr>
-<tr class="memdesc:a4c763a8d16f1c88ac493d128abbbd24d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Derivative gain (Kd = Kp · Td).  <br /></td></tr>
+<tr class="memdesc:a4c763a8d16f1c88ac493d128abbbd24d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Derivative gain (Kd = Kp . Td).  <br /></td></tr>
 <tr class="separator:a4c763a8d16f1c88ac493d128abbbd24d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae47f28adcce19093b8509be3423ce350" id="r_ae47f28adcce19093b8509be3423ce350"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDParams.html#ae47f28adcce19093b8509be3423ce350">N</a> = 100.0</td></tr>
 <tr class="memdesc:ae47f28adcce19093b8509be3423ce350"><td class="mdescLeft">&#160;</td><td class="mdescRight">Derivative filter coefficient N [rad/s].  <br /></td></tr>
@@ -110,7 +110,7 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a7626dbcc40d8b82afa45b6f7ee9627fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Anti-windup back-calculation gain (0 = disabled, 1 = default).  <br /></td></tr>
 <tr class="separator:a7626dbcc40d8b82afa45b6f7ee9627fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa0cffc00a3934a9687f65bee5c56e97e" id="r_aa0cffc00a3934a9687f65bee5c56e97e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDParams.html#aa0cffc00a3934a9687f65bee5c56e97e">b_weight</a> = 1.0</td></tr>
-<tr class="memdesc:aa0cffc00a3934a9687f65bee5c56e97e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Two-degree-of-freedom proportional setpoint weight b ∈ [0, 1].  <br /></td></tr>
+<tr class="memdesc:aa0cffc00a3934a9687f65bee5c56e97e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Two-degree-of-freedom proportional setpoint weight b \in [0, 1].  <br /></td></tr>
 <tr class="separator:aa0cffc00a3934a9687f65bee5c56e97e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -131,14 +131,14 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Two-degree-of-freedom proportional setpoint weight b ∈ [0, 1]. </p>
-<p>Applied only by computeDoM(y, r): the proportional term acts on (b·r − y) while the integral term acts on (r − y). This decouples setpoint-tracking bandwidth from disturbance-rejection bandwidth without changing any gains.</p>
-<p>Tuning guide (Skogestad 2003 / Åström &amp; Hägglund 2006 §8.4):</p><ul>
-<li><code>b = 1.0</code> (default): standard 1DOF — maximum setpoint gain.</li>
-<li><code>b = 0.5</code>: reduces overshoot ~10–15 % vs b = 1 for ZN-tuned loops.</li>
+<p>Two-degree-of-freedom proportional setpoint weight b \in [0, 1]. </p>
+<p>Applied only by computeDoM(y, r): the proportional term acts on (b.r - y) while the integral term acts on (r - y). This decouples setpoint-tracking bandwidth from disturbance-rejection bandwidth without changing any gains.</p>
+<p>Tuning guide (Skogestad 2003 / Astrom &amp; Hagglund 2006 Section 8.4):</p><ul>
+<li><code>b = 1.0</code> (default): standard 1DOF - maximum setpoint gain.</li>
+<li><code>b = 0.5</code>: reduces overshoot ~10-15 % vs b = 1 for ZN-tuned loops.</li>
 <li><code>b = 0.0</code>: setpoint feed-forward entirely through integrator; no proportional kick.</li>
 </ul>
-<dl class="section note"><dt>Note</dt><dd>Has no effect on compute(error) because that overload receives only the pre-computed error (r − y) and cannot separate r from y. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Has no effect on compute(error) because that overload receives only the pre-computed error (r - y) and cannot separate r from y. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00086">86</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
 
@@ -159,12 +159,12 @@ Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Anti-windup back-calculation gain (0 = disabled, 1 = default). </p>
-<p>Recommended tuning range (Åström &amp; Wittenmark §3.5): Ki/Kp ≤ Kb ≤ Kp/Kd</p><ul>
-<li><code>Kb = Ki/Kp</code> — slow reset; good for dead-time-dominated plants.</li>
-<li><code>Kb = Kp/Kd</code> — fast reset; may cause an actuator spike on re-entry.</li>
-<li><code>Kb = sqrt(Ki·Kp/Kd)</code> — geometric-mean rule of thumb for balanced reset.</li>
-<li><code>Kb = 0</code> — disables anti-windup entirely; use only when saturation cannot occur.</li>
-<li><code>Kb = 1.0</code> (default) — reasonable for many processes; may be slow for high-Ki loops. </li>
+<p>Recommended tuning range (Astrom &amp; Wittenmark Section 3.5): Ki/Kp &lt;= Kb &lt;= Kp/Kd</p><ul>
+<li><code>Kb = Ki/Kp</code> - slow reset; good for dead-time-dominated plants.</li>
+<li><code>Kb = Kp/Kd</code> - fast reset; may cause an actuator spike on re-entry.</li>
+<li><code>Kb = sqrt(Ki.Kp/Kd)</code> - geometric-mean rule of thumb for balanced reset.</li>
+<li><code>Kb = 0</code> - disables anti-windup entirely; use only when saturation cannot occur.</li>
+<li><code>Kb = 1.0</code> (default) - reasonable for many processes; may be slow for high-Ki loops. </li>
 </ul>
 
 <p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00069">69</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
@@ -185,7 +185,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Derivative gain (Kd = Kp · Td). </p>
+<p>Derivative gain (Kd = Kp . Td). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00039">39</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
 
@@ -246,10 +246,10 @@ Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Derivative filter coefficient N [rad/s]. </p>
-<p>Higher N = less filtering (sharper derivative). The derivative pole is placed at z = 1/(1 + N·Ts) in the backward-Euler discretisation, corresponding to a continuous-time pole at s = −N. This attenuates derivative action above N rad/s.</p>
+<p>Higher N = less filtering (sharper derivative). The derivative pole is placed at z = 1/(1 + N.Ts) in the backward-Euler discretisation, corresponding to a continuous-time pole at s = -N. This attenuates derivative action above N rad/s.</p>
 <p>Constraints:</p><ul>
-<li>Nyquist limit: N &lt; π/Ts (e.g., N &lt; 314 rad/s for Ts = 0.01 s).</li>
-<li>Practical limit: N &lt; π/(2·Ts·ωc) where ωc is the closed-loop bandwidth.</li>
+<li>Nyquist limit: N &lt; pi/Ts (e.g., N &lt; 314 rad/s for Ts = 0.01 s).</li>
+<li>Practical limit: N &lt; pi/(2.Ts.omegac) where omegac is the closed-loop bandwidth.</li>
 </ul>
 <p>The default N = 100 suits many process-control loops; reduce if derivative is noisy. </p>
 

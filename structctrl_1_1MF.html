@@ -119,8 +119,8 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Value-type tagged-union membership function. </p>
-<p>Replaces <code>std::function&lt;double(double)&gt;</code> to eliminate heap allocation in the RT inference hot path. <code>std::function</code> stores closures on the heap for captures &gt; ~16 bytes (implementation-defined SBO threshold), making it unsafe for hard-RT use. <a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">MF</a> is a plain struct (sizeof ≤ 5 doubles) that is trivially copyable and stack-allocatable.</p>
-<p>Use the factory functions (mfTriangular, mfTrapezoidal, etc.) to construct properly typed <a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">MF</a> instances — the public API is identical to a callable except that <a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">MF</a> is a concrete value type, not a type-erased callable. </p>
+<p>Replaces <code>std::function&lt;double(double)&gt;</code> to eliminate heap allocation in the RT inference hot path. <code>std::function</code> stores closures on the heap for captures &gt; ~16 bytes (implementation-defined SBO threshold), making it unsafe for hard-RT use. <a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">MF</a> is a plain struct (sizeof &lt;= 5 doubles) that is trivially copyable and stack-allocatable.</p>
+<p>Use the factory functions (mfTriangular, mfTrapezoidal, etc.) to construct properly typed <a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">MF</a> instances - the public API is identical to a callable except that <a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">MF</a> is a concrete value type, not a type-erased callable. </p>
 
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00052">52</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 </div><h2 class="groupheader">Member Enumeration Documentation</h2>
@@ -150,13 +150,13 @@ Public Attributes</h2></td></tr>
 </td></tr>
 <tr><td class="fieldname"><a id="a45111b9be760c87a34728c543aca96c3ac8033504125d03081a43b4efc5b8868c" name="a45111b9be760c87a34728c543aca96c3ac8033504125d03081a43b4efc5b8868c"></a>Trapezoidal&#160;</td><td class="fielddoc"><p>/‾\ flat-top from p[1]=b to p[2]=c, zero outside [p[0]=a, p[3]=d]. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a45111b9be760c87a34728c543aca96c3afedf7ba6075fb5526a7ace0b9385528d" name="a45111b9be760c87a34728c543aca96c3afedf7ba6075fb5526a7ace0b9385528d"></a>Gaussian&#160;</td><td class="fielddoc"><p>exp(-0.5·((x-p[0])/p[1])²). </p>
+<tr><td class="fieldname"><a id="a45111b9be760c87a34728c543aca96c3afedf7ba6075fb5526a7ace0b9385528d" name="a45111b9be760c87a34728c543aca96c3afedf7ba6075fb5526a7ace0b9385528d"></a>Gaussian&#160;</td><td class="fielddoc"><p>exp(-0.5.((x-p[0])/p[1])^2). </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a45111b9be760c87a34728c543aca96c3a6ff5f73c8b5ebd311406568c8ef50bfd" name="a45111b9be760c87a34728c543aca96c3a6ff5f73c8b5ebd311406568c8ef50bfd"></a>Singleton&#160;</td><td class="fielddoc"><p>1 at x == p[0], 0 elsewhere. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a45111b9be760c87a34728c543aca96c3a6f06420ba820e90993137a63f10146c2" name="a45111b9be760c87a34728c543aca96c3a6f06420ba820e90993137a63f10146c2"></a>ShoulderLeft&#160;</td><td class="fielddoc"><p>1 for x ≤ p[0], linear 1→0 from p[0]=a to p[1]=b. </p>
+<tr><td class="fieldname"><a id="a45111b9be760c87a34728c543aca96c3a6f06420ba820e90993137a63f10146c2" name="a45111b9be760c87a34728c543aca96c3a6f06420ba820e90993137a63f10146c2"></a>ShoulderLeft&#160;</td><td class="fielddoc"><p>1 for x &lt;= p[0], linear 1-&gt;0 from p[0]=a to p[1]=b. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a45111b9be760c87a34728c543aca96c3aa1a480b34eb3460ee2772c38bfb4bf1c" name="a45111b9be760c87a34728c543aca96c3aa1a480b34eb3460ee2772c38bfb4bf1c"></a>ShoulderRight&#160;</td><td class="fielddoc"><p>linear 0→1 from p[0]=a to p[1]=b, 1 for x ≥ p[1]. </p>
+<tr><td class="fieldname"><a id="a45111b9be760c87a34728c543aca96c3aa1a480b34eb3460ee2772c38bfb4bf1c" name="a45111b9be760c87a34728c543aca96c3aa1a480b34eb3460ee2772c38bfb4bf1c"></a>ShoulderRight&#160;</td><td class="fielddoc"><p>linear 0-&gt;1 from p[0]=a to p[1]=b, 1 for x &gt;= p[1]. </p>
 </td></tr>
 </table>
 
@@ -189,7 +189,7 @@ Public Attributes</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Membership degree ∈ [0, 1]. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Membership degree \in [0, 1]. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8cpp_source.html#l00020">20</a> of file <a class="el" href="FuzzyLogic_8cpp_source.html">FuzzyLogic.cpp</a>.</p>
 

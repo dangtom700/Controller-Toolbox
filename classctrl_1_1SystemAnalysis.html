@@ -95,16 +95,16 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memdesc:a2f243ec5de8087ffd338ac6cd3ea8fc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Test discrete-time stability.  <br /></td></tr>
 <tr class="separator:a2f243ec5de8087ffd338ac6cd3ea8fc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3665107dd59a3f84b44b4a4e462b18ad" id="r_a3665107dd59a3f84b44b4a4e462b18ad"><td class="memItemLeft" align="right" valign="top">static Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SystemAnalysis.html#a3665107dd59a3f84b44b4a4e462b18ad">solveDiscreteLyapunov</a> (const Eigen::MatrixXd &amp;A, const Eigen::MatrixXd &amp;Q)</td></tr>
-<tr class="memdesc:a3665107dd59a3f84b44b4a4e462b18ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve the discrete Lyapunov equation A·P·Aᵀ − P + Q = 0.  <br /></td></tr>
+<tr class="memdesc:a3665107dd59a3f84b44b4a4e462b18ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve the discrete Lyapunov equation A.P.Aᵀ - P + Q = 0.  <br /></td></tr>
 <tr class="separator:a3665107dd59a3f84b44b4a4e462b18ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9302c9ab17ea2f1a9bbecbb9c98a9acf" id="r_a9302c9ab17ea2f1a9bbecbb9c98a9acf"><td class="memItemLeft" align="right" valign="top">static std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SystemAnalysis.html#a9302c9ab17ea2f1a9bbecbb9c98a9acf">getFrequencyResponse</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys, const std::vector&lt; double &gt; &amp;freqs)</td></tr>
-<tr class="memdesc:a9302c9ab17ea2f1a9bbecbb9c98a9acf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the frequency response G(e^{jωTs}) at each frequency in <code>freqs</code>.  <br /></td></tr>
+<tr class="memdesc:a9302c9ab17ea2f1a9bbecbb9c98a9acf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the frequency response G(e^{jomegaTs}) at each frequency in <code>freqs</code>.  <br /></td></tr>
 <tr class="separator:a9302c9ab17ea2f1a9bbecbb9c98a9acf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f5aa15839819c0ff49fdb495c031f9f" id="r_a7f5aa15839819c0ff49fdb495c031f9f"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1StabilityMargins.html">StabilityMargins</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SystemAnalysis.html#a7f5aa15839819c0ff49fdb495c031f9f">calculateMargins</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys)</td></tr>
 <tr class="memdesc:a7f5aa15839819c0ff49fdb495c031f9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute gain and phase margins for a SISO open-loop plant.  <br /></td></tr>
 <tr class="separator:a7f5aa15839819c0ff49fdb495c031f9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a05e675bdc440ad52a6185f510ea2a49b" id="r_a05e675bdc440ad52a6185f510ea2a49b"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SystemAnalysis.html#a05e675bdc440ad52a6185f510ea2a49b">calculateHInfinityNorm</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys)</td></tr>
-<tr class="memdesc:a05e675bdc440ad52a6185f510ea2a49b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the peak H∞ norm of a state-space model.  <br /></td></tr>
+<tr class="memdesc:a05e675bdc440ad52a6185f510ea2a49b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the peak Hinf norm of a state-space model.  <br /></td></tr>
 <tr class="separator:a05e675bdc440ad52a6185f510ea2a49b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -136,8 +136,8 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Compute the peak H∞ norm of a state-space model. </p>
-<p>For SISO plants, equals the peak frequency-response magnitude. For MIMO plants, equals the peak induced L₂-gain (maximum singular value over all frequencies).</p>
+<p>Compute the peak Hinf norm of a state-space model. </p>
+<p>For SISO plants, equals the peak frequency-response magnitude. For MIMO plants, equals the peak induced L2-gain (maximum singular value over all frequencies).</p>
 <p>Uses a coarse grid followed by golden-section search; typical accuracy is better than 0.1%.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -145,7 +145,7 @@ Static Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Peak H∞ norm. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Peak Hinf norm. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="SystemAnalysis_8cpp_source.html#l00240">240</a> of file <a class="el" href="SystemAnalysis_8cpp_source.html">SystemAnalysis.cpp</a>.</p>
 
@@ -178,7 +178,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Compute gain and phase margins for a SISO open-loop plant. </p>
-<p>Algorithm: coarse logarithmic grid (200 points) to bracket crossings, followed by bisection (50 iterations) for accuracy. Phase is continuously unwrapped across grid points, so the result is correct for higher-order and non-minimum-phase plants where phase can cross −180° multiple times. Returns the worst-case (smallest) margin when multiple crossings exist.</p>
+<p>Algorithm: coarse logarithmic grid (200 points) to bracket crossings, followed by bisection (50 iterations) for accuracy. Phase is continuously unwrapped across grid points, so the result is correct for higher-order and non-minimum-phase plants where phase can cross -180^\circ multiple times. Returns the worst-case (smallest) margin when multiple crossings exist.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">sys</td><td>SISO discrete-time state-space model. </td></tr>
@@ -227,8 +227,8 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Compute the frequency response G(e^{jωTs}) at each frequency in <code>freqs</code>. </p>
-<p>Uses the direct formula G(z) = C·(z·I − A)⁻¹·B + D at z = e^{jωTs}. SISO only; throws for MIMO plants.</p>
+<p>Compute the frequency response G(e^{jomegaTs}) at each frequency in <code>freqs</code>. </p>
+<p>Uses the direct formula G(z) = C.(z.I - A)^-^1.B + D at z = e^{jomegaTs}. SISO only; throws for MIMO plants.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">sys</td><td>SISO discrete-time state-space model. </td></tr>
@@ -317,7 +317,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Test discrete-time stability. </p>
-<p>Returns <code>true</code> iff all eigenvalues of A satisfy |λ| &lt; 1 (strict stability). Marginally stable systems (|λ| = 1) return <code>false</code>.</p>
+<p>Returns <code>true</code> iff all eigenvalues of A satisfy |lambda| &lt; 1 (strict stability). Marginally stable systems (|lambda| = 1) return <code>false</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">sys</td><td>Discrete-time state-space model. </td></tr>
@@ -366,9 +366,9 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Solve the discrete Lyapunov equation A·P·Aᵀ − P + Q = 0. </p>
-<p>Solved via Kronecker product vectorisation: (I − A⊗A)·vec(P) = vec(Q).</p>
-<dl class="section user"><dt>Complexity note</dt><dd>O(n⁶) due to the n²×n² linear system — suitable for n ≤ 10. For n &gt; 10, the Bartels-Stewart algorithm (O(n³) via Schur decomposition) is strongly preferred; MATLAB's dlyap() uses Bartels-Stewart internally.</dd></dl>
+<p>Solve the discrete Lyapunov equation A.P.Aᵀ - P + Q = 0. </p>
+<p>Solved via Kronecker product vectorisation: (I - A\otimesA).vec(P) = vec(Q).</p>
+<dl class="section user"><dt>Complexity note</dt><dd>O(n⁶) due to the n^2*n^2 linear system - suitable for n &lt;= 10. For n &gt; 10, the Bartels-Stewart algorithm (O(n^3) via Schur decomposition) is strongly preferred; MATLAB's dlyap() uses Bartels-Stewart internally.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">A</td><td>System matrix (must be strictly stable; unstable A gives a singular system). </td></tr>

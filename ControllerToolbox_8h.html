@@ -78,7 +78,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Discrete-Time Controller Toolbox — umbrella include.  
+<p>Discrete-Time Controller Toolbox - umbrella include.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="IController_8h_source.html">IController.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="IControllerObserver_8h_source.html">IControllerObserver.h</a>&quot;</code><br />
@@ -112,12 +112,12 @@ $(function() {
 </div>
 <p><a href="ControllerToolbox_8h_source.html">Go to the source code of this file.</a></p>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Discrete-Time Controller Toolbox — umbrella include. </p>
+<div class="textblock"><p>Discrete-Time Controller Toolbox - umbrella include. </p>
 <p>Include path: the target must have <code>lib/</code> as an include root. Usage: <code>#include "ControllerToolbox.h"</code></p>
 <p>All controllers run at a fixed sample time Ts (discrete-time mode). Plant input: TransferFunction or StateSpace (z-domain).</p>
 <p><b>Quick-start:</b> </p><div class="fragment"><div class="line"><span class="comment">// --- Define plant ---</span></div>
 <div class="line"><a class="code hl_struct" href="structctrl_1_1TransferFunction.html">ctrl::TransferFunction</a> G({b0,b1}, {1,a1,a2}, Ts);   <span class="comment">// TF form</span></div>
-<div class="line"><a class="code hl_struct" href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a> sys = <a class="code hl_function" href="namespacectrl.html#a4f658728be7420e427723b3d0eb389d9">ctrl::tf2ss</a>(G);                <span class="comment">// or convert TF → SS</span></div>
+<div class="line"><a class="code hl_struct" href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a> sys = <a class="code hl_function" href="namespacectrl.html#a4f658728be7420e427723b3d0eb389d9">ctrl::tf2ss</a>(G);                <span class="comment">// or convert TF -&gt; SS</span></div>
 <div class="line"><span class="comment">// ctrl::StateSpace sys(A, B, C, D, Ts);             // or direct SS</span></div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// --- Tune (optional) ---</span></div>
@@ -157,14 +157,14 @@ $(function() {
 <div class="ttc" id="aclassctrl_1_1DiscretePID_html"><div class="ttname"><a href="classctrl_1_1DiscretePID.html">ctrl::DiscretePID</a></div><div class="ttdoc">Discrete-time PID controller.</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00099">DiscretePID.h:100</a></div></div>
 <div class="ttc" id="aclassctrl_1_1DiscreteSMC_html"><div class="ttname"><a href="classctrl_1_1DiscreteSMC.html">ctrl::DiscreteSMC</a></div><div class="ttdoc">Discrete first-order Sliding Mode Controller with boundary-layer saturation.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8h_source.html#l00078">DiscreteSMC.h:79</a></div></div>
 <div class="ttc" id="aclassctrl_1_1ExtremumSeeker_html"><div class="ttname"><a href="classctrl_1_1ExtremumSeeker.html">ctrl::ExtremumSeeker</a></div><div class="ttdoc">Perturbation-based Extremum Seeking Controller.</div><div class="ttdef"><b>Definition</b> <a href="ExtremumSeeker_8h_source.html#l00064">ExtremumSeeker.h:65</a></div></div>
-<div class="ttc" id="aclassctrl_1_1RelayAutoTuner_html"><div class="ttname"><a href="classctrl_1_1RelayAutoTuner.html">ctrl::RelayAutoTuner</a></div><div class="ttdoc">Åström-Hägglund relay feedback auto-tuner.</div><div class="ttdef"><b>Definition</b> <a href="ControllerTuner_8h_source.html#l00098">ControllerTuner.h:99</a></div></div>
+<div class="ttc" id="aclassctrl_1_1RelayAutoTuner_html"><div class="ttname"><a href="classctrl_1_1RelayAutoTuner.html">ctrl::RelayAutoTuner</a></div><div class="ttdoc">Astrom-Hagglund relay feedback auto-tuner.</div><div class="ttdef"><b>Definition</b> <a href="ControllerTuner_8h_source.html#l00098">ControllerTuner.h:99</a></div></div>
 <div class="ttc" id="aclassctrl_1_1SmithPredictor_html"><div class="ttname"><a href="classctrl_1_1SmithPredictor.html">ctrl::SmithPredictor</a></div><div class="ttdoc">Smith Predictor wrapper for any IController inner loop.</div><div class="ttdef"><b>Definition</b> <a href="SmithPredictor_8h_source.html#l00042">SmithPredictor.h:43</a></div></div>
 <div class="ttc" id="anamespacectrl_html_a4312ec6fe1026061128af26aaf161458a45ed3b27103b66790c200c1af5f94c33"><div class="ttname"><a href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458a45ed3b27103b66790c200c1af5f94c33">ctrl::StackMode::Supervisory</a></div><div class="ttdeci">@ Supervisory</div><div class="ttdoc">Only one controller is active per step.</div></div>
 <div class="ttc" id="anamespacectrl_html_a4f658728be7420e427723b3d0eb389d9"><div class="ttname"><a href="namespacectrl.html#a4f658728be7420e427723b3d0eb389d9">ctrl::tf2ss</a></div><div class="ttdeci">StateSpace tf2ss(const TransferFunction &amp;tf)</div><div class="ttdoc">Convert a SISO discrete transfer function to controllable canonical state-space form.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8cpp_source.html#l00048">PlantModel.cpp:48</a></div></div>
 <div class="ttc" id="anamespacectrl_html_aea7d2241a62dea05772df99d95464b53"><div class="ttname"><a href="namespacectrl.html#aea7d2241a62dea05772df99d95464b53">ctrl::ssStep</a></div><div class="ttdeci">Eigen::VectorXd ssStep(const StateSpace &amp;sys, Eigen::Ref&lt; Eigen::VectorXd &gt; x, const Eigen::VectorXd &amp;u)</div><div class="ttdoc">Simulate one step of a state-space model with an in-place state update.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8cpp_source.html#l00088">PlantModel.cpp:88</a></div></div>
 <div class="ttc" id="astructctrl_1_1PIDParams_html"><div class="ttname"><a href="structctrl_1_1PIDParams.html">ctrl::PIDParams</a></div><div class="ttdoc">Tuning parameters for DiscretePID.</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00035">DiscretePID.h:36</a></div></div>
 <div class="ttc" id="astructctrl_1_1StateSpace_html"><div class="ttname"><a href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a></div><div class="ttdoc">Discrete-time state-space model.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00067">PlantModel.h:68</a></div></div>
-<div class="ttc" id="astructctrl_1_1TransferFunction_html"><div class="ttname"><a href="structctrl_1_1TransferFunction.html">ctrl::TransferFunction</a></div><div class="ttdoc">Discrete-time transfer function in z⁻¹ polynomial form.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00031">PlantModel.h:32</a></div></div>
+<div class="ttc" id="astructctrl_1_1TransferFunction_html"><div class="ttname"><a href="structctrl_1_1TransferFunction.html">ctrl::TransferFunction</a></div><div class="ttdoc">Discrete-time transfer function in z^-^1 polynomial form.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00031">PlantModel.h:32</a></div></div>
 </div><!-- fragment --><dl class="section note"><dt>Note</dt><dd>Requires Eigen 3.4+ and C++20. </dd></dl>
 
 <p class="definition">Definition in file <a class="el" href="ControllerToolbox_8h_source.html">ControllerToolbox.h</a>.</p>

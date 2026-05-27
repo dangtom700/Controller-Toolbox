@@ -112,19 +112,19 @@ Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Batch subspace state-space system identification (N4SID / MOESP). </p>
-<p>Identifies a linear discrete-time state-space model from batch I/O data: </p><div class="fragment"><div class="line">x[k+1] = A·x[k] + B·u[k] + w[k]</div>
-<div class="line">y[k]   = C·x[k] + D·u[k] + v[k]</div>
-</div><!-- fragment --><p><b>Algorithm — MOESP oblique-projection variant (Verhaegen &amp; Dewilde 1992):</b></p><ol type="1">
+<p>Identifies a linear discrete-time state-space model from batch I/O data: </p><div class="fragment"><div class="line">x[k+1] = A.x[k] + B.u[k] + w[k]</div>
+<div class="line">y[k]   = C.x[k] + D.u[k] + v[k]</div>
+</div><!-- fragment --><p><b>Algorithm - MOESP oblique-projection variant (Verhaegen &amp; Dewilde 1992):</b></p><ol type="1">
 <li>Build 2i-block Hankel matrices from (Y, U): Z = [Uf; Wp; Yf], Wp = [Up; Yp].</li>
-<li>Thin LQ decomposition isolates the (3,2) block L32 (oblique projection of Yf onto Wp ⊥ Uf).</li>
-<li>SVD(L32): singular values reveal system order; left singular vectors form the extended observability matrix Γ = U[:, :n]·√(S[:n]).</li>
-<li>Extract C = Γ[:p, :], A from shift-invariance of Γ (least squares).</li>
+<li>Thin LQ decomposition isolates the (3,2) block L32 (oblique projection of Yf onto Wp \perp Uf).</li>
+<li>SVD(L32): singular values reveal system order; left singular vectors form the extended observability matrix Gamma = U[:, :n].\sqrt(S[:n]).</li>
+<li>Extract C = Gamma[:p, :], A from shift-invariance of Gamma (least squares).</li>
 <li>Least-squares regression for B and D from the state sequence.</li>
 </ol>
 <dl class="section user"><dt>Data requirements</dt><dd><ul>
 <li>Persistent excitation: input must excite at least n_order frequencies.</li>
-<li>N ≫ 2·i·(m+p): more samples → better estimates.</li>
-<li>i ≥ n_order/p (i_horizon must be large enough to capture all modes).</li>
+<li>N ≫ 2.i.(m+p): more samples -&gt; better estimates.</li>
+<li>i &gt;= n_order/p (i_horizon must be large enough to capture all modes).</li>
 </ul>
 </dd></dl>
 <dl class="section user"><dt>Similarity transform note</dt><dd>The returned realisation (A, B, C, D) is determined only up to a similarity transform T. <b>Similarity-invariant</b> (trustworthy): eigenvalues of A, I/O transfer function G(z), DC gain, stability. <b>Not invariant</b>: individual entries of B, C, D, state norms. For Kalman filter use, prefer the returned kalmanGain (already in the identified basis) over manual Q/R tuning.</dd></dl>

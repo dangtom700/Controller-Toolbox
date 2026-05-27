@@ -103,7 +103,7 @@ Namespaces</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Seqlock-based double-buffer for lock-free controller parameter updates. </p>
 <p><b>Problem:</b> A background thread (gain scheduler, auto-tuner, telemetry) needs to push new parameters to a controller while the real-time thread is inside <code>compute()</code>. A mutex would stall the RT thread; this seqlock allows the RT thread to read without blocking while the writer atomically publishes.</p>
-<p><b>Design — seqlock:</b> A sequence counter <code>seq_</code> is incremented twice per write: once before (making it odd = "write in progress") and once after (making it even = done). The reader spins until it sees an even <code>seq_</code> value that is unchanged across its entire read. Two <code>Params</code> slots (<code>bufs_[]</code>) are retained so the writer can prepare the next value in the inactive slot before promoting it, avoiding a mid-write view.</p>
+<p><b>Design - seqlock:</b> A sequence counter <code>seq_</code> is incremented twice per write: once before (making it odd = "write in progress") and once after (making it even = done). The reader spins until it sees an even <code>seq_</code> value that is unchanged across its entire read. Two <code>Params</code> slots (<code>bufs_[]</code>) are retained so the writer can prepare the next value in the inactive slot before promoting it, avoiding a mid-write view.</p>
 <p><b>Guarantees:</b></p><ul>
 <li>Single writer + single reader: lock-free on the reader side.</li>
 <li>No torn reads: the reader retries if a write overlaps its read window.</li>

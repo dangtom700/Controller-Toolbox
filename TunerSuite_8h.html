@@ -157,30 +157,30 @@ Enumerations</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:af1099cea15a27eeefa55322641f5100f" id="r_af1099cea15a27eeefa55322641f5100f"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#af1099cea15a27eeefa55322641f5100f">ctrl::ctrlKindName</a> (<a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">CtrlKind</a> k) noexcept</td></tr>
-<tr class="memdesc:af1099cea15a27eeefa55322641f5100f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Human-readable name for a CtrlKind tag — for diagnostic messages.  <br /></td></tr>
+<tr class="memdesc:af1099cea15a27eeefa55322641f5100f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Human-readable name for a CtrlKind tag - for diagnostic messages.  <br /></td></tr>
 <tr class="separator:af1099cea15a27eeefa55322641f5100f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Unified tuner library with runtime soft-warning dispatch across all seven tuning families. </p>
 <p>Covers all tuning families from the tuning cheatsheet:</p><ol type="1">
-<li><b>Relay / Ziegler-Nichols</b> → dedicated: PID.</li>
-<li><b>IMC-PID</b> → dedicated: PID.</li>
-<li><b>Cohen-Coon</b> → dedicated: PID (high dead-time).</li>
-<li><b>LQR Bryson's Rule</b> → dedicated: LQR, LQG.</li>
-<li><b>LQG Kalman noise</b> → dedicated: LQG.</li>
-<li><b>MPC horizon/weight</b> → dedicated: MPC.</li>
-<li><b>Frequency-domain shaping</b> → dedicated: LeadLag.</li>
-<li><b>Optimisation-based (Nelder-Mead ISE)</b> → any controller (generic).</li>
+<li><b>Relay / Ziegler-Nichols</b> -&gt; dedicated: PID.</li>
+<li><b>IMC-PID</b> -&gt; dedicated: PID.</li>
+<li><b>Cohen-Coon</b> -&gt; dedicated: PID (high dead-time).</li>
+<li><b>LQR Bryson's Rule</b> -&gt; dedicated: LQR, LQG.</li>
+<li><b>LQG Kalman noise</b> -&gt; dedicated: LQG.</li>
+<li><b>MPC horizon/weight</b> -&gt; dedicated: MPC.</li>
+<li><b>Frequency-domain shaping</b> -&gt; dedicated: LeadLag.</li>
+<li><b>Optimisation-based (Nelder-Mead ISE)</b> -&gt; any controller (generic).</li>
 </ol>
 <p><b>Compatibility tiers</b> (applied at runtime, not compile time):</p><ul>
-<li><code>IDEAL</code> — tuner was designed for this controller; no warning emitted.</li>
-<li><code>SOFT</code> — tuner can produce useful output but the match is imperfect; a diagnostic is written to <code>std::clog</code> and <code>result.warned == true</code>.</li>
-<li><code>FALLBACK</code> — tuner is not meaningful for this controller; default/zero parameters are returned, <code>result.success == false</code>, strong warning emitted.</li>
+<li><code>IDEAL</code> - tuner was designed for this controller; no warning emitted.</li>
+<li><code>SOFT</code> - tuner can produce useful output but the match is imperfect; a diagnostic is written to <code>std::clog</code> and <code>result.warned == true</code>.</li>
+<li><code>FALLBACK</code> - tuner is not meaningful for this controller; default/zero parameters are returned, <code>result.success == false</code>, strong warning emitted.</li>
 </ul>
 <dl class="section note"><dt>Note</dt><dd>The hard compile-time errors (ControllerTraits <code>static_assert</code>) in <a class="el" href="ControllerTuner_8h.html" title="Offline and online tuning utilities with compile-time type safety.">ControllerTuner.h</a> remain unchanged; they fire when calling typed template wrappers such as <code>tuneFor&lt;C&gt;()</code>. TunerSuite takes a different path: it accepts a runtime CtrlKind tag and never blocks compilation.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="ControllerTuner_8h.html" title="Offline and online tuning utilities with compile-time type safety.">ControllerTuner.h</a> for compile-time-safe typed wrappers. </dd>
 <dd>
-Åström &amp; Hägglund, "Advanced PID Control" (2006). </dd>
+Astrom &amp; Hagglund, "Advanced PID Control" (2006). </dd>
 <dd>
 Bryson &amp; Ho, "Applied Optimal Control" (1975). </dd>
 <dd>

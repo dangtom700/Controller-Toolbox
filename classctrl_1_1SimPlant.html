@@ -92,10 +92,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a4a641df759f2094f8eb662602cb69d1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct with a discrete-time state-space model.  <br /></td></tr>
 <tr class="separator:a4a641df759f2094f8eb662602cb69d1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1bd8fa92d3fd14548ad06912eba68f73" id="r_a1bd8fa92d3fd14548ad06912eba68f73"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73">step</a> (double u)</td></tr>
-<tr class="memdesc:a1bd8fa92d3fd14548ad06912eba68f73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample: x[k+1] = A·x[k] + B·u[k], y[k] = C·x[k] + D·u[k].  <br /></td></tr>
+<tr class="memdesc:a1bd8fa92d3fd14548ad06912eba68f73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample: x[k+1] = A.x[k] + B.u[k], y[k] = C.x[k] + D.u[k].  <br /></td></tr>
 <tr class="separator:a1bd8fa92d3fd14548ad06912eba68f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53edf7706f7e6e6a1abdfb0df7dbdd7f" id="r_a53edf7706f7e6e6a1abdfb0df7dbdd7f"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimPlant.html#a53edf7706f7e6e6a1abdfb0df7dbdd7f">output</a> () const</td></tr>
-<tr class="memdesc:a53edf7706f7e6e6a1abdfb0df7dbdd7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the cached output from the last <a class="el" href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73" title="Advance one sample: x[k+1] = A·x[k] + B·u[k], y[k] = C·x[k] + D·u[k].">step()</a> call.  <br /></td></tr>
+<tr class="memdesc:a53edf7706f7e6e6a1abdfb0df7dbdd7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the cached output from the last <a class="el" href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73" title="Advance one sample: x[k+1] = A.x[k] + B.u[k], y[k] = C.x[k] + D.u[k].">step()</a> call.  <br /></td></tr>
 <tr class="separator:a53edf7706f7e6e6a1abdfb0df7dbdd7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3b58cddcff6463bc1fb32c5240b2e48" id="r_ac3b58cddcff6463bc1fb32c5240b2e48"><td class="memItemLeft" align="right" valign="top">const Eigen::VectorXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimPlant.html#ac3b58cddcff6463bc1fb32c5240b2e48">state</a> () const</td></tr>
 <tr class="memdesc:ac3b58cddcff6463bc1fb32c5240b2e48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read-only access to the current state x[k].  <br /></td></tr>
@@ -209,8 +209,8 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Return the cached output from the last <a class="el" href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73" title="Advance one sample: x[k+1] = A·x[k] + B·u[k], y[k] = C·x[k] + D·u[k].">step()</a> call. </p>
-<p>On construction (before any step), returns C·x0 + D·0.</p>
+<p>Return the cached output from the last <a class="el" href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73" title="Advance one sample: x[k+1] = A.x[k] + B.u[k], y[k] = C.x[k] + D.u[k].">step()</a> call. </p>
+<p>On construction (before any step), returns C.x0 + D.0.</p>
 <dl class="section return"><dt>Returns</dt><dd>y[k] (mutex-protected). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="SimPlant_8cpp_source.html#l00025">25</a> of file <a class="el" href="SimPlant_8cpp_source.html">SimPlant.cpp</a>.</p>
@@ -316,8 +316,8 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Advance one sample: x[k+1] = A·x[k] + B·u[k], y[k] = C·x[k] + D·u[k]. </p>
-<p>The output y[k] is cached internally; call <a class="el" href="classctrl_1_1SimPlant.html#a53edf7706f7e6e6a1abdfb0df7dbdd7f" title="Return the cached output from the last step() call.">output()</a> after <a class="el" href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73" title="Advance one sample: x[k+1] = A·x[k] + B·u[k], y[k] = C·x[k] + D·u[k].">step()</a> to read it.</p>
+<p>Advance one sample: x[k+1] = A.x[k] + B.u[k], y[k] = C.x[k] + D.u[k]. </p>
+<p>The output y[k] is cached internally; call <a class="el" href="classctrl_1_1SimPlant.html#a53edf7706f7e6e6a1abdfb0df7dbdd7f" title="Return the cached output from the last step() call.">output()</a> after <a class="el" href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73" title="Advance one sample: x[k+1] = A.x[k] + B.u[k], y[k] = C.x[k] + D.u[k].">step()</a> to read it.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">u</td><td>Control input for this step. </td></tr>

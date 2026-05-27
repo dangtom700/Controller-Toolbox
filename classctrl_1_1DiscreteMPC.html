@@ -101,10 +101,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a88ffdafcdd2e4e4ac9c2b9fe5dc18597"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct the MPC and precompute condensed prediction matrices.  <br /></td></tr>
 <tr class="separator:a88ffdafcdd2e4e4ac9c2b9fe5dc18597"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a934980cf4c18a14707cb4392feafc63c" id="r_a934980cf4c18a14707cb4392feafc63c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteMPC.html#a934980cf4c18a14707cb4392feafc63c">compute</a> (double error) override</td></tr>
-<tr class="memdesc:a934980cf4c18a14707cb4392feafc63c"><td class="mdescLeft">&#160;</td><td class="mdescRight">SISO convenience interface — compute u[k] from tracking error.  <br /></td></tr>
+<tr class="memdesc:a934980cf4c18a14707cb4392feafc63c"><td class="mdescLeft">&#160;</td><td class="mdescRight">SISO convenience interface - compute u[k] from tracking error.  <br /></td></tr>
 <tr class="separator:a934980cf4c18a14707cb4392feafc63c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65deea4c912e4e79d54ac91cc8fadcf2" id="r_a65deea4c912e4e79d54ac91cc8fadcf2"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2">computeRef</a> (const Eigen::VectorXd &amp;x_current, const Eigen::VectorXd &amp;r_ref)</td></tr>
-<tr class="memdesc:a65deea4c912e4e79d54ac91cc8fadcf2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full MIMO interface — optimise u[k] given state and reference vector.  <br /></td></tr>
+<tr class="memdesc:a65deea4c912e4e79d54ac91cc8fadcf2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full MIMO interface - optimise u[k] given state and reference vector.  <br /></td></tr>
 <tr class="separator:a65deea4c912e4e79d54ac91cc8fadcf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a211de191cc5da0deb483db1f9fedbf5b" id="r_a211de191cc5da0deb483db1f9fedbf5b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteMPC.html#a211de191cc5da0deb483db1f9fedbf5b">reset</a> () override</td></tr>
 <tr class="memdesc:a211de191cc5da0deb483db1f9fedbf5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset internal state estimate and previous input to zero.  <br /></td></tr>
@@ -131,7 +131,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a4f704afde269d8b5f873a9adb6d2b1a2"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>true</code> if the most recent QP converged within qpMaxIter iterations.  <br /></td></tr>
 <tr class="separator:a4f704afde269d8b5f873a9adb6d2b1a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa4c1215570b8434108bb00ab5aacb741" id="r_aa4c1215570b8434108bb00ab5aacb741"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteMPC.html#aa4c1215570b8434108bb00ab5aacb741">lastQPIters</a> () const</td></tr>
-<tr class="memdesc:aa4c1215570b8434108bb00ab5aacb741"><td class="mdescLeft">&#160;</td><td class="mdescRight">Actual gradient-projection iterations used in the most recent <a class="el" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2" title="Full MIMO interface — optimise u[k] given state and reference vector.">computeRef()</a>.  <br /></td></tr>
+<tr class="memdesc:aa4c1215570b8434108bb00ab5aacb741"><td class="mdescLeft">&#160;</td><td class="mdescRight">Actual gradient-projection iterations used in the most recent <a class="el" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2" title="Full MIMO interface - optimise u[k] given state and reference vector.">computeRef()</a>.  <br /></td></tr>
 <tr class="separator:aa4c1215570b8434108bb00ab5aacb741"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5db42f01b9bf5a603608c37964085e0" id="r_aa5db42f01b9bf5a603608c37964085e0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteMPC.html#aa5db42f01b9bf5a603608c37964085e0">isHealthy</a> () const override</td></tr>
 <tr class="memdesc:aa5db42f01b9bf5a603608c37964085e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Health reflects QP convergence.  <br /></td></tr>
@@ -140,10 +140,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController" id="r_a209dd6532b22278f93430a0757aae4c7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a209dd6532b22278f93430a0757aae4c7">~IController</a> ()=default</td></tr>
 <tr class="separator:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController" id="r_a9d81dd5427e094d72906d54dd5e6548e"><td class="memItemLeft" align="right" valign="top">virtual Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e">computeVec</a> (const Eigen::VectorXd &amp;signal)</td></tr>
-<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step — vector MIMO interface.  <br /></td></tr>
+<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step - vector MIMO interface.  <br /></td></tr>
 <tr class="separator:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController" id="r_a20821745ef7099941a9e9fdb6eeddd07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">bumplessInit</a> (double, double)</td></tr>
-<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation — prepares the controller for smooth activation.  <br /></td></tr>
+<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation - prepares the controller for smooth activation.  <br /></td></tr>
 <tr class="separator:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController" id="r_abe5b62c21069e869261e870363ee8ab5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#abe5b62c21069e869261e870363ee8ab5">attachObserver</a> (<a class="el" href="classctrl_1_1IControllerObserver.html">IControllerObserver</a> *obs)</td></tr>
 <tr class="memdesc:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attach a telemetry observer.  <br /></td></tr>
@@ -170,7 +170,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete-time Model Predictive Controller. </p>
-<p>Prediction matrices F, Φ, and Hessian H are precomputed at construction and whenever the plant or parameters change. Per-step heap allocation is eliminated via pre-allocated work vectors. </p>
+<p>Prediction matrices F, Phi, and Hessian H are precomputed at construction and whenever the plant or parameters change. Per-step heap allocation is eliminated via pre-allocated work vectors. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteMPC_8h_source.html#l00077">77</a> of file <a class="el" href="DiscreteMPC_8h_source.html">DiscreteMPC.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -248,11 +248,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>SISO convenience interface — compute u[k] from tracking error. </p>
-<p>Reconstructs the reference as r = ŷ + error where ŷ = C·x̂ + D·u_prev. Valid for D = 0 plants. For D ≠ 0, the feedthrough term uses u[k−1] (one step stale); use <a class="el" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2" title="Full MIMO interface — optimise u[k] given state and reference vector.">computeRef()</a> directly and supply the current r explicitly.</p>
+<p>SISO convenience interface - compute u[k] from tracking error. </p>
+<p>Reconstructs the reference as r = yhat + error where yhat = C.x^ + D.u_prev. Valid for D = 0 plants. For D != 0, the feedthrough term uses u[k-1] (one step stale); use <a class="el" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2" title="Full MIMO interface - optimise u[k] given state and reference vector.">computeRef()</a> directly and supply the current r explicitly.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">error</td><td>Tracking error e[k] = r[k] − y[k]. </td></tr>
+    <tr><td class="paramname">error</td><td>Tracking error e[k] = r[k] - y[k]. </td></tr>
   </table>
   </dd>
 </dl>
@@ -292,15 +292,15 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Full MIMO interface — optimise u[k] given state and reference vector. </p>
+<p>Full MIMO interface - optimise u[k] given state and reference vector. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x_current</td><td>Current state vector x[k] (n × 1). </td></tr>
-    <tr><td class="paramname">r_ref</td><td>Reference output vector r[k] (p × 1). </td></tr>
+    <tr><td class="paramname">x_current</td><td>Current state vector x[k] (n * 1). </td></tr>
+    <tr><td class="paramname">r_ref</td><td>Reference output vector r[k] (p * 1). </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Control action u[k] (m × 1). </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Control action u[k] (m * 1). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteMPC_8cpp_source.html#l00137">137</a> of file <a class="el" href="DiscreteMPC_8cpp_source.html">DiscreteMPC.cpp</a>.</p>
 
@@ -366,7 +366,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p><code>true</code> if the most recent QP converged within qpMaxIter iterations. </p>
-<p><code>false</code> means the returned u[k] is the best available suboptimal iterate. Repeated non-convergence indicates qpMaxIter is too small, qpTol is too tight, or H is ill-conditioned (large Np, small ρu). </p>
+<p><code>false</code> means the returned u[k] is the best available suboptimal iterate. Repeated non-convergence indicates qpMaxIter is too small, qpTol is too tight, or H is ill-conditioned (large Np, small rhou). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteMPC_8h_source.html#l00163">163</a> of file <a class="el" href="DiscreteMPC_8h_source.html">DiscreteMPC.h</a>.</p>
 
@@ -395,7 +395,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Actual gradient-projection iterations used in the most recent <a class="el" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2" title="Full MIMO interface — optimise u[k] given state and reference vector.">computeRef()</a>. </p>
+<p>Actual gradient-projection iterations used in the most recent <a class="el" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2" title="Full MIMO interface - optimise u[k] given state and reference vector.">computeRef()</a>. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteMPC_8h_source.html#l00166">166</a> of file <a class="el" href="DiscreteMPC_8h_source.html">DiscreteMPC.h</a>.</p>
 
@@ -517,7 +517,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Correct the previous applied input after external actuator saturation. </p>
-<p>When an actuator layer clips or redistributes the MPC output before it reaches the plant, call this method after each step so that the next <a class="el" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2" title="Full MIMO interface — optimise u[k] given state and reference vector.">computeRef()</a> uses the physically applied input when advancing the internal state estimate. Without this, repeated saturation causes x̂ to drift silently from the real plant state.</p>
+<p>When an actuator layer clips or redistributes the MPC output before it reaches the plant, call this method after each step so that the next <a class="el" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2" title="Full MIMO interface - optimise u[k] given state and reference vector.">computeRef()</a> uses the physically applied input when advancing the internal state estimate. Without this, repeated saturation causes x^ to drift silently from the real plant state.</p>
 <p>Typical call pattern (each step, after actuator): </p><div class="fragment"><div class="line"><span class="keyword">auto</span> u_cmd = mpc.computeRef(x, r);   <span class="comment">// MPC command</span></div>
 <div class="line"><span class="keyword">auto</span> u_act = allocator.apply(u_cmd);  <span class="comment">// actuator may clip/redistribute</span></div>
 <div class="line">mpc.setLastApplied(u_act);            <span class="comment">// correct u_prev_ for next step</span></div>
@@ -619,7 +619,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Inject a state estimate from an external observer (e.g., Kalman filter). </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x</td><td>State estimate x̂[k] (n × 1). </td></tr>
+    <tr><td class="paramname">x</td><td>State estimate x^[k] (n * 1). </td></tr>
   </table>
   </dd>
 </dl>

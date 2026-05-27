@@ -105,10 +105,10 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Fuzzy supervisory monitor that decides when a linearised controller needs re-tuning. </p>
-<p>Decision logic (2-input → 1-output Mamdani fuzzy system):</p><ul>
+<p>Decision logic (2-input -&gt; 1-output Mamdani fuzzy system):</p><ul>
 <li><b>Input 1:</b> normalised_error = |e| / e_threshold; terms: Small, Medium, Large.</li>
 <li><b>Input 2:</b> error_trend = d|e|/dt / trend_threshold; terms: Decreasing, Steady, Increasing.</li>
-<li><b>Output:</b> relinearize_signal ∈ [0, 1]; 0 = no action, 1 = force relinearisation.</li>
+<li><b>Output:</b> relinearize_signal \in [0, 1]; 0 = no action, 1 = force relinearisation.</li>
 </ul>
 <p>Representative rules (full 9-rule table built internally): </p><div class="fragment"><div class="line">IF error is Small  AND trend is Decreasing  THEN signal is None  (0.0)</div>
 <div class="line">IF error is Medium AND trend is Increasing  THEN signal is Maybe (0.5)</div>

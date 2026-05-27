@@ -89,10 +89,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a59deb8f98e587269d8cc14ac2e696f49" id="r_a59deb8f98e587269d8cc14ac2e696f49"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1LQRParams.html">LQRParams</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1LQRWeightTuner.html#a59deb8f98e587269d8cc14ac2e696f49">brysonMethod</a> (const Eigen::VectorXd &amp;maxStateDeviation, const Eigen::VectorXd &amp;maxControlEffort)</td></tr>
-<tr class="memdesc:a59deb8f98e587269d8cc14ac2e696f49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bryson's rule: Q = diag(1/xmax²), R = diag(1/umax²) — unchecked.  <br /></td></tr>
+<tr class="memdesc:a59deb8f98e587269d8cc14ac2e696f49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bryson's rule: Q = diag(1/xmax^2), R = diag(1/umax^2) - unchecked.  <br /></td></tr>
 <tr class="separator:a59deb8f98e587269d8cc14ac2e696f49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a48adb0f63d70dc532542cc146defb8c9" id="r_a48adb0f63d70dc532542cc146defb8c9"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1LQRParams.html">LQRParams</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1LQRWeightTuner.html#a48adb0f63d70dc532542cc146defb8c9">polePlacementHint</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;plant, const std::vector&lt; std::complex&lt; double &gt; &gt; &amp;desiredPoles, int maxIter=200)</td></tr>
-<tr class="memdesc:a48adb0f63d70dc532542cc146defb8c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterative Q/R search to steer closed-loop poles — unchecked.  <br /></td></tr>
+<tr class="memdesc:a48adb0f63d70dc532542cc146defb8c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterative Q/R search to steer closed-loop poles - unchecked.  <br /></td></tr>
 <tr class="separator:a48adb0f63d70dc532542cc146defb8c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeecb275e655b6c78a4174ff6e4e27d87" id="r_aeecb275e655b6c78a4174ff6e4e27d87"><td class="memTemplParams" colspan="2">template&lt;typename C &gt; </td></tr>
 <tr class="memitem:aeecb275e655b6c78a4174ff6e4e27d87"><td class="memTemplItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1LQRParams.html">LQRParams</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classctrl_1_1LQRWeightTuner.html#aeecb275e655b6c78a4174ff6e4e27d87">brysonMethodFor</a> (const Eigen::VectorXd &amp;maxStateDeviation, const Eigen::VectorXd &amp;maxControlEffort)</td></tr>
@@ -106,8 +106,8 @@ Static Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>LQR weight selector for <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> and <a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a>. </p>
 <p>Provides two methods:</p><ul>
-<li><b>Bryson's rule</b> — diagonal Q and R from per-channel maximum acceptable deviations.</li>
-<li><b>Pole-placement hint</b> — iterative Q/R search to steer closed-loop poles toward desired locations. </li>
+<li><b>Bryson's rule</b> - diagonal Q and R from per-channel maximum acceptable deviations.</li>
+<li><b>Pole-placement hint</b> - iterative Q/R search to steer closed-loop poles toward desired locations. </li>
 </ul>
 
 <p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00267">267</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
@@ -146,11 +146,11 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Bryson's rule: Q = diag(1/xmax²), R = diag(1/umax²) — unchecked. </p>
+<p>Bryson's rule: Q = diag(1/xmax^2), R = diag(1/umax^2) - unchecked. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">maxStateDeviation</td><td>Maximum acceptable state deviation per channel (n×1). </td></tr>
-    <tr><td class="paramname">maxControlEffort</td><td>Maximum acceptable control effort per channel (m×1). </td></tr>
+    <tr><td class="paramname">maxStateDeviation</td><td>Maximum acceptable state deviation per channel (n*1). </td></tr>
+    <tr><td class="paramname">maxControlEffort</td><td>Maximum acceptable control effort per channel (m*1). </td></tr>
   </table>
   </dd>
 </dl>
@@ -254,7 +254,7 @@ template&lt;typename C &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Iterative Q/R search to steer closed-loop poles — unchecked. </p>
+<p>Iterative Q/R search to steer closed-loop poles - unchecked. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">plant</td><td>Discrete-time state-space model. </td></tr>
@@ -316,7 +316,7 @@ template&lt;typename C &gt; </div>
 </div><div class="memdoc">
 
 <p>Type-checked pole-placement hint wrapper. </p>
-<p>Emits a <code>[[deprecated]]</code> warning (not error) when <code>C = <a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a></code>, because pole placement only tunes the LQR part — the Kalman observer gains (Qf, Rf) still need separate attention via <a class="el" href="classctrl_1_1KalmanWeightTuner.html" title="Heuristic noise covariance selector for the Kalman observer in DiscreteLQG.">KalmanWeightTuner</a>.</p>
+<p>Emits a <code>[[deprecated]]</code> warning (not error) when <code>C = <a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a></code>, because pole placement only tunes the LQR part - the Kalman observer gains (Qf, Rf) still need separate attention via <a class="el" href="classctrl_1_1KalmanWeightTuner.html" title="Heuristic noise covariance selector for the Kalman observer in DiscreteLQG.">KalmanWeightTuner</a>.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">C</td><td>Must have <code>supports_lqr_tuning == true</code>. </td></tr>

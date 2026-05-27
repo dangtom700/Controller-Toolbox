@@ -92,7 +92,7 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a1d249bc5108b6f21e2c252ff4b99647a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Error weight in the sliding surface.  <br /></td></tr>
 <tr class="separator:a1d249bc5108b6f21e2c252ff4b99647a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c1885b64dc2c56ec81a203d812b7f3c" id="r_a3c1885b64dc2c56ec81a203d812b7f3c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c">c_de</a> = 0.1</td></tr>
-<tr class="memdesc:a3c1885b64dc2c56ec81a203d812b7f3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Error-rate weight in the sliding surface (discrete, stores λ·Ts).  <br /></td></tr>
+<tr class="memdesc:a3c1885b64dc2c56ec81a203d812b7f3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Error-rate weight in the sliding surface (discrete, stores lambda.Ts).  <br /></td></tr>
 <tr class="separator:a3c1885b64dc2c56ec81a203d812b7f3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3fa027ba3dfca3725f172fabd129a455" id="r_a3fa027ba3dfca3725f172fabd129a455"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SMCParams.html#a3fa027ba3dfca3725f172fabd129a455">K</a> = 5.0</td></tr>
 <tr class="memdesc:a3fa027ba3dfca3725f172fabd129a455"><td class="mdescLeft">&#160;</td><td class="mdescRight">Switching gain. Larger = more robust, more chattering.  <br /></td></tr>
@@ -124,12 +124,12 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Error-rate weight in the sliding surface (discrete, stores λ·Ts). </p>
-<dl class="section user"><dt>Sample-time dependence (calibration trap)</dt><dd>The discrete derivative is approximated as (e[k] − e[k−1]) / Ts. Therefore c_de is implicitly Ts-dependent: halving Ts doubles the surface sensitivity without any parameter change.</dd></dl>
-<p><b>Convention:</b> c_de stores the <b>discrete</b> coefficient, i.e., c_de already absorbs Ts. To convert from a continuous-time slope λ [1/s]: </p><div class="fragment"><div class="line"><a class="code hl_variable" href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c">c_de</a> = lambda * Ts</div>
-<div class="ttc" id="astructctrl_1_1SMCParams_html_a3c1885b64dc2c56ec81a203d812b7f3c"><div class="ttname"><a href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c">ctrl::SMCParams::c_de</a></div><div class="ttdeci">double c_de</div><div class="ttdoc">Error-rate weight in the sliding surface (discrete, stores λ·Ts).</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8h_source.html#l00052">DiscreteSMC.h:52</a></div></div>
+<p>Error-rate weight in the sliding surface (discrete, stores lambda.Ts). </p>
+<dl class="section user"><dt>Sample-time dependence (calibration trap)</dt><dd>The discrete derivative is approximated as (e[k] - e[k-1]) / Ts. Therefore c_de is implicitly Ts-dependent: halving Ts doubles the surface sensitivity without any parameter change.</dd></dl>
+<p><b>Convention:</b> c_de stores the <b>discrete</b> coefficient, i.e., c_de already absorbs Ts. To convert from a continuous-time slope lambda [1/s]: </p><div class="fragment"><div class="line"><a class="code hl_variable" href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c">c_de</a> = lambda * Ts</div>
+<div class="ttc" id="astructctrl_1_1SMCParams_html_a3c1885b64dc2c56ec81a203d812b7f3c"><div class="ttname"><a href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c">ctrl::SMCParams::c_de</a></div><div class="ttdeci">double c_de</div><div class="ttdoc">Error-rate weight in the sliding surface (discrete, stores lambda.Ts).</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8h_source.html#l00052">DiscreteSMC.h:52</a></div></div>
 </div><!-- fragment --><p> Recalculate c_de whenever Ts changes.</p>
-<p>Larger c_de → faster convergence to the sliding surface but more chattering. </p>
+<p>Larger c_de -&gt; faster convergence to the sliding surface but more chattering. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00052">52</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 
@@ -150,9 +150,9 @@ Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Error weight in the sliding surface. </p>
-<p>Together with c_de, determines the sliding surface bandwidth. Setting σ = 0 and substituting the discrete derivative gives the continuous convergence rate: </p><div class="fragment"><div class="line">ω_s = <a class="code hl_variable" href="structctrl_1_1SMCParams.html#a1d249bc5108b6f21e2c252ff4b99647a">c_e</a> · Ts / <a class="code hl_variable" href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c">c_de</a>   [rad/s]</div>
+<p>Together with c_de, determines the sliding surface bandwidth. Setting sigma = 0 and substituting the discrete derivative gives the continuous convergence rate: </p><div class="fragment"><div class="line">omega_s = <a class="code hl_variable" href="structctrl_1_1SMCParams.html#a1d249bc5108b6f21e2c252ff4b99647a">c_e</a> . Ts / <a class="code hl_variable" href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c">c_de</a>   [rad/s]</div>
 <div class="ttc" id="astructctrl_1_1SMCParams_html_a1d249bc5108b6f21e2c252ff4b99647a"><div class="ttname"><a href="structctrl_1_1SMCParams.html#a1d249bc5108b6f21e2c252ff4b99647a">ctrl::SMCParams::c_e</a></div><div class="ttdeci">double c_e</div><div class="ttdoc">Error weight in the sliding surface.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8h_source.html#l00033">DiscreteSMC.h:33</a></div></div>
-</div><!-- fragment --><p> Choose c_e and c_de so that ω_s matches the desired closed-loop bandwidth. Larger c_e relative to c_de → faster convergence but higher sensitivity to noise in e. </p>
+</div><!-- fragment --><p> Choose c_e and c_de so that omega_s matches the desired closed-loop bandwidth. Larger c_e relative to c_de -&gt; faster convergence but higher sensitivity to noise in e. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00033">33</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 

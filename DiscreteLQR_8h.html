@@ -112,9 +112,9 @@ Namespaces</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete-time Linear Quadratic Regulator (LQR). </p>
 <p>Solves the Discrete Algebraic Riccati Equation (DARE) offline via value iteration, then applies the optimal state-feedback law online.</p>
-<p><b>DARE (value iteration):</b> </p><div class="fragment"><div class="line">P∞ = AᵀP∞A − (AᵀP∞B)(R + BᵀP∞B)⁻¹(BᵀP∞A) + Q</div>
-<div class="line">K* = (R + BᵀP∞B)⁻¹ BᵀP∞A</div>
-</div><!-- fragment --><p><b>Online control law:</b> </p><div class="fragment"><div class="line">u[k] = −K*·(x[k] − x_ref) + u_ff</div>
+<p><b>DARE (value iteration):</b> </p><div class="fragment"><div class="line">Pinf = AᵀPinfA - (AᵀPinfB)(R + BᵀPinfB)^-^1(BᵀPinfA) + Q</div>
+<div class="line">K* = (R + BᵀPinfB)^-^1 BᵀPinfA</div>
+</div><!-- fragment --><p><b>Online control law:</b> </p><div class="fragment"><div class="line">u[k] = -K*.(x[k] - x_ref) + u_ff</div>
 </div><!-- fragment --><p>For output feedback, reconstruct the full state with an observer (e.g., KalmanFilter) before calling compute().</p>
 <dl class="section see"><dt>See also</dt><dd>Anderson &amp; Moore, "Optimal Control" (1990). </dd>
 <dd>

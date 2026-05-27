@@ -95,10 +95,10 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:ab01edb10fbae2d8311d14377a26eb8ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">All singular values of L32 (for order selection).  <br /></td></tr>
 <tr class="separator:ab01edb10fbae2d8311d14377a26eb8ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac0a3c0cbe4e80c8a31969e26d1c0171d" id="r_ac0a3c0cbe4e80c8a31969e26d1c0171d"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SubspaceIDResult.html#ac0a3c0cbe4e80c8a31969e26d1c0171d">kalmanGain</a></td></tr>
-<tr class="memdesc:ac0a3c0cbe4e80c8a31969e26d1c0171d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Estimated Kalman gain (n × p).  <br /></td></tr>
+<tr class="memdesc:ac0a3c0cbe4e80c8a31969e26d1c0171d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Estimated Kalman gain (n * p).  <br /></td></tr>
 <tr class="separator:ac0a3c0cbe4e80c8a31969e26d1c0171d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a938133873cfb3e4521051e1017cc2982" id="r_a938133873cfb3e4521051e1017cc2982"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SubspaceIDResult.html#a938133873cfb3e4521051e1017cc2982">innovCov</a></td></tr>
-<tr class="memdesc:a938133873cfb3e4521051e1017cc2982"><td class="mdescLeft">&#160;</td><td class="mdescRight">Innovation covariance Λ = E[ε·εᵀ] (p × p).  <br /></td></tr>
+<tr class="memdesc:a938133873cfb3e4521051e1017cc2982"><td class="mdescLeft">&#160;</td><td class="mdescRight">Innovation covariance Lambda = E[epsilon.epsilonᵀ] (p * p).  <br /></td></tr>
 <tr class="separator:a938133873cfb3e4521051e1017cc2982"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c0e45ca264974aa9cc68d2b0cb4357e" id="r_a5c0e45ca264974aa9cc68d2b0cb4357e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SubspaceIDResult.html#a5c0e45ca264974aa9cc68d2b0cb4357e">success</a> = false</td></tr>
 <tr class="memdesc:a5c0e45ca264974aa9cc68d2b0cb4357e"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>true</code> when identification succeeded.  <br /></td></tr>
@@ -124,7 +124,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Innovation covariance Λ = E[ε·εᵀ] (p × p). </p>
+<p>Innovation covariance Lambda = E[epsilon.epsilonᵀ] (p * p). </p>
 <p>Use as R_noise in <a class="el" href="classctrl_1_1KalmanFilter.html" title="Discrete-time Linear Kalman Filter.">KalmanFilter</a> for noise-matched estimation. Empty on failure. </p>
 
 <p class="definition">Definition at line <a class="el" href="SubspaceID_8h_source.html#l00066">66</a> of file <a class="el" href="SubspaceID_8h_source.html">SubspaceID.h</a>.</p>
@@ -145,8 +145,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Estimated Kalman gain (n × p). </p>
-<p>Kalman gain K such that x[k+1] = A·x[k] + B·u[k] + K·ε[k]. Pass directly to <a class="el" href="classctrl_1_1KalmanFilter.html" title="Discrete-time Linear Kalman Filter.">KalmanFilter</a> or <a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a> to avoid manual Q/R tuning. Empty on failure. </p>
+<p>Estimated Kalman gain (n * p). </p>
+<p>Kalman gain K such that x[k+1] = A.x[k] + B.u[k] + K.epsilon[k]. Pass directly to <a class="el" href="classctrl_1_1KalmanFilter.html" title="Discrete-time Linear Kalman Filter.">KalmanFilter</a> or <a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a> to avoid manual Q/R tuning. Empty on failure. </p>
 
 <p class="definition">Definition at line <a class="el" href="SubspaceID_8h_source.html#l00059">59</a> of file <a class="el" href="SubspaceID_8h_source.html">SubspaceID.h</a>.</p>
 

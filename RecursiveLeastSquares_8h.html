@@ -102,17 +102,17 @@ Namespaces</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Online SISO ARX system identification via Recursive Least Squares (RLS). </p>
 <p>Identifies a discrete-time ARX model from input-output data: </p><div class="fragment"><div class="line">A(q)y[k] = B(q)u[k] + e[k]</div>
-<div class="line">y[k] = −a₁·y[k−1] − … − aₙₐ·y[k−nₐ]</div>
-<div class="line">       + b₁·u[k−1] + … + bₙᵦ·u[k−nᵦ] + e[k]</div>
-</div><!-- fragment --><p><b>Regressor:</b> φ[k] = [−y[k−1], …, −y[k−nₐ], u[k−1], …, u[k−nᵦ]]ᵀ ∈ ℝ^(nₐ+nᵦ)</p>
-<p><b>Recursive update (exponential forgetting via scalar λ):</b> </p><div class="fragment"><div class="line">K[k]     = P[k−1]·φ[k] / (λ + φ[k]ᵀ·P[k−1]·φ[k])</div>
-<div class="line">e[k]     = y[k] − φ[k]ᵀ·θ[k−1]           (a-posteriori prediction error)</div>
-<div class="line">θ[k]     = θ[k−1] + K[k]·e[k]</div>
-<div class="line">P[k]     = (P[k−1] − K[k]·φ[k]ᵀ·P[k−1]) / λ</div>
+<div class="line">y[k] = -a1.y[k-1] - ... - a_nₐ.y[k-nₐ]</div>
+<div class="line">       + b1.u[k-1] + ... + b_nᵦ.u[k-nᵦ] + e[k]</div>
+</div><!-- fragment --><p><b>Regressor:</b> phi[k] = [-y[k-1], ..., -y[k-nₐ], u[k-1], ..., u[k-nᵦ]]ᵀ \in ℝ^(nₐ+nᵦ)</p>
+<p><b>Recursive update (exponential forgetting via scalar lambda):</b> </p><div class="fragment"><div class="line">K[k]     = P[k-1].phi[k] / (lambda + phi[k]ᵀ.P[k-1].phi[k])</div>
+<div class="line">e[k]     = y[k] - phi[k]ᵀ.theta[k-1]           (a-posteriori prediction error)</div>
+<div class="line">theta[k]     = theta[k-1] + K[k].e[k]</div>
+<div class="line">P[k]     = (P[k-1] - K[k].phi[k]ᵀ.P[k-1]) / lambda</div>
 </div><!-- fragment --><p>After sufficient excitation, call toTransferFunction() or toStateSpace() to extract a model for use with DiscreteMPC, DiscreteLQG, etc.</p>
-<dl class="section see"><dt>See also</dt><dd>Åström &amp; Wittenmark, "Adaptive Control" (1995) Ch. 2. </dd>
+<dl class="section see"><dt>See also</dt><dd>Astrom &amp; Wittenmark, "Adaptive Control" (1995) Ch. 2. </dd>
 <dd>
-Ljung, "System Identification" (1999) §11.2. </dd></dl>
+Ljung, "System Identification" (1999) Section 11.2. </dd></dl>
 
 <p class="definition">Definition in file <a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>.</p>
 </div></div><!-- contents -->

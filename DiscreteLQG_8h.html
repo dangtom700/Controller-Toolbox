@@ -105,15 +105,15 @@ Namespaces</h2></td></tr>
 <div class="textblock"><p>Discrete-time Linear Quadratic Gaussian (LQG) Controller. </p>
 <p>Combines DiscreteLQR (optimal state-feedback gain) with KalmanFilter (optimal state estimator) via the <b>separation principle</b>: the LQR and Kalman filter can be designed independently and combined without loss of optimality (Wonham 1968).</p>
 <p><b>Control law per step:</b></p><ol type="1">
-<li>Kalman predict: x̂[k|k−1] from u[k−1]</li>
-<li>Kalman update: x̂[k|k] from y[k]</li>
-<li>LQR control: u[k] = −K·(x̂[k|k] − x_ref)</li>
+<li>Kalman predict: x^[k|k-1] from u[k-1]</li>
+<li>Kalman update: x^[k|k] from y[k]</li>
+<li>LQR control: u[k] = -K.(x^[k|k] - x_ref)</li>
 </ol>
 <dl class="section user"><dt>Scope limitation</dt><dd>The separation principle holds exactly only for linear systems with additive Gaussian noise. For nonlinear plants, this class linearises the plant model at construction time; stability and performance guarantees apply only near the linearisation point. For wider operating regions, consider periodic re-linearisation or using ExtendedKalmanFilter + DiscreteLQR as separate objects to recompute Jacobians at each step.</dd></dl>
 <dl class="section warning"><dt>Warning</dt><dd>compute(y) takes the raw plant output <b>not</b> the error. Call setReference() before compute() for IController-compatible usage, or use the full step() method directly.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd>Athans (1971), "Role of Decision Theory in Systems Engineering". </dd>
 <dd>
-MATLAB lqg(), kalman(); Åström, "Introduction to Stochastic Control". </dd></dl>
+MATLAB lqg(), kalman(); Astrom, "Introduction to Stochastic Control". </dd></dl>
 
 <p class="definition">Definition in file <a class="el" href="DiscreteLQG_8h_source.html">DiscreteLQG.h</a>.</p>
 </div></div><!-- contents -->

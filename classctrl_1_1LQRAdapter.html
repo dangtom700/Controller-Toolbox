@@ -101,13 +101,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a83bc714547dbe21e26b898e60bada666"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct the adapter with state and optional reference providers.  <br /></td></tr>
 <tr class="separator:a83bc714547dbe21e26b898e60bada666"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa98cd8c81bd08aa25a099ea9c7c25cf9" id="r_aa98cd8c81bd08aa25a099ea9c7c25cf9"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1LQRAdapter.html#aa98cd8c81bd08aa25a099ea9c7c25cf9">compute</a> (double) override</td></tr>
-<tr class="memdesc:aa98cd8c81bd08aa25a099ea9c7c25cf9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] — <code>signal</code> is ignored; state and reference come from callbacks.  <br /></td></tr>
+<tr class="memdesc:aa98cd8c81bd08aa25a099ea9c7c25cf9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] - <code>signal</code> is ignored; state and reference come from callbacks.  <br /></td></tr>
 <tr class="separator:aa98cd8c81bd08aa25a099ea9c7c25cf9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a039bebf87ac2169e9a6ab1bd42ce3da6" id="r_a039bebf87ac2169e9a6ab1bd42ce3da6"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1LQRAdapter.html#a039bebf87ac2169e9a6ab1bd42ce3da6">computeVec</a> (const Eigen::VectorXd &amp;) override</td></tr>
-<tr class="memdesc:a039bebf87ac2169e9a6ab1bd42ce3da6"><td class="mdescLeft">&#160;</td><td class="mdescRight">MIMO interface — returns the full LQR control vector u[k] (m × 1).  <br /></td></tr>
+<tr class="memdesc:a039bebf87ac2169e9a6ab1bd42ce3da6"><td class="mdescLeft">&#160;</td><td class="mdescRight">MIMO interface - returns the full LQR control vector u[k] (m * 1).  <br /></td></tr>
 <tr class="separator:a039bebf87ac2169e9a6ab1bd42ce3da6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9a6d55262294745098909b2e5f4de731" id="r_a9a6d55262294745098909b2e5f4de731"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1LQRAdapter.html#a9a6d55262294745098909b2e5f4de731">reset</a> () override</td></tr>
-<tr class="memdesc:a9a6d55262294745098909b2e5f4de731"><td class="mdescLeft">&#160;</td><td class="mdescRight">No-op — <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> is stateless at runtime.  <br /></td></tr>
+<tr class="memdesc:a9a6d55262294745098909b2e5f4de731"><td class="mdescLeft">&#160;</td><td class="mdescRight">No-op - <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> is stateless at runtime.  <br /></td></tr>
 <tr class="separator:a9a6d55262294745098909b2e5f4de731"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0c91be56b7ba8e90b509b26107a84a8" id="r_af0c91be56b7ba8e90b509b26107a84a8"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1LQRAdapter.html#af0c91be56b7ba8e90b509b26107a84a8">sampleTime</a> () const override</td></tr>
 <tr class="memdesc:af0c91be56b7ba8e90b509b26107a84a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time inherited from the underlying LQR.  <br /></td></tr>
@@ -119,7 +119,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController" id="r_a209dd6532b22278f93430a0757aae4c7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a209dd6532b22278f93430a0757aae4c7">~IController</a> ()=default</td></tr>
 <tr class="separator:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController" id="r_a20821745ef7099941a9e9fdb6eeddd07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">bumplessInit</a> (double, double)</td></tr>
-<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation — prepares the controller for smooth activation.  <br /></td></tr>
+<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation - prepares the controller for smooth activation.  <br /></td></tr>
 <tr class="separator:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController" id="r_abe5b62c21069e869261e870363ee8ab5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#abe5b62c21069e869261e870363ee8ab5">attachObserver</a> (<a class="el" href="classctrl_1_1IControllerObserver.html">IControllerObserver</a> *obs)</td></tr>
 <tr class="memdesc:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attach a telemetry observer.  <br /></td></tr>
@@ -146,7 +146,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Adapter that wraps <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> as an <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> for use in <a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a>. </p>
-<p>State and reference are supplied via std::function callbacks, decoupling the LQR from specific sensor or trajectory objects. For SISO plants, the scalar <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step — scalar SISO interface.">IController::compute()</a> interface is used; the adapter extracts the first element of the LQR control vector. </p>
+<p>State and reference are supplied via std::function callbacks, decoupling the LQR from specific sensor or trajectory objects. For SISO plants, the scalar <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step - scalar SISO interface.">IController::compute()</a> interface is used; the adapter extracts the first element of the LQR control vector. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00131">131</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -194,8 +194,8 @@ Additional Inherited Members</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">lqr</td><td>The underlying <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> solver. </td></tr>
-    <tr><td class="paramname">stateProvider</td><td>Callable returning the current state vector x[k] (n × 1). </td></tr>
-    <tr><td class="paramname">refProvider</td><td>Callable returning the reference state x_ref[k] (n × 1); may return an empty vector for regulation to origin. </td></tr>
+    <tr><td class="paramname">stateProvider</td><td>Callable returning the current state vector x[k] (n * 1). </td></tr>
+    <tr><td class="paramname">refProvider</td><td>Callable returning the reference state x_ref[k] (n * 1); may return an empty vector for regulation to origin. </td></tr>
   </table>
   </dd>
 </dl>
@@ -229,8 +229,8 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Compute u[k] — <code>signal</code> is ignored; state and reference come from callbacks. </p>
-<p>For MIMO plants (m &gt; 1) this returns only the first element u[0]. A one-shot warning is printed to stderr on the first such call. Use <a class="el" href="classctrl_1_1LQRAdapter.html#a039bebf87ac2169e9a6ab1bd42ce3da6" title="MIMO interface — returns the full LQR control vector u[k] (m × 1).">computeVec()</a> to obtain all m inputs.</p>
+<p>Compute u[k] - <code>signal</code> is ignored; state and reference come from callbacks. </p>
+<p>For MIMO plants (m &gt; 1) this returns only the first element u[0]. A one-shot warning is printed to stderr on the first such call. Use <a class="el" href="classctrl_1_1LQRAdapter.html#a039bebf87ac2169e9a6ab1bd42ce3da6" title="MIMO interface - returns the full LQR control vector u[k] (m * 1).">computeVec()</a> to obtain all m inputs.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">signal</td><td>Unused (inherited interface). </td></tr>
@@ -271,15 +271,15 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>MIMO interface — returns the full LQR control vector u[k] (m × 1). </p>
-<p>Preferred over <a class="el" href="classctrl_1_1LQRAdapter.html#aa98cd8c81bd08aa25a099ea9c7c25cf9" title="Compute u[k] — signal is ignored; state and reference come from callbacks.">compute()</a> for plants with more than one control input. <code>signal</code> is ignored; state and reference are obtained from the registered callbacks.</p>
+<p>MIMO interface - returns the full LQR control vector u[k] (m * 1). </p>
+<p>Preferred over <a class="el" href="classctrl_1_1LQRAdapter.html#aa98cd8c81bd08aa25a099ea9c7c25cf9" title="Compute u[k] - signal is ignored; state and reference come from callbacks.">compute()</a> for plants with more than one control input. <code>signal</code> is ignored; state and reference are obtained from the registered callbacks.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">signal</td><td>Unused (inherited interface). </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>u[k] = −K*·(x − x_ref) (m × 1). </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>u[k] = -K*.(x - x_ref) (m * 1). </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e">ctrl::IController</a>.</p>
 
@@ -347,7 +347,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>No-op — <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> is stateless at runtime. </p>
+<p>No-op - <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> is stateless at runtime. </p>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac69ef6691d5831cda3adcdc59971fcac">ctrl::IController</a>.</p>
 

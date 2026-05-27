@@ -108,16 +108,16 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a5692af54040746138b34d3d502e22add" id="r_a5692af54040746138b34d3d502e22add"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#a5692af54040746138b34d3d502e22add">A</a></td></tr>
-<tr class="memdesc:a5692af54040746138b34d3d502e22add"><td class="mdescLeft">&#160;</td><td class="mdescRight">State-transition matrix (n × n).  <br /></td></tr>
+<tr class="memdesc:a5692af54040746138b34d3d502e22add"><td class="mdescLeft">&#160;</td><td class="mdescRight">State-transition matrix (n * n).  <br /></td></tr>
 <tr class="separator:a5692af54040746138b34d3d502e22add"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9bc2151f5d148bcb5676d81d57a38410" id="r_a9bc2151f5d148bcb5676d81d57a38410"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#a9bc2151f5d148bcb5676d81d57a38410">B</a></td></tr>
-<tr class="memdesc:a9bc2151f5d148bcb5676d81d57a38410"><td class="mdescLeft">&#160;</td><td class="mdescRight">Input matrix (n × m).  <br /></td></tr>
+<tr class="memdesc:a9bc2151f5d148bcb5676d81d57a38410"><td class="mdescLeft">&#160;</td><td class="mdescRight">Input matrix (n * m).  <br /></td></tr>
 <tr class="separator:a9bc2151f5d148bcb5676d81d57a38410"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a102ebd15fc174335e7be995a37afdcd4" id="r_a102ebd15fc174335e7be995a37afdcd4"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#a102ebd15fc174335e7be995a37afdcd4">C</a></td></tr>
-<tr class="memdesc:a102ebd15fc174335e7be995a37afdcd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output matrix (p × n).  <br /></td></tr>
+<tr class="memdesc:a102ebd15fc174335e7be995a37afdcd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output matrix (p * n).  <br /></td></tr>
 <tr class="separator:a102ebd15fc174335e7be995a37afdcd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a29841a16218926079b626c4661444ccd" id="r_a29841a16218926079b626c4661444ccd"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#a29841a16218926079b626c4661444ccd">D</a></td></tr>
-<tr class="memdesc:a29841a16218926079b626c4661444ccd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Feedthrough matrix (p × m).  <br /></td></tr>
+<tr class="memdesc:a29841a16218926079b626c4661444ccd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Feedthrough matrix (p * m).  <br /></td></tr>
 <tr class="separator:a29841a16218926079b626c4661444ccd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6ed610dbd71a5f06d923a224e6371a4" id="r_ad6ed610dbd71a5f06d923a224e6371a4"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#ad6ed610dbd71a5f06d923a224e6371a4">Ts</a></td></tr>
 <tr class="memdesc:ad6ed610dbd71a5f06d923a224e6371a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time [s]; 0.0 indicates continuous time (used by <a class="el" href="namespacectrl.html#a49df1e780437c779996e8f431faaa542" title="Discretise a continuous-time state-space model.">c2d()</a>).  <br /></td></tr>
@@ -125,8 +125,12 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete-time state-space model. </p>
-<div class="fragment"><div class="line">x[k+1] = A·x[k] + B·u[k]</div>
-<div class="line">y[k]   = C·x[k] + D·u[k]</div>
+<div class="fragment"><div class="line">x[k+1] = <a class="code hl_variable" href="structctrl_1_1StateSpace.html#a5692af54040746138b34d3d502e22add">A</a>.x[k] + <a class="code hl_variable" href="structctrl_1_1StateSpace.html#a9bc2151f5d148bcb5676d81d57a38410">B</a>.u[k]</div>
+<div class="line">y[k]   = <a class="code hl_variable" href="structctrl_1_1StateSpace.html#a102ebd15fc174335e7be995a37afdcd4">C</a>.x[k] + <a class="code hl_variable" href="structctrl_1_1StateSpace.html#a29841a16218926079b626c4661444ccd">D</a>.u[k]</div>
+<div class="ttc" id="astructctrl_1_1StateSpace_html_a102ebd15fc174335e7be995a37afdcd4"><div class="ttname"><a href="structctrl_1_1StateSpace.html#a102ebd15fc174335e7be995a37afdcd4">ctrl::StateSpace::C</a></div><div class="ttdeci">Eigen::MatrixXd C</div><div class="ttdoc">Output matrix (p * n).</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00071">PlantModel.h:71</a></div></div>
+<div class="ttc" id="astructctrl_1_1StateSpace_html_a29841a16218926079b626c4661444ccd"><div class="ttname"><a href="structctrl_1_1StateSpace.html#a29841a16218926079b626c4661444ccd">ctrl::StateSpace::D</a></div><div class="ttdeci">Eigen::MatrixXd D</div><div class="ttdoc">Feedthrough matrix (p * m).</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00072">PlantModel.h:72</a></div></div>
+<div class="ttc" id="astructctrl_1_1StateSpace_html_a5692af54040746138b34d3d502e22add"><div class="ttname"><a href="structctrl_1_1StateSpace.html#a5692af54040746138b34d3d502e22add">ctrl::StateSpace::A</a></div><div class="ttdeci">Eigen::MatrixXd A</div><div class="ttdoc">State-transition matrix (n * n).</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00069">PlantModel.h:69</a></div></div>
+<div class="ttc" id="astructctrl_1_1StateSpace_html_a9bc2151f5d148bcb5676d81d57a38410"><div class="ttname"><a href="structctrl_1_1StateSpace.html#a9bc2151f5d148bcb5676d81d57a38410">ctrl::StateSpace::B</a></div><div class="ttdeci">Eigen::MatrixXd B</div><div class="ttdoc">Input matrix (n * m).</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00070">PlantModel.h:70</a></div></div>
 </div><!-- fragment --><p>Equivalent MATLAB: <code>sys = ss(A, B, C, D, Ts)</code> </p>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00067">67</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
@@ -186,10 +190,10 @@ Public Attributes</h2></td></tr>
 <p>Construct and validate a state-space model. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">a</td><td>State-transition matrix (n × n). </td></tr>
-    <tr><td class="paramname">b</td><td>Input matrix (n × m). </td></tr>
-    <tr><td class="paramname">c</td><td>Output matrix (p × n). </td></tr>
-    <tr><td class="paramname">d</td><td>Feedthrough matrix (p × m). </td></tr>
+    <tr><td class="paramname">a</td><td>State-transition matrix (n * n). </td></tr>
+    <tr><td class="paramname">b</td><td>Input matrix (n * m). </td></tr>
+    <tr><td class="paramname">c</td><td>Output matrix (p * n). </td></tr>
+    <tr><td class="paramname">d</td><td>Feedthrough matrix (p * m). </td></tr>
     <tr><td class="paramname">sampleTime</td><td>Sample period Ts [s]; pass 0.0 for continuous-time models. </td></tr>
   </table>
   </dd>
@@ -351,7 +355,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>State-transition matrix (n × n). </p>
+<p>State-transition matrix (n * n). </p>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00069">69</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
@@ -371,7 +375,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Input matrix (n × m). </p>
+<p>Input matrix (n * m). </p>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00070">70</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
@@ -391,7 +395,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Output matrix (p × n). </p>
+<p>Output matrix (p * n). </p>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00071">71</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
@@ -411,7 +415,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Feedthrough matrix (p × m). </p>
+<p>Feedthrough matrix (p * m). </p>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00072">72</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 

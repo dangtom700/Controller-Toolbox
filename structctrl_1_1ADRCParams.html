@@ -89,13 +89,13 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a0b906b144bbe2c2ab2f11082a8660344" id="r_a0b906b144bbe2c2ab2f11082a8660344"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ADRCParams.html#a0b906b144bbe2c2ab2f11082a8660344">omega_o</a> = 20.0</td></tr>
-<tr class="memdesc:a0b906b144bbe2c2ab2f11082a8660344"><td class="mdescLeft">&#160;</td><td class="mdescRight">ESO bandwidth [rad/s]. Typically 3–10× omega_c.  <br /></td></tr>
+<tr class="memdesc:a0b906b144bbe2c2ab2f11082a8660344"><td class="mdescLeft">&#160;</td><td class="mdescRight">ESO bandwidth [rad/s]. Typically 3-10* omega_c.  <br /></td></tr>
 <tr class="separator:a0b906b144bbe2c2ab2f11082a8660344"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a236c298d82fe43914d7455bb5dbda0c3" id="r_a236c298d82fe43914d7455bb5dbda0c3"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ADRCParams.html#a236c298d82fe43914d7455bb5dbda0c3">omega_c</a> = 5.0</td></tr>
 <tr class="memdesc:a236c298d82fe43914d7455bb5dbda0c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controller bandwidth [rad/s].  <br /></td></tr>
 <tr class="separator:a236c298d82fe43914d7455bb5dbda0c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac0abfcd2e0ae3055a7ca69254b74dad9" id="r_ac0abfcd2e0ae3055a7ca69254b74dad9"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ADRCParams.html#ac0abfcd2e0ae3055a7ca69254b74dad9">b0</a> = 1.0</td></tr>
-<tr class="memdesc:ac0abfcd2e0ae3055a7ca69254b74dad9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Approximate plant input gain b₀.  <br /></td></tr>
+<tr class="memdesc:ac0abfcd2e0ae3055a7ca69254b74dad9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Approximate plant input gain b0.  <br /></td></tr>
 <tr class="separator:ac0abfcd2e0ae3055a7ca69254b74dad9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac301afe64d5e8fba27633380ec00f9f9" id="r_ac301afe64d5e8fba27633380ec00f9f9"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ADRCParams.html#ac301afe64d5e8fba27633380ec00f9f9">uMin</a> = -1e9</td></tr>
 <tr class="memdesc:ac301afe64d5e8fba27633380ec00f9f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lower output saturation limit.  <br /></td></tr>
@@ -121,15 +121,15 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Approximate plant input gain b₀. </p>
-<p>The control law u = (u₀ − z₃)/b₀ cancels the estimated total disturbance z₃; if b₀ is badly wrong, cancellation degrades and the ESO may diverge.</p>
-<p>Robustness: ADRC tolerates b₀ uncertainty within roughly a factor of 3 for ω₀ ≥ 5·ωc (Gao 2003, §IV). Beyond that, disturbance cancellation degrades.</p>
+<p>Approximate plant input gain b0. </p>
+<p>The control law u = (u0 - z3)/b0 cancels the estimated total disturbance z3; if b0 is badly wrong, cancellation degrades and the ESO may diverge.</p>
+<p>Robustness: ADRC tolerates b0 uncertainty within roughly a factor of 3 for omega0 &gt;= 5.omegac (Gao 2003, Section IV). Beyond that, disturbance cancellation degrades.</p>
 <p>Practical starting estimates:</p><ul>
-<li>Motors: b₀ = Km / J (torque constant / inertia)</li>
-<li>Integrating plants: b₀ = DC_gain / Ts²</li>
-<li>Unknown plants: b₀ = 1/τ where τ is the open-loop time constant</li>
+<li>Motors: b0 = Km / J (torque constant / inertia)</li>
+<li>Integrating plants: b0 = DC_gain / Ts^2</li>
+<li>Unknown plants: b0 = 1/tau where tau is the open-loop time constant</li>
 </ul>
-<p>Verify by running open-loop: the step response slope at t = 0⁺ ≈ b₀·u. </p>
+<p>Verify by running open-loop: the step response slope at t = 0^+ approx = b0.u. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteADRC_8h_source.html#l00066">66</a> of file <a class="el" href="DiscreteADRC_8h_source.html">DiscreteADRC.h</a>.</p>
 
@@ -169,7 +169,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>ESO bandwidth [rad/s]. Typically 3–10× omega_c. </p>
+<p>ESO bandwidth [rad/s]. Typically 3-10* omega_c. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteADRC_8h_source.html#l00047">47</a> of file <a class="el" href="DiscreteADRC_8h_source.html">DiscreteADRC.h</a>.</p>
 

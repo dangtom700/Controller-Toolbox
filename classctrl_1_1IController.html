@@ -94,7 +94,7 @@ Inheritance diagram for ctrl::IController:</div>
   <map id="ctrl::IController_map" name="ctrl::IController_map">
 <area href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries." alt="ctrl::ControllerStack" shape="rect" coords="227,56,444,80"/>
 <area href="classctrl_1_1DiscreteADRC.html" title="Discrete-time 2nd-order Linear Active Disturbance Rejection Controller." alt="ctrl::DiscreteADRC" shape="rect" coords="227,112,444,136"/>
-<area href="classctrl_1_1DiscreteHinf.html" title="Discrete-time dynamic output-feedback H∞ controller." alt="ctrl::DiscreteHinf" shape="rect" coords="227,168,444,192"/>
+<area href="classctrl_1_1DiscreteHinf.html" title="Discrete-time dynamic output-feedback Hinf controller." alt="ctrl::DiscreteHinf" shape="rect" coords="227,168,444,192"/>
 <area href="classctrl_1_1DiscreteLeadLag.html" title="Discrete Lead-Lag compensator." alt="ctrl::DiscreteLeadLag" shape="rect" coords="227,224,444,248"/>
 <area href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller." alt="ctrl::DiscreteMPC" shape="rect" coords="227,280,444,304"/>
 <area href="classctrl_1_1DiscretePID.html" title="Discrete-time PID controller." alt="ctrl::DiscretePID" shape="rect" coords="227,336,444,360"/>
@@ -115,10 +115,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a209dd6532b22278f93430a0757aae4c7" id="r_a209dd6532b22278f93430a0757aae4c7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a209dd6532b22278f93430a0757aae4c7">~IController</a> ()=default</td></tr>
 <tr class="separator:a209dd6532b22278f93430a0757aae4c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a5967a1fe140ab705a2761268d49eb8" id="r_a6a5967a1fe140ab705a2761268d49eb8"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8">compute</a> (double signal)=0</td></tr>
-<tr class="memdesc:a6a5967a1fe140ab705a2761268d49eb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step — scalar SISO interface.  <br /></td></tr>
+<tr class="memdesc:a6a5967a1fe140ab705a2761268d49eb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step - scalar SISO interface.  <br /></td></tr>
 <tr class="separator:a6a5967a1fe140ab705a2761268d49eb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d81dd5427e094d72906d54dd5e6548e" id="r_a9d81dd5427e094d72906d54dd5e6548e"><td class="memItemLeft" align="right" valign="top">virtual Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e">computeVec</a> (const Eigen::VectorXd &amp;signal)</td></tr>
-<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step — vector MIMO interface.  <br /></td></tr>
+<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step - vector MIMO interface.  <br /></td></tr>
 <tr class="separator:a9d81dd5427e094d72906d54dd5e6548e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac69ef6691d5831cda3adcdc59971fcac" id="r_ac69ef6691d5831cda3adcdc59971fcac"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#ac69ef6691d5831cda3adcdc59971fcac">reset</a> ()=0</td></tr>
 <tr class="memdesc:ac69ef6691d5831cda3adcdc59971fcac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset all internal states (integrators, delay buffers, estimators).  <br /></td></tr>
@@ -127,7 +127,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ac1d1ab003ea7fa4f0ab49291d97473a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time in seconds.  <br /></td></tr>
 <tr class="separator:ac1d1ab003ea7fa4f0ab49291d97473a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20821745ef7099941a9e9fdb6eeddd07" id="r_a20821745ef7099941a9e9fdb6eeddd07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">bumplessInit</a> (double, double)</td></tr>
-<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation — prepares the controller for smooth activation.  <br /></td></tr>
+<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation - prepares the controller for smooth activation.  <br /></td></tr>
 <tr class="separator:a20821745ef7099941a9e9fdb6eeddd07"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2dc30a3b9bfb8b9649cef7218ad9e68b" id="r_a2dc30a3b9bfb8b9649cef7218ad9e68b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b">isHealthy</a> () const</td></tr>
 <tr class="memdesc:a2dc30a3b9bfb8b9649cef7218ad9e68b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Health query for supervisory fault-tolerant control.  <br /></td></tr>
@@ -156,7 +156,7 @@ Protected Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Abstract interface for all discrete-time controllers. </p>
-<p>All implementations operate at a fixed sample time Ts and are called once per step. The interface covers both SISO (<a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step — scalar SISO interface.">compute()</a>) and MIMO (<a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e" title="Advance one sample step — vector MIMO interface.">computeVec()</a>) controllers, bumpless initialisation for supervisory switching, and a runtime health query used by <a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a> to implement automatic fallback chains.</p>
+<p>All implementations operate at a fixed sample time Ts and are called once per step. The interface covers both SISO (<a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step - scalar SISO interface.">compute()</a>) and MIMO (<a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e" title="Advance one sample step - vector MIMO interface.">computeVec()</a>) controllers, bumpless initialisation for supervisory switching, and a runtime health query used by <a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a> to implement automatic fallback chains.</p>
 <dl class="section see"><dt>See also</dt><dd>MATLAB Control System Toolbox discrete controller pattern. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00019">19</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
@@ -259,13 +259,13 @@ Protected Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Bumpless initialisation — prepares the controller for smooth activation. </p>
-<p>Called by <a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a> (Supervisory mode) when this controller is newly selected, so its first <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step — scalar SISO interface.">compute()</a> call returns <code>u_target</code> at the current <code>error</code> without a bump.</p>
+<p>Bumpless initialisation - prepares the controller for smooth activation. </p>
+<p>Called by <a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a> (Supervisory mode) when this controller is newly selected, so its first <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step - scalar SISO interface.">compute()</a> call returns <code>u_target</code> at the current <code>error</code> without a bump.</p>
 <p>The default is a no-op; override in controllers that have integral or memory state (<a class="el" href="classctrl_1_1DiscretePID.html" title="Discrete-time PID controller.">DiscretePID</a>, <a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>, <a class="el" href="classctrl_1_1DiscreteSMC.html" title="Discrete first-order Sliding Mode Controller with boundary-layer saturation.">DiscreteSMC</a>).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">u_target</td><td>The composite output the loop is currently delivering. </td></tr>
-    <tr><td class="paramname">error</td><td>The current tracking error that will be passed to <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step — scalar SISO interface.">compute()</a>.</td></tr>
+    <tr><td class="paramname">error</td><td>The current tracking error that will be passed to <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step - scalar SISO interface.">compute()</a>.</td></tr>
   </table>
   </dd>
 </dl>
@@ -301,7 +301,7 @@ Protected Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Advance one sample step — scalar SISO interface. </p>
+<p>Advance one sample step - scalar SISO interface. </p>
 <ul>
 <li>Tracking controllers (PID, MPC, LQR-adapter): <code>signal</code> = e[k] = r[k] - y[k]</li>
 <li>Optimisation-based controllers (ESC): <code>signal</code> = plant output y[k] (cost to extremize)</li>
@@ -344,8 +344,8 @@ Protected Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Advance one sample step — vector MIMO interface. </p>
-<p>The default implementation delegates to <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step — scalar SISO interface.">compute()</a> when <code>signal</code> has exactly one element, and throws std::logic_error for multi-element signals to prevent silent truncation. Override this method in MIMO controllers (<a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>, <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a>, etc.).</p>
+<p>Advance one sample step - vector MIMO interface. </p>
+<p>The default implementation delegates to <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step - scalar SISO interface.">compute()</a> when <code>signal</code> has exactly one element, and throws std::logic_error for multi-element signals to prevent silent truncation. Override this method in MIMO controllers (<a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>, <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a>, etc.).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">signal</td><td>Reference or error vector (n x 1). </td></tr>
@@ -450,12 +450,12 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Health query for supervisory fault-tolerant control. </p>
-<p>Returns <code>false</code> when the controller's last <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step — scalar SISO interface.">compute()</a> call produced a result known to be suboptimal or potentially unsafe:</p><ul>
+<p>Returns <code>false</code> when the controller's last <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step - scalar SISO interface.">compute()</a> call produced a result known to be suboptimal or potentially unsafe:</p><ul>
 <li><a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a>: DARE did not converge at construction.</li>
 <li><a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>: QP solver hit qpMaxIter (last step did not converge).</li>
 <li>GeneralizedPredictiveControl: same as MPC.</li>
 </ul>
-<p><a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a> (Supervisory mode) checks <a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b" title="Health query for supervisory fault-tolerant control.">isHealthy()</a> before selecting an entry; an unhealthy controller is skipped in favour of the next eligible entry, enabling automatic fallback: MPC → GPC → PID when the QP consistently fails.</p>
+<p><a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a> (Supervisory mode) checks <a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b" title="Health query for supervisory fault-tolerant control.">isHealthy()</a> before selecting an entry; an unhealthy controller is skipped in favour of the next eligible entry, enabling automatic fallback: MPC -&gt; GPC -&gt; PID when the QP consistently fails.</p>
 <p>The default returns <code>true</code>. Override only in controllers with meaningful runtime health state.</p>
 <dl class="section return"><dt>Returns</dt><dd><code>true</code> if the last computation was nominal; <code>false</code> if suboptimal. </dd></dl>
 
@@ -500,11 +500,11 @@ Protected Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Fire the observer's onCompute() callback (if attached). </p>
-<p>Call this at the end of every <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step — scalar SISO interface.">compute()</a> override to deliver telemetry. <a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a> calls it automatically for controllers dispatched through the stack; controllers used directly should call it themselves.</p>
+<p>Call this at the end of every <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step - scalar SISO interface.">compute()</a> override to deliver telemetry. <a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a> calls it automatically for controllers dispatched through the stack; controllers used directly should call it themselves.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">u</td><td>Computed control action. </td></tr>
-    <tr><td class="paramname">signal</td><td>Signal that was passed to <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step — scalar SISO interface.">compute()</a>. </td></tr>
+    <tr><td class="paramname">signal</td><td>Signal that was passed to <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step - scalar SISO interface.">compute()</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -589,7 +589,7 @@ Protected Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">u</td><td>Computed control vector. </td></tr>
-    <tr><td class="paramname">signal</td><td>Signal vector that was passed to <a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e" title="Advance one sample step — vector MIMO interface.">computeVec()</a>. </td></tr>
+    <tr><td class="paramname">signal</td><td>Signal vector that was passed to <a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e" title="Advance one sample step - vector MIMO interface.">computeVec()</a>. </td></tr>
   </table>
   </dd>
 </dl>

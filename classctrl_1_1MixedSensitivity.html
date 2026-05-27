@@ -81,7 +81,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Helper class that assembles a <a class="el" href="structctrl_1_1GeneralisedPlant.html" title="Generalised plant for H∞ synthesis.">GeneralisedPlant</a> for S/KS/T mixed-sensitivity design.  
+<p>Helper class that assembles a <a class="el" href="structctrl_1_1GeneralisedPlant.html" title="Generalised plant for Hinf synthesis.">GeneralisedPlant</a> for S/KS/T mixed-sensitivity design.  
  <a href="classctrl_1_1MixedSensitivity.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>&gt;</code></p>
@@ -92,10 +92,10 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memdesc:a6207c8d097c37a19f89dd937cf2f973d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sensitivity weight W1 for tracking and disturbance rejection.  <br /></td></tr>
 <tr class="separator:a6207c8d097c37a19f89dd937cf2f973d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adef193ebdb1a2283aebfd8c7de3d7bfe" id="r_adef193ebdb1a2283aebfd8c7de3d7bfe"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1MixedSensitivity.html#adef193ebdb1a2283aebfd8c7de3d7bfe">makeW2constant</a> (double gain, double Ts)</td></tr>
-<tr class="memdesc:adef193ebdb1a2283aebfd8c7de3d7bfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control effort weight W2 — flat gain at all frequencies.  <br /></td></tr>
+<tr class="memdesc:adef193ebdb1a2283aebfd8c7de3d7bfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control effort weight W2 - flat gain at all frequencies.  <br /></td></tr>
 <tr class="separator:adef193ebdb1a2283aebfd8c7de3d7bfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1d05a62595195439b85f59a4bfb7c029" id="r_a1d05a62595195439b85f59a4bfb7c029"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1MixedSensitivity.html#a1d05a62595195439b85f59a4bfb7c029">makeW2highpass</a> (double omega_u, double eps, double Ts)</td></tr>
-<tr class="memdesc:a1d05a62595195439b85f59a4bfb7c029"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control effort weight W2 — first-order high-pass.  <br /></td></tr>
+<tr class="memdesc:a1d05a62595195439b85f59a4bfb7c029"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control effort weight W2 - first-order high-pass.  <br /></td></tr>
 <tr class="separator:a1d05a62595195439b85f59a4bfb7c029"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a342dbf91e32f029708e8de46ff5ed220" id="r_a342dbf91e32f029708e8de46ff5ed220"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1MixedSensitivity.html#a342dbf91e32f029708e8de46ff5ed220">makeW3</a> (double omega_T, double Mt, double eps, double Ts)</td></tr>
 <tr class="memdesc:a342dbf91e32f029708e8de46ff5ed220"><td class="mdescLeft">&#160;</td><td class="mdescRight">Robustness weight W3 for complementary sensitivity rolloff.  <br /></td></tr>
@@ -105,18 +105,18 @@ Static Public Member Functions</h2></td></tr>
 <tr class="separator:a406b1e5f5063bb0207519a2e6e0d9c19"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Helper class that assembles a <a class="el" href="structctrl_1_1GeneralisedPlant.html" title="Generalised plant for H∞ synthesis.">GeneralisedPlant</a> for S/KS/T mixed-sensitivity design. </p>
+<div class="textblock"><p>Helper class that assembles a <a class="el" href="structctrl_1_1GeneralisedPlant.html" title="Generalised plant for Hinf synthesis.">GeneralisedPlant</a> for S/KS/T mixed-sensitivity design. </p>
 <p>Augments a SISO discrete-time plant G(z) with three weighting state-space models:</p><ul>
-<li><b>W1</b> — tracking / disturbance rejection (high gain at low frequencies).</li>
-<li><b>W2</b> — control effort / actuator limits (limits high-frequency commands).</li>
-<li><b>W3</b> — robustness / unmodelled dynamics (forces T rolloff at high frequencies).</li>
+<li><b>W1</b> - tracking / disturbance rejection (high gain at low frequencies).</li>
+<li><b>W2</b> - control effort / actuator limits (limits high-frequency commands).</li>
+<li><b>W3</b> - robustness / unmodelled dynamics (forces T rolloff at high frequencies).</li>
 </ul>
 <dl class="section user"><dt>Infeasibility troubleshooting</dt><dd>If solve() returns feasible = <code>false:</code> <ol type="1">
-<li>Increase gammaInit (start at 10·‖W1‖∞·‖W3‖∞ as a rule of thumb).</li>
+<li>Increase gammaInit (start at 10.||W1||inf.||W3||inf as a rule of thumb).</li>
 <li>Verify W1 crossover is below the plant open-loop bandwidth.</li>
-<li>For non-minimum-phase plants, the achievable sensitivity peak is bounded below by the Poisson integral; reduce W1 gain or relax the crossover requirement (Skogestad &amp; Postlethwaite §6.3).</li>
-<li>If W1 and W3 both have high gain in overlapping bands, the design may be fundamentally infeasible (S + T = 1). Reduce |W1(jω)|·|W3(jω)|.</li>
-<li>If gammaInit is below the achievable γ, bisection cannot start — increase it. </li>
+<li>For non-minimum-phase plants, the achievable sensitivity peak is bounded below by the Poisson integral; reduce W1 gain or relax the crossover requirement (Skogestad &amp; Postlethwaite Section 6.3).</li>
+<li>If W1 and W3 both have high gain in overlapping bands, the design may be fundamentally infeasible (S + T = 1). Reduce |W1(jomega)|.|W3(jomega)|.</li>
+<li>If gammaInit is below the achievable gamma, bisection cannot start - increase it. </li>
 </ol>
 </dd></dl>
 
@@ -170,7 +170,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Assemble the generalised plant from G, W1, W2, W3. </p>
 <p>All inputs must be discrete-time (Ts &gt; 0) with the same sample time. G must be SISO. W1, W2, W3 may be any order (first-order recommended for efficiency).</p>
-<p>Augmented state: xₐ = [xG; xW1; xW2; xW3]. Exogenous inputs: w = [r; d] (reference + output disturbance), nw = 2. Performance outputs: z = [W1·(r−y); W2·u; W3·y], nz = 3.</p>
+<p>Augmented state: xₐ = [xG; xW1; xW2; xW3]. Exogenous inputs: w = [r; d] (reference + output disturbance), nw = 2. Performance outputs: z = [W1.(r-y); W2.u; W3.y], nz = 3.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">G</td><td>SISO discrete-time plant. </td></tr>
@@ -180,7 +180,7 @@ Static Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Assembled <a class="el" href="structctrl_1_1GeneralisedPlant.html" title="Generalised plant for H∞ synthesis.">GeneralisedPlant</a> ready for <a class="el" href="classctrl_1_1DiscreteHinf.html#ab774c7a783a1e411b701289d00be1603" title="Solve the discrete-time H∞ optimal control problem.">DiscreteHinf::solve()</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Assembled <a class="el" href="structctrl_1_1GeneralisedPlant.html" title="Generalised plant for Hinf synthesis.">GeneralisedPlant</a> ready for <a class="el" href="classctrl_1_1DiscreteHinf.html#ab774c7a783a1e411b701289d00be1603" title="Solve the discrete-time Hinf optimal control problem.">DiscreteHinf::solve()</a>. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8cpp_source.html#l00660">660</a> of file <a class="el" href="DiscreteHinf_8cpp_source.html">DiscreteHinf.cpp</a>.</p>
 
@@ -235,7 +235,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Sensitivity weight W1 for tracking and disturbance rejection. </p>
-<p>Continuous: W1(s) = (s/M + ωB) / (s + ωB·ε). Low-freq gain ≈ 1/ε, crossover at ωB, high-freq gain ≈ M.</p>
+<p>Continuous: W1(s) = (s/M + omegaB) / (s + omegaB.epsilon). Low-freq gain approx = 1/epsilon, crossover at omegaB, high-freq gain approx = M.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">omega_B</td><td>Crossover frequency [rad/s]. </td></tr>
@@ -286,7 +286,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Control effort weight W2 — flat gain at all frequencies. </p>
+<p>Control effort weight W2 - flat gain at all frequencies. </p>
 <p>Simple actuator-level constraint: set gain = 1/u_max.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -340,8 +340,8 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Control effort weight W2 — first-order high-pass. </p>
-<p>Continuous: W2(s) = (s + ωu·ε) / (s/1 + ωu). Low-freq gain ≈ ε, high-freq gain ≈ 1, rolloff at ωu.</p>
+<p>Control effort weight W2 - first-order high-pass. </p>
+<p>Continuous: W2(s) = (s + omegau.epsilon) / (s/1 + omegau). Low-freq gain approx = epsilon, high-freq gain approx = 1, rolloff at omegau.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">omega_u</td><td>Rolloff frequency [rad/s]. </td></tr>
@@ -404,11 +404,11 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Robustness weight W3 for complementary sensitivity rolloff. </p>
-<p>Continuous: W3(s) = (s + ωT/Mt) / (ε·s + ωT). Low-freq gain ≈ ε, high-freq gain ≈ 1/Mt, rollup above ωT.</p>
+<p>Continuous: W3(s) = (s + omegaT/Mt) / (epsilon.s + omegaT). Low-freq gain approx = epsilon, high-freq gain approx = 1/Mt, rollup above omegaT.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">omega_T</td><td>Rollup frequency [rad/s]. </td></tr>
-    <tr><td class="paramname">Mt</td><td>Maximum complementary sensitivity (e.g., 1.2–2.0). </td></tr>
+    <tr><td class="paramname">Mt</td><td>Maximum complementary sensitivity (e.g., 1.2-2.0). </td></tr>
     <tr><td class="paramname">eps</td><td>Low-frequency gain floor. </td></tr>
     <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
   </table>

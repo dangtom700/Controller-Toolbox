@@ -109,22 +109,22 @@ Typedefs</h2></td></tr>
 <tr class="memdesc:aee8aa60f7a448b1cb384efdf32eada41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for the nonlinear measurement model: y[k] = h(x[k], u[k]).  <br /></td></tr>
 <tr class="separator:aee8aa60f7a448b1cb384efdf32eada41"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b4f19ebb433c185c5b7a561cec22f20" id="r_a2b4f19ebb433c185c5b7a561cec22f20"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a2b4f19ebb433c185c5b7a561cec22f20">ctrl::JacobianFn</a> = std::function&lt; Eigen::MatrixXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td></tr>
-<tr class="memdesc:a2b4f19ebb433c185c5b7a561cec22f20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for a Jacobian: returns an (n×n) or (p×n) matrix given (x, u).  <br /></td></tr>
+<tr class="memdesc:a2b4f19ebb433c185c5b7a561cec22f20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for a Jacobian: returns an (n*n) or (p*n) matrix given (x, u).  <br /></td></tr>
 <tr class="separator:a2b4f19ebb433c185c5b7a561cec22f20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete-time Extended Kalman Filter (EKF) for nonlinear systems. </p>
 <p>Handles nonlinear process and measurement models with <b>additive</b> Gaussian noise: </p><div class="fragment"><div class="line">x[k+1] = f(x[k], u[k]) + w[k],   w ~ N(0, Q_noise)</div>
 <div class="line">y[k]   = h(x[k], u[k]) + v[k],   v ~ N(0, R_noise)</div>
-</div><!-- fragment --><dl class="section user"><dt>Noise model assumption</dt><dd>Process and measurement noise are <b>additive</b> as shown above. For multiplicative or state-dependent noise (e.g., gyroscope scale-factor noise, Poisson photon counts), the EKF must be reformulated with augmented state and noise channels — that form is <b>not</b> implemented here.</dd></dl>
-<p>The EKF linearises around the current estimate at each step: </p><div class="fragment"><div class="line">F[k] = ∂f/∂x |_(x̂[k|k], u[k])     — state Jacobian (n×n)</div>
-<div class="line">H[k] = ∂h/∂x |_(x̂[k+1|k], u[k])   — observation Jacobian (p×n)</div>
-</div><!-- fragment --><p><b>Predict:</b> </p><div class="fragment"><div class="line">x̂[k+1|k]  = f(x̂[k|k], u[k])</div>
-<div class="line">P[k+1|k]   = F[k]·P[k|k]·F[k]ᵀ + Q</div>
-</div><!-- fragment --><p><b>Update (Joseph form):</b> </p><div class="fragment"><div class="line">S            = H[k]·P[k+1|k]·H[k]ᵀ + R</div>
-<div class="line">K            = P[k+1|k]·H[k]ᵀ·S⁻¹</div>
-<div class="line">x̂[k+1|k+1] = x̂[k+1|k] + K·(y − h(x̂[k+1|k], u[k]))</div>
-<div class="line">P[k+1|k+1]  = (I − K·H)·P·(I − K·H)ᵀ + K·R·Kᵀ</div>
+</div><!-- fragment --><dl class="section user"><dt>Noise model assumption</dt><dd>Process and measurement noise are <b>additive</b> as shown above. For multiplicative or state-dependent noise (e.g., gyroscope scale-factor noise, Poisson photon counts), the EKF must be reformulated with augmented state and noise channels - that form is <b>not</b> implemented here.</dd></dl>
+<p>The EKF linearises around the current estimate at each step: </p><div class="fragment"><div class="line">F[k] = df/dx |_(x^[k|k], u[k])     - state Jacobian (n*n)</div>
+<div class="line">H[k] = dh/dx |_(x^[k+1|k], u[k])   - observation Jacobian (p*n)</div>
+</div><!-- fragment --><p><b>Predict:</b> </p><div class="fragment"><div class="line">x^[k+1|k]  = f(x^[k|k], u[k])</div>
+<div class="line">P[k+1|k]   = F[k].P[k|k].F[k]ᵀ + Q</div>
+</div><!-- fragment --><p><b>Update (Joseph form):</b> </p><div class="fragment"><div class="line">S            = H[k].P[k+1|k].H[k]ᵀ + R</div>
+<div class="line">K            = P[k+1|k].H[k]ᵀ.S^-^1</div>
+<div class="line">x^[k+1|k+1] = x^[k+1|k] + K.(y - h(x^[k+1|k], u[k]))</div>
+<div class="line">P[k+1|k+1]  = (I - K.H).P.(I - K.H)ᵀ + K.R.Kᵀ</div>
 </div><!-- fragment --><p>Jacobians may be analytical (preferred) or computed numerically via numericalJacobian().</p>
 <dl class="section see"><dt>See also</dt><dd>Jazwinski, "Stochastic Processes and Filtering Theory" (1970). </dd>
 <dd>

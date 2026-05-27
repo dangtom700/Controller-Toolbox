@@ -199,7 +199,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Reflects the inner sensor's validity. </p>
-<p><code>true</code> = the inner sensor reports fresh data. Does NOT indicate whether <code>last_valid_</code> is still trustworthy — check <code><a class="el" href="classctrl_1_1SafeSensor.html#a408e67837fadc30479d3e2fca292f69d" title="Number of consecutive samples since the last valid reading.">staleCount()</a></code> or the <code>onMaxStale</code> callback for that.</p>
+<p><code>true</code> = the inner sensor reports fresh data. Does NOT indicate whether <code>last_valid_</code> is still trustworthy - check <code><a class="el" href="classctrl_1_1SafeSensor.html#a408e67837fadc30479d3e2fca292f69d" title="Number of consecutive samples since the last valid reading.">staleCount()</a></code> or the <code>onMaxStale</code> callback for that.</p>
 <dl class="section return"><dt>Returns</dt><dd><code>inner_-&gt;<a class="el" href="classctrl_1_1SafeSensor.html#a2588ae59386c9d31ab7c7c21309cff78" title="Reflects the inner sensor&#39;s validity.">isValid()</a></code>. </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classctrl_1_1ISensor.html#a366745c03cda60b3c91f2e5425e818d7">ctrl::ISensor</a>.</p>
@@ -264,7 +264,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Return the inner sensor's reading, or the last valid value when invalid. </p>
-<p>Also rejects non-finite inner values (NaN, ±Inf) even when <code><a class="el" href="classctrl_1_1SafeSensor.html#a2588ae59386c9d31ab7c7c21309cff78" title="Reflects the inner sensor&#39;s validity.">isValid()</a> == true</code>. Increments the stale counter on any rejected sample.</p>
+<p>Also rejects non-finite inner values (NaN, +/-Inf) even when <code><a class="el" href="classctrl_1_1SafeSensor.html#a2588ae59386c9d31ab7c7c21309cff78" title="Reflects the inner sensor&#39;s validity.">isValid()</a> == true</code>. Increments the stale counter on any rejected sample.</p>
 <dl class="section return"><dt>Returns</dt><dd>Most recent valid (finite) measurement. Never NaN or Inf. </dd></dl>
 
 <p>Implements <a class="el" href="classctrl_1_1ISensor.html#abadb0fd78eaa7f41319e0f20a4434a82">ctrl::ISensor</a>.</p>

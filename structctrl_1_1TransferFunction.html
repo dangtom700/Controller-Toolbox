@@ -82,7 +82,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Discrete-time transfer function in z⁻¹ polynomial form.  
+<p>Discrete-time transfer function in z^-^1 polynomial form.  
  <a href="structctrl_1_1TransferFunction.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>&gt;</code></p>
@@ -99,20 +99,20 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a5d019a4f6f10e99341ecd27e6d9403d6" id="r_a5d019a4f6f10e99341ecd27e6d9403d6"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TransferFunction.html#a5d019a4f6f10e99341ecd27e6d9403d6">num</a></td></tr>
-<tr class="memdesc:a5d019a4f6f10e99341ecd27e6d9403d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Numerator coefficients [b0, b1, …, bm].  <br /></td></tr>
+<tr class="memdesc:a5d019a4f6f10e99341ecd27e6d9403d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Numerator coefficients [b0, b1, ..., bm].  <br /></td></tr>
 <tr class="separator:a5d019a4f6f10e99341ecd27e6d9403d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a137ed1576cb50e7ee0ed6e5fe1491436" id="r_a137ed1576cb50e7ee0ed6e5fe1491436"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TransferFunction.html#a137ed1576cb50e7ee0ed6e5fe1491436">den</a></td></tr>
-<tr class="memdesc:a137ed1576cb50e7ee0ed6e5fe1491436"><td class="mdescLeft">&#160;</td><td class="mdescRight">Monic denominator [1, a1, …, an]; den[0] must equal 1.  <br /></td></tr>
+<tr class="memdesc:a137ed1576cb50e7ee0ed6e5fe1491436"><td class="mdescLeft">&#160;</td><td class="mdescRight">Monic denominator [1, a1, ..., an]; den[0] must equal 1.  <br /></td></tr>
 <tr class="separator:a137ed1576cb50e7ee0ed6e5fe1491436"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae97ba6406688b691461c2e86beb8181e" id="r_ae97ba6406688b691461c2e86beb8181e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TransferFunction.html#ae97ba6406688b691461c2e86beb8181e">Ts</a></td></tr>
 <tr class="memdesc:ae97ba6406688b691461c2e86beb8181e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time [s].  <br /></td></tr>
 <tr class="separator:ae97ba6406688b691461c2e86beb8181e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Discrete-time transfer function in z⁻¹ polynomial form. </p>
-<div class="fragment"><div class="line">H(z⁻¹) = (b0 + b1·z⁻¹ + … + bm·z⁻ᵐ)</div>
-<div class="line">          ─────────────────────────────</div>
-<div class="line">          (1  + a1·z⁻¹ + … + an·z⁻ⁿ)</div>
+<div class="textblock"><p>Discrete-time transfer function in z^-^1 polynomial form. </p>
+<div class="fragment"><div class="line">H(z^-^1) = (b0 + b1.z^-^1 + ... + bm.z^-^m)</div>
+<div class="line">          -----------------------------</div>
+<div class="line">          (1  + a1.z^-^1 + ... + an.z^-^n)</div>
 </div><!-- fragment --><p>Equivalent MATLAB: &lsquo;G = tf(num, den, Ts, 'Variable&rsquo;, 'z^-1')` </p>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00031">31</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
@@ -160,15 +160,15 @@ Public Attributes</h2></td></tr>
 <p>Construct and validate a transfer function. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">numerator</td><td>Numerator coefficient vector [b0, b1, …, bm]. </td></tr>
-    <tr><td class="paramname">denominator</td><td>Monic denominator vector [1, a1, …, an]. </td></tr>
+    <tr><td class="paramname">numerator</td><td>Numerator coefficient vector [b0, b1, ..., bm]. </td></tr>
+    <tr><td class="paramname">denominator</td><td>Monic denominator vector [1, a1, ..., an]. </td></tr>
     <tr><td class="paramname">sampleTime</td><td>Sample period Ts [s]. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname">std::invalid_argument</td><td>If denominator is empty or den[0] ≠ 1. </td></tr>
+    <tr><td class="paramname">std::invalid_argument</td><td>If denominator is empty or den[0] != 1. </td></tr>
   </table>
   </dd>
 </dl>
@@ -226,7 +226,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Monic denominator [1, a1, …, an]; den[0] must equal 1. </p>
+<p>Monic denominator [1, a1, ..., an]; den[0] must equal 1. </p>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00034">34</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
@@ -246,7 +246,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Numerator coefficients [b0, b1, …, bm]. </p>
+<p>Numerator coefficients [b0, b1, ..., bm]. </p>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00033">33</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 

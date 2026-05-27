@@ -89,19 +89,19 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a335b1cb5ea52f3a5b02864cd0ec41882" id="r_a335b1cb5ea52f3a5b02864cd0ec41882"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1PIDParams.html">PIDParams</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1CohenCoonTuner.html#a335b1cb5ea52f3a5b02864cd0ec41882">tuneImpl</a> (const <a class="el" href="structctrl_1_1StepResponseTuner_1_1FOPDTModel.html">StepResponseTuner::FOPDTModel</a> &amp;m, double Ts)</td></tr>
-<tr class="memdesc:a335b1cb5ea52f3a5b02864cd0ec41882"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute PID parameters from a FOPDT model — unchecked.  <br /></td></tr>
+<tr class="memdesc:a335b1cb5ea52f3a5b02864cd0ec41882"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute PID parameters from a FOPDT model - unchecked.  <br /></td></tr>
 <tr class="separator:a335b1cb5ea52f3a5b02864cd0ec41882"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c146227e48a93d01a6280c2cfdc398a" id="r_a5c146227e48a93d01a6280c2cfdc398a"><td class="memTemplParams" colspan="2">template&lt;typename C &gt; </td></tr>
 <tr class="memitem:a5c146227e48a93d01a6280c2cfdc398a"><td class="memTemplItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1PIDParams.html">PIDParams</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classctrl_1_1CohenCoonTuner.html#a5c146227e48a93d01a6280c2cfdc398a">tuneFor</a> (const <a class="el" href="structctrl_1_1StepResponseTuner_1_1FOPDTModel.html">StepResponseTuner::FOPDTModel</a> &amp;m, double Ts)</td></tr>
-<tr class="memdesc:a5c146227e48a93d01a6280c2cfdc398a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type-checked wrapper — hard compiler error for non-PID controllers.  <br /></td></tr>
+<tr class="memdesc:a5c146227e48a93d01a6280c2cfdc398a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type-checked wrapper - hard compiler error for non-PID controllers.  <br /></td></tr>
 <tr class="separator:a5c146227e48a93d01a6280c2cfdc398a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Cohen-Coon PID tuner from a FOPDT model. </p>
-<p>More accurate than ZN for processes where θ/τ ∈ [0.1, 1.0].</p>
-<p>Formulas (PID form, r = θ/τ): </p><div class="fragment"><div class="line">Kp = (τ / (K·θ)) · (4/3 + r/4)</div>
-<div class="line">Ti = θ · (32 + 6r) / (13 + 8r)</div>
-<div class="line">Td = 4θ / (11 + 2r)</div>
+<p>More accurate than ZN for processes where theta/tau \in [0.1, 1.0].</p>
+<p>Formulas (PID form, r = theta/tau): </p><div class="fragment"><div class="line">Kp = (tau / (K.theta)) . (4/3 + r/4)</div>
+<div class="line">Ti = theta . (32 + 6r) / (13 + 8r)</div>
+<div class="line">Td = 4theta / (11 + 2r)</div>
 </div><!-- fragment --><dl class="section see"><dt>See also</dt><dd>Cohen &amp; Coon, "Theoretical Consideration of Retarded Control" (1953). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00507">507</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
@@ -142,7 +142,7 @@ template&lt;typename C &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Type-checked wrapper — hard compiler error for non-PID controllers. </p>
+<p>Type-checked wrapper - hard compiler error for non-PID controllers. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">C</td><td>Must have <code>supports_heuristic_pid == true</code>. </td></tr>
@@ -190,11 +190,11 @@ template&lt;typename C &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Compute PID parameters from a FOPDT model — unchecked. </p>
+<p>Compute PID parameters from a FOPDT model - unchecked. </p>
 <p>Obtain <code>m</code> via <a class="el" href="classctrl_1_1StepResponseTuner.html#ab2b49beb2dc2105275ad5c9f4d23e422" title="Identify a FOPDT model from open-loop step-response data.">StepResponseTuner::identify()</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">m</td><td>FOPDT model (K, τ, θ). </td></tr>
+    <tr><td class="paramname">m</td><td>FOPDT model (K, tau, theta). </td></tr>
     <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
   </table>
   </dd>

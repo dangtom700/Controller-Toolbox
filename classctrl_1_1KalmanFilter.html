@@ -92,22 +92,22 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a226052d8a01efa2589f81e7c52964d0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct the Kalman filter.  <br /></td></tr>
 <tr class="separator:a226052d8a01efa2589f81e7c52964d0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf9a9b384da9b6fa0decdaf86b3dd778" id="r_acf9a9b384da9b6fa0decdaf86b3dd778"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#acf9a9b384da9b6fa0decdaf86b3dd778">predict</a> (const Eigen::VectorXd &amp;u)</td></tr>
-<tr class="memdesc:acf9a9b384da9b6fa0decdaf86b3dd778"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prediction step — advance state estimate with the previous control input.  <br /></td></tr>
+<tr class="memdesc:acf9a9b384da9b6fa0decdaf86b3dd778"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prediction step - advance state estimate with the previous control input.  <br /></td></tr>
 <tr class="separator:acf9a9b384da9b6fa0decdaf86b3dd778"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a555b459680345323b9670665dfa9417c" id="r_a555b459680345323b9670665dfa9417c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#a555b459680345323b9670665dfa9417c">update</a> (const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u_current)</td></tr>
-<tr class="memdesc:a555b459680345323b9670665dfa9417c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update step — incorporate a new measurement.  <br /></td></tr>
+<tr class="memdesc:a555b459680345323b9670665dfa9417c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update step - incorporate a new measurement.  <br /></td></tr>
 <tr class="separator:a555b459680345323b9670665dfa9417c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ef0abd00aa2240bc3c065f19ea34b52" id="r_a3ef0abd00aa2240bc3c065f19ea34b52"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#a3ef0abd00aa2240bc3c065f19ea34b52">step</a> (const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u_prev, std::optional&lt; std::reference_wrapper&lt; const Eigen::VectorXd &gt; &gt; u_current=std::nullopt)</td></tr>
-<tr class="memdesc:a3ef0abd00aa2240bc3c065f19ea34b52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Combined predict + update — most common usage pattern.  <br /></td></tr>
+<tr class="memdesc:a3ef0abd00aa2240bc3c065f19ea34b52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Combined predict + update - most common usage pattern.  <br /></td></tr>
 <tr class="separator:a3ef0abd00aa2240bc3c065f19ea34b52"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1aae1aea67146371347c0a2cf3ca7c76" id="r_a1aae1aea67146371347c0a2cf3ca7c76"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#a1aae1aea67146371347c0a2cf3ca7c76">reset</a> ()</td></tr>
 <tr class="memdesc:a1aae1aea67146371347c0a2cf3ca7c76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset state estimate to zero and covariance to P0 (or identity).  <br /></td></tr>
 <tr class="separator:a1aae1aea67146371347c0a2cf3ca7c76"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a05e97ec40d3744a1b1945f5b02e4b6b4" id="r_a05e97ec40d3744a1b1945f5b02e4b6b4"><td class="memItemLeft" align="right" valign="top">const Eigen::VectorXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#a05e97ec40d3744a1b1945f5b02e4b6b4">state</a> () const</td></tr>
-<tr class="memdesc:a05e97ec40d3744a1b1945f5b02e4b6b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current state estimate x̂[k|k] (n × 1).  <br /></td></tr>
+<tr class="memdesc:a05e97ec40d3744a1b1945f5b02e4b6b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current state estimate x^[k|k] (n * 1).  <br /></td></tr>
 <tr class="separator:a05e97ec40d3744a1b1945f5b02e4b6b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb4640d57a1e7ea68acf15c571fab7ba" id="r_afb4640d57a1e7ea68acf15c571fab7ba"><td class="memItemLeft" align="right" valign="top">const Eigen::MatrixXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#afb4640d57a1e7ea68acf15c571fab7ba">covariance</a> () const</td></tr>
-<tr class="memdesc:afb4640d57a1e7ea68acf15c571fab7ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current error covariance P[k|k] (n × n).  <br /></td></tr>
+<tr class="memdesc:afb4640d57a1e7ea68acf15c571fab7ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current error covariance P[k|k] (n * n).  <br /></td></tr>
 <tr class="separator:afb4640d57a1e7ea68acf15c571fab7ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2f7253fb0abf98aa9cdaa8fc5ee1b1b" id="r_ab2f7253fb0abf98aa9cdaa8fc5ee1b1b"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#ab2f7253fb0abf98aa9cdaa8fc5ee1b1b">sampleTime</a> () const</td></tr>
 <tr class="memdesc:ab2f7253fb0abf98aa9cdaa8fc5ee1b1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
@@ -160,9 +160,9 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">plant</td><td>Linear discrete-time model (A, B, C, D, Ts). </td></tr>
-    <tr><td class="paramname">Q_noise</td><td>Process noise covariance (n × n, positive semi-definite). </td></tr>
-    <tr><td class="paramname">R_noise</td><td>Measurement noise covariance (p × p, positive definite). </td></tr>
-    <tr><td class="paramname">P0</td><td>Initial error covariance (n × n). Defaults to identity when empty. </td></tr>
+    <tr><td class="paramname">Q_noise</td><td>Process noise covariance (n * n, positive semi-definite). </td></tr>
+    <tr><td class="paramname">R_noise</td><td>Measurement noise covariance (p * p, positive definite). </td></tr>
+    <tr><td class="paramname">P0</td><td>Initial error covariance (n * n). Defaults to identity when empty. </td></tr>
   </table>
   </dd>
 </dl>
@@ -197,7 +197,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Current error covariance P[k|k] (n × n). </p>
+<p>Current error covariance P[k|k] (n * n). </p>
 
 <p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00104">104</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
 
@@ -219,10 +219,10 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Prediction step — advance state estimate with the previous control input. </p>
+<p>Prediction step - advance state estimate with the previous control input. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">u</td><td>Control input u[k−1] applied at the last sample. </td></tr>
+    <tr><td class="paramname">u</td><td>Control input u[k-1] applied at the last sample. </td></tr>
   </table>
   </dd>
 </dl>
@@ -310,7 +310,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Current state estimate x̂[k|k] (n × 1). </p>
+<p>Current state estimate x^[k|k] (n * 1). </p>
 
 <p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00101">101</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
 
@@ -348,13 +348,13 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Combined predict + update — most common usage pattern. </p>
+<p>Combined predict + update - most common usage pattern. </p>
 <p>Equivalent to calling predict(u_prev) followed by update(y, u_current).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">y</td><td>Measurement vector y[k]. </td></tr>
-    <tr><td class="paramname">u_prev</td><td>Control input u[k−1] (predict step). </td></tr>
-    <tr><td class="paramname">u_current</td><td>Control input u[k] (update step, D·u feedthrough). Defaults to nullopt, which falls back to u_prev — correct for D = 0 plants. For D ≠ 0, pass the actual current input to avoid a one-step feedthrough bias. </td></tr>
+    <tr><td class="paramname">u_prev</td><td>Control input u[k-1] (predict step). </td></tr>
+    <tr><td class="paramname">u_current</td><td>Control input u[k] (update step, D.u feedthrough). Defaults to nullopt, which falls back to u_prev - correct for D = 0 plants. For D != 0, pass the actual current input to avoid a one-step feedthrough bias. </td></tr>
   </table>
   </dd>
 </dl>
@@ -391,11 +391,11 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Update step — incorporate a new measurement. </p>
+<p>Update step - incorporate a new measurement. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">y</td><td>Measurement vector y[k]. </td></tr>
-    <tr><td class="paramname">u_current</td><td>Control input u[k] applied at the current sample (used in D·u feedthrough). </td></tr>
+    <tr><td class="paramname">u_current</td><td>Control input u[k] applied at the current sample (used in D.u feedthrough). </td></tr>
   </table>
   </dd>
 </dl>

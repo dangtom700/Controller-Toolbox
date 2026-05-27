@@ -99,10 +99,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RelayTunerConfig.html">ctrl::RelayTunerConfig</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration for <a class="el" href="classctrl_1_1RelayAutoTuner.html" title="Åström-Hägglund relay feedback auto-tuner.">RelayAutoTuner</a>.  <a href="structctrl_1_1RelayTunerConfig.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration for <a class="el" href="classctrl_1_1RelayAutoTuner.html" title="Astrom-Hagglund relay feedback auto-tuner.">RelayAutoTuner</a>.  <a href="structctrl_1_1RelayTunerConfig.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RelayAutoTuner.html">ctrl::RelayAutoTuner</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Åström-Hägglund relay feedback auto-tuner.  <a href="classctrl_1_1RelayAutoTuner.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Astrom-Hagglund relay feedback auto-tuner.  <a href="classctrl_1_1RelayAutoTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1StepResponseTuner.html">ctrl::StepResponseTuner</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open-loop step-response FOPDT identifier and PID tuner.  <a href="classctrl_1_1StepResponseTuner.html#details">More...</a><br /></td></tr>
@@ -159,27 +159,27 @@ Enumerations</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Offline and online tuning utilities with compile-time type safety. </p>
 <p>Every tuner exposes two interfaces:</p><ul>
-<li><code>tuneImpl(…)</code> / <code>computePIDParams(…)</code> — unchecked, for internal use or when the controller type is already known.</li>
-<li><code>tuneFor&lt;C&gt;(…)</code> / <code>computePIDParamsFor&lt;C&gt;(…)</code> — template wrapper that triggers a <code>static_assert</code> (hard compiler error) when <code>C</code> is incompatible, with a diagnostic naming the correct tuner.</li>
+<li><code>tuneImpl(...)</code> / <code>computePIDParams(...)</code> - unchecked, for internal use or when the controller type is already known.</li>
+<li><code>tuneFor&lt;C&gt;(...)</code> / <code>computePIDParamsFor&lt;C&gt;(...)</code> - template wrapper that triggers a <code>static_assert</code> (hard compiler error) when <code>C</code> is incompatible, with a diagnostic naming the correct tuner.</li>
 </ul>
 <p><b>Tuners provided:</b></p><ul>
-<li>RelayAutoTuner — Åström-Hägglund relay feedback test → (Ku, Tu) → PIDParams.</li>
-<li>StepResponseTuner — Open-loop FOPDT identification → PIDParams.</li>
-<li>LQRWeightTuner — Bryson's rule / pole-placement hint → LQRParams.</li>
-<li>MPCHorizonTuner — Settling-time estimate → (Np, Nc, ρy, ρu) recommendation.</li>
-<li>ZieglerNicholsTuner — Standalone ZN from (Ku, Tu).</li>
-<li>CohenCoonTuner — FOPDT-based PID (Cohen &amp; Coon 1953).</li>
-<li>LoopShapingTuner — Crossover frequency + phase margin → LeadLagParams.</li>
-<li>KalmanWeightTuner — Noise levels → Qf / Rf for DiscreteLQG.</li>
+<li>RelayAutoTuner - Astrom-Hagglund relay feedback test -&gt; (Ku, Tu) -&gt; PIDParams.</li>
+<li>StepResponseTuner - Open-loop FOPDT identification -&gt; PIDParams.</li>
+<li>LQRWeightTuner - Bryson's rule / pole-placement hint -&gt; LQRParams.</li>
+<li>MPCHorizonTuner - Settling-time estimate -&gt; (Np, Nc, rhoy, rhou) recommendation.</li>
+<li>ZieglerNicholsTuner - Standalone ZN from (Ku, Tu).</li>
+<li>CohenCoonTuner - FOPDT-based PID (Cohen &amp; Coon 1953).</li>
+<li>LoopShapingTuner - Crossover frequency + phase margin -&gt; LeadLagParams.</li>
+<li>KalmanWeightTuner - Noise levels -&gt; Qf / Rf for DiscreteLQG.</li>
 </ul>
 <p><b>Strategies that are intentionally NOT included</b> (require external solvers):</p><ul>
-<li>H∞ / μ-synthesis — SLICOT, Python-control, or MATLAB.</li>
-<li>QFT — QFT Toolbox, QDESIGN.</li>
-<li>GA / PSO / DE — Optuna, DEAP.</li>
-<li>Bayesian optimisation — BoTorch / GPyOpt / scikit-optimize.</li>
-<li>MRAC / STR / IFT / VRFT — adaptive control; separate library.</li>
+<li>Hinf / mu-synthesis - SLICOT, Python-control, or MATLAB.</li>
+<li>QFT - QFT Toolbox, QDESIGN.</li>
+<li>GA / PSO / DE - Optuna, DEAP.</li>
+<li>Bayesian optimisation - BoTorch / GPyOpt / scikit-optimize.</li>
+<li>MRAC / STR / IFT / VRFT - adaptive control; separate library.</li>
 </ul>
-<dl class="section see"><dt>See also</dt><dd>Åström &amp; Hägglund, "PID Controllers: Theory, Design, and Tuning" (1988, 2006). </dd>
+<dl class="section see"><dt>See also</dt><dd>Astrom &amp; Hagglund, "PID Controllers: Theory, Design, and Tuning" (1988, 2006). </dd>
 <dd>
 Bryson &amp; Ho, "Applied Optimal Control" (1975). </dd>
 <dd>

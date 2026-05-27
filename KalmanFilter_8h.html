@@ -103,22 +103,22 @@ Namespaces</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete-time Linear Kalman Filter (LKF). </p>
 <p>Optimal state estimator for linear, time-invariant plants with Gaussian noise.</p>
-<p><b>Plant model:</b> </p><div class="fragment"><div class="line">x[k+1] = A·x[k] + B·u[k] + w[k],   w ~ N(0, Q_noise)</div>
-<div class="line">y[k]   = C·x[k] + D·u[k] + v[k],   v ~ N(0, R_noise)</div>
-</div><!-- fragment --><p><b>Predict step</b> (given control input u[k−1]): </p><div class="fragment"><div class="line">x̂[k|k−1] = A·x̂[k−1|k−1] + B·u[k−1]</div>
-<div class="line">P[k|k−1]  = A·P[k−1|k−1]·Aᵀ + Q</div>
-</div><!-- fragment --><p><b>Update step</b> (given measurement y[k]): </p><div class="fragment"><div class="line">S[k]    = C·P[k|k−1]·Cᵀ + R</div>
-<div class="line">K[k]    = P[k|k−1]·Cᵀ·S⁻¹</div>
-<div class="line">x̂[k|k]  = x̂[k|k−1] + K·(y[k] − C·x̂[k|k−1] − D·u[k])</div>
-<div class="line">P[k|k]  = (I − K·C)·P[k|k−1]           (Joseph form <span class="keywordflow">for</span> numerical stability)</div>
-</div><!-- fragment --><dl class="section user"><dt>Tuning Q and R — NEES consistency test</dt><dd>Run the filter in simulation alongside the true state and compute the Normalised Estimation Error Squared (NEES) at each step: <div class="fragment"><div class="line">ε[k] = (x_true[k] − x̂[k|k])ᵀ · P[k|k]⁻¹ · (x_true[k] − x̂[k|k])</div>
-</div><!-- fragment --> A consistent filter has E[ε[k]] ≈ n (state dimension). Diagnostic rules:<ul>
-<li>E[ε] &gt;&gt; n → filter overconfident: Q too small or R too large (increase Q or R).</li>
-<li>E[ε] &lt;&lt; n → filter underconfident: Q too large or R too small (decrease Q or R).</li>
-<li>E[ε] ≈ n but P diverges → plant–model mismatch; verify A, B, C matrices.</li>
+<p><b>Plant model:</b> </p><div class="fragment"><div class="line">x[k+1] = A.x[k] + B.u[k] + w[k],   w ~ N(0, Q_noise)</div>
+<div class="line">y[k]   = C.x[k] + D.u[k] + v[k],   v ~ N(0, R_noise)</div>
+</div><!-- fragment --><p><b>Predict step</b> (given control input u[k-1]): </p><div class="fragment"><div class="line">x^[k|k-1] = A.x^[k-1|k-1] + B.u[k-1]</div>
+<div class="line">P[k|k-1]  = A.P[k-1|k-1].Aᵀ + Q</div>
+</div><!-- fragment --><p><b>Update step</b> (given measurement y[k]): </p><div class="fragment"><div class="line">S[k]    = C.P[k|k-1].Cᵀ + R</div>
+<div class="line">K[k]    = P[k|k-1].Cᵀ.S^-^1</div>
+<div class="line">x^[k|k]  = x^[k|k-1] + K.(y[k] - C.x^[k|k-1] - D.u[k])</div>
+<div class="line">P[k|k]  = (I - K.C).P[k|k-1]           (Joseph form <span class="keywordflow">for</span> numerical stability)</div>
+</div><!-- fragment --><dl class="section user"><dt>Tuning Q and R - NEES consistency test</dt><dd>Run the filter in simulation alongside the true state and compute the Normalised Estimation Error Squared (NEES) at each step: <div class="fragment"><div class="line">epsilon[k] = (x_true[k] - x^[k|k])ᵀ . P[k|k]^-^1 . (x_true[k] - x^[k|k])</div>
+</div><!-- fragment --> A consistent filter has E[epsilon[k]] approx = n (state dimension). Diagnostic rules:<ul>
+<li>E[epsilon] &gt;&gt; n -&gt; filter overconfident: Q too small or R too large (increase Q or R).</li>
+<li>E[epsilon] &lt;&lt; n -&gt; filter underconfident: Q too large or R too small (decrease Q or R).</li>
+<li>E[epsilon] approx = n but P diverges -&gt; plant-model mismatch; verify A, B, C matrices.</li>
 </ul>
 </dd></dl>
-<dl class="section see"><dt>See also</dt><dd>Bar-Shalom, Li &amp; Kirubarajan, "Estimation with Applications" §5.4 (2001). </dd>
+<dl class="section see"><dt>See also</dt><dd>Bar-Shalom, Li &amp; Kirubarajan, "Estimation with Applications" Section 5.4 (2001). </dd>
 <dd>
 Kalman, "A New Approach to Linear Filtering" (1960). </dd>
 <dd>

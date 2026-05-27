@@ -104,8 +104,8 @@ Namespaces</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>IActuator adapter backed by a SimPlant. </p>
 <p><code>write(u)</code> applies the control input to the plant with two safety guards:</p><ul>
-<li><b>NaN/Inf rejection</b> — non-finite values are discarded and the last valid output is repeated. This mirrors the "hold-last" fail-safe behaviour of real hardware.</li>
-<li><b>Saturation</b> — an optional [uMin, uMax] clamp (default: ±∞) is applied before forwarding to the plant, mirroring physical actuator limits.</li>
+<li><b>NaN/Inf rejection</b> - non-finite values are discarded and the last valid output is repeated. This mirrors the "hold-last" fail-safe behaviour of real hardware.</li>
+<li><b>Saturation</b> - an optional [uMin, uMax] clamp (default: +/-inf) is applied before forwarding to the plant, mirroring physical actuator limits.</li>
 </ul>
 <p><code>lastOutput()</code> returns the most recent finite, saturated value actually applied. </p>
 

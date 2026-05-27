@@ -87,13 +87,13 @@ $(function() {
 struct ctrl::ControllerTraits&lt; C &gt;</div><p>Compile-time tuning capability traits for a controller type <code>C</code>. </p>
 <p>The primary template is intentionally undefined; using it for an unregistered type produces a clear <code>static_assert</code> diagnostic that names the missing specialisation.</p>
 <p>Each specialisation exposes:</p><ul>
-<li><code>category</code> — tag type (<a class="el" href="structctrl_1_1tag_1_1PID.html" title="DiscretePID.">tag::PID</a>, <a class="el" href="structctrl_1_1tag_1_1StateFeedback.html" title="DiscreteLQR (full-state feedback).">tag::StateFeedback</a>, …).</li>
-<li><code>name</code> — human-readable string for diagnostics.</li>
-<li><code>supports_heuristic_pid</code> — ZN, Cohen-Coon, Lambda/IMC, Relay, AMIGO.</li>
-<li><code>supports_lqr_tuning</code> — Bryson's rule, pole-placement hint.</li>
-<li><code>supports_mpc_tuning</code> — <a class="el" href="classctrl_1_1MPCHorizonTuner.html" title="MPC horizon and weight recommender for DiscreteMPC.">MPCHorizonTuner</a>.</li>
-<li><code>supports_freq_tuning</code> — <a class="el" href="classctrl_1_1LoopShapingTuner.html" title="Lead compensator designer for DiscreteLeadLag via frequency-domain loop shaping.">LoopShapingTuner</a> (lead/lag).</li>
-<li><code>supports_kalman_tuning</code> — Qf/Rf observer noise selection. </li>
+<li><code>category</code> - tag type (<a class="el" href="structctrl_1_1tag_1_1PID.html" title="DiscretePID.">tag::PID</a>, <a class="el" href="structctrl_1_1tag_1_1StateFeedback.html" title="DiscreteLQR (full-state feedback).">tag::StateFeedback</a>, ...).</li>
+<li><code>name</code> - human-readable string for diagnostics.</li>
+<li><code>supports_heuristic_pid</code> - ZN, Cohen-Coon, Lambda/IMC, Relay, AMIGO.</li>
+<li><code>supports_lqr_tuning</code> - Bryson's rule, pole-placement hint.</li>
+<li><code>supports_mpc_tuning</code> - <a class="el" href="classctrl_1_1MPCHorizonTuner.html" title="MPC horizon and weight recommender for DiscreteMPC.">MPCHorizonTuner</a>.</li>
+<li><code>supports_freq_tuning</code> - <a class="el" href="classctrl_1_1LoopShapingTuner.html" title="Lead compensator designer for DiscreteLeadLag via frequency-domain loop shaping.">LoopShapingTuner</a> (lead/lag).</li>
+<li><code>supports_kalman_tuning</code> - Qf/Rf observer noise selection. </li>
 </ul>
 
 <p class="definition">Definition at line <a class="el" href="ControllerTraits_8h_source.html#l00118">118</a> of file <a class="el" href="ControllerTraits_8h_source.html">ControllerTraits.h</a>.</p>

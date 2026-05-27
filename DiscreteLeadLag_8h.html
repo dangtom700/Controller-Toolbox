@@ -103,16 +103,16 @@ Namespaces</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete Lead, Lag, or Lead-Lag compensator (Tustin-discretised first-order IIR). </p>
-<p><b>Continuous form:</b> C(s) = K·(s + zc) / (s + pc)</p><ul>
+<p><b>Continuous form:</b> C(s) = K.(s + zc) / (s + pc)</p><ul>
 <li><b>Lead</b> (pc &gt; zc &gt; 0): adds positive phase, improves phase margin and closed-loop speed.</li>
 <li><b>Lag</b> (0 &lt; pc &lt; zc): adds low-frequency gain, improves steady-state accuracy.</li>
 </ul>
-<p><b>Tustin discretisation</b> (s = 2(z−1)/(Ts(z+1))): </p><div class="fragment"><div class="line">C(z) = (b0 + b1·z⁻¹) / (1 + a1·z⁻¹)</div>
+<p><b>Tustin discretisation</b> (s = 2(z-1)/(Ts(z+1))): </p><div class="fragment"><div class="line">C(z) = (b0 + b1.z^-^1) / (1 + a1.z^-^1)</div>
 <div class="line"> </div>
-<div class="line">b0 = K·(2/Ts + zc) / (2/Ts + pc)</div>
-<div class="line">b1 = K·(zc − 2/Ts) / (2/Ts + pc)</div>
-<div class="line">a1 = (pc − 2/Ts)   / (2/Ts + pc)</div>
-</div><!-- fragment --><p>Difference equation: y[k] = b0·u[k] + b1·u[k−1] − a1·y[k−1]</p>
+<div class="line">b0 = K.(2/Ts + zc) / (2/Ts + pc)</div>
+<div class="line">b1 = K.(zc - 2/Ts) / (2/Ts + pc)</div>
+<div class="line">a1 = (pc - 2/Ts)   / (2/Ts + pc)</div>
+</div><!-- fragment --><p>Difference equation: y[k] = b0.u[k] + b1.u[k-1] - a1.y[k-1]</p>
 <dl class="section see"><dt>See also</dt><dd>Franklin, Powell &amp; Emami-Naeini, "Feedback Control of Dynamic Systems". </dd>
 <dd>
 MATLAB c2d() with 'tustin' method. </dd></dl>

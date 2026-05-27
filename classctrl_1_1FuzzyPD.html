@@ -115,16 +115,16 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae4c811460986ea826a572bf1ff3f762c" id="r_ae4c811460986ea826a572bf1ff3f762c"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structctrl_1_1FuzzyPDParams.html">FuzzyPDParams</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FuzzyPD.html#ae4c811460986ea826a572bf1ff3f762c">params</a> () const</td></tr>
 <tr class="separator:ae4c811460986ea826a572bf1ff3f762c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d4fbca77923817e6136b4469ef430cb" id="r_a2d4fbca77923817e6136b4469ef430cb"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FuzzyPD.html#a2d4fbca77923817e6136b4469ef430cb">lastOutput</a> () const</td></tr>
-<tr class="memdesc:a2d4fbca77923817e6136b4469ef430cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Last computed control output u[k−1].  <br /></td></tr>
+<tr class="memdesc:a2d4fbca77923817e6136b4469ef430cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Last computed control output u[k-1].  <br /></td></tr>
 <tr class="separator:a2d4fbca77923817e6136b4469ef430cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classctrl_1_1IController"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classctrl_1_1IController')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classctrl_1_1IController.html">ctrl::IController</a></td></tr>
 <tr class="memitem:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController" id="r_a209dd6532b22278f93430a0757aae4c7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a209dd6532b22278f93430a0757aae4c7">~IController</a> ()=default</td></tr>
 <tr class="separator:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController" id="r_a9d81dd5427e094d72906d54dd5e6548e"><td class="memItemLeft" align="right" valign="top">virtual Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e">computeVec</a> (const Eigen::VectorXd &amp;signal)</td></tr>
-<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step — vector MIMO interface.  <br /></td></tr>
+<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step - vector MIMO interface.  <br /></td></tr>
 <tr class="separator:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController" id="r_a20821745ef7099941a9e9fdb6eeddd07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">bumplessInit</a> (double, double)</td></tr>
-<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation — prepares the controller for smooth activation.  <br /></td></tr>
+<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation - prepares the controller for smooth activation.  <br /></td></tr>
 <tr class="separator:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController" id="r_a2dc30a3b9bfb8b9649cef7218ad9e68b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b">isHealthy</a> () const</td></tr>
 <tr class="memdesc:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Health query for supervisory fault-tolerant control.  <br /></td></tr>
@@ -154,10 +154,10 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>5-term PD fuzzy controller implementing <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a>. </p>
-<p>Inputs: error e[k] and error-rate de[k] = (e[k] − e[k−1]) / Ts. Output: control effort u[k].</p>
+<p>Inputs: error e[k] and error-rate de[k] = (e[k] - e[k-1]) / Ts. Output: control effort u[k].</p>
 <p>Uses a standard 5-term partition (NL, NS, ZE, PS, PL) with triangular and shoulder membership functions and a 25-rule canonical diagonal Mamdani table.</p>
-<p><b>Scaling:</b> </p><div class="fragment"><div class="line">e_norm  = e  / e_scale   ∈ [-1, 1]</div>
-<div class="line">de_norm = de / de_scale  ∈ [-1, 1]</div>
+<p><b>Scaling:</b> </p><div class="fragment"><div class="line">e_norm  = e  / e_scale   \in [-1, 1]</div>
+<div class="line">de_norm = de / de_scale  \in [-1, 1]</div>
 <div class="line">u       = u_norm * u_scale</div>
 </div><!-- fragment --> 
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00356">356</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
@@ -200,7 +200,7 @@ Additional Inherited Members</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">p</td><td>Scaling and output limit parameters. </td></tr>
-    <tr><td class="paramname">sampleTime</td><td>Ts [s]; used to compute error-rate de = (e − e_prev) / Ts. </td></tr>
+    <tr><td class="paramname">sampleTime</td><td>Ts [s]; used to compute error-rate de = (e - e_prev) / Ts. </td></tr>
   </table>
   </dd>
 </dl>
@@ -237,7 +237,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Compute u[k] from tracking error e[k]. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">error</td><td>Tracking error e[k] = r[k] − y[k]. </td></tr>
+    <tr><td class="paramname">error</td><td>Tracking error e[k] = r[k] - y[k]. </td></tr>
   </table>
   </dd>
 </dl>
@@ -276,7 +276,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Last computed control output u[k−1]. </p>
+<p>Last computed control output u[k-1]. </p>
 
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00384">384</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 

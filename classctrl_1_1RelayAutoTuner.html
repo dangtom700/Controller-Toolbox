@@ -81,7 +81,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Åström-Hägglund relay feedback auto-tuner.  
+<p>Astrom-Hagglund relay feedback auto-tuner.  
  <a href="classctrl_1_1RelayAutoTuner.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>&gt;</code></p>
@@ -98,11 +98,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a776a5bd2d3aeb831a88009fef9dc2e55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns <code>true</code> when enough stable limit cycles have been collected.  <br /></td></tr>
 <tr class="separator:a776a5bd2d3aeb831a88009fef9dc2e55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ee752c1cbf7ed7c99a6800ceaad2a4e" id="r_a8ee752c1cbf7ed7c99a6800ceaad2a4e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1PIDParams.html">PIDParams</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RelayAutoTuner.html#a8ee752c1cbf7ed7c99a6800ceaad2a4e">computePIDParams</a> (<a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197f">PIDTuningRule</a> rule=<a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fa96062f227af0e4f48b5754f935e3fc63">PIDTuningRule::TyreusLuyben</a>, double lambda=-1.0) const</td></tr>
-<tr class="memdesc:a8ee752c1cbf7ed7c99a6800ceaad2a4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute PID parameters from the identified (Ku, Tu) — unchecked.  <br /></td></tr>
+<tr class="memdesc:a8ee752c1cbf7ed7c99a6800ceaad2a4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute PID parameters from the identified (Ku, Tu) - unchecked.  <br /></td></tr>
 <tr class="separator:a8ee752c1cbf7ed7c99a6800ceaad2a4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5a5b8cb673899257db48fd709a0eca79" id="r_a5a5b8cb673899257db48fd709a0eca79"><td class="memTemplParams" colspan="2">template&lt;typename C &gt; </td></tr>
 <tr class="memitem:a5a5b8cb673899257db48fd709a0eca79"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1PIDParams.html">PIDParams</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classctrl_1_1RelayAutoTuner.html#a5a5b8cb673899257db48fd709a0eca79">computePIDParamsFor</a> (<a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197f">PIDTuningRule</a> rule=<a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fa96062f227af0e4f48b5754f935e3fc63">PIDTuningRule::TyreusLuyben</a>, double lambda=-1.0) const</td></tr>
-<tr class="memdesc:a5a5b8cb673899257db48fd709a0eca79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type-checked wrapper — hard compiler error for non-PID controllers.  <br /></td></tr>
+<tr class="memdesc:a5a5b8cb673899257db48fd709a0eca79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type-checked wrapper - hard compiler error for non-PID controllers.  <br /></td></tr>
 <tr class="separator:a5a5b8cb673899257db48fd709a0eca79"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a091fd779e24f5d8b570067a16718b291" id="r_a091fd779e24f5d8b570067a16718b291"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RelayAutoTuner.html#a091fd779e24f5d8b570067a16718b291">ultimateGain</a> () const</td></tr>
 <tr class="memdesc:a091fd779e24f5d8b570067a16718b291"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ultimate gain Ku from the completed relay test.  <br /></td></tr>
@@ -112,15 +112,15 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab3b84f85821f4449d5b16ab912906a5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Åström-Hägglund relay feedback auto-tuner. </p>
-<p>Applies a relay ±d to the closed-loop plant, records the resulting limit cycle, then derives the ultimate gain Ku and ultimate period Tu: </p><div class="fragment"><div class="line">Ku = (4·d) / (π·a_y)   where a_y = peak-to-peak output amplitude / 2</div>
+<div class="textblock"><p>Astrom-Hagglund relay feedback auto-tuner. </p>
+<p>Applies a relay +/-d to the closed-loop plant, records the resulting limit cycle, then derives the ultimate gain Ku and ultimate period Tu: </p><div class="fragment"><div class="line">Ku = (4.d) / (pi.a_y)   where a_y = peak-to-peak output amplitude / 2</div>
 <div class="line">Tu = average oscillation period from zero-crossing times</div>
 </div><!-- fragment --><p><b>Usage pattern (simulation loop):</b> </p><div class="fragment"><div class="line"><span class="keywordflow">while</span> (!tuner.isDone()) {</div>
 <div class="line">    <span class="keywordtype">double</span> u = tuner.step(plant_output);</div>
 <div class="line">    <span class="comment">// apply u, advance plant simulation</span></div>
 <div class="line">}</div>
 <div class="line"><a class="code hl_struct" href="structctrl_1_1PIDParams.html">PIDParams</a> p = tuner.computePIDParams(<a class="code hl_enumvalue" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fa96062f227af0e4f48b5754f935e3fc63">PIDTuningRule::TyreusLuyben</a>);</div>
-<div class="ttc" id="anamespacectrl_html_ac903a5a20ba43db1acb05d549374197fa96062f227af0e4f48b5754f935e3fc63"><div class="ttname"><a href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fa96062f227af0e4f48b5754f935e3fc63">ctrl::PIDTuningRule::TyreusLuyben</a></div><div class="ttdeci">@ TyreusLuyben</div><div class="ttdoc">Conservative ZN variant — better load rejection (Tyreus &amp; Luyben 1992).</div></div>
+<div class="ttc" id="anamespacectrl_html_ac903a5a20ba43db1acb05d549374197fa96062f227af0e4f48b5754f935e3fc63"><div class="ttname"><a href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fa96062f227af0e4f48b5754f935e3fc63">ctrl::PIDTuningRule::TyreusLuyben</a></div><div class="ttdeci">@ TyreusLuyben</div><div class="ttdoc">Conservative ZN variant - better load rejection (Tyreus &amp; Luyben 1992).</div></div>
 <div class="ttc" id="astructctrl_1_1PIDParams_html"><div class="ttname"><a href="structctrl_1_1PIDParams.html">ctrl::PIDParams</a></div><div class="ttdoc">Tuning parameters for DiscretePID.</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00035">DiscretePID.h:36</a></div></div>
 </div><!-- fragment --> 
 <p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00098">98</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
@@ -191,11 +191,11 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Compute PID parameters from the identified (Ku, Tu) — unchecked. </p>
+<p>Compute PID parameters from the identified (Ku, Tu) - unchecked. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">rule</td><td>PID tuning rule to apply. </td></tr>
-    <tr><td class="paramname">lambda</td><td>Closed-loop time constant for IMC (−1 = auto). </td></tr>
+    <tr><td class="paramname">lambda</td><td>Closed-loop time constant for IMC (-1 = auto). </td></tr>
   </table>
   </dd>
 </dl>
@@ -245,7 +245,7 @@ template&lt;typename C &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Type-checked wrapper — hard compiler error for non-PID controllers. </p>
+<p>Type-checked wrapper - hard compiler error for non-PID controllers. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">C</td><td>Target controller type. Must have <code><a class="el" href="structctrl_1_1ControllerTraits.html" title="Compile-time tuning capability traits for a controller type C.">ControllerTraits</a>&lt;C&gt;::supports_heuristic_pid == true</code>. </td></tr>
@@ -255,7 +255,7 @@ template&lt;typename C &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">rule</td><td>PID tuning rule. </td></tr>
-    <tr><td class="paramname">lambda</td><td>IMC closed-loop time constant (−1 = auto). </td></tr>
+    <tr><td class="paramname">lambda</td><td>IMC closed-loop time constant (-1 = auto). </td></tr>
   </table>
   </dd>
 </dl>
@@ -319,7 +319,7 @@ template&lt;typename C &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Relay output u[k] ∈ {−d, +d}. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Relay output u[k] \in {-d, +d}. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="ControllerTuner_8cpp_source.html#l00020">20</a> of file <a class="el" href="ControllerTuner_8cpp_source.html">ControllerTuner.cpp</a>.</p>
 

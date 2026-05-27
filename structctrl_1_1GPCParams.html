@@ -92,16 +92,16 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:ac973ff63905d8be6ffbc6a71a7174b3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prediction horizon [steps].  <br /></td></tr>
 <tr class="separator:ac973ff63905d8be6ffbc6a71a7174b3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae456e552591711cddf0be7c36e260270" id="r_ae456e552591711cddf0be7c36e260270"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GPCParams.html#ae456e552591711cddf0be7c36e260270">Nu</a> = 3</td></tr>
-<tr class="memdesc:ae456e552591711cddf0be7c36e260270"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control horizon [steps], Nu ≤ Np.  <br /></td></tr>
+<tr class="memdesc:ae456e552591711cddf0be7c36e260270"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control horizon [steps], Nu &lt;= Np.  <br /></td></tr>
 <tr class="separator:ae456e552591711cddf0be7c36e260270"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04e39d437974efd16386886b54f8fe6d" id="r_a04e39d437974efd16386886b54f8fe6d"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GPCParams.html#a04e39d437974efd16386886b54f8fe6d">rho_y</a> = 1.0</td></tr>
-<tr class="memdesc:a04e39d437974efd16386886b54f8fe6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output tracking weight (Qy = ρy·I).  <br /></td></tr>
+<tr class="memdesc:a04e39d437974efd16386886b54f8fe6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output tracking weight (Qy = rhoy.I).  <br /></td></tr>
 <tr class="separator:a04e39d437974efd16386886b54f8fe6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf74e670d7aa2e5823b23f42b4f6d29e" id="r_adf74e670d7aa2e5823b23f42b4f6d29e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GPCParams.html#adf74e670d7aa2e5823b23f42b4f6d29e">rho_u</a> = 0.1</td></tr>
-<tr class="memdesc:adf74e670d7aa2e5823b23f42b4f6d29e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move suppression weight (Ru = ρu·I).  <br /></td></tr>
+<tr class="memdesc:adf74e670d7aa2e5823b23f42b4f6d29e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move suppression weight (Ru = rhou.I).  <br /></td></tr>
 <tr class="separator:adf74e670d7aa2e5823b23f42b4f6d29e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a10fb636e34f7fac3b77bec9ec907cbf0" id="r_a10fb636e34f7fac3b77bec9ec907cbf0"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GPCParams.html#a10fb636e34f7fac3b77bec9ec907cbf0">alpha</a> = 0.0</td></tr>
-<tr class="memdesc:a10fb636e34f7fac3b77bec9ec907cbf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference trajectory softening factor α ∈ [0, 1).  <br /></td></tr>
+<tr class="memdesc:a10fb636e34f7fac3b77bec9ec907cbf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference trajectory softening factor alpha \in [0, 1).  <br /></td></tr>
 <tr class="separator:a10fb636e34f7fac3b77bec9ec907cbf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a47abdc1b37a51074235129d5650248cf" id="r_a47abdc1b37a51074235129d5650248cf"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GPCParams.html#a47abdc1b37a51074235129d5650248cf">uMin</a> = -1e9</td></tr>
 <tr class="memdesc:a47abdc1b37a51074235129d5650248cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard lower limit on u.  <br /></td></tr>
@@ -110,16 +110,16 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a5e769e0906cbf64303cc1c93e1749620"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard upper limit on u.  <br /></td></tr>
 <tr class="separator:a5e769e0906cbf64303cc1c93e1749620"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a34f1dae381d27a812cf721fd99975c7d" id="r_a34f1dae381d27a812cf721fd99975c7d"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GPCParams.html#a34f1dae381d27a812cf721fd99975c7d">duMin</a> = -1e9</td></tr>
-<tr class="memdesc:a34f1dae381d27a812cf721fd99975c7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard lower limit on Δu.  <br /></td></tr>
+<tr class="memdesc:a34f1dae381d27a812cf721fd99975c7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard lower limit on Deltau.  <br /></td></tr>
 <tr class="separator:a34f1dae381d27a812cf721fd99975c7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e2582585b776464456fdcd9f4831f27" id="r_a1e2582585b776464456fdcd9f4831f27"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GPCParams.html#a1e2582585b776464456fdcd9f4831f27">duMax</a> = 1e9</td></tr>
-<tr class="memdesc:a1e2582585b776464456fdcd9f4831f27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard upper limit on Δu.  <br /></td></tr>
+<tr class="memdesc:a1e2582585b776464456fdcd9f4831f27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard upper limit on Deltau.  <br /></td></tr>
 <tr class="separator:a1e2582585b776464456fdcd9f4831f27"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a22be725bbd88ccfdfba1e5fa0a768ce5" id="r_a22be725bbd88ccfdfba1e5fa0a768ce5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GPCParams.html#a22be725bbd88ccfdfba1e5fa0a768ce5">qpMaxIter</a> = 200</td></tr>
 <tr class="memdesc:a22be725bbd88ccfdfba1e5fa0a768ce5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gradient-projection iteration limit.  <br /></td></tr>
 <tr class="separator:a22be725bbd88ccfdfba1e5fa0a768ce5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b94cd8e07a684a3034391cbf91e6e9b" id="r_a2b94cd8e07a684a3034391cbf91e6e9b"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GPCParams.html#a2b94cd8e07a684a3034391cbf91e6e9b">qpTol</a> = 1e-8</td></tr>
-<tr class="memdesc:a2b94cd8e07a684a3034391cbf91e6e9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convergence tolerance (‖Δx‖∞).  <br /></td></tr>
+<tr class="memdesc:a2b94cd8e07a684a3034391cbf91e6e9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convergence tolerance (||Deltax||inf).  <br /></td></tr>
 <tr class="separator:a2b94cd8e07a684a3034391cbf91e6e9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -139,8 +139,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Reference trajectory softening factor α ∈ [0, 1). </p>
-<p>α = 0 recovers a step reference (same as <a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>). α → 1 produces a very soft approach, reducing overshoot without tuning derivative weights. </p>
+<p>Reference trajectory softening factor alpha \in [0, 1). </p>
+<p>alpha = 0 recovers a step reference (same as <a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>). alpha -&gt; 1 produces a very soft approach, reducing overshoot without tuning derivative weights. </p>
 
 <p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00056">56</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
@@ -160,7 +160,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Hard upper limit on Δu. </p>
+<p>Hard upper limit on Deltau. </p>
 
 <p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00061">61</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
@@ -180,7 +180,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Hard lower limit on Δu. </p>
+<p>Hard lower limit on Deltau. </p>
 
 <p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00060">60</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
@@ -220,7 +220,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Control horizon [steps], Nu ≤ Np. </p>
+<p>Control horizon [steps], Nu &lt;= Np. </p>
 
 <p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00046">46</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
@@ -260,7 +260,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Convergence tolerance (‖Δx‖∞). </p>
+<p>Convergence tolerance (||Deltax||inf). </p>
 
 <p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00063">63</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
@@ -280,7 +280,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Move suppression weight (Ru = ρu·I). </p>
+<p>Move suppression weight (Ru = rhou.I). </p>
 
 <p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00048">48</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
@@ -298,7 +298,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Output tracking weight (Qy = ρy·I). </p>
+<p>Output tracking weight (Qy = rhoy.I). </p>
 
 <p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00047">47</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 

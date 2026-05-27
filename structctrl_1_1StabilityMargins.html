@@ -92,18 +92,18 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a7ea63c5cb0df3c6abef4dd0f2094b592"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gain margin GM [dB]: how much loop gain can increase before instability.  <br /></td></tr>
 <tr class="separator:a7ea63c5cb0df3c6abef4dd0f2094b592"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a545c8a69805fa7a09aa44f7a7e64824a" id="r_a545c8a69805fa7a09aa44f7a7e64824a"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StabilityMargins.html#a545c8a69805fa7a09aa44f7a7e64824a">phaseMarginDeg</a></td></tr>
-<tr class="memdesc:a545c8a69805fa7a09aa44f7a7e64824a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase margin PM [°]: phase above −180° at the gain-crossover frequency.  <br /></td></tr>
+<tr class="memdesc:a545c8a69805fa7a09aa44f7a7e64824a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase margin PM [^\circ]: phase above -180^\circ at the gain-crossover frequency.  <br /></td></tr>
 <tr class="separator:a545c8a69805fa7a09aa44f7a7e64824a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3881a81fafb13778a075225a406a6a6" id="r_ad3881a81fafb13778a075225a406a6a6"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StabilityMargins.html#ad3881a81fafb13778a075225a406a6a6">wCrossoverGain</a></td></tr>
-<tr class="memdesc:ad3881a81fafb13778a075225a406a6a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gain-crossover frequency ωc [rad/s] where |G(jωc)| = 1 (0 dB).  <br /></td></tr>
+<tr class="memdesc:ad3881a81fafb13778a075225a406a6a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gain-crossover frequency omegac [rad/s] where |G(jomegac)| = 1 (0 dB).  <br /></td></tr>
 <tr class="separator:ad3881a81fafb13778a075225a406a6a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3e1fcf9625811ebe2c2b31ace3caf21e" id="r_a3e1fcf9625811ebe2c2b31ace3caf21e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StabilityMargins.html#a3e1fcf9625811ebe2c2b31ace3caf21e">wCrossoverPhase</a></td></tr>
-<tr class="memdesc:a3e1fcf9625811ebe2c2b31ace3caf21e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase-crossover frequency ωp [rad/s] where ∠G(jωp) = −180°.  <br /></td></tr>
+<tr class="memdesc:a3e1fcf9625811ebe2c2b31ace3caf21e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase-crossover frequency omegap [rad/s] where \angleG(jomegap) = -180^\circ.  <br /></td></tr>
 <tr class="separator:a3e1fcf9625811ebe2c2b31ace3caf21e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Stability margins for a SISO open-loop plant. </p>
-<p>A value of infinity indicates the corresponding frequency crossing was not found on the evaluation grid — a system with very high margins or a critically damped plant may legitimately have no phase or gain crossover. </p>
+<p>A value of infinity indicates the corresponding frequency crossing was not found on the evaluation grid - a system with very high margins or a critically damped plant may legitimately have no phase or gain crossover. </p>
 
 <p class="definition">Definition at line <a class="el" href="SystemAnalysis_8h_source.html#l00022">22</a> of file <a class="el" href="SystemAnalysis_8h_source.html">SystemAnalysis.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
@@ -139,7 +139,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Phase margin PM [°]: phase above −180° at the gain-crossover frequency. </p>
+<p>Phase margin PM [^\circ]: phase above -180^\circ at the gain-crossover frequency. </p>
 
 <p class="definition">Definition at line <a class="el" href="SystemAnalysis_8h_source.html#l00025">25</a> of file <a class="el" href="SystemAnalysis_8h_source.html">SystemAnalysis.h</a>.</p>
 
@@ -159,7 +159,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gain-crossover frequency ωc [rad/s] where |G(jωc)| = 1 (0 dB). </p>
+<p>Gain-crossover frequency omegac [rad/s] where |G(jomegac)| = 1 (0 dB). </p>
 
 <p class="definition">Definition at line <a class="el" href="SystemAnalysis_8h_source.html#l00026">26</a> of file <a class="el" href="SystemAnalysis_8h_source.html">SystemAnalysis.h</a>.</p>
 
@@ -179,7 +179,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Phase-crossover frequency ωp [rad/s] where ∠G(jωp) = −180°. </p>
+<p>Phase-crossover frequency omegap [rad/s] where \angleG(jomegap) = -180^\circ. </p>
 
 <p class="definition">Definition at line <a class="el" href="SystemAnalysis_8h_source.html#l00027">27</a> of file <a class="el" href="SystemAnalysis_8h_source.html">SystemAnalysis.h</a>.</p>
 

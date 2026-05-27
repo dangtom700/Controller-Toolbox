@@ -110,10 +110,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ae1cf0e3234e46c2e5c15c2367e493c96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
 <tr class="separator:ae1cf0e3234e46c2e5c15c2367e493c96"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea85efab35e84e7967dcccfd8d9d520b" id="r_aea85efab35e84e7967dcccfd8d9d520b"><td class="memItemLeft" align="right" valign="top">const Eigen::VectorXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQG.html#aea85efab35e84e7967dcccfd8d9d520b">stateEstimate</a> () const</td></tr>
-<tr class="memdesc:aea85efab35e84e7967dcccfd8d9d520b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current Kalman state estimate x̂[k|k].  <br /></td></tr>
+<tr class="memdesc:aea85efab35e84e7967dcccfd8d9d520b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current Kalman state estimate x^[k|k].  <br /></td></tr>
 <tr class="separator:aea85efab35e84e7967dcccfd8d9d520b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af62696fd71732ba400a1352e7155ba35" id="r_af62696fd71732ba400a1352e7155ba35"><td class="memItemLeft" align="right" valign="top">const Eigen::MatrixXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQG.html#af62696fd71732ba400a1352e7155ba35">gainMatrix</a> () const</td></tr>
-<tr class="memdesc:af62696fd71732ba400a1352e7155ba35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optimal LQR feedback gain matrix K* (m × n).  <br /></td></tr>
+<tr class="memdesc:af62696fd71732ba400a1352e7155ba35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optimal LQR feedback gain matrix K* (m * n).  <br /></td></tr>
 <tr class="separator:af62696fd71732ba400a1352e7155ba35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -168,11 +168,11 @@ Public Member Functions</h2></td></tr>
 <p>Construct the LQG controller. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">plant</td><td>Discrete-time model (A, B, C, D, Ts). If D ≠ 0, a warning is printed: the Kalman innovation uses u[k−1] for the D·u feedthrough term (one step stale). Use D = 0 for noise-free feedthrough accuracy. </td></tr>
+    <tr><td class="paramname">plant</td><td>Discrete-time model (A, B, C, D, Ts). If D != 0, a warning is printed: the Kalman innovation uses u[k-1] for the D.u feedthrough term (one step stale). Use D = 0 for noise-free feedthrough accuracy. </td></tr>
     <tr><td class="paramname">lqr_p</td><td>LQR cost weights Q (state) and R (control). </td></tr>
-    <tr><td class="paramname">Q_noise</td><td>Process noise covariance (n × n, positive semi-definite). </td></tr>
-    <tr><td class="paramname">R_noise</td><td>Measurement noise covariance (p × p, positive definite). </td></tr>
-    <tr><td class="paramname">P0</td><td>Initial Kalman error covariance (n × n). Defaults to identity when empty. </td></tr>
+    <tr><td class="paramname">Q_noise</td><td>Process noise covariance (n * n, positive semi-definite). </td></tr>
+    <tr><td class="paramname">R_noise</td><td>Measurement noise covariance (p * p, positive definite). </td></tr>
+    <tr><td class="paramname">P0</td><td>Initial Kalman error covariance (n * n). Defaults to identity when empty. </td></tr>
   </table>
   </dd>
 </dl>
@@ -239,7 +239,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Optimal LQR feedback gain matrix K* (m × n). </p>
+<p>Optimal LQR feedback gain matrix K* (m * n). </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteLQG_8h_source.html#l00106">106</a> of file <a class="el" href="DiscreteLQG_8h_source.html">DiscreteLQG.h</a>.</p>
 
@@ -322,7 +322,7 @@ Public Member Functions</h2></td></tr>
 <p>Set the reference state for the next <a class="el" href="classctrl_1_1DiscreteLQG.html#ac21cfd16e2aa7b4ea2004b26c5ad3070" title="SISO convenience: returns the first control component.">compute()</a> call (<a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> compat). </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">x_ref</td><td>Reference state vector (n × 1). </td></tr>
+    <tr><td class="paramname">x_ref</td><td>Reference state vector (n * 1). </td></tr>
   </table>
   </dd>
 </dl>
@@ -358,7 +358,7 @@ Public Member Functions</h2></td></tr>
 <p>Set the previous control input for the next <a class="el" href="classctrl_1_1DiscreteLQG.html#ac21cfd16e2aa7b4ea2004b26c5ad3070" title="SISO convenience: returns the first control component.">compute()</a> call (<a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> compat). </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">u</td><td>Previous control input u[k−1] (m × 1). </td></tr>
+    <tr><td class="paramname">u</td><td>Previous control input u[k-1] (m * 1). </td></tr>
   </table>
   </dd>
 </dl>
@@ -390,7 +390,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Current Kalman state estimate x̂[k|k]. </p>
+<p>Current Kalman state estimate x^[k|k]. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteLQG_8h_source.html#l00103">103</a> of file <a class="el" href="DiscreteLQG_8h_source.html">DiscreteLQG.h</a>.</p>
 
@@ -431,13 +431,13 @@ Public Member Functions</h2></td></tr>
 <p>Full step: update Kalman filter with (y, u_prev), then apply LQR toward x_ref. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">y</td><td>Plant output measurement y[k] (p × 1). </td></tr>
-    <tr><td class="paramname">u_prev</td><td>Control input applied at the previous step u[k−1] (m × 1). </td></tr>
-    <tr><td class="paramname">x_ref</td><td>Reference state x_ref[k] (n × 1). Pass empty for regulation to origin. </td></tr>
+    <tr><td class="paramname">y</td><td>Plant output measurement y[k] (p * 1). </td></tr>
+    <tr><td class="paramname">u_prev</td><td>Control input applied at the previous step u[k-1] (m * 1). </td></tr>
+    <tr><td class="paramname">x_ref</td><td>Reference state x_ref[k] (n * 1). Pass empty for regulation to origin. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Control action u[k] (m × 1). </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Control action u[k] (m * 1). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteLQG_8cpp_source.html#l00035">35</a> of file <a class="el" href="DiscreteLQG_8cpp_source.html">DiscreteLQG.cpp</a>.</p>
 

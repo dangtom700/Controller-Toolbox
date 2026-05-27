@@ -103,19 +103,19 @@ Inheritance diagram for ctrl::TuningResultBase:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a2d65fe6726445e3b8ff99b23fd80c671" id="r_a2d65fe6726445e3b8ff99b23fd80c671"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TuningResultBase.html#a2d65fe6726445e3b8ff99b23fd80c671">success</a> = false</td></tr>
-<tr class="memdesc:a2d65fe6726445e3b8ff99b23fd80c671"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>false</code> → parameters are default or invalid.  <br /></td></tr>
+<tr class="memdesc:a2d65fe6726445e3b8ff99b23fd80c671"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>false</code> -&gt; parameters are default or invalid.  <br /></td></tr>
 <tr class="separator:a2d65fe6726445e3b8ff99b23fd80c671"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46a48ca5d07af7f910c53e321cbd225c" id="r_a46a48ca5d07af7f910c53e321cbd225c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TuningResultBase.html#a46a48ca5d07af7f910c53e321cbd225c">warned</a> = false</td></tr>
-<tr class="memdesc:a46a48ca5d07af7f910c53e321cbd225c"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>true</code> → a soft warning was emitted to std::clog.  <br /></td></tr>
+<tr class="memdesc:a46a48ca5d07af7f910c53e321cbd225c"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>true</code> -&gt; a soft warning was emitted to std::clog.  <br /></td></tr>
 <tr class="separator:a46a48ca5d07af7f910c53e321cbd225c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ae8d074fd1836f905c9829d6302ddb1" id="r_a7ae8d074fd1836f905c9829d6302ddb1"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TuningResultBase.html#a7ae8d074fd1836f905c9829d6302ddb1">warning</a></td></tr>
 <tr class="memdesc:a7ae8d074fd1836f905c9829d6302ddb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diagnostic text (also sent to std::clog when non-empty).  <br /></td></tr>
 <tr class="separator:a7ae8d074fd1836f905c9829d6302ddb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40e273dd00b5617da70596b2ec5be355" id="r_a40e273dd00b5617da70596b2ec5be355"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TuningResultBase.html#a40e273dd00b5617da70596b2ec5be355">predictedCrossoverFreq</a> = -1.0</td></tr>
-<tr class="memdesc:a40e273dd00b5617da70596b2ec5be355"><td class="mdescLeft">&#160;</td><td class="mdescRight">Predicted gain crossover ωc [rad/s]; −1 if unknown.  <br /></td></tr>
+<tr class="memdesc:a40e273dd00b5617da70596b2ec5be355"><td class="mdescLeft">&#160;</td><td class="mdescRight">Predicted gain crossover omegac [rad/s]; -1 if unknown.  <br /></td></tr>
 <tr class="separator:a40e273dd00b5617da70596b2ec5be355"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8845ae86ce6d01d58399a10dd5d52f48" id="r_a8845ae86ce6d01d58399a10dd5d52f48"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TuningResultBase.html#a8845ae86ce6d01d58399a10dd5d52f48">predictedDampingRatio</a> = -1.0</td></tr>
-<tr class="memdesc:a8845ae86ce6d01d58399a10dd5d52f48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Predicted damping ratio ζ; −1 if unknown.  <br /></td></tr>
+<tr class="memdesc:a8845ae86ce6d01d58399a10dd5d52f48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Predicted damping ratio zeta; -1 if unknown.  <br /></td></tr>
 <tr class="separator:a8845ae86ce6d01d58399a10dd5d52f48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -135,7 +135,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Predicted gain crossover ωc [rad/s]; −1 if unknown. </p>
+<p>Predicted gain crossover omegac [rad/s]; -1 if unknown. </p>
 
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00093">93</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
 
@@ -153,7 +153,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Predicted damping ratio ζ; −1 if unknown. </p>
+<p>Predicted damping ratio zeta; -1 if unknown. </p>
 
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00094">94</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
 
@@ -171,7 +171,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p><code>false</code> → parameters are default or invalid. </p>
+<p><code>false</code> -&gt; parameters are default or invalid. </p>
 
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00089">89</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
 
@@ -191,7 +191,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p><code>true</code> → a soft warning was emitted to std::clog. </p>
+<p><code>true</code> -&gt; a soft warning was emitted to std::clog. </p>
 
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00090">90</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
 

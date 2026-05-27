@@ -81,7 +81,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Active Disturbance Rejection Controller — 2nd-order Linear ADRC (LADRC).  
+<p>Active Disturbance Rejection Controller - 2nd-order Linear ADRC (LADRC).  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="IController_8h_source.html">IController.h</a>&quot;</code><br />
 <code>#include &lt;Eigen/Dense&gt;</code><br />
@@ -103,20 +103,20 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Active Disturbance Rejection Controller — 2nd-order Linear ADRC (LADRC). </p>
-<p>Models the controlled plant as a double integrator with unknown total disturbance: </p><div class="fragment"><div class="line">ÿ = f(y, ẏ, d, t) + b₀·u     (b₀ is an approximate input gain)</div>
+<div class="textblock"><p>Active Disturbance Rejection Controller - 2nd-order Linear ADRC (LADRC). </p>
+<p>Models the controlled plant as a double integrator with unknown total disturbance: </p><div class="fragment"><div class="line">y = f(y, ydot, d, t) + b0.u     (b0 is an approximate input gain)</div>
 </div><!-- fragment --><p>A 3rd-order Extended State Observer (ESO) estimates:</p><ul>
-<li>z₁ ≈ y (output)</li>
-<li>z₂ ≈ ẏ (rate)</li>
-<li>z₃ ≈ f(…) (total disturbance — lumped unknown dynamics + external)</li>
+<li>z1 approx = y (output)</li>
+<li>z2 approx = ydot (rate)</li>
+<li>z3 approx = f(...) (total disturbance - lumped unknown dynamics + external)</li>
 </ul>
-<p><b>ESO (backward Euler, bandwidth-parameterised at ω₀):</b> </p><div class="fragment"><div class="line">ε[k]    = y[k] − z₁[k]</div>
-<div class="line">z₃[k+1] = z₃[k] + Ts·β₃·ε[k]</div>
-<div class="line">z₂[k+1] = z₂[k] + Ts·(β₂·ε[k] + b₀·u[k]) + Ts·z₃[k+1]</div>
-<div class="line">z₁[k+1] = z₁[k] + Ts·β₁·ε[k]              + Ts·z₂[k+1]</div>
-</div><!-- fragment --><p> where β₁ = 3ω₀, β₂ = 3ω₀², β₃ = ω₀³ (pole at (s + ω₀)³). This scheme is A-stable for all ω₀·Ts &gt; 0.</p>
-<p><b>PD + disturbance cancellation (bandwidth ωc):</b> </p><div class="fragment"><div class="line">u₀[k] = ωc²·(r[k] − z₁[k]) − 2ωc·z₂[k]</div>
-<div class="line">u[k]  = (u₀[k] − z₃[k]) / b₀</div>
+<p><b>ESO (backward Euler, bandwidth-parameterised at omega0):</b> </p><div class="fragment"><div class="line">epsilon[k]    = y[k] - z1[k]</div>
+<div class="line">z3[k+1] = z3[k] + Ts.beta3.epsilon[k]</div>
+<div class="line">z2[k+1] = z2[k] + Ts.(beta2.epsilon[k] + b0.u[k]) + Ts.z3[k+1]</div>
+<div class="line">z1[k+1] = z1[k] + Ts.beta1.epsilon[k]              + Ts.z2[k+1]</div>
+</div><!-- fragment --><p> where beta1 = 3omega0, beta2 = 3omega0^2, beta3 = omega0^3 (pole at (s + omega0)^3). This scheme is A-stable for all omega0.Ts &gt; 0.</p>
+<p><b>PD + disturbance cancellation (bandwidth omegac):</b> </p><div class="fragment"><div class="line">u0[k] = omegac^2.(r[k] - z1[k]) - 2omegac.z2[k]</div>
+<div class="line">u[k]  = (u0[k] - z3[k]) / b0</div>
 </div><!-- fragment --><dl class="section see"><dt>See also</dt><dd>Han, "From PID to Active Disturbance Rejection Control" (2009). </dd>
 <dd>
 Gao, "Scaling and bandwidth-parameterisation based controller tuning" (2003). </dd></dl>

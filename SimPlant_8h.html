@@ -105,8 +105,8 @@ Namespaces</h2></td></tr>
 <p>Owns the state-space model and its current state vector. Both simulation adapters hold a reference to the same SimPlant so that sensor readings and actuator commands remain consistent within one sample step.</p>
 <p><b>Typical closed-loop simulation pattern (one step k):</b> </p><div class="fragment"><div class="line"><span class="keywordtype">double</span> y = sensor.read();              <span class="comment">// 1. read current output y[k]</span></div>
 <div class="line"><span class="keywordtype">double</span> u = controller.compute(r - y);  <span class="comment">// 2. compute control action</span></div>
-<div class="line">actuator.write(u);                     <span class="comment">// 3. write u[k] → advances plant to x[k+1]</span></div>
-</div><!-- fragment --><p><code>read()</code> must be called <b>before</b> <code>write()</code> in the same sample, because <code>write()</code> advances the state. Reversing the order models a one-step computational delay — which is valid for hardware; just document the convention.</p>
+<div class="line">actuator.write(u);                     <span class="comment">// 3. write u[k] -&gt; advances plant to x[k+1]</span></div>
+</div><!-- fragment --><p><code>read()</code> must be called <b>before</b> <code>write()</code> in the same sample, because <code>write()</code> advances the state. Reversing the order models a one-step computational delay - which is valid for hardware; just document the convention.</p>
 <p><b>Thread safety:</b> <code>step()</code>, <code>setState()</code>, <code>reset()</code>, and <code>output()</code> are all protected by an internal <code>std::mutex</code>. This enables Hardware-in-the-Loop (HIL) setups where the plant runs in a background thread while a logger reads <code>output()</code> concurrently.</p>
 <dl class="section note"><dt>Note</dt><dd>A read-then-step sequence is NOT atomic without an external lock. For simulation-only use from a single thread the mutex overhead is negligible. </dd></dl>
 

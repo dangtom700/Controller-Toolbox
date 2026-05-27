@@ -101,10 +101,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ad1792bab7b62f22a676cb2efe79d2579"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct the GPC and precompute augmented condensed matrices.  <br /></td></tr>
 <tr class="separator:ad1792bab7b62f22a676cb2efe79d2579"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a78b29e051e0d1bade4f3c8106da8e491" id="r_a78b29e051e0d1bade4f3c8106da8e491"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#a78b29e051e0d1bade4f3c8106da8e491">compute</a> (double error) override</td></tr>
-<tr class="memdesc:a78b29e051e0d1bade4f3c8106da8e491"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] from tracking error e[k] = r[k] − y[k].  <br /></td></tr>
+<tr class="memdesc:a78b29e051e0d1bade4f3c8106da8e491"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] from tracking error e[k] = r[k] - y[k].  <br /></td></tr>
 <tr class="separator:a78b29e051e0d1bade4f3c8106da8e491"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad571aad123993961b3e44a6a36b64eee" id="r_ad571aad123993961b3e44a6a36b64eee"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#ad571aad123993961b3e44a6a36b64eee">computeRef</a> (double y, double r)</td></tr>
-<tr class="memdesc:ad571aad123993961b3e44a6a36b64eee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full interface — supply plant output y and setpoint r separately.  <br /></td></tr>
+<tr class="memdesc:ad571aad123993961b3e44a6a36b64eee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full interface - supply plant output y and setpoint r separately.  <br /></td></tr>
 <tr class="separator:ad571aad123993961b3e44a6a36b64eee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94aa973e1c05778632e0316de6e0111d" id="r_a94aa973e1c05778632e0316de6e0111d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#a94aa973e1c05778632e0316de6e0111d">setPlant</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;plant)</td></tr>
 <tr class="memdesc:a94aa973e1c05778632e0316de6e0111d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hot-swap the plant model (adaptive GPC).  <br /></td></tr>
@@ -125,13 +125,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ac9faafa9a2d8bf1a128181b63c267135"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
 <tr class="separator:ac9faafa9a2d8bf1a128181b63c267135"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9f5a55b9cbccce5786740f80c70505e4" id="r_a9f5a55b9cbccce5786740f80c70505e4"><td class="memItemLeft" align="right" valign="top">const Eigen::VectorXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#a9f5a55b9cbccce5786740f80c70505e4">augmentedState</a> () const</td></tr>
-<tr class="memdesc:a9f5a55b9cbccce5786740f80c70505e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current augmented state xₐ = [Δx; y] (size n+p).  <br /></td></tr>
+<tr class="memdesc:a9f5a55b9cbccce5786740f80c70505e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current augmented state xₐ = [Deltax; y] (size n+p).  <br /></td></tr>
 <tr class="separator:a9f5a55b9cbccce5786740f80c70505e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a02c58aa49467163557ddc162333d067e" id="r_a02c58aa49467163557ddc162333d067e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#a02c58aa49467163557ddc162333d067e">lastQPConverged</a> () const</td></tr>
 <tr class="memdesc:a02c58aa49467163557ddc162333d067e"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>true</code> if the most recent QP converged within qpMaxIter iterations.  <br /></td></tr>
 <tr class="separator:a02c58aa49467163557ddc162333d067e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad7359afa8988f1de19236714b3a381f" id="r_aad7359afa8988f1de19236714b3a381f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#aad7359afa8988f1de19236714b3a381f">lastQPIters</a> () const</td></tr>
-<tr class="memdesc:aad7359afa8988f1de19236714b3a381f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Actual gradient-projection iterations used in the most recent <a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#ad571aad123993961b3e44a6a36b64eee" title="Full interface — supply plant output y and setpoint r separately.">computeRef()</a>.  <br /></td></tr>
+<tr class="memdesc:aad7359afa8988f1de19236714b3a381f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Actual gradient-projection iterations used in the most recent <a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#ad571aad123993961b3e44a6a36b64eee" title="Full interface - supply plant output y and setpoint r separately.">computeRef()</a>.  <br /></td></tr>
 <tr class="separator:aad7359afa8988f1de19236714b3a381f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6f4220ef0b13ee07e868518c3c607a33" id="r_a6f4220ef0b13ee07e868518c3c607a33"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#a6f4220ef0b13ee07e868518c3c607a33">isHealthy</a> () const override</td></tr>
 <tr class="memdesc:a6f4220ef0b13ee07e868518c3c607a33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Health reflects QP convergence for <a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a> fallback.  <br /></td></tr>
@@ -140,10 +140,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController" id="r_a209dd6532b22278f93430a0757aae4c7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a209dd6532b22278f93430a0757aae4c7">~IController</a> ()=default</td></tr>
 <tr class="separator:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController" id="r_a9d81dd5427e094d72906d54dd5e6548e"><td class="memItemLeft" align="right" valign="top">virtual Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e">computeVec</a> (const Eigen::VectorXd &amp;signal)</td></tr>
-<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step — vector MIMO interface.  <br /></td></tr>
+<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step - vector MIMO interface.  <br /></td></tr>
 <tr class="separator:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController" id="r_a20821745ef7099941a9e9fdb6eeddd07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">bumplessInit</a> (double, double)</td></tr>
-<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation — prepares the controller for smooth activation.  <br /></td></tr>
+<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation - prepares the controller for smooth activation.  <br /></td></tr>
 <tr class="separator:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController" id="r_abe5b62c21069e869261e870363ee8ab5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#abe5b62c21069e869261e870363ee8ab5">attachObserver</a> (<a class="el" href="classctrl_1_1IControllerObserver.html">IControllerObserver</a> *obs)</td></tr>
 <tr class="memdesc:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attach a telemetry observer.  <br /></td></tr>
@@ -239,7 +239,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Current augmented state xₐ = [Δx; y] (size n+p). </p>
+<p>Current augmented state xₐ = [Deltax; y] (size n+p). </p>
 <p>Useful for monitoring the velocity-form integrator state. </p>
 
 <p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00140">140</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
@@ -270,7 +270,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Compute u[k] from tracking error e[k] = r[k] − y[k]. </p>
+<p>Compute u[k] from tracking error e[k] = r[k] - y[k]. </p>
 <p>Uses the setpoint stored via <a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#ad5ab5b524a201ab5bc21f62a04949416" title="Set the reference setpoint for the next compute(error) call.">setReference()</a>. Defaults to r = 0. Prefer computeRef(y, r) directly when y and r are independently available.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -314,7 +314,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Full interface — supply plant output y and setpoint r separately. </p>
+<p>Full interface - supply plant output y and setpoint r separately. </p>
 <p>Preferred over compute(error) because the reference trajectory requires y[k] independently of the error.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -418,7 +418,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Actual gradient-projection iterations used in the most recent <a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#ad571aad123993961b3e44a6a36b64eee" title="Full interface — supply plant output y and setpoint r separately.">computeRef()</a>. </p>
+<p>Actual gradient-projection iterations used in the most recent <a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#ad571aad123993961b3e44a6a36b64eee" title="Full interface - supply plant output y and setpoint r separately.">computeRef()</a>. </p>
 
 <p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00150">150</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 

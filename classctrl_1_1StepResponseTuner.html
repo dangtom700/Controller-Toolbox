@@ -99,16 +99,16 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memdesc:ab2b49beb2dc2105275ad5c9f4d23e422"><td class="mdescLeft">&#160;</td><td class="mdescRight">Identify a FOPDT model from open-loop step-response data.  <br /></td></tr>
 <tr class="separator:ab2b49beb2dc2105275ad5c9f4d23e422"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2edcdf510157f0a1b1646fbdc9eb18d8" id="r_a2edcdf510157f0a1b1646fbdc9eb18d8"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1PIDParams.html">PIDParams</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1StepResponseTuner.html#a2edcdf510157f0a1b1646fbdc9eb18d8">computePIDParams</a> (const <a class="el" href="structctrl_1_1StepResponseTuner_1_1FOPDTModel.html">FOPDTModel</a> &amp;model, double Ts, <a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197f">PIDTuningRule</a> rule=<a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fad7a1003002f545d6e966d9cdd7a63f71">PIDTuningRule::IMC</a>, double lambda=-1.0)</td></tr>
-<tr class="memdesc:a2edcdf510157f0a1b1646fbdc9eb18d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute PID parameters from a FOPDT model — unchecked.  <br /></td></tr>
+<tr class="memdesc:a2edcdf510157f0a1b1646fbdc9eb18d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute PID parameters from a FOPDT model - unchecked.  <br /></td></tr>
 <tr class="separator:a2edcdf510157f0a1b1646fbdc9eb18d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab45b68cd9ba54e4e1d3057e4eb2e0888" id="r_ab45b68cd9ba54e4e1d3057e4eb2e0888"><td class="memTemplParams" colspan="2">template&lt;typename C &gt; </td></tr>
 <tr class="memitem:ab45b68cd9ba54e4e1d3057e4eb2e0888"><td class="memTemplItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1PIDParams.html">PIDParams</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classctrl_1_1StepResponseTuner.html#ab45b68cd9ba54e4e1d3057e4eb2e0888">computePIDParamsFor</a> (const <a class="el" href="structctrl_1_1StepResponseTuner_1_1FOPDTModel.html">FOPDTModel</a> &amp;model, double Ts, <a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197f">PIDTuningRule</a> rule=<a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fad7a1003002f545d6e966d9cdd7a63f71">PIDTuningRule::IMC</a>, double lambda=-1.0)</td></tr>
-<tr class="memdesc:ab45b68cd9ba54e4e1d3057e4eb2e0888"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type-checked wrapper — hard compiler error for non-PID controllers.  <br /></td></tr>
+<tr class="memdesc:ab45b68cd9ba54e4e1d3057e4eb2e0888"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type-checked wrapper - hard compiler error for non-PID controllers.  <br /></td></tr>
 <tr class="separator:ab45b68cd9ba54e4e1d3057e4eb2e0888"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Open-loop step-response FOPDT identifier and PID tuner. </p>
-<p>Fits a First-Order Plus Dead-Time (FOPDT) model to open-loop step-response data using the process-reaction-curve tangent method: </p><div class="fragment"><div class="line">G(s) ≈ K · e^{−θs} / (τs + 1)</div>
+<p>Fits a First-Order Plus Dead-Time (FOPDT) model to open-loop step-response data using the process-reaction-curve tangent method: </p><div class="fragment"><div class="line">G(s) approx = K . e^{-thetas} / (taus + 1)</div>
 </div><!-- fragment --> 
 <p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00190">190</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
@@ -158,13 +158,13 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Compute PID parameters from a FOPDT model — unchecked. </p>
+<p>Compute PID parameters from a FOPDT model - unchecked. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">model</td><td>Identified FOPDT model. </td></tr>
     <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
     <tr><td class="paramname">rule</td><td>PID tuning rule. </td></tr>
-    <tr><td class="paramname">lambda</td><td>IMC closed-loop time constant (−1 = 0.5·τ). </td></tr>
+    <tr><td class="paramname">lambda</td><td>IMC closed-loop time constant (-1 = 0.5.tau). </td></tr>
   </table>
   </dd>
 </dl>
@@ -226,7 +226,7 @@ template&lt;typename C &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Type-checked wrapper — hard compiler error for non-PID controllers. </p>
+<p>Type-checked wrapper - hard compiler error for non-PID controllers. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">C</td><td>Target controller type. </td></tr>
@@ -289,7 +289,7 @@ template&lt;typename C &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Identified <a class="el" href="structctrl_1_1StepResponseTuner_1_1FOPDTModel.html" title="FOPDT model parameters.">FOPDTModel</a> (K, τ, θ). </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Identified <a class="el" href="structctrl_1_1StepResponseTuner_1_1FOPDTModel.html" title="FOPDT model parameters.">FOPDTModel</a> (K, tau, theta). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="ControllerTuner_8cpp_source.html#l00127">127</a> of file <a class="el" href="ControllerTuner_8cpp_source.html">ControllerTuner.cpp</a>.</p>
 

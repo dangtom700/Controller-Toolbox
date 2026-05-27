@@ -108,7 +108,7 @@ Namespaces</h2></td></tr>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">double</span> y = sensor.read();        <span class="comment">// y[k] = plant output before this step</span></div>
 <div class="line"><span class="keywordtype">double</span> u = pid.compute(r - y);</div>
-<div class="line">actuator.write(u);               <span class="comment">// advances plant → x[k+1]</span></div>
+<div class="line">actuator.write(u);               <span class="comment">// advances plant -&gt; x[k+1]</span></div>
 <div class="ttc" id="aclassctrl_1_1SimActuator_html"><div class="ttname"><a href="classctrl_1_1SimActuator.html">ctrl::SimActuator</a></div><div class="ttdoc">IActuator implementation that drives a SimPlant.</div><div class="ttdef"><b>Definition</b> <a href="SimActuator_8h_source.html#l00025">SimActuator.h:25</a></div></div>
 <div class="ttc" id="aclassctrl_1_1SimPlant_html"><div class="ttname"><a href="classctrl_1_1SimPlant.html">ctrl::SimPlant</a></div><div class="ttdoc">Thread-safe discrete-time plant simulator.</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8h_source.html#l00039">SimPlant.h:39</a></div></div>
 <div class="ttc" id="aclassctrl_1_1SimSensor_html"><div class="ttname"><a href="classctrl_1_1SimSensor.html">ctrl::SimSensor</a></div><div class="ttdoc">ISensor implementation that reads from a SimPlant.</div><div class="ttdef"><b>Definition</b> <a href="SimSensor_8h_source.html#l00029">SimSensor.h:29</a></div></div>
