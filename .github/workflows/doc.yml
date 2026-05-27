@@ -1,0 +1,42 @@
+name: Documentation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  doxygen:
+    runs-on: ubuntu-latest
+
+    concurrency:
+      group: ${{ github.ref }}-docs
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Doxygen and Graphviz
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y doxygen graphviz
+
+      - name: Build Doxygen docs
+        run: |
+          doxygen Doxyfile
+        # WARN_AS_ERROR = YES in Doxyfile causes a non-zero exit on undocumented
+        # symbols or mismatched @param tags, failing the job on doc regressions.
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/html
+          publish_branch: gh-pages
+          commit_message: "docs: auto-deploy from ${{ github.sha }}"
