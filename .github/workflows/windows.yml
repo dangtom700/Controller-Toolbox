@@ -117,15 +117,15 @@ jobs:
           id: get_target_name
           run: |
             targetName=$(grep 'target' xmake.lua | cut -d'"' -f 2)
-            echo "::set-output name=target_name::$targetName"
-          
+            echo "target_name=$targetName" >> $GITHUB_OUTPUT
+
         - name: Download x64 artifact
-          uses: actions/download-artifact@v2
+          uses: actions/download-artifact@v4
           with:
             name: exe-file-x64
-  
+
         - name: Download x86 artifact
-          uses: actions/download-artifact@v2
+          uses: actions/download-artifact@v4
           with:
             name: exe-file-x86
   
