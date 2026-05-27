@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -73,8 +73,8 @@ $(function() {
   <div class="headertitle"><div class="title">Controller Toolbox </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md_README"></a> A discrete-time C++17 control library with PID, LQR, LQG, MPC, ADRC, SMC, Lead-Lag, Smith Predictor, Extremum Seeking, Kalman filtering, Fuzzy Logic inference, plus an integrated tuner suite and analysis layer.</p>
-<p>Twelve controller implementations, eight tuning families, frequency- and time-domain analysis, controller composition (Supervisory / Additive / Weighted), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.</p>
+<div class="textblock"><p><a class="anchor" id="md_README"></a> A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H∞, Lead-Lag, Smith Predictor, Extremum Seeking, Kalman/EKF/UKF filtering, Fuzzy Logic inference, RLS and N4SID system identification, plus an integrated tuner suite and analysis layer.</p>
+<p>Twenty-plus controller implementations, eight tuning families, frequency- and time-domain analysis, controller composition (Supervisory / Additive / Weighted), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.</p>
 <hr  />
 <h1><a class="anchor" id="autotoc_md2"></a>
 Quick Start</h1>
@@ -83,7 +83,7 @@ Native build</h2>
 <div class="fragment"><div class="line">cmake -S . -B build -DCMAKE_BUILD_TYPE=Release</div>
 <div class="line">cmake --build build --parallel</div>
 <div class="line">ctest --test-dir build --output-on-failure</div>
-</div><!-- fragment --><p>Requires <b>C++17</b>, <b>CMake &gt;= 3.16</b>, and <b>Eigen &gt;= 3.4</b>.</p>
+</div><!-- fragment --><p>Requires <b>C++20</b>, <b>CMake &gt;= 3.16</b>, and <b>Eigen &gt;= 3.4</b>.</p>
 <h2><a class="anchor" id="autotoc_md4"></a>
 Docker build</h2>
 <div class="fragment"><div class="line">docker build -t controller-toolbox .</div>
@@ -110,17 +110,17 @@ Minimal Example</h1>
 <div class="line">    Eigen::VectorXd uv(1); uv &lt;&lt; u;</div>
 <div class="line">    y = <a class="code hl_function" href="namespacectrl.html#aea7d2241a62dea05772df99d95464b53">ctrl::ssStep</a>(sys, x, uv)(0);</div>
 <div class="line">}</div>
-<div class="ttc" id="aControllerToolbox_8h_html"><div class="ttname"><a href="ControllerToolbox_8h.html">ControllerToolbox.h</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DiscretePID_html"><div class="ttname"><a href="classctrl_1_1DiscretePID.html">ctrl::DiscretePID</a></div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00062">DiscretePID.h:63</a></div></div>
-<div class="ttc" id="anamespacectrl_html_a4f658728be7420e427723b3d0eb389d9"><div class="ttname"><a href="namespacectrl.html#a4f658728be7420e427723b3d0eb389d9">ctrl::tf2ss</a></div><div class="ttdeci">StateSpace tf2ss(const TransferFunction &amp;tf)</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8cpp_source.html#l00048">PlantModel.cpp:48</a></div></div>
-<div class="ttc" id="anamespacectrl_html_aea7d2241a62dea05772df99d95464b53"><div class="ttname"><a href="namespacectrl.html#aea7d2241a62dea05772df99d95464b53">ctrl::ssStep</a></div><div class="ttdeci">Eigen::VectorXd ssStep(const StateSpace &amp;sys, Eigen::Ref&lt; Eigen::VectorXd &gt; x, const Eigen::VectorXd &amp;u)</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8cpp_source.html#l00088">PlantModel.cpp:88</a></div></div>
-<div class="ttc" id="astructctrl_1_1PIDParams_html"><div class="ttname"><a href="structctrl_1_1PIDParams.html">ctrl::PIDParams</a></div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00021">DiscretePID.h:22</a></div></div>
-<div class="ttc" id="astructctrl_1_1PIDParams_html_a4c763a8d16f1c88ac493d128abbbd24d"><div class="ttname"><a href="structctrl_1_1PIDParams.html#a4c763a8d16f1c88ac493d128abbbd24d">ctrl::PIDParams::Kd</a></div><div class="ttdeci">double Kd</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00025">DiscretePID.h:25</a></div></div>
-<div class="ttc" id="astructctrl_1_1PIDParams_html_a7b0512d735243a9f654eb2914524111f"><div class="ttname"><a href="structctrl_1_1PIDParams.html#a7b0512d735243a9f654eb2914524111f">ctrl::PIDParams::Ki</a></div><div class="ttdeci">double Ki</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00024">DiscretePID.h:24</a></div></div>
-<div class="ttc" id="astructctrl_1_1PIDParams_html_a93322cf198692466ad0919ea06297b31"><div class="ttname"><a href="structctrl_1_1PIDParams.html#a93322cf198692466ad0919ea06297b31">ctrl::PIDParams::Kp</a></div><div class="ttdeci">double Kp</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00023">DiscretePID.h:23</a></div></div>
-<div class="ttc" id="astructctrl_1_1PIDParams_html_ae47f28adcce19093b8509be3423ce350"><div class="ttname"><a href="structctrl_1_1PIDParams.html#ae47f28adcce19093b8509be3423ce350">ctrl::PIDParams::N</a></div><div class="ttdeci">double N</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00034">DiscretePID.h:34</a></div></div>
-<div class="ttc" id="astructctrl_1_1StateSpace_html"><div class="ttname"><a href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a></div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00047">PlantModel.h:48</a></div></div>
-<div class="ttc" id="astructctrl_1_1TransferFunction_html"><div class="ttname"><a href="structctrl_1_1TransferFunction.html">ctrl::TransferFunction</a></div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00021">PlantModel.h:22</a></div></div>
+<div class="ttc" id="aControllerToolbox_8h_html"><div class="ttname"><a href="ControllerToolbox_8h.html">ControllerToolbox.h</a></div><div class="ttdoc">Discrete-Time Controller Toolbox — umbrella include.</div></div>
+<div class="ttc" id="aclassctrl_1_1DiscretePID_html"><div class="ttname"><a href="classctrl_1_1DiscretePID.html">ctrl::DiscretePID</a></div><div class="ttdoc">Discrete-time PID controller.</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00099">DiscretePID.h:100</a></div></div>
+<div class="ttc" id="anamespacectrl_html_a4f658728be7420e427723b3d0eb389d9"><div class="ttname"><a href="namespacectrl.html#a4f658728be7420e427723b3d0eb389d9">ctrl::tf2ss</a></div><div class="ttdeci">StateSpace tf2ss(const TransferFunction &amp;tf)</div><div class="ttdoc">Convert a SISO discrete transfer function to controllable canonical state-space form.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8cpp_source.html#l00048">PlantModel.cpp:48</a></div></div>
+<div class="ttc" id="anamespacectrl_html_aea7d2241a62dea05772df99d95464b53"><div class="ttname"><a href="namespacectrl.html#aea7d2241a62dea05772df99d95464b53">ctrl::ssStep</a></div><div class="ttdeci">Eigen::VectorXd ssStep(const StateSpace &amp;sys, Eigen::Ref&lt; Eigen::VectorXd &gt; x, const Eigen::VectorXd &amp;u)</div><div class="ttdoc">Simulate one step of a state-space model with an in-place state update.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8cpp_source.html#l00088">PlantModel.cpp:88</a></div></div>
+<div class="ttc" id="astructctrl_1_1PIDParams_html"><div class="ttname"><a href="structctrl_1_1PIDParams.html">ctrl::PIDParams</a></div><div class="ttdoc">Tuning parameters for DiscretePID.</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00035">DiscretePID.h:36</a></div></div>
+<div class="ttc" id="astructctrl_1_1PIDParams_html_a4c763a8d16f1c88ac493d128abbbd24d"><div class="ttname"><a href="structctrl_1_1PIDParams.html#a4c763a8d16f1c88ac493d128abbbd24d">ctrl::PIDParams::Kd</a></div><div class="ttdeci">double Kd</div><div class="ttdoc">Derivative gain (Kd = Kp · Td).</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00039">DiscretePID.h:39</a></div></div>
+<div class="ttc" id="astructctrl_1_1PIDParams_html_a7b0512d735243a9f654eb2914524111f"><div class="ttname"><a href="structctrl_1_1PIDParams.html#a7b0512d735243a9f654eb2914524111f">ctrl::PIDParams::Ki</a></div><div class="ttdeci">double Ki</div><div class="ttdoc">Integral gain (Ki = Kp / Ti).</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00038">DiscretePID.h:38</a></div></div>
+<div class="ttc" id="astructctrl_1_1PIDParams_html_a93322cf198692466ad0919ea06297b31"><div class="ttname"><a href="structctrl_1_1PIDParams.html#a93322cf198692466ad0919ea06297b31">ctrl::PIDParams::Kp</a></div><div class="ttdeci">double Kp</div><div class="ttdoc">Proportional gain.</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00037">DiscretePID.h:37</a></div></div>
+<div class="ttc" id="astructctrl_1_1PIDParams_html_ae47f28adcce19093b8509be3423ce350"><div class="ttname"><a href="structctrl_1_1PIDParams.html#ae47f28adcce19093b8509be3423ce350">ctrl::PIDParams::N</a></div><div class="ttdeci">double N</div><div class="ttdoc">Derivative filter coefficient N [rad/s].</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00054">DiscretePID.h:54</a></div></div>
+<div class="ttc" id="astructctrl_1_1StateSpace_html"><div class="ttname"><a href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a></div><div class="ttdoc">Discrete-time state-space model.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00067">PlantModel.h:68</a></div></div>
+<div class="ttc" id="astructctrl_1_1TransferFunction_html"><div class="ttname"><a href="structctrl_1_1TransferFunction.html">ctrl::TransferFunction</a></div><div class="ttdoc">Discrete-time transfer function in z⁻¹ polynomial form.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00031">PlantModel.h:32</a></div></div>
 </div><!-- fragment --><hr  />
 <h1><a class="anchor" id="autotoc_md8"></a>
 Documentation</h1>
@@ -190,7 +190,7 @@ Tested Compilers</h1>
 <hr  />
 <h1><a class="anchor" id="autotoc_md21"></a>
 Project Status</h1>
-<p>Twelve controllers implemented and unit-tested. <code>FuzzyLogic</code> module added 2026-05-23: Mamdani and Takagi-Sugeno inference engines, <code>FuzzyPD</code>, <code>FuzzyPID</code>, and <code>FuzzySupervisor</code> classes - see <a class="el" href="md_docs_2DOCUMENTATION.html">docs/DOCUMENTATION.md Section 5.2</a>. Four fuzzy application examples added (<code>ex23</code>-<code>ex26</code>). Five earlier math corrections (2026-05-22): MPC condensed prediction formula (<code>G_u.u_prev</code> term), PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor D.u_prev feedthrough, and SMC <code>c_de</code> Ts-absorption documentation - details in docs/cumulative_bug_report.md. Real-time deployment guidance in <a class="el" href="md_docs_2DEPLOYMENT.html">docs/DEPLOYMENT.md</a>. </p>
+<p>Twenty-plus controllers implemented and unit-tested. <code>FuzzyLogic</code> module added 2026-05-23: Mamdani and Takagi-Sugeno inference engines, <code>FuzzyPD</code>, <code>FuzzyPID</code>, and <code>FuzzySupervisor</code> classes - see <a class="el" href="md_docs_2DOCUMENTATION.html">docs/DOCUMENTATION.md Section 5.2</a>. Four fuzzy application examples added (<code>ex23</code>-<code>ex26</code>). Five earlier math corrections (2026-05-22): MPC condensed prediction formula (<code>G_u.u_prev</code> term), PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor D.u_prev feedthrough, and SMC <code>c_de</code> Ts-absorption documentation - details in docs/cumulative_bug_report.md. Real-time deployment guidance in <a class="el" href="md_docs_2DEPLOYMENT.html">docs/DEPLOYMENT.md</a>. </p>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->

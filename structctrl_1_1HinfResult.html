@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,28 +81,43 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Result returned by <a class="el" href="classctrl_1_1DiscreteHinf.html#ab774c7a783a1e411b701289d00be1603" title="Solve the discrete-time H∞ optimal control problem.">DiscreteHinf::solve()</a>.  
+ <a href="structctrl_1_1HinfResult.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:ac2cc5ad5ec5b2e69bce96f8a84df66b2" id="r_ac2cc5ad5ec5b2e69bce96f8a84df66b2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfResult.html#ac2cc5ad5ec5b2e69bce96f8a84df66b2">feasible</a> = false</td></tr>
+<tr class="memdesc:ac2cc5ad5ec5b2e69bce96f8a84df66b2"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>true</code> when synthesis succeeded.  <br /></td></tr>
 <tr class="separator:ac2cc5ad5ec5b2e69bce96f8a84df66b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a500f78778309d1a83d6c5d649fe46b" id="r_a1a500f78778309d1a83d6c5d649fe46b"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfResult.html#a1a500f78778309d1a83d6c5d649fe46b">achievedGamma</a> = 0.0</td></tr>
+<tr class="memdesc:a1a500f78778309d1a83d6c5d649fe46b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Smallest feasible γ found by bisection.  <br /></td></tr>
 <tr class="separator:a1a500f78778309d1a83d6c5d649fe46b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8c12b3560c577ebec538ddab1eba56d1" id="r_a8c12b3560c577ebec538ddab1eba56d1"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfResult.html#a8c12b3560c577ebec538ddab1eba56d1">Ts</a> = 0.0</td></tr>
+<tr class="memdesc:a8c12b3560c577ebec538ddab1eba56d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plant sample time.  <br /></td></tr>
 <tr class="separator:a8c12b3560c577ebec538ddab1eba56d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Controller matrices — K(z): xk[k+1] = Ak·xk + Bk·y, u = Ck·xk + Dk·y</div></td></tr>
 <tr class="memitem:a1ad747b2a5167abae6f92a1d21b7fcfc" id="r_a1ad747b2a5167abae6f92a1d21b7fcfc"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfResult.html#a1ad747b2a5167abae6f92a1d21b7fcfc">Ak</a></td></tr>
+<tr class="memdesc:a1ad747b2a5167abae6f92a1d21b7fcfc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controller state transition (nk × nk, nk = plant state size).  <br /></td></tr>
 <tr class="separator:a1ad747b2a5167abae6f92a1d21b7fcfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ff250afb69519206a4fee0bf5e50e9b" id="r_a3ff250afb69519206a4fee0bf5e50e9b"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfResult.html#a3ff250afb69519206a4fee0bf5e50e9b">Bk</a></td></tr>
+<tr class="memdesc:a3ff250afb69519206a4fee0bf5e50e9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controller input gain (nk × ny).  <br /></td></tr>
 <tr class="separator:a3ff250afb69519206a4fee0bf5e50e9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0622416aa5be16d9de312a579113875b" id="r_a0622416aa5be16d9de312a579113875b"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfResult.html#a0622416aa5be16d9de312a579113875b">Ck</a></td></tr>
+<tr class="memdesc:a0622416aa5be16d9de312a579113875b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controller output gain (nu × nk).  <br /></td></tr>
 <tr class="separator:a0622416aa5be16d9de312a579113875b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a15e297860c8ceea12c34e052d0024d35" id="r_a15e297860c8ceea12c34e052d0024d35"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfResult.html#a15e297860c8ceea12c34e052d0024d35">Dk</a></td></tr>
+<tr class="memdesc:a15e297860c8ceea12c34e052d0024d35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controller feedthrough (nu × ny).  <br /></td></tr>
 <tr class="separator:a15e297860c8ceea12c34e052d0024d35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">DARE solutions (available for diagnostics) @{</div></td></tr>
 <tr class="memitem:a1f5829d4c831486d1672430264c15078" id="r_a1f5829d4c831486d1672430264c15078"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfResult.html#a1f5829d4c831486d1672430264c15078">X_inf</a></td></tr>
+<tr class="memdesc:a1f5829d4c831486d1672430264c15078"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control Riccati solution.  <br /></td></tr>
 <tr class="separator:a1f5829d4c831486d1672430264c15078"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a07e57b48748357d27db5c3325440e9fe" id="r_a07e57b48748357d27db5c3325440e9fe"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfResult.html#a07e57b48748357d27db5c3325440e9fe">Y_inf</a></td></tr>
+<tr class="memdesc:a07e57b48748357d27db5c3325440e9fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Filter Riccati solution.  <br /></td></tr>
 <tr class="separator:a07e57b48748357d27db5c3325440e9fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Synthesis diagnostics @{</div></td></tr>
 <tr class="memitem:adeaa917643fafae2086fbe1374494184" id="r_adeaa917643fafae2086fbe1374494184"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfResult.html#adeaa917643fafae2086fbe1374494184">dareItersX</a> = 0</td></tr>
 <tr class="separator:adeaa917643fafae2086fbe1374494184"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3dd9cdaea4da1bbb5c66aff7723e04f3" id="r_a3dd9cdaea4da1bbb5c66aff7723e04f3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfResult.html#a3dd9cdaea4da1bbb5c66aff7723e04f3">dareItersY</a> = 0</td></tr>
@@ -112,11 +127,13 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:aa9a8e4e4f82b94957c301a6f8df1bac0" id="r_aa9a8e4e4f82b94957c301a6f8df1bac0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfResult.html#aa9a8e4e4f82b94957c301a6f8df1bac0">dareConvY</a> = false</td></tr>
 <tr class="separator:aa9a8e4e4f82b94957c301a6f8df1bac0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79d2a4cac7a89b8a1996337db4a5c9c6" id="r_a79d2a4cac7a89b8a1996337db4a5c9c6"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfResult.html#a79d2a4cac7a89b8a1996337db4a5c9c6">spectralRadius</a> = 0.0</td></tr>
+<tr class="memdesc:a79d2a4cac7a89b8a1996337db4a5c9c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">ρ(X∞·Y∞); must be &lt; γ² for feasibility.  <br /></td></tr>
 <tr class="separator:a79d2a4cac7a89b8a1996337db4a5c9c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00141">141</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<div class="textblock"><p>Result returned by <a class="el" href="classctrl_1_1DiscreteHinf.html#ab774c7a783a1e411b701289d00be1603" title="Solve the discrete-time H∞ optimal control problem.">DiscreteHinf::solve()</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00100">100</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a1a500f78778309d1a83d6c5d649fe46b" name="a1a500f78778309d1a83d6c5d649fe46b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1a500f78778309d1a83d6c5d649fe46b">&#9670;&#160;</a></span>achievedGamma</h2>
@@ -130,7 +147,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00144">144</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p>Smallest feasible γ found by bisection. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00103">103</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00020">ctrl::DiscreteHinf::DiscreteHinf()</a>, and <a class="el" href="DiscreteHinf_8cpp_source.html#l00436">ctrl::DiscreteHinf::solve()</a>.</p>
 
@@ -148,7 +167,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00150">150</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p>Controller state transition (nk × nk, nk = plant state size). </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00110">110</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00020">ctrl::DiscreteHinf::DiscreteHinf()</a>.</p>
 
@@ -166,7 +187,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00151">151</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p>Controller input gain (nk × ny). </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00111">111</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00020">ctrl::DiscreteHinf::DiscreteHinf()</a>.</p>
 
@@ -184,7 +207,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00152">152</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p>Controller output gain (nu × nk). </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00112">112</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00020">ctrl::DiscreteHinf::DiscreteHinf()</a>.</p>
 
@@ -202,7 +227,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00162">162</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00124">124</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 </div>
 </div>
@@ -218,7 +243,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00163">163</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00125">125</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 </div>
 </div>
@@ -234,7 +259,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00160">160</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00122">122</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 </div>
 </div>
@@ -250,7 +275,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00161">161</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00123">123</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 </div>
 </div>
@@ -266,7 +291,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00153">153</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p>Controller feedthrough (nu × ny). </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00113">113</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00020">ctrl::DiscreteHinf::DiscreteHinf()</a>.</p>
 
@@ -284,7 +311,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00143">143</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p><code>true</code> when synthesis succeeded. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00102">102</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00020">ctrl::DiscreteHinf::DiscreteHinf()</a>, and <a class="el" href="DiscreteHinf_8cpp_source.html#l00436">ctrl::DiscreteHinf::solve()</a>.</p>
 
@@ -302,7 +331,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00164">164</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p>ρ(X∞·Y∞); must be &lt; γ² for feasibility. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00126">126</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 </div>
 </div>
@@ -318,7 +349,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00145">145</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p>Plant sample time. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00104">104</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00020">ctrl::DiscreteHinf::DiscreteHinf()</a>, and <a class="el" href="DiscreteHinf_8cpp_source.html#l00436">ctrl::DiscreteHinf::solve()</a>.</p>
 
@@ -336,7 +369,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00156">156</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p>Control Riccati solution. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00117">117</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 </div>
 </div>
@@ -352,7 +387,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00157">157</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p>Filter Riccati solution. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00118">118</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 </div>
 </div>

@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,6 +81,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Abstract base class for all sensor adapters in the HAL.  
+ <a href="classctrl_1_1ISensor.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="ISensor_8h_source.html">ISensor.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for ctrl::ISensor:</div>
@@ -88,8 +91,8 @@ Inheritance diagram for ctrl::ISensor:</div>
  <div class="center">
   <img src="classctrl_1_1ISensor.png" usemap="#ctrl::ISensor_map" alt=""/>
   <map id="ctrl::ISensor_map" name="ctrl::ISensor_map">
-<area href="classctrl_1_1SafeSensor.html" alt="ctrl::SafeSensor" shape="rect" coords="0,56,102,80"/>
-<area href="classctrl_1_1SimSensor.html" alt="ctrl::SimSensor" shape="rect" coords="112,56,214,80"/>
+<area href="classctrl_1_1SafeSensor.html" title="ISensor decorator with hold-last fault semantics and optional staleness alarm." alt="ctrl::SafeSensor" shape="rect" coords="0,56,102,80"/>
+<area href="classctrl_1_1SimSensor.html" title="ISensor implementation that reads from a SimPlant." alt="ctrl::SimSensor" shape="rect" coords="112,56,214,80"/>
   </map>
 </div></div>
 <table class="memberdecls">
@@ -98,15 +101,19 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a7d48f47d37701465bf558e62295ae647" id="r_a7d48f47d37701465bf558e62295ae647"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ISensor.html#a7d48f47d37701465bf558e62295ae647">~ISensor</a> ()=default</td></tr>
 <tr class="separator:a7d48f47d37701465bf558e62295ae647"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abadb0fd78eaa7f41319e0f20a4434a82" id="r_abadb0fd78eaa7f41319e0f20a4434a82"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ISensor.html#abadb0fd78eaa7f41319e0f20a4434a82">read</a> ()=0</td></tr>
+<tr class="memdesc:abadb0fd78eaa7f41319e0f20a4434a82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read the most recent measurement.  <br /></td></tr>
 <tr class="separator:abadb0fd78eaa7f41319e0f20a4434a82"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a366745c03cda60b3c91f2e5425e818d7" id="r_a366745c03cda60b3c91f2e5425e818d7"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ISensor.html#a366745c03cda60b3c91f2e5425e818d7">isValid</a> () const</td></tr>
+<tr class="memdesc:a366745c03cda60b3c91f2e5425e818d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check whether the sensor data is currently fresh and valid.  <br /></td></tr>
 <tr class="separator:a366745c03cda60b3c91f2e5425e818d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3010cc729f7fb0b5f1d08f06d8285195" id="r_a3010cc729f7fb0b5f1d08f06d8285195"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ISensor.html#a3010cc729f7fb0b5f1d08f06d8285195">reset</a> ()</td></tr>
+<tr class="memdesc:a3010cc729f7fb0b5f1d08f06d8285195"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset the sensor to its initial state (clear filters, counters).  <br /></td></tr>
 <tr class="separator:a3010cc729f7fb0b5f1d08f06d8285195"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="ISensor_8h_source.html#l00020">20</a> of file <a class="el" href="ISensor_8h_source.html">ISensor.h</a>.</p>
+<div class="textblock"><p>Abstract base class for all sensor adapters in the HAL. </p>
+
+<p class="definition">Definition at line <a class="el" href="ISensor_8h_source.html#l00026">26</a> of file <a class="el" href="ISensor_8h_source.html">ISensor.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a7d48f47d37701465bf558e62295ae647" name="a7d48f47d37701465bf558e62295ae647"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7d48f47d37701465bf558e62295ae647">&#9670;&#160;</a></span>~ISensor()</h2>
@@ -157,11 +164,14 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Check whether the sensor data is currently fresh and valid. </p>
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> if the reading from <code><a class="el" href="classctrl_1_1ISensor.html#abadb0fd78eaa7f41319e0f20a4434a82" title="Read the most recent measurement.">read()</a></code> is trustworthy. </dd></dl>
+
 <p>Reimplemented in <a class="el" href="classctrl_1_1SafeSensor.html#a2588ae59386c9d31ab7c7c21309cff78">ctrl::SafeSensor</a>, and <a class="el" href="classctrl_1_1SimSensor.html#aab8b15621d8bf66b61b7d237a5396046">ctrl::SimSensor</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="ISensor_8h_source.html#l00025">25</a> of file <a class="el" href="ISensor_8h_source.html">ISensor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ISensor_8h_source.html#l00040">40</a> of file <a class="el" href="ISensor_8h_source.html">ISensor.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="SafeSensor_8h_source.html#l00073">ctrl::SafeSensor::isValid()</a>, and <a class="el" href="SafeSensor_8h_source.html#l00051">ctrl::SafeSensor::read()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="SafeSensor_8h_source.html#l00092">ctrl::SafeSensor::isValid()</a>, and <a class="el" href="SafeSensor_8h_source.html#l00065">ctrl::SafeSensor::read()</a>.</p>
 
 </div>
 </div>
@@ -188,9 +198,12 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Read the most recent measurement. </p>
+<dl class="section return"><dt>Returns</dt><dd>Current sensor value. Must not be NaN. </dd></dl>
+
 <p>Implemented in <a class="el" href="classctrl_1_1SafeSensor.html#a374c25efba5ccc8dff666842a82492e7">ctrl::SafeSensor</a>, and <a class="el" href="classctrl_1_1SimSensor.html#aaf43364c5cbca96013f486e834da2825">ctrl::SimSensor</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="SafeSensor_8h_source.html#l00051">ctrl::SafeSensor::read()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="SafeSensor_8h_source.html#l00065">ctrl::SafeSensor::read()</a>.</p>
 
 </div>
 </div>
@@ -217,11 +230,13 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Reset the sensor to its initial state (clear filters, counters). </p>
+
 <p>Reimplemented in <a class="el" href="classctrl_1_1SafeSensor.html#a3926ae95f2a6ee64e49124fcd1bb4490">ctrl::SafeSensor</a>, and <a class="el" href="classctrl_1_1SimSensor.html#a9b4d0770aaaadd68dca7c358989c6a3d">ctrl::SimSensor</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="ISensor_8h_source.html#l00026">26</a> of file <a class="el" href="ISensor_8h_source.html">ISensor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ISensor_8h_source.html#l00045">45</a> of file <a class="el" href="ISensor_8h_source.html">ISensor.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="SafeSensor_8h_source.html#l00076">ctrl::SafeSensor::reset()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="SafeSensor_8h_source.html#l00097">ctrl::SafeSensor::reset()</a>.</p>
 
 </div>
 </div>

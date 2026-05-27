@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,6 +81,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Smith Predictor wrapper for any <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> inner loop.  
+ <a href="classctrl_1_1SmithPredictor.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="SmithPredictor_8h_source.html">SmithPredictor.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for ctrl::SmithPredictor:</div>
@@ -88,43 +91,57 @@ Inheritance diagram for ctrl::SmithPredictor:</div>
  <div class="center">
   <img src="classctrl_1_1SmithPredictor.png" usemap="#ctrl::SmithPredictor_map" alt=""/>
   <map id="ctrl::SmithPredictor_map" name="ctrl::SmithPredictor_map">
-<area href="classctrl_1_1IController.html" alt="ctrl::IController" shape="rect" coords="0,0,118,24"/>
+<area href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers." alt="ctrl::IController" shape="rect" coords="0,0,118,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ab27b2ade908d0d11ade86d4fae145962" id="r_ab27b2ade908d0d11ade86d4fae145962"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SmithPredictor.html#ab27b2ade908d0d11ade86d4fae145962">SmithPredictor</a> (std::shared_ptr&lt; <a class="el" href="classctrl_1_1IController.html">IController</a> &gt; inner, const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;delayModel, int delaySteps)</td></tr>
+<tr class="memdesc:ab27b2ade908d0d11ade86d4fae145962"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct for an integer dead-time delay only.  <br /></td></tr>
 <tr class="separator:ab27b2ade908d0d11ade86d4fae145962"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98c957ec63fdaaddd44d0cd376457e83" id="r_a98c957ec63fdaaddd44d0cd376457e83"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SmithPredictor.html#a98c957ec63fdaaddd44d0cd376457e83">SmithPredictor</a> (std::shared_ptr&lt; <a class="el" href="classctrl_1_1IController.html">IController</a> &gt; inner, const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;delayModel, int delaySteps, const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;fracDelayFilter)</td></tr>
+<tr class="memdesc:a98c957ec63fdaaddd44d0cd376457e83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct with explicit fractional Padé filter for sub-sample dead time.  <br /></td></tr>
 <tr class="separator:a98c957ec63fdaaddd44d0cd376457e83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad55b544a861fb0a865f3838d0e399244" id="r_ad55b544a861fb0a865f3838d0e399244"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SmithPredictor.html#ad55b544a861fb0a865f3838d0e399244">SmithPredictor</a> (std::shared_ptr&lt; <a class="el" href="classctrl_1_1IController.html">IController</a> &gt; inner, const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;delayModel, double theta, double Ts)</td></tr>
+<tr class="memdesc:ad55b544a861fb0a865f3838d0e399244"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenient whole-dead-time constructor — handles fractional remainder automatically.  <br /></td></tr>
 <tr class="separator:ad55b544a861fb0a865f3838d0e399244"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8644acd3ee741f207e3785b4c47a30ef" id="r_a8644acd3ee741f207e3785b4c47a30ef"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SmithPredictor.html#a8644acd3ee741f207e3785b4c47a30ef">compute</a> (double error) override</td></tr>
+<tr class="memdesc:a8644acd3ee741f207e3785b4c47a30ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] from closed-loop error e[k] = r[k] − y[k].  <br /></td></tr>
 <tr class="separator:a8644acd3ee741f207e3785b4c47a30ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac4244b6f2c02981232c742157cd44fa3" id="r_ac4244b6f2c02981232c742157cd44fa3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SmithPredictor.html#ac4244b6f2c02981232c742157cd44fa3">reset</a> () override</td></tr>
+<tr class="memdesc:ac4244b6f2c02981232c742157cd44fa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset model state, output buffer, and inner controller.  <br /></td></tr>
 <tr class="separator:ac4244b6f2c02981232c742157cd44fa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1d00e857dc74990ba1ed8d8bdf9010bc" id="r_a1d00e857dc74990ba1ed8d8bdf9010bc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SmithPredictor.html#a1d00e857dc74990ba1ed8d8bdf9010bc">sampleTime</a> () const override</td></tr>
+<tr class="memdesc:a1d00e857dc74990ba1ed8d8bdf9010bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
 <tr class="separator:a1d00e857dc74990ba1ed8d8bdf9010bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade9087f18b2bcc12b13ab5ad780a02f6" id="r_ade9087f18b2bcc12b13ab5ad780a02f6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classctrl_1_1IController.html">IController</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SmithPredictor.html#ade9087f18b2bcc12b13ab5ad780a02f6">innerController</a> ()</td></tr>
+<tr class="memdesc:ade9087f18b2bcc12b13ab5ad780a02f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access the wrapped inner controller for runtime tuning.  <br /></td></tr>
 <tr class="separator:ade9087f18b2bcc12b13ab5ad780a02f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a251d132fb5030730bc88d96b499845ab" id="r_a251d132fb5030730bc88d96b499845ab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SmithPredictor.html#a251d132fb5030730bc88d96b499845ab">setModel</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;delayModel, int delaySteps)</td></tr>
+<tr class="memdesc:a251d132fb5030730bc88d96b499845ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replace the delay-free plant model and dead-time length at runtime.  <br /></td></tr>
 <tr class="separator:a251d132fb5030730bc88d96b499845ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a368c4c039699c1ac790582a78088f276" id="r_a368c4c039699c1ac790582a78088f276"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SmithPredictor.html#a368c4c039699c1ac790582a78088f276">setModel</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;delayModel, int delaySteps, const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;fracDelayFilter)</td></tr>
+<tr class="memdesc:a368c4c039699c1ac790582a78088f276"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replace the plant model with a fractional delay filter at runtime.  <br /></td></tr>
 <tr class="separator:a368c4c039699c1ac790582a78088f276"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classctrl_1_1IController"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classctrl_1_1IController')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classctrl_1_1IController.html">ctrl::IController</a></td></tr>
 <tr class="memitem:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController" id="r_a209dd6532b22278f93430a0757aae4c7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a209dd6532b22278f93430a0757aae4c7">~IController</a> ()=default</td></tr>
 <tr class="separator:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController" id="r_a9d81dd5427e094d72906d54dd5e6548e"><td class="memItemLeft" align="right" valign="top">virtual Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e">computeVec</a> (const Eigen::VectorXd &amp;signal)</td></tr>
+<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step — vector MIMO interface.  <br /></td></tr>
 <tr class="separator:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController" id="r_a20821745ef7099941a9e9fdb6eeddd07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">bumplessInit</a> (double, double)</td></tr>
+<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation — prepares the controller for smooth activation.  <br /></td></tr>
 <tr class="separator:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController" id="r_a2dc30a3b9bfb8b9649cef7218ad9e68b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b">isHealthy</a> () const</td></tr>
+<tr class="memdesc:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Health query for supervisory fault-tolerant control.  <br /></td></tr>
 <tr class="separator:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="SmithPredictor_8h_source.html#l00040">40</a> of file <a class="el" href="SmithPredictor_8h_source.html">SmithPredictor.h</a>.</p>
+<div class="textblock"><p>Smith Predictor wrapper for any <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> inner loop. </p>
+<p>Three overloaded constructors support integer-only dead time, explicit fractional Padé filters, and an automatic whole-dead-time constructor that splits θ = floor(θ/Ts)·Ts + θ_frac. </p>
+
+<p class="definition">Definition at line <a class="el" href="SmithPredictor_8h_source.html#l00042">42</a> of file <a class="el" href="SmithPredictor_8h_source.html">SmithPredictor.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ab27b2ade908d0d11ade86d4fae145962" name="ab27b2ade908d0d11ade86d4fae145962"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab27b2ade908d0d11ade86d4fae145962">&#9670;&#160;</a></span>SmithPredictor() <span class="overload">[1/3]</span></h2>
@@ -157,6 +174,16 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Construct for an integer dead-time delay only. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">inner</td><td>Base stabilising controller (e.g., <a class="el" href="classctrl_1_1DiscretePID.html" title="Discrete-time PID controller.">DiscretePID</a>). </td></tr>
+    <tr><td class="paramname">delayModel</td><td>State-space model of the plant <b>without</b> the dead-time delay. </td></tr>
+    <tr><td class="paramname">delaySteps</td><td>Integer dead-time length in samples d. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="SmithPredictor_8cpp_source.html#l00031">31</a> of file <a class="el" href="SmithPredictor_8cpp_source.html">SmithPredictor.cpp</a>.</p>
 
@@ -200,9 +227,20 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Construct with explicit fractional Padé filter for sub-sample dead time. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">inner</td><td>Base stabilising controller. </td></tr>
+    <tr><td class="paramname">delayModel</td><td>Delay-free plant model P₀. </td></tr>
+    <tr><td class="paramname">delaySteps</td><td>Integer part of dead time in samples d. </td></tr>
+    <tr><td class="paramname">fracDelayFilter</td><td>First-order <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> from padeDelayFilter(θ_frac, Ts). </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="SmithPredictor_8cpp_source.html#l00040">40</a> of file <a class="el" href="SmithPredictor_8cpp_source.html">SmithPredictor.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00053">ctrl::StateSpace::Ts</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
 </div>
 </div>
@@ -244,6 +282,18 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Convenient whole-dead-time constructor — handles fractional remainder automatically. </p>
+<p>Splits θ into floor(θ/Ts) integer steps and builds a first-order Padé filter for the sub-sample remainder.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">inner</td><td>Base stabilising controller. </td></tr>
+    <tr><td class="paramname">delayModel</td><td>Delay-free plant model. </td></tr>
+    <tr><td class="paramname">theta</td><td>Total dead time θ [s]. </td></tr>
+    <tr><td class="paramname">Ts</td><td>Sample time [s] (must match delayModel.Ts). </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="SmithPredictor_8cpp_source.html#l00053">53</a> of file <a class="el" href="SmithPredictor_8cpp_source.html">SmithPredictor.cpp</a>.</p>
 
 </div>
@@ -272,6 +322,15 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Compute u[k] from closed-loop error e[k] = r[k] − y[k]. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">error</td><td>Current tracking error. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Control output u[k] from the inner controller operating on the Smith-corrected error. </dd></dl>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8">ctrl::IController</a>.</p>
 
@@ -302,7 +361,10 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="SmithPredictor_8h_source.html#l00081">81</a> of file <a class="el" href="SmithPredictor_8h_source.html">SmithPredictor.h</a>.</p>
+<p>Access the wrapped inner controller for runtime tuning. </p>
+<dl class="section return"><dt>Returns</dt><dd>Mutable reference to the inner controller. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="SmithPredictor_8h_source.html#l00100">100</a> of file <a class="el" href="SmithPredictor_8h_source.html">SmithPredictor.h</a>.</p>
 
 </div>
 </div>
@@ -328,6 +390,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Reset model state, output buffer, and inner controller. </p>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac69ef6691d5831cda3adcdc59971fcac">ctrl::IController</a>.</p>
 
@@ -358,9 +422,11 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Sample time Ts [s]. </p>
+
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac1d1ab003ea7fa4f0ab49291d97473a0">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="SmithPredictor_8h_source.html#l00078">78</a> of file <a class="el" href="SmithPredictor_8h_source.html">SmithPredictor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SmithPredictor_8h_source.html#l00094">94</a> of file <a class="el" href="SmithPredictor_8h_source.html">SmithPredictor.h</a>.</p>
 
 </div>
 </div>
@@ -390,9 +456,18 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Replace the delay-free plant model and dead-time length at runtime. </p>
+<p>Resets model state and output buffer (equivalent to <a class="el" href="classctrl_1_1SmithPredictor.html#ac4244b6f2c02981232c742157cd44fa3" title="Reset model state, output buffer, and inner controller.">reset()</a>). </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">delayModel</td><td>Updated delay-free model. </td></tr>
+    <tr><td class="paramname">delaySteps</td><td>New integer dead-time length in samples. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="SmithPredictor_8cpp_source.html#l00149">149</a> of file <a class="el" href="SmithPredictor_8cpp_source.html">SmithPredictor.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="SmithPredictor_8cpp_source.html#l00013">ctrl::makeIdentityFilter()</a>, and <a class="el" href="PlantModel_8h_source.html#l00053">ctrl::StateSpace::Ts</a>.</p>
+<p class="reference">References <a class="el" href="SmithPredictor_8cpp_source.html#l00013">ctrl::makeIdentityFilter()</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
 </div>
 </div>
@@ -428,9 +503,19 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Replace the plant model with a fractional delay filter at runtime. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">delayModel</td><td>Updated delay-free model. </td></tr>
+    <tr><td class="paramname">delaySteps</td><td>New integer dead-time length in samples. </td></tr>
+    <tr><td class="paramname">fracDelayFilter</td><td>Updated first-order Padé filter for the sub-sample remainder. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="SmithPredictor_8cpp_source.html#l00159">159</a> of file <a class="el" href="SmithPredictor_8cpp_source.html">SmithPredictor.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00053">ctrl::StateSpace::Ts</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
 </div>
 </div>

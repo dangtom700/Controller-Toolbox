@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,26 +81,36 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Tuning parameters for <a class="el" href="classctrl_1_1DiscreteSMC.html" title="Discrete first-order Sliding Mode Controller with boundary-layer saturation.">DiscreteSMC</a>.  
+ <a href="structctrl_1_1SMCParams.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a1d249bc5108b6f21e2c252ff4b99647a" id="r_a1d249bc5108b6f21e2c252ff4b99647a"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SMCParams.html#a1d249bc5108b6f21e2c252ff4b99647a">c_e</a> = 1.0</td></tr>
+<tr class="memdesc:a1d249bc5108b6f21e2c252ff4b99647a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Error weight in the sliding surface.  <br /></td></tr>
 <tr class="separator:a1d249bc5108b6f21e2c252ff4b99647a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c1885b64dc2c56ec81a203d812b7f3c" id="r_a3c1885b64dc2c56ec81a203d812b7f3c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c">c_de</a> = 0.1</td></tr>
+<tr class="memdesc:a3c1885b64dc2c56ec81a203d812b7f3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Error-rate weight in the sliding surface (discrete, stores λ·Ts).  <br /></td></tr>
 <tr class="separator:a3c1885b64dc2c56ec81a203d812b7f3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3fa027ba3dfca3725f172fabd129a455" id="r_a3fa027ba3dfca3725f172fabd129a455"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SMCParams.html#a3fa027ba3dfca3725f172fabd129a455">K</a> = 5.0</td></tr>
+<tr class="memdesc:a3fa027ba3dfca3725f172fabd129a455"><td class="mdescLeft">&#160;</td><td class="mdescRight">Switching gain. Larger = more robust, more chattering.  <br /></td></tr>
 <tr class="separator:a3fa027ba3dfca3725f172fabd129a455"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abdc54f1d0798b7b555d042eb9d095cd8" id="r_abdc54f1d0798b7b555d042eb9d095cd8"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SMCParams.html#abdc54f1d0798b7b555d042eb9d095cd8">phi</a> = 0.5</td></tr>
+<tr class="memdesc:abdc54f1d0798b7b555d042eb9d095cd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Boundary-layer thickness. Larger = smoother, slower.  <br /></td></tr>
 <tr class="separator:abdc54f1d0798b7b555d042eb9d095cd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a813a9b4b2b87ed7fad94b1a6f43342d4" id="r_a813a9b4b2b87ed7fad94b1a6f43342d4"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SMCParams.html#a813a9b4b2b87ed7fad94b1a6f43342d4">uMin</a> = -1e9</td></tr>
+<tr class="memdesc:a813a9b4b2b87ed7fad94b1a6f43342d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output saturation lower limit.  <br /></td></tr>
 <tr class="separator:a813a9b4b2b87ed7fad94b1a6f43342d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a098f2ef5891177964432117e86cce7c3" id="r_a098f2ef5891177964432117e86cce7c3"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SMCParams.html#a098f2ef5891177964432117e86cce7c3">uMax</a> = 1e9</td></tr>
+<tr class="memdesc:a098f2ef5891177964432117e86cce7c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output saturation upper limit.  <br /></td></tr>
 <tr class="separator:a098f2ef5891177964432117e86cce7c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00026">26</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
+<div class="textblock"><p>Tuning parameters for <a class="el" href="classctrl_1_1DiscreteSMC.html" title="Discrete first-order Sliding Mode Controller with boundary-layer saturation.">DiscreteSMC</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00020">20</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a3c1885b64dc2c56ec81a203d812b7f3c" name="a3c1885b64dc2c56ec81a203d812b7f3c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3c1885b64dc2c56ec81a203d812b7f3c">&#9670;&#160;</a></span>c_de</h2>
@@ -114,7 +124,14 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00042">42</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
+<p>Error-rate weight in the sliding surface (discrete, stores λ·Ts). </p>
+<dl class="section user"><dt>Sample-time dependence (calibration trap)</dt><dd>The discrete derivative is approximated as (e[k] − e[k−1]) / Ts. Therefore c_de is implicitly Ts-dependent: halving Ts doubles the surface sensitivity without any parameter change.</dd></dl>
+<p><b>Convention:</b> c_de stores the <b>discrete</b> coefficient, i.e., c_de already absorbs Ts. To convert from a continuous-time slope λ [1/s]: </p><div class="fragment"><div class="line"><a class="code hl_variable" href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c">c_de</a> = lambda * Ts</div>
+<div class="ttc" id="astructctrl_1_1SMCParams_html_a3c1885b64dc2c56ec81a203d812b7f3c"><div class="ttname"><a href="structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c">ctrl::SMCParams::c_de</a></div><div class="ttdeci">double c_de</div><div class="ttdoc">Error-rate weight in the sliding surface (discrete, stores λ·Ts).</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8h_source.html#l00041">DiscreteSMC.h:41</a></div></div>
+</div><!-- fragment --><p> Recalculate c_de whenever Ts changes.</p>
+<p>Larger c_de → faster convergence to the sliding surface but more chattering. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00041">41</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteSMC_8cpp_source.html#l00019">ctrl::DiscreteSMC::compute()</a>.</p>
 
@@ -132,7 +149,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00027">27</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
+<p>Error weight in the sliding surface. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00022">22</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteSMC_8cpp_source.html#l00019">ctrl::DiscreteSMC::compute()</a>.</p>
 
@@ -149,6 +168,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Switching gain. Larger = more robust, more chattering. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00043">43</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 
@@ -168,6 +189,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Boundary-layer thickness. Larger = smoother, slower. </p>
+
 <p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00044">44</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteSMC_8cpp_source.html#l00019">ctrl::DiscreteSMC::compute()</a>.</p>
@@ -186,6 +209,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Output saturation upper limit. </p>
+
 <p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00046">46</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteSMC_8cpp_source.html#l00019">ctrl::DiscreteSMC::compute()</a>.</p>
@@ -203,6 +228,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Output saturation lower limit. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteSMC_8h_source.html#l00045">45</a> of file <a class="el" href="DiscreteSMC_8h_source.html">DiscreteSMC.h</a>.</p>
 

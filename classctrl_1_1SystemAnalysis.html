@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,26 +81,36 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Static analysis utilities for discrete-time state-space systems.  
+ <a href="classctrl_1_1SystemAnalysis.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="SystemAnalysis_8h_source.html">SystemAnalysis.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:ae9fd5f69fc3911297a2c09a3832dac2b" id="r_ae9fd5f69fc3911297a2c09a3832dac2b"><td class="memItemLeft" align="right" valign="top">static std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SystemAnalysis.html#ae9fd5f69fc3911297a2c09a3832dac2b">getPoles</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys)</td></tr>
+<tr class="memdesc:ae9fd5f69fc3911297a2c09a3832dac2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the poles (eigenvalues of A) of a state-space system.  <br /></td></tr>
 <tr class="separator:ae9fd5f69fc3911297a2c09a3832dac2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f243ec5de8087ffd338ac6cd3ea8fc6" id="r_a2f243ec5de8087ffd338ac6cd3ea8fc6"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SystemAnalysis.html#a2f243ec5de8087ffd338ac6cd3ea8fc6">isDiscreteStable</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys)</td></tr>
+<tr class="memdesc:a2f243ec5de8087ffd338ac6cd3ea8fc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Test discrete-time stability.  <br /></td></tr>
 <tr class="separator:a2f243ec5de8087ffd338ac6cd3ea8fc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3665107dd59a3f84b44b4a4e462b18ad" id="r_a3665107dd59a3f84b44b4a4e462b18ad"><td class="memItemLeft" align="right" valign="top">static Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SystemAnalysis.html#a3665107dd59a3f84b44b4a4e462b18ad">solveDiscreteLyapunov</a> (const Eigen::MatrixXd &amp;A, const Eigen::MatrixXd &amp;Q)</td></tr>
+<tr class="memdesc:a3665107dd59a3f84b44b4a4e462b18ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve the discrete Lyapunov equation A·P·Aᵀ − P + Q = 0.  <br /></td></tr>
 <tr class="separator:a3665107dd59a3f84b44b4a4e462b18ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9302c9ab17ea2f1a9bbecbb9c98a9acf" id="r_a9302c9ab17ea2f1a9bbecbb9c98a9acf"><td class="memItemLeft" align="right" valign="top">static std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SystemAnalysis.html#a9302c9ab17ea2f1a9bbecbb9c98a9acf">getFrequencyResponse</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys, const std::vector&lt; double &gt; &amp;freqs)</td></tr>
+<tr class="memdesc:a9302c9ab17ea2f1a9bbecbb9c98a9acf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the frequency response G(e^{jωTs}) at each frequency in <code>freqs</code>.  <br /></td></tr>
 <tr class="separator:a9302c9ab17ea2f1a9bbecbb9c98a9acf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f5aa15839819c0ff49fdb495c031f9f" id="r_a7f5aa15839819c0ff49fdb495c031f9f"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1StabilityMargins.html">StabilityMargins</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SystemAnalysis.html#a7f5aa15839819c0ff49fdb495c031f9f">calculateMargins</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys)</td></tr>
+<tr class="memdesc:a7f5aa15839819c0ff49fdb495c031f9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute gain and phase margins for a SISO open-loop plant.  <br /></td></tr>
 <tr class="separator:a7f5aa15839819c0ff49fdb495c031f9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a05e675bdc440ad52a6185f510ea2a49b" id="r_a05e675bdc440ad52a6185f510ea2a49b"><td class="memItemLeft" align="right" valign="top">static double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SystemAnalysis.html#a05e675bdc440ad52a6185f510ea2a49b">calculateHInfinityNorm</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys)</td></tr>
+<tr class="memdesc:a05e675bdc440ad52a6185f510ea2a49b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the peak H∞ norm of a state-space model.  <br /></td></tr>
 <tr class="separator:a05e675bdc440ad52a6185f510ea2a49b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="SystemAnalysis_8h_source.html#l00021">21</a> of file <a class="el" href="SystemAnalysis_8h_source.html">SystemAnalysis.h</a>.</p>
+<div class="textblock"><p>Static analysis utilities for discrete-time state-space systems. </p>
+
+<p class="definition">Definition at line <a class="el" href="SystemAnalysis_8h_source.html#l00033">33</a> of file <a class="el" href="SystemAnalysis_8h_source.html">SystemAnalysis.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a05e675bdc440ad52a6185f510ea2a49b" name="a05e675bdc440ad52a6185f510ea2a49b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a05e675bdc440ad52a6185f510ea2a49b">&#9670;&#160;</a></span>calculateHInfinityNorm()</h2>
@@ -126,9 +136,20 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Compute the peak H∞ norm of a state-space model. </p>
+<p>For SISO plants, equals the peak frequency-response magnitude. For MIMO plants, equals the peak induced L₂-gain (maximum singular value over all frequencies).</p>
+<p>Uses a coarse grid followed by golden-section search; typical accuracy is better than 0.1%.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Discrete-time state-space model. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Peak H∞ norm. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="SystemAnalysis_8cpp_source.html#l00240">240</a> of file <a class="el" href="SystemAnalysis_8cpp_source.html">SystemAnalysis.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00049">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00050">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00051">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00052">ctrl::StateSpace::D</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00009">kPi</a>, and <a class="el" href="PlantModel_8h_source.html#l00053">ctrl::StateSpace::Ts</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00009">kPi</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
 </div>
 </div>
@@ -156,9 +177,19 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Compute gain and phase margins for a SISO open-loop plant. </p>
+<p>Algorithm: coarse logarithmic grid (200 points) to bracket crossings, followed by bisection (50 iterations) for accuracy. Phase is continuously unwrapped across grid points, so the result is correct for higher-order and non-minimum-phase plants where phase can cross −180° multiple times. Returns the worst-case (smallest) margin when multiple crossings exist.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>SISO discrete-time state-space model. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1StabilityMargins.html" title="Stability margins for a SISO open-loop plant.">StabilityMargins</a> with GM, PM, and crossover frequencies. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="SystemAnalysis_8cpp_source.html#l00120">120</a> of file <a class="el" href="SystemAnalysis_8cpp_source.html">SystemAnalysis.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00049">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00050">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00051">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00052">ctrl::StateSpace::D</a>, <a class="el" href="SystemAnalysis_8h_source.html#l00015">ctrl::StabilityMargins::gainMarginDb</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00009">kPi</a>, <a class="el" href="SystemAnalysis_8h_source.html#l00016">ctrl::StabilityMargins::phaseMarginDeg</a>, <a class="el" href="PlantModel_8h_source.html#l00053">ctrl::StateSpace::Ts</a>, <a class="el" href="SystemAnalysis_8h_source.html#l00017">ctrl::StabilityMargins::wCrossoverGain</a>, and <a class="el" href="SystemAnalysis_8h_source.html#l00018">ctrl::StabilityMargins::wCrossoverPhase</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>, <a class="el" href="SystemAnalysis_8h_source.html#l00024">ctrl::StabilityMargins::gainMarginDb</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00009">kPi</a>, <a class="el" href="SystemAnalysis_8h_source.html#l00025">ctrl::StabilityMargins::phaseMarginDeg</a>, <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>, <a class="el" href="SystemAnalysis_8h_source.html#l00026">ctrl::StabilityMargins::wCrossoverGain</a>, and <a class="el" href="SystemAnalysis_8h_source.html#l00027">ctrl::StabilityMargins::wCrossoverPhase</a>.</p>
 
 </div>
 </div>
@@ -196,9 +227,26 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Compute the frequency response G(e^{jωTs}) at each frequency in <code>freqs</code>. </p>
+<p>Uses the direct formula G(z) = C·(z·I − A)⁻¹·B + D at z = e^{jωTs}. SISO only; throws for MIMO plants.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>SISO discrete-time state-space model. </td></tr>
+    <tr><td class="paramname">freqs</td><td>Frequency vector [rad/s]. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Complex frequency response at each frequency (same length as freqs). </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>If the system is not SISO. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="SystemAnalysis_8cpp_source.html#l00093">93</a> of file <a class="el" href="SystemAnalysis_8cpp_source.html">SystemAnalysis.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00049">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00050">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00051">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00052">ctrl::StateSpace::D</a>, and <a class="el" href="PlantModel_8h_source.html#l00053">ctrl::StateSpace::Ts</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
 </div>
 </div>
@@ -226,9 +274,19 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Compute the poles (eigenvalues of A) of a state-space system. </p>
+<p>For discrete-time systems, stability requires all |poles| &lt; 1.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Discrete-time state-space model. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Vector of poles (eigenvalues of A). </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="SystemAnalysis_8cpp_source.html#l00014">14</a> of file <a class="el" href="SystemAnalysis_8cpp_source.html">SystemAnalysis.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00049">ctrl::StateSpace::A</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="SystemAnalysis_8cpp_source.html#l00026">isDiscreteStable()</a>.</p>
 
@@ -257,6 +315,16 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Test discrete-time stability. </p>
+<p>Returns <code>true</code> iff all eigenvalues of A satisfy |λ| &lt; 1 (strict stability). Marginally stable systems (|λ| = 1) return <code>false</code>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Discrete-time state-space model. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> if strictly stable. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="SystemAnalysis_8cpp_source.html#l00026">26</a> of file <a class="el" href="SystemAnalysis_8cpp_source.html">SystemAnalysis.cpp</a>.</p>
 
@@ -297,6 +365,19 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Solve the discrete Lyapunov equation A·P·Aᵀ − P + Q = 0. </p>
+<p>Solved via Kronecker product vectorisation: (I − A⊗A)·vec(P) = vec(Q).</p>
+<dl class="section user"><dt>Complexity note</dt><dd>O(n⁶) due to the n²×n² linear system — suitable for n ≤ 10. For n &gt; 10, the Bartels-Stewart algorithm (O(n³) via Schur decomposition) is strongly preferred; MATLAB's dlyap() uses Bartels-Stewart internally.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">A</td><td>System matrix (must be strictly stable; unstable A gives a singular system). </td></tr>
+    <tr><td class="paramname">Q</td><td>Symmetric positive semi-definite matrix (same dimensions as A). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Solution P.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd>Golub, Nash &amp; Van Loan, "A Hessenberg-Schur method for AX+XB=C", IEEE TAC (1979). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="SystemAnalysis_8cpp_source.html#l00039">39</a> of file <a class="el" href="SystemAnalysis_8cpp_source.html">SystemAnalysis.cpp</a>.</p>
 

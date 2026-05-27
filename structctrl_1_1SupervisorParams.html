@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,22 +81,30 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Tuning parameters for <a class="el" href="classctrl_1_1FuzzySupervisor.html" title="Fuzzy supervisory monitor that decides when a linearised controller needs re-tuning.">FuzzySupervisor</a>.  
+ <a href="structctrl_1_1SupervisorParams.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a420f60f781eb3614cb24572f4e4c842d" id="r_a420f60f781eb3614cb24572f4e4c842d"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SupervisorParams.html#a420f60f781eb3614cb24572f4e4c842d">e_threshold</a> = 5.0</td></tr>
+<tr class="memdesc:a420f60f781eb3614cb24572f4e4c842d"><td class="mdescLeft">&#160;</td><td class="mdescRight">|e| at which error is considered "Large" [same units as error].  <br /></td></tr>
 <tr class="separator:a420f60f781eb3614cb24572f4e4c842d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8c497ea5b6a80340113a41e14311dfa8" id="r_a8c497ea5b6a80340113a41e14311dfa8"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SupervisorParams.html#a8c497ea5b6a80340113a41e14311dfa8">trend_threshold</a> = 0.5</td></tr>
+<tr class="memdesc:a8c497ea5b6a80340113a41e14311dfa8"><td class="mdescLeft">&#160;</td><td class="mdescRight">d|e|/dt considered "Increasing fast" [units/s].  <br /></td></tr>
 <tr class="separator:a8c497ea5b6a80340113a41e14311dfa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af692884ca6b3763128d0263c2293ac65" id="r_af692884ca6b3763128d0263c2293ac65"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SupervisorParams.html#af692884ca6b3763128d0263c2293ac65">signal_threshold</a> = 0.5</td></tr>
+<tr class="memdesc:af692884ca6b3763128d0263c2293ac65"><td class="mdescLeft">&#160;</td><td class="mdescRight">relinearize_signal &gt; this value triggers the action flag.  <br /></td></tr>
 <tr class="separator:af692884ca6b3763128d0263c2293ac65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada70cb220190389accdbb8bf8f758b48" id="r_ada70cb220190389accdbb8bf8f758b48"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SupervisorParams.html#ada70cb220190389accdbb8bf8f758b48">cooldown_steps</a> = 20</td></tr>
+<tr class="memdesc:ada70cb220190389accdbb8bf8f758b48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hysteresis cooldown.  <br /></td></tr>
 <tr class="separator:ada70cb220190389accdbb8bf8f758b48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00334">334</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<div class="textblock"><p>Tuning parameters for <a class="el" href="classctrl_1_1FuzzySupervisor.html" title="Fuzzy supervisory monitor that decides when a linearised controller needs re-tuning.">FuzzySupervisor</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00477">477</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="ada70cb220190389accdbb8bf8f758b48" name="ada70cb220190389accdbb8bf8f758b48"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ada70cb220190389accdbb8bf8f758b48">&#9670;&#160;</a></span>cooldown_steps</h2>
@@ -110,7 +118,10 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00339">339</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>Hysteresis cooldown. </p>
+<p>Once a relinearisation is triggered, the supervisor will not trigger again for <code>cooldown_steps</code> control steps. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00488">488</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="FuzzyLogic_8cpp_source.html#l00519">ctrl::FuzzySupervisor::update()</a>.</p>
 
@@ -128,7 +139,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00335">335</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>|e| at which error is considered "Large" [same units as error]. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00478">478</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="FuzzyLogic_8cpp_source.html#l00519">ctrl::FuzzySupervisor::update()</a>.</p>
 
@@ -146,7 +159,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00337">337</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>relinearize_signal &gt; this value triggers the action flag. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00480">480</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="FuzzyLogic_8cpp_source.html#l00519">ctrl::FuzzySupervisor::update()</a>.</p>
 
@@ -164,7 +179,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00336">336</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>d|e|/dt considered "Increasing fast" [units/s]. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00479">479</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="FuzzyLogic_8cpp_source.html#l00519">ctrl::FuzzySupervisor::update()</a>.</p>
 

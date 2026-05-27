@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,6 +81,9 @@ $(function() {
   <div class="headertitle"><div class="title">ControllerTuner.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Offline and online tuning utilities with compile-time type safety.  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>&quot;</code><br />
@@ -96,32 +99,46 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RelayTunerConfig.html">ctrl::RelayTunerConfig</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration for <a class="el" href="classctrl_1_1RelayAutoTuner.html" title="Åström-Hägglund relay feedback auto-tuner.">RelayAutoTuner</a>.  <a href="structctrl_1_1RelayTunerConfig.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RelayAutoTuner.html">ctrl::RelayAutoTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Åström-Hägglund relay feedback auto-tuner.  <a href="classctrl_1_1RelayAutoTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1StepResponseTuner.html">ctrl::StepResponseTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open-loop step-response FOPDT identifier and PID tuner.  <a href="classctrl_1_1StepResponseTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StepResponseTuner_1_1FOPDTModel.html">ctrl::StepResponseTuner::FOPDTModel</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">FOPDT model parameters.  <a href="structctrl_1_1StepResponseTuner_1_1FOPDTModel.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1LQRWeightTuner.html">ctrl::LQRWeightTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">LQR weight selector for <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> and <a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a>.  <a href="classctrl_1_1LQRWeightTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1MPCHorizonTuner.html">ctrl::MPCHorizonTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">MPC horizon and weight recommender for <a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>.  <a href="classctrl_1_1MPCHorizonTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MPCHorizonTuner_1_1Recommendation.html">ctrl::MPCHorizonTuner::Recommendation</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recommended horizon and weight parameters for <a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>.  <a href="structctrl_1_1MPCHorizonTuner_1_1Recommendation.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1KalmanNoiseParams.html">ctrl::KalmanNoiseParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Noise covariance matrices for Kalman observer initialisation.  <a href="structctrl_1_1KalmanNoiseParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ZieglerNicholsTuner.html">ctrl::ZieglerNicholsTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Standalone Ziegler-Nichols tuner from ultimate gain and period.  <a href="classctrl_1_1ZieglerNicholsTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ZieglerNicholsTuner_1_1Input.html">ctrl::ZieglerNicholsTuner::Input</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structctrl_1_1ZieglerNicholsTuner_1_1Input.html" title="Input to the ZN tuner.">Input</a> to the ZN tuner.  <a href="structctrl_1_1ZieglerNicholsTuner_1_1Input.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1CohenCoonTuner.html">ctrl::CohenCoonTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cohen-Coon PID tuner from a FOPDT model.  <a href="classctrl_1_1CohenCoonTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1LoopShapingTuner.html">ctrl::LoopShapingTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lead compensator designer for <a class="el" href="classctrl_1_1DiscreteLeadLag.html" title="Discrete Lead-Lag compensator.">DiscreteLeadLag</a> via frequency-domain loop shaping.  <a href="classctrl_1_1LoopShapingTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LoopShapingTuner_1_1Input.html">ctrl::LoopShapingTuner::Input</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structctrl_1_1LoopShapingTuner_1_1Input.html" title="Input parameters for the loop-shaping design.">Input</a> parameters for the loop-shaping design.  <a href="structctrl_1_1LoopShapingTuner_1_1Input.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanWeightTuner.html">ctrl::KalmanWeightTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Heuristic noise covariance selector for the Kalman observer in <a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a>.  <a href="classctrl_1_1KalmanWeightTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -136,9 +153,44 @@ Enumerations</h2></td></tr>
 , <a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fad7a1003002f545d6e966d9cdd7a63f71">ctrl::IMC</a>
 , <a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fa64fa05ea7fba95880b45131928594ae0">ctrl::AMIGO</a>
  }</td></tr>
+<tr class="memdesc:ac903a5a20ba43db1acb05d549374197f"><td class="mdescLeft">&#160;</td><td class="mdescRight">PID tuning rule applied by heuristic tuners.  <a href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197f">More...</a><br /></td></tr>
 <tr class="separator:ac903a5a20ba43db1acb05d549374197f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Offline and online tuning utilities with compile-time type safety. </p>
+<p>Every tuner exposes two interfaces:</p><ul>
+<li><code>tuneImpl(…)</code> / <code>computePIDParams(…)</code> — unchecked, for internal use or when the controller type is already known.</li>
+<li><code>tuneFor&lt;C&gt;(…)</code> / <code>computePIDParamsFor&lt;C&gt;(…)</code> — template wrapper that triggers a <code>static_assert</code> (hard compiler error) when <code>C</code> is incompatible, with a diagnostic naming the correct tuner.</li>
+</ul>
+<p><b>Tuners provided:</b></p><ul>
+<li>RelayAutoTuner — Åström-Hägglund relay feedback test → (Ku, Tu) → PIDParams.</li>
+<li>StepResponseTuner — Open-loop FOPDT identification → PIDParams.</li>
+<li>LQRWeightTuner — Bryson's rule / pole-placement hint → LQRParams.</li>
+<li>MPCHorizonTuner — Settling-time estimate → (Np, Nc, ρy, ρu) recommendation.</li>
+<li>ZieglerNicholsTuner — Standalone ZN from (Ku, Tu).</li>
+<li>CohenCoonTuner — FOPDT-based PID (Cohen &amp; Coon 1953).</li>
+<li>LoopShapingTuner — Crossover frequency + phase margin → LeadLagParams.</li>
+<li>KalmanWeightTuner — Noise levels → Qf / Rf for DiscreteLQG.</li>
+</ul>
+<p><b>Strategies that are intentionally NOT included</b> (require external solvers):</p><ul>
+<li>H∞ / μ-synthesis — SLICOT, Python-control, or MATLAB.</li>
+<li>QFT — QFT Toolbox, QDESIGN.</li>
+<li>GA / PSO / DE — Optuna, DEAP.</li>
+<li>Bayesian optimisation — BoTorch / GPyOpt / scikit-optimize.</li>
+<li>MRAC / STR / IFT / VRFT — adaptive control; separate library.</li>
+</ul>
+<dl class="section see"><dt>See also</dt><dd>Åström &amp; Hägglund, "PID Controllers: Theory, Design, and Tuning" (1988, 2006). </dd>
+<dd>
+Bryson &amp; Ho, "Applied Optimal Control" (1975). </dd>
+<dd>
+Cohen &amp; Coon, "Theoretical Consideration of Retarded Control" (1953). </dd>
+<dd>
+Rivera, Morari &amp; Skogestad, "Internal Model Control" Ind. Eng. Chem. (1986). </dd>
+<dd>
+Franklin, Powell &amp; Emami-Naeini, "Feedback Control of Dynamic Systems". </dd></dl>
+
+<p class="definition">Definition in file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8

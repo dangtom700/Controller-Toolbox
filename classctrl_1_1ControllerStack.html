@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,6 +81,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Composite controller that dispatches to multiple <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> entries.  
+ <a href="classctrl_1_1ControllerStack.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="ControllerStack_8h_source.html">ControllerStack.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for ctrl::ControllerStack:</div>
@@ -88,47 +91,71 @@ Inheritance diagram for ctrl::ControllerStack:</div>
  <div class="center">
   <img src="classctrl_1_1ControllerStack.png" usemap="#ctrl::ControllerStack_map" alt=""/>
   <map id="ctrl::ControllerStack_map" name="ctrl::ControllerStack_map">
-<area href="classctrl_1_1IController.html" alt="ctrl::IController" shape="rect" coords="0,0,123,24"/>
+<area href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers." alt="ctrl::IController" shape="rect" coords="0,0,123,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ab132e40a4ee1d6054313e1c778ae9712" id="r_ab132e40a4ee1d6054313e1c778ae9712"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#ab132e40a4ee1d6054313e1c778ae9712">ControllerStack</a> (<a class="el" href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458">StackMode</a> <a class="el" href="classctrl_1_1ControllerStack.html#a7699dc65172c47b782b42d668a718cde">mode</a>, double <a class="el" href="classctrl_1_1ControllerStack.html#a406041e44af7c8cd2df0d17de8a6b858">sampleTime</a>)</td></tr>
+<tr class="memdesc:ab132e40a4ee1d6054313e1c778ae9712"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct an empty stack.  <br /></td></tr>
 <tr class="separator:ab132e40a4ee1d6054313e1c778ae9712"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afbbd26638b331147b1548baeba205c22" id="r_afbbd26638b331147b1548baeba205c22"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#afbbd26638b331147b1548baeba205c22">addController</a> (std::shared_ptr&lt; <a class="el" href="classctrl_1_1IController.html">IController</a> &gt; controller, const std::string &amp;name, double weight=1.0, std::function&lt; bool(double, double)&gt; condition=nullptr)</td></tr>
+<tr class="memdesc:afbbd26638b331147b1548baeba205c22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Append a controller to the priority queue.  <br /></td></tr>
 <tr class="separator:afbbd26638b331147b1548baeba205c22"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51e3842848a0f6ea804f11105f43c01f" id="r_a51e3842848a0f6ea804f11105f43c01f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#a51e3842848a0f6ea804f11105f43c01f">removeController</a> (const std::string &amp;name)</td></tr>
+<tr class="memdesc:a51e3842848a0f6ea804f11105f43c01f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove the entry with the given name.  <br /></td></tr>
 <tr class="separator:a51e3842848a0f6ea804f11105f43c01f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9999b764bca2817d5a4ed977f4ee7098" id="r_a9999b764bca2817d5a4ed977f4ee7098"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#a9999b764bca2817d5a4ed977f4ee7098">setActive</a> (const std::string &amp;name, bool active)</td></tr>
+<tr class="memdesc:a9999b764bca2817d5a4ed977f4ee7098"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable or disable an entry without removing it.  <br /></td></tr>
 <tr class="separator:a9999b764bca2817d5a4ed977f4ee7098"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89e87343e0f7a06f37a184a17a78bffb" id="r_a89e87343e0f7a06f37a184a17a78bffb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#a89e87343e0f7a06f37a184a17a78bffb">setWeight</a> (const std::string &amp;name, double weight)</td></tr>
+<tr class="memdesc:a89e87343e0f7a06f37a184a17a78bffb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the weight of an entry (Weighted mode only).  <br /></td></tr>
 <tr class="separator:a89e87343e0f7a06f37a184a17a78bffb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa00ac88e91ad03fd85c302f9a8171048" id="r_aa00ac88e91ad03fd85c302f9a8171048"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#aa00ac88e91ad03fd85c302f9a8171048">compute</a> (double error) override</td></tr>
+<tr class="memdesc:aa00ac88e91ad03fd85c302f9a8171048"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the composite output according to the current StackMode.  <br /></td></tr>
 <tr class="separator:aa00ac88e91ad03fd85c302f9a8171048"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58f0b3f4ca17949b4e0499e3b5493972" id="r_a58f0b3f4ca17949b4e0499e3b5493972"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#a58f0b3f4ca17949b4e0499e3b5493972">reset</a> () override</td></tr>
+<tr class="memdesc:a58f0b3f4ca17949b4e0499e3b5493972"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset all registered controllers.  <br /></td></tr>
 <tr class="separator:a58f0b3f4ca17949b4e0499e3b5493972"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a406041e44af7c8cd2df0d17de8a6b858" id="r_a406041e44af7c8cd2df0d17de8a6b858"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#a406041e44af7c8cd2df0d17de8a6b858">sampleTime</a> () const override</td></tr>
+<tr class="memdesc:a406041e44af7c8cd2df0d17de8a6b858"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
 <tr class="separator:a406041e44af7c8cd2df0d17de8a6b858"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7699dc65172c47b782b42d668a718cde" id="r_a7699dc65172c47b782b42d668a718cde"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458">StackMode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#a7699dc65172c47b782b42d668a718cde">mode</a> () const</td></tr>
+<tr class="memdesc:a7699dc65172c47b782b42d668a718cde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current dispatch mode.  <br /></td></tr>
 <tr class="separator:a7699dc65172c47b782b42d668a718cde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5163b3d2876650be029c3e782a8b68ff" id="r_a5163b3d2876650be029c3e782a8b68ff"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#a5163b3d2876650be029c3e782a8b68ff">activeControllerName</a> () const</td></tr>
+<tr class="memdesc:a5163b3d2876650be029c3e782a8b68ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name of the controller selected in the most recent <a class="el" href="classctrl_1_1ControllerStack.html#aa00ac88e91ad03fd85c302f9a8171048" title="Compute the composite output according to the current StackMode.">compute()</a> call (Supervisory mode).  <br /></td></tr>
 <tr class="separator:a5163b3d2876650be029c3e782a8b68ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af87c172864b6bf23e359389a5131ee7e" id="r_af87c172864b6bf23e359389a5131ee7e"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; <a class="el" href="structctrl_1_1StackEntry.html">StackEntry</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#af87c172864b6bf23e359389a5131ee7e">entries</a> () const</td></tr>
+<tr class="memdesc:af87c172864b6bf23e359389a5131ee7e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read-only view of all registered entries.  <br /></td></tr>
 <tr class="separator:af87c172864b6bf23e359389a5131ee7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classctrl_1_1IController"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classctrl_1_1IController')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classctrl_1_1IController.html">ctrl::IController</a></td></tr>
 <tr class="memitem:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController" id="r_a209dd6532b22278f93430a0757aae4c7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a209dd6532b22278f93430a0757aae4c7">~IController</a> ()=default</td></tr>
 <tr class="separator:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController" id="r_a9d81dd5427e094d72906d54dd5e6548e"><td class="memItemLeft" align="right" valign="top">virtual Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e">computeVec</a> (const Eigen::VectorXd &amp;signal)</td></tr>
+<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step — vector MIMO interface.  <br /></td></tr>
 <tr class="separator:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController" id="r_a20821745ef7099941a9e9fdb6eeddd07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">bumplessInit</a> (double, double)</td></tr>
+<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation — prepares the controller for smooth activation.  <br /></td></tr>
 <tr class="separator:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController" id="r_a2dc30a3b9bfb8b9649cef7218ad9e68b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b">isHealthy</a> () const</td></tr>
+<tr class="memdesc:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Health query for supervisory fault-tolerant control.  <br /></td></tr>
 <tr class="separator:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="ControllerStack_8h_source.html#l00091">91</a> of file <a class="el" href="ControllerStack_8h_source.html">ControllerStack.h</a>.</p>
+<div class="textblock"><p>Composite controller that dispatches to multiple <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> entries. </p>
+<p>Itself satisfies the <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> interface, so stacks can be nested.</p>
+<div class="fragment"><div class="line"><span class="comment">// Example: supervisory fallback chain</span></div>
+<div class="line"><span class="keyword">auto</span> stack = std::make_shared&lt;ctrl::ControllerStack&gt;(<a class="code hl_enumvalue" href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458a45ed3b27103b66790c200c1af5f94c33">ctrl::StackMode::Supervisory</a>, Ts);</div>
+<div class="line">stack-&gt;addController(mpc,  <span class="stringliteral">&quot;MPC&quot;</span>,  1.0, [](<span class="keywordtype">double</span>, <span class="keywordtype">double</span>) { <span class="keywordflow">return</span> mpc-&gt;isHealthy(); });</div>
+<div class="line">stack-&gt;addController(pid,  <span class="stringliteral">&quot;PID&quot;</span>);   <span class="comment">// always-eligible fallback</span></div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// step</span></div>
+<div class="line"><span class="keywordtype">double</span> u = stack-&gt;compute(error);</div>
+<div class="ttc" id="anamespacectrl_html_a4312ec6fe1026061128af26aaf161458a45ed3b27103b66790c200c1af5f94c33"><div class="ttname"><a href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458a45ed3b27103b66790c200c1af5f94c33">ctrl::StackMode::Supervisory</a></div><div class="ttdeci">@ Supervisory</div><div class="ttdoc">Only one controller is active per step.</div></div>
+</div><!-- fragment --> 
+<p class="definition">Definition at line <a class="el" href="ControllerStack_8h_source.html#l00112">112</a> of file <a class="el" href="ControllerStack_8h_source.html">ControllerStack.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ab132e40a4ee1d6054313e1c778ae9712" name="ab132e40a4ee1d6054313e1c778ae9712"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab132e40a4ee1d6054313e1c778ae9712">&#9670;&#160;</a></span>ControllerStack()</h2>
@@ -164,6 +191,15 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Construct an empty stack. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mode</td><td>Dispatch strategy (Supervisory, Additive, or Weighted). </td></tr>
+    <tr><td class="paramname">sampleTime</td><td>Sample period Ts [s] shared across all entries. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="ControllerStack_8cpp_source.html#l00010">10</a> of file <a class="el" href="ControllerStack_8cpp_source.html">ControllerStack.cpp</a>.</p>
 
 </div>
@@ -192,7 +228,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ControllerStack_8h_source.html#l00115">115</a> of file <a class="el" href="ControllerStack_8h_source.html">ControllerStack.h</a>.</p>
+<p>Name of the controller selected in the most recent <a class="el" href="classctrl_1_1ControllerStack.html#aa00ac88e91ad03fd85c302f9a8171048" title="Compute the composite output according to the current StackMode.">compute()</a> call (Supervisory mode). </p>
+
+<p class="definition">Definition at line <a class="el" href="ControllerStack_8h_source.html#l00175">175</a> of file <a class="el" href="ControllerStack_8h_source.html">ControllerStack.h</a>.</p>
 
 </div>
 </div>
@@ -234,6 +272,18 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Append a controller to the priority queue. </p>
+<p>In Supervisory mode the insertion order determines fallback priority (first = highest).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">controller</td><td>Shared ownership of the controller. </td></tr>
+    <tr><td class="paramname">name</td><td>Unique name for lookup (removeController, setActive, setWeight). </td></tr>
+    <tr><td class="paramname">weight</td><td>Relative weight used in Weighted mode (ignored in other modes). </td></tr>
+    <tr><td class="paramname">condition</td><td>Activation gate; <code>nullptr</code> means always eligible. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="ControllerStack_8cpp_source.html#l00015">15</a> of file <a class="el" href="ControllerStack_8cpp_source.html">ControllerStack.cpp</a>.</p>
 
 </div>
@@ -261,6 +311,15 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Compute the composite output according to the current StackMode. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">error</td><td>Current tracking error e[k] (or signal as defined by <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a>). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Composite control output u[k]. </dd></dl>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8">ctrl::IController</a>.</p>
 
@@ -293,7 +352,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ControllerStack_8h_source.html#l00116">116</a> of file <a class="el" href="ControllerStack_8h_source.html">ControllerStack.h</a>.</p>
+<p>Read-only view of all registered entries. </p>
+
+<p class="definition">Definition at line <a class="el" href="ControllerStack_8h_source.html#l00178">178</a> of file <a class="el" href="ControllerStack_8h_source.html">ControllerStack.h</a>.</p>
 
 </div>
 </div>
@@ -320,7 +381,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ControllerStack_8h_source.html#l00114">114</a> of file <a class="el" href="ControllerStack_8h_source.html">ControllerStack.h</a>.</p>
+<p>Current dispatch mode. </p>
+
+<p class="definition">Definition at line <a class="el" href="ControllerStack_8h_source.html#l00172">172</a> of file <a class="el" href="ControllerStack_8h_source.html">ControllerStack.h</a>.</p>
 
 </div>
 </div>
@@ -339,6 +402,20 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Remove the entry with the given name. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>Controller name as passed to <a class="el" href="classctrl_1_1ControllerStack.html#afbbd26638b331147b1548baeba205c22" title="Append a controller to the priority queue.">addController()</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::out_of_range</td><td>If no entry with that name exists. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="ControllerStack_8cpp_source.html#l00023">23</a> of file <a class="el" href="ControllerStack_8cpp_source.html">ControllerStack.cpp</a>.</p>
 
@@ -366,6 +443,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Reset all registered controllers. </p>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac69ef6691d5831cda3adcdc59971fcac">ctrl::IController</a>.</p>
 
@@ -396,9 +475,11 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Sample time Ts [s]. </p>
+
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac1d1ab003ea7fa4f0ab49291d97473a0">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="ControllerStack_8h_source.html#l00113">113</a> of file <a class="el" href="ControllerStack_8h_source.html">ControllerStack.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ControllerStack_8h_source.html#l00169">169</a> of file <a class="el" href="ControllerStack_8h_source.html">ControllerStack.h</a>.</p>
 
 </div>
 </div>
@@ -428,9 +509,18 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Enable or disable an entry without removing it. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>Controller name. </td></tr>
+    <tr><td class="paramname">active</td><td><code>true</code> to enable, <code>false</code> to exclude from dispatch. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="ControllerStack_8cpp_source.html#l00040">40</a> of file <a class="el" href="ControllerStack_8cpp_source.html">ControllerStack.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="ControllerStack_8h_source.html#l00083">ctrl::StackEntry::active</a>.</p>
+<p class="reference">References <a class="el" href="ControllerStack_8h_source.html#l00085">ctrl::StackEntry::active</a>.</p>
 
 </div>
 </div>
@@ -459,6 +549,15 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Update the weight of an entry (Weighted mode only). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>Controller name. </td></tr>
+    <tr><td class="paramname">weight</td><td>New relative weight (must be ≥ 0). </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="ControllerStack_8cpp_source.html#l00046">46</a> of file <a class="el" href="ControllerStack_8cpp_source.html">ControllerStack.cpp</a>.</p>
 

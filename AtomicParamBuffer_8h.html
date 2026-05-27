@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -80,6 +80,9 @@ $(function() {
   <div class="headertitle"><div class="title">AtomicParamBuffer.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Seqlock-based double-buffer for lock-free controller parameter updates.  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;atomic&gt;</code><br />
 <code>#include &lt;array&gt;</code><br />
 <code>#include &lt;cstdint&gt;</code><br />
@@ -89,6 +92,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1AtomicParamBuffer.html">ctrl::AtomicParamBuffer&lt; Params &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seqlock double-buffer for lock-free parameter hand-off between a background writer thread and a real-time reader thread.  <a href="classctrl_1_1AtomicParamBuffer.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -96,7 +100,30 @@ Namespaces</h2></td></tr>
 <tr class="memitem:namespacectrl" id="r_namespacectrl"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html">ctrl</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Seqlock-based double-buffer for lock-free controller parameter updates. </p>
+<p><b>Problem:</b> A background thread (gain scheduler, auto-tuner, telemetry) needs to push new parameters to a controller while the real-time thread is inside <code>compute()</code>. A mutex would stall the RT thread; this seqlock allows the RT thread to read without blocking while the writer atomically publishes.</p>
+<p><b>Design — seqlock:</b> A sequence counter <code>seq_</code> is incremented twice per write: once before (making it odd = "write in progress") and once after (making it even = done). The reader spins until it sees an even <code>seq_</code> value that is unchanged across its entire read. Two <code>Params</code> slots (<code>bufs_[]</code>) are retained so the writer can prepare the next value in the inactive slot before promoting it, avoiding a mid-write view.</p>
+<p><b>Guarantees:</b></p><ul>
+<li>Single writer + single reader: lock-free on the reader side.</li>
+<li>No torn reads: the reader retries if a write overlaps its read window.</li>
+<li><code>Params</code> must be trivially copyable (struct of doubles, ints, etc.).</li>
+<li>The RT thread may observe the old or new Params on the step that publish() fires; it will always observe the new Params on the next step.</li>
+</ul>
+<p><b>Limitation:</b> Multiple concurrent writers are not supported. Guard publish() with a mutex when more than one background thread updates parameters.</p>
+<p><b>Usage:</b> </p><div class="fragment"><div class="line"><a class="code hl_class" href="classctrl_1_1AtomicParamBuffer.html">ctrl::AtomicParamBuffer&lt;PIDParams&gt;</a> buf({1.0, 0.1, 0.05});</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// RT thread (called every Ts):</span></div>
+<div class="line">PIDParams p = buf.<a class="code hl_function" href="classctrl_1_1AtomicParamBuffer.html#a9c63717ca1dfde3a2edefc696a17a422">read</a>();</div>
+<div class="line">pid.setParams(p);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Background thread (called on tuner update):</span></div>
+<div class="line">buf.publish({2.0, 0.2, 0.1});</div>
+<div class="ttc" id="aclassctrl_1_1AtomicParamBuffer_html"><div class="ttname"><a href="classctrl_1_1AtomicParamBuffer.html">ctrl::AtomicParamBuffer</a></div><div class="ttdoc">Seqlock double-buffer for lock-free parameter hand-off between a background writer thread and a real-...</div><div class="ttdef"><b>Definition</b> <a href="AtomicParamBuffer_8h_source.html#l00054">AtomicParamBuffer.h:54</a></div></div>
+<div class="ttc" id="aclassctrl_1_1AtomicParamBuffer_html_a9c63717ca1dfde3a2edefc696a17a422"><div class="ttname"><a href="classctrl_1_1AtomicParamBuffer.html#a9c63717ca1dfde3a2edefc696a17a422">ctrl::AtomicParamBuffer::read</a></div><div class="ttdeci">Params read() const</div><div class="ttdoc">Read the current parameter set (real-time thread).</div><div class="ttdef"><b>Definition</b> <a href="AtomicParamBuffer_8h_source.html#l00079">AtomicParamBuffer.h:79</a></div></div>
+</div><!-- fragment --> 
+<p class="definition">Definition in file <a class="el" href="AtomicParamBuffer_8h_source.html">AtomicParamBuffer.h</a>.</p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8

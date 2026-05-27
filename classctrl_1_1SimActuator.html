@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,6 +81,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p><a class="el" href="classctrl_1_1IActuator.html" title="Abstract base class for all actuator adapters in the HAL.">IActuator</a> implementation that drives a <a class="el" href="classctrl_1_1SimPlant.html" title="Thread-safe discrete-time plant simulator.">SimPlant</a>.  
+ <a href="classctrl_1_1SimActuator.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="SimActuator_8h_source.html">SimActuator.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for ctrl::SimActuator:</div>
@@ -88,27 +91,32 @@ Inheritance diagram for ctrl::SimActuator:</div>
  <div class="center">
   <img src="classctrl_1_1SimActuator.png" usemap="#ctrl::SimActuator_map" alt=""/>
   <map id="ctrl::SimActuator_map" name="ctrl::SimActuator_map">
-<area href="classctrl_1_1IActuator.html" alt="ctrl::IActuator" shape="rect" coords="0,0,104,24"/>
+<area href="classctrl_1_1IActuator.html" title="Abstract base class for all actuator adapters in the HAL." alt="ctrl::IActuator" shape="rect" coords="0,0,104,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a6b2e156bf5f9f465693b0441b85abfd6" id="r_a6b2e156bf5f9f465693b0441b85abfd6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimActuator.html#a6b2e156bf5f9f465693b0441b85abfd6">SimActuator</a> (<a class="el" href="classctrl_1_1SimPlant.html">SimPlant</a> &amp;plant, double uMin=-std::numeric_limits&lt; double &gt;::infinity(), double uMax=std::numeric_limits&lt; double &gt;::infinity())</td></tr>
+<tr class="memdesc:a6b2e156bf5f9f465693b0441b85abfd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct the actuator adapter.  <br /></td></tr>
 <tr class="separator:a6b2e156bf5f9f465693b0441b85abfd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeeedd4bb19bd1bcbbe968d1c851ba98e" id="r_aeeedd4bb19bd1bcbbe968d1c851ba98e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimActuator.html#aeeedd4bb19bd1bcbbe968d1c851ba98e">write</a> (double u) override</td></tr>
+<tr class="memdesc:aeeedd4bb19bd1bcbbe968d1c851ba98e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply <code>u</code> to the plant after NaN/Inf rejection and saturation.  <br /></td></tr>
 <tr class="separator:aeeedd4bb19bd1bcbbe968d1c851ba98e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad98fca771aaf43ba231720dff8bbeb53" id="r_ad98fca771aaf43ba231720dff8bbeb53"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimActuator.html#ad98fca771aaf43ba231720dff8bbeb53">lastOutput</a> () const override</td></tr>
+<tr class="memdesc:ad98fca771aaf43ba231720dff8bbeb53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the most recent value successfully applied to the plant.  <br /></td></tr>
 <tr class="separator:ad98fca771aaf43ba231720dff8bbeb53"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a369dcdb6011f6d7803e7166735a2ad7a" id="r_a369dcdb6011f6d7803e7166735a2ad7a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimActuator.html#a369dcdb6011f6d7803e7166735a2ad7a">reset</a> () override</td></tr>
+<tr class="memdesc:a369dcdb6011f6d7803e7166735a2ad7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset last output to zero (does not reset the plant).  <br /></td></tr>
 <tr class="separator:a369dcdb6011f6d7803e7166735a2ad7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classctrl_1_1IActuator"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classctrl_1_1IActuator')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classctrl_1_1IActuator.html">ctrl::IActuator</a></td></tr>
 <tr class="memitem:a04954bfa36bd3ba79e3cd50d4ab92984 inherit pub_methods_classctrl_1_1IActuator" id="r_a04954bfa36bd3ba79e3cd50d4ab92984"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IActuator.html#a04954bfa36bd3ba79e3cd50d4ab92984">~IActuator</a> ()=default</td></tr>
 <tr class="separator:a04954bfa36bd3ba79e3cd50d4ab92984 inherit pub_methods_classctrl_1_1IActuator"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="SimActuator_8h_source.html#l00019">19</a> of file <a class="el" href="SimActuator_8h_source.html">SimActuator.h</a>.</p>
+<div class="textblock"><p><a class="el" href="classctrl_1_1IActuator.html" title="Abstract base class for all actuator adapters in the HAL.">IActuator</a> implementation that drives a <a class="el" href="classctrl_1_1SimPlant.html" title="Thread-safe discrete-time plant simulator.">SimPlant</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="SimActuator_8h_source.html#l00025">25</a> of file <a class="el" href="SimActuator_8h_source.html">SimActuator.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a6b2e156bf5f9f465693b0441b85abfd6" name="a6b2e156bf5f9f465693b0441b85abfd6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6b2e156bf5f9f465693b0441b85abfd6">&#9670;&#160;</a></span>SimActuator()</h2>
@@ -150,7 +158,17 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="SimActuator_8h_source.html#l00021">21</a> of file <a class="el" href="SimActuator_8h_source.html">SimActuator.h</a>.</p>
+<p>Construct the actuator adapter. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">plant</td><td><a class="el" href="classctrl_1_1SimPlant.html" title="Thread-safe discrete-time plant simulator.">SimPlant</a> instance (must outlive this object). </td></tr>
+    <tr><td class="paramname">uMin</td><td>Lower saturation limit (default: −∞). </td></tr>
+    <tr><td class="paramname">uMax</td><td>Upper saturation limit (default: +∞). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="SimActuator_8h_source.html#l00033">33</a> of file <a class="el" href="SimActuator_8h_source.html">SimActuator.h</a>.</p>
 
 </div>
 </div>
@@ -178,9 +196,12 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Return the most recent value successfully applied to the plant. </p>
+<dl class="section return"><dt>Returns</dt><dd>Last finite, saturated u. </dd></dl>
+
 <p>Implements <a class="el" href="classctrl_1_1IActuator.html#ad9c35118fbf95b959c85c65296b014ec">ctrl::IActuator</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="SimActuator_8h_source.html#l00040">40</a> of file <a class="el" href="SimActuator_8h_source.html">SimActuator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SimActuator_8h_source.html#l00060">60</a> of file <a class="el" href="SimActuator_8h_source.html">SimActuator.h</a>.</p>
 
 </div>
 </div>
@@ -207,9 +228,11 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Reset last output to zero (does not reset the plant). </p>
+
 <p>Reimplemented from <a class="el" href="classctrl_1_1IActuator.html#a8265a8b71ddc715a8f7e444ba22904f9">ctrl::IActuator</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="SimActuator_8h_source.html#l00042">42</a> of file <a class="el" href="SimActuator_8h_source.html">SimActuator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SimActuator_8h_source.html#l00065">65</a> of file <a class="el" href="SimActuator_8h_source.html">SimActuator.h</a>.</p>
 
 </div>
 </div>
@@ -237,9 +260,18 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Apply <code>u</code> to the plant after NaN/Inf rejection and saturation. </p>
+<p>Non-finite inputs are replaced with the last valid output (hold-last). Saturated inputs are clamped to [uMin, uMax].</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">u</td><td>Desired control input. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p>Implements <a class="el" href="classctrl_1_1IActuator.html#ac6546d74dfc79167c6de08f6b218141c">ctrl::IActuator</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="SimActuator_8h_source.html#l00027">27</a> of file <a class="el" href="SimActuator_8h_source.html">SimActuator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SimActuator_8h_source.html#l00047">47</a> of file <a class="el" href="SimActuator_8h_source.html">SimActuator.h</a>.</p>
 
 <p class="reference">References <a class="el" href="SimPlant_8cpp_source.html#l00014">ctrl::SimPlant::step()</a>.</p>
 

@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,6 +81,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Discrete Lead-Lag compensator.  
+ <a href="classctrl_1_1DiscreteLeadLag.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for ctrl::DiscreteLeadLag:</div>
@@ -88,39 +91,51 @@ Inheritance diagram for ctrl::DiscreteLeadLag:</div>
  <div class="center">
   <img src="classctrl_1_1DiscreteLeadLag.png" usemap="#ctrl::DiscreteLeadLag_map" alt=""/>
   <map id="ctrl::DiscreteLeadLag_map" name="ctrl::DiscreteLeadLag_map">
-<area href="classctrl_1_1IController.html" alt="ctrl::IController" shape="rect" coords="0,0,132,24"/>
+<area href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers." alt="ctrl::IController" shape="rect" coords="0,0,132,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:acc32b8b2b2ecc777f052cc13aa247a35" id="r_acc32b8b2b2ecc777f052cc13aa247a35"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLeadLag.html#acc32b8b2b2ecc777f052cc13aa247a35">DiscreteLeadLag</a> (const <a class="el" href="structctrl_1_1LeadLagParams.html">LeadLagParams</a> &amp;<a class="el" href="classctrl_1_1DiscreteLeadLag.html#aeabf84bdc743e7a9ab9f2fedc6e90116">params</a>, double <a class="el" href="classctrl_1_1DiscreteLeadLag.html#adc4bcf24a03c1cf18fae2c15705e84d9">sampleTime</a>)</td></tr>
+<tr class="memdesc:acc32b8b2b2ecc777f052cc13aa247a35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct and precompute IIR coefficients.  <br /></td></tr>
 <tr class="separator:acc32b8b2b2ecc777f052cc13aa247a35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a88ef9af7288d23f7deddfc82edd610fc" id="r_a88ef9af7288d23f7deddfc82edd610fc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLeadLag.html#a88ef9af7288d23f7deddfc82edd610fc">compute</a> (double u) override</td></tr>
+<tr class="memdesc:a88ef9af7288d23f7deddfc82edd610fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Filter the input signal (typically the tracking error or plant output).  <br /></td></tr>
 <tr class="separator:a88ef9af7288d23f7deddfc82edd610fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0d1683adb46d220252469441bf3ac989" id="r_a0d1683adb46d220252469441bf3ac989"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLeadLag.html#a0d1683adb46d220252469441bf3ac989">reset</a> () override</td></tr>
+<tr class="memdesc:a0d1683adb46d220252469441bf3ac989"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset previous input and output to zero.  <br /></td></tr>
 <tr class="separator:a0d1683adb46d220252469441bf3ac989"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc4bcf24a03c1cf18fae2c15705e84d9" id="r_adc4bcf24a03c1cf18fae2c15705e84d9"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLeadLag.html#adc4bcf24a03c1cf18fae2c15705e84d9">sampleTime</a> () const override</td></tr>
+<tr class="memdesc:adc4bcf24a03c1cf18fae2c15705e84d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
 <tr class="separator:adc4bcf24a03c1cf18fae2c15705e84d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90dd77ba9db85c8ce185e3b16a61e706" id="r_a90dd77ba9db85c8ce185e3b16a61e706"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLeadLag.html#a90dd77ba9db85c8ce185e3b16a61e706">setParams</a> (const <a class="el" href="structctrl_1_1LeadLagParams.html">LeadLagParams</a> &amp;p)</td></tr>
+<tr class="memdesc:a90dd77ba9db85c8ce185e3b16a61e706"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hot-update parameters and recompute IIR coefficients.  <br /></td></tr>
 <tr class="separator:a90dd77ba9db85c8ce185e3b16a61e706"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeabf84bdc743e7a9ab9f2fedc6e90116" id="r_aeabf84bdc743e7a9ab9f2fedc6e90116"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structctrl_1_1LeadLagParams.html">LeadLagParams</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLeadLag.html#aeabf84bdc743e7a9ab9f2fedc6e90116">params</a> () const</td></tr>
+<tr class="memdesc:aeabf84bdc743e7a9ab9f2fedc6e90116"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read-only access to current parameters.  <br /></td></tr>
 <tr class="separator:aeabf84bdc743e7a9ab9f2fedc6e90116"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70d9221a783ccd2094c38d6a8d5c9236" id="r_a70d9221a783ccd2094c38d6a8d5c9236"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLeadLag.html#a70d9221a783ccd2094c38d6a8d5c9236">phaseAt</a> (double omega_rad_s) const</td></tr>
+<tr class="memdesc:a70d9221a783ccd2094c38d6a8d5c9236"><td class="mdescLeft">&#160;</td><td class="mdescRight">Phase contribution at a given frequency (continuous-domain approximation).  <br /></td></tr>
 <tr class="separator:a70d9221a783ccd2094c38d6a8d5c9236"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classctrl_1_1IController"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classctrl_1_1IController')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classctrl_1_1IController.html">ctrl::IController</a></td></tr>
 <tr class="memitem:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController" id="r_a209dd6532b22278f93430a0757aae4c7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a209dd6532b22278f93430a0757aae4c7">~IController</a> ()=default</td></tr>
 <tr class="separator:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController" id="r_a9d81dd5427e094d72906d54dd5e6548e"><td class="memItemLeft" align="right" valign="top">virtual Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e">computeVec</a> (const Eigen::VectorXd &amp;signal)</td></tr>
+<tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step — vector MIMO interface.  <br /></td></tr>
 <tr class="separator:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController" id="r_a20821745ef7099941a9e9fdb6eeddd07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">bumplessInit</a> (double, double)</td></tr>
+<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation — prepares the controller for smooth activation.  <br /></td></tr>
 <tr class="separator:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController" id="r_a2dc30a3b9bfb8b9649cef7218ad9e68b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b">isHealthy</a> () const</td></tr>
+<tr class="memdesc:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Health query for supervisory fault-tolerant control.  <br /></td></tr>
 <tr class="separator:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8h_source.html#l00036">36</a> of file <a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>.</p>
+<div class="textblock"><p>Discrete Lead-Lag compensator. </p>
+<p>Implemented as a first-order IIR filter derived from the Tustin-discretised continuous transfer function C(s) = K·(s + zc)/(s + pc). </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8h_source.html#l00046">46</a> of file <a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="acc32b8b2b2ecc777f052cc13aa247a35" name="acc32b8b2b2ecc777f052cc13aa247a35"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acc32b8b2b2ecc777f052cc13aa247a35">&#9670;&#160;</a></span>DiscreteLeadLag()</h2>
@@ -147,6 +162,15 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Construct and precompute IIR coefficients. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">params</td><td>Lead/lag zero, pole, and gain parameters. </td></tr>
+    <tr><td class="paramname">sampleTime</td><td>Sample period Ts [s]. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8cpp_source.html#l00007">7</a> of file <a class="el" href="DiscreteLeadLag_8cpp_source.html">DiscreteLeadLag.cpp</a>.</p>
 
@@ -179,6 +203,15 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Filter the input signal (typically the tracking error or plant output). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">u</td><td>Input signal u[k]. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Filtered output y[k]. </dd></dl>
+
 <p>Implements <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8">ctrl::IController</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8cpp_source.html#l00030">30</a> of file <a class="el" href="DiscreteLeadLag_8cpp_source.html">DiscreteLeadLag.cpp</a>.</p>
@@ -208,7 +241,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8h_source.html#l00048">48</a> of file <a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>.</p>
+<p>Read-only access to current parameters. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8h_source.html#l00076">76</a> of file <a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>.</p>
 
 </div>
 </div>
@@ -228,9 +263,19 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Phase contribution at a given frequency (continuous-domain approximation). </p>
+<p>Returns the phase angle of C(jω) = K·(jω + zc)/(jω + pc) in degrees. Useful for verifying that the compensator provides the intended phase lead/lag.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">omega_rad_s</td><td>Frequency [rad/s]. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Phase shift [degrees]. Positive = lead, negative = lag. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8cpp_source.html#l00058">58</a> of file <a class="el" href="DiscreteLeadLag_8cpp_source.html">DiscreteLeadLag.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="DiscreteLeadLag_8h_source.html#l00032">ctrl::LeadLagParams::continuousPole</a>, and <a class="el" href="DiscreteLeadLag_8h_source.html#l00031">ctrl::LeadLagParams::continuousZero</a>.</p>
+<p class="reference">References <a class="el" href="DiscreteLeadLag_8h_source.html#l00036">ctrl::LeadLagParams::continuousPole</a>, and <a class="el" href="DiscreteLeadLag_8h_source.html#l00035">ctrl::LeadLagParams::continuousZero</a>.</p>
 
 </div>
 </div>
@@ -256,6 +301,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Reset previous input and output to zero. </p>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac69ef6691d5831cda3adcdc59971fcac">ctrl::IController</a>.</p>
 
@@ -288,9 +335,11 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Sample time Ts [s]. </p>
+
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac1d1ab003ea7fa4f0ab49291d97473a0">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8h_source.html#l00045">45</a> of file <a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8h_source.html#l00067">67</a> of file <a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>.</p>
 
 </div>
 </div>
@@ -309,6 +358,14 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Hot-update parameters and recompute IIR coefficients. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">p</td><td>New lead-lag parameters. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8cpp_source.html#l00047">47</a> of file <a class="el" href="DiscreteLeadLag_8cpp_source.html">DiscreteLeadLag.cpp</a>.</p>
 

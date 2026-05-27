@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -82,6 +82,9 @@ $(function() {
   <div class="headertitle"><div class="title">FuzzyLogic.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Mamdani and Takagi-Sugeno fuzzy inference engine with IController wrappers.  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="IController_8h_source.html">IController.h</a>&quot;</code><br />
 <code>#include &lt;Eigen/Dense&gt;</code><br />
 <code>#include &lt;optional&gt;</code><br />
@@ -93,32 +96,46 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MF.html">ctrl::MF</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value-type tagged-union membership function.  <a href="structctrl_1_1MF.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LinguisticTerm.html">ctrl::LinguisticTerm</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A named fuzzy term with its membership function and optional peak location.  <a href="structctrl_1_1LinguisticTerm.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LinguisticVariable.html">ctrl::LinguisticVariable</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A fuzzy variable with a named universe of discourse and a set of linguistic terms.  <a href="structctrl_1_1LinguisticVariable.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1Antecedent.html">ctrl::Antecedent</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One input condition in a fuzzy rule antecedent.  <a href="structctrl_1_1Antecedent.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1Rule.html">ctrl::Rule</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One fuzzy IF-THEN rule.  <a href="structctrl_1_1Rule.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1FuzzySystemParams.html">ctrl::FuzzySystemParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration parameters for <a class="el" href="classctrl_1_1FuzzySystem.html" title="Core Mamdani / Takagi-Sugeno fuzzy inference engine.">FuzzySystem</a>.  <a href="structctrl_1_1FuzzySystemParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FuzzySystem.html">ctrl::FuzzySystem</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Core Mamdani / Takagi-Sugeno fuzzy inference engine.  <a href="classctrl_1_1FuzzySystem.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1FuzzyPDParams.html">ctrl::FuzzyPDParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1FuzzyPD.html" title="5-term PD fuzzy controller implementing IController.">FuzzyPD</a>.  <a href="structctrl_1_1FuzzyPDParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FuzzyPD.html">ctrl::FuzzyPD</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">5-term PD fuzzy controller implementing <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a>.  <a href="classctrl_1_1FuzzyPD.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1FuzzyPIDParams.html">ctrl::FuzzyPIDParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1FuzzyPID.html" title="FuzzyPD extended with a crisp integral term and back-calculation anti-windup.">FuzzyPID</a>.  <a href="structctrl_1_1FuzzyPIDParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FuzzyPID.html">ctrl::FuzzyPID</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classctrl_1_1FuzzyPD.html" title="5-term PD fuzzy controller implementing IController.">FuzzyPD</a> extended with a crisp integral term and back-calculation anti-windup.  <a href="classctrl_1_1FuzzyPID.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SupervisorParams.html">ctrl::SupervisorParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1FuzzySupervisor.html" title="Fuzzy supervisory monitor that decides when a linearised controller needs re-tuning.">FuzzySupervisor</a>.  <a href="structctrl_1_1SupervisorParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SupervisorDecision.html">ctrl::SupervisorDecision</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output of a <a class="el" href="classctrl_1_1FuzzySupervisor.html#aba8d2cc89d3bf8d527de92b9790dd062" title="Feed the current absolute position or output error.">FuzzySupervisor::update()</a> call.  <a href="structctrl_1_1SupervisorDecision.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FuzzySupervisor.html">ctrl::FuzzySupervisor</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fuzzy supervisory monitor that decides when a linearised controller needs re-tuning.  <a href="classctrl_1_1FuzzySupervisor.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -131,30 +148,63 @@ Enumerations</h2></td></tr>
 <tr class="memitem:a73e0367e44b7fe77d1b4948481380c22" id="r_a73e0367e44b7fe77d1b4948481380c22"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a73e0367e44b7fe77d1b4948481380c22">ctrl::InferenceMethod</a> { <a class="el" href="namespacectrl.html#a73e0367e44b7fe77d1b4948481380c22a9143c38c21671f0ff420d7e14388bdf9">ctrl::Mamdani</a>
 , <a class="el" href="namespacectrl.html#a73e0367e44b7fe77d1b4948481380c22a53391a7d0f1fa14ead79172e520cc0e1">ctrl::TakagiSugeno</a>
  }</td></tr>
+<tr class="memdesc:a73e0367e44b7fe77d1b4948481380c22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inference method selector.  <a href="namespacectrl.html#a73e0367e44b7fe77d1b4948481380c22">More...</a><br /></td></tr>
 <tr class="separator:a73e0367e44b7fe77d1b4948481380c22"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6dfa916cba4d5f5b44a2bf5317cd196e" id="r_a6dfa916cba4d5f5b44a2bf5317cd196e"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a6dfa916cba4d5f5b44a2bf5317cd196e">ctrl::DefuzzMethod</a> { <a class="el" href="namespacectrl.html#a6dfa916cba4d5f5b44a2bf5317cd196eac10f78db71a8c5fcfcf69151ec4d676e">ctrl::CoG</a>
 , <a class="el" href="namespacectrl.html#a6dfa916cba4d5f5b44a2bf5317cd196eaf818fb451ad05227ddf60d3380f8dd99">ctrl::WeightedAverage</a>
  }</td></tr>
+<tr class="memdesc:a6dfa916cba4d5f5b44a2bf5317cd196e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defuzzification method selector.  <a href="namespacectrl.html#a6dfa916cba4d5f5b44a2bf5317cd196e">More...</a><br /></td></tr>
 <tr class="separator:a6dfa916cba4d5f5b44a2bf5317cd196e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a210a1ff6e7c04e4d043ed83f0ad3a129" id="r_a210a1ff6e7c04e4d043ed83f0ad3a129"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a210a1ff6e7c04e4d043ed83f0ad3a129">ctrl::mfTriangular</a> (double a, double c, double b)</td></tr>
+<tr class="memdesc:a210a1ff6e7c04e4d043ed83f0ad3a129"><td class="mdescLeft">&#160;</td><td class="mdescRight">Triangular membership function: /\ peaks at <code>c</code>, zero at <code>a</code> and <code>b</code>.  <br /></td></tr>
 <tr class="separator:a210a1ff6e7c04e4d043ed83f0ad3a129"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3bbf52403d666ffe411d11dc25482996" id="r_a3bbf52403d666ffe411d11dc25482996"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a3bbf52403d666ffe411d11dc25482996">ctrl::mfTrapezoidal</a> (double a, double b, double c, double d)</td></tr>
+<tr class="memdesc:a3bbf52403d666ffe411d11dc25482996"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trapezoidal membership function: /‾\ flat-top from <code>b</code> to <code>c</code>, zero outside [<code>a</code>, <code>d</code>].  <br /></td></tr>
 <tr class="separator:a3bbf52403d666ffe411d11dc25482996"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b22feed3a0eeddddf10263fa0d8529f" id="r_a0b22feed3a0eeddddf10263fa0d8529f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a0b22feed3a0eeddddf10263fa0d8529f">ctrl::mfGaussian</a> (double mean, double sigma)</td></tr>
+<tr class="memdesc:a0b22feed3a0eeddddf10263fa0d8529f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gaussian membership function: exp(-0.5·((x - <code>mean</code>) / <code>sigma</code>)²).  <br /></td></tr>
 <tr class="separator:a0b22feed3a0eeddddf10263fa0d8529f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8cee0db195ae17d833885884e3579f57" id="r_a8cee0db195ae17d833885884e3579f57"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a8cee0db195ae17d833885884e3579f57">ctrl::mfSingleton</a> (double value)</td></tr>
+<tr class="memdesc:a8cee0db195ae17d833885884e3579f57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Singleton membership function: 1 at x == <code>value</code>, 0 elsewhere.  <br /></td></tr>
 <tr class="separator:a8cee0db195ae17d833885884e3579f57"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6da5eb7b6281f23b946aa8d55d7be186" id="r_a6da5eb7b6281f23b946aa8d55d7be186"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a6da5eb7b6281f23b946aa8d55d7be186">ctrl::mfShoulderLeft</a> (double a, double b)</td></tr>
+<tr class="memdesc:a6da5eb7b6281f23b946aa8d55d7be186"><td class="mdescLeft">&#160;</td><td class="mdescRight">Left-shoulder membership function: 1 for x ≤ <code>a</code>, linear 1→0 from <code>a</code> to <code>b</code>.  <br /></td></tr>
 <tr class="separator:a6da5eb7b6281f23b946aa8d55d7be186"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9df999bbef221d7d1a6f3604e16722c" id="r_ab9df999bbef221d7d1a6f3604e16722c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ab9df999bbef221d7d1a6f3604e16722c">ctrl::mfShoulderRight</a> (double a, double b)</td></tr>
+<tr class="memdesc:ab9df999bbef221d7d1a6f3604e16722c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Right-shoulder membership function: linear 0→1 from <code>a</code> to <code>b</code>, 1 for x ≥ <code>b</code>.  <br /></td></tr>
 <tr class="separator:ab9df999bbef221d7d1a6f3604e16722c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f1dad886251652b6661dd678241730e" id="r_a8f1dad886251652b6661dd678241730e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1LinguisticTerm.html">LinguisticTerm</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a8f1dad886251652b6661dd678241730e">ctrl::ltSingleton</a> (const std::string &amp;name, double value)</td></tr>
+<tr class="memdesc:a8f1dad886251652b6661dd678241730e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a fully specified <a class="el" href="structctrl_1_1LinguisticTerm.html" title="A named fuzzy term with its membership function and optional peak location.">LinguisticTerm</a> for a Takagi-Sugeno singleton output.  <br /></td></tr>
 <tr class="separator:a8f1dad886251652b6661dd678241730e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Mamdani and Takagi-Sugeno fuzzy inference engine with IController wrappers. </p>
+<p><b>Architecture overview:</b></p><ol type="1">
+<li><b>Input variables</b> — each partitioned into N linguistic terms with membership functions (triangular, trapezoidal, Gaussian, singleton, shoulder).</li>
+<li><b>Rule base</b> — IF-THEN rules of the form: IF x1 is Aᵢ AND x2 is Bⱼ … THEN y is Cₖ. AND is implemented via the product t-norm.</li>
+<li><b>Inference methods:</b><ul>
+<li><em>Mamdani</em> — output fuzzy sets are clipped/scaled then aggregated; defuzzified with CoG.</li>
+<li><em>Takagi-Sugeno</em> — consequent is a crisp value per rule; defuzzified via weighted average.</li>
+</ul>
+</li>
+<li><b>Output</b> — single real value (SISO) or one FuzzySystem per axis (MIMO).</li>
+</ol>
+<p><b>IController wrappers:</b></p><ul>
+<li>FuzzyPD — 5-term PD controller (25-rule diagonal Mamdani table).</li>
+<li>FuzzyPID — FuzzyPD augmented with a crisp integral + back-calculation anti-windup.</li>
+<li>FuzzySupervisor — monitors closed-loop performance and triggers plant relinearisation.</li>
+</ul>
+<dl class="section see"><dt>See also</dt><dd>Mamdani &amp; Assilian, "An Experiment in Linguistic Synthesis," Int. J. Man-Machine Studies (1975). </dd>
+<dd>
+Takagi &amp; Sugeno, "Fuzzy Identification of Systems," IEEE Trans. SMC (1985). </dd>
+<dd>
+Jang, Sun &amp; Mizutani, "Neuro-Fuzzy and Soft Computing" (1997). </dd></dl>
+
+<p class="definition">Definition in file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8

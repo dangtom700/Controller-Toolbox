@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -82,6 +82,9 @@ $(function() {
   <div class="headertitle"><div class="title">TunerSuite.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Unified tuner library with runtime soft-warning dispatch across all seven tuning families.  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="IController_8h_source.html">IController.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>&quot;</code><br />
@@ -102,20 +105,28 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TuningResultBase.html">ctrl::TuningResultBase</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base fields shared by all <a class="el" href="classctrl_1_1TunerSuite.html" title="Unified collection of all eight tuning strategies with runtime compatibility checking.">TunerSuite</a> result types.  <a href="structctrl_1_1TuningResultBase.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDTuneResult.html">ctrl::PIDTuneResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of a relay/ZN, IMC, or Cohen-Coon tuning call.  <a href="structctrl_1_1PIDTuneResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LQRTuneResult.html">ctrl::LQRTuneResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of a Bryson LQR tuning call.  <a href="structctrl_1_1LQRTuneResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1KalmanTuneResult.html">ctrl::KalmanTuneResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of a Kalman noise tuning call.  <a href="structctrl_1_1KalmanTuneResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MPCTuneResult.html">ctrl::MPCTuneResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of an MPC horizon tuning call.  <a href="structctrl_1_1MPCTuneResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LeadLagTuneResult.html">ctrl::LeadLagTuneResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of a loop-shaping lead/lag tuning call.  <a href="structctrl_1_1LeadLagTuneResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1OptimTuneResult.html">ctrl::OptimTuneResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of an optimisation-based tuning call (Nelder-Mead ISE/ITAE).  <a href="structctrl_1_1OptimTuneResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1TunerSuite.html">ctrl::TunerSuite</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unified collection of all eight tuning strategies with runtime compatibility checking.  <a href="classctrl_1_1TunerSuite.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -140,14 +151,43 @@ Enumerations</h2></td></tr>
 , <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa8045a0a6c688b0635e3caccc408a1446">ctrl::Generic</a>
 <br />
  }</td></tr>
+<tr class="memdesc:ae9f75df6083768f99f318568d9b9038a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runtime controller-type tag for TunerSuite dispatch.  <a href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">More...</a><br /></td></tr>
 <tr class="separator:ae9f75df6083768f99f318568d9b9038a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:af1099cea15a27eeefa55322641f5100f" id="r_af1099cea15a27eeefa55322641f5100f"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#af1099cea15a27eeefa55322641f5100f">ctrl::ctrlKindName</a> (<a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">CtrlKind</a> k) noexcept</td></tr>
+<tr class="memdesc:af1099cea15a27eeefa55322641f5100f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Human-readable name for a CtrlKind tag — for diagnostic messages.  <br /></td></tr>
 <tr class="separator:af1099cea15a27eeefa55322641f5100f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Unified tuner library with runtime soft-warning dispatch across all seven tuning families. </p>
+<p>Covers all tuning families from the tuning cheatsheet:</p><ol type="1">
+<li><b>Relay / Ziegler-Nichols</b> → dedicated: PID.</li>
+<li><b>IMC-PID</b> → dedicated: PID.</li>
+<li><b>Cohen-Coon</b> → dedicated: PID (high dead-time).</li>
+<li><b>LQR Bryson's Rule</b> → dedicated: LQR, LQG.</li>
+<li><b>LQG Kalman noise</b> → dedicated: LQG.</li>
+<li><b>MPC horizon/weight</b> → dedicated: MPC.</li>
+<li><b>Frequency-domain shaping</b> → dedicated: LeadLag.</li>
+<li><b>Optimisation-based (Nelder-Mead ISE)</b> → any controller (generic).</li>
+</ol>
+<p><b>Compatibility tiers</b> (applied at runtime, not compile time):</p><ul>
+<li><code>IDEAL</code> — tuner was designed for this controller; no warning emitted.</li>
+<li><code>SOFT</code> — tuner can produce useful output but the match is imperfect; a diagnostic is written to <code>std::clog</code> and <code>result.warned == true</code>.</li>
+<li><code>FALLBACK</code> — tuner is not meaningful for this controller; default/zero parameters are returned, <code>result.success == false</code>, strong warning emitted.</li>
+</ul>
+<dl class="section note"><dt>Note</dt><dd>The hard compile-time errors (ControllerTraits <code>static_assert</code>) in <a class="el" href="ControllerTuner_8h.html" title="Offline and online tuning utilities with compile-time type safety.">ControllerTuner.h</a> remain unchanged; they fire when calling typed template wrappers such as <code>tuneFor&lt;C&gt;()</code>. TunerSuite takes a different path: it accepts a runtime CtrlKind tag and never blocks compilation.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ControllerTuner_8h.html" title="Offline and online tuning utilities with compile-time type safety.">ControllerTuner.h</a> for compile-time-safe typed wrappers. </dd>
+<dd>
+Åström &amp; Hägglund, "Advanced PID Control" (2006). </dd>
+<dd>
+Bryson &amp; Ho, "Applied Optimal Control" (1975). </dd>
+<dd>
+Gao, "Active Disturbance Rejection Control," ACC (2003). </dd></dl>
+
+<p class="definition">Definition in file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8

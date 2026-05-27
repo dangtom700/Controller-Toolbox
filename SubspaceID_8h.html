@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,6 +81,9 @@ $(function() {
   <div class="headertitle"><div class="title">SubspaceID.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Batch subspace state-space system identification (N4SID / MOESP).  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>&quot;</code><br />
 <code>#include &lt;Eigen/Dense&gt;</code><br />
 <code>#include &lt;optional&gt;</code><br />
@@ -90,6 +93,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SubspaceIDResult.html">ctrl::SubspaceIDResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output of the <a class="el" href="namespacectrl.html#ac04c2f87d749604186fa29b45048e9a3" title="Batch subspace state-space identification (N4SID / MOESP).">n4sid()</a> identification algorithm.  <a href="structctrl_1_1SubspaceIDResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -99,12 +103,37 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a48a62fef709551ddc55b6c8f07101213" id="r_a48a62fef709551ddc55b6c8f07101213"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1SubspaceIDResult.html">SubspaceIDResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a48a62fef709551ddc55b6c8f07101213">ctrl::n4sid</a> (const Eigen::MatrixXd &amp;Y, const Eigen::MatrixXd &amp;U, int n_order, int i, double Ts, double svd_tol)</td></tr>
-<tr class="separator:a48a62fef709551ddc55b6c8f07101213"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abf201dbb12d9ee3725c56b5c3d2a5831" id="r_abf201dbb12d9ee3725c56b5c3d2a5831"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#abf201dbb12d9ee3725c56b5c3d2a5831">ctrl::suggestOrder</a> (const Eigen::VectorXd &amp;sv, double threshold, int maxOrder)</td></tr>
-<tr class="separator:abf201dbb12d9ee3725c56b5c3d2a5831"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac04c2f87d749604186fa29b45048e9a3" id="r_ac04c2f87d749604186fa29b45048e9a3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1SubspaceIDResult.html">SubspaceIDResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ac04c2f87d749604186fa29b45048e9a3">ctrl::n4sid</a> (const Eigen::MatrixXd &amp;Y, const Eigen::MatrixXd &amp;U, int n_order, int i_horizon, double Ts, double svd_tol=-1.0)</td></tr>
+<tr class="memdesc:ac04c2f87d749604186fa29b45048e9a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Batch subspace state-space identification (N4SID / MOESP).  <br /></td></tr>
+<tr class="separator:ac04c2f87d749604186fa29b45048e9a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefc7138f387ba6cc9fed750baa2e615c" id="r_aefc7138f387ba6cc9fed750baa2e615c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#aefc7138f387ba6cc9fed750baa2e615c">ctrl::suggestOrder</a> (const Eigen::VectorXd &amp;sv, double threshold=0.01, int maxOrder=-1)</td></tr>
+<tr class="memdesc:aefc7138f387ba6cc9fed750baa2e615c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Automated system-order selection from the singular-value spectrum.  <br /></td></tr>
+<tr class="separator:aefc7138f387ba6cc9fed750baa2e615c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Batch subspace state-space system identification (N4SID / MOESP). </p>
+<p>Identifies a linear discrete-time state-space model from batch I/O data: </p><div class="fragment"><div class="line">x[k+1] = A·x[k] + B·u[k] + w[k]</div>
+<div class="line">y[k]   = C·x[k] + D·u[k] + v[k]</div>
+</div><!-- fragment --><p><b>Algorithm — MOESP oblique-projection variant (Verhaegen &amp; Dewilde 1992):</b></p><ol type="1">
+<li>Build 2i-block Hankel matrices from (Y, U): Z = [Uf; Wp; Yf], Wp = [Up; Yp].</li>
+<li>Thin LQ decomposition isolates the (3,2) block L32 (oblique projection of Yf onto Wp ⊥ Uf).</li>
+<li>SVD(L32): singular values reveal system order; left singular vectors form the extended observability matrix Γ = U[:, :n]·√(S[:n]).</li>
+<li>Extract C = Γ[:p, :], A from shift-invariance of Γ (least squares).</li>
+<li>Least-squares regression for B and D from the state sequence.</li>
+</ol>
+<dl class="section user"><dt>Data requirements</dt><dd><ul>
+<li>Persistent excitation: input must excite at least n_order frequencies.</li>
+<li>N ≫ 2·i·(m+p): more samples → better estimates.</li>
+<li>i ≥ n_order/p (i_horizon must be large enough to capture all modes).</li>
+</ul>
+</dd></dl>
+<dl class="section user"><dt>Similarity transform note</dt><dd>The returned realisation (A, B, C, D) is determined only up to a similarity transform T. <b>Similarity-invariant</b> (trustworthy): eigenvalues of A, I/O transfer function G(z), DC gain, stability. <b>Not invariant</b>: individual entries of B, C, D, state norms. For Kalman filter use, prefer the returned kalmanGain (already in the identified basis) over manual Q/R tuning.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd>Van Overschee &amp; De Moor, "Subspace Identification for Linear Systems" (Kluwer 1996). </dd>
+<dd>
+Verhaegen, "Identification of the Deterministic Part of MIMO State Space Models", Automatica (1994). </dd></dl>
+
+<p class="definition">Definition in file <a class="el" href="SubspaceID_8h_source.html">SubspaceID.h</a>.</p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8

@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -82,37 +82,54 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Discrete-time state-space model.  
+ <a href="structctrl_1_1StateSpace.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a02d095eac089f9d53a7cfe9e504ae670" id="r_a02d095eac089f9d53a7cfe9e504ae670"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#a02d095eac089f9d53a7cfe9e504ae670">StateSpace</a> (Eigen::MatrixXd a, Eigen::MatrixXd b, Eigen::MatrixXd c, Eigen::MatrixXd d, double sampleTime)</td></tr>
+<tr class="memdesc:a02d095eac089f9d53a7cfe9e504ae670"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct and validate a state-space model.  <br /></td></tr>
 <tr class="separator:a02d095eac089f9d53a7cfe9e504ae670"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2fb0b092751ef357a0b6c2beb0efba8a" id="r_a2fb0b092751ef357a0b6c2beb0efba8a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#a2fb0b092751ef357a0b6c2beb0efba8a">stateSize</a> () const</td></tr>
+<tr class="memdesc:a2fb0b092751ef357a0b6c2beb0efba8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of states n.  <br /></td></tr>
 <tr class="separator:a2fb0b092751ef357a0b6c2beb0efba8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ad091cf54b39bd4564617daf686b104" id="r_a7ad091cf54b39bd4564617daf686b104"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#a7ad091cf54b39bd4564617daf686b104">inputSize</a> () const</td></tr>
+<tr class="memdesc:a7ad091cf54b39bd4564617daf686b104"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of inputs m.  <br /></td></tr>
 <tr class="separator:a7ad091cf54b39bd4564617daf686b104"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4ad7c88e0250e0c5648204a56365d2e" id="r_ae4ad7c88e0250e0c5648204a56365d2e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#ae4ad7c88e0250e0c5648204a56365d2e">outputSize</a> () const</td></tr>
+<tr class="memdesc:ae4ad7c88e0250e0c5648204a56365d2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of outputs p.  <br /></td></tr>
 <tr class="separator:ae4ad7c88e0250e0c5648204a56365d2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa2ade49d4760438060a3335c1b019c40" id="r_aa2ade49d4760438060a3335c1b019c40"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#aa2ade49d4760438060a3335c1b019c40">validate</a> () const</td></tr>
+<tr class="memdesc:aa2ade49d4760438060a3335c1b019c40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validate that all matrix dimensions are mutually consistent.  <br /></td></tr>
 <tr class="separator:aa2ade49d4760438060a3335c1b019c40"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a5692af54040746138b34d3d502e22add" id="r_a5692af54040746138b34d3d502e22add"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#a5692af54040746138b34d3d502e22add">A</a></td></tr>
+<tr class="memdesc:a5692af54040746138b34d3d502e22add"><td class="mdescLeft">&#160;</td><td class="mdescRight">State-transition matrix (n × n).  <br /></td></tr>
 <tr class="separator:a5692af54040746138b34d3d502e22add"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9bc2151f5d148bcb5676d81d57a38410" id="r_a9bc2151f5d148bcb5676d81d57a38410"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#a9bc2151f5d148bcb5676d81d57a38410">B</a></td></tr>
+<tr class="memdesc:a9bc2151f5d148bcb5676d81d57a38410"><td class="mdescLeft">&#160;</td><td class="mdescRight">Input matrix (n × m).  <br /></td></tr>
 <tr class="separator:a9bc2151f5d148bcb5676d81d57a38410"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a102ebd15fc174335e7be995a37afdcd4" id="r_a102ebd15fc174335e7be995a37afdcd4"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#a102ebd15fc174335e7be995a37afdcd4">C</a></td></tr>
+<tr class="memdesc:a102ebd15fc174335e7be995a37afdcd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output matrix (p × n).  <br /></td></tr>
 <tr class="separator:a102ebd15fc174335e7be995a37afdcd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a29841a16218926079b626c4661444ccd" id="r_a29841a16218926079b626c4661444ccd"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#a29841a16218926079b626c4661444ccd">D</a></td></tr>
+<tr class="memdesc:a29841a16218926079b626c4661444ccd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Feedthrough matrix (p × m).  <br /></td></tr>
 <tr class="separator:a29841a16218926079b626c4661444ccd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6ed610dbd71a5f06d923a224e6371a4" id="r_ad6ed610dbd71a5f06d923a224e6371a4"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html#ad6ed610dbd71a5f06d923a224e6371a4">Ts</a></td></tr>
+<tr class="memdesc:ad6ed610dbd71a5f06d923a224e6371a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time [s]; 0.0 indicates continuous time (used by <a class="el" href="namespacectrl.html#a49df1e780437c779996e8f431faaa542" title="Discretise a continuous-time state-space model.">c2d()</a>).  <br /></td></tr>
 <tr class="separator:ad6ed610dbd71a5f06d923a224e6371a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00047">47</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+<div class="textblock"><p>Discrete-time state-space model. </p>
+<div class="fragment"><div class="line">x[k+1] = A·x[k] + B·u[k]</div>
+<div class="line">y[k]   = C·x[k] + D·u[k]</div>
+</div><!-- fragment --><p>Equivalent MATLAB: <code>sys = ss(A, B, C, D, Ts)</code> </p>
+
+<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00067">67</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a02d095eac089f9d53a7cfe9e504ae670" name="a02d095eac089f9d53a7cfe9e504ae670"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a02d095eac089f9d53a7cfe9e504ae670">&#9670;&#160;</a></span>StateSpace()</h2>
@@ -166,7 +183,25 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00055">55</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+<p>Construct and validate a state-space model. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>State-transition matrix (n × n). </td></tr>
+    <tr><td class="paramname">b</td><td>Input matrix (n × m). </td></tr>
+    <tr><td class="paramname">c</td><td>Output matrix (p × n). </td></tr>
+    <tr><td class="paramname">d</td><td>Feedthrough matrix (p × m). </td></tr>
+    <tr><td class="paramname">sampleTime</td><td>Sample period Ts [s]; pass 0.0 for continuous-time models. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>If matrix dimensions are inconsistent. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00084">84</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
 <p class="reference">References <a class="el" href="PlantModel_8cpp_source.html#l00014">validate()</a>.</p>
 
@@ -196,9 +231,11 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00066">66</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+<p>Number of inputs m. </p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00050">B</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00095">95</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00070">B</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00660">ctrl::MixedSensitivity::build()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00185">ctrl::c2d()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00136">ctrl::DiscreteMPC::computeRef()</a>, <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00095">ctrl::GeneralizedPredictiveController::computeRef()</a>, <a class="el" href="DiscreteLQG_8cpp_source.html#l00007">ctrl::DiscreteLQG::DiscreteLQG()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00009">ctrl::DiscreteMPC::DiscreteMPC()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00295">ctrl::MPCHorizonTuner::estimateSettlingTime()</a>, <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00008">ctrl::GeneralizedPredictiveController::GeneralizedPredictiveController()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00268">ctrl::minreal()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00247">ctrl::LQRWeightTuner::polePlacementHint()</a>, <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00190">ctrl::GeneralizedPredictiveController::setPlant()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00110">ctrl::ss2tf()</a>, and <a class="el" href="SimPlant_8cpp_source.html#l00014">ctrl::SimPlant::step()</a>.</p>
 
@@ -227,9 +264,11 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00067">67</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+<p>Number of outputs p. </p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00051">C</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00096">96</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00071">C</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00660">ctrl::MixedSensitivity::build()</a>, <a class="el" href="DiscreteLQG_8cpp_source.html#l00058">ctrl::DiscreteLQG::compute()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00136">ctrl::DiscreteMPC::computeRef()</a>, <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00008">ctrl::GeneralizedPredictiveController::GeneralizedPredictiveController()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00268">ctrl::minreal()</a>, <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00190">ctrl::GeneralizedPredictiveController::setPlant()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00110">ctrl::ss2tf()</a>, and <a class="el" href="KalmanFilter_8cpp_source.html#l00027">ctrl::KalmanFilter::update()</a>.</p>
 
@@ -258,9 +297,11 @@ Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00065">65</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+<p>Number of states n. </p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00049">A</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00094">94</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">A</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00660">ctrl::MixedSensitivity::build()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00185">ctrl::c2d()</a>, <a class="el" href="DiscreteLQG_8cpp_source.html#l00007">ctrl::DiscreteLQG::DiscreteLQG()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00009">ctrl::DiscreteMPC::DiscreteMPC()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00295">ctrl::MPCHorizonTuner::estimateSettlingTime()</a>, <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00008">ctrl::GeneralizedPredictiveController::GeneralizedPredictiveController()</a>, <a class="el" href="KalmanFilter_8cpp_source.html#l00007">ctrl::KalmanFilter::KalmanFilter()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00722">ctrl::TunerSuite::makeISECost()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00777">ctrl::TunerSuite::makeITAECost()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00268">ctrl::minreal()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00247">ctrl::LQRWeightTuner::polePlacementHint()</a>, <a class="el" href="KalmanFilter_8cpp_source.html#l00067">ctrl::KalmanFilter::reset()</a>, <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00190">ctrl::GeneralizedPredictiveController::setPlant()</a>, <a class="el" href="SimPlant_8cpp_source.html#l00031">ctrl::SimPlant::setState()</a>, <a class="el" href="SimPlant_8cpp_source.html#l00005">ctrl::SimPlant::SimPlant()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00110">ctrl::ss2tf()</a>, <a class="el" href="DiscreteLQG_8cpp_source.html#l00035">ctrl::DiscreteLQG::step()</a>, and <a class="el" href="KalmanFilter_8cpp_source.html#l00027">ctrl::KalmanFilter::update()</a>.</p>
 
@@ -281,11 +322,19 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Validate that all matrix dimensions are mutually consistent. </p>
+<p>Called automatically by the constructor. Call manually after modifying matrices in-place. </p><dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>On any dimension mismatch. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00014">14</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00049">A</a>, <a class="el" href="PlantModel_8h_source.html#l00050">B</a>, <a class="el" href="PlantModel_8h_source.html#l00051">C</a>, <a class="el" href="PlantModel_8h_source.html#l00052">D</a>, and <a class="el" href="PlantModel_8h_source.html#l00053">Ts</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">C</a>, <a class="el" href="PlantModel_8h_source.html#l00072">D</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">Ts</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="PlantModel_8h_source.html#l00055">StateSpace()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="PlantModel_8h_source.html#l00084">StateSpace()</a>.</p>
 
 </div>
 </div>
@@ -302,9 +351,11 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00049">49</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+<p>State-transition matrix (n × n). </p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00660">ctrl::MixedSensitivity::build()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00185">ctrl::c2d()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00240">ctrl::SystemAnalysis::calculateHInfinityNorm()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00120">ctrl::SystemAnalysis::calculateMargins()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00136">ctrl::DiscreteMPC::computeRef()</a>, <a class="el" href="DiscreteLQR_8cpp_source.html#l00137">ctrl::DiscreteLQR::DiscreteLQR()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00295">ctrl::MPCHorizonTuner::estimateSettlingTime()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00093">ctrl::SystemAnalysis::getFrequencyResponse()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00014">ctrl::SystemAnalysis::getPoles()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00268">ctrl::minreal()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00247">ctrl::LQRWeightTuner::polePlacementHint()</a>, <a class="el" href="KalmanFilter_8cpp_source.html#l00019">ctrl::KalmanFilter::predict()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00110">ctrl::ss2tf()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00088">ctrl::ssStep()</a>, <a class="el" href="PlantModel_8h_source.html#l00065">stateSize()</a>, <a class="el" href="SimPlant_8cpp_source.html#l00014">ctrl::SimPlant::step()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00014">validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00069">69</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00660">ctrl::MixedSensitivity::build()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00185">ctrl::c2d()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00240">ctrl::SystemAnalysis::calculateHInfinityNorm()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00120">ctrl::SystemAnalysis::calculateMargins()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00136">ctrl::DiscreteMPC::computeRef()</a>, <a class="el" href="DiscreteLQR_8cpp_source.html#l00137">ctrl::DiscreteLQR::DiscreteLQR()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00295">ctrl::MPCHorizonTuner::estimateSettlingTime()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00093">ctrl::SystemAnalysis::getFrequencyResponse()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00014">ctrl::SystemAnalysis::getPoles()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00268">ctrl::minreal()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00247">ctrl::LQRWeightTuner::polePlacementHint()</a>, <a class="el" href="KalmanFilter_8cpp_source.html#l00019">ctrl::KalmanFilter::predict()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00110">ctrl::ss2tf()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00088">ctrl::ssStep()</a>, <a class="el" href="PlantModel_8h_source.html#l00094">stateSize()</a>, <a class="el" href="SimPlant_8cpp_source.html#l00014">ctrl::SimPlant::step()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00014">validate()</a>.</p>
 
 </div>
 </div>
@@ -320,9 +371,11 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00050">50</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+<p>Input matrix (n × m). </p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00660">ctrl::MixedSensitivity::build()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00185">ctrl::c2d()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00240">ctrl::SystemAnalysis::calculateHInfinityNorm()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00120">ctrl::SystemAnalysis::calculateMargins()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00136">ctrl::DiscreteMPC::computeRef()</a>, <a class="el" href="DiscreteLQR_8cpp_source.html#l00137">ctrl::DiscreteLQR::DiscreteLQR()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00295">ctrl::MPCHorizonTuner::estimateSettlingTime()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00093">ctrl::SystemAnalysis::getFrequencyResponse()</a>, <a class="el" href="PlantModel_8h_source.html#l00066">inputSize()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00268">ctrl::minreal()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00247">ctrl::LQRWeightTuner::polePlacementHint()</a>, <a class="el" href="KalmanFilter_8cpp_source.html#l00019">ctrl::KalmanFilter::predict()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00110">ctrl::ss2tf()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00088">ctrl::ssStep()</a>, <a class="el" href="SimPlant_8cpp_source.html#l00014">ctrl::SimPlant::step()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00014">validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00070">70</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00660">ctrl::MixedSensitivity::build()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00185">ctrl::c2d()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00240">ctrl::SystemAnalysis::calculateHInfinityNorm()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00120">ctrl::SystemAnalysis::calculateMargins()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00136">ctrl::DiscreteMPC::computeRef()</a>, <a class="el" href="DiscreteLQR_8cpp_source.html#l00137">ctrl::DiscreteLQR::DiscreteLQR()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00295">ctrl::MPCHorizonTuner::estimateSettlingTime()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00093">ctrl::SystemAnalysis::getFrequencyResponse()</a>, <a class="el" href="PlantModel_8h_source.html#l00095">inputSize()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00268">ctrl::minreal()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00247">ctrl::LQRWeightTuner::polePlacementHint()</a>, <a class="el" href="KalmanFilter_8cpp_source.html#l00019">ctrl::KalmanFilter::predict()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00110">ctrl::ss2tf()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00088">ctrl::ssStep()</a>, <a class="el" href="SimPlant_8cpp_source.html#l00014">ctrl::SimPlant::step()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00014">validate()</a>.</p>
 
 </div>
 </div>
@@ -338,9 +391,11 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00051">51</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+<p>Output matrix (p × n). </p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00660">ctrl::MixedSensitivity::build()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00185">ctrl::c2d()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00240">ctrl::SystemAnalysis::calculateHInfinityNorm()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00120">ctrl::SystemAnalysis::calculateMargins()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00111">ctrl::DiscreteMPC::compute()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00295">ctrl::MPCHorizonTuner::estimateSettlingTime()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00093">ctrl::SystemAnalysis::getFrequencyResponse()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00268">ctrl::minreal()</a>, <a class="el" href="PlantModel_8h_source.html#l00067">outputSize()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00110">ctrl::ss2tf()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00088">ctrl::ssStep()</a>, <a class="el" href="KalmanFilter_8cpp_source.html#l00027">ctrl::KalmanFilter::update()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00014">validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00071">71</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00660">ctrl::MixedSensitivity::build()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00185">ctrl::c2d()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00240">ctrl::SystemAnalysis::calculateHInfinityNorm()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00120">ctrl::SystemAnalysis::calculateMargins()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00111">ctrl::DiscreteMPC::compute()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00295">ctrl::MPCHorizonTuner::estimateSettlingTime()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00093">ctrl::SystemAnalysis::getFrequencyResponse()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00268">ctrl::minreal()</a>, <a class="el" href="PlantModel_8h_source.html#l00096">outputSize()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00110">ctrl::ss2tf()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00088">ctrl::ssStep()</a>, <a class="el" href="KalmanFilter_8cpp_source.html#l00027">ctrl::KalmanFilter::update()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00014">validate()</a>.</p>
 
 </div>
 </div>
@@ -356,7 +411,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00052">52</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+<p>Feedthrough matrix (p × m). </p>
+
+<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00072">72</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00660">ctrl::MixedSensitivity::build()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00185">ctrl::c2d()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00240">ctrl::SystemAnalysis::calculateHInfinityNorm()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00120">ctrl::SystemAnalysis::calculateMargins()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00111">ctrl::DiscreteMPC::compute()</a>, <a class="el" href="DiscreteLQG_8cpp_source.html#l00007">ctrl::DiscreteLQG::DiscreteLQG()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00009">ctrl::DiscreteMPC::DiscreteMPC()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00295">ctrl::MPCHorizonTuner::estimateSettlingTime()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00093">ctrl::SystemAnalysis::getFrequencyResponse()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00268">ctrl::minreal()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00110">ctrl::ss2tf()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00088">ctrl::ssStep()</a>, <a class="el" href="KalmanFilter_8cpp_source.html#l00027">ctrl::KalmanFilter::update()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00014">validate()</a>.</p>
 
@@ -374,7 +431,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00053">53</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+<p>Sample time [s]; 0.0 indicates continuous time (used by <a class="el" href="namespacectrl.html#a49df1e780437c779996e8f431faaa542" title="Discretise a continuous-time state-space model.">c2d()</a>). </p>
+
+<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00073">73</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00660">ctrl::MixedSensitivity::build()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00185">ctrl::c2d()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00240">ctrl::SystemAnalysis::calculateHInfinityNorm()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00120">ctrl::SystemAnalysis::calculateMargins()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00295">ctrl::MPCHorizonTuner::estimateSettlingTime()</a>, <a class="el" href="SystemAnalysis_8cpp_source.html#l00093">ctrl::SystemAnalysis::getFrequencyResponse()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00722">ctrl::TunerSuite::makeISECost()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00777">ctrl::TunerSuite::makeITAECost()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00268">ctrl::minreal()</a>, <a class="el" href="SmithPredictor_8cpp_source.html#l00149">ctrl::SmithPredictor::setModel()</a>, <a class="el" href="SmithPredictor_8cpp_source.html#l00159">ctrl::SmithPredictor::setModel()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00234">ctrl::DiscreteMPC::setPlant()</a>, <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00190">ctrl::GeneralizedPredictiveController::setPlant()</a>, <a class="el" href="SmithPredictor_8cpp_source.html#l00040">ctrl::SmithPredictor::SmithPredictor()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00110">ctrl::ss2tf()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00014">validate()</a>.</p>
 

@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,38 +81,54 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Online SISO ARX system identifier using Recursive Least Squares.  
+ <a href="classctrl_1_1RecursiveLeastSquares.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a29700bdf7d74ede9d2f177405b623de1" id="r_a29700bdf7d74ede9d2f177405b623de1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RecursiveLeastSquares.html#a29700bdf7d74ede9d2f177405b623de1">RecursiveLeastSquares</a> (int na, int nb, double Ts, double lambda=0.98, double P0_scale=1e4)</td></tr>
+<tr class="memdesc:a29700bdf7d74ede9d2f177405b623de1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct the RLS estimator.  <br /></td></tr>
 <tr class="separator:a29700bdf7d74ede9d2f177405b623de1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af55260afe405c204d29f2a26e46dbfb9" id="r_af55260afe405c204d29f2a26e46dbfb9"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RecursiveLeastSquares.html#af55260afe405c204d29f2a26e46dbfb9">update</a> (double y, double u)</td></tr>
+<tr class="memdesc:af55260afe405c204d29f2a26e46dbfb9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Feed one new I/O sample and update the parameter estimate.  <br /></td></tr>
 <tr class="separator:af55260afe405c204d29f2a26e46dbfb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6b7d8b958a765ccbf4475acc9c5cee65" id="r_a6b7d8b958a765ccbf4475acc9c5cee65"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RecursiveLeastSquares.html#a6b7d8b958a765ccbf4475acc9c5cee65">reset</a> ()</td></tr>
+<tr class="memdesc:a6b7d8b958a765ccbf4475acc9c5cee65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset circular buffers, parameter estimate, and covariance.  <br /></td></tr>
 <tr class="separator:a6b7d8b958a765ccbf4475acc9c5cee65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe2305bf3b9e0e0af862413c7c1b4c46" id="r_afe2305bf3b9e0e0af862413c7c1b4c46"><td class="memItemLeft" align="right" valign="top">const Eigen::VectorXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RecursiveLeastSquares.html#afe2305bf3b9e0e0af862413c7c1b4c46">params</a> () const</td></tr>
+<tr class="memdesc:afe2305bf3b9e0e0af862413c7c1b4c46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current parameter estimate θ = [a₁,…,aₙₐ, b₁,…,bₙᵦ]ᵀ.  <br /></td></tr>
 <tr class="separator:afe2305bf3b9e0e0af862413c7c1b4c46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c72a2ff75c00356032afe9d05c72e77" id="r_a7c72a2ff75c00356032afe9d05c72e77"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RecursiveLeastSquares.html#a7c72a2ff75c00356032afe9d05c72e77">denominator</a> () const</td></tr>
+<tr class="memdesc:a7c72a2ff75c00356032afe9d05c72e77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Monic denominator polynomial [1, a₁, …, aₙₐ] (length nₐ + 1).  <br /></td></tr>
 <tr class="separator:a7c72a2ff75c00356032afe9d05c72e77"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae077fa95d60789bbbbb1959caf93fb6" id="r_aae077fa95d60789bbbbb1959caf93fb6"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RecursiveLeastSquares.html#aae077fa95d60789bbbbb1959caf93fb6">numerator</a> () const</td></tr>
+<tr class="memdesc:aae077fa95d60789bbbbb1959caf93fb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Numerator polynomial [b₁, …, bₙᵦ] (length nᵦ).  <br /></td></tr>
 <tr class="separator:aae077fa95d60789bbbbb1959caf93fb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaa12ce8181db2cf1cf39b757431f535d" id="r_aaa12ce8181db2cf1cf39b757431f535d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1TransferFunction.html">TransferFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RecursiveLeastSquares.html#aaa12ce8181db2cf1cf39b757431f535d">toTransferFunction</a> () const</td></tr>
+<tr class="memdesc:aaa12ce8181db2cf1cf39b757431f535d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a <a class="el" href="structctrl_1_1TransferFunction.html" title="Discrete-time transfer function in z⁻¹ polynomial form.">TransferFunction</a> from the current estimate.  <br /></td></tr>
 <tr class="separator:aaa12ce8181db2cf1cf39b757431f535d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee7e96824c4ab6e4a454dfe29c7d0293" id="r_aee7e96824c4ab6e4a454dfe29c7d0293"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RecursiveLeastSquares.html#aee7e96824c4ab6e4a454dfe29c7d0293">toStateSpace</a> () const</td></tr>
+<tr class="memdesc:aee7e96824c4ab6e4a454dfe29c7d0293"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a minimal <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> model from the current estimate.  <br /></td></tr>
 <tr class="separator:aee7e96824c4ab6e4a454dfe29c7d0293"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa30994501d7391077e1447bd04e6127f" id="r_aa30994501d7391077e1447bd04e6127f"><td class="memItemLeft" align="right" valign="top">const Eigen::MatrixXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RecursiveLeastSquares.html#aa30994501d7391077e1447bd04e6127f">covariance</a> () const</td></tr>
+<tr class="memdesc:aa30994501d7391077e1447bd04e6127f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Covariance matrix P ((nₐ+nᵦ) × (nₐ+nᵦ)).  <br /></td></tr>
 <tr class="separator:aa30994501d7391077e1447bd04e6127f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0eb844c3548536030d294cf0f8aae519" id="r_a0eb844c3548536030d294cf0f8aae519"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RecursiveLeastSquares.html#a0eb844c3548536030d294cf0f8aae519">sampleCount</a> () const</td></tr>
+<tr class="memdesc:a0eb844c3548536030d294cf0f8aae519"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of samples processed since construction or the last <a class="el" href="classctrl_1_1RecursiveLeastSquares.html#a6b7d8b958a765ccbf4475acc9c5cee65" title="Reset circular buffers, parameter estimate, and covariance.">reset()</a>.  <br /></td></tr>
 <tr class="separator:a0eb844c3548536030d294cf0f8aae519"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a205eeb0e24029b7f31c33e5df2a01295" id="r_a205eeb0e24029b7f31c33e5df2a01295"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RecursiveLeastSquares.html#a205eeb0e24029b7f31c33e5df2a01295">sampleTime</a> () const</td></tr>
+<tr class="memdesc:a205eeb0e24029b7f31c33e5df2a01295"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
 <tr class="separator:a205eeb0e24029b7f31c33e5df2a01295"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adb3c316a05209ef84ae242fec15c7eca" id="r_adb3c316a05209ef84ae242fec15c7eca"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RecursiveLeastSquares.html#adb3c316a05209ef84ae242fec15c7eca">forgettingFactor</a> () const</td></tr>
+<tr class="memdesc:adb3c316a05209ef84ae242fec15c7eca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forgetting factor λ.  <br /></td></tr>
 <tr class="separator:adb3c316a05209ef84ae242fec15c7eca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8h_source.html#l00034">34</a> of file <a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>.</p>
+<div class="textblock"><p>Online SISO ARX system identifier using Recursive Least Squares. </p>
+
+<p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8h_source.html#l00039">39</a> of file <a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a29700bdf7d74ede9d2f177405b623de1" name="a29700bdf7d74ede9d2f177405b623de1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a29700bdf7d74ede9d2f177405b623de1">&#9670;&#160;</a></span>RecursiveLeastSquares()</h2>
@@ -158,6 +174,23 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Construct the RLS estimator. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">na</td><td>Number of output (A-polynomial) lags. </td></tr>
+    <tr><td class="paramname">nb</td><td>Number of input (B-polynomial) lags (delay starts at k−1). </td></tr>
+    <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
+    <tr><td class="paramname">lambda</td><td>Forgetting factor λ ∈ (0, 1].<ul>
+<li>λ = 1: standard least squares (weights all data equally).</li>
+<li>λ &lt; 1: exponential forgetting; effective window ≈ 1/(1−λ) samples.</li>
+<li>Typical range: 0.95–0.99 for slowly time-varying plants. </li>
+</ul>
+</td></tr>
+    <tr><td class="paramname">P0_scale</td><td>Initial covariance = P0_scale·I. Large value = high initial uncertainty. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8cpp_source.html#l00007">7</a> of file <a class="el" href="RecursiveLeastSquares_8cpp_source.html">RecursiveLeastSquares.cpp</a>.</p>
 
 </div>
@@ -186,7 +219,10 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8h_source.html#l00070">70</a> of file <a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>.</p>
+<p>Covariance matrix P ((nₐ+nᵦ) × (nₐ+nᵦ)). </p>
+<p>trace(P) is a scalar measure of parameter uncertainty; decreasing trace indicates converging estimates. Large trace after many samples suggests insufficient excitation. </p>
+
+<p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8h_source.html#l00101">101</a> of file <a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>.</p>
 
 </div>
 </div>
@@ -204,6 +240,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Monic denominator polynomial [1, a₁, …, aₙₐ] (length nₐ + 1). </p>
 
 <p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8cpp_source.html#l00087">87</a> of file <a class="el" href="RecursiveLeastSquares_8cpp_source.html">RecursiveLeastSquares.cpp</a>.</p>
 
@@ -234,7 +272,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8h_source.html#l00076">76</a> of file <a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>.</p>
+<p>Forgetting factor λ. </p>
+
+<p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8h_source.html#l00110">110</a> of file <a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>.</p>
 
 </div>
 </div>
@@ -252,6 +292,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Numerator polynomial [b₁, …, bₙᵦ] (length nᵦ). </p>
 
 <p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8cpp_source.html#l00096">96</a> of file <a class="el" href="RecursiveLeastSquares_8cpp_source.html">RecursiveLeastSquares.cpp</a>.</p>
 
@@ -280,7 +322,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8h_source.html#l00054">54</a> of file <a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>.</p>
+<p>Current parameter estimate θ = [a₁,…,aₙₐ, b₁,…,bₙᵦ]ᵀ. </p>
+
+<p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8h_source.html#l00073">73</a> of file <a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>.</p>
 
 </div>
 </div>
@@ -298,6 +342,9 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Reset circular buffers, parameter estimate, and covariance. </p>
+<p>Restarts identification. </p>
 
 <p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8cpp_source.html#l00078">78</a> of file <a class="el" href="RecursiveLeastSquares_8cpp_source.html">RecursiveLeastSquares.cpp</a>.</p>
 
@@ -326,7 +373,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8h_source.html#l00073">73</a> of file <a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>.</p>
+<p>Number of samples processed since construction or the last <a class="el" href="classctrl_1_1RecursiveLeastSquares.html#a6b7d8b958a765ccbf4475acc9c5cee65" title="Reset circular buffers, parameter estimate, and covariance.">reset()</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8h_source.html#l00104">104</a> of file <a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>.</p>
 
 </div>
 </div>
@@ -353,7 +402,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8h_source.html#l00075">75</a> of file <a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>.</p>
+<p>Sample time Ts [s]. </p>
+
+<p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8h_source.html#l00107">107</a> of file <a class="el" href="RecursiveLeastSquares_8h_source.html">RecursiveLeastSquares.h</a>.</p>
 
 </div>
 </div>
@@ -371,6 +422,9 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Build a minimal <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> model from the current estimate. </p>
+<dl class="section return"><dt>Returns</dt><dd>Discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> in controllable canonical form. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8cpp_source.html#l00128">128</a> of file <a class="el" href="RecursiveLeastSquares_8cpp_source.html">RecursiveLeastSquares.cpp</a>.</p>
 
@@ -392,6 +446,9 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Build a <a class="el" href="structctrl_1_1TransferFunction.html" title="Discrete-time transfer function in z⁻¹ polynomial form.">TransferFunction</a> from the current estimate. </p>
+<p>Valid only after the regressor buffer has been filled (k ≥ max(nₐ, nᵦ)). </p><dl class="section return"><dt>Returns</dt><dd>Discrete-time <a class="el" href="structctrl_1_1TransferFunction.html" title="Discrete-time transfer function in z⁻¹ polynomial form.">TransferFunction</a> in z⁻¹ form. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8cpp_source.html#l00102">102</a> of file <a class="el" href="RecursiveLeastSquares_8cpp_source.html">RecursiveLeastSquares.cpp</a>.</p>
 
@@ -426,6 +483,17 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Feed one new I/O sample and update the parameter estimate. </p>
+<p>Fills internal circular buffers for y and u, then runs the RLS recursion. Updates are reliable once the buffer has been filled: after max(nₐ, nᵦ) calls.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">y</td><td>Plant output sample y[k]. </td></tr>
+    <tr><td class="paramname">u</td><td>Control input sample u[k]. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A-posteriori prediction error e[k] = y[k] − φ[k]ᵀ·θ[k−1]. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="RecursiveLeastSquares_8cpp_source.html#l00017">17</a> of file <a class="el" href="RecursiveLeastSquares_8cpp_source.html">RecursiveLeastSquares.cpp</a>.</p>
 

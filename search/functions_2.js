@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['c2d_0',['c2d',['../namespacectrl.html#a45b2bf7781f9cef0da5ad16543b77eed',1,'ctrl']]],
+  ['c2d_0',['c2d',['../namespacectrl.html#a49df1e780437c779996e8f431faaa542',1,'ctrl']]],
   ['calculate_1',['calculate',['../classctrl_1_1MetricsAnalyzer.html#ad5ce8357e70f38682e2858a8c0f0239c',1,'ctrl::MetricsAnalyzer']]],
   ['calculatehinfinitynorm_2',['calculateHInfinityNorm',['../classctrl_1_1SystemAnalysis.html#a05e675bdc440ad52a6185f510ea2a49b',1,'ctrl::SystemAnalysis']]],
   ['calculatemargins_3',['calculateMargins',['../classctrl_1_1SystemAnalysis.html#a7f5aa15839819c0ff49fdb495c031f9f',1,'ctrl::SystemAnalysis']]],

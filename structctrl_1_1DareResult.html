@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,20 +81,28 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Result returned by the DARE solver.  
+ <a href="structctrl_1_1DareResult.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a41de4c889ede14c44c1f771f3e08e8da" id="r_a41de4c889ede14c44c1f771f3e08e8da"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1DareResult.html#a41de4c889ede14c44c1f771f3e08e8da">P</a></td></tr>
+<tr class="memdesc:a41de4c889ede14c44c1f771f3e08e8da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Best available Riccati solution (converged or last iterate).  <br /></td></tr>
 <tr class="separator:a41de4c889ede14c44c1f771f3e08e8da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a147e98f76a3426f3db037b034853666e" id="r_a147e98f76a3426f3db037b034853666e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1DareResult.html#a147e98f76a3426f3db037b034853666e">converged</a></td></tr>
+<tr class="memdesc:a147e98f76a3426f3db037b034853666e"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>true</code> if value iteration reached the tolerance.  <br /></td></tr>
 <tr class="separator:a147e98f76a3426f3db037b034853666e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a15fc6f428bc21ddc1b65e189bad58175" id="r_a15fc6f428bc21ddc1b65e189bad58175"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1DareResult.html#a15fc6f428bc21ddc1b65e189bad58175">iterations</a></td></tr>
+<tr class="memdesc:a15fc6f428bc21ddc1b65e189bad58175"><td class="mdescLeft">&#160;</td><td class="mdescRight">Actual number of iterations performed.  <br /></td></tr>
 <tr class="separator:a15fc6f428bc21ddc1b65e189bad58175"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00026">26</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<div class="textblock"><p>Result returned by the DARE solver. </p>
+<p>Carries the solution matrix, convergence flag, and iteration count so callers can decide whether to accept an approximate result. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00042">42</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a147e98f76a3426f3db037b034853666e" name="a147e98f76a3426f3db037b034853666e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a147e98f76a3426f3db037b034853666e">&#9670;&#160;</a></span>converged</h2>
@@ -108,7 +116,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00029">29</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p><code>true</code> if value iteration reached the tolerance. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00045">45</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteLQR_8cpp_source.html#l00137">ctrl::DiscreteLQR::DiscreteLQR()</a>.</p>
 
@@ -126,7 +136,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00030">30</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p>Actual number of iterations performed. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00046">46</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteLQR_8cpp_source.html#l00137">ctrl::DiscreteLQR::DiscreteLQR()</a>.</p>
 
@@ -144,7 +156,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00028">28</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p>Best available Riccati solution (converged or last iterate). </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00044">44</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteLQR_8cpp_source.html#l00137">ctrl::DiscreteLQR::DiscreteLQR()</a>.</p>
 

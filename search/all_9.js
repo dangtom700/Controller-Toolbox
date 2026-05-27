@@ -4,7 +4,7 @@ var searchData=
   ['c_20tt_20a_20href_20lib_20controllertraits_20h_20controllertraits_20h_20a_1',['&lt;tt&gt;ControllerTraits&lt;C&gt;&lt;/tt&gt; (&lt;a href=&quot;lib/ControllerTraits.h&quot; &gt;ControllerTraits.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md91',1,'']]],
   ['c1_2',['C1',['../structctrl_1_1GeneralisedPlant.html#acc888810f6315566a7ef3b53b6528c17',1,'ctrl::GeneralisedPlant']]],
   ['c2_3',['C2',['../structctrl_1_1GeneralisedPlant.html#ad7546293998aa6f781c2f63c5f3ff61b',1,'ctrl::GeneralisedPlant']]],
-  ['c2d_4',['c2d',['../namespacectrl.html#a45b2bf7781f9cef0da5ad16543b77eed',1,'ctrl']]],
+  ['c2d_4',['c2d',['../namespacectrl.html#a49df1e780437c779996e8f431faaa542',1,'ctrl']]],
   ['c2dmethod_5',['C2dMethod',['../namespacectrl.html#adca30ca249ad63cca5be491ba5520156',1,'ctrl']]],
   ['c_5fde_6',['c_de',['../structctrl_1_1SuperTwistingParams.html#a62ce8285bffab84b6a9761bb17e4dc57',1,'ctrl::SuperTwistingParams::c_de'],['../structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c',1,'ctrl::SMCParams::c_de']]],
   ['c_5fe_7',['c_e',['../structctrl_1_1SuperTwistingParams.html#afd3504ce1d4ae3532f0e2bb032894b66',1,'ctrl::SuperTwistingParams::c_e'],['../structctrl_1_1SMCParams.html#a1d249bc5108b6f21e2c252ff4b99647a',1,'ctrl::SMCParams::c_e']]],

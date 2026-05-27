@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -82,37 +82,51 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Discrete-time Extended Kalman Filter.  
+ <a href="classctrl_1_1ExtendedKalmanFilter.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ae3841dcb576b5053ea00c4681f4ca8ff" id="r_ae3841dcb576b5053ea00c4681f4ca8ff"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#ae3841dcb576b5053ea00c4681f4ca8ff">ExtendedKalmanFilter</a> (int n, int p, <a class="el" href="namespacectrl.html#ad5cf392399fd6913c6c79ca43b0db5ed">StateFunc</a> f, <a class="el" href="namespacectrl.html#aee8aa60f7a448b1cb384efdf32eada41">MeasFunc</a> h, <a class="el" href="namespacectrl.html#a2b4f19ebb433c185c5b7a561cec22f20">JacobianFn</a> Fjac, <a class="el" href="namespacectrl.html#a2b4f19ebb433c185c5b7a561cec22f20">JacobianFn</a> Hjac, const Eigen::MatrixXd &amp;Q_noise, const Eigen::MatrixXd &amp;R_noise, double Ts, const Eigen::MatrixXd &amp;P0=Eigen::MatrixXd())</td></tr>
+<tr class="memdesc:ae3841dcb576b5053ea00c4681f4ca8ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct the EKF with nonlinear models and noise statistics.  <br /></td></tr>
 <tr class="separator:ae3841dcb576b5053ea00c4681f4ca8ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad718e7997865127cfac7a43acc196c70" id="r_ad718e7997865127cfac7a43acc196c70"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#ad718e7997865127cfac7a43acc196c70">predict</a> (const Eigen::VectorXd &amp;u)</td></tr>
+<tr class="memdesc:ad718e7997865127cfac7a43acc196c70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prediction step — propagate state through f and inflate covariance with F.  <br /></td></tr>
 <tr class="separator:ad718e7997865127cfac7a43acc196c70"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc408ef1287096c22669ed8a711a8a0f" id="r_afc408ef1287096c22669ed8a711a8a0f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#afc408ef1287096c22669ed8a711a8a0f">update</a> (const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u)</td></tr>
+<tr class="memdesc:afc408ef1287096c22669ed8a711a8a0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update step — incorporate measurement y[k].  <br /></td></tr>
 <tr class="separator:afc408ef1287096c22669ed8a711a8a0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d7d137a0e335bc07912f1c7134afaa8" id="r_a9d7d137a0e335bc07912f1c7134afaa8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#a9d7d137a0e335bc07912f1c7134afaa8">step</a> (const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u_prev)</td></tr>
+<tr class="memdesc:a9d7d137a0e335bc07912f1c7134afaa8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Combined predict + update — most common usage.  <br /></td></tr>
 <tr class="separator:a9d7d137a0e335bc07912f1c7134afaa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43b798ac50195abe1756203113d20b92" id="r_a43b798ac50195abe1756203113d20b92"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#a43b798ac50195abe1756203113d20b92">reset</a> ()</td></tr>
+<tr class="memdesc:a43b798ac50195abe1756203113d20b92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset state estimate to zero and covariance to P0 (or identity).  <br /></td></tr>
 <tr class="separator:a43b798ac50195abe1756203113d20b92"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51452ba465a3b259f65d8d95094f4839" id="r_a51452ba465a3b259f65d8d95094f4839"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#a51452ba465a3b259f65d8d95094f4839">setState</a> (const Eigen::VectorXd &amp;x0)</td></tr>
+<tr class="memdesc:a51452ba465a3b259f65d8d95094f4839"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inject an initial state estimate.  <br /></td></tr>
 <tr class="separator:a51452ba465a3b259f65d8d95094f4839"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abde630993ad0416c47d4c2908d09bf83" id="r_abde630993ad0416c47d4c2908d09bf83"><td class="memItemLeft" align="right" valign="top">const Eigen::VectorXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#abde630993ad0416c47d4c2908d09bf83">state</a> () const</td></tr>
+<tr class="memdesc:abde630993ad0416c47d4c2908d09bf83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current state estimate x̂[k|k] (n × 1).  <br /></td></tr>
 <tr class="separator:abde630993ad0416c47d4c2908d09bf83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab16ff734af63bb32c8bd9f9908adde71" id="r_ab16ff734af63bb32c8bd9f9908adde71"><td class="memItemLeft" align="right" valign="top">const Eigen::MatrixXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#ab16ff734af63bb32c8bd9f9908adde71">covariance</a> () const</td></tr>
+<tr class="memdesc:ab16ff734af63bb32c8bd9f9908adde71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current error covariance P[k|k] (n × n).  <br /></td></tr>
 <tr class="separator:ab16ff734af63bb32c8bd9f9908adde71"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad85c5c6ae873b66cb2c50d0ecf244d21" id="r_ad85c5c6ae873b66cb2c50d0ecf244d21"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#ad85c5c6ae873b66cb2c50d0ecf244d21">sampleTime</a> () const</td></tr>
+<tr class="memdesc:ad85c5c6ae873b66cb2c50d0ecf244d21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
 <tr class="separator:ad85c5c6ae873b66cb2c50d0ecf244d21"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a815d8777c0943cb4e84947a771335253" id="r_a815d8777c0943cb4e84947a771335253"><td class="memItemLeft" align="right" valign="top">static Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#a815d8777c0943cb4e84947a771335253">numericalJacobian</a> (const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x, double eps=1e-5)</td></tr>
+<tr class="memdesc:a815d8777c0943cb4e84947a771335253"><td class="mdescLeft">&#160;</td><td class="mdescRight">Central-difference numerical Jacobian (finite-difference step h = 1e-5).  <br /></td></tr>
 <tr class="separator:a815d8777c0943cb4e84947a771335253"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00044">44</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+<div class="textblock"><p>Discrete-time Extended Kalman Filter. </p>
+
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00065">65</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ae3841dcb576b5053ea00c4681f4ca8ff" name="ae3841dcb576b5053ea00c4681f4ca8ff"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae3841dcb576b5053ea00c4681f4ca8ff">&#9670;&#160;</a></span>ExtendedKalmanFilter()</h2>
@@ -188,6 +202,23 @@ Static Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Construct the EKF with nonlinear models and noise statistics. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>State dimension. </td></tr>
+    <tr><td class="paramname">p</td><td>Measurement dimension. </td></tr>
+    <tr><td class="paramname">f</td><td>Process function x[k+1] = f(x[k], u[k]). </td></tr>
+    <tr><td class="paramname">h</td><td>Measurement function y[k] = h(x[k], u[k]). </td></tr>
+    <tr><td class="paramname">Fjac</td><td>Jacobian ∂f/∂x (n × n), evaluated at (x̂, u). </td></tr>
+    <tr><td class="paramname">Hjac</td><td>Jacobian ∂h/∂x (p × n), evaluated at (x̂_pred, u). </td></tr>
+    <tr><td class="paramname">Q_noise</td><td>Process noise covariance (n × n, positive semi-definite). </td></tr>
+    <tr><td class="paramname">R_noise</td><td>Measurement noise covariance (p × p, positive definite). </td></tr>
+    <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
+    <tr><td class="paramname">P0</td><td>Initial error covariance (n × n). Defaults to identity when empty. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00006">6</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
 </div>
@@ -216,7 +247,9 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00079">79</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+<p>Current error covariance P[k|k] (n × n). </p>
+
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00122">122</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -260,6 +293,22 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Central-difference numerical Jacobian (finite-difference step h = 1e-5). </p>
+<p>Use when analytical Jacobians are unavailable or too complex to maintain. Bind u as a constant to obtain ∂f/∂x or ∂h/∂x: </p><div class="fragment"><div class="line"><span class="keyword">auto</span> Fjac = [&amp;](<span class="keyword">const</span> Eigen::VectorXd&amp; x, <span class="keyword">const</span> Eigen::VectorXd&amp; u) {</div>
+<div class="line">    <span class="keywordflow">return</span> <a class="code hl_function" href="classctrl_1_1ExtendedKalmanFilter.html#a815d8777c0943cb4e84947a771335253">ExtendedKalmanFilter::numericalJacobian</a>(</div>
+<div class="line">        [&amp;](<span class="keyword">const</span> Eigen::VectorXd&amp; xx){ <span class="keywordflow">return</span> f(xx, u); }, x);</div>
+<div class="line">};</div>
+<div class="ttc" id="aclassctrl_1_1ExtendedKalmanFilter_html_a815d8777c0943cb4e84947a771335253"><div class="ttname"><a href="classctrl_1_1ExtendedKalmanFilter.html#a815d8777c0943cb4e84947a771335253">ctrl::ExtendedKalmanFilter::numericalJacobian</a></div><div class="ttdeci">static Eigen::MatrixXd numericalJacobian(const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x, double eps=1e-5)</div><div class="ttdoc">Central-difference numerical Jacobian (finite-difference step h = 1e-5).</div><div class="ttdef"><b>Definition</b> <a href="ExtendedKalmanFilter_8cpp_source.html#l00071">ExtendedKalmanFilter.cpp:71</a></div></div>
+</div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">func</td><td>Scalar-to-vector function to differentiate. </td></tr>
+    <tr><td class="paramname">x</td><td>Point at which to evaluate the Jacobian. </td></tr>
+    <tr><td class="paramname">eps</td><td>Finite-difference step size (default 1e-5). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Jacobian matrix (output_dim × input_dim). </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00071">71</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
 </div>
@@ -279,6 +328,14 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Prediction step — propagate state through f and inflate covariance with F. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">u</td><td>Control input u[k] applied at the current sample. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00023">23</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
@@ -300,6 +357,8 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Reset state estimate to zero and covariance to P0 (or identity). </p>
 
 <p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00065">65</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
@@ -328,7 +387,9 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00080">80</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+<p>Sample time Ts [s]. </p>
+
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00125">125</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -356,7 +417,15 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00076">76</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+<p>Inject an initial state estimate. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x0</td><td>Initial state vector (n × 1). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00116">116</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -383,7 +452,9 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00078">78</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+<p>Current state estimate x̂[k|k] (n × 1). </p>
+
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00119">119</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -412,6 +483,15 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Combined predict + update — most common usage. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">y</td><td>Measurement y[k]. </td></tr>
+    <tr><td class="paramname">u_prev</td><td>Control input u[k−1] applied at the previous sample. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00058">58</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
@@ -444,6 +524,15 @@ Static Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Update step — incorporate measurement y[k]. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">y</td><td>Current measurement y[k]. </td></tr>
+    <tr><td class="paramname">u</td><td>Control input u[k] (used in innovation h(x̂, u)). </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00033">33</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 

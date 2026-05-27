@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -84,220 +84,325 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacectrl_1_1detail" id="r_namespacectrl_1_1detail"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl_1_1detail.html">detail</a></td></tr>
+<tr class="memdesc:namespacectrl_1_1detail"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal detail namespace for conditional <code>[[deprecated]]</code> warnings. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacectrl_1_1tag" id="r_namespacectrl_1_1tag"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl_1_1tag.html">tag</a></td></tr>
+<tr class="memdesc:namespacectrl_1_1tag"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controller-category tag types for template dispatch. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ADRCParams.html">ADRCParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1DiscreteADRC.html" title="Discrete-time 2nd-order Linear Active Disturbance Rejection Controller.">DiscreteADRC</a>.  <a href="structctrl_1_1ADRCParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1Antecedent.html">Antecedent</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One input condition in a fuzzy rule antecedent.  <a href="structctrl_1_1Antecedent.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1AtomicParamBuffer.html">AtomicParamBuffer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seqlock double-buffer for lock-free parameter hand-off between a background writer thread and a real-time reader thread.  <a href="classctrl_1_1AtomicParamBuffer.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1CohenCoonTuner.html">CohenCoonTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cohen-Coon PID tuner from a FOPDT model.  <a href="classctrl_1_1CohenCoonTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html">ControllerStack</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Composite controller that dispatches to multiple <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> entries.  <a href="classctrl_1_1ControllerStack.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ControllerTraits.html">ControllerTraits</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile-time tuning capability traits for a controller type <code>C</code>.  <a href="structctrl_1_1ControllerTraits.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ControllerTraits_3_01DiscreteADRC_01_4.html">ControllerTraits&lt; DiscreteADRC &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Traits for <a class="el" href="classctrl_1_1DiscreteADRC.html" title="Discrete-time 2nd-order Linear Active Disturbance Rejection Controller.">DiscreteADRC</a> — uses bandwidth parameterisation (Gao 2003), not auto-tuners.  <a href="structctrl_1_1ControllerTraits_3_01DiscreteADRC_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ControllerTraits_3_01DiscreteHinf_01_4.html">ControllerTraits&lt; DiscreteHinf &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Traits for <a class="el" href="classctrl_1_1DiscreteHinf.html" title="Discrete-time dynamic output-feedback H∞ controller.">DiscreteHinf</a> — synthesis via DGKF bisection, not classical auto-tuners.  <a href="structctrl_1_1ControllerTraits_3_01DiscreteHinf_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ControllerTraits_3_01DiscreteLeadLag_01_4.html">ControllerTraits&lt; DiscreteLeadLag &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Traits for <a class="el" href="classctrl_1_1DiscreteLeadLag.html" title="Discrete Lead-Lag compensator.">DiscreteLeadLag</a> — supports <a class="el" href="classctrl_1_1LoopShapingTuner.html" title="Lead compensator designer for DiscreteLeadLag via frequency-domain loop shaping.">LoopShapingTuner</a>.  <a href="structctrl_1_1ControllerTraits_3_01DiscreteLeadLag_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ControllerTraits_3_01DiscreteLQG_01_4.html">ControllerTraits&lt; DiscreteLQG &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Traits for <a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a> — supports LQR tuning (controller part) and Kalman noise tuning (observer part).  <a href="structctrl_1_1ControllerTraits_3_01DiscreteLQG_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ControllerTraits_3_01DiscreteLQR_01_4.html">ControllerTraits&lt; DiscreteLQR &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Traits for <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> — supports Bryson's rule and pole-placement hint.  <a href="structctrl_1_1ControllerTraits_3_01DiscreteLQR_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ControllerTraits_3_01DiscreteMPC_01_4.html">ControllerTraits&lt; DiscreteMPC &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Traits for <a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a> — supports <a class="el" href="classctrl_1_1MPCHorizonTuner.html" title="MPC horizon and weight recommender for DiscreteMPC.">MPCHorizonTuner</a>.  <a href="structctrl_1_1ControllerTraits_3_01DiscreteMPC_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ControllerTraits_3_01DiscretePID_01_4.html">ControllerTraits&lt; DiscretePID &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Traits for <a class="el" href="classctrl_1_1DiscretePID.html" title="Discrete-time PID controller.">DiscretePID</a> — supports all heuristic PID tuners.  <a href="structctrl_1_1ControllerTraits_3_01DiscretePID_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ControllerTraits_3_01DiscreteSMC_01_4.html">ControllerTraits&lt; DiscreteSMC &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Traits for <a class="el" href="classctrl_1_1DiscreteSMC.html" title="Discrete first-order Sliding Mode Controller with boundary-layer saturation.">DiscreteSMC</a> — no classical auto-tuner; parameters from Lyapunov design.  <a href="structctrl_1_1ControllerTraits_3_01DiscreteSMC_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ControllerTraits_3_01ExtremumSeeker_01_4.html">ControllerTraits&lt; ExtremumSeeker &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Traits for <a class="el" href="classctrl_1_1ExtremumSeeker.html" title="Perturbation-based Extremum Seeking Controller.">ExtremumSeeker</a> — no classical auto-tuner; set parameters directly.  <a href="structctrl_1_1ControllerTraits_3_01ExtremumSeeker_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ControllerTraits_3_01GeneralizedPredictiveController_01_4.html">ControllerTraits&lt; GeneralizedPredictiveController &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Traits for <a class="el" href="classctrl_1_1GeneralizedPredictiveController.html" title="Discrete-time Generalised Predictive Controller.">GeneralizedPredictiveController</a> — supports <a class="el" href="classctrl_1_1MPCHorizonTuner.html" title="MPC horizon and weight recommender for DiscreteMPC.">MPCHorizonTuner</a> (same horizon semantics as <a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>).  <a href="structctrl_1_1ControllerTraits_3_01GeneralizedPredictiveController_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ControllerTraits_3_01RepetitiveController_01_4.html">ControllerTraits&lt; RepetitiveController &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Traits for <a class="el" href="classctrl_1_1RepetitiveController.html" title="Discrete-time Plug-in Repetitive Controller.">RepetitiveController</a> — internal-model-principle design, not auto-tuners.  <a href="structctrl_1_1ControllerTraits_3_01RepetitiveController_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ControllerTraits_3_01SmithPredictor_01_4.html">ControllerTraits&lt; SmithPredictor &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Traits for <a class="el" href="classctrl_1_1SmithPredictor.html" title="Smith Predictor wrapper for any IController inner loop.">SmithPredictor</a> — tune the inner controller, not the wrapper.  <a href="structctrl_1_1ControllerTraits_3_01SmithPredictor_01_4.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1DareResult.html">DareResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result returned by the DARE solver.  <a href="structctrl_1_1DareResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteADRC.html">DiscreteADRC</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete-time 2nd-order Linear Active Disturbance Rejection Controller.  <a href="classctrl_1_1DiscreteADRC.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteHinf.html">DiscreteHinf</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete-time dynamic output-feedback H∞ controller.  <a href="classctrl_1_1DiscreteHinf.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLeadLag.html">DiscreteLeadLag</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete Lead-Lag compensator.  <a href="classctrl_1_1DiscreteLeadLag.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQG.html">DiscreteLQG</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete-time LQG controller (LQR + Kalman filter).  <a href="classctrl_1_1DiscreteLQG.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQR.html">DiscreteLQR</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete-time Linear Quadratic Regulator.  <a href="classctrl_1_1DiscreteLQR.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteMPC.html">DiscreteMPC</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete-time Model Predictive Controller.  <a href="classctrl_1_1DiscreteMPC.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscretePID.html">DiscretePID</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete-time PID controller.  <a href="classctrl_1_1DiscretePID.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteSMC.html">DiscreteSMC</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete first-order Sliding Mode Controller with boundary-layer saturation.  <a href="classctrl_1_1DiscreteSMC.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html">ExtendedKalmanFilter</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete-time Extended Kalman Filter.  <a href="classctrl_1_1ExtendedKalmanFilter.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtremumSeeker.html">ExtremumSeeker</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perturbation-based Extremum Seeking Controller.  <a href="classctrl_1_1ExtremumSeeker.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ExtremumSeekerParams.html">ExtremumSeekerParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1ExtremumSeeker.html" title="Perturbation-based Extremum Seeking Controller.">ExtremumSeeker</a>.  <a href="structctrl_1_1ExtremumSeekerParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FuzzyPD.html">FuzzyPD</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">5-term PD fuzzy controller implementing <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a>.  <a href="classctrl_1_1FuzzyPD.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1FuzzyPDParams.html">FuzzyPDParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1FuzzyPD.html" title="5-term PD fuzzy controller implementing IController.">FuzzyPD</a>.  <a href="structctrl_1_1FuzzyPDParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FuzzyPID.html">FuzzyPID</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classctrl_1_1FuzzyPD.html" title="5-term PD fuzzy controller implementing IController.">FuzzyPD</a> extended with a crisp integral term and back-calculation anti-windup.  <a href="classctrl_1_1FuzzyPID.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1FuzzyPIDParams.html">FuzzyPIDParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1FuzzyPID.html" title="FuzzyPD extended with a crisp integral term and back-calculation anti-windup.">FuzzyPID</a>.  <a href="structctrl_1_1FuzzyPIDParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FuzzySupervisor.html">FuzzySupervisor</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fuzzy supervisory monitor that decides when a linearised controller needs re-tuning.  <a href="classctrl_1_1FuzzySupervisor.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FuzzySystem.html">FuzzySystem</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Core Mamdani / Takagi-Sugeno fuzzy inference engine.  <a href="classctrl_1_1FuzzySystem.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1FuzzySystemParams.html">FuzzySystemParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration parameters for <a class="el" href="classctrl_1_1FuzzySystem.html" title="Core Mamdani / Takagi-Sugeno fuzzy inference engine.">FuzzySystem</a>.  <a href="structctrl_1_1FuzzySystemParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GeneralisedPlant.html">GeneralisedPlant</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generalised plant for H∞ synthesis.  <a href="structctrl_1_1GeneralisedPlant.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1GeneralizedPredictiveController.html">GeneralizedPredictiveController</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete-time Generalised Predictive Controller.  <a href="classctrl_1_1GeneralizedPredictiveController.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GPCParams.html">GPCParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning and horizon parameters for <a class="el" href="classctrl_1_1GeneralizedPredictiveController.html" title="Discrete-time Generalised Predictive Controller.">GeneralizedPredictiveController</a>.  <a href="structctrl_1_1GPCParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfParams.html">HinfParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">H∞ synthesis algorithm parameters.  <a href="structctrl_1_1HinfParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1HinfResult.html">HinfResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result returned by <a class="el" href="classctrl_1_1DiscreteHinf.html#ab774c7a783a1e411b701289d00be1603" title="Solve the discrete-time H∞ optimal control problem.">DiscreteHinf::solve()</a>.  <a href="structctrl_1_1HinfResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IActuator.html">IActuator</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract base class for all actuator adapters in the HAL.  <a href="classctrl_1_1IActuator.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html">IController</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract interface for all discrete-time controllers.  <a href="classctrl_1_1IController.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IScheduler.html">IScheduler</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract periodic task scheduler for the control loop.  <a href="classctrl_1_1IScheduler.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ISensor.html">ISensor</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract base class for all sensor adapters in the HAL.  <a href="classctrl_1_1ISensor.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ITimer.html">ITimer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract monotonic clock for deadline and execution-time measurement.  <a href="classctrl_1_1ITimer.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html">KalmanFilter</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete-time Linear Kalman Filter.  <a href="classctrl_1_1KalmanFilter.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1KalmanNoiseParams.html">KalmanNoiseParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Noise covariance matrices for Kalman observer initialisation.  <a href="structctrl_1_1KalmanNoiseParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1KalmanTuneResult.html">KalmanTuneResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of a Kalman noise tuning call.  <a href="structctrl_1_1KalmanTuneResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanWeightTuner.html">KalmanWeightTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Heuristic noise covariance selector for the Kalman observer in <a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a>.  <a href="classctrl_1_1KalmanWeightTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LeadLagParams.html">LeadLagParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1DiscreteLeadLag.html" title="Discrete Lead-Lag compensator.">DiscreteLeadLag</a>.  <a href="structctrl_1_1LeadLagParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LeadLagTuneResult.html">LeadLagTuneResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of a loop-shaping lead/lag tuning call.  <a href="structctrl_1_1LeadLagTuneResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LinguisticTerm.html">LinguisticTerm</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A named fuzzy term with its membership function and optional peak location.  <a href="structctrl_1_1LinguisticTerm.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LinguisticVariable.html">LinguisticVariable</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A fuzzy variable with a named universe of discourse and a set of linguistic terms.  <a href="structctrl_1_1LinguisticVariable.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1LoopShapingTuner.html">LoopShapingTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lead compensator designer for <a class="el" href="classctrl_1_1DiscreteLeadLag.html" title="Discrete Lead-Lag compensator.">DiscreteLeadLag</a> via frequency-domain loop shaping.  <a href="classctrl_1_1LoopShapingTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1LQRAdapter.html">LQRAdapter</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adapter that wraps <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> as an <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> for use in <a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a>.  <a href="classctrl_1_1LQRAdapter.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LQRParams.html">LQRParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">LQR weighting matrices.  <a href="structctrl_1_1LQRParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LQRTuneResult.html">LQRTuneResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of a Bryson LQR tuning call.  <a href="structctrl_1_1LQRTuneResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1LQRWeightTuner.html">LQRWeightTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">LQR weight selector for <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> and <a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a>.  <a href="classctrl_1_1LQRWeightTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1MetricsAnalyzer.html">MetricsAnalyzer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts standard step-response metrics from sampled time-series data.  <a href="classctrl_1_1MetricsAnalyzer.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MF.html">MF</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Value-type tagged-union membership function.  <a href="structctrl_1_1MF.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1MixedSensitivity.html">MixedSensitivity</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper class that assembles a <a class="el" href="structctrl_1_1GeneralisedPlant.html" title="Generalised plant for H∞ synthesis.">GeneralisedPlant</a> for S/KS/T mixed-sensitivity design.  <a href="classctrl_1_1MixedSensitivity.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1MPCHorizonTuner.html">MPCHorizonTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">MPC horizon and weight recommender for <a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>.  <a href="classctrl_1_1MPCHorizonTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MPCParams.html">MPCParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning and horizon parameters for <a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>.  <a href="structctrl_1_1MPCParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MPCTuneResult.html">MPCTuneResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of an MPC horizon tuning call.  <a href="structctrl_1_1MPCTuneResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1OptimTuneResult.html">OptimTuneResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of an optimisation-based tuning call (Nelder-Mead ISE/ITAE).  <a href="structctrl_1_1OptimTuneResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html">PadeApproximator</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rational function approximator (Padé / Sanathanan–Koerner least squares).  <a href="classctrl_1_1PadeApproximator.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDParams.html">PIDParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1DiscretePID.html" title="Discrete-time PID controller.">DiscretePID</a>.  <a href="structctrl_1_1PIDParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDTuneResult.html">PIDTuneResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of a relay/ZN, IMC, or Cohen-Coon tuning call.  <a href="structctrl_1_1PIDTuneResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RecursiveLeastSquares.html">RecursiveLeastSquares</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Online SISO ARX system identifier using Recursive Least Squares.  <a href="classctrl_1_1RecursiveLeastSquares.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RelayAutoTuner.html">RelayAutoTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Åström-Hägglund relay feedback auto-tuner.  <a href="classctrl_1_1RelayAutoTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RelayTunerConfig.html">RelayTunerConfig</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration for <a class="el" href="classctrl_1_1RelayAutoTuner.html" title="Åström-Hägglund relay feedback auto-tuner.">RelayAutoTuner</a>.  <a href="structctrl_1_1RelayTunerConfig.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RepetitiveController.html">RepetitiveController</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete-time Plug-in Repetitive Controller.  <a href="classctrl_1_1RepetitiveController.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RepetitiveParams.html">RepetitiveParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1RepetitiveController.html" title="Discrete-time Plug-in Repetitive Controller.">RepetitiveController</a>.  <a href="structctrl_1_1RepetitiveParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1Rule.html">Rule</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One fuzzy IF-THEN rule.  <a href="structctrl_1_1Rule.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SafeSensor.html">SafeSensor</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classctrl_1_1ISensor.html" title="Abstract base class for all sensor adapters in the HAL.">ISensor</a> decorator with hold-last fault semantics and optional staleness alarm.  <a href="classctrl_1_1SafeSensor.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimActuator.html">SimActuator</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classctrl_1_1IActuator.html" title="Abstract base class for all actuator adapters in the HAL.">IActuator</a> implementation that drives a <a class="el" href="classctrl_1_1SimPlant.html" title="Thread-safe discrete-time plant simulator.">SimPlant</a>.  <a href="classctrl_1_1SimActuator.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimPlant.html">SimPlant</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Thread-safe discrete-time plant simulator.  <a href="classctrl_1_1SimPlant.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimSensor.html">SimSensor</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classctrl_1_1ISensor.html" title="Abstract base class for all sensor adapters in the HAL.">ISensor</a> implementation that reads from a <a class="el" href="classctrl_1_1SimPlant.html" title="Thread-safe discrete-time plant simulator.">SimPlant</a>.  <a href="classctrl_1_1SimSensor.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SMCParams.html">SMCParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1DiscreteSMC.html" title="Discrete first-order Sliding Mode Controller with boundary-layer saturation.">DiscreteSMC</a>.  <a href="structctrl_1_1SMCParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SmithPredictor.html">SmithPredictor</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Smith Predictor wrapper for any <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> inner loop.  <a href="classctrl_1_1SmithPredictor.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StabilityMargins.html">StabilityMargins</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stability margins for a SISO open-loop plant.  <a href="structctrl_1_1StabilityMargins.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StackEntry.html">StackEntry</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A single entry in the <a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a> priority queue.  <a href="structctrl_1_1StackEntry.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete-time state-space model.  <a href="structctrl_1_1StateSpace.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1StdTimer.html">StdTimer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Non-RT <a class="el" href="classctrl_1_1ITimer.html" title="Abstract monotonic clock for deadline and execution-time measurement.">ITimer</a> backed by <code>std::chrono::steady_clock</code>.  <a href="classctrl_1_1StdTimer.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1StepResponseTuner.html">StepResponseTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open-loop step-response FOPDT identifier and PID tuner.  <a href="classctrl_1_1StepResponseTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SubspaceIDResult.html">SubspaceIDResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output of the <a class="el" href="namespacectrl.html#ac04c2f87d749604186fa29b45048e9a3" title="Batch subspace state-space identification (N4SID / MOESP).">n4sid()</a> identification algorithm.  <a href="structctrl_1_1SubspaceIDResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SuperTwistingParams.html">SuperTwistingParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1SuperTwistingSMC.html" title="Discrete 2nd-order Sliding Mode Controller (super-twisting algorithm).">SuperTwistingSMC</a>.  <a href="structctrl_1_1SuperTwistingParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SuperTwistingSMC.html">SuperTwistingSMC</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete 2nd-order Sliding Mode Controller (super-twisting algorithm).  <a href="classctrl_1_1SuperTwistingSMC.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SupervisorDecision.html">SupervisorDecision</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output of a <a class="el" href="classctrl_1_1FuzzySupervisor.html#aba8d2cc89d3bf8d527de92b9790dd062" title="Feed the current absolute position or output error.">FuzzySupervisor::update()</a> call.  <a href="structctrl_1_1SupervisorDecision.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SupervisorParams.html">SupervisorParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1FuzzySupervisor.html" title="Fuzzy supervisory monitor that decides when a linearised controller needs re-tuning.">FuzzySupervisor</a>.  <a href="structctrl_1_1SupervisorParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SystemAnalysis.html">SystemAnalysis</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static analysis utilities for discrete-time state-space systems.  <a href="classctrl_1_1SystemAnalysis.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1TaylorApproximator.html">TaylorApproximator</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Polynomial function approximator (Taylor / Vandermonde least squares).  <a href="classctrl_1_1TaylorApproximator.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TimeDomainMetrics.html">TimeDomainMetrics</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Standard step-response performance metrics.  <a href="structctrl_1_1TimeDomainMetrics.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TransferFunction.html">TransferFunction</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete-time transfer function in z⁻¹ polynomial form.  <a href="structctrl_1_1TransferFunction.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1TunerSuite.html">TunerSuite</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unified collection of all eight tuning strategies with runtime compatibility checking.  <a href="classctrl_1_1TunerSuite.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TuningResultBase.html">TuningResultBase</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base fields shared by all <a class="el" href="classctrl_1_1TunerSuite.html" title="Unified collection of all eight tuning strategies with runtime compatibility checking.">TunerSuite</a> result types.  <a href="structctrl_1_1TuningResultBase.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1UnscentedKalmanFilter.html">UnscentedKalmanFilter</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discrete-time Unscented Kalman Filter.  <a href="classctrl_1_1UnscentedKalmanFilter.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ZieglerNicholsTuner.html">ZieglerNicholsTuner</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Standalone Ziegler-Nichols tuner from ultimate gain and period.  <a href="classctrl_1_1ZieglerNicholsTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr class="memitem:ad5cf392399fd6913c6c79ca43b0db5ed" id="r_ad5cf392399fd6913c6c79ca43b0db5ed"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ad5cf392399fd6913c6c79ca43b0db5ed">StateFunc</a> = std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td></tr>
+<tr class="memdesc:ad5cf392399fd6913c6c79ca43b0db5ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for the nonlinear process model: x[k+1] = f(x[k], u[k]).  <br /></td></tr>
 <tr class="separator:ad5cf392399fd6913c6c79ca43b0db5ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee8aa60f7a448b1cb384efdf32eada41" id="r_aee8aa60f7a448b1cb384efdf32eada41"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#aee8aa60f7a448b1cb384efdf32eada41">MeasFunc</a> = std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td></tr>
+<tr class="memdesc:aee8aa60f7a448b1cb384efdf32eada41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for the nonlinear measurement model: y[k] = h(x[k], u[k]).  <br /></td></tr>
 <tr class="separator:aee8aa60f7a448b1cb384efdf32eada41"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b4f19ebb433c185c5b7a561cec22f20" id="r_a2b4f19ebb433c185c5b7a561cec22f20"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a2b4f19ebb433c185c5b7a561cec22f20">JacobianFn</a> = std::function&lt; Eigen::MatrixXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td></tr>
+<tr class="memdesc:a2b4f19ebb433c185c5b7a561cec22f20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for a Jacobian: returns an (n×n) or (p×n) matrix given (x, u).  <br /></td></tr>
 <tr class="separator:a2b4f19ebb433c185c5b7a561cec22f20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
@@ -306,25 +411,30 @@ Enumerations</h2></td></tr>
 , <a class="el" href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458a3f7b3d8ee7bf0d542bd50821c083888f">Additive</a>
 , <a class="el" href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458a582368ac8232617ead14ac74ccc40ea9">Weighted</a>
  }</td></tr>
+<tr class="memdesc:a4312ec6fe1026061128af26aaf161458"><td class="mdescLeft">&#160;</td><td class="mdescRight">Orchestration strategy for ControllerStack.  <a href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458">More...</a><br /></td></tr>
 <tr class="separator:a4312ec6fe1026061128af26aaf161458"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac903a5a20ba43db1acb05d549374197f" id="r_ac903a5a20ba43db1acb05d549374197f"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197f">PIDTuningRule</a> { <a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fa7d30101201a1dac0ee341ec1054810b5">ZieglerNichols</a>
 , <a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fa96062f227af0e4f48b5754f935e3fc63">TyreusLuyben</a>
 , <a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fad7a1003002f545d6e966d9cdd7a63f71">IMC</a>
 , <a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fa64fa05ea7fba95880b45131928594ae0">AMIGO</a>
  }</td></tr>
+<tr class="memdesc:ac903a5a20ba43db1acb05d549374197f"><td class="mdescLeft">&#160;</td><td class="mdescRight">PID tuning rule applied by heuristic tuners.  <a href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197f">More...</a><br /></td></tr>
 <tr class="separator:ac903a5a20ba43db1acb05d549374197f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73e0367e44b7fe77d1b4948481380c22" id="r_a73e0367e44b7fe77d1b4948481380c22"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a73e0367e44b7fe77d1b4948481380c22">InferenceMethod</a> { <a class="el" href="namespacectrl.html#a73e0367e44b7fe77d1b4948481380c22a9143c38c21671f0ff420d7e14388bdf9">Mamdani</a>
 , <a class="el" href="namespacectrl.html#a73e0367e44b7fe77d1b4948481380c22a53391a7d0f1fa14ead79172e520cc0e1">TakagiSugeno</a>
  }</td></tr>
+<tr class="memdesc:a73e0367e44b7fe77d1b4948481380c22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inference method selector.  <a href="namespacectrl.html#a73e0367e44b7fe77d1b4948481380c22">More...</a><br /></td></tr>
 <tr class="separator:a73e0367e44b7fe77d1b4948481380c22"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6dfa916cba4d5f5b44a2bf5317cd196e" id="r_a6dfa916cba4d5f5b44a2bf5317cd196e"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a6dfa916cba4d5f5b44a2bf5317cd196e">DefuzzMethod</a> { <a class="el" href="namespacectrl.html#a6dfa916cba4d5f5b44a2bf5317cd196eac10f78db71a8c5fcfcf69151ec4d676e">CoG</a>
 , <a class="el" href="namespacectrl.html#a6dfa916cba4d5f5b44a2bf5317cd196eaf818fb451ad05227ddf60d3380f8dd99">WeightedAverage</a>
  }</td></tr>
+<tr class="memdesc:a6dfa916cba4d5f5b44a2bf5317cd196e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defuzzification method selector.  <a href="namespacectrl.html#a6dfa916cba4d5f5b44a2bf5317cd196e">More...</a><br /></td></tr>
 <tr class="separator:a6dfa916cba4d5f5b44a2bf5317cd196e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adca30ca249ad63cca5be491ba5520156" id="r_adca30ca249ad63cca5be491ba5520156"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156">C2dMethod</a> { <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd">ZOH</a>
 , <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156aa56934567c0b3ed078a9a0e3197525c8">Tustin</a>
 , <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156a0032796475fd7203f9b920f1a59b969f">TustinPrewarped</a>
  }</td></tr>
+<tr class="memdesc:adca30ca249ad63cca5be491ba5520156"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discretisation method selector for c2d().  <a href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156">More...</a><br /></td></tr>
 <tr class="separator:adca30ca249ad63cca5be491ba5520156"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9752729b6a670d0a30adcdfee0c3d0b0" id="r_a9752729b6a670d0a30adcdfee0c3d0b0"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0">Tier</a> { <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">IDEAL</a>
 , <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">SOFT</a>
@@ -346,6 +456,7 @@ Enumerations</h2></td></tr>
 , <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa8045a0a6c688b0635e3caccc408a1446">Generic</a>
 <br />
  }</td></tr>
+<tr class="memdesc:ae9f75df6083768f99f318568d9b9038a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runtime controller-type tag for TunerSuite dispatch.  <a href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">More...</a><br /></td></tr>
 <tr class="separator:ae9f75df6083768f99f318568d9b9038a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
@@ -357,44 +468,60 @@ Functions</h2></td></tr>
 <tr class="memitem:a7f88ce31d2b44d52a66fee321e29391d" id="r_a7f88ce31d2b44d52a66fee321e29391d"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a7f88ce31d2b44d52a66fee321e29391d">isPBHDetectable</a> (const Eigen::MatrixXd &amp;A, const Eigen::MatrixXd &amp;Q)</td></tr>
 <tr class="separator:a7f88ce31d2b44d52a66fee321e29391d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9a02758f980949ccd582565a29640613" id="r_a9a02758f980949ccd582565a29640613"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a9a02758f980949ccd582565a29640613">padeDelayFilter</a> (double theta_frac, double Ts)</td></tr>
+<tr class="memdesc:a9a02758f980949ccd582565a29640613"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a first-order Padé filter for fractional dead-time compensation.  <br /></td></tr>
 <tr class="separator:a9a02758f980949ccd582565a29640613"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a210a1ff6e7c04e4d043ed83f0ad3a129" id="r_a210a1ff6e7c04e4d043ed83f0ad3a129"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a210a1ff6e7c04e4d043ed83f0ad3a129">mfTriangular</a> (double a, double c, double b)</td></tr>
+<tr class="memdesc:a210a1ff6e7c04e4d043ed83f0ad3a129"><td class="mdescLeft">&#160;</td><td class="mdescRight">Triangular membership function: /\ peaks at <code>c</code>, zero at <code>a</code> and <code>b</code>.  <br /></td></tr>
 <tr class="separator:a210a1ff6e7c04e4d043ed83f0ad3a129"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3bbf52403d666ffe411d11dc25482996" id="r_a3bbf52403d666ffe411d11dc25482996"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a3bbf52403d666ffe411d11dc25482996">mfTrapezoidal</a> (double a, double b, double c, double d)</td></tr>
+<tr class="memdesc:a3bbf52403d666ffe411d11dc25482996"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trapezoidal membership function: /‾\ flat-top from <code>b</code> to <code>c</code>, zero outside [<code>a</code>, <code>d</code>].  <br /></td></tr>
 <tr class="separator:a3bbf52403d666ffe411d11dc25482996"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b22feed3a0eeddddf10263fa0d8529f" id="r_a0b22feed3a0eeddddf10263fa0d8529f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a0b22feed3a0eeddddf10263fa0d8529f">mfGaussian</a> (double mean, double sigma)</td></tr>
+<tr class="memdesc:a0b22feed3a0eeddddf10263fa0d8529f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gaussian membership function: exp(-0.5·((x - <code>mean</code>) / <code>sigma</code>)²).  <br /></td></tr>
 <tr class="separator:a0b22feed3a0eeddddf10263fa0d8529f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8cee0db195ae17d833885884e3579f57" id="r_a8cee0db195ae17d833885884e3579f57"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a8cee0db195ae17d833885884e3579f57">mfSingleton</a> (double value)</td></tr>
+<tr class="memdesc:a8cee0db195ae17d833885884e3579f57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Singleton membership function: 1 at x == <code>value</code>, 0 elsewhere.  <br /></td></tr>
 <tr class="separator:a8cee0db195ae17d833885884e3579f57"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f1dad886251652b6661dd678241730e" id="r_a8f1dad886251652b6661dd678241730e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1LinguisticTerm.html">LinguisticTerm</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a8f1dad886251652b6661dd678241730e">ltSingleton</a> (const std::string &amp;name, double value)</td></tr>
+<tr class="memdesc:a8f1dad886251652b6661dd678241730e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a fully specified <a class="el" href="structctrl_1_1LinguisticTerm.html" title="A named fuzzy term with its membership function and optional peak location.">LinguisticTerm</a> for a Takagi-Sugeno singleton output.  <br /></td></tr>
 <tr class="separator:a8f1dad886251652b6661dd678241730e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6da5eb7b6281f23b946aa8d55d7be186" id="r_a6da5eb7b6281f23b946aa8d55d7be186"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a6da5eb7b6281f23b946aa8d55d7be186">mfShoulderLeft</a> (double a, double b)</td></tr>
+<tr class="memdesc:a6da5eb7b6281f23b946aa8d55d7be186"><td class="mdescLeft">&#160;</td><td class="mdescRight">Left-shoulder membership function: 1 for x ≤ <code>a</code>, linear 1→0 from <code>a</code> to <code>b</code>.  <br /></td></tr>
 <tr class="separator:a6da5eb7b6281f23b946aa8d55d7be186"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9df999bbef221d7d1a6f3604e16722c" id="r_ab9df999bbef221d7d1a6f3604e16722c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ab9df999bbef221d7d1a6f3604e16722c">mfShoulderRight</a> (double a, double b)</td></tr>
+<tr class="memdesc:ab9df999bbef221d7d1a6f3604e16722c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Right-shoulder membership function: linear 0→1 from <code>a</code> to <code>b</code>, 1 for x ≥ <code>b</code>.  <br /></td></tr>
 <tr class="separator:ab9df999bbef221d7d1a6f3604e16722c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0ae3861533016651748384f0ae65112" id="r_af0ae3861533016651748384f0ae65112"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#af0ae3861533016651748384f0ae65112">build5TermPartition</a> (<a class="el" href="structctrl_1_1LinguisticVariable.html">LinguisticVariable</a> &amp;v)</td></tr>
 <tr class="separator:af0ae3861533016651748384f0ae65112"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f658728be7420e427723b3d0eb389d9" id="r_a4f658728be7420e427723b3d0eb389d9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a4f658728be7420e427723b3d0eb389d9">tf2ss</a> (const <a class="el" href="structctrl_1_1TransferFunction.html">TransferFunction</a> &amp;tf)</td></tr>
+<tr class="memdesc:a4f658728be7420e427723b3d0eb389d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a SISO discrete transfer function to controllable canonical state-space form.  <br /></td></tr>
 <tr class="separator:a4f658728be7420e427723b3d0eb389d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea7d2241a62dea05772df99d95464b53" id="r_aea7d2241a62dea05772df99d95464b53"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#aea7d2241a62dea05772df99d95464b53">ssStep</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys, Eigen::Ref&lt; Eigen::VectorXd &gt; x, const Eigen::VectorXd &amp;u)</td></tr>
+<tr class="memdesc:aea7d2241a62dea05772df99d95464b53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simulate one step of a state-space model with an in-place state update.  <br /></td></tr>
 <tr class="separator:aea7d2241a62dea05772df99d95464b53"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad7110422057b1f806de5faebd00d3b7d" id="r_ad7110422057b1f806de5faebd00d3b7d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1TransferFunction.html">TransferFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ad7110422057b1f806de5faebd00d3b7d">ss2tf</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys)</td></tr>
+<tr class="memdesc:ad7110422057b1f806de5faebd00d3b7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a SISO discrete state-space model to transfer function form.  <br /></td></tr>
 <tr class="separator:ad7110422057b1f806de5faebd00d3b7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae8d35eaeeec8b5f5e41ef5ef8da359dc" id="r_ae8d35eaeeec8b5f5e41ef5ef8da359dc"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ae8d35eaeeec8b5f5e41ef5ef8da359dc">checkDiscreteStability</a> (const Eigen::MatrixXd &amp;Ad, const char *context)</td></tr>
 <tr class="separator:ae8d35eaeeec8b5f5e41ef5ef8da359dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a45b2bf7781f9cef0da5ad16543b77eed" id="r_a45b2bf7781f9cef0da5ad16543b77eed"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a45b2bf7781f9cef0da5ad16543b77eed">c2d</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys_c, double Ts, <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156">C2dMethod</a> method, double prewarp_freq)</td></tr>
-<tr class="separator:a45b2bf7781f9cef0da5ad16543b77eed"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acce1df04d7785058183c243ace535413" id="r_acce1df04d7785058183c243ace535413"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#acce1df04d7785058183c243ace535413">minreal</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys, double tol)</td></tr>
-<tr class="separator:acce1df04d7785058183c243ace535413"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49df1e780437c779996e8f431faaa542" id="r_a49df1e780437c779996e8f431faaa542"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a49df1e780437c779996e8f431faaa542">c2d</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys_c, double Ts, <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156">C2dMethod</a> method=<a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd">C2dMethod::ZOH</a>, double prewarp_freq=0.0)</td></tr>
+<tr class="memdesc:a49df1e780437c779996e8f431faaa542"><td class="mdescLeft">&#160;</td><td class="mdescRight">Discretise a continuous-time state-space model.  <br /></td></tr>
+<tr class="separator:a49df1e780437c779996e8f431faaa542"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a336b6d277ba94f21f11fcb2e5283952d" id="r_a336b6d277ba94f21f11fcb2e5283952d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a336b6d277ba94f21f11fcb2e5283952d">minreal</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys, double tol=1e-6)</td></tr>
+<tr class="memdesc:a336b6d277ba94f21f11fcb2e5283952d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the minimal realisation of a state-space model.  <br /></td></tr>
+<tr class="separator:a336b6d277ba94f21f11fcb2e5283952d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab2f248f0823357051986e2eb7a7dc84" id="r_aab2f248f0823357051986e2eb7a7dc84"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#aab2f248f0823357051986e2eb7a7dc84">makeIdentityFilter</a> (double Ts)</td></tr>
 <tr class="separator:aab2f248f0823357051986e2eb7a7dc84"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48a62fef709551ddc55b6c8f07101213" id="r_a48a62fef709551ddc55b6c8f07101213"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1SubspaceIDResult.html">SubspaceIDResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a48a62fef709551ddc55b6c8f07101213">n4sid</a> (const Eigen::MatrixXd &amp;Y, const Eigen::MatrixXd &amp;U, int n_order, int i, double Ts, double svd_tol)</td></tr>
-<tr class="separator:a48a62fef709551ddc55b6c8f07101213"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abf201dbb12d9ee3725c56b5c3d2a5831" id="r_abf201dbb12d9ee3725c56b5c3d2a5831"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#abf201dbb12d9ee3725c56b5c3d2a5831">suggestOrder</a> (const Eigen::VectorXd &amp;sv, double threshold, int maxOrder)</td></tr>
-<tr class="separator:abf201dbb12d9ee3725c56b5c3d2a5831"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac04c2f87d749604186fa29b45048e9a3" id="r_ac04c2f87d749604186fa29b45048e9a3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1SubspaceIDResult.html">SubspaceIDResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ac04c2f87d749604186fa29b45048e9a3">n4sid</a> (const Eigen::MatrixXd &amp;Y, const Eigen::MatrixXd &amp;U, int n_order, int i_horizon, double Ts, double svd_tol=-1.0)</td></tr>
+<tr class="memdesc:ac04c2f87d749604186fa29b45048e9a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Batch subspace state-space identification (N4SID / MOESP).  <br /></td></tr>
+<tr class="separator:ac04c2f87d749604186fa29b45048e9a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefc7138f387ba6cc9fed750baa2e615c" id="r_aefc7138f387ba6cc9fed750baa2e615c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#aefc7138f387ba6cc9fed750baa2e615c">suggestOrder</a> (const Eigen::VectorXd &amp;sv, double threshold=0.01, int maxOrder=-1)</td></tr>
+<tr class="memdesc:aefc7138f387ba6cc9fed750baa2e615c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Automated system-order selection from the singular-value spectrum.  <br /></td></tr>
+<tr class="separator:aefc7138f387ba6cc9fed750baa2e615c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a932227b39a676cf6614adbc574457f5a" id="r_a932227b39a676cf6614adbc574457f5a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0">Tier</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a932227b39a676cf6614adbc574457f5a">tier</a> (const char *tuner, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">CtrlKind</a> k)</td></tr>
 <tr class="separator:a932227b39a676cf6614adbc574457f5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af1099cea15a27eeefa55322641f5100f" id="r_af1099cea15a27eeefa55322641f5100f"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#af1099cea15a27eeefa55322641f5100f">ctrlKindName</a> (<a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">CtrlKind</a> k) noexcept</td></tr>
+<tr class="memdesc:af1099cea15a27eeefa55322641f5100f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Human-readable name for a CtrlKind tag — for diagnostic messages.  <br /></td></tr>
 <tr class="separator:af1099cea15a27eeefa55322641f5100f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aef6c869b488ae749eed6e486ca0b0bd6" id="r_aef6c869b488ae749eed6e486ca0b0bd6"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#aef6c869b488ae749eed6e486ca0b0bd6">buildWarnMsg</a> (const char *tunerName, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">CtrlKind</a> target, const char *dedicated, const char *suggestion)</td></tr>
 <tr class="separator:aef6c869b488ae749eed6e486ca0b0bd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -423,7 +550,9 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00041">41</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+<p>Function type for a Jacobian: returns an (n×n) or (p×n) matrix given (x, u). </p>
+
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00059">59</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -439,7 +568,9 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00039">39</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+<p>Function type for the nonlinear measurement model: y[k] = h(x[k], u[k]). </p>
+
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00055">55</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -455,7 +586,9 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00037">37</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+<p>Function type for the nonlinear process model: x[k+1] = f(x[k], u[k]). </p>
+
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00051">51</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -479,13 +612,18 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Discretisation method selector for <a class="el" href="namespacectrl.html#a49df1e780437c779996e8f431faaa542" title="Discretise a continuous-time state-space model.">c2d()</a>. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd" name="adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd"></a>ZOH&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="adca30ca249ad63cca5be491ba5520156aa56934567c0b3ed078a9a0e3197525c8" name="adca30ca249ad63cca5be491ba5520156aa56934567c0b3ed078a9a0e3197525c8"></a>Tustin&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="adca30ca249ad63cca5be491ba5520156a0032796475fd7203f9b920f1a59b969f" name="adca30ca249ad63cca5be491ba5520156a0032796475fd7203f9b920f1a59b969f"></a>TustinPrewarped&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd" name="adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd"></a>ZOH&#160;</td><td class="fielddoc"><p>Zero-order hold — exact for piecewise-constant inputs. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="adca30ca249ad63cca5be491ba5520156aa56934567c0b3ed078a9a0e3197525c8" name="adca30ca249ad63cca5be491ba5520156aa56934567c0b3ed078a9a0e3197525c8"></a>Tustin&#160;</td><td class="fielddoc"><p>Bilinear (Tustin) transform: s = (2/Ts)·(z−1)/(z+1). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="adca30ca249ad63cca5be491ba5520156a0032796475fd7203f9b920f1a59b969f" name="adca30ca249ad63cca5be491ba5520156a0032796475fd7203f9b920f1a59b969f"></a>TustinPrewarped&#160;</td><td class="fielddoc"><p>Bilinear transform prewarped at a specified frequency [rad/s]. </p>
+</td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00149">149</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00139">139</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
 </div>
 </div>
@@ -508,20 +646,32 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Runtime controller-type tag for <a class="el" href="classctrl_1_1TunerSuite.html" title="Unified collection of all eight tuning strategies with runtime compatibility checking.">TunerSuite</a> dispatch. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aa2d73559f294204a42bda2e926d094612" name="ae9f75df6083768f99f318568d9b9038aa2d73559f294204a42bda2e926d094612"></a>PID&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aaa6e6a19e8d19a6641a626a0bf2a39919" name="ae9f75df6083768f99f318568d9b9038aaa6e6a19e8d19a6641a626a0bf2a39919"></a>LQR&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aa21d16cd097fc5e73bbaf35a33f632f74" name="ae9f75df6083768f99f318568d9b9038aa21d16cd097fc5e73bbaf35a33f632f74"></a>LQG&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aad1738fdc0b25022b98c832d0c0417080" name="ae9f75df6083768f99f318568d9b9038aad1738fdc0b25022b98c832d0c0417080"></a>MPC&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aa7cacc882b6fbe96bad6aa3c3a0ea6677" name="ae9f75df6083768f99f318568d9b9038aa7cacc882b6fbe96bad6aa3c3a0ea6677"></a>LeadLag&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aa381f153a0e6e6dc7d3bf5dbef251b370" name="ae9f75df6083768f99f318568d9b9038aa381f153a0e6e6dc7d3bf5dbef251b370"></a>SMC&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aa7f41193a18ce16e7f583c1ee5098a28a" name="ae9f75df6083768f99f318568d9b9038aa7f41193a18ce16e7f583c1ee5098a28a"></a>ADRC&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aa6351aefd1e5e1b62c76f8580116964be" name="ae9f75df6083768f99f318568d9b9038aa6351aefd1e5e1b62c76f8580116964be"></a>ESC&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aae95f770ac4fb91ac2e4873e4b2dfc0e6" name="ae9f75df6083768f99f318568d9b9038aae95f770ac4fb91ac2e4873e4b2dfc0e6"></a>Smith&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aa8045a0a6c688b0635e3caccc408a1446" name="ae9f75df6083768f99f318568d9b9038aa8045a0a6c688b0635e3caccc408a1446"></a>Generic&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aa2d73559f294204a42bda2e926d094612" name="ae9f75df6083768f99f318568d9b9038aa2d73559f294204a42bda2e926d094612"></a>PID&#160;</td><td class="fielddoc"><p><a class="el" href="classctrl_1_1DiscretePID.html" title="Discrete-time PID controller.">DiscretePID</a>. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aaa6e6a19e8d19a6641a626a0bf2a39919" name="ae9f75df6083768f99f318568d9b9038aaa6e6a19e8d19a6641a626a0bf2a39919"></a>LQR&#160;</td><td class="fielddoc"><p><a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a>. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aa21d16cd097fc5e73bbaf35a33f632f74" name="ae9f75df6083768f99f318568d9b9038aa21d16cd097fc5e73bbaf35a33f632f74"></a>LQG&#160;</td><td class="fielddoc"><p><a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a>. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aad1738fdc0b25022b98c832d0c0417080" name="ae9f75df6083768f99f318568d9b9038aad1738fdc0b25022b98c832d0c0417080"></a>MPC&#160;</td><td class="fielddoc"><p><a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aa7cacc882b6fbe96bad6aa3c3a0ea6677" name="ae9f75df6083768f99f318568d9b9038aa7cacc882b6fbe96bad6aa3c3a0ea6677"></a>LeadLag&#160;</td><td class="fielddoc"><p><a class="el" href="classctrl_1_1DiscreteLeadLag.html" title="Discrete Lead-Lag compensator.">DiscreteLeadLag</a>. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aa381f153a0e6e6dc7d3bf5dbef251b370" name="ae9f75df6083768f99f318568d9b9038aa381f153a0e6e6dc7d3bf5dbef251b370"></a>SMC&#160;</td><td class="fielddoc"><p><a class="el" href="classctrl_1_1DiscreteSMC.html" title="Discrete first-order Sliding Mode Controller with boundary-layer saturation.">DiscreteSMC</a>. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aa7f41193a18ce16e7f583c1ee5098a28a" name="ae9f75df6083768f99f318568d9b9038aa7f41193a18ce16e7f583c1ee5098a28a"></a>ADRC&#160;</td><td class="fielddoc"><p><a class="el" href="classctrl_1_1DiscreteADRC.html" title="Discrete-time 2nd-order Linear Active Disturbance Rejection Controller.">DiscreteADRC</a>. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aa6351aefd1e5e1b62c76f8580116964be" name="ae9f75df6083768f99f318568d9b9038aa6351aefd1e5e1b62c76f8580116964be"></a>ESC&#160;</td><td class="fielddoc"><p><a class="el" href="classctrl_1_1ExtremumSeeker.html" title="Perturbation-based Extremum Seeking Controller.">ExtremumSeeker</a>. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aae95f770ac4fb91ac2e4873e4b2dfc0e6" name="ae9f75df6083768f99f318568d9b9038aae95f770ac4fb91ac2e4873e4b2dfc0e6"></a>Smith&#160;</td><td class="fielddoc"><p><a class="el" href="classctrl_1_1SmithPredictor.html" title="Smith Predictor wrapper for any IController inner loop.">SmithPredictor</a> (tune the inner controller, not the wrapper). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ae9f75df6083768f99f318568d9b9038aa8045a0a6c688b0635e3caccc408a1446" name="ae9f75df6083768f99f318568d9b9038aa8045a0a6c688b0635e3caccc408a1446"></a>Generic&#160;</td><td class="fielddoc"><p>Any <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> with unknown or custom type. </p>
+</td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00052">52</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00059">59</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
 
 </div>
 </div>
@@ -544,12 +694,16 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Defuzzification method selector. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a6dfa916cba4d5f5b44a2bf5317cd196eac10f78db71a8c5fcfcf69151ec4d676e" name="a6dfa916cba4d5f5b44a2bf5317cd196eac10f78db71a8c5fcfcf69151ec4d676e"></a>CoG&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a6dfa916cba4d5f5b44a2bf5317cd196eaf818fb451ad05227ddf60d3380f8dd99" name="a6dfa916cba4d5f5b44a2bf5317cd196eaf818fb451ad05227ddf60d3380f8dd99"></a>WeightedAverage&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a6dfa916cba4d5f5b44a2bf5317cd196eac10f78db71a8c5fcfcf69151ec4d676e" name="a6dfa916cba4d5f5b44a2bf5317cd196eac10f78db71a8c5fcfcf69151ec4d676e"></a>CoG&#160;</td><td class="fielddoc"><p>Centre of Gravity over a discrete universe (Mamdani). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6dfa916cba4d5f5b44a2bf5317cd196eaf818fb451ad05227ddf60d3380f8dd99" name="a6dfa916cba4d5f5b44a2bf5317cd196eaf818fb451ad05227ddf60d3380f8dd99"></a>WeightedAverage&#160;</td><td class="fielddoc"><p>Weighted average of consequent peaks (Takagi-Sugeno). </p>
+</td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00149">149</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00231">231</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>
@@ -572,12 +726,16 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Inference method selector. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a73e0367e44b7fe77d1b4948481380c22a9143c38c21671f0ff420d7e14388bdf9" name="a73e0367e44b7fe77d1b4948481380c22a9143c38c21671f0ff420d7e14388bdf9"></a>Mamdani&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a73e0367e44b7fe77d1b4948481380c22a53391a7d0f1fa14ead79172e520cc0e1" name="a73e0367e44b7fe77d1b4948481380c22a53391a7d0f1fa14ead79172e520cc0e1"></a>TakagiSugeno&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a73e0367e44b7fe77d1b4948481380c22a9143c38c21671f0ff420d7e14388bdf9" name="a73e0367e44b7fe77d1b4948481380c22a9143c38c21671f0ff420d7e14388bdf9"></a>Mamdani&#160;</td><td class="fielddoc"><p>Clip/scale output MFs, aggregate, then defuzzify with CoG. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a73e0367e44b7fe77d1b4948481380c22a53391a7d0f1fa14ead79172e520cc0e1" name="a73e0367e44b7fe77d1b4948481380c22a53391a7d0f1fa14ead79172e520cc0e1"></a>TakagiSugeno&#160;</td><td class="fielddoc"><p>Crisp consequent per rule; defuzzify with weighted average. </p>
+</td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00148">148</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00225">225</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>
@@ -600,14 +758,20 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>PID tuning rule applied by heuristic tuners. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ac903a5a20ba43db1acb05d549374197fa7d30101201a1dac0ee341ec1054810b5" name="ac903a5a20ba43db1acb05d549374197fa7d30101201a1dac0ee341ec1054810b5"></a>ZieglerNichols&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ac903a5a20ba43db1acb05d549374197fa96062f227af0e4f48b5754f935e3fc63" name="ac903a5a20ba43db1acb05d549374197fa96062f227af0e4f48b5754f935e3fc63"></a>TyreusLuyben&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ac903a5a20ba43db1acb05d549374197fad7a1003002f545d6e966d9cdd7a63f71" name="ac903a5a20ba43db1acb05d549374197fad7a1003002f545d6e966d9cdd7a63f71"></a>IMC&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ac903a5a20ba43db1acb05d549374197fa64fa05ea7fba95880b45131928594ae0" name="ac903a5a20ba43db1acb05d549374197fa64fa05ea7fba95880b45131928594ae0"></a>AMIGO&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ac903a5a20ba43db1acb05d549374197fa7d30101201a1dac0ee341ec1054810b5" name="ac903a5a20ba43db1acb05d549374197fa7d30101201a1dac0ee341ec1054810b5"></a>ZieglerNichols&#160;</td><td class="fielddoc"><p>Classic ZN — fast, ~25% overshoot (Ziegler &amp; Nichols 1942). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ac903a5a20ba43db1acb05d549374197fa96062f227af0e4f48b5754f935e3fc63" name="ac903a5a20ba43db1acb05d549374197fa96062f227af0e4f48b5754f935e3fc63"></a>TyreusLuyben&#160;</td><td class="fielddoc"><p>Conservative ZN variant — better load rejection (Tyreus &amp; Luyben 1992). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ac903a5a20ba43db1acb05d549374197fad7a1003002f545d6e966d9cdd7a63f71" name="ac903a5a20ba43db1acb05d549374197fad7a1003002f545d6e966d9cdd7a63f71"></a>IMC&#160;</td><td class="fielddoc"><p>Internal Model Control (lambda-tuning) — requires FOPDT model + λ. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ac903a5a20ba43db1acb05d549374197fa64fa05ea7fba95880b45131928594ae0" name="ac903a5a20ba43db1acb05d549374197fa64fa05ea7fba95880b45131928594ae0"></a>AMIGO&#160;</td><td class="fielddoc"><p>Approximate M-constrained Integral Gain Optimisation (Åström 2006). </p>
+</td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00053">53</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00057">57</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
 
 </div>
 </div>
@@ -630,13 +794,31 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Orchestration strategy for <a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a>. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a4312ec6fe1026061128af26aaf161458a45ed3b27103b66790c200c1af5f94c33" name="a4312ec6fe1026061128af26aaf161458a45ed3b27103b66790c200c1af5f94c33"></a>Supervisory&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4312ec6fe1026061128af26aaf161458a3f7b3d8ee7bf0d542bd50821c083888f" name="a4312ec6fe1026061128af26aaf161458a3f7b3d8ee7bf0d542bd50821c083888f"></a>Additive&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4312ec6fe1026061128af26aaf161458a582368ac8232617ead14ac74ccc40ea9" name="a4312ec6fe1026061128af26aaf161458a582368ac8232617ead14ac74ccc40ea9"></a>Weighted&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a4312ec6fe1026061128af26aaf161458a45ed3b27103b66790c200c1af5f94c33" name="a4312ec6fe1026061128af26aaf161458a45ed3b27103b66790c200c1af5f94c33"></a>Supervisory&#160;</td><td class="fielddoc"><p>Only one controller is active per step. </p>
+<p>Entries are evaluated in insertion order. The first entry whose activationCondition returns <code>true</code> <b>and</b> whose isHealthy() returns <code>true</code> is selected. An unhealthy controller is skipped with a stderr warning, enabling automatic fallback (e.g., MPC → GPC → PID when the QP consistently fails).</p>
+<p>On controller change, bumplessInit() is called on the newly selected entry to prevent an output bump.</p>
+<p>If no entry is active, eligible, and healthy, the output holds at the previous value and a warning is emitted. Ensure at least one always-eligible, always-healthy entry (e.g., a PID) to avoid this.</p>
+<p>Use for: gain-scheduled switching, mode-based selection, fallback chains. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4312ec6fe1026061128af26aaf161458a3f7b3d8ee7bf0d542bd50821c083888f" name="a4312ec6fe1026061128af26aaf161458a3f7b3d8ee7bf0d542bd50821c083888f"></a>Additive&#160;</td><td class="fielddoc"><p>All enabled entries contribute; their outputs are summed. </p>
+<p>Use for: inner/outer cascade (fast PID + slow MPC trim), complementary power splitting. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4312ec6fe1026061128af26aaf161458a582368ac8232617ead14ac74ccc40ea9" name="a4312ec6fe1026061128af26aaf161458a582368ac8232617ead14ac74ccc40ea9"></a>Weighted&#160;</td><td class="fielddoc"><p>Normalised weighted average of all enabled, gate-passing entries. </p>
+<div class="fragment"><div class="line">u = (Σ wᵢ·uᵢ(e)) / (Σ wᵢ)   over active, gate-passing entries only</div>
+</div><!-- fragment --><p>The denominator is the sum of <em>active and gate-passing</em> weights only. When an entry's activationCondition returns <code>false</code>, its weight is excluded from the denominator, so the remaining controllers automatically fill the full output range. Set all conditions to <code>nullptr</code> for a static blend.</p>
+<p>Example with weights [0.7, 0.3]:</p><ul>
+<li>Both active: u = 0.7·u0 + 0.3·u1</li>
+<li>Entry 0 gates out: u = u1 (entry 1 gets full authority)</li>
+</ul>
+<p>If all entries are inactive, the output holds and a warning is emitted.</p>
+<p>Use for: blended controller transitions, fuzzy membership weighting. </p>
+</td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="ControllerStack_8h_source.html#l00072">72</a> of file <a class="el" href="ControllerStack_8h_source.html">ControllerStack.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ControllerStack_8h_source.html#l00027">27</a> of file <a class="el" href="ControllerStack_8h_source.html">ControllerStack.h</a>.</p>
 
 </div>
 </div>
@@ -696,7 +878,7 @@ Variables</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8cpp_source.html#l00303">303</a> of file <a class="el" href="FuzzyLogic_8cpp_source.html">FuzzyLogic.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="FuzzyLogic_8cpp_source.html#l00100">mfShoulderLeft()</a>, <a class="el" href="FuzzyLogic_8cpp_source.html#l00107">mfShoulderRight()</a>, <a class="el" href="FuzzyLogic_8cpp_source.html#l00067">mfTriangular()</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00117">ctrl::LinguisticVariable::terms</a>.</p>
+<p class="reference">References <a class="el" href="FuzzyLogic_8cpp_source.html#l00100">mfShoulderLeft()</a>, <a class="el" href="FuzzyLogic_8cpp_source.html#l00107">mfShoulderRight()</a>, <a class="el" href="FuzzyLogic_8cpp_source.html#l00067">mfTriangular()</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00178">ctrl::LinguisticVariable::terms</a>.</p>
 
 </div>
 </div>
@@ -754,8 +936,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a45b2bf7781f9cef0da5ad16543b77eed" name="a45b2bf7781f9cef0da5ad16543b77eed"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a45b2bf7781f9cef0da5ad16543b77eed">&#9670;&#160;</a></span>c2d()</h2>
+<a id="a49df1e780437c779996e8f431faaa542" name="a49df1e780437c779996e8f431faaa542"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49df1e780437c779996e8f431faaa542">&#9670;&#160;</a></span>c2d()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -776,13 +958,13 @@ Variables</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156">C2dMethod</a>&#160;</td>
-          <td class="paramname"><em>method</em>, </td>
+          <td class="paramname"><em>method</em> = <code><a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd">C2dMethod::ZOH</a></code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>prewarp_freq</em>&#160;</td>
+          <td class="paramname"><em>prewarp_freq</em> = <code>0.0</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -792,9 +974,27 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Discretise a continuous-time state-space model. </p>
+<p>The input <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> must have Ts == 0.0 to indicate continuous time.</p>
+<p><b>ZOH</b> (zero-order hold) — uses the Van Loan (1978) matrix-exponential embedding: </p><div class="fragment"><div class="line">M = expm([Ac  Bc; 0  0] · Ts)  →  Ad = M[:n,:n],  Bd = M[:n,n:]</div>
+</div><!-- fragment --><p><b>Tustin</b> — bilinear transform s = (2/Ts)·(z−1)/(z+1): </p><div class="fragment"><div class="line">Ad = (I − α·Ac)⁻¹·(I + α·Ac),  Bd = Ts·(I − α·Ac)⁻¹·Bc,  α = Ts/2</div>
+</div><!-- fragment --><p><b>TustinPrewarped</b> — bilinear transform with frequency prewarping at <code>prewarp_freq</code> [rad/s], so that the discrete frequency response matches the continuous response exactly at that frequency. Degenerates to standard Tustin when prewarp_freq = 0.</p>
+<p>Cd and Dd are unchanged for all methods. A stability warning is printed to stderr if any eigenvalue of Ad lies outside the unit disk.</p>
+<p>Equivalent MATLAB: &lsquo;c2d(sys_c, Ts, 'zoh&rsquo;)<code>/</code>c2d(sys_c, Ts, 'tustin')`</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys_c</td><td>Continuous-time model (Ts must be 0.0). </td></tr>
+    <tr><td class="paramname">Ts</td><td>Desired sample period [s]. </td></tr>
+    <tr><td class="paramname">method</td><td>Discretisation method (default: ZOH). </td></tr>
+    <tr><td class="paramname">prewarp_freq</td><td>Prewarping frequency [rad/s] (only used for TustinPrewarped). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Equivalent discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> model. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00185">185</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00049">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00050">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00051">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8cpp_source.html#l00164">checkDiscreteStability()</a>, <a class="el" href="PlantModel_8h_source.html#l00052">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00066">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00065">ctrl::StateSpace::stateSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00053">ctrl::StateSpace::Ts</a>, <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156a0032796475fd7203f9b920f1a59b969f">TustinPrewarped</a>, and <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd">ZOH</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8cpp_source.html#l00164">checkDiscreteStability()</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>, <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156a0032796475fd7203f9b920f1a59b969f">TustinPrewarped</a>, and <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd">ZOH</a>.</p>
 
 </div>
 </div>
@@ -861,6 +1061,15 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Human-readable name for a CtrlKind tag — for diagnostic messages. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">k</td><td>Controller kind. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Null-terminated string (e.g., "DiscretePID"). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8cpp_source.html#l00148">148</a> of file <a class="el" href="TunerSuite_8cpp_source.html">TunerSuite.cpp</a>.</p>
 
@@ -978,6 +1187,17 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Build a fully specified <a class="el" href="structctrl_1_1LinguisticTerm.html" title="A named fuzzy term with its membership function and optional peak location.">LinguisticTerm</a> for a Takagi-Sugeno singleton output. </p>
+<p>Sets both <code>mf</code> and <code>peak</code> so defuzzWeightedAvg does not rely on grid search.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>Label for the term. </td></tr>
+    <tr><td class="paramname">value</td><td>Singleton value (both <a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">MF</a> location and peak). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Fully initialised <a class="el" href="structctrl_1_1LinguisticTerm.html" title="A named fuzzy term with its membership function and optional peak location.">LinguisticTerm</a>. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8cpp_source.html#l00095">95</a> of file <a class="el" href="FuzzyLogic_8cpp_source.html">FuzzyLogic.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="FuzzyLogic_8cpp_source.html#l00088">mfSingleton()</a>.</p>
@@ -1040,9 +1260,19 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Gaussian membership function: exp(-0.5·((x - <code>mean</code>) / <code>sigma</code>)²). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mean</td><td>Centre of the Gaussian. </td></tr>
+    <tr><td class="paramname">sigma</td><td>Standard deviation (width). Must be &gt; 0. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">MF</a> with Type::Gaussian. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8cpp_source.html#l00081">81</a> of file <a class="el" href="FuzzyLogic_8cpp_source.html">FuzzyLogic.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3afedf7ba6075fb5526a7ace0b9385528d">ctrl::MF::Gaussian</a>, <a class="el" href="FuzzyLogic_8h_source.html#l00070">ctrl::MF::p</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00069">ctrl::MF::type</a>.</p>
+<p class="reference">References <a class="el" href="structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3afedf7ba6075fb5526a7ace0b9385528d">ctrl::MF::Gaussian</a>, <a class="el" href="FuzzyLogic_8h_source.html#l00066">ctrl::MF::p</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00065">ctrl::MF::type</a>.</p>
 
 </div>
 </div>
@@ -1072,9 +1302,20 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Left-shoulder membership function: 1 for x ≤ <code>a</code>, linear 1→0 from <code>a</code> to <code>b</code>. </p>
+<p>Useful for the "Negative Large" (NL) extreme term.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>Saturation point (full membership for x ≤ a). </td></tr>
+    <tr><td class="paramname">b</td><td>Right zero-crossing (a &lt; b). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">MF</a> with Type::ShoulderLeft. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8cpp_source.html#l00100">100</a> of file <a class="el" href="FuzzyLogic_8cpp_source.html">FuzzyLogic.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="FuzzyLogic_8h_source.html#l00070">ctrl::MF::p</a>, <a class="el" href="structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3a6f06420ba820e90993137a63f10146c2">ctrl::MF::ShoulderLeft</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00069">ctrl::MF::type</a>.</p>
+<p class="reference">References <a class="el" href="FuzzyLogic_8h_source.html#l00066">ctrl::MF::p</a>, <a class="el" href="structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3a6f06420ba820e90993137a63f10146c2">ctrl::MF::ShoulderLeft</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00065">ctrl::MF::type</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="FuzzyLogic_8cpp_source.html#l00303">build5TermPartition()</a>.</p>
 
@@ -1106,9 +1347,20 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Right-shoulder membership function: linear 0→1 from <code>a</code> to <code>b</code>, 1 for x ≥ <code>b</code>. </p>
+<p>Useful for the "Positive Large" (PL) extreme term.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>Left zero-crossing. </td></tr>
+    <tr><td class="paramname">b</td><td>Saturation point (full membership for x ≥ b, a &lt; b). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">MF</a> with Type::ShoulderRight. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8cpp_source.html#l00107">107</a> of file <a class="el" href="FuzzyLogic_8cpp_source.html">FuzzyLogic.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="FuzzyLogic_8h_source.html#l00070">ctrl::MF::p</a>, <a class="el" href="structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3aa1a480b34eb3460ee2772c38bfb4bf1c">ctrl::MF::ShoulderRight</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00069">ctrl::MF::type</a>.</p>
+<p class="reference">References <a class="el" href="FuzzyLogic_8h_source.html#l00066">ctrl::MF::p</a>, <a class="el" href="structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3aa1a480b34eb3460ee2772c38bfb4bf1c">ctrl::MF::ShoulderRight</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00065">ctrl::MF::type</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="FuzzyLogic_8cpp_source.html#l00303">build5TermPartition()</a>.</p>
 
@@ -1130,9 +1382,19 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Singleton membership function: 1 at x == <code>value</code>, 0 elsewhere. </p>
+<p>Intended for Takagi-Sugeno consequents.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">value</td><td>The singleton location. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">MF</a> with Type::Singleton. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8cpp_source.html#l00088">88</a> of file <a class="el" href="FuzzyLogic_8cpp_source.html">FuzzyLogic.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="FuzzyLogic_8h_source.html#l00070">ctrl::MF::p</a>, <a class="el" href="structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3a6ff5f73c8b5ebd311406568c8ef50bfd">ctrl::MF::Singleton</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00069">ctrl::MF::type</a>.</p>
+<p class="reference">References <a class="el" href="FuzzyLogic_8h_source.html#l00066">ctrl::MF::p</a>, <a class="el" href="structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3a6ff5f73c8b5ebd311406568c8ef50bfd">ctrl::MF::Singleton</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00065">ctrl::MF::type</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="FuzzyLogic_8cpp_source.html#l00095">ltSingleton()</a>.</p>
 
@@ -1176,9 +1438,21 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Trapezoidal membership function: /‾\ flat-top from <code>b</code> to <code>c</code>, zero outside [<code>a</code>, <code>d</code>]. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>Left zero-crossing (a ≤ b). </td></tr>
+    <tr><td class="paramname">b</td><td>Left shoulder start. </td></tr>
+    <tr><td class="paramname">c</td><td>Right shoulder start (b ≤ c). </td></tr>
+    <tr><td class="paramname">d</td><td>Right zero-crossing (c ≤ d). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">MF</a> with Type::Trapezoidal. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8cpp_source.html#l00074">74</a> of file <a class="el" href="FuzzyLogic_8cpp_source.html">FuzzyLogic.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="FuzzyLogic_8h_source.html#l00070">ctrl::MF::p</a>, <a class="el" href="structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3ac8033504125d03081a43b4efc5b8868c">ctrl::MF::Trapezoidal</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00069">ctrl::MF::type</a>.</p>
+<p class="reference">References <a class="el" href="FuzzyLogic_8h_source.html#l00066">ctrl::MF::p</a>, <a class="el" href="structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3ac8033504125d03081a43b4efc5b8868c">ctrl::MF::Trapezoidal</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00065">ctrl::MF::type</a>.</p>
 
 </div>
 </div>
@@ -1214,16 +1488,27 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Triangular membership function: /\ peaks at <code>c</code>, zero at <code>a</code> and <code>b</code>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>Left zero-crossing (a ≤ c). </td></tr>
+    <tr><td class="paramname">c</td><td>Peak (a ≤ c ≤ b). </td></tr>
+    <tr><td class="paramname">b</td><td>Right zero-crossing (c ≤ b). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">MF</a> with Type::Triangular. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8cpp_source.html#l00067">67</a> of file <a class="el" href="FuzzyLogic_8cpp_source.html">FuzzyLogic.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="FuzzyLogic_8h_source.html#l00070">ctrl::MF::p</a>, <a class="el" href="structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3a241f88afa7becb8633ca074c48e0d77c">ctrl::MF::Triangular</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00069">ctrl::MF::type</a>.</p>
+<p class="reference">References <a class="el" href="FuzzyLogic_8h_source.html#l00066">ctrl::MF::p</a>, <a class="el" href="structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3a241f88afa7becb8633ca074c48e0d77c">ctrl::MF::Triangular</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00065">ctrl::MF::type</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="FuzzyLogic_8cpp_source.html#l00303">build5TermPartition()</a>.</p>
 
 </div>
 </div>
-<a id="acce1df04d7785058183c243ace535413" name="acce1df04d7785058183c243ace535413"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acce1df04d7785058183c243ace535413">&#9670;&#160;</a></span>minreal()</h2>
+<a id="a336b6d277ba94f21f11fcb2e5283952d" name="a336b6d277ba94f21f11fcb2e5283952d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a336b6d277ba94f21f11fcb2e5283952d">&#9670;&#160;</a></span>minreal()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1238,7 +1523,7 @@ Variables</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>tol</em>&#160;</td>
+          <td class="paramname"><em>tol</em> = <code>1e-6</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1248,14 +1533,25 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Compute the minimal realisation of a state-space model. </p>
+<p>Removes uncontrollable and unobservable states using balanced truncation (Ho–Kalman). States with Hankel singular values below <code>tol</code> are discarded.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Source state-space model. </td></tr>
+    <tr><td class="paramname">tol</td><td>Hankel singular value threshold (default 1e-6). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Minimal-order <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> model. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00268">268</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00049">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00050">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00051">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00052">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00066">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00067">ctrl::StateSpace::outputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00065">ctrl::StateSpace::stateSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00053">ctrl::StateSpace::Ts</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00096">ctrl::StateSpace::outputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
 </div>
 </div>
-<a id="a48a62fef709551ddc55b6c8f07101213" name="a48a62fef709551ddc55b6c8f07101213"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a48a62fef709551ddc55b6c8f07101213">&#9670;&#160;</a></span>n4sid()</h2>
+<a id="ac04c2f87d749604186fa29b45048e9a3" name="ac04c2f87d749604186fa29b45048e9a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac04c2f87d749604186fa29b45048e9a3">&#9670;&#160;</a></span>n4sid()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1282,7 +1578,7 @@ Variables</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>i</em>, </td>
+          <td class="paramname"><em>i_horizon</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1294,7 +1590,7 @@ Variables</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>svd_tol</em>&#160;</td>
+          <td class="paramname"><em>svd_tol</em> = <code>-1.0</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1304,9 +1600,24 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Batch subspace state-space identification (N4SID / MOESP). </p>
+<p>Plot result.singularValues to choose n_order: look for an elbow where values drop sharply (signal vs. noise subspace boundary). Alternatively, use <a class="el" href="namespacectrl.html#aefc7138f387ba6cc9fed750baa2e615c" title="Automated system-order selection from the singular-value spectrum.">suggestOrder()</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">Y</td><td>Output data matrix (p × N): rows = outputs, columns = time samples. </td></tr>
+    <tr><td class="paramname">U</td><td>Input data matrix (m × N): rows = inputs, columns = time samples. </td></tr>
+    <tr><td class="paramname">n_order</td><td>Desired model order n. Choose by inspecting singularValues or <a class="el" href="namespacectrl.html#aefc7138f387ba6cc9fed750baa2e615c" title="Automated system-order selection from the singular-value spectrum.">suggestOrder()</a>. </td></tr>
+    <tr><td class="paramname">i_horizon</td><td>Block-row count in Hankel matrices. Recommend i ≥ 2·n_order/p, minimum n_order+1. </td></tr>
+    <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
+    <tr><td class="paramname">svd_tol</td><td>SVD truncation tolerance; if &gt; 0, n_order is capped at the number of singular values exceeding svd_tol. Pass −1.0 to disable (default). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1SubspaceIDResult.html" title="Output of the n4sid() identification algorithm.">SubspaceIDResult</a> containing the model, singular values, and diagnostics. Check result.success before using result.model. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="SubspaceID_8cpp_source.html#l00029">29</a> of file <a class="el" href="SubspaceID_8cpp_source.html">SubspaceID.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="SubspaceID_8h_source.html#l00054">ctrl::SubspaceIDResult::innovCov</a>, <a class="el" href="SubspaceID_8h_source.html#l00053">ctrl::SubspaceIDResult::kalmanGain</a>, <a class="el" href="SubspaceID_8h_source.html#l00057">ctrl::SubspaceIDResult::message</a>, <a class="el" href="SubspaceID_8h_source.html#l00044">ctrl::SubspaceIDResult::model</a>, <a class="el" href="SubspaceID_8h_source.html#l00045">ctrl::SubspaceIDResult::singularValues</a>, and <a class="el" href="SubspaceID_8h_source.html#l00056">ctrl::SubspaceIDResult::success</a>.</p>
+<p class="reference">References <a class="el" href="SubspaceID_8h_source.html#l00066">ctrl::SubspaceIDResult::innovCov</a>, <a class="el" href="SubspaceID_8h_source.html#l00059">ctrl::SubspaceIDResult::kalmanGain</a>, <a class="el" href="SubspaceID_8h_source.html#l00069">ctrl::SubspaceIDResult::message</a>, <a class="el" href="SubspaceID_8h_source.html#l00049">ctrl::SubspaceIDResult::model</a>, <a class="el" href="SubspaceID_8h_source.html#l00050">ctrl::SubspaceIDResult::singularValues</a>, and <a class="el" href="SubspaceID_8h_source.html#l00068">ctrl::SubspaceIDResult::success</a>.</p>
 
 </div>
 </div>
@@ -1336,6 +1647,24 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Build a first-order Padé filter for fractional dead-time compensation. </p>
+<p>Returns a 1-state discrete <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> representing e^{−θ_frac·s} to first order, discretised via Tustin: </p><div class="fragment"><div class="line">Continuous:  H(s) = (1 − 0.5·θ_frac·s) / (1 + 0.5·θ_frac·s)</div>
+</div><!-- fragment --><p>Typical use — absorbing a fractional delay into a <a class="el" href="classctrl_1_1SmithPredictor.html" title="Smith Predictor wrapper for any IController inner loop.">SmithPredictor</a>: </p><div class="fragment"><div class="line"><span class="keywordtype">int</span>    d_int    = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(theta / Ts);   <span class="comment">// integer steps</span></div>
+<div class="line"><span class="keywordtype">double</span> theta_fr = theta - d_int * Ts;             <span class="comment">// sub-sample remainder</span></div>
+<div class="line"><a class="code hl_struct" href="structctrl_1_1StateSpace.html">StateSpace</a> Hfrac = <a class="code hl_function" href="namespacectrl.html#a9a02758f980949ccd582565a29640613">ctrl::padeDelayFilter</a>(theta_fr, Ts);</div>
+<div class="line"><a class="code hl_class" href="classctrl_1_1SmithPredictor.html">ctrl::SmithPredictor</a> sp(inner, G0, d_int, Hfrac);</div>
+<div class="ttc" id="aclassctrl_1_1SmithPredictor_html"><div class="ttname"><a href="classctrl_1_1SmithPredictor.html">ctrl::SmithPredictor</a></div><div class="ttdoc">Smith Predictor wrapper for any IController inner loop.</div><div class="ttdef"><b>Definition</b> <a href="SmithPredictor_8h_source.html#l00042">SmithPredictor.h:43</a></div></div>
+<div class="ttc" id="anamespacectrl_html_a9a02758f980949ccd582565a29640613"><div class="ttname"><a href="namespacectrl.html#a9a02758f980949ccd582565a29640613">ctrl::padeDelayFilter</a></div><div class="ttdeci">StateSpace padeDelayFilter(double theta_frac, double Ts)</div><div class="ttdoc">Build a first-order Padé filter for fractional dead-time compensation.</div><div class="ttdef"><b>Definition</b> <a href="FunctionApproximator_8cpp_source.html#l00224">FunctionApproximator.cpp:224</a></div></div>
+<div class="ttc" id="astructctrl_1_1StateSpace_html"><div class="ttname"><a href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a></div><div class="ttdoc">Discrete-time state-space model.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00067">PlantModel.h:68</a></div></div>
+</div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">theta_frac</td><td>Fractional dead time θ_frac ∈ (0, Ts) [s]. If 0, returns a unit-gain static <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> (no dynamics). </td></tr>
+    <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>1-state discrete <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> approximating e^{−θ_frac·s}. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="FunctionApproximator_8cpp_source.html#l00224">224</a> of file <a class="el" href="FunctionApproximator_8cpp_source.html">FunctionApproximator.cpp</a>.</p>
 
 </div>
@@ -1356,9 +1685,27 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Convert a SISO discrete state-space model to transfer function form. </p>
+<p>Computes the denominator from the characteristic polynomial of A (Faddeev–LeVerrier) and the numerator from Markov parameters h[0] = D, h[k] = C·Aᵏ⁻¹·B (k ≥ 1).</p>
+<p>The returned <a class="el" href="structctrl_1_1TransferFunction.html" title="Discrete-time transfer function in z⁻¹ polynomial form.">TransferFunction</a> uses the z⁻¹ polynomial form with a monic denominator (den[0] = 1). Coefficient order: den = {1, a1, …, an} in z⁻¹ powers.</p>
+<p>Equivalent MATLAB: <code>tf(sys)</code> where sys is a discrete ss object.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Source SISO discrete state-space model. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Equivalent <a class="el" href="structctrl_1_1TransferFunction.html" title="Discrete-time transfer function in z⁻¹ polynomial form.">TransferFunction</a> in z⁻¹ form. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>If the system is not SISO. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00110">110</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00049">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00050">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00051">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00052">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00066">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00067">ctrl::StateSpace::outputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00065">ctrl::StateSpace::stateSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00053">ctrl::StateSpace::Ts</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00096">ctrl::StateSpace::outputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
 </div>
 </div>
@@ -1394,9 +1741,25 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Simulate one step of a state-space model with an in-place state update. </p>
+<p>Execution order:</p><ol type="1">
+<li>Compute y[k] = C·x[k] + D·u[k]</li>
+<li>Advance x[k+1] = A·x[k] + B·u[k] (x updated in-place)</li>
+</ol>
+<p><code>x</code> accepts both fixed-size (Vector2d) and dynamic (VectorXd) vectors via Eigen::Ref.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Plant model. </td></tr>
+    <tr><td class="paramname">x</td><td>State vector x[k] (modified in-place to x[k+1]). </td></tr>
+    <tr><td class="paramname">u</td><td>Input vector u[k]. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Output vector y[k]. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00088">88</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00049">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00050">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00051">ctrl::StateSpace::C</a>, and <a class="el" href="PlantModel_8h_source.html#l00052">ctrl::StateSpace::D</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, and <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="TunerSuite_8cpp_source.html#l00722">ctrl::TunerSuite::makeISECost()</a>, and <a class="el" href="TunerSuite_8cpp_source.html#l00777">ctrl::TunerSuite::makeITAECost()</a>.</p>
 
@@ -1434,8 +1797,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="abf201dbb12d9ee3725c56b5c3d2a5831" name="abf201dbb12d9ee3725c56b5c3d2a5831"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abf201dbb12d9ee3725c56b5c3d2a5831">&#9670;&#160;</a></span>suggestOrder()</h2>
+<a id="aefc7138f387ba6cc9fed750baa2e615c" name="aefc7138f387ba6cc9fed750baa2e615c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aefc7138f387ba6cc9fed750baa2e615c">&#9670;&#160;</a></span>suggestOrder()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1450,13 +1813,13 @@ Variables</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>threshold</em>, </td>
+          <td class="paramname"><em>threshold</em> = <code>0.01</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>maxOrder</em>&#160;</td>
+          <td class="paramname"><em>maxOrder</em> = <code>-1</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1465,6 +1828,19 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Automated system-order selection from the singular-value spectrum. </p>
+<p>Uses the maximum-consecutive-ratio heuristic: finds the index i* where sv(i*)/sv(i*+1) is largest (sharpest drop) and returns i*+1 as the suggested order. A secondary threshold guard caps the result at the first index where sv(i)/sv(0) falls below <code>threshold</code>.</p>
+<p>Use after <a class="el" href="namespacectrl.html#ac04c2f87d749604186fa29b45048e9a3" title="Batch subspace state-space identification (N4SID / MOESP).">n4sid()</a> to eliminate the manual elbow-inspection step in adaptive loops (e.g., RLS → n4sid → GPC).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sv</td><td><a class="el" href="structctrl_1_1SubspaceIDResult.html#ab01edb10fbae2d8311d14377a26eb8ad" title="All singular values of L32 (for order selection).">SubspaceIDResult::singularValues</a> from a prior <a class="el" href="namespacectrl.html#ac04c2f87d749604186fa29b45048e9a3" title="Batch subspace state-space identification (N4SID / MOESP).">n4sid()</a> call. </td></tr>
+    <tr><td class="paramname">threshold</td><td>Relative floor; singular values below threshold·sv(0) are treated as noise. Set to 0 to disable the threshold guard. </td></tr>
+    <tr><td class="paramname">maxOrder</td><td>Hard cap on the returned order (−1 = no cap). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Suggested model order ≥ 1. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="SubspaceID_8cpp_source.html#l00276">276</a> of file <a class="el" href="SubspaceID_8cpp_source.html">SubspaceID.cpp</a>.</p>
 
@@ -1486,9 +1862,20 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Convert a SISO discrete transfer function to controllable canonical state-space form. </p>
+<p>Equivalent MATLAB: <code>[A,B,C,D] = tf2ss(num, den)</code> applied to the z⁻¹ polynomial.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tf</td><td>Source transfer function (SISO, z⁻¹ form). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Equivalent <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> model in controllable canonical form. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>Ogata, "Modern Control Engineering"; MATLAB <a class="el" href="namespacectrl.html#a4f658728be7420e427723b3d0eb389d9" title="Convert a SISO discrete transfer function to controllable canonical state-space form.">tf2ss</a> documentation. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00048">48</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00024">ctrl::TransferFunction::den</a>, <a class="el" href="PlantModel_8h_source.html#l00023">ctrl::TransferFunction::num</a>, <a class="el" href="PlantModel_8h_source.html#l00037">ctrl::TransferFunction::order()</a>, and <a class="el" href="PlantModel_8h_source.html#l00026">ctrl::TransferFunction::Ts</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00034">ctrl::TransferFunction::den</a>, <a class="el" href="PlantModel_8h_source.html#l00033">ctrl::TransferFunction::num</a>, <a class="el" href="PlantModel_8h_source.html#l00054">ctrl::TransferFunction::order()</a>, and <a class="el" href="PlantModel_8h_source.html#l00035">ctrl::TransferFunction::Ts</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="RecursiveLeastSquares_8cpp_source.html#l00128">ctrl::RecursiveLeastSquares::toStateSpace()</a>.</p>
 

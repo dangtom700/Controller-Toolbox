@@ -26,7 +26,7 @@ var searchData=
   ['mftriangular_23',['mfTriangular',['../namespacectrl.html#a210a1ff6e7c04e4d043ed83f0ad3a129',1,'ctrl']]],
   ['minimal_20example_24',['Minimal Example',['../index.html#autotoc_md6',1,'']]],
   ['minimum_20closed_20loop_20example_20siso_20pid_25',['4.1 Minimum Closed-Loop Example (SISO PID)',['../md_docs_2DOCUMENTATION.html#autotoc_md47',1,'']]],
-  ['minreal_26',['minreal',['../namespacectrl.html#acce1df04d7785058183c243ace535413',1,'ctrl']]],
+  ['minreal_26',['minreal',['../namespacectrl.html#a336b6d277ba94f21f11fcb2e5283952d',1,'ctrl']]],
   ['mismatch_27',['SmithPredictor Delay Mismatch',['../md_docs_2DEPLOYMENT.html#autotoc_md141',1,'']]],
   ['mixedsensitivity_28',['MixedSensitivity',['../classctrl_1_1MixedSensitivity.html',1,'ctrl']]],
   ['mode_29',['mode',['../classctrl_1_1ControllerStack.html#a7699dc65172c47b782b42d668a718cde',1,'ctrl::ControllerStack']]],

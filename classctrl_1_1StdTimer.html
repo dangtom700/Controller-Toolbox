@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,6 +81,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Non-RT <a class="el" href="classctrl_1_1ITimer.html" title="Abstract monotonic clock for deadline and execution-time measurement.">ITimer</a> backed by <code>std::chrono::steady_clock</code>.  
+ <a href="classctrl_1_1StdTimer.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="StdTimer_8h_source.html">StdTimer.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for ctrl::StdTimer:</div>
@@ -88,23 +91,26 @@ Inheritance diagram for ctrl::StdTimer:</div>
  <div class="center">
   <img src="classctrl_1_1StdTimer.png" usemap="#ctrl::StdTimer_map" alt=""/>
   <map id="ctrl::StdTimer_map" name="ctrl::StdTimer_map">
-<area href="classctrl_1_1ITimer.html" alt="ctrl::ITimer" shape="rect" coords="0,0,85,24"/>
+<area href="classctrl_1_1ITimer.html" title="Abstract monotonic clock for deadline and execution-time measurement." alt="ctrl::ITimer" shape="rect" coords="0,0,85,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a0802afe91b9abe2278aa6443c931fa97" id="r_a0802afe91b9abe2278aa6443c931fa97"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1StdTimer.html#a0802afe91b9abe2278aa6443c931fa97">nowNs</a> () const override</td></tr>
+<tr class="memdesc:a0802afe91b9abe2278aa6443c931fa97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the current steady-clock time in nanoseconds.  <br /></td></tr>
 <tr class="separator:a0802afe91b9abe2278aa6443c931fa97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classctrl_1_1ITimer"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classctrl_1_1ITimer')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classctrl_1_1ITimer.html">ctrl::ITimer</a></td></tr>
 <tr class="memitem:a52b3fc9c30e56f81b3922f83b27e278c inherit pub_methods_classctrl_1_1ITimer" id="r_a52b3fc9c30e56f81b3922f83b27e278c"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ITimer.html#a52b3fc9c30e56f81b3922f83b27e278c">~ITimer</a> ()=default</td></tr>
 <tr class="separator:a52b3fc9c30e56f81b3922f83b27e278c inherit pub_methods_classctrl_1_1ITimer"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a29a5a4d5b693221fedfd529e10172dbd inherit pub_methods_classctrl_1_1ITimer" id="r_a29a5a4d5b693221fedfd529e10172dbd"><td class="memItemLeft" align="right" valign="top">virtual uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ITimer.html#a29a5a4d5b693221fedfd529e10172dbd">elapsedNs</a> (uint64_t t0) const</td></tr>
+<tr class="memdesc:a29a5a4d5b693221fedfd529e10172dbd inherit pub_methods_classctrl_1_1ITimer"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return nanoseconds elapsed since a previously recorded timestamp.  <br /></td></tr>
 <tr class="separator:a29a5a4d5b693221fedfd529e10172dbd inherit pub_methods_classctrl_1_1ITimer"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="StdTimer_8h_source.html#l00020">20</a> of file <a class="el" href="StdTimer_8h_source.html">StdTimer.h</a>.</p>
+<div class="textblock"><p>Non-RT <a class="el" href="classctrl_1_1ITimer.html" title="Abstract monotonic clock for deadline and execution-time measurement.">ITimer</a> backed by <code>std::chrono::steady_clock</code>. </p>
+
+<p class="definition">Definition at line <a class="el" href="StdTimer_8h_source.html#l00030">30</a> of file <a class="el" href="StdTimer_8h_source.html">StdTimer.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a0802afe91b9abe2278aa6443c931fa97" name="a0802afe91b9abe2278aa6443c931fa97"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0802afe91b9abe2278aa6443c931fa97">&#9670;&#160;</a></span>nowNs()</h2>
@@ -129,9 +135,12 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Return the current steady-clock time in nanoseconds. </p>
+<dl class="section return"><dt>Returns</dt><dd>Monotonic timestamp [ns] since some unspecified epoch. </dd></dl>
+
 <p>Implements <a class="el" href="classctrl_1_1ITimer.html#af3c2fa16d291acbefd92b5bedc8d160c">ctrl::ITimer</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="StdTimer_8h_source.html#l00022">22</a> of file <a class="el" href="StdTimer_8h_source.html">StdTimer.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="StdTimer_8h_source.html#l00036">36</a> of file <a class="el" href="StdTimer_8h_source.html">StdTimer.h</a>.</p>
 
 </div>
 </div>

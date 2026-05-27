@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,34 +81,54 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Unified collection of all eight tuning strategies with runtime compatibility checking.  
+ <a href="classctrl_1_1TunerSuite.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a6c195008a5f37983aa85c3d6521101cd" id="r_a6c195008a5f37983aa85c3d6521101cd"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1PIDTuneResult.html">PIDTuneResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1TunerSuite.html#a6c195008a5f37983aa85c3d6521101cd">relayZN</a> (<a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">CtrlKind</a> target, const <a class="el" href="classctrl_1_1RelayAutoTuner.html">RelayAutoTuner</a> &amp;relay, <a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197f">PIDTuningRule</a> rule=<a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fa96062f227af0e4f48b5754f935e3fc63">PIDTuningRule::TyreusLuyben</a>, double lambda=-1.0)</td></tr>
+<tr class="memdesc:a6c195008a5f37983aa85c3d6521101cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relay / ZN tuning (cheatsheet §1).  <br /></td></tr>
 <tr class="separator:a6c195008a5f37983aa85c3d6521101cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1d27ab9e2492f07053ddbcab32d1867e" id="r_a1d27ab9e2492f07053ddbcab32d1867e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1PIDTuneResult.html">PIDTuneResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1TunerSuite.html#a1d27ab9e2492f07053ddbcab32d1867e">imcPID</a> (<a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">CtrlKind</a> target, const <a class="el" href="structctrl_1_1StepResponseTuner_1_1FOPDTModel.html">StepResponseTuner::FOPDTModel</a> &amp;fopdt, double Ts, double lambda=-1.0)</td></tr>
+<tr class="memdesc:a1d27ab9e2492f07053ddbcab32d1867e"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMC-PID tuning from a FOPDT model (cheatsheet §2).  <br /></td></tr>
 <tr class="separator:a1d27ab9e2492f07053ddbcab32d1867e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a459ddfd6b298ebae75aa513a7c36bfe2" id="r_a459ddfd6b298ebae75aa513a7c36bfe2"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1PIDTuneResult.html">PIDTuneResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1TunerSuite.html#a459ddfd6b298ebae75aa513a7c36bfe2">cohenCoon</a> (<a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">CtrlKind</a> target, const <a class="el" href="structctrl_1_1StepResponseTuner_1_1FOPDTModel.html">StepResponseTuner::FOPDTModel</a> &amp;fopdt, double Ts)</td></tr>
+<tr class="memdesc:a459ddfd6b298ebae75aa513a7c36bfe2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cohen-Coon PID tuning (cheatsheet §2 variant).  <br /></td></tr>
 <tr class="separator:a459ddfd6b298ebae75aa513a7c36bfe2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aecae43608db76d6d46e32562f9d0ff2e" id="r_aecae43608db76d6d46e32562f9d0ff2e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1LQRTuneResult.html">LQRTuneResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1TunerSuite.html#aecae43608db76d6d46e32562f9d0ff2e">bryson</a> (<a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">CtrlKind</a> target, const Eigen::VectorXd &amp;xmax, const Eigen::VectorXd &amp;umax)</td></tr>
+<tr class="memdesc:aecae43608db76d6d46e32562f9d0ff2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">LQR Bryson's rule (cheatsheet §3).  <br /></td></tr>
 <tr class="separator:aecae43608db76d6d46e32562f9d0ff2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae8b0a08e8163a2b97a7a3ac72f90875" id="r_aae8b0a08e8163a2b97a7a3ac72f90875"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1KalmanTuneResult.html">KalmanTuneResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1TunerSuite.html#aae8b0a08e8163a2b97a7a3ac72f90875">kalmanNoise</a> (<a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">CtrlKind</a> target, int nStates, int nOutputs, double sigmaProcess, double sigmaMeas)</td></tr>
+<tr class="memdesc:aae8b0a08e8163a2b97a7a3ac72f90875"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kalman observer noise weights (cheatsheet §4, observer part).  <br /></td></tr>
 <tr class="separator:aae8b0a08e8163a2b97a7a3ac72f90875"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73582e0e3f826ebcfbdb9b64644e9a87" id="r_a73582e0e3f826ebcfbdb9b64644e9a87"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1MPCTuneResult.html">MPCTuneResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1TunerSuite.html#a73582e0e3f826ebcfbdb9b64644e9a87">mpcHorizon</a> (<a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">CtrlKind</a> target, const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;plant, double Ts, double rho_y=1.0, double rho_u=0.1)</td></tr>
+<tr class="memdesc:a73582e0e3f826ebcfbdb9b64644e9a87"><td class="mdescLeft">&#160;</td><td class="mdescRight">MPC horizon and weight recommendation (cheatsheet §5).  <br /></td></tr>
 <tr class="separator:a73582e0e3f826ebcfbdb9b64644e9a87"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a68241e3f0b3f6f4a023ab58ea82bf3f2" id="r_a68241e3f0b3f6f4a023ab58ea82bf3f2"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1LeadLagTuneResult.html">LeadLagTuneResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1TunerSuite.html#a68241e3f0b3f6f4a023ab58ea82bf3f2">loopShaping</a> (<a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">CtrlKind</a> target, const <a class="el" href="structctrl_1_1LoopShapingTuner_1_1Input.html">LoopShapingTuner::Input</a> &amp;in)</td></tr>
+<tr class="memdesc:a68241e3f0b3f6f4a023ab58ea82bf3f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frequency-domain loop shaping (cheatsheet §6).  <br /></td></tr>
 <tr class="separator:a68241e3f0b3f6f4a023ab58ea82bf3f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9c32b9bf224d2b1fe4ff2c40e334b41e" id="r_a9c32b9bf224d2b1fe4ff2c40e334b41e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1OptimTuneResult.html">OptimTuneResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1TunerSuite.html#a9c32b9bf224d2b1fe4ff2c40e334b41e">optimise</a> (<a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038a">CtrlKind</a> target, const std::vector&lt; std::pair&lt; double, double &gt; &gt; &amp;paramBounds, std::function&lt; double(const std::vector&lt; double &gt; &amp;)&gt; costFn, std::vector&lt; double &gt; x0={}, int maxEvals=300, double tol=1e-5)</td></tr>
+<tr class="memdesc:a9c32b9bf224d2b1fe4ff2c40e334b41e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Black-box Nelder-Mead optimisation tuner (cheatsheet §7).  <br /></td></tr>
 <tr class="separator:a9c32b9bf224d2b1fe4ff2c40e334b41e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adb8100763edc5e4de0f4362fc2e0919f" id="r_adb8100763edc5e4de0f4362fc2e0919f"><td class="memItemLeft" align="right" valign="top">static std::function&lt; double(const std::vector&lt; double &gt; &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1TunerSuite.html#adb8100763edc5e4de0f4362fc2e0919f">makeISECost</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;plant, double ref, int N, std::function&lt; std::unique_ptr&lt; <a class="el" href="classctrl_1_1IController.html">IController</a> &gt;(const std::vector&lt; double &gt; &amp;)&gt; factory)</td></tr>
+<tr class="memdesc:adb8100763edc5e4de0f4362fc2e0919f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build an ISE cost function for a closed-loop simulation.  <br /></td></tr>
 <tr class="separator:adb8100763edc5e4de0f4362fc2e0919f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad673d834ff7df9428fecf14413eee5df" id="r_ad673d834ff7df9428fecf14413eee5df"><td class="memItemLeft" align="right" valign="top">static std::function&lt; double(const std::vector&lt; double &gt; &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1TunerSuite.html#ad673d834ff7df9428fecf14413eee5df">makeITAECost</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;plant, double ref, int N, std::function&lt; std::unique_ptr&lt; <a class="el" href="classctrl_1_1IController.html">IController</a> &gt;(const std::vector&lt; double &gt; &amp;)&gt; factory)</td></tr>
+<tr class="memdesc:ad673d834ff7df9428fecf14413eee5df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build an ITAE cost function — penalises late errors more than ISE.  <br /></td></tr>
 <tr class="separator:ad673d834ff7df9428fecf14413eee5df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00127">127</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
+<div class="textblock"><p>Unified collection of all eight tuning strategies with runtime compatibility checking. </p>
+<p>Each static method:</p><ol type="1">
+<li>Checks the supplied CtrlKind against the tuner's compatibility tier.</li>
+<li>Runs the underlying tuner if IDEAL or SOFT.</li>
+<li>Returns default parameters and sets <code>success = false</code> for FALLBACK targets.</li>
+<li>Writes a diagnostic to <code>std::clog</code> and sets <code>warned = true</code> for SOFT targets. </li>
+</ol>
+
+<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00150">150</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="aecae43608db76d6d46e32562f9d0ff2e" name="aecae43608db76d6d46e32562f9d0ff2e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aecae43608db76d6d46e32562f9d0ff2e">&#9670;&#160;</a></span>bryson()</h2>
@@ -150,9 +170,25 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>LQR Bryson's rule (cheatsheet §3). </p>
+<p>Compatibility:</p><ul>
+<li>IDEAL: LQR, LQG.</li>
+<li>SOFT: MPC (different Q/R convention), SMC (c_e ~ √(Q ratio) hint).</li>
+<li>FALLBACK: PID, LeadLag, ESC, Smith.</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>Runtime controller kind. </td></tr>
+    <tr><td class="paramname">xmax</td><td>Maximum acceptable state deviation per channel (n×1). </td></tr>
+    <tr><td class="paramname">umax</td><td>Maximum acceptable control effort per channel (m×1). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1LQRTuneResult.html" title="Result of a Bryson LQR tuning call.">LQRTuneResult</a>. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8cpp_source.html#l00365">365</a> of file <a class="el" href="TunerSuite_8cpp_source.html">TunerSuite.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="ControllerTuner_8cpp_source.html#l00238">ctrl::LQRWeightTuner::brysonMethod()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00189">ctrl::buildWarnMsg()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72">ctrl::FALLBACK</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">ctrl::IDEAL</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aad1738fdc0b25022b98c832d0c0417080">ctrl::MPC</a>, <a class="el" href="TunerSuite_8h_source.html#l00094">ctrl::LQRTuneResult::params</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa381f153a0e6e6dc7d3bf5dbef251b370">ctrl::SMC</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">ctrl::SOFT</a>, <a class="el" href="TunerSuite_8h_source.html#l00078">ctrl::TuningResultBase::success</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00204">ctrl::suggestFor()</a>, and <a class="el" href="TunerSuite_8cpp_source.html#l00036">ctrl::tier()</a>.</p>
+<p class="reference">References <a class="el" href="ControllerTuner_8cpp_source.html#l00238">ctrl::LQRWeightTuner::brysonMethod()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00189">ctrl::buildWarnMsg()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72">ctrl::FALLBACK</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">ctrl::IDEAL</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aad1738fdc0b25022b98c832d0c0417080">ctrl::MPC</a>, <a class="el" href="TunerSuite_8h_source.html#l00106">ctrl::LQRTuneResult::params</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa381f153a0e6e6dc7d3bf5dbef251b370">ctrl::SMC</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">ctrl::SOFT</a>, <a class="el" href="TunerSuite_8h_source.html#l00089">ctrl::TuningResultBase::success</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00204">ctrl::suggestFor()</a>, and <a class="el" href="TunerSuite_8cpp_source.html#l00036">ctrl::tier()</a>.</p>
 
 </div>
 </div>
@@ -196,9 +232,27 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Cohen-Coon PID tuning (cheatsheet §2 variant). </p>
+<p>Especially accurate when θ/τ ∈ [0.1, 1.0].</p>
+<p>Compatibility:</p><ul>
+<li>IDEAL: PID.</li>
+<li>SOFT: Smith (inner).</li>
+<li>FALLBACK: all others.</li>
+</ul>
+<dl class="section note"><dt>Note</dt><dd>Emits a soft warning if <code>fopdt.theta</code> is near zero.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>Runtime controller kind. </td></tr>
+    <tr><td class="paramname">fopdt</td><td>FOPDT model (must have theta &gt; 0). </td></tr>
+    <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1PIDTuneResult.html" title="Result of a relay/ZN, IMC, or Cohen-Coon tuning call.">PIDTuneResult</a>. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8cpp_source.html#l00313">313</a> of file <a class="el" href="TunerSuite_8cpp_source.html">TunerSuite.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="TunerSuite_8cpp_source.html#l00189">ctrl::buildWarnMsg()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00184">ctrl::StepResponseTuner::computePIDParams()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72">ctrl::FALLBACK</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">ctrl::IDEAL</a>, <a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fad7a1003002f545d6e966d9cdd7a63f71">ctrl::IMC</a>, <a class="el" href="TunerSuite_8h_source.html#l00089">ctrl::PIDTuneResult::params</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">ctrl::SOFT</a>, <a class="el" href="TunerSuite_8h_source.html#l00078">ctrl::TuningResultBase::success</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00204">ctrl::suggestFor()</a>, <a class="el" href="ControllerTuner_8h_source.html#l00152">ctrl::StepResponseTuner::FOPDTModel::theta</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00036">ctrl::tier()</a>, and <a class="el" href="ControllerTuner_8cpp_source.html#l00353">ctrl::CohenCoonTuner::tuneImpl()</a>.</p>
+<p class="reference">References <a class="el" href="TunerSuite_8cpp_source.html#l00189">ctrl::buildWarnMsg()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00184">ctrl::StepResponseTuner::computePIDParams()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72">ctrl::FALLBACK</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">ctrl::IDEAL</a>, <a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fad7a1003002f545d6e966d9cdd7a63f71">ctrl::IMC</a>, <a class="el" href="TunerSuite_8h_source.html#l00100">ctrl::PIDTuneResult::params</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">ctrl::SOFT</a>, <a class="el" href="TunerSuite_8h_source.html#l00089">ctrl::TuningResultBase::success</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00204">ctrl::suggestFor()</a>, <a class="el" href="ControllerTuner_8h_source.html#l00200">ctrl::StepResponseTuner::FOPDTModel::theta</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00036">ctrl::tier()</a>, and <a class="el" href="ControllerTuner_8cpp_source.html#l00353">ctrl::CohenCoonTuner::tuneImpl()</a>.</p>
 
 </div>
 </div>
@@ -248,9 +302,26 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>IMC-PID tuning from a FOPDT model (cheatsheet §2). </p>
+<p>Compatibility:</p><ul>
+<li>IDEAL: PID.</li>
+<li>SOFT: Smith (inner), LeadLag (Kp as bandwidth hint).</li>
+<li>FALLBACK: LQR, LQG, MPC, SMC, ADRC, ESC.</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>Runtime controller kind. </td></tr>
+    <tr><td class="paramname">fopdt</td><td>FOPDT model from <a class="el" href="classctrl_1_1StepResponseTuner.html#ab2b49beb2dc2105275ad5c9f4d23e422" title="Identify a FOPDT model from open-loop step-response data.">StepResponseTuner::identify()</a>. </td></tr>
+    <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
+    <tr><td class="paramname">lambda</td><td>Closed-loop BW (−1 = 0.5·τ). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1PIDTuneResult.html" title="Result of a relay/ZN, IMC, or Cohen-Coon tuning call.">PIDTuneResult</a>. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8cpp_source.html#l00275">275</a> of file <a class="el" href="TunerSuite_8cpp_source.html">TunerSuite.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="TunerSuite_8cpp_source.html#l00189">ctrl::buildWarnMsg()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00184">ctrl::StepResponseTuner::computePIDParams()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72">ctrl::FALLBACK</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">ctrl::IDEAL</a>, <a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fad7a1003002f545d6e966d9cdd7a63f71">ctrl::IMC</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa7cacc882b6fbe96bad6aa3c3a0ea6677">ctrl::LeadLag</a>, <a class="el" href="TunerSuite_8h_source.html#l00089">ctrl::PIDTuneResult::params</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aae95f770ac4fb91ac2e4873e4b2dfc0e6">ctrl::Smith</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">ctrl::SOFT</a>, <a class="el" href="TunerSuite_8h_source.html#l00078">ctrl::TuningResultBase::success</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00204">ctrl::suggestFor()</a>, and <a class="el" href="TunerSuite_8cpp_source.html#l00036">ctrl::tier()</a>.</p>
+<p class="reference">References <a class="el" href="TunerSuite_8cpp_source.html#l00189">ctrl::buildWarnMsg()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00184">ctrl::StepResponseTuner::computePIDParams()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72">ctrl::FALLBACK</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">ctrl::IDEAL</a>, <a class="el" href="namespacectrl.html#ac903a5a20ba43db1acb05d549374197fad7a1003002f545d6e966d9cdd7a63f71">ctrl::IMC</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa7cacc882b6fbe96bad6aa3c3a0ea6677">ctrl::LeadLag</a>, <a class="el" href="TunerSuite_8h_source.html#l00100">ctrl::PIDTuneResult::params</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aae95f770ac4fb91ac2e4873e4b2dfc0e6">ctrl::Smith</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">ctrl::SOFT</a>, <a class="el" href="TunerSuite_8h_source.html#l00089">ctrl::TuningResultBase::success</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00204">ctrl::suggestFor()</a>, and <a class="el" href="TunerSuite_8cpp_source.html#l00036">ctrl::tier()</a>.</p>
 
 </div>
 </div>
@@ -306,9 +377,28 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Kalman observer noise weights (cheatsheet §4, observer part). </p>
+<p>Uses an isotropic model: Qf = σp²·I, Rf = σm²·I, P0 = Qf.</p>
+<p>Compatibility:</p><ul>
+<li>IDEAL: LQG.</li>
+<li>SOFT: Generic (standalone <a class="el" href="classctrl_1_1KalmanFilter.html" title="Discrete-time Linear Kalman Filter.">KalmanFilter</a>).</li>
+<li>FALLBACK: LQR, PID, MPC, LeadLag, SMC, ADRC, ESC.</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>Runtime controller kind. </td></tr>
+    <tr><td class="paramname">nStates</td><td>Number of states n. </td></tr>
+    <tr><td class="paramname">nOutputs</td><td>Number of outputs p. </td></tr>
+    <tr><td class="paramname">sigmaProcess</td><td>Process noise standard deviation. </td></tr>
+    <tr><td class="paramname">sigmaMeas</td><td>Measurement noise standard deviation. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1KalmanTuneResult.html" title="Result of a Kalman noise tuning call.">KalmanTuneResult</a>. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8cpp_source.html#l00406">406</a> of file <a class="el" href="TunerSuite_8cpp_source.html">TunerSuite.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="TunerSuite_8cpp_source.html#l00189">ctrl::buildWarnMsg()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72">ctrl::FALLBACK</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">ctrl::IDEAL</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00417">ctrl::KalmanWeightTuner::isotropic()</a>, <a class="el" href="TunerSuite_8h_source.html#l00099">ctrl::KalmanTuneResult::params</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">ctrl::SOFT</a>, <a class="el" href="TunerSuite_8h_source.html#l00078">ctrl::TuningResultBase::success</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00204">ctrl::suggestFor()</a>, and <a class="el" href="TunerSuite_8cpp_source.html#l00036">ctrl::tier()</a>.</p>
+<p class="reference">References <a class="el" href="TunerSuite_8cpp_source.html#l00189">ctrl::buildWarnMsg()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72">ctrl::FALLBACK</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">ctrl::IDEAL</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00417">ctrl::KalmanWeightTuner::isotropic()</a>, <a class="el" href="TunerSuite_8h_source.html#l00112">ctrl::KalmanTuneResult::params</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">ctrl::SOFT</a>, <a class="el" href="TunerSuite_8h_source.html#l00089">ctrl::TuningResultBase::success</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00204">ctrl::suggestFor()</a>, and <a class="el" href="TunerSuite_8cpp_source.html#l00036">ctrl::tier()</a>.</p>
 
 </div>
 </div>
@@ -346,9 +436,25 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Frequency-domain loop shaping (cheatsheet §6). </p>
+<p>Compatibility:</p><ul>
+<li>IDEAL: LeadLag.</li>
+<li>SOFT: PID (ωc used as a bandwidth / N-filter hint).</li>
+<li>FALLBACK: LQR, LQG, MPC, SMC, ADRC, ESC.</li>
+</ul>
+<dl class="section note"><dt>Note</dt><dd><code>in.phase_add_deg</code> must be in (0, 90). <a class="el" href="classctrl_1_1LoopShapingTuner.html" title="Lead compensator designer for DiscreteLeadLag via frequency-domain loop shaping.">LoopShapingTuner</a> handles fallback internally for invalid angles.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>Runtime controller kind. </td></tr>
+    <tr><td class="paramname">in</td><td>Loop-shaping inputs (ωc, phase lead, plant gain at ωc). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1LeadLagTuneResult.html" title="Result of a loop-shaping lead/lag tuning call.">LeadLagTuneResult</a>. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8cpp_source.html#l00477">477</a> of file <a class="el" href="TunerSuite_8cpp_source.html">TunerSuite.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="TunerSuite_8cpp_source.html#l00189">ctrl::buildWarnMsg()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72">ctrl::FALLBACK</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">ctrl::IDEAL</a>, <a class="el" href="TunerSuite_8h_source.html#l00109">ctrl::LeadLagTuneResult::params</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">ctrl::SOFT</a>, <a class="el" href="TunerSuite_8h_source.html#l00078">ctrl::TuningResultBase::success</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00204">ctrl::suggestFor()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00036">ctrl::tier()</a>, and <a class="el" href="ControllerTuner_8cpp_source.html#l00378">ctrl::LoopShapingTuner::tuneImpl()</a>.</p>
+<p class="reference">References <a class="el" href="TunerSuite_8cpp_source.html#l00189">ctrl::buildWarnMsg()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72">ctrl::FALLBACK</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">ctrl::IDEAL</a>, <a class="el" href="TunerSuite_8h_source.html#l00124">ctrl::LeadLagTuneResult::params</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">ctrl::SOFT</a>, <a class="el" href="TunerSuite_8h_source.html#l00089">ctrl::TuningResultBase::success</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00204">ctrl::suggestFor()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00036">ctrl::tier()</a>, and <a class="el" href="ControllerTuner_8cpp_source.html#l00378">ctrl::LoopShapingTuner::tuneImpl()</a>.</p>
 
 </div>
 </div>
@@ -398,9 +504,34 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Build an ISE cost function for a closed-loop simulation. </p>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> costFn = <a class="code hl_function" href="classctrl_1_1TunerSuite.html#adb8100763edc5e4de0f4362fc2e0919f">TunerSuite::makeISECost</a>(plant, ref, N,</div>
+<div class="line">    [](<span class="keyword">const</span> std::vector&lt;double&gt;&amp; p) -&gt; std::unique_ptr&lt;IController&gt; {</div>
+<div class="line">        <a class="code hl_struct" href="structctrl_1_1PIDParams.html">PIDParams</a> pp; pp.<a class="code hl_variable" href="structctrl_1_1PIDParams.html#a93322cf198692466ad0919ea06297b31">Kp</a>=p[0]; pp.<a class="code hl_variable" href="structctrl_1_1PIDParams.html#a7b0512d735243a9f654eb2914524111f">Ki</a>=p[1]; pp.<a class="code hl_variable" href="structctrl_1_1PIDParams.html#a4c763a8d16f1c88ac493d128abbbd24d">Kd</a>=p[2];</div>
+<div class="line">        <span class="keywordflow">return</span> std::make_unique&lt;DiscretePID&gt;(pp, Ts);</div>
+<div class="line">    });</div>
+<div class="line"><span class="keyword">auto</span> result = <a class="code hl_function" href="classctrl_1_1TunerSuite.html#a9c32b9bf224d2b1fe4ff2c40e334b41e">TunerSuite::optimise</a>(<a class="code hl_enumvalue" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa2d73559f294204a42bda2e926d094612">CtrlKind::PID</a>, bounds, costFn);</div>
+<div class="ttc" id="aclassctrl_1_1TunerSuite_html_a9c32b9bf224d2b1fe4ff2c40e334b41e"><div class="ttname"><a href="classctrl_1_1TunerSuite.html#a9c32b9bf224d2b1fe4ff2c40e334b41e">ctrl::TunerSuite::optimise</a></div><div class="ttdeci">static OptimTuneResult optimise(CtrlKind target, const std::vector&lt; std::pair&lt; double, double &gt; &gt; &amp;paramBounds, std::function&lt; double(const std::vector&lt; double &gt; &amp;)&gt; costFn, std::vector&lt; double &gt; x0={}, int maxEvals=300, double tol=1e-5)</div><div class="ttdoc">Black-box Nelder-Mead optimisation tuner (cheatsheet §7).</div><div class="ttdef"><b>Definition</b> <a href="TunerSuite_8cpp_source.html#l00662">TunerSuite.cpp:662</a></div></div>
+<div class="ttc" id="aclassctrl_1_1TunerSuite_html_adb8100763edc5e4de0f4362fc2e0919f"><div class="ttname"><a href="classctrl_1_1TunerSuite.html#adb8100763edc5e4de0f4362fc2e0919f">ctrl::TunerSuite::makeISECost</a></div><div class="ttdeci">static std::function&lt; double(const std::vector&lt; double &gt; &amp;)&gt; makeISECost(const StateSpace &amp;plant, double ref, int N, std::function&lt; std::unique_ptr&lt; IController &gt;(const std::vector&lt; double &gt; &amp;)&gt; factory)</div><div class="ttdoc">Build an ISE cost function for a closed-loop simulation.</div><div class="ttdef"><b>Definition</b> <a href="TunerSuite_8cpp_source.html#l00722">TunerSuite.cpp:722</a></div></div>
+<div class="ttc" id="anamespacectrl_html_ae9f75df6083768f99f318568d9b9038aa2d73559f294204a42bda2e926d094612"><div class="ttname"><a href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa2d73559f294204a42bda2e926d094612">ctrl::CtrlKind::PID</a></div><div class="ttdeci">@ PID</div><div class="ttdoc">DiscretePID.</div></div>
+<div class="ttc" id="astructctrl_1_1PIDParams_html"><div class="ttname"><a href="structctrl_1_1PIDParams.html">ctrl::PIDParams</a></div><div class="ttdoc">Tuning parameters for DiscretePID.</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00035">DiscretePID.h:36</a></div></div>
+<div class="ttc" id="astructctrl_1_1PIDParams_html_a4c763a8d16f1c88ac493d128abbbd24d"><div class="ttname"><a href="structctrl_1_1PIDParams.html#a4c763a8d16f1c88ac493d128abbbd24d">ctrl::PIDParams::Kd</a></div><div class="ttdeci">double Kd</div><div class="ttdoc">Derivative gain (Kd = Kp · Td).</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00039">DiscretePID.h:39</a></div></div>
+<div class="ttc" id="astructctrl_1_1PIDParams_html_a7b0512d735243a9f654eb2914524111f"><div class="ttname"><a href="structctrl_1_1PIDParams.html#a7b0512d735243a9f654eb2914524111f">ctrl::PIDParams::Ki</a></div><div class="ttdeci">double Ki</div><div class="ttdoc">Integral gain (Ki = Kp / Ti).</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00038">DiscretePID.h:38</a></div></div>
+<div class="ttc" id="astructctrl_1_1PIDParams_html_a93322cf198692466ad0919ea06297b31"><div class="ttname"><a href="structctrl_1_1PIDParams.html#a93322cf198692466ad0919ea06297b31">ctrl::PIDParams::Kp</a></div><div class="ttdeci">double Kp</div><div class="ttdoc">Proportional gain.</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00037">DiscretePID.h:37</a></div></div>
+</div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">plant</td><td>Discrete-time state-space model. </td></tr>
+    <tr><td class="paramname">ref</td><td>Step reference value. </td></tr>
+    <tr><td class="paramname">N</td><td>Simulation horizon [steps]. </td></tr>
+    <tr><td class="paramname">factory</td><td>Factory <code>unique_ptr&lt;<a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a>&gt;(vector&lt;double&gt;)</code> → controller. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Callable <code>double(vector&lt;double&gt;)</code> suitable for <a class="el" href="classctrl_1_1TunerSuite.html#a9c32b9bf224d2b1fe4ff2c40e334b41e" title="Black-box Nelder-Mead optimisation tuner (cheatsheet §7).">optimise()</a>. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8cpp_source.html#l00722">722</a> of file <a class="el" href="TunerSuite_8cpp_source.html">TunerSuite.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8cpp_source.html#l00088">ctrl::ssStep()</a>, <a class="el" href="PlantModel_8h_source.html#l00065">ctrl::StateSpace::stateSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00053">ctrl::StateSpace::Ts</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8cpp_source.html#l00088">ctrl::ssStep()</a>, <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
 </div>
 </div>
@@ -450,9 +581,22 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Build an ITAE cost function — penalises late errors more than ISE. </p>
+<p>ITAE = ∫ t·|e(t)| dt. Otherwise identical interface to <a class="el" href="classctrl_1_1TunerSuite.html#adb8100763edc5e4de0f4362fc2e0919f" title="Build an ISE cost function for a closed-loop simulation.">makeISECost()</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">plant</td><td>Discrete-time state-space model. </td></tr>
+    <tr><td class="paramname">ref</td><td>Step reference value. </td></tr>
+    <tr><td class="paramname">N</td><td>Simulation horizon [steps]. </td></tr>
+    <tr><td class="paramname">factory</td><td>Factory <code>unique_ptr&lt;<a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a>&gt;(vector&lt;double&gt;)</code> → controller. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Callable <code>double(vector&lt;double&gt;)</code> suitable for <a class="el" href="classctrl_1_1TunerSuite.html#a9c32b9bf224d2b1fe4ff2c40e334b41e" title="Black-box Nelder-Mead optimisation tuner (cheatsheet §7).">optimise()</a>. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8cpp_source.html#l00777">777</a> of file <a class="el" href="TunerSuite_8cpp_source.html">TunerSuite.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8cpp_source.html#l00088">ctrl::ssStep()</a>, <a class="el" href="PlantModel_8h_source.html#l00065">ctrl::StateSpace::stateSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00053">ctrl::StateSpace::Ts</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8cpp_source.html#l00088">ctrl::ssStep()</a>, <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
 </div>
 </div>
@@ -508,9 +652,27 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>MPC horizon and weight recommendation (cheatsheet §5). </p>
+<p>Compatibility:</p><ul>
+<li>IDEAL: MPC.</li>
+<li>SOFT: LQR (settling-time estimate is useful as Np guidance).</li>
+<li>FALLBACK: all others.</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>Runtime controller kind. </td></tr>
+    <tr><td class="paramname">plant</td><td>Discrete-time state-space model. </td></tr>
+    <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
+    <tr><td class="paramname">rho_y</td><td>Output tracking weight (passed through). </td></tr>
+    <tr><td class="paramname">rho_u</td><td>Move suppression weight (passed through). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1MPCTuneResult.html" title="Result of an MPC horizon tuning call.">MPCTuneResult</a> with recommended Np, Nc, ρy, ρu. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8cpp_source.html#l00441">441</a> of file <a class="el" href="TunerSuite_8cpp_source.html">TunerSuite.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="TunerSuite_8cpp_source.html#l00189">ctrl::buildWarnMsg()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72">ctrl::FALLBACK</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">ctrl::IDEAL</a>, <a class="el" href="TunerSuite_8h_source.html#l00104">ctrl::MPCTuneResult::params</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00323">ctrl::MPCHorizonTuner::recommend()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">ctrl::SOFT</a>, <a class="el" href="TunerSuite_8h_source.html#l00078">ctrl::TuningResultBase::success</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00204">ctrl::suggestFor()</a>, and <a class="el" href="TunerSuite_8cpp_source.html#l00036">ctrl::tier()</a>.</p>
+<p class="reference">References <a class="el" href="TunerSuite_8cpp_source.html#l00189">ctrl::buildWarnMsg()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72">ctrl::FALLBACK</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">ctrl::IDEAL</a>, <a class="el" href="TunerSuite_8h_source.html#l00118">ctrl::MPCTuneResult::params</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00323">ctrl::MPCHorizonTuner::recommend()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">ctrl::SOFT</a>, <a class="el" href="TunerSuite_8h_source.html#l00089">ctrl::TuningResultBase::success</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00204">ctrl::suggestFor()</a>, and <a class="el" href="TunerSuite_8cpp_source.html#l00036">ctrl::tier()</a>.</p>
 
 </div>
 </div>
@@ -572,9 +734,30 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Black-box Nelder-Mead optimisation tuner (cheatsheet §7). </p>
+<p>Applies to <b>all</b> controller types. No warnings are emitted regardless of target because this method treats the controller as a black box.</p>
+<p>The cost function must:</p><ol type="1">
+<li>Construct a controller from the parameter vector.</li>
+<li>Simulate it against the plant (or real hardware).</li>
+<li>Return a scalar cost (ISE, IAE, ITAE, …).</li>
+</ol>
+<p>For multi-modal cost surfaces, run multiple restarts with different <code>x0</code>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>Runtime controller kind (used for logging only). </td></tr>
+    <tr><td class="paramname">paramBounds</td><td>[{lo, hi}, …] for each scalar parameter. </td></tr>
+    <tr><td class="paramname">costFn</td><td>Cost function <code>double(vector&lt;double&gt;)</code>. </td></tr>
+    <tr><td class="paramname">x0</td><td>Initial guess; empty → midpoint of each bound. </td></tr>
+    <tr><td class="paramname">maxEvals</td><td>Cost-function evaluation budget. </td></tr>
+    <tr><td class="paramname">tol</td><td>Convergence tolerance on simplex size. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1OptimTuneResult.html" title="Result of an optimisation-based tuning call (Nelder-Mead ISE/ITAE).">OptimTuneResult</a> with bestParams and bestCost. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8cpp_source.html#l00662">662</a> of file <a class="el" href="TunerSuite_8cpp_source.html">TunerSuite.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="TunerSuite_8h_source.html#l00120">ctrl::OptimTuneResult::bestCost</a>, <a class="el" href="TunerSuite_8h_source.html#l00119">ctrl::OptimTuneResult::bestParams</a>, <a class="el" href="TunerSuite_8h_source.html#l00121">ctrl::OptimTuneResult::evalCount</a>, and <a class="el" href="TunerSuite_8h_source.html#l00078">ctrl::TuningResultBase::success</a>.</p>
+<p class="reference">References <a class="el" href="TunerSuite_8h_source.html#l00133">ctrl::OptimTuneResult::bestCost</a>, <a class="el" href="TunerSuite_8h_source.html#l00132">ctrl::OptimTuneResult::bestParams</a>, <a class="el" href="TunerSuite_8h_source.html#l00134">ctrl::OptimTuneResult::evalCount</a>, and <a class="el" href="TunerSuite_8h_source.html#l00089">ctrl::TuningResultBase::success</a>.</p>
 
 </div>
 </div>
@@ -624,9 +807,26 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Relay / ZN tuning (cheatsheet §1). </p>
+<p>Compatibility:</p><ul>
+<li>IDEAL: PID.</li>
+<li>SOFT: Smith (tune inner PID).</li>
+<li>FALLBACK: LQR, LQG, MPC, LeadLag, SMC, ADRC, ESC.</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>Runtime controller kind. </td></tr>
+    <tr><td class="paramname">relay</td><td>A completed <a class="el" href="classctrl_1_1RelayAutoTuner.html" title="Åström-Hägglund relay feedback auto-tuner.">RelayAutoTuner</a> (<code>isDone() == true</code>). </td></tr>
+    <tr><td class="paramname">rule</td><td>ZN | TyreusLuyben | AMIGO | IMC. </td></tr>
+    <tr><td class="paramname">lambda</td><td>IMC closed-loop time constant (−1 = auto). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1PIDTuneResult.html" title="Result of a relay/ZN, IMC, or Cohen-Coon tuning call.">PIDTuneResult</a> with default params when success == false. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="TunerSuite_8cpp_source.html#l00235">235</a> of file <a class="el" href="TunerSuite_8cpp_source.html">TunerSuite.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="TunerSuite_8cpp_source.html#l00189">ctrl::buildWarnMsg()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00078">ctrl::RelayAutoTuner::computePIDParams()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72">ctrl::FALLBACK</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">ctrl::IDEAL</a>, <a class="el" href="DiscretePID_8h_source.html#l00025">ctrl::PIDParams::Kd</a>, <a class="el" href="DiscretePID_8h_source.html#l00024">ctrl::PIDParams::Ki</a>, <a class="el" href="DiscretePID_8h_source.html#l00023">ctrl::PIDParams::Kp</a>, <a class="el" href="TunerSuite_8h_source.html#l00089">ctrl::PIDTuneResult::params</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aae95f770ac4fb91ac2e4873e4b2dfc0e6">ctrl::Smith</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">ctrl::SOFT</a>, <a class="el" href="TunerSuite_8h_source.html#l00078">ctrl::TuningResultBase::success</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00204">ctrl::suggestFor()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00036">ctrl::tier()</a>, and <a class="el" href="ControllerTuner_8h_source.html#l00120">ctrl::RelayAutoTuner::ultimateGain()</a>.</p>
+<p class="reference">References <a class="el" href="TunerSuite_8cpp_source.html#l00189">ctrl::buildWarnMsg()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00078">ctrl::RelayAutoTuner::computePIDParams()</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72">ctrl::FALLBACK</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff">ctrl::IDEAL</a>, <a class="el" href="DiscretePID_8h_source.html#l00039">ctrl::PIDParams::Kd</a>, <a class="el" href="DiscretePID_8h_source.html#l00038">ctrl::PIDParams::Ki</a>, <a class="el" href="DiscretePID_8h_source.html#l00037">ctrl::PIDParams::Kp</a>, <a class="el" href="TunerSuite_8h_source.html#l00100">ctrl::PIDTuneResult::params</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aae95f770ac4fb91ac2e4873e4b2dfc0e6">ctrl::Smith</a>, <a class="el" href="namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a52e743143106c12bfd73aae547fc6e2e">ctrl::SOFT</a>, <a class="el" href="TunerSuite_8h_source.html#l00089">ctrl::TuningResultBase::success</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00204">ctrl::suggestFor()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00036">ctrl::tier()</a>, and <a class="el" href="ControllerTuner_8h_source.html#l00158">ctrl::RelayAutoTuner::ultimateGain()</a>.</p>
 
 </div>
 </div>

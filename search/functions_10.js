@@ -33,6 +33,6 @@ var searchData=
   ['step_30',['step',['../classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73',1,'ctrl::SimPlant::step()'],['../classctrl_1_1UnscentedKalmanFilter.html#a188a89fc26cdf430ca0466812bb494ed',1,'ctrl::UnscentedKalmanFilter::step()'],['../classctrl_1_1KalmanFilter.html#a3ef0abd00aa2240bc3c065f19ea34b52',1,'ctrl::KalmanFilter::step()'],['../classctrl_1_1ExtendedKalmanFilter.html#a9d7d137a0e335bc07912f1c7134afaa8',1,'ctrl::ExtendedKalmanFilter::step()'],['../classctrl_1_1DiscreteLQG.html#a830cb8532a3b4f1f652651b73a49bda7',1,'ctrl::DiscreteLQG::step()'],['../classctrl_1_1RelayAutoTuner.html#a6b2d57b1137ea9ad92fa91bd67ab80f9',1,'ctrl::RelayAutoTuner::step()']]],
   ['stop_31',['stop',['../classctrl_1_1IScheduler.html#ac5957a15af672cea12c8fa63634494b6',1,'ctrl::IScheduler']]],
   ['suggestfor_32',['suggestFor',['../namespacectrl.html#a9a339bd3bc9a921d27b6a5b630eb1dca',1,'ctrl']]],
-  ['suggestorder_33',['suggestOrder',['../namespacectrl.html#abf201dbb12d9ee3725c56b5c3d2a5831',1,'ctrl']]],
+  ['suggestorder_33',['suggestOrder',['../namespacectrl.html#aefc7138f387ba6cc9fed750baa2e615c',1,'ctrl']]],
   ['supertwistingsmc_34',['SuperTwistingSMC',['../classctrl_1_1SuperTwistingSMC.html#a0017d1769280062a47caf49fecf153d1',1,'ctrl::SuperTwistingSMC']]]
 ];

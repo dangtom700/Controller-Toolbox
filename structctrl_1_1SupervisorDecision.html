@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,22 +81,30 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Output of a <a class="el" href="classctrl_1_1FuzzySupervisor.html#aba8d2cc89d3bf8d527de92b9790dd062" title="Feed the current absolute position or output error.">FuzzySupervisor::update()</a> call.  
+ <a href="structctrl_1_1SupervisorDecision.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a88973de918a00d8df19919133496a5ff" id="r_a88973de918a00d8df19919133496a5ff"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SupervisorDecision.html#a88973de918a00d8df19919133496a5ff">relinearize_signal</a></td></tr>
+<tr class="memdesc:a88973de918a00d8df19919133496a5ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Raw fuzzy output ∈ [0, 1].  <br /></td></tr>
 <tr class="separator:a88973de918a00d8df19919133496a5ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43f45542814093bd823352c862f24f17" id="r_a43f45542814093bd823352c862f24f17"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SupervisorDecision.html#a43f45542814093bd823352c862f24f17">relinearize</a></td></tr>
+<tr class="memdesc:a43f45542814093bd823352c862f24f17"><td class="mdescLeft">&#160;</td><td class="mdescRight">true when signal &gt; signal_threshold and cooldown has expired.  <br /></td></tr>
 <tr class="separator:a43f45542814093bd823352c862f24f17"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af706e539fc0660eb74f811b7014653f4" id="r_af706e539fc0660eb74f811b7014653f4"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SupervisorDecision.html#af706e539fc0660eb74f811b7014653f4">error_norm</a></td></tr>
+<tr class="memdesc:af706e539fc0660eb74f811b7014653f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normalised |e| / e_threshold used as fuzzy input.  <br /></td></tr>
 <tr class="separator:af706e539fc0660eb74f811b7014653f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8713ecebf6d251e071844373912ac324" id="r_a8713ecebf6d251e071844373912ac324"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1SupervisorDecision.html#a8713ecebf6d251e071844373912ac324">trend</a></td></tr>
+<tr class="memdesc:a8713ecebf6d251e071844373912ac324"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normalised d|e|/dt / trend_threshold used as fuzzy input.  <br /></td></tr>
 <tr class="separator:a8713ecebf6d251e071844373912ac324"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00342">342</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<div class="textblock"><p>Output of a <a class="el" href="classctrl_1_1FuzzySupervisor.html#aba8d2cc89d3bf8d527de92b9790dd062" title="Feed the current absolute position or output error.">FuzzySupervisor::update()</a> call. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00494">494</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="af706e539fc0660eb74f811b7014653f4" name="af706e539fc0660eb74f811b7014653f4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af706e539fc0660eb74f811b7014653f4">&#9670;&#160;</a></span>error_norm</h2>
@@ -110,7 +118,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00345">345</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>Normalised |e| / e_threshold used as fuzzy input. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00497">497</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>
@@ -126,7 +136,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00344">344</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>true when signal &gt; signal_threshold and cooldown has expired. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00496">496</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>
@@ -142,7 +154,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00343">343</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>Raw fuzzy output ∈ [0, 1]. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00495">495</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>
@@ -158,7 +172,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00346">346</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>Normalised d|e|/dt / trend_threshold used as fuzzy input. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00498">498</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>

@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,32 +81,46 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Rational function approximator (Padé / Sanathanan–Koerner least squares).  
+ <a href="classctrl_1_1PadeApproximator.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="FunctionApproximator_8h_source.html">FunctionApproximator.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a29bb8876f20cee739fb91815215542ad" id="r_a29bb8876f20cee739fb91815215542ad"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#a29bb8876f20cee739fb91815215542ad">PadeApproximator</a> (const std::vector&lt; double &gt; &amp;xs, const std::vector&lt; double &gt; &amp;ys, int num_degree, int den_degree)</td></tr>
+<tr class="memdesc:a29bb8876f20cee739fb91815215542ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fit a [m/n] Padé rational approximant to data (xs, ys).  <br /></td></tr>
 <tr class="separator:a29bb8876f20cee739fb91815215542ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae16f151cf3ae9a30534696b9ff713fdc" id="r_ae16f151cf3ae9a30534696b9ff713fdc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#ae16f151cf3ae9a30534696b9ff713fdc">evaluate</a> (double x) const</td></tr>
+<tr class="memdesc:ae16f151cf3ae9a30534696b9ff713fdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate P(x)/Q(x) at <code>x</code>.  <br /></td></tr>
 <tr class="separator:ae16f151cf3ae9a30534696b9ff713fdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a690d045d93ba530795c7b5103852d936" id="r_a690d045d93ba530795c7b5103852d936"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; double &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#a690d045d93ba530795c7b5103852d936">numerator</a> () const</td></tr>
+<tr class="memdesc:a690d045d93ba530795c7b5103852d936"><td class="mdescLeft">&#160;</td><td class="mdescRight">Numerator coefficients p[0…m]: P(x) = p[0] + p[1]·x + … + p[m]·xᵐ.  <br /></td></tr>
 <tr class="separator:a690d045d93ba530795c7b5103852d936"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3cd7c894c4b8d0762de8183f210026c4" id="r_a3cd7c894c4b8d0762de8183f210026c4"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; double &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#a3cd7c894c4b8d0762de8183f210026c4">denominator</a> () const</td></tr>
+<tr class="memdesc:a3cd7c894c4b8d0762de8183f210026c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Denominator coefficients q[0…n] with q[0] = 1: Q(x) = 1 + q[1]·x + … + q[n]·xⁿ.  <br /></td></tr>
 <tr class="separator:a3cd7c894c4b8d0762de8183f210026c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a48f445660e01ba2f702ad028855a0083" id="r_a48f445660e01ba2f702ad028855a0083"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#a48f445660e01ba2f702ad028855a0083">numDegree</a> () const</td></tr>
+<tr class="memdesc:a48f445660e01ba2f702ad028855a0083"><td class="mdescLeft">&#160;</td><td class="mdescRight">Numerator degree m.  <br /></td></tr>
 <tr class="separator:a48f445660e01ba2f702ad028855a0083"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a59ce8bab488d35fecd13592472701604" id="r_a59ce8bab488d35fecd13592472701604"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#a59ce8bab488d35fecd13592472701604">denDegree</a> () const</td></tr>
+<tr class="memdesc:a59ce8bab488d35fecd13592472701604"><td class="mdescLeft">&#160;</td><td class="mdescRight">Denominator degree n.  <br /></td></tr>
 <tr class="separator:a59ce8bab488d35fecd13592472701604"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb7998edf017992818ebab1ab546ab69" id="r_aeb7998edf017992818ebab1ab546ab69"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#aeb7998edf017992818ebab1ab546ab69">fitRMSE</a> () const</td></tr>
+<tr class="memdesc:aeb7998edf017992818ebab1ab546ab69"><td class="mdescLeft">&#160;</td><td class="mdescRight">RMS residual of the fit over the training data.  <br /></td></tr>
 <tr class="separator:aeb7998edf017992818ebab1ab546ab69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae3ec858ffcd1f787477b850c567886c8" id="r_ae3ec858ffcd1f787477b850c567886c8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#ae3ec858ffcd1f787477b850c567886c8">hasPoleInDomain</a> (double x_lo, double x_hi, int n_pts=1000) const</td></tr>
+<tr class="memdesc:ae3ec858ffcd1f787477b850c567886c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check whether Q(x) has a real root inside [x_lo, x_hi].  <br /></td></tr>
 <tr class="separator:ae3ec858ffcd1f787477b850c567886c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abad5a9ee7014f065d0e4992ed91d5ed4" id="r_abad5a9ee7014f065d0e4992ed91d5ed4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html#abad5a9ee7014f065d0e4992ed91d5ed4">toDiscreteFilter</a> (double Ts) const</td></tr>
+<tr class="memdesc:abad5a9ee7014f065d0e4992ed91d5ed4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a [1/1] Padé approximant to a discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> filter.  <br /></td></tr>
 <tr class="separator:abad5a9ee7014f065d0e4992ed91d5ed4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="FunctionApproximator_8h_source.html#l00096">96</a> of file <a class="el" href="FunctionApproximator_8h_source.html">FunctionApproximator.h</a>.</p>
+<div class="textblock"><p>Rational function approximator (Padé / Sanathanan–Koerner least squares). </p>
+<p>Fits f(x) ≈ P(x)/Q(x), deg(P) = m, deg(Q) = n, Q(0) = 1. The denominator normalisation avoids the trivial all-zero solution of the unconstrained bilinear problem. </p>
+
+<p class="definition">Definition at line <a class="el" href="FunctionApproximator_8h_source.html#l00084">84</a> of file <a class="el" href="FunctionApproximator_8h_source.html">FunctionApproximator.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a29bb8876f20cee739fb91815215542ad" name="a29bb8876f20cee739fb91815215542ad"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a29bb8876f20cee739fb91815215542ad">&#9670;&#160;</a></span>PadeApproximator()</h2>
@@ -146,6 +160,23 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Fit a [m/n] Padé rational approximant to data (xs, ys). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">xs</td><td>Input sample vector. </td></tr>
+    <tr><td class="paramname">ys</td><td>Output sample vector, same length as xs. </td></tr>
+    <tr><td class="paramname">num_degree</td><td>Numerator degree m. Require xs.size() &gt; m + n. </td></tr>
+    <tr><td class="paramname">den_degree</td><td>Denominator degree n. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>On dimension mismatch or underdetermined system. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="FunctionApproximator_8cpp_source.html#l00084">84</a> of file <a class="el" href="FunctionApproximator_8cpp_source.html">FunctionApproximator.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="FunctionApproximator_8cpp_source.html#l00152">evaluate()</a>.</p>
@@ -176,6 +207,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Denominator degree n. </p>
+
 <p class="definition">Definition at line <a class="el" href="FunctionApproximator_8h_source.html#l00119">119</a> of file <a class="el" href="FunctionApproximator_8h_source.html">FunctionApproximator.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="FunctionApproximator_8cpp_source.html#l00195">toDiscreteFilter()</a>.</p>
@@ -205,6 +238,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Denominator coefficients q[0…n] with q[0] = 1: Q(x) = 1 + q[1]·x + … + q[n]·xⁿ. </p>
+
 <p class="definition">Definition at line <a class="el" href="FunctionApproximator_8h_source.html#l00116">116</a> of file <a class="el" href="FunctionApproximator_8h_source.html">FunctionApproximator.h</a>.</p>
 
 </div>
@@ -224,6 +259,21 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Evaluate P(x)/Q(x) at <code>x</code>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>Evaluation point. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Approximate f(x). </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::domain_error</td><td>If Q(x) ≈ 0 (pole near evaluation point). </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="FunctionApproximator_8cpp_source.html#l00152">152</a> of file <a class="el" href="FunctionApproximator_8cpp_source.html">FunctionApproximator.cpp</a>.</p>
 
@@ -254,7 +304,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FunctionApproximator_8h_source.html#l00122">122</a> of file <a class="el" href="FunctionApproximator_8h_source.html">FunctionApproximator.h</a>.</p>
+<p>RMS residual of the fit over the training data. </p>
+
+<p class="definition">Definition at line <a class="el" href="FunctionApproximator_8h_source.html#l00124">124</a> of file <a class="el" href="FunctionApproximator_8h_source.html">FunctionApproximator.h</a>.</p>
 
 </div>
 </div>
@@ -290,6 +342,18 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Check whether Q(x) has a real root inside [x_lo, x_hi]. </p>
+<p>Samples Q at <code>n_pts</code> points and returns <code>true</code> if the sign changes anywhere in the interval, indicating a pole that would cause <a class="el" href="classctrl_1_1PadeApproximator.html#ae16f151cf3ae9a30534696b9ff713fdc" title="Evaluate P(x)/Q(x) at x.">evaluate()</a> to diverge.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x_lo</td><td>Lower bound of the evaluation domain. </td></tr>
+    <tr><td class="paramname">x_hi</td><td>Upper bound of the evaluation domain. </td></tr>
+    <tr><td class="paramname">n_pts</td><td>Number of sample points (default 1000). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><code>true</code> if a real pole exists in [x_lo, x_hi]. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="FunctionApproximator_8cpp_source.html#l00172">172</a> of file <a class="el" href="FunctionApproximator_8cpp_source.html">FunctionApproximator.cpp</a>.</p>
 
 </div>
@@ -316,6 +380,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Numerator degree m. </p>
 
 <p class="definition">Definition at line <a class="el" href="FunctionApproximator_8h_source.html#l00118">118</a> of file <a class="el" href="FunctionApproximator_8h_source.html">FunctionApproximator.h</a>.</p>
 
@@ -346,7 +412,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FunctionApproximator_8h_source.html#l00112">112</a> of file <a class="el" href="FunctionApproximator_8h_source.html">FunctionApproximator.h</a>.</p>
+<p>Numerator coefficients p[0…m]: P(x) = p[0] + p[1]·x + … + p[m]·xᵐ. </p>
+
+<p class="definition">Definition at line <a class="el" href="FunctionApproximator_8h_source.html#l00111">111</a> of file <a class="el" href="FunctionApproximator_8h_source.html">FunctionApproximator.h</a>.</p>
 
 </div>
 </div>
@@ -365,6 +433,22 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Convert a [1/1] Padé approximant to a discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> filter. </p>
+<p>Treats the approximant as a rational function of z⁻¹ and converts via controllable canonical form.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> (1 state, 1 input, 1 output). </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::logic_error</td><td>If the approximant is not [1/1]. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p class="definition">Definition at line <a class="el" href="FunctionApproximator_8cpp_source.html#l00195">195</a> of file <a class="el" href="FunctionApproximator_8cpp_source.html">FunctionApproximator.cpp</a>.</p>
 

@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -88,68 +88,54 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;cmath&gt;</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;limits&gt;</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// SimActuator - IActuator adapter backed by a SimPlant.</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">//</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">// write(u) applies the control input to the plant:</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">//   - Non-finite values (NaN, +/-Inf) are rejected; the last valid output is</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">//     repeated and the plant is stepped with that value.  This matches the</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">//     &quot;hold-last&quot; actuator fail-safe behaviour expected from real hardware.</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//   - An optional saturation limit [uMin, uMax] (defaults to +/-inf) is applied</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">//     before forwarding to the plant, mirroring physical actuator limits.</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">//</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">// lastOutput() returns the most recent value actually applied to the plant.</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacectrl.html">ctrl</a> {</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
-<div class="foldopen" id="foldopen00019" data-start="{" data-end="};">
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="classctrl_1_1SimActuator.html">   19</a></span><span class="keyword">class </span><a class="code hl_class" href="classctrl_1_1SimActuator.html">SimActuator</a> : <span class="keyword">public</span> <a class="code hl_class" href="classctrl_1_1IActuator.html">IActuator</a> {</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">public</span>:</div>
-<div class="foldopen" id="foldopen00021" data-start="{" data-end="}">
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="classctrl_1_1SimActuator.html#a6b2e156bf5f9f465693b0441b85abfd6">   21</a></span>    <span class="keyword">explicit</span> <a class="code hl_function" href="classctrl_1_1SimActuator.html#a6b2e156bf5f9f465693b0441b85abfd6">SimActuator</a>(<a class="code hl_class" href="classctrl_1_1SimPlant.html">SimPlant</a>&amp; plant,</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>                         <span class="keywordtype">double</span> uMin = -std::numeric_limits&lt;double&gt;::infinity(),</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>                         <span class="keywordtype">double</span> uMax =  std::numeric_limits&lt;double&gt;::infinity())</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        : plant_(&amp;plant), u_last_(0.0), u_min_(uMin), u_max_(uMax)</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    {}</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacectrl.html">ctrl</a> {</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="foldopen" id="foldopen00025" data-start="{" data-end="};">
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classctrl_1_1SimActuator.html">   25</a></span><span class="keyword">class </span><a class="code hl_class" href="classctrl_1_1SimActuator.html">SimActuator</a> : <span class="keyword">public</span> <a class="code hl_class" href="classctrl_1_1IActuator.html">IActuator</a> {</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00033" data-start="{" data-end="}">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classctrl_1_1SimActuator.html#a6b2e156bf5f9f465693b0441b85abfd6">   33</a></span>    <span class="keyword">explicit</span> <a class="code hl_function" href="classctrl_1_1SimActuator.html#a6b2e156bf5f9f465693b0441b85abfd6">SimActuator</a>(<a class="code hl_class" href="classctrl_1_1SimPlant.html">SimPlant</a>&amp; plant,</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>                         <span class="keywordtype">double</span> uMin = -std::numeric_limits&lt;double&gt;::infinity(),</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>                         <span class="keywordtype">double</span> uMax =  std::numeric_limits&lt;double&gt;::infinity())</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        : plant_(&amp;plant), u_last_(0.0), u_min_(uMin), u_max_(uMax)</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    {}</div>
 </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
-<div class="foldopen" id="foldopen00027" data-start="{" data-end="}">
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classctrl_1_1SimActuator.html#aeeedd4bb19bd1bcbbe968d1c851ba98e">   27</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1SimActuator.html#aeeedd4bb19bd1bcbbe968d1c851ba98e">write</a>(<span class="keywordtype">double</span> u)<span class="keyword"> override</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">    </span>{</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <span class="comment">// Reject non-finite inputs - hold last good output (safe-state behaviour)</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        <span class="keywordflow">if</span> (!std::isfinite(u)) u = u_last_;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="comment">// Apply actuator saturation limits</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="keywordflow">if</span> (u &lt; u_min_) u = u_min_;</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <span class="keywordflow">if</span> (u &gt; u_max_) u = u_max_;</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        u_last_ = u;</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        plant_-&gt;<a class="code hl_function" href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73">step</a>(u);</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    }</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="foldopen" id="foldopen00047" data-start="{" data-end="}">
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="classctrl_1_1SimActuator.html#aeeedd4bb19bd1bcbbe968d1c851ba98e">   47</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1SimActuator.html#aeeedd4bb19bd1bcbbe968d1c851ba98e">write</a>(<span class="keywordtype">double</span> u)<span class="keyword"> override</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="keyword">    </span>{</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="keywordflow">if</span> (!std::isfinite(u)) u = u_last_;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        <span class="keywordflow">if</span> (u &lt; u_min_) u = u_min_;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        <span class="keywordflow">if</span> (u &gt; u_max_) u = u_max_;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        u_last_ = u;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        plant_-&gt;<a class="code hl_function" href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73">step</a>(u);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    }</div>
 </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="classctrl_1_1SimActuator.html#ad98fca771aaf43ba231720dff8bbeb53">   40</a></span>    <span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1SimActuator.html#ad98fca771aaf43ba231720dff8bbeb53">lastOutput</a>()<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> u_last_; }</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="classctrl_1_1SimActuator.html#a369dcdb6011f6d7803e7166735a2ad7a">   42</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1SimActuator.html#a369dcdb6011f6d7803e7166735a2ad7a">reset</a>()<span class="keyword"> override </span>{ u_last_ = 0.0; }</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <a class="code hl_class" href="classctrl_1_1SimPlant.html">SimPlant</a>* plant_;  <span class="comment">// non-owning</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordtype">double</span>    u_last_;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keywordtype">double</span>    u_min_;</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordtype">double</span>    u_max_;</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>};</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="classctrl_1_1SimActuator.html#ad98fca771aaf43ba231720dff8bbeb53">   60</a></span>    <span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1SimActuator.html#ad98fca771aaf43ba231720dff8bbeb53">lastOutput</a>()<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> u_last_; }</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classctrl_1_1SimActuator.html#a369dcdb6011f6d7803e7166735a2ad7a">   65</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1SimActuator.html#a369dcdb6011f6d7803e7166735a2ad7a">reset</a>()<span class="keyword"> override </span>{ u_last_ = 0.0; }</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <a class="code hl_class" href="classctrl_1_1SimPlant.html">SimPlant</a>* plant_;   </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keywordtype">double</span>    u_last_;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keywordtype">double</span>    u_min_;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keywordtype">double</span>    u_max_;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>};</div>
 </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>} <span class="comment">// namespace ctrl</span></div>
-<div class="ttc" id="aIActuator_8h_html"><div class="ttname"><a href="IActuator_8h.html">IActuator.h</a></div></div>
-<div class="ttc" id="aSimPlant_8h_html"><div class="ttname"><a href="SimPlant_8h.html">SimPlant.h</a></div></div>
-<div class="ttc" id="aclassctrl_1_1IActuator_html"><div class="ttname"><a href="classctrl_1_1IActuator.html">ctrl::IActuator</a></div><div class="ttdef"><b>Definition</b> <a href="IActuator_8h_source.html#l00019">IActuator.h:19</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SimActuator_html"><div class="ttname"><a href="classctrl_1_1SimActuator.html">ctrl::SimActuator</a></div><div class="ttdef"><b>Definition</b> <a href="SimActuator_8h_source.html#l00019">SimActuator.h:19</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SimActuator_html_a369dcdb6011f6d7803e7166735a2ad7a"><div class="ttname"><a href="classctrl_1_1SimActuator.html#a369dcdb6011f6d7803e7166735a2ad7a">ctrl::SimActuator::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdef"><b>Definition</b> <a href="SimActuator_8h_source.html#l00042">SimActuator.h:42</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SimActuator_html_a6b2e156bf5f9f465693b0441b85abfd6"><div class="ttname"><a href="classctrl_1_1SimActuator.html#a6b2e156bf5f9f465693b0441b85abfd6">ctrl::SimActuator::SimActuator</a></div><div class="ttdeci">SimActuator(SimPlant &amp;plant, double uMin=-std::numeric_limits&lt; double &gt;::infinity(), double uMax=std::numeric_limits&lt; double &gt;::infinity())</div><div class="ttdef"><b>Definition</b> <a href="SimActuator_8h_source.html#l00021">SimActuator.h:21</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SimActuator_html_ad98fca771aaf43ba231720dff8bbeb53"><div class="ttname"><a href="classctrl_1_1SimActuator.html#ad98fca771aaf43ba231720dff8bbeb53">ctrl::SimActuator::lastOutput</a></div><div class="ttdeci">double lastOutput() const override</div><div class="ttdef"><b>Definition</b> <a href="SimActuator_8h_source.html#l00040">SimActuator.h:40</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SimActuator_html_aeeedd4bb19bd1bcbbe968d1c851ba98e"><div class="ttname"><a href="classctrl_1_1SimActuator.html#aeeedd4bb19bd1bcbbe968d1c851ba98e">ctrl::SimActuator::write</a></div><div class="ttdeci">void write(double u) override</div><div class="ttdef"><b>Definition</b> <a href="SimActuator_8h_source.html#l00027">SimActuator.h:27</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SimPlant_html"><div class="ttname"><a href="classctrl_1_1SimPlant.html">ctrl::SimPlant</a></div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8h_source.html#l00032">SimPlant.h:32</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SimPlant_html_a1bd8fa92d3fd14548ad06912eba68f73"><div class="ttname"><a href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73">ctrl::SimPlant::step</a></div><div class="ttdeci">void step(double u)</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8cpp_source.html#l00014">SimPlant.cpp:14</a></div></div>
-<div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AtomicParamBuffer_8h_source.html#l00046">AtomicParamBuffer.h:46</a></div></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="ttc" id="aIActuator_8h_html"><div class="ttname"><a href="IActuator_8h.html">IActuator.h</a></div><div class="ttdoc">Abstract interface for any command output.</div></div>
+<div class="ttc" id="aSimPlant_8h_html"><div class="ttname"><a href="SimPlant_8h.html">SimPlant.h</a></div><div class="ttdoc">Discrete-time plant simulator shared by SimSensor and SimActuator.</div></div>
+<div class="ttc" id="aclassctrl_1_1IActuator_html"><div class="ttname"><a href="classctrl_1_1IActuator.html">ctrl::IActuator</a></div><div class="ttdoc">Abstract base class for all actuator adapters in the HAL.</div><div class="ttdef"><b>Definition</b> <a href="IActuator_8h_source.html#l00026">IActuator.h:26</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SimActuator_html"><div class="ttname"><a href="classctrl_1_1SimActuator.html">ctrl::SimActuator</a></div><div class="ttdoc">IActuator implementation that drives a SimPlant.</div><div class="ttdef"><b>Definition</b> <a href="SimActuator_8h_source.html#l00025">SimActuator.h:25</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SimActuator_html_a369dcdb6011f6d7803e7166735a2ad7a"><div class="ttname"><a href="classctrl_1_1SimActuator.html#a369dcdb6011f6d7803e7166735a2ad7a">ctrl::SimActuator::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset last output to zero (does not reset the plant).</div><div class="ttdef"><b>Definition</b> <a href="SimActuator_8h_source.html#l00065">SimActuator.h:65</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SimActuator_html_a6b2e156bf5f9f465693b0441b85abfd6"><div class="ttname"><a href="classctrl_1_1SimActuator.html#a6b2e156bf5f9f465693b0441b85abfd6">ctrl::SimActuator::SimActuator</a></div><div class="ttdeci">SimActuator(SimPlant &amp;plant, double uMin=-std::numeric_limits&lt; double &gt;::infinity(), double uMax=std::numeric_limits&lt; double &gt;::infinity())</div><div class="ttdoc">Construct the actuator adapter.</div><div class="ttdef"><b>Definition</b> <a href="SimActuator_8h_source.html#l00033">SimActuator.h:33</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SimActuator_html_ad98fca771aaf43ba231720dff8bbeb53"><div class="ttname"><a href="classctrl_1_1SimActuator.html#ad98fca771aaf43ba231720dff8bbeb53">ctrl::SimActuator::lastOutput</a></div><div class="ttdeci">double lastOutput() const override</div><div class="ttdoc">Return the most recent value successfully applied to the plant.</div><div class="ttdef"><b>Definition</b> <a href="SimActuator_8h_source.html#l00060">SimActuator.h:60</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SimActuator_html_aeeedd4bb19bd1bcbbe968d1c851ba98e"><div class="ttname"><a href="classctrl_1_1SimActuator.html#aeeedd4bb19bd1bcbbe968d1c851ba98e">ctrl::SimActuator::write</a></div><div class="ttdeci">void write(double u) override</div><div class="ttdoc">Apply u to the plant after NaN/Inf rejection and saturation.</div><div class="ttdef"><b>Definition</b> <a href="SimActuator_8h_source.html#l00047">SimActuator.h:47</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SimPlant_html"><div class="ttname"><a href="classctrl_1_1SimPlant.html">ctrl::SimPlant</a></div><div class="ttdoc">Thread-safe discrete-time plant simulator.</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8h_source.html#l00039">SimPlant.h:39</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SimPlant_html_a1bd8fa92d3fd14548ad06912eba68f73"><div class="ttname"><a href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73">ctrl::SimPlant::step</a></div><div class="ttdeci">void step(double u)</div><div class="ttdoc">Advance one sample: x[k+1] = A·x[k] + B·u[k], y[k] = C·x[k] + D·u[k].</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8cpp_source.html#l00014">SimPlant.cpp:14</a></div></div>
+<div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AtomicParamBuffer_8h_source.html#l00045">AtomicParamBuffer.h:45</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

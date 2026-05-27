@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,6 +81,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p><a class="el" href="classctrl_1_1ISensor.html" title="Abstract base class for all sensor adapters in the HAL.">ISensor</a> decorator with hold-last fault semantics and optional staleness alarm.  
+ <a href="classctrl_1_1SafeSensor.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for ctrl::SafeSensor:</div>
@@ -88,33 +91,41 @@ Inheritance diagram for ctrl::SafeSensor:</div>
  <div class="center">
   <img src="classctrl_1_1SafeSensor.png" usemap="#ctrl::SafeSensor_map" alt=""/>
   <map id="ctrl::SafeSensor_map" name="ctrl::SafeSensor_map">
-<area href="classctrl_1_1ISensor.html" alt="ctrl::ISensor" shape="rect" coords="0,0,102,24"/>
+<area href="classctrl_1_1ISensor.html" title="Abstract base class for all sensor adapters in the HAL." alt="ctrl::ISensor" shape="rect" coords="0,0,102,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ab509f6cb397f4f5d61c082cd7e36fc65" id="r_ab509f6cb397f4f5d61c082cd7e36fc65"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SafeSensor.html#ab509f6cb397f4f5d61c082cd7e36fc65">SafeSensor</a> (<a class="el" href="classctrl_1_1ISensor.html">ISensor</a> &amp;inner, int max_stale_steps=0)</td></tr>
+<tr class="memdesc:ab509f6cb397f4f5d61c082cd7e36fc65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wrap <code>inner</code> with hold-last protection.  <br /></td></tr>
 <tr class="separator:ab509f6cb397f4f5d61c082cd7e36fc65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a374c25efba5ccc8dff666842a82492e7" id="r_a374c25efba5ccc8dff666842a82492e7"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SafeSensor.html#a374c25efba5ccc8dff666842a82492e7">read</a> () override</td></tr>
+<tr class="memdesc:a374c25efba5ccc8dff666842a82492e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the inner sensor's reading, or the last valid value when invalid.  <br /></td></tr>
 <tr class="separator:a374c25efba5ccc8dff666842a82492e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2588ae59386c9d31ab7c7c21309cff78" id="r_a2588ae59386c9d31ab7c7c21309cff78"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SafeSensor.html#a2588ae59386c9d31ab7c7c21309cff78">isValid</a> () const override</td></tr>
+<tr class="memdesc:a2588ae59386c9d31ab7c7c21309cff78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reflects the inner sensor's validity.  <br /></td></tr>
 <tr class="separator:a2588ae59386c9d31ab7c7c21309cff78"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3926ae95f2a6ee64e49124fcd1bb4490" id="r_a3926ae95f2a6ee64e49124fcd1bb4490"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SafeSensor.html#a3926ae95f2a6ee64e49124fcd1bb4490">reset</a> () override</td></tr>
+<tr class="memdesc:a3926ae95f2a6ee64e49124fcd1bb4490"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset the hold value to 0, the stale counter, and the inner sensor.  <br /></td></tr>
 <tr class="separator:a3926ae95f2a6ee64e49124fcd1bb4490"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a408e67837fadc30479d3e2fca292f69d" id="r_a408e67837fadc30479d3e2fca292f69d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SafeSensor.html#a408e67837fadc30479d3e2fca292f69d">staleCount</a> () const</td></tr>
+<tr class="memdesc:a408e67837fadc30479d3e2fca292f69d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of consecutive samples since the last valid reading.  <br /></td></tr>
 <tr class="separator:a408e67837fadc30479d3e2fca292f69d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae10704d23bbb34984d1c14eb438e2a16" id="r_ae10704d23bbb34984d1c14eb438e2a16"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SafeSensor.html#ae10704d23bbb34984d1c14eb438e2a16">lastValidReading</a> () const</td></tr>
+<tr class="memdesc:ae10704d23bbb34984d1c14eb438e2a16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Last measurement successfully accepted from the inner sensor (finite, valid).  <br /></td></tr>
 <tr class="separator:ae10704d23bbb34984d1c14eb438e2a16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aef44f71efb527c0d3e208bea974f895d" id="r_aef44f71efb527c0d3e208bea974f895d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SafeSensor.html#aef44f71efb527c0d3e208bea974f895d">setOnMaxStale</a> (std::function&lt; void(int stale_count)&gt; cb)</td></tr>
+<tr class="memdesc:aef44f71efb527c0d3e208bea974f895d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a callback invoked when stale_count reaches max_stale_steps.  <br /></td></tr>
 <tr class="separator:aef44f71efb527c0d3e208bea974f895d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classctrl_1_1ISensor"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classctrl_1_1ISensor')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classctrl_1_1ISensor.html">ctrl::ISensor</a></td></tr>
 <tr class="memitem:a7d48f47d37701465bf558e62295ae647 inherit pub_methods_classctrl_1_1ISensor" id="r_a7d48f47d37701465bf558e62295ae647"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ISensor.html#a7d48f47d37701465bf558e62295ae647">~ISensor</a> ()=default</td></tr>
 <tr class="separator:a7d48f47d37701465bf558e62295ae647 inherit pub_methods_classctrl_1_1ISensor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00038">38</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
+<div class="textblock"><p><a class="el" href="classctrl_1_1ISensor.html" title="Abstract base class for all sensor adapters in the HAL.">ISensor</a> decorator with hold-last fault semantics and optional staleness alarm. </p>
+
+<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00044">44</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ab509f6cb397f4f5d61c082cd7e36fc65" name="ab509f6cb397f4f5d61c082cd7e36fc65"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab509f6cb397f4f5d61c082cd7e36fc65">&#9670;&#160;</a></span>SafeSensor()</h2>
@@ -150,7 +161,16 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00043">43</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
+<p>Wrap <code>inner</code> with hold-last protection. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">inner</td><td>The sensor to wrap (must outlive this object). </td></tr>
+    <tr><td class="paramname">max_stale_steps</td><td>How many consecutive invalid samples before <code>onMaxStale()</code> fires. 0 = unlimited (hold forever, never fire callback). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00052">52</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
 
 </div>
 </div>
@@ -178,11 +198,15 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Reflects the inner sensor's validity. </p>
+<p><code>true</code> = the inner sensor reports fresh data. Does NOT indicate whether <code>last_valid_</code> is still trustworthy — check <code><a class="el" href="classctrl_1_1SafeSensor.html#a408e67837fadc30479d3e2fca292f69d" title="Number of consecutive samples since the last valid reading.">staleCount()</a></code> or the <code>onMaxStale</code> callback for that.</p>
+<dl class="section return"><dt>Returns</dt><dd><code>inner_-&gt;<a class="el" href="classctrl_1_1SafeSensor.html#a2588ae59386c9d31ab7c7c21309cff78" title="Reflects the inner sensor&#39;s validity.">isValid()</a></code>. </dd></dl>
+
 <p>Reimplemented from <a class="el" href="classctrl_1_1ISensor.html#a366745c03cda60b3c91f2e5425e818d7">ctrl::ISensor</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00073">73</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00092">92</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
 
-<p class="reference">References <a class="el" href="ISensor_8h_source.html#l00025">ctrl::ISensor::isValid()</a>.</p>
+<p class="reference">References <a class="el" href="ISensor_8h_source.html#l00040">ctrl::ISensor::isValid()</a>.</p>
 
 </div>
 </div>
@@ -209,7 +233,10 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00087">87</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
+<p>Last measurement successfully accepted from the inner sensor (finite, valid). </p>
+<dl class="section return"><dt>Returns</dt><dd>Last valid reading. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00114">114</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
 
 </div>
 </div>
@@ -236,11 +263,15 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Return the inner sensor's reading, or the last valid value when invalid. </p>
+<p>Also rejects non-finite inner values (NaN, ±Inf) even when <code><a class="el" href="classctrl_1_1SafeSensor.html#a2588ae59386c9d31ab7c7c21309cff78" title="Reflects the inner sensor&#39;s validity.">isValid()</a> == true</code>. Increments the stale counter on any rejected sample.</p>
+<dl class="section return"><dt>Returns</dt><dd>Most recent valid (finite) measurement. Never NaN or Inf. </dd></dl>
+
 <p>Implements <a class="el" href="classctrl_1_1ISensor.html#abadb0fd78eaa7f41319e0f20a4434a82">ctrl::ISensor</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00051">51</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00065">65</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
 
-<p class="reference">References <a class="el" href="ISensor_8h_source.html#l00025">ctrl::ISensor::isValid()</a>, and <a class="el" href="classctrl_1_1ISensor.html#abadb0fd78eaa7f41319e0f20a4434a82">ctrl::ISensor::read()</a>.</p>
+<p class="reference">References <a class="el" href="ISensor_8h_source.html#l00040">ctrl::ISensor::isValid()</a>, and <a class="el" href="classctrl_1_1ISensor.html#abadb0fd78eaa7f41319e0f20a4434a82">ctrl::ISensor::read()</a>.</p>
 
 </div>
 </div>
@@ -267,11 +298,13 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Reset the hold value to 0, the stale counter, and the inner sensor. </p>
+
 <p>Reimplemented from <a class="el" href="classctrl_1_1ISensor.html#a3010cc729f7fb0b5f1d08f06d8285195">ctrl::ISensor</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00076">76</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00097">97</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
 
-<p class="reference">References <a class="el" href="ISensor_8h_source.html#l00026">ctrl::ISensor::reset()</a>.</p>
+<p class="reference">References <a class="el" href="ISensor_8h_source.html#l00045">ctrl::ISensor::reset()</a>.</p>
 
 </div>
 </div>
@@ -299,7 +332,16 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00091">91</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
+<p>Register a callback invoked when stale_count reaches max_stale_steps. </p>
+<p>Useful for triggering alarms or switching to a safe mode without polling. The callback receives the current stale count.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cb</td><td>Callback <code>void(int stale_count)</code>. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00124">124</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
 
 </div>
 </div>
@@ -326,7 +368,10 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00084">84</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
+<p>Number of consecutive samples since the last valid reading. </p>
+<dl class="section return"><dt>Returns</dt><dd>Stale-sample count. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="SafeSensor_8h_source.html#l00108">108</a> of file <a class="el" href="SafeSensor_8h_source.html">SafeSensor.h</a>.</p>
 
 </div>
 </div>

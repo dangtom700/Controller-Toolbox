@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,6 +81,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p><a class="el" href="classctrl_1_1ISensor.html" title="Abstract base class for all sensor adapters in the HAL.">ISensor</a> implementation that reads from a <a class="el" href="classctrl_1_1SimPlant.html" title="Thread-safe discrete-time plant simulator.">SimPlant</a>.  
+ <a href="classctrl_1_1SimSensor.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="SimSensor_8h_source.html">SimSensor.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for ctrl::SimSensor:</div>
@@ -88,27 +91,32 @@ Inheritance diagram for ctrl::SimSensor:</div>
  <div class="center">
   <img src="classctrl_1_1SimSensor.png" usemap="#ctrl::SimSensor_map" alt=""/>
   <map id="ctrl::SimSensor_map" name="ctrl::SimSensor_map">
-<area href="classctrl_1_1ISensor.html" alt="ctrl::ISensor" shape="rect" coords="0,0,96,24"/>
+<area href="classctrl_1_1ISensor.html" title="Abstract base class for all sensor adapters in the HAL." alt="ctrl::ISensor" shape="rect" coords="0,0,96,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a035b1537876e408b390bdb7911250370" id="r_a035b1537876e408b390bdb7911250370"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimSensor.html#a035b1537876e408b390bdb7911250370">SimSensor</a> (<a class="el" href="classctrl_1_1SimPlant.html">SimPlant</a> &amp;plant)</td></tr>
+<tr class="memdesc:a035b1537876e408b390bdb7911250370"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct the sensor adapter.  <br /></td></tr>
 <tr class="separator:a035b1537876e408b390bdb7911250370"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf43364c5cbca96013f486e834da2825" id="r_aaf43364c5cbca96013f486e834da2825"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimSensor.html#aaf43364c5cbca96013f486e834da2825">read</a> () override</td></tr>
+<tr class="memdesc:aaf43364c5cbca96013f486e834da2825"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the plant's cached output from the last step().  <br /></td></tr>
 <tr class="separator:aaf43364c5cbca96013f486e834da2825"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab8b15621d8bf66b61b7d237a5396046" id="r_aab8b15621d8bf66b61b7d237a5396046"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimSensor.html#aab8b15621d8bf66b61b7d237a5396046">isValid</a> () const override</td></tr>
+<tr class="memdesc:aab8b15621d8bf66b61b7d237a5396046"><td class="mdescLeft">&#160;</td><td class="mdescRight">Always returns <code>true</code> (simulation has no hardware faults).  <br /></td></tr>
 <tr class="separator:aab8b15621d8bf66b61b7d237a5396046"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9b4d0770aaaadd68dca7c358989c6a3d" id="r_a9b4d0770aaaadd68dca7c358989c6a3d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimSensor.html#a9b4d0770aaaadd68dca7c358989c6a3d">reset</a> () override</td></tr>
+<tr class="memdesc:a9b4d0770aaaadd68dca7c358989c6a3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">No-op — plant reset is the caller's responsibility.  <br /></td></tr>
 <tr class="separator:a9b4d0770aaaadd68dca7c358989c6a3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classctrl_1_1ISensor"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classctrl_1_1ISensor')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classctrl_1_1ISensor.html">ctrl::ISensor</a></td></tr>
 <tr class="memitem:a7d48f47d37701465bf558e62295ae647 inherit pub_methods_classctrl_1_1ISensor" id="r_a7d48f47d37701465bf558e62295ae647"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ISensor.html#a7d48f47d37701465bf558e62295ae647">~ISensor</a> ()=default</td></tr>
 <tr class="separator:a7d48f47d37701465bf558e62295ae647 inherit pub_methods_classctrl_1_1ISensor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="SimSensor_8h_source.html#l00020">20</a> of file <a class="el" href="SimSensor_8h_source.html">SimSensor.h</a>.</p>
+<div class="textblock"><p><a class="el" href="classctrl_1_1ISensor.html" title="Abstract base class for all sensor adapters in the HAL.">ISensor</a> implementation that reads from a <a class="el" href="classctrl_1_1SimPlant.html" title="Thread-safe discrete-time plant simulator.">SimPlant</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="SimSensor_8h_source.html#l00029">29</a> of file <a class="el" href="SimSensor_8h_source.html">SimSensor.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a035b1537876e408b390bdb7911250370" name="a035b1537876e408b390bdb7911250370"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a035b1537876e408b390bdb7911250370">&#9670;&#160;</a></span>SimSensor()</h2>
@@ -134,7 +142,15 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="SimSensor_8h_source.html#l00022">22</a> of file <a class="el" href="SimSensor_8h_source.html">SimSensor.h</a>.</p>
+<p>Construct the sensor adapter. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">plant</td><td><a class="el" href="classctrl_1_1SimPlant.html" title="Thread-safe discrete-time plant simulator.">SimPlant</a> instance (must outlive this object). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="SimSensor_8h_source.html#l00035">35</a> of file <a class="el" href="SimSensor_8h_source.html">SimSensor.h</a>.</p>
 
 </div>
 </div>
@@ -162,9 +178,12 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Always returns <code>true</code> (simulation has no hardware faults). </p>
+<dl class="section return"><dt>Returns</dt><dd><code>true</code>. </dd></dl>
+
 <p>Reimplemented from <a class="el" href="classctrl_1_1ISensor.html#a366745c03cda60b3c91f2e5425e818d7">ctrl::ISensor</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="SimSensor_8h_source.html#l00025">25</a> of file <a class="el" href="SimSensor_8h_source.html">SimSensor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SimSensor_8h_source.html#l00047">47</a> of file <a class="el" href="SimSensor_8h_source.html">SimSensor.h</a>.</p>
 
 </div>
 </div>
@@ -191,9 +210,12 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Return the plant's cached output from the last step(). </p>
+<dl class="section return"><dt>Returns</dt><dd>y[k]. </dd></dl>
+
 <p>Implements <a class="el" href="classctrl_1_1ISensor.html#abadb0fd78eaa7f41319e0f20a4434a82">ctrl::ISensor</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="SimSensor_8h_source.html#l00024">24</a> of file <a class="el" href="SimSensor_8h_source.html">SimSensor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SimSensor_8h_source.html#l00041">41</a> of file <a class="el" href="SimSensor_8h_source.html">SimSensor.h</a>.</p>
 
 <p class="reference">References <a class="el" href="SimPlant_8cpp_source.html#l00025">ctrl::SimPlant::output()</a>.</p>
 
@@ -222,9 +244,11 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>No-op — plant reset is the caller's responsibility. </p>
+
 <p>Reimplemented from <a class="el" href="classctrl_1_1ISensor.html#a3010cc729f7fb0b5f1d08f06d8285195">ctrl::ISensor</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="SimSensor_8h_source.html#l00026">26</a> of file <a class="el" href="SimSensor_8h_source.html">SimSensor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SimSensor_8h_source.html#l00052">52</a> of file <a class="el" href="SimSensor_8h_source.html">SimSensor.h</a>.</p>
 
 </div>
 </div>

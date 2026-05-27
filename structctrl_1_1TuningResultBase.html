@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,6 +81,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Base fields shared by all <a class="el" href="classctrl_1_1TunerSuite.html" title="Unified collection of all eight tuning strategies with runtime compatibility checking.">TunerSuite</a> result types.  
+ <a href="structctrl_1_1TuningResultBase.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for ctrl::TuningResultBase:</div>
@@ -88,31 +91,37 @@ Inheritance diagram for ctrl::TuningResultBase:</div>
  <div class="center">
   <img src="structctrl_1_1TuningResultBase.png" usemap="#ctrl::TuningResultBase_map" alt=""/>
   <map id="ctrl::TuningResultBase_map" name="ctrl::TuningResultBase_map">
-<area href="structctrl_1_1KalmanTuneResult.html" alt="ctrl::KalmanTuneResult" shape="rect" coords="0,56,147,80"/>
-<area href="structctrl_1_1LQRTuneResult.html" alt="ctrl::LQRTuneResult" shape="rect" coords="157,56,304,80"/>
-<area href="structctrl_1_1LeadLagTuneResult.html" alt="ctrl::LeadLagTuneResult" shape="rect" coords="314,56,461,80"/>
-<area href="structctrl_1_1MPCTuneResult.html" alt="ctrl::MPCTuneResult" shape="rect" coords="471,56,618,80"/>
-<area href="structctrl_1_1OptimTuneResult.html" alt="ctrl::OptimTuneResult" shape="rect" coords="628,56,775,80"/>
-<area href="structctrl_1_1PIDTuneResult.html" alt="ctrl::PIDTuneResult" shape="rect" coords="785,56,932,80"/>
+<area href="structctrl_1_1KalmanTuneResult.html" title="Result of a Kalman noise tuning call." alt="ctrl::KalmanTuneResult" shape="rect" coords="0,56,147,80"/>
+<area href="structctrl_1_1LQRTuneResult.html" title="Result of a Bryson LQR tuning call." alt="ctrl::LQRTuneResult" shape="rect" coords="157,56,304,80"/>
+<area href="structctrl_1_1LeadLagTuneResult.html" title="Result of a loop-shaping lead/lag tuning call." alt="ctrl::LeadLagTuneResult" shape="rect" coords="314,56,461,80"/>
+<area href="structctrl_1_1MPCTuneResult.html" title="Result of an MPC horizon tuning call." alt="ctrl::MPCTuneResult" shape="rect" coords="471,56,618,80"/>
+<area href="structctrl_1_1OptimTuneResult.html" title="Result of an optimisation-based tuning call (Nelder-Mead ISE/ITAE)." alt="ctrl::OptimTuneResult" shape="rect" coords="628,56,775,80"/>
+<area href="structctrl_1_1PIDTuneResult.html" title="Result of a relay/ZN, IMC, or Cohen-Coon tuning call." alt="ctrl::PIDTuneResult" shape="rect" coords="785,56,932,80"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a2d65fe6726445e3b8ff99b23fd80c671" id="r_a2d65fe6726445e3b8ff99b23fd80c671"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TuningResultBase.html#a2d65fe6726445e3b8ff99b23fd80c671">success</a> = false</td></tr>
+<tr class="memdesc:a2d65fe6726445e3b8ff99b23fd80c671"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>false</code> → parameters are default or invalid.  <br /></td></tr>
 <tr class="separator:a2d65fe6726445e3b8ff99b23fd80c671"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46a48ca5d07af7f910c53e321cbd225c" id="r_a46a48ca5d07af7f910c53e321cbd225c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TuningResultBase.html#a46a48ca5d07af7f910c53e321cbd225c">warned</a> = false</td></tr>
+<tr class="memdesc:a46a48ca5d07af7f910c53e321cbd225c"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>true</code> → a soft warning was emitted to std::clog.  <br /></td></tr>
 <tr class="separator:a46a48ca5d07af7f910c53e321cbd225c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ae8d074fd1836f905c9829d6302ddb1" id="r_a7ae8d074fd1836f905c9829d6302ddb1"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TuningResultBase.html#a7ae8d074fd1836f905c9829d6302ddb1">warning</a></td></tr>
+<tr class="memdesc:a7ae8d074fd1836f905c9829d6302ddb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diagnostic text (also sent to std::clog when non-empty).  <br /></td></tr>
 <tr class="separator:a7ae8d074fd1836f905c9829d6302ddb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40e273dd00b5617da70596b2ec5be355" id="r_a40e273dd00b5617da70596b2ec5be355"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TuningResultBase.html#a40e273dd00b5617da70596b2ec5be355">predictedCrossoverFreq</a> = -1.0</td></tr>
+<tr class="memdesc:a40e273dd00b5617da70596b2ec5be355"><td class="mdescLeft">&#160;</td><td class="mdescRight">Predicted gain crossover ωc [rad/s]; −1 if unknown.  <br /></td></tr>
 <tr class="separator:a40e273dd00b5617da70596b2ec5be355"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8845ae86ce6d01d58399a10dd5d52f48" id="r_a8845ae86ce6d01d58399a10dd5d52f48"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TuningResultBase.html#a8845ae86ce6d01d58399a10dd5d52f48">predictedDampingRatio</a> = -1.0</td></tr>
+<tr class="memdesc:a8845ae86ce6d01d58399a10dd5d52f48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Predicted damping ratio ζ; −1 if unknown.  <br /></td></tr>
 <tr class="separator:a8845ae86ce6d01d58399a10dd5d52f48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00076">76</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
+<div class="textblock"><p>Base fields shared by all <a class="el" href="classctrl_1_1TunerSuite.html" title="Unified collection of all eight tuning strategies with runtime compatibility checking.">TunerSuite</a> result types. </p>
+
+<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00087">87</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a40e273dd00b5617da70596b2ec5be355" name="a40e273dd00b5617da70596b2ec5be355"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a40e273dd00b5617da70596b2ec5be355">&#9670;&#160;</a></span>predictedCrossoverFreq</h2>
@@ -126,7 +135,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00083">83</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
+<p>Predicted gain crossover ωc [rad/s]; −1 if unknown. </p>
+
+<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00093">93</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
 
 </div>
 </div>
@@ -142,7 +153,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00084">84</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
+<p>Predicted damping ratio ζ; −1 if unknown. </p>
+
+<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00094">94</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
 
 </div>
 </div>
@@ -158,7 +171,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00078">78</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
+<p><code>false</code> → parameters are default or invalid. </p>
+
+<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00089">89</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="TunerSuite_8cpp_source.html#l00365">ctrl::TunerSuite::bryson()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00313">ctrl::TunerSuite::cohenCoon()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00275">ctrl::TunerSuite::imcPID()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00406">ctrl::TunerSuite::kalmanNoise()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00477">ctrl::TunerSuite::loopShaping()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00441">ctrl::TunerSuite::mpcHorizon()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00662">ctrl::TunerSuite::optimise()</a>, and <a class="el" href="TunerSuite_8cpp_source.html#l00235">ctrl::TunerSuite::relayZN()</a>.</p>
 
@@ -176,7 +191,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00079">79</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
+<p><code>true</code> → a soft warning was emitted to std::clog. </p>
+
+<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00090">90</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
 
 </div>
 </div>
@@ -192,7 +209,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00080">80</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
+<p>Diagnostic text (also sent to std::clog when non-empty). </p>
+
+<p class="definition">Definition at line <a class="el" href="TunerSuite_8h_source.html#l00091">91</a> of file <a class="el" href="TunerSuite_8h_source.html">TunerSuite.h</a>.</p>
 
 </div>
 </div>

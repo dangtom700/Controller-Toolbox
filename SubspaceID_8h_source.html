@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -87,129 +87,47 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;Eigen/Dense&gt;</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// Subspace State-Space System Identification (N4SID / MOESP).</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">//</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// Identifies a linear discrete-time state-space model from batch I/O data:</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">//   x[k+1] = A.x[k] + B.u[k] + w[k]</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">//   y[k]   = C.x[k] + D.u[k] + v[k]</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">//</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// Algorithm - MOESP oblique-projection variant (Verhaegen &amp; Dewilde 1992):</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">//  1. Build 2i-block Hankel matrices from (Y, U):</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">//       Z = [U_f; W_p; Y_f]   where W_p = [U_p; Y_p]</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">//</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">//  2. Thin LQ decomposition of Z (QR of Z&#39;) isolates the (3,2) block L32</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">//     which contains the oblique projection of Y_f onto W_p \perp U_f.</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">//</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">//  3. SVD(L32): singular values reveal system order; left singular vectors</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">//     form the extended observability matrix Gamma = U[:, :n].sqrt(S[:n]).</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">//</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">//  4. Extract  C = Gamma[:p, :]</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">//              A = Gamma_up^T . Gamma_down   (shift-invariance, least squares)</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">//</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment">//  5. Least-squares regression for B and D from the state sequence and data.</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment">//</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">// Data requirements:</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">//   - Persistent excitation: the input must excite at least n_order frequencies.</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">//   - N &gt;&gt; 2*i*(m+p): more samples -&gt; better estimates.</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">//   - i &gt;= n_order/p (i_horizon must be large enough to capture all modes).</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="comment">//</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment">// Output singularValues can be plotted to choose n_order: look for an elbow</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment">// where singular values drop sharply (signal vs. noise subspace boundary).</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment">//</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment">// Ref: Van Overschee &amp; De Moor &quot;Subspace Identification for Linear Systems&quot;</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment">//      (Kluwer 1996); Verhaegen &quot;Identification of the Deterministic Part of</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment">//      MIMO State Space Models&quot; Automatica (1994).</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacectrl.html">ctrl</a></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>{</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
-<div class="foldopen" id="foldopen00042" data-start="{" data-end="};">
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="structctrl_1_1SubspaceIDResult.html">   42</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structctrl_1_1SubspaceIDResult.html">SubspaceIDResult</a></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>{</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="structctrl_1_1SubspaceIDResult.html#a43faac3b1f835579bf140d39b37dac21">   44</a></span>    std::optional&lt;StateSpace&gt; <a class="code hl_variable" href="structctrl_1_1SubspaceIDResult.html#a43faac3b1f835579bf140d39b37dac21">model</a>;  <span class="comment">// identified A,B,C,D,Ts (empty on failure)</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="structctrl_1_1SubspaceIDResult.html#ab01edb10fbae2d8311d14377a26eb8ad">   45</a></span>    Eigen::VectorXd  <a class="code hl_variable" href="structctrl_1_1SubspaceIDResult.html#ab01edb10fbae2d8311d14377a26eb8ad">singularValues</a>;  <span class="comment">// all singular values of L32 (for order selection)</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="comment">// Stochastic realisation - estimated from residuals after the deterministic fit.</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="comment">// kalmanGain:  n*p Kalman gain K such that x[k+1] = A x[k] + B u[k] + K epsilon[k].</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="comment">//              Pass directly to KalmanFilter or DiscreteLQG as the innovation-based</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="comment">//              gain, avoiding manual Q/R tuning.</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="comment">// innovCov:    p*p innovation covariance Lambda = E[epsilon epsilon&#39;].  Use as R_noise in KalmanFilter.</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="comment">// Both are empty (size 0) on failure.</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="structctrl_1_1SubspaceIDResult.html#ac0a3c0cbe4e80c8a31969e26d1c0171d">   53</a></span>    Eigen::MatrixXd  <a class="code hl_variable" href="structctrl_1_1SubspaceIDResult.html#ac0a3c0cbe4e80c8a31969e26d1c0171d">kalmanGain</a>;      <span class="comment">// n*p  (empty on failure)</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="structctrl_1_1SubspaceIDResult.html#a938133873cfb3e4521051e1017cc2982">   54</a></span>    Eigen::MatrixXd  <a class="code hl_variable" href="structctrl_1_1SubspaceIDResult.html#a938133873cfb3e4521051e1017cc2982">innovCov</a>;        <span class="comment">// p*p  (empty on failure)</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="structctrl_1_1SubspaceIDResult.html#a5c0e45ca264974aa9cc68d2b0cb4357e">   56</a></span>    <span class="keywordtype">bool</span>             <a class="code hl_variable" href="structctrl_1_1SubspaceIDResult.html#a5c0e45ca264974aa9cc68d2b0cb4357e">success</a> = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="structctrl_1_1SubspaceIDResult.html#ab11bfc9d8aa33ea86ee77445613957d8">   57</a></span>    std::string      <a class="code hl_variable" href="structctrl_1_1SubspaceIDResult.html#ab11bfc9d8aa33ea86ee77445613957d8">message</a>;         <span class="comment">// error description on failure</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>};</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacectrl.html">ctrl</a></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>{</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="foldopen" id="foldopen00047" data-start="{" data-end="};">
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="structctrl_1_1SubspaceIDResult.html">   47</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structctrl_1_1SubspaceIDResult.html">SubspaceIDResult</a></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>{</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="structctrl_1_1SubspaceIDResult.html#a43faac3b1f835579bf140d39b37dac21">   49</a></span>    std::optional&lt;StateSpace&gt; <a class="code hl_variable" href="structctrl_1_1SubspaceIDResult.html#a43faac3b1f835579bf140d39b37dac21">model</a>;        </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="structctrl_1_1SubspaceIDResult.html#ab01edb10fbae2d8311d14377a26eb8ad">   50</a></span>    Eigen::VectorXd  <a class="code hl_variable" href="structctrl_1_1SubspaceIDResult.html#ab01edb10fbae2d8311d14377a26eb8ad">singularValues</a>;        </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="structctrl_1_1SubspaceIDResult.html#ac0a3c0cbe4e80c8a31969e26d1c0171d">   59</a></span>    Eigen::MatrixXd  <a class="code hl_variable" href="structctrl_1_1SubspaceIDResult.html#ac0a3c0cbe4e80c8a31969e26d1c0171d">kalmanGain</a>;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="structctrl_1_1SubspaceIDResult.html#a938133873cfb3e4521051e1017cc2982">   66</a></span>    Eigen::MatrixXd  <a class="code hl_variable" href="structctrl_1_1SubspaceIDResult.html#a938133873cfb3e4521051e1017cc2982">innovCov</a>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="structctrl_1_1SubspaceIDResult.html#a5c0e45ca264974aa9cc68d2b0cb4357e">   68</a></span>    <span class="keywordtype">bool</span>        <a class="code hl_variable" href="structctrl_1_1SubspaceIDResult.html#a5c0e45ca264974aa9cc68d2b0cb4357e">success</a> = <span class="keyword">false</span>; </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="structctrl_1_1SubspaceIDResult.html#ab11bfc9d8aa33ea86ee77445613957d8">   69</a></span>    std::string <a class="code hl_variable" href="structctrl_1_1SubspaceIDResult.html#ab11bfc9d8aa33ea86ee77445613957d8">message</a>;         </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>};</div>
 </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment">// n4sid: batch subspace identification.</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="comment">//</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="comment">// Y:          output matrix (p * N)  - rows = outputs, cols = time samples</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="comment">// U:          input  matrix (m * N)  - rows = inputs,  cols = time samples</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="comment">// n_order:    desired state order n  (choose by inspecting result.singularValues,</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="comment">//             or use suggestOrder() below)</span></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="comment">// i_horizon:  number of block rows in Hankel matrices (recommend i &gt;= 2*n_order/p,</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="comment">//             minimum i = n_order + 1)</span></div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="comment">// Ts:         sample time [s]</span></div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="comment">//</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="comment">// IMPORTANT - Similarity transform:</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="comment">//   The returned state-space realization (A, B, C, D) is determined only up to an</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="comment">//   arbitrary similarity transform T: A_true = T*A*T^{-1}, B_true = T*B, C_true = C*T^{-1}.</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="comment">//   The following quantities ARE similarity-invariant and can be trusted directly:</span></div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="comment">//     - Eigenvalues of A  (system poles)</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="comment">//     - I/O transfer function G(z) = C*(zI-A)^{-1}*B + D  (frequency response)</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="comment">//     - DC gain  C*(I-A)^{-1}*B + D</span></div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="comment">//     - Stability (all |lambda(A)| &lt; 1)</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="comment">//   The following are NOT similarity-invariant and must NOT be compared to physical values:</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="comment">//     - Individual entries of B, C, D</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="comment">//     - State norms or covariances</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="comment">//   If you need a canonical realization, apply a balancing transformation (e.g., via</span></div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="comment">//   Eigen::RealSchur) after identification. For Kalman filter use, prefer the returned</span></div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="comment">//   kalmanGain (already in the identified basis) over manual Q/R tuning.</span></div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="comment">//</span></div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="comment">// svd_tol:    tolerance for singular value truncation (e.g. 1e-6). </span></div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="comment">//             If &gt; 0, n_order is capped at the number of SVs &gt; svd_tol.</span></div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="comment">//</span></div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="comment">// Returns a SubspaceIDResult. On failure, result.success = false and result.message</span></div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="comment">// describes the cause.</span></div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><a class="code hl_struct" href="structctrl_1_1SubspaceIDResult.html">SubspaceIDResult</a> <a class="code hl_function" href="namespacectrl.html#a48a62fef709551ddc55b6c8f07101213">n4sid</a>(<span class="keyword">const</span> Eigen::MatrixXd &amp;Y,</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>                       <span class="keyword">const</span> Eigen::MatrixXd &amp;U,</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>                       <span class="keywordtype">int</span> n_order,</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>                       <span class="keywordtype">int</span> i_horizon,</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>                       <span class="keywordtype">double</span> Ts,</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>                       <span class="keywordtype">double</span> svd_tol = -1.0);</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="comment">// suggestOrder: automated system-order selection from the singular-value spectrum.</span></div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="comment">//</span></div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="comment">// Uses the elbow (maximum consecutive ratio) heuristic: finds the index i* at which</span></div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="comment">// sv(i*) / sv(i*+1) is maximised (the sharpest drop in the spectrum) and returns</span></div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="comment">// i* + 1 as the suggested order.  A secondary threshold guard caps the result at</span></div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="comment">// the first index where sv(i)/sv(0) falls below `threshold` (default 1 %).</span></div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="comment">//</span></div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="comment">// sv:        SubspaceIDResult::singularValues from a previous n4sid call.</span></div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="comment">// threshold: relative floor; singular values below threshold*sv(0) are treated as</span></div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="comment">//            noise.  Set to 0 to disable the threshold guard.</span></div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="comment">// maxOrder:  hard cap on the returned order (-1 = no cap).</span></div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="comment">//</span></div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="comment">// Returns at least 1.  Call after n4sid() to eliminate the manual &quot;elbow inspection&quot;</span></div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="comment">// step when building adaptive loops (e.g., RLS -&gt; n4sid -&gt; GPC).</span></div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="keywordtype">int</span> <a class="code hl_function" href="namespacectrl.html#abf201dbb12d9ee3725c56b5c3d2a5831">suggestOrder</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;sv,</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><a class="code hl_struct" href="structctrl_1_1SubspaceIDResult.html">SubspaceIDResult</a> <a class="code hl_function" href="namespacectrl.html#ac04c2f87d749604186fa29b45048e9a3">n4sid</a>(<span class="keyword">const</span> Eigen::MatrixXd &amp;Y,</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>                       <span class="keyword">const</span> Eigen::MatrixXd &amp;U,</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>                       <span class="keywordtype">int</span> n_order,</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>                       <span class="keywordtype">int</span> i_horizon,</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>                       <span class="keywordtype">double</span> Ts,</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>                       <span class="keywordtype">double</span> svd_tol = -1.0);</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="keywordtype">int</span> <a class="code hl_function" href="namespacectrl.html#aefc7138f387ba6cc9fed750baa2e615c">suggestOrder</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;sv,</div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>                 <span class="keywordtype">double</span> threshold = 0.01,</div>
 <div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>                 <span class="keywordtype">int</span> maxOrder     = -1);</div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>} <span class="comment">// namespace ctrl</span></div>
-<div class="ttc" id="aPlantModel_8h_html"><div class="ttname"><a href="PlantModel_8h.html">PlantModel.h</a></div></div>
-<div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AtomicParamBuffer_8h_source.html#l00046">AtomicParamBuffer.h:46</a></div></div>
-<div class="ttc" id="anamespacectrl_html_a48a62fef709551ddc55b6c8f07101213"><div class="ttname"><a href="namespacectrl.html#a48a62fef709551ddc55b6c8f07101213">ctrl::n4sid</a></div><div class="ttdeci">SubspaceIDResult n4sid(const Eigen::MatrixXd &amp;Y, const Eigen::MatrixXd &amp;U, int n_order, int i, double Ts, double svd_tol)</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8cpp_source.html#l00029">SubspaceID.cpp:29</a></div></div>
-<div class="ttc" id="anamespacectrl_html_abf201dbb12d9ee3725c56b5c3d2a5831"><div class="ttname"><a href="namespacectrl.html#abf201dbb12d9ee3725c56b5c3d2a5831">ctrl::suggestOrder</a></div><div class="ttdeci">int suggestOrder(const Eigen::VectorXd &amp;sv, double threshold, int maxOrder)</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8cpp_source.html#l00276">SubspaceID.cpp:276</a></div></div>
-<div class="ttc" id="astructctrl_1_1SubspaceIDResult_html"><div class="ttname"><a href="structctrl_1_1SubspaceIDResult.html">ctrl::SubspaceIDResult</a></div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8h_source.html#l00042">SubspaceID.h:43</a></div></div>
-<div class="ttc" id="astructctrl_1_1SubspaceIDResult_html_a43faac3b1f835579bf140d39b37dac21"><div class="ttname"><a href="structctrl_1_1SubspaceIDResult.html#a43faac3b1f835579bf140d39b37dac21">ctrl::SubspaceIDResult::model</a></div><div class="ttdeci">std::optional&lt; StateSpace &gt; model</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8h_source.html#l00044">SubspaceID.h:44</a></div></div>
-<div class="ttc" id="astructctrl_1_1SubspaceIDResult_html_a5c0e45ca264974aa9cc68d2b0cb4357e"><div class="ttname"><a href="structctrl_1_1SubspaceIDResult.html#a5c0e45ca264974aa9cc68d2b0cb4357e">ctrl::SubspaceIDResult::success</a></div><div class="ttdeci">bool success</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8h_source.html#l00056">SubspaceID.h:56</a></div></div>
-<div class="ttc" id="astructctrl_1_1SubspaceIDResult_html_a938133873cfb3e4521051e1017cc2982"><div class="ttname"><a href="structctrl_1_1SubspaceIDResult.html#a938133873cfb3e4521051e1017cc2982">ctrl::SubspaceIDResult::innovCov</a></div><div class="ttdeci">Eigen::MatrixXd innovCov</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8h_source.html#l00054">SubspaceID.h:54</a></div></div>
-<div class="ttc" id="astructctrl_1_1SubspaceIDResult_html_ab01edb10fbae2d8311d14377a26eb8ad"><div class="ttname"><a href="structctrl_1_1SubspaceIDResult.html#ab01edb10fbae2d8311d14377a26eb8ad">ctrl::SubspaceIDResult::singularValues</a></div><div class="ttdeci">Eigen::VectorXd singularValues</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8h_source.html#l00045">SubspaceID.h:45</a></div></div>
-<div class="ttc" id="astructctrl_1_1SubspaceIDResult_html_ab11bfc9d8aa33ea86ee77445613957d8"><div class="ttname"><a href="structctrl_1_1SubspaceIDResult.html#ab11bfc9d8aa33ea86ee77445613957d8">ctrl::SubspaceIDResult::message</a></div><div class="ttdeci">std::string message</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8h_source.html#l00057">SubspaceID.h:57</a></div></div>
-<div class="ttc" id="astructctrl_1_1SubspaceIDResult_html_ac0a3c0cbe4e80c8a31969e26d1c0171d"><div class="ttname"><a href="structctrl_1_1SubspaceIDResult.html#ac0a3c0cbe4e80c8a31969e26d1c0171d">ctrl::SubspaceIDResult::kalmanGain</a></div><div class="ttdeci">Eigen::MatrixXd kalmanGain</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8h_source.html#l00053">SubspaceID.h:53</a></div></div>
+<div class="ttc" id="aPlantModel_8h_html"><div class="ttname"><a href="PlantModel_8h.html">PlantModel.h</a></div><div class="ttdoc">Discrete-time plant model representations and utilities.</div></div>
+<div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AtomicParamBuffer_8h_source.html#l00045">AtomicParamBuffer.h:45</a></div></div>
+<div class="ttc" id="anamespacectrl_html_ac04c2f87d749604186fa29b45048e9a3"><div class="ttname"><a href="namespacectrl.html#ac04c2f87d749604186fa29b45048e9a3">ctrl::n4sid</a></div><div class="ttdeci">SubspaceIDResult n4sid(const Eigen::MatrixXd &amp;Y, const Eigen::MatrixXd &amp;U, int n_order, int i, double Ts, double svd_tol)</div><div class="ttdoc">Batch subspace state-space identification (N4SID / MOESP).</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8cpp_source.html#l00029">SubspaceID.cpp:29</a></div></div>
+<div class="ttc" id="anamespacectrl_html_aefc7138f387ba6cc9fed750baa2e615c"><div class="ttname"><a href="namespacectrl.html#aefc7138f387ba6cc9fed750baa2e615c">ctrl::suggestOrder</a></div><div class="ttdeci">int suggestOrder(const Eigen::VectorXd &amp;sv, double threshold, int maxOrder)</div><div class="ttdoc">Automated system-order selection from the singular-value spectrum.</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8cpp_source.html#l00276">SubspaceID.cpp:276</a></div></div>
+<div class="ttc" id="astructctrl_1_1SubspaceIDResult_html"><div class="ttname"><a href="structctrl_1_1SubspaceIDResult.html">ctrl::SubspaceIDResult</a></div><div class="ttdoc">Output of the n4sid() identification algorithm.</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8h_source.html#l00047">SubspaceID.h:48</a></div></div>
+<div class="ttc" id="astructctrl_1_1SubspaceIDResult_html_a43faac3b1f835579bf140d39b37dac21"><div class="ttname"><a href="structctrl_1_1SubspaceIDResult.html#a43faac3b1f835579bf140d39b37dac21">ctrl::SubspaceIDResult::model</a></div><div class="ttdeci">std::optional&lt; StateSpace &gt; model</div><div class="ttdoc">Identified A, B, C, D, Ts; empty on failure.</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8h_source.html#l00049">SubspaceID.h:49</a></div></div>
+<div class="ttc" id="astructctrl_1_1SubspaceIDResult_html_a5c0e45ca264974aa9cc68d2b0cb4357e"><div class="ttname"><a href="structctrl_1_1SubspaceIDResult.html#a5c0e45ca264974aa9cc68d2b0cb4357e">ctrl::SubspaceIDResult::success</a></div><div class="ttdeci">bool success</div><div class="ttdoc">true when identification succeeded.</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8h_source.html#l00068">SubspaceID.h:68</a></div></div>
+<div class="ttc" id="astructctrl_1_1SubspaceIDResult_html_a938133873cfb3e4521051e1017cc2982"><div class="ttname"><a href="structctrl_1_1SubspaceIDResult.html#a938133873cfb3e4521051e1017cc2982">ctrl::SubspaceIDResult::innovCov</a></div><div class="ttdeci">Eigen::MatrixXd innovCov</div><div class="ttdoc">Innovation covariance Λ = E[ε·εᵀ] (p × p).</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8h_source.html#l00066">SubspaceID.h:66</a></div></div>
+<div class="ttc" id="astructctrl_1_1SubspaceIDResult_html_ab01edb10fbae2d8311d14377a26eb8ad"><div class="ttname"><a href="structctrl_1_1SubspaceIDResult.html#ab01edb10fbae2d8311d14377a26eb8ad">ctrl::SubspaceIDResult::singularValues</a></div><div class="ttdeci">Eigen::VectorXd singularValues</div><div class="ttdoc">All singular values of L32 (for order selection).</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8h_source.html#l00050">SubspaceID.h:50</a></div></div>
+<div class="ttc" id="astructctrl_1_1SubspaceIDResult_html_ab11bfc9d8aa33ea86ee77445613957d8"><div class="ttname"><a href="structctrl_1_1SubspaceIDResult.html#ab11bfc9d8aa33ea86ee77445613957d8">ctrl::SubspaceIDResult::message</a></div><div class="ttdeci">std::string message</div><div class="ttdoc">Error description on failure.</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8h_source.html#l00069">SubspaceID.h:69</a></div></div>
+<div class="ttc" id="astructctrl_1_1SubspaceIDResult_html_ac0a3c0cbe4e80c8a31969e26d1c0171d"><div class="ttname"><a href="structctrl_1_1SubspaceIDResult.html#ac0a3c0cbe4e80c8a31969e26d1c0171d">ctrl::SubspaceIDResult::kalmanGain</a></div><div class="ttdeci">Eigen::MatrixXd kalmanGain</div><div class="ttdoc">Estimated Kalman gain (n × p).</div><div class="ttdef"><b>Definition</b> <a href="SubspaceID_8h_source.html#l00059">SubspaceID.h:59</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

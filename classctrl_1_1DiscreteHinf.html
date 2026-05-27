@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -83,6 +83,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Discrete-time dynamic output-feedback H∞ controller.  
+ <a href="classctrl_1_1DiscreteHinf.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for ctrl::DiscreteHinf:</div>
@@ -90,26 +93,34 @@ Inheritance diagram for ctrl::DiscreteHinf:</div>
  <div class="center">
   <img src="classctrl_1_1DiscreteHinf.png" usemap="#ctrl::DiscreteHinf_map" alt=""/>
   <map id="ctrl::DiscreteHinf_map" name="ctrl::DiscreteHinf_map">
-<area href="classctrl_1_1IController.html" alt="ctrl::IController" shape="rect" coords="0,0,106,24"/>
+<area href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers." alt="ctrl::IController" shape="rect" coords="0,0,106,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a169f8969ecf4fa37c73bda8a77e7696a" id="r_a169f8969ecf4fa37c73bda8a77e7696a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteHinf.html#a169f8969ecf4fa37c73bda8a77e7696a">DiscreteHinf</a> (const <a class="el" href="structctrl_1_1HinfResult.html">HinfResult</a> &amp;result)</td></tr>
+<tr class="memdesc:a169f8969ecf4fa37c73bda8a77e7696a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct from a completed synthesis result.  <br /></td></tr>
 <tr class="separator:a169f8969ecf4fa37c73bda8a77e7696a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a69fd61f01e7282265cda542324062d7a" id="r_a69fd61f01e7282265cda542324062d7a"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteHinf.html#a69fd61f01e7282265cda542324062d7a">compute</a> (double signal) override</td></tr>
+<tr class="memdesc:a69fd61f01e7282265cda542324062d7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] — SISO interface (ny = 1, nu = 1).  <br /></td></tr>
 <tr class="separator:a69fd61f01e7282265cda542324062d7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99c9c3b562b2f2a2c03c8dfbc63b5964" id="r_a99c9c3b562b2f2a2c03c8dfbc63b5964"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteHinf.html#a99c9c3b562b2f2a2c03c8dfbc63b5964">computeVec</a> (const Eigen::VectorXd &amp;y) override</td></tr>
+<tr class="memdesc:a99c9c3b562b2f2a2c03c8dfbc63b5964"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] — MIMO interface.  <br /></td></tr>
 <tr class="separator:a99c9c3b562b2f2a2c03c8dfbc63b5964"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a399495e7fcfed678c55081aaab1d9451" id="r_a399495e7fcfed678c55081aaab1d9451"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteHinf.html#a399495e7fcfed678c55081aaab1d9451">reset</a> () override</td></tr>
+<tr class="memdesc:a399495e7fcfed678c55081aaab1d9451"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset controller internal state xk to zero.  <br /></td></tr>
 <tr class="separator:a399495e7fcfed678c55081aaab1d9451"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53ed8cc37f17f93126077e0da4e99b48" id="r_a53ed8cc37f17f93126077e0da4e99b48"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteHinf.html#a53ed8cc37f17f93126077e0da4e99b48">sampleTime</a> () const override</td></tr>
+<tr class="memdesc:a53ed8cc37f17f93126077e0da4e99b48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
 <tr class="separator:a53ed8cc37f17f93126077e0da4e99b48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a57ba60889b7131863ba6d797c1b1363e" id="r_a57ba60889b7131863ba6d797c1b1363e"><td class="memItemLeft" align="right" valign="top">const Eigen::VectorXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteHinf.html#a57ba60889b7131863ba6d797c1b1363e">controllerState</a> () const</td></tr>
+<tr class="memdesc:a57ba60889b7131863ba6d797c1b1363e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current controller internal state xk (nk × 1).  <br /></td></tr>
 <tr class="separator:a57ba60889b7131863ba6d797c1b1363e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a8bdbbdf385d798f2e6a338911c382f" id="r_a7a8bdbbdf385d798f2e6a338911c382f"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteHinf.html#a7a8bdbbdf385d798f2e6a338911c382f">achievedGamma</a> () const</td></tr>
+<tr class="memdesc:a7a8bdbbdf385d798f2e6a338911c382f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Achieved H∞ bound γ from synthesis.  <br /></td></tr>
 <tr class="separator:a7a8bdbbdf385d798f2e6a338911c382f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Read-only access to controller matrices @{</div></td></tr>
 <tr class="memitem:ad0261e4e1e22da4e35df40eb1bcea8c0" id="r_ad0261e4e1e22da4e35df40eb1bcea8c0"><td class="memItemLeft" align="right" valign="top">const Eigen::MatrixXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteHinf.html#ad0261e4e1e22da4e35df40eb1bcea8c0">Ak</a> () const</td></tr>
 <tr class="separator:ad0261e4e1e22da4e35df40eb1bcea8c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8adbfd0a759755ad0d280df2210ac0b7" id="r_a8adbfd0a759755ad0d280df2210ac0b7"><td class="memItemLeft" align="right" valign="top">const Eigen::MatrixXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteHinf.html#a8adbfd0a759755ad0d280df2210ac0b7">Bk</a> () const</td></tr>
@@ -122,18 +133,24 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController" id="r_a209dd6532b22278f93430a0757aae4c7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a209dd6532b22278f93430a0757aae4c7">~IController</a> ()=default</td></tr>
 <tr class="separator:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController" id="r_a20821745ef7099941a9e9fdb6eeddd07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">bumplessInit</a> (double, double)</td></tr>
+<tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation — prepares the controller for smooth activation.  <br /></td></tr>
 <tr class="separator:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController" id="r_a2dc30a3b9bfb8b9649cef7218ad9e68b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b">isHealthy</a> () const</td></tr>
+<tr class="memdesc:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Health query for supervisory fault-tolerant control.  <br /></td></tr>
 <tr class="separator:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:ab774c7a783a1e411b701289d00be1603" id="r_ab774c7a783a1e411b701289d00be1603"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1HinfResult.html">HinfResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteHinf.html#ab774c7a783a1e411b701289d00be1603">solve</a> (const <a class="el" href="structctrl_1_1GeneralisedPlant.html">GeneralisedPlant</a> &amp;P, const <a class="el" href="structctrl_1_1HinfParams.html">HinfParams</a> &amp;params={})</td></tr>
+<tr class="memdesc:ab774c7a783a1e411b701289d00be1603"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve the discrete-time H∞ optimal control problem.  <br /></td></tr>
 <tr class="separator:ab774c7a783a1e411b701289d00be1603"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00177">177</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<div class="textblock"><p>Discrete-time dynamic output-feedback H∞ controller. </p>
+<p>Implements the synthesised controller K(z): </p><div class="fragment"><div class="line">xk[k+1] = Ak·xk[k] + Bk·y[k]</div>
+<div class="line">u[k]    = Ck·xk[k] + Dk·y[k]</div>
+</div><!-- fragment --> 
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00139">139</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a169f8969ecf4fa37c73bda8a77e7696a" name="a169f8969ecf4fa37c73bda8a77e7696a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a169f8969ecf4fa37c73bda8a77e7696a">&#9670;&#160;</a></span>DiscreteHinf()</h2>
@@ -159,9 +176,17 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Construct from a completed synthesis result. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">result</td><td>A <a class="el" href="structctrl_1_1HinfResult.html" title="Result returned by DiscreteHinf::solve().">HinfResult</a> with feasible == true. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8cpp_source.html#l00020">20</a> of file <a class="el" href="DiscreteHinf_8cpp_source.html">DiscreteHinf.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="DiscreteHinf_8h_source.html#l00144">ctrl::HinfResult::achievedGamma</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00150">ctrl::HinfResult::Ak</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00151">ctrl::HinfResult::Bk</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00152">ctrl::HinfResult::Ck</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00153">ctrl::HinfResult::Dk</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00143">ctrl::HinfResult::feasible</a>, and <a class="el" href="DiscreteHinf_8h_source.html#l00145">ctrl::HinfResult::Ts</a>.</p>
+<p class="reference">References <a class="el" href="DiscreteHinf_8h_source.html#l00103">ctrl::HinfResult::achievedGamma</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00110">ctrl::HinfResult::Ak</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00111">ctrl::HinfResult::Bk</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00112">ctrl::HinfResult::Ck</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00113">ctrl::HinfResult::Dk</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00102">ctrl::HinfResult::feasible</a>, and <a class="el" href="DiscreteHinf_8h_source.html#l00104">ctrl::HinfResult::Ts</a>.</p>
 
 </div>
 </div>
@@ -189,7 +214,9 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00212">212</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p>Achieved H∞ bound γ from synthesis. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00187">187</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 </div>
 </div>
@@ -216,7 +243,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00215">215</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00190">190</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 </div>
 </div>
@@ -243,7 +270,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00216">216</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00191">191</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 </div>
 </div>
@@ -270,7 +297,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00217">217</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00192">192</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 </div>
 </div>
@@ -297,6 +324,15 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Compute u[k] — SISO interface (ny = 1, nu = 1). </p>
+<p><code>signal</code> is the plant measurement y[k] <b>not</b> the tracking error. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">signal</td><td>Measurement output y[k]. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Control input u[k]. </dd></dl>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8">ctrl::IController</a>.</p>
 
@@ -330,6 +366,15 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Compute u[k] — MIMO interface. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">y</td><td>Measurement vector y[k] (ny × 1). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Control vector u[k] (nu × 1). </dd></dl>
+
 <p>Reimplemented from <a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e">ctrl::IController</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8cpp_source.html#l00045">45</a> of file <a class="el" href="DiscreteHinf_8cpp_source.html">DiscreteHinf.cpp</a>.</p>
@@ -361,7 +406,9 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00209">209</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p>Current controller internal state xk (nk × 1). </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00184">184</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 </div>
 </div>
@@ -388,7 +435,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00218">218</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00193">193</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 </div>
 </div>
@@ -414,6 +461,8 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Reset controller internal state xk to zero. </p>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac69ef6691d5831cda3adcdc59971fcac">ctrl::IController</a>.</p>
 
@@ -444,9 +493,11 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Sample time Ts [s]. </p>
+
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac1d1ab003ea7fa4f0ab49291d97473a0">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00206">206</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00181">181</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
 </div>
 </div>
@@ -484,9 +535,20 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Solve the discrete-time H∞ optimal control problem. </p>
+<p>Bisects γ from [gammaLow, params.gammaInit] until the bracket is narrower than params.gammaTol. gammaLow is set automatically.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">P</td><td>Generalised plant (use <a class="el" href="classctrl_1_1MixedSensitivity.html#a406b1e5f5063bb0207519a2e6e0d9c19" title="Assemble the generalised plant from G, W1, W2, W3.">MixedSensitivity::build()</a> for S/KS/T design). </td></tr>
+    <tr><td class="paramname">params</td><td>Synthesis algorithm parameters. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1HinfResult.html" title="Result returned by DiscreteHinf::solve().">HinfResult</a> containing controller matrices and diagnostics. Check result.feasible before constructing a <a class="el" href="classctrl_1_1DiscreteHinf.html" title="Discrete-time dynamic output-feedback H∞ controller.">DiscreteHinf</a>. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8cpp_source.html#l00436">436</a> of file <a class="el" href="DiscreteHinf_8cpp_source.html">DiscreteHinf.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="DiscreteHinf_8h_source.html#l00144">ctrl::HinfResult::achievedGamma</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00113">ctrl::GeneralisedPlant::D11</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00114">ctrl::GeneralisedPlant::D12</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00115">ctrl::GeneralisedPlant::D21</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00116">ctrl::GeneralisedPlant::D22</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00135">ctrl::HinfParams::dareMaxIter</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00134">ctrl::HinfParams::dareTol</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00143">ctrl::HinfResult::feasible</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00131">ctrl::HinfParams::gammaInit</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00132">ctrl::HinfParams::gammaTol</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00133">ctrl::HinfParams::maxIter</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00121">ctrl::GeneralisedPlant::nu()</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00120">ctrl::GeneralisedPlant::nw()</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00123">ctrl::GeneralisedPlant::ny()</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00122">ctrl::GeneralisedPlant::nz()</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00119">ctrl::GeneralisedPlant::stateSize()</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00117">ctrl::GeneralisedPlant::Ts</a>, and <a class="el" href="DiscreteHinf_8h_source.html#l00145">ctrl::HinfResult::Ts</a>.</p>
+<p class="reference">References <a class="el" href="DiscreteHinf_8h_source.html#l00103">ctrl::HinfResult::achievedGamma</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00072">ctrl::GeneralisedPlant::D11</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00073">ctrl::GeneralisedPlant::D12</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00074">ctrl::GeneralisedPlant::D21</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00075">ctrl::GeneralisedPlant::D22</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00094">ctrl::HinfParams::dareMaxIter</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00093">ctrl::HinfParams::dareTol</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00102">ctrl::HinfResult::feasible</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00090">ctrl::HinfParams::gammaInit</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00091">ctrl::HinfParams::gammaTol</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00092">ctrl::HinfParams::maxIter</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00080">ctrl::GeneralisedPlant::nu()</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00079">ctrl::GeneralisedPlant::nw()</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00082">ctrl::GeneralisedPlant::ny()</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00081">ctrl::GeneralisedPlant::nz()</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00078">ctrl::GeneralisedPlant::stateSize()</a>, <a class="el" href="DiscreteHinf_8h_source.html#l00076">ctrl::GeneralisedPlant::Ts</a>, and <a class="el" href="DiscreteHinf_8h_source.html#l00104">ctrl::HinfResult::Ts</a>.</p>
 
 </div>
 </div>

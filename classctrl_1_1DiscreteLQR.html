@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,28 +81,40 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Discrete-time Linear Quadratic Regulator.  
+ <a href="classctrl_1_1DiscreteLQR.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a36a13a6e38e680d7ec1fbfebc899e4cd" id="r_a36a13a6e38e680d7ec1fbfebc899e4cd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQR.html#a36a13a6e38e680d7ec1fbfebc899e4cd">DiscreteLQR</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;plant, const <a class="el" href="structctrl_1_1LQRParams.html">LQRParams</a> &amp;params)</td></tr>
+<tr class="memdesc:a36a13a6e38e680d7ec1fbfebc899e4cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct, run PBH stabilisability/detectability checks, and solve the DARE.  <br /></td></tr>
 <tr class="separator:a36a13a6e38e680d7ec1fbfebc899e4cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af537e64f9d2a4e53e3ce9ea122aa5afa" id="r_af537e64f9d2a4e53e3ce9ea122aa5afa"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQR.html#af537e64f9d2a4e53e3ce9ea122aa5afa">compute</a> (const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;x_ref=Eigen::VectorXd(), const Eigen::VectorXd &amp;u_ff=Eigen::VectorXd()) const</td></tr>
+<tr class="memdesc:af537e64f9d2a4e53e3ce9ea122aa5afa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] = −K*·(x − x_ref) + u_ff.  <br /></td></tr>
 <tr class="separator:af537e64f9d2a4e53e3ce9ea122aa5afa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a105cacaf1eff90674b11f0308f07ad61" id="r_a105cacaf1eff90674b11f0308f07ad61"><td class="memItemLeft" align="right" valign="top">const Eigen::MatrixXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQR.html#a105cacaf1eff90674b11f0308f07ad61">gainMatrix</a> () const</td></tr>
+<tr class="memdesc:a105cacaf1eff90674b11f0308f07ad61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optimal feedback gain matrix K* (m × n).  <br /></td></tr>
 <tr class="separator:a105cacaf1eff90674b11f0308f07ad61"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2a21672fede43a7ed0314c781db7a8f" id="r_af2a21672fede43a7ed0314c781db7a8f"><td class="memItemLeft" align="right" valign="top">const Eigen::MatrixXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQR.html#af2a21672fede43a7ed0314c781db7a8f">riccatiSolution</a> () const</td></tr>
+<tr class="memdesc:af2a21672fede43a7ed0314c781db7a8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">DARE stabilising solution P∞ (n × n).  <br /></td></tr>
 <tr class="separator:af2a21672fede43a7ed0314c781db7a8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0de8244c86cf4050bc76044631b3ca87" id="r_a0de8244c86cf4050bc76044631b3ca87"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQR.html#a0de8244c86cf4050bc76044631b3ca87">dareConverged</a> () const</td></tr>
+<tr class="memdesc:a0de8244c86cf4050bc76044631b3ca87"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>true</code> if the DARE converged to the requested tolerance.  <br /></td></tr>
 <tr class="separator:a0de8244c86cf4050bc76044631b3ca87"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1df51e3428bb40132c415cf6dbe5b8a" id="r_ad1df51e3428bb40132c415cf6dbe5b8a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQR.html#ad1df51e3428bb40132c415cf6dbe5b8a">dareIterations</a> () const</td></tr>
+<tr class="memdesc:ad1df51e3428bb40132c415cf6dbe5b8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of value-iteration steps taken by the DARE solver.  <br /></td></tr>
 <tr class="separator:ad1df51e3428bb40132c415cf6dbe5b8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a658070a2f3db150eae368edda7f8954f" id="r_a658070a2f3db150eae368edda7f8954f"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscreteLQR.html#a658070a2f3db150eae368edda7f8954f">sampleTime</a> () const</td></tr>
+<tr class="memdesc:a658070a2f3db150eae368edda7f8954f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
 <tr class="separator:a658070a2f3db150eae368edda7f8954f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00042">42</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<div class="textblock"><p>Discrete-time Linear Quadratic Regulator. </p>
+<p>Stateless at runtime — no internal memory between <a class="el" href="classctrl_1_1DiscreteLQR.html#af537e64f9d2a4e53e3ce9ea122aa5afa" title="Compute u[k] = −K*·(x − x_ref) + u_ff.">compute()</a> calls. Pass the actual plant state (from a sensor or state observer) to <a class="el" href="classctrl_1_1DiscreteLQR.html#af537e64f9d2a4e53e3ce9ea122aa5afa" title="Compute u[k] = −K*·(x − x_ref) + u_ff.">compute()</a> at every step to benefit from closed-loop disturbance rejection. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00065">65</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a36a13a6e38e680d7ec1fbfebc899e4cd" name="a36a13a6e38e680d7ec1fbfebc899e4cd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a36a13a6e38e680d7ec1fbfebc899e4cd">&#9670;&#160;</a></span>DiscreteLQR()</h2>
@@ -130,9 +142,20 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Construct, run PBH stabilisability/detectability checks, and solve the DARE. </p>
+<p>Prints a warning to stderr if DARE does not converge; uses the best available iterate.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">plant</td><td>Discrete-time plant model (A, B, C, D, Ts). </td></tr>
+    <tr><td class="paramname">params</td><td>LQR weighting matrices Q and R.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>PBH rank test: stabilisability and detectability are checked using Eigen's fullPivLu().rank() with an automatic threshold scaled by max_singular_value × n × ε. For plants with eigenvalues very close to the unit circle (e.g., 0.9999 or 1.0001), this may produce a false failure. If suspected, verify manually: rank([A − λI, B]) == n for all |λ| ≥ 1. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="DiscreteLQR_8cpp_source.html#l00137">137</a> of file <a class="el" href="DiscreteLQR_8cpp_source.html">DiscreteLQR.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00049">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00050">ctrl::StateSpace::B</a>, <a class="el" href="DiscreteLQR_8h_source.html#l00029">ctrl::DareResult::converged</a>, <a class="el" href="DiscreteLQR_8cpp_source.html#l00114">ctrl::isPBHDetectable()</a>, <a class="el" href="DiscreteLQR_8cpp_source.html#l00015">ctrl::isPBHStabilizable()</a>, <a class="el" href="DiscreteLQR_8h_source.html#l00030">ctrl::DareResult::iterations</a>, <a class="el" href="DiscreteLQR_8h_source.html#l00028">ctrl::DareResult::P</a>, <a class="el" href="DiscreteLQR_8h_source.html#l00036">ctrl::LQRParams::Q</a>, and <a class="el" href="DiscreteLQR_8h_source.html#l00038">ctrl::LQRParams::R</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="DiscreteLQR_8h_source.html#l00045">ctrl::DareResult::converged</a>, <a class="el" href="DiscreteLQR_8cpp_source.html#l00114">ctrl::isPBHDetectable()</a>, <a class="el" href="DiscreteLQR_8cpp_source.html#l00015">ctrl::isPBHStabilizable()</a>, <a class="el" href="DiscreteLQR_8h_source.html#l00046">ctrl::DareResult::iterations</a>, <a class="el" href="DiscreteLQR_8h_source.html#l00044">ctrl::DareResult::P</a>, <a class="el" href="DiscreteLQR_8h_source.html#l00054">ctrl::LQRParams::Q</a>, and <a class="el" href="DiscreteLQR_8h_source.html#l00055">ctrl::LQRParams::R</a>.</p>
 
 </div>
 </div>
@@ -169,9 +192,22 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Compute u[k] = −K*·(x − x_ref) + u_ff. </p>
+<p><code>x_ref</code> and <code>u_ff</code> default to zero when empty (no-argument versions).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>Current state vector x[k] (n × 1). </td></tr>
+    <tr><td class="paramname">x_ref</td><td>Reference state x_ref[k] (n × 1). Pass empty for regulation to origin. </td></tr>
+    <tr><td class="paramname">u_ff</td><td>Feed-forward term u_ff[k] (m × 1). Pass empty for zero feed-forward. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Control action u[k] (m × 1).</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>If the returned u[k] is clamped by an external actuator, always pass the <em>actual</em> measured state to <a class="el" href="classctrl_1_1DiscreteLQR.html#af537e64f9d2a4e53e3ce9ea122aa5afa" title="Compute u[k] = −K*·(x − x_ref) + u_ff.">compute()</a> rather than integrating with the unsaturated u[k]. The observer's measurement update implicitly corrects for saturation. For explicit anti-windup in state-feedback loops, see Åström &amp; Wittenmark §9.3. </dd></dl>
+
 <p class="definition">Definition at line <a class="el" href="DiscreteLQR_8cpp_source.html#l00172">172</a> of file <a class="el" href="DiscreteLQR_8cpp_source.html">DiscreteLQR.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteLQR_8h_source.html#l00112">ctrl::LQRAdapter::compute()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DiscreteLQR_8h_source.html#l00163">ctrl::LQRAdapter::compute()</a>.</p>
 
 </div>
 </div>
@@ -198,9 +234,11 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00074">74</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p><code>true</code> if the DARE converged to the requested tolerance. </p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteLQR_8h_source.html#l00127">ctrl::LQRAdapter::isHealthy()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00111">111</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="DiscreteLQR_8h_source.html#l00186">ctrl::LQRAdapter::isHealthy()</a>.</p>
 
 </div>
 </div>
@@ -227,7 +265,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00075">75</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p>Number of value-iteration steps taken by the DARE solver. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00114">114</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
 </div>
 </div>
@@ -254,7 +294,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00072">72</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p>Optimal feedback gain matrix K* (m × n). </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00105">105</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="ControllerTuner_8cpp_source.html#l00247">ctrl::LQRWeightTuner::polePlacementHint()</a>.</p>
 
@@ -283,7 +325,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00073">73</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p>DARE stabilising solution P∞ (n × n). </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00108">108</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
 </div>
 </div>
@@ -310,9 +354,11 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00076">76</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p>Sample time Ts [s]. </p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteLQR_8h_source.html#l00121">ctrl::LQRAdapter::sampleTime()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00117">117</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="DiscreteLQR_8h_source.html#l00175">ctrl::LQRAdapter::sampleTime()</a>.</p>
 
 </div>
 </div>

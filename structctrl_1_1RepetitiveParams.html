@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,24 +81,33 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Tuning parameters for <a class="el" href="classctrl_1_1RepetitiveController.html" title="Discrete-time Plug-in Repetitive Controller.">RepetitiveController</a>.  
+ <a href="structctrl_1_1RepetitiveParams.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:aba6e5280caafbfa9d160cb9b0f16ff46" id="r_aba6e5280caafbfa9d160cb9b0f16ff46"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RepetitiveParams.html#aba6e5280caafbfa9d160cb9b0f16ff46">periodSteps</a> = 100</td></tr>
+<tr class="memdesc:aba6e5280caafbfa9d160cb9b0f16ff46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Period N in samples (T = N·Ts).  <br /></td></tr>
 <tr class="separator:aba6e5280caafbfa9d160cb9b0f16ff46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af45f21dc8cea5232bb198c0003ade087" id="r_af45f21dc8cea5232bb198c0003ade087"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RepetitiveParams.html#af45f21dc8cea5232bb198c0003ade087">Krc</a> = 0.5</td></tr>
+<tr class="memdesc:af45f21dc8cea5232bb198c0003ade087"><td class="mdescLeft">&#160;</td><td class="mdescRight">Learning gain. Small = slow but stable. Typical: 0.3–0.8.  <br /></td></tr>
 <tr class="separator:af45f21dc8cea5232bb198c0003ade087"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aef9b55ca120723e3617e378e36469775" id="r_aef9b55ca120723e3617e378e36469775"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RepetitiveParams.html#aef9b55ca120723e3617e378e36469775">Q</a> = 0.98</td></tr>
+<tr class="memdesc:aef9b55ca120723e3617e378e36469775"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forgetting/robustness factor ∈ (0, 1]. Typical: 0.95–1.0.  <br /></td></tr>
 <tr class="separator:aef9b55ca120723e3617e378e36469775"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a900954eeb4884a1fb84ecba212dca35a" id="r_a900954eeb4884a1fb84ecba212dca35a"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RepetitiveParams.html#a900954eeb4884a1fb84ecba212dca35a">uMin</a> = -1e9</td></tr>
+<tr class="memdesc:a900954eeb4884a1fb84ecba212dca35a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output saturation lower limit.  <br /></td></tr>
 <tr class="separator:a900954eeb4884a1fb84ecba212dca35a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a7529d03ee19b42b60fcdd87fc1138e" id="r_a0a7529d03ee19b42b60fcdd87fc1138e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RepetitiveParams.html#a0a7529d03ee19b42b60fcdd87fc1138e">uMax</a> = 1e9</td></tr>
+<tr class="memdesc:a0a7529d03ee19b42b60fcdd87fc1138e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output saturation upper limit.  <br /></td></tr>
 <tr class="separator:a0a7529d03ee19b42b60fcdd87fc1138e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00041">41</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
+<div class="textblock"><p>Tuning parameters for <a class="el" href="classctrl_1_1RepetitiveController.html" title="Discrete-time Plug-in Repetitive Controller.">RepetitiveController</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00044">44</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="af45f21dc8cea5232bb198c0003ade087" name="af45f21dc8cea5232bb198c0003ade087"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af45f21dc8cea5232bb198c0003ade087">&#9670;&#160;</a></span>Krc</h2>
@@ -112,7 +121,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00044">44</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
+<p>Learning gain. Small = slow but stable. Typical: 0.3–0.8. </p>
+
+<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00047">47</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="RepetitiveController_8cpp_source.html#l00018">ctrl::RepetitiveController::compute()</a>.</p>
 
@@ -130,7 +141,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00043">43</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
+<p>Period N in samples (T = N·Ts). </p>
+
+<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00046">46</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="RepetitiveController_8cpp_source.html#l00018">ctrl::RepetitiveController::compute()</a>, <a class="el" href="RepetitiveController_8cpp_source.html#l00008">ctrl::RepetitiveController::RepetitiveController()</a>, and <a class="el" href="RepetitiveController_8cpp_source.html#l00052">ctrl::RepetitiveController::setParams()</a>.</p>
 
@@ -148,7 +161,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00045">45</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
+<p>Forgetting/robustness factor ∈ (0, 1]. Typical: 0.95–1.0. </p>
+
+<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00048">48</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="RepetitiveController_8cpp_source.html#l00018">ctrl::RepetitiveController::compute()</a>.</p>
 
@@ -166,7 +181,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00047">47</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
+<p>Output saturation upper limit. </p>
+
+<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00050">50</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="RepetitiveController_8cpp_source.html#l00018">ctrl::RepetitiveController::compute()</a>.</p>
 
@@ -184,7 +201,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00046">46</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
+<p>Output saturation lower limit. </p>
+
+<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00049">49</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="RepetitiveController_8cpp_source.html#l00018">ctrl::RepetitiveController::compute()</a>.</p>
 

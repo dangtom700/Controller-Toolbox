@@ -90,7 +90,7 @@ var searchData=
   ['subspaceidresult_87',['SubspaceIDResult',['../structctrl_1_1SubspaceIDResult.html',1,'ctrl']]],
   ['success_88',['success',['../structctrl_1_1TuningResultBase.html#a2d65fe6726445e3b8ff99b23fd80c671',1,'ctrl::TuningResultBase::success'],['../structctrl_1_1SubspaceIDResult.html#a5c0e45ca264974aa9cc68d2b0cb4357e',1,'ctrl::SubspaceIDResult::success']]],
   ['suggestfor_89',['suggestFor',['../namespacectrl.html#a9a339bd3bc9a921d27b6a5b630eb1dca',1,'ctrl']]],
-  ['suggestorder_90',['suggestOrder',['../namespacectrl.html#abf201dbb12d9ee3725c56b5c3d2a5831',1,'ctrl']]],
+  ['suggestorder_90',['suggestOrder',['../namespacectrl.html#aefc7138f387ba6cc9fed750baa2e615c',1,'ctrl']]],
   ['suite_20default_20tt_20cmd_20tt_91',['Run the test suite (default &lt;tt&gt;CMD&lt;/tt&gt;)',['../index.html#autotoc_md14',1,'']]],
   ['supertwistingparams_92',['SuperTwistingParams',['../structctrl_1_1SuperTwistingParams.html',1,'ctrl']]],
   ['supertwistingsmc_93',['supertwistingsmc',['../classctrl_1_1SuperTwistingSMC.html#a0017d1769280062a47caf49fecf153d1',1,'ctrl::SuperTwistingSMC::SuperTwistingSMC()'],['../classctrl_1_1SuperTwistingSMC.html',1,'ctrl::SuperTwistingSMC']]],

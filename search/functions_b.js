@@ -13,7 +13,7 @@ var searchData=
   ['mfsingleton_10',['mfSingleton',['../namespacectrl.html#a8cee0db195ae17d833885884e3579f57',1,'ctrl']]],
   ['mftrapezoidal_11',['mfTrapezoidal',['../namespacectrl.html#a3bbf52403d666ffe411d11dc25482996',1,'ctrl']]],
   ['mftriangular_12',['mfTriangular',['../namespacectrl.html#a210a1ff6e7c04e4d043ed83f0ad3a129',1,'ctrl']]],
-  ['minreal_13',['minreal',['../namespacectrl.html#acce1df04d7785058183c243ace535413',1,'ctrl']]],
+  ['minreal_13',['minreal',['../namespacectrl.html#a336b6d277ba94f21f11fcb2e5283952d',1,'ctrl']]],
   ['mode_14',['mode',['../classctrl_1_1ControllerStack.html#a7699dc65172c47b782b42d668a718cde',1,'ctrl::ControllerStack']]],
   ['model_15',['model',['../classctrl_1_1SimPlant.html#ad71a6b423717b13f00d648b5aca5d941',1,'ctrl::SimPlant']]],
   ['mpchorizon_16',['mpcHorizon',['../classctrl_1_1TunerSuite.html#a73582e0e3f826ebcfbdb9b64644e9a87',1,'ctrl::TunerSuite']]]

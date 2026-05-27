@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,24 +81,33 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Tuning parameters for <a class="el" href="classctrl_1_1FuzzyPID.html" title="FuzzyPD extended with a crisp integral term and back-calculation anti-windup.">FuzzyPID</a>.  
+ <a href="structctrl_1_1FuzzyPIDParams.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a5a6e49517cf4cf754bbce4297ca34446" id="r_a5a6e49517cf4cf754bbce4297ca34446"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1FuzzyPDParams.html">FuzzyPDParams</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1FuzzyPIDParams.html#a5a6e49517cf4cf754bbce4297ca34446">pd</a></td></tr>
+<tr class="memdesc:a5a6e49517cf4cf754bbce4297ca34446"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classctrl_1_1FuzzyPD.html" title="5-term PD fuzzy controller implementing IController.">FuzzyPD</a> scaling (e_scale, de_scale, u_scale).  <br /></td></tr>
 <tr class="separator:a5a6e49517cf4cf754bbce4297ca34446"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a046d377d969c225ef9eed6389faad046" id="r_a046d377d969c225ef9eed6389faad046"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1FuzzyPIDParams.html#a046d377d969c225ef9eed6389faad046">Ki</a> = 0.0</td></tr>
+<tr class="memdesc:a046d377d969c225ef9eed6389faad046"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integral gain (0 = pure <a class="el" href="classctrl_1_1FuzzyPD.html" title="5-term PD fuzzy controller implementing IController.">FuzzyPD</a>).  <br /></td></tr>
 <tr class="separator:a046d377d969c225ef9eed6389faad046"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7366645017121608cbb7c7725bae12dd" id="r_a7366645017121608cbb7c7725bae12dd"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1FuzzyPIDParams.html#a7366645017121608cbb7c7725bae12dd">Kb</a> = 1.0</td></tr>
+<tr class="memdesc:a7366645017121608cbb7c7725bae12dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Anti-windup back-calculation gain.  <br /></td></tr>
 <tr class="separator:a7366645017121608cbb7c7725bae12dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b8cfea8628a82a79763bfd7b4a7dfc0" id="r_a5b8cfea8628a82a79763bfd7b4a7dfc0"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1FuzzyPIDParams.html#a5b8cfea8628a82a79763bfd7b4a7dfc0">uMin</a> = -1e9</td></tr>
+<tr class="memdesc:a5b8cfea8628a82a79763bfd7b4a7dfc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard lower output clamp.  <br /></td></tr>
 <tr class="separator:a5b8cfea8628a82a79763bfd7b4a7dfc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac19334f3453c3b49766f178e256f5f34" id="r_ac19334f3453c3b49766f178e256f5f34"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1FuzzyPIDParams.html#ac19334f3453c3b49766f178e256f5f34">uMax</a> = 1e9</td></tr>
+<tr class="memdesc:ac19334f3453c3b49766f178e256f5f34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard upper output clamp.  <br /></td></tr>
 <tr class="separator:ac19334f3453c3b49766f178e256f5f34"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00271">271</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<div class="textblock"><p>Tuning parameters for <a class="el" href="classctrl_1_1FuzzyPID.html" title="FuzzyPD extended with a crisp integral term and back-calculation anti-windup.">FuzzyPID</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00404">404</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a7366645017121608cbb7c7725bae12dd" name="a7366645017121608cbb7c7725bae12dd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7366645017121608cbb7c7725bae12dd">&#9670;&#160;</a></span>Kb</h2>
@@ -112,7 +121,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00274">274</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>Anti-windup back-calculation gain. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00407">407</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="FuzzyLogic_8cpp_source.html#l00410">ctrl::FuzzyPID::compute()</a>.</p>
 
@@ -130,7 +141,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00273">273</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>Integral gain (0 = pure <a class="el" href="classctrl_1_1FuzzyPD.html" title="5-term PD fuzzy controller implementing IController.">FuzzyPD</a>). </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00406">406</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="FuzzyLogic_8cpp_source.html#l00410">ctrl::FuzzyPID::compute()</a>.</p>
 
@@ -148,7 +161,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00272">272</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p><a class="el" href="classctrl_1_1FuzzyPD.html" title="5-term PD fuzzy controller implementing IController.">FuzzyPD</a> scaling (e_scale, de_scale, u_scale). </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00405">405</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="FuzzyLogic_8cpp_source.html#l00404">ctrl::FuzzyPID::setParams()</a>.</p>
 
@@ -166,7 +181,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00276">276</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>Hard upper output clamp. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00409">409</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="FuzzyLogic_8cpp_source.html#l00410">ctrl::FuzzyPID::compute()</a>.</p>
 
@@ -184,7 +201,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00275">275</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>Hard lower output clamp. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00408">408</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="FuzzyLogic_8cpp_source.html#l00410">ctrl::FuzzyPID::compute()</a>.</p>
 

@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,6 +81,9 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Abstract base class for all actuator adapters in the HAL.  
+ <a href="classctrl_1_1IActuator.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="IActuator_8h_source.html">IActuator.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for ctrl::IActuator:</div>
@@ -88,7 +91,7 @@ Inheritance diagram for ctrl::IActuator:</div>
  <div class="center">
   <img src="classctrl_1_1IActuator.png" usemap="#ctrl::IActuator_map" alt=""/>
   <map id="ctrl::IActuator_map" name="ctrl::IActuator_map">
-<area href="classctrl_1_1SimActuator.html" alt="ctrl::SimActuator" shape="rect" coords="0,56,104,80"/>
+<area href="classctrl_1_1SimActuator.html" title="IActuator implementation that drives a SimPlant." alt="ctrl::SimActuator" shape="rect" coords="0,56,104,80"/>
   </map>
 </div></div>
 <table class="memberdecls">
@@ -97,15 +100,19 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a04954bfa36bd3ba79e3cd50d4ab92984" id="r_a04954bfa36bd3ba79e3cd50d4ab92984"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IActuator.html#a04954bfa36bd3ba79e3cd50d4ab92984">~IActuator</a> ()=default</td></tr>
 <tr class="separator:a04954bfa36bd3ba79e3cd50d4ab92984"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac6546d74dfc79167c6de08f6b218141c" id="r_ac6546d74dfc79167c6de08f6b218141c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IActuator.html#ac6546d74dfc79167c6de08f6b218141c">write</a> (double u)=0</td></tr>
+<tr class="memdesc:ac6546d74dfc79167c6de08f6b218141c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply a control value to the actuator.  <br /></td></tr>
 <tr class="separator:ac6546d74dfc79167c6de08f6b218141c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad9c35118fbf95b959c85c65296b014ec" id="r_ad9c35118fbf95b959c85c65296b014ec"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IActuator.html#ad9c35118fbf95b959c85c65296b014ec">lastOutput</a> () const =0</td></tr>
+<tr class="memdesc:ad9c35118fbf95b959c85c65296b014ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the most recent successfully applied control value.  <br /></td></tr>
 <tr class="separator:ad9c35118fbf95b959c85c65296b014ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8265a8b71ddc715a8f7e444ba22904f9" id="r_a8265a8b71ddc715a8f7e444ba22904f9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IActuator.html#a8265a8b71ddc715a8f7e444ba22904f9">reset</a> ()</td></tr>
+<tr class="memdesc:a8265a8b71ddc715a8f7e444ba22904f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drive output to zero and clear internal state.  <br /></td></tr>
 <tr class="separator:a8265a8b71ddc715a8f7e444ba22904f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="IActuator_8h_source.html#l00019">19</a> of file <a class="el" href="IActuator_8h_source.html">IActuator.h</a>.</p>
+<div class="textblock"><p>Abstract base class for all actuator adapters in the HAL. </p>
+
+<p class="definition">Definition at line <a class="el" href="IActuator_8h_source.html#l00026">26</a> of file <a class="el" href="IActuator_8h_source.html">IActuator.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a04954bfa36bd3ba79e3cd50d4ab92984" name="a04954bfa36bd3ba79e3cd50d4ab92984"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a04954bfa36bd3ba79e3cd50d4ab92984">&#9670;&#160;</a></span>~IActuator()</h2>
@@ -156,6 +163,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Return the most recent successfully applied control value. </p>
+<dl class="section return"><dt>Returns</dt><dd>Last finite value passed to <a class="el" href="classctrl_1_1IActuator.html#ac6546d74dfc79167c6de08f6b218141c" title="Apply a control value to the actuator.">write()</a>. </dd></dl>
+
 <p>Implemented in <a class="el" href="classctrl_1_1SimActuator.html#ad98fca771aaf43ba231720dff8bbeb53">ctrl::SimActuator</a>.</p>
 
 </div>
@@ -183,9 +193,11 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Drive output to zero and clear internal state. </p>
+
 <p>Reimplemented in <a class="el" href="classctrl_1_1SimActuator.html#a369dcdb6011f6d7803e7166735a2ad7a">ctrl::SimActuator</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="IActuator_8h_source.html#l00025">25</a> of file <a class="el" href="IActuator_8h_source.html">IActuator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IActuator_8h_source.html#l00049">49</a> of file <a class="el" href="IActuator_8h_source.html">IActuator.h</a>.</p>
 
 </div>
 </div>
@@ -212,6 +224,15 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Apply a control value to the actuator. </p>
+<p>Non-finite values (<code>u</code> = NaN or ±Inf) must be silently rejected and the last valid output held.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">u</td><td>Control command to apply. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p>Implemented in <a class="el" href="classctrl_1_1SimActuator.html#aeeedd4bb19bd1bcbbe968d1c851ba98e">ctrl::SimActuator</a>.</p>
 

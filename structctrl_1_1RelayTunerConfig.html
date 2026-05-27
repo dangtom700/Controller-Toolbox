@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,20 +81,27 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Configuration for <a class="el" href="classctrl_1_1RelayAutoTuner.html" title="Åström-Hägglund relay feedback auto-tuner.">RelayAutoTuner</a>.  
+ <a href="structctrl_1_1RelayTunerConfig.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a64273cf3502e05d816b9034078ef2a9b" id="r_a64273cf3502e05d816b9034078ef2a9b"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RelayTunerConfig.html#a64273cf3502e05d816b9034078ef2a9b">relayAmplitude</a> = 1.0</td></tr>
+<tr class="memdesc:a64273cf3502e05d816b9034078ef2a9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relay output amplitude ±d.  <br /></td></tr>
 <tr class="separator:a64273cf3502e05d816b9034078ef2a9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55f1bb1c0100e0c089bf1191b180e280" id="r_a55f1bb1c0100e0c089bf1191b180e280"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RelayTunerConfig.html#a55f1bb1c0100e0c089bf1191b180e280">hysteresis</a> = 0.0</td></tr>
+<tr class="memdesc:a55f1bb1c0100e0c089bf1191b180e280"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dead-band [same units as y] to suppress noise-driven chatter.  <br /></td></tr>
 <tr class="separator:a55f1bb1c0100e0c089bf1191b180e280"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac6cae77f414d8d71797db566d10e9881" id="r_ac6cae77f414d8d71797db566d10e9881"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RelayTunerConfig.html#ac6cae77f414d8d71797db566d10e9881">cyclesRequired</a> = 3</td></tr>
+<tr class="memdesc:ac6cae77f414d8d71797db566d10e9881"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stable oscillation cycles required before the tuner exits.  <br /></td></tr>
 <tr class="separator:ac6cae77f414d8d71797db566d10e9881"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00076">76</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
+<div class="textblock"><p>Configuration for <a class="el" href="classctrl_1_1RelayAutoTuner.html" title="Åström-Hägglund relay feedback auto-tuner.">RelayAutoTuner</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00072">72</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="ac6cae77f414d8d71797db566d10e9881" name="ac6cae77f414d8d71797db566d10e9881"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac6cae77f414d8d71797db566d10e9881">&#9670;&#160;</a></span>cyclesRequired</h2>
@@ -108,7 +115,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00080">80</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
+<p>Stable oscillation cycles required before the tuner exits. </p>
+
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00076">76</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="ControllerTuner_8cpp_source.html#l00020">ctrl::RelayAutoTuner::step()</a>.</p>
 
@@ -126,7 +135,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00079">79</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
+<p>Dead-band [same units as y] to suppress noise-driven chatter. </p>
+
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00075">75</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="ControllerTuner_8cpp_source.html#l00020">ctrl::RelayAutoTuner::step()</a>.</p>
 
@@ -144,7 +155,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00078">78</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
+<p>Relay output amplitude ±d. </p>
+
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00074">74</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="ControllerTuner_8cpp_source.html#l00020">ctrl::RelayAutoTuner::step()</a>.</p>
 

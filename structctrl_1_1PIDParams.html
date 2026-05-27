@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,30 +81,43 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Tuning parameters for <a class="el" href="classctrl_1_1DiscretePID.html" title="Discrete-time PID controller.">DiscretePID</a>.  
+ <a href="structctrl_1_1PIDParams.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a93322cf198692466ad0919ea06297b31" id="r_a93322cf198692466ad0919ea06297b31"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDParams.html#a93322cf198692466ad0919ea06297b31">Kp</a> = 1.0</td></tr>
+<tr class="memdesc:a93322cf198692466ad0919ea06297b31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Proportional gain.  <br /></td></tr>
 <tr class="separator:a93322cf198692466ad0919ea06297b31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b0512d735243a9f654eb2914524111f" id="r_a7b0512d735243a9f654eb2914524111f"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDParams.html#a7b0512d735243a9f654eb2914524111f">Ki</a> = 0.0</td></tr>
+<tr class="memdesc:a7b0512d735243a9f654eb2914524111f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integral gain (Ki = Kp / Ti).  <br /></td></tr>
 <tr class="separator:a7b0512d735243a9f654eb2914524111f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c763a8d16f1c88ac493d128abbbd24d" id="r_a4c763a8d16f1c88ac493d128abbbd24d"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDParams.html#a4c763a8d16f1c88ac493d128abbbd24d">Kd</a> = 0.0</td></tr>
+<tr class="memdesc:a4c763a8d16f1c88ac493d128abbbd24d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Derivative gain (Kd = Kp · Td).  <br /></td></tr>
 <tr class="separator:a4c763a8d16f1c88ac493d128abbbd24d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae47f28adcce19093b8509be3423ce350" id="r_ae47f28adcce19093b8509be3423ce350"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDParams.html#ae47f28adcce19093b8509be3423ce350">N</a> = 100.0</td></tr>
+<tr class="memdesc:ae47f28adcce19093b8509be3423ce350"><td class="mdescLeft">&#160;</td><td class="mdescRight">Derivative filter coefficient N [rad/s].  <br /></td></tr>
 <tr class="separator:ae47f28adcce19093b8509be3423ce350"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a783e8b40feada9a7ebad451fe38b41eb" id="r_a783e8b40feada9a7ebad451fe38b41eb"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDParams.html#a783e8b40feada9a7ebad451fe38b41eb">uMin</a> = -1e9</td></tr>
+<tr class="memdesc:a783e8b40feada9a7ebad451fe38b41eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lower output saturation limit.  <br /></td></tr>
 <tr class="separator:a783e8b40feada9a7ebad451fe38b41eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5954ea1d7057a35a6c2b28f3e8f62406" id="r_a5954ea1d7057a35a6c2b28f3e8f62406"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDParams.html#a5954ea1d7057a35a6c2b28f3e8f62406">uMax</a> = 1e9</td></tr>
+<tr class="memdesc:a5954ea1d7057a35a6c2b28f3e8f62406"><td class="mdescLeft">&#160;</td><td class="mdescRight">Upper output saturation limit.  <br /></td></tr>
 <tr class="separator:a5954ea1d7057a35a6c2b28f3e8f62406"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7626dbcc40d8b82afa45b6f7ee9627fe" id="r_a7626dbcc40d8b82afa45b6f7ee9627fe"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDParams.html#a7626dbcc40d8b82afa45b6f7ee9627fe">Kb</a> = 1.0</td></tr>
+<tr class="memdesc:a7626dbcc40d8b82afa45b6f7ee9627fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Anti-windup back-calculation gain (0 = disabled, 1 = default).  <br /></td></tr>
 <tr class="separator:a7626dbcc40d8b82afa45b6f7ee9627fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa0cffc00a3934a9687f65bee5c56e97e" id="r_aa0cffc00a3934a9687f65bee5c56e97e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDParams.html#aa0cffc00a3934a9687f65bee5c56e97e">b_weight</a> = 1.0</td></tr>
+<tr class="memdesc:aa0cffc00a3934a9687f65bee5c56e97e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Two-degree-of-freedom proportional setpoint weight b ∈ [0, 1].  <br /></td></tr>
 <tr class="separator:aa0cffc00a3934a9687f65bee5c56e97e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00021">21</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
+<div class="textblock"><p>Tuning parameters for <a class="el" href="classctrl_1_1DiscretePID.html" title="Discrete-time PID controller.">DiscretePID</a>. </p>
+<p>All gains follow MATLAB's parallel PID form. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00035">35</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="aa0cffc00a3934a9687f65bee5c56e97e" name="aa0cffc00a3934a9687f65bee5c56e97e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa0cffc00a3934a9687f65bee5c56e97e">&#9670;&#160;</a></span>b_weight</h2>
@@ -118,7 +131,16 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00059">59</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
+<p>Two-degree-of-freedom proportional setpoint weight b ∈ [0, 1]. </p>
+<p>Applied only by computeDoM(y, r): the proportional term acts on (b·r − y) while the integral term acts on (r − y). This decouples setpoint-tracking bandwidth from disturbance-rejection bandwidth without changing any gains.</p>
+<p>Tuning guide (Skogestad 2003 / Åström &amp; Hägglund 2006 §8.4):</p><ul>
+<li><code>b = 1.0</code> (default): standard 1DOF — maximum setpoint gain.</li>
+<li><code>b = 0.5</code>: reduces overshoot ~10–15 % vs b = 1 for ZN-tuned loops.</li>
+<li><code>b = 0.0</code>: setpoint feed-forward entirely through integrator; no proportional kick.</li>
+</ul>
+<dl class="section note"><dt>Note</dt><dd>Has no effect on compute(error) because that overload receives only the pre-computed error (r − y) and cannot separate r from y. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00086">86</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscretePID_8cpp_source.html#l00083">ctrl::DiscretePID::computeDoM()</a>.</p>
 
@@ -136,7 +158,16 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00045">45</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
+<p>Anti-windup back-calculation gain (0 = disabled, 1 = default). </p>
+<p>Recommended tuning range (Åström &amp; Wittenmark §3.5): Ki/Kp ≤ Kb ≤ Kp/Kd</p><ul>
+<li><code>Kb = Ki/Kp</code> — slow reset; good for dead-time-dominated plants.</li>
+<li><code>Kb = Kp/Kd</code> — fast reset; may cause an actuator spike on re-entry.</li>
+<li><code>Kb = sqrt(Ki·Kp/Kd)</code> — geometric-mean rule of thumb for balanced reset.</li>
+<li><code>Kb = 0</code> — disables anti-windup entirely; use only when saturation cannot occur.</li>
+<li><code>Kb = 1.0</code> (default) — reasonable for many processes; may be slow for high-Ki loops. </li>
+</ul>
+
+<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00069">69</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscretePID_8cpp_source.html#l00022">ctrl::DiscretePID::compute()</a>, <a class="el" href="DiscretePID_8cpp_source.html#l00083">ctrl::DiscretePID::computeDoM()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00184">ctrl::StepResponseTuner::computePIDParams()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00078">ctrl::RelayAutoTuner::computePIDParams()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00338">ctrl::ZieglerNicholsTuner::tuneImpl()</a>, and <a class="el" href="ControllerTuner_8cpp_source.html#l00353">ctrl::CohenCoonTuner::tuneImpl()</a>.</p>
 
@@ -154,7 +185,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00025">25</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
+<p>Derivative gain (Kd = Kp · Td). </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00039">39</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscretePID_8cpp_source.html#l00022">ctrl::DiscretePID::compute()</a>, <a class="el" href="DiscretePID_8cpp_source.html#l00083">ctrl::DiscretePID::computeDoM()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00184">ctrl::StepResponseTuner::computePIDParams()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00078">ctrl::RelayAutoTuner::computePIDParams()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00235">ctrl::TunerSuite::relayZN()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00338">ctrl::ZieglerNicholsTuner::tuneImpl()</a>, and <a class="el" href="ControllerTuner_8cpp_source.html#l00353">ctrl::CohenCoonTuner::tuneImpl()</a>.</p>
 
@@ -172,7 +205,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00024">24</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
+<p>Integral gain (Ki = Kp / Ti). </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00038">38</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscretePID_8cpp_source.html#l00022">ctrl::DiscretePID::compute()</a>, <a class="el" href="DiscretePID_8cpp_source.html#l00083">ctrl::DiscretePID::computeDoM()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00184">ctrl::StepResponseTuner::computePIDParams()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00078">ctrl::RelayAutoTuner::computePIDParams()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00235">ctrl::TunerSuite::relayZN()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00338">ctrl::ZieglerNicholsTuner::tuneImpl()</a>, and <a class="el" href="ControllerTuner_8cpp_source.html#l00353">ctrl::CohenCoonTuner::tuneImpl()</a>.</p>
 
@@ -190,7 +225,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00023">23</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
+<p>Proportional gain. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00037">37</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscretePID_8cpp_source.html#l00065">ctrl::DiscretePID::bumplessInit()</a>, <a class="el" href="DiscretePID_8cpp_source.html#l00022">ctrl::DiscretePID::compute()</a>, <a class="el" href="DiscretePID_8cpp_source.html#l00083">ctrl::DiscretePID::computeDoM()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00184">ctrl::StepResponseTuner::computePIDParams()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00078">ctrl::RelayAutoTuner::computePIDParams()</a>, <a class="el" href="TunerSuite_8cpp_source.html#l00235">ctrl::TunerSuite::relayZN()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00338">ctrl::ZieglerNicholsTuner::tuneImpl()</a>, and <a class="el" href="ControllerTuner_8cpp_source.html#l00353">ctrl::CohenCoonTuner::tuneImpl()</a>.</p>
 
@@ -208,7 +245,15 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00034">34</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
+<p>Derivative filter coefficient N [rad/s]. </p>
+<p>Higher N = less filtering (sharper derivative). The derivative pole is placed at z = 1/(1 + N·Ts) in the backward-Euler discretisation, corresponding to a continuous-time pole at s = −N. This attenuates derivative action above N rad/s.</p>
+<p>Constraints:</p><ul>
+<li>Nyquist limit: N &lt; π/Ts (e.g., N &lt; 314 rad/s for Ts = 0.01 s).</li>
+<li>Practical limit: N &lt; π/(2·Ts·ωc) where ωc is the closed-loop bandwidth.</li>
+</ul>
+<p>The default N = 100 suits many process-control loops; reduce if derivative is noisy. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00054">54</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscretePID_8cpp_source.html#l00022">ctrl::DiscretePID::compute()</a>, <a class="el" href="DiscretePID_8cpp_source.html#l00083">ctrl::DiscretePID::computeDoM()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00184">ctrl::StepResponseTuner::computePIDParams()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00078">ctrl::RelayAutoTuner::computePIDParams()</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00338">ctrl::ZieglerNicholsTuner::tuneImpl()</a>, and <a class="el" href="ControllerTuner_8cpp_source.html#l00353">ctrl::CohenCoonTuner::tuneImpl()</a>.</p>
 
@@ -226,7 +271,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00036">36</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
+<p>Upper output saturation limit. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00057">57</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscretePID_8cpp_source.html#l00022">ctrl::DiscretePID::compute()</a>, and <a class="el" href="DiscretePID_8cpp_source.html#l00083">ctrl::DiscretePID::computeDoM()</a>.</p>
 
@@ -244,7 +291,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00035">35</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
+<p>Lower output saturation limit. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00056">56</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscretePID_8cpp_source.html#l00022">ctrl::DiscretePID::compute()</a>, and <a class="el" href="DiscretePID_8cpp_source.html#l00083">ctrl::DiscretePID::computeDoM()</a>.</p>
 

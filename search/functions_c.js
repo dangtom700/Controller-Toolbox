@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['n4sid_0',['n4sid',['../namespacectrl.html#a48a62fef709551ddc55b6c8f07101213',1,'ctrl']]],
+  ['n4sid_0',['n4sid',['../namespacectrl.html#ac04c2f87d749604186fa29b45048e9a3',1,'ctrl']]],
   ['nowns_1',['nowns',['../classctrl_1_1ITimer.html#af3c2fa16d291acbefd92b5bedc8d160c',1,'ctrl::ITimer::nowNs()'],['../classctrl_1_1StdTimer.html#a0802afe91b9abe2278aa6443c931fa97',1,'ctrl::StdTimer::nowNs()']]],
   ['nu_2',['nu',['../structctrl_1_1GeneralisedPlant.html#a6e8d9e00ba64b8e752a0805184898b43',1,'ctrl::GeneralisedPlant']]],
   ['numdegree_3',['numDegree',['../classctrl_1_1PadeApproximator.html#a48f445660e01ba2f702ad028855a0083',1,'ctrl::PadeApproximator']]],

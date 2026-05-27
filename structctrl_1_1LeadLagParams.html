@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,20 +81,27 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>Tuning parameters for <a class="el" href="classctrl_1_1DiscreteLeadLag.html" title="Discrete Lead-Lag compensator.">DiscreteLeadLag</a>.  
+ <a href="structctrl_1_1LeadLagParams.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a8c49942a230d42ed6ba68a5e43d245b2" id="r_a8c49942a230d42ed6ba68a5e43d245b2"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LeadLagParams.html#a8c49942a230d42ed6ba68a5e43d245b2">continuousZero</a> = 1.0</td></tr>
+<tr class="memdesc:a8c49942a230d42ed6ba68a5e43d245b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Zero location zc [rad/s].  <br /></td></tr>
 <tr class="separator:a8c49942a230d42ed6ba68a5e43d245b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e7822a35e1f1910b39523ebc3a138d9" id="r_a6e7822a35e1f1910b39523ebc3a138d9"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LeadLagParams.html#a6e7822a35e1f1910b39523ebc3a138d9">continuousPole</a> = 10.0</td></tr>
+<tr class="memdesc:a6e7822a35e1f1910b39523ebc3a138d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pole location pc [rad/s].  <br /></td></tr>
 <tr class="separator:a6e7822a35e1f1910b39523ebc3a138d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4df386fb4a3e21bddac5a898cd6137e3" id="r_a4df386fb4a3e21bddac5a898cd6137e3"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LeadLagParams.html#a4df386fb4a3e21bddac5a898cd6137e3">gain</a> = 1.0</td></tr>
+<tr class="memdesc:a4df386fb4a3e21bddac5a898cd6137e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">DC gain K.  <br /></td></tr>
 <tr class="separator:a4df386fb4a3e21bddac5a898cd6137e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8h_source.html#l00029">29</a> of file <a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>.</p>
+<div class="textblock"><p>Tuning parameters for <a class="el" href="classctrl_1_1DiscreteLeadLag.html" title="Discrete Lead-Lag compensator.">DiscreteLeadLag</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8h_source.html#l00033">33</a> of file <a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a6e7822a35e1f1910b39523ebc3a138d9" name="a6e7822a35e1f1910b39523ebc3a138d9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6e7822a35e1f1910b39523ebc3a138d9">&#9670;&#160;</a></span>continuousPole</h2>
@@ -108,7 +115,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8h_source.html#l00032">32</a> of file <a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>.</p>
+<p>Pole location pc [rad/s]. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8h_source.html#l00036">36</a> of file <a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteLeadLag_8cpp_source.html#l00058">ctrl::DiscreteLeadLag::phaseAt()</a>, and <a class="el" href="ControllerTuner_8cpp_source.html#l00378">ctrl::LoopShapingTuner::tuneImpl()</a>.</p>
 
@@ -126,7 +135,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8h_source.html#l00031">31</a> of file <a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>.</p>
+<p>Zero location zc [rad/s]. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8h_source.html#l00035">35</a> of file <a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteLeadLag_8cpp_source.html#l00058">ctrl::DiscreteLeadLag::phaseAt()</a>, and <a class="el" href="ControllerTuner_8cpp_source.html#l00378">ctrl::LoopShapingTuner::tuneImpl()</a>.</p>
 
@@ -144,7 +155,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8h_source.html#l00033">33</a> of file <a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>.</p>
+<p>DC gain K. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLeadLag_8h_source.html#l00037">37</a> of file <a class="el" href="DiscreteLeadLag_8h_source.html">DiscreteLeadLag.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="ControllerTuner_8cpp_source.html#l00378">ctrl::LoopShapingTuner::tuneImpl()</a>.</p>
 

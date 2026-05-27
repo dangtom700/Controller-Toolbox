@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,20 +81,27 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>A named fuzzy term with its membership function and optional peak location.  
+ <a href="structctrl_1_1LinguisticTerm.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a493db638621c5c11773f32a7bc05c87e" id="r_a493db638621c5c11773f32a7bc05c87e"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LinguisticTerm.html#a493db638621c5c11773f32a7bc05c87e">name</a></td></tr>
+<tr class="memdesc:a493db638621c5c11773f32a7bc05c87e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Human-readable label (e.g., "Negative Large").  <br /></td></tr>
 <tr class="separator:a493db638621c5c11773f32a7bc05c87e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa40d3fdcf5c92b42b8e0a7fa288f2f4e" id="r_aa40d3fdcf5c92b42b8e0a7fa288f2f4e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LinguisticTerm.html#aa40d3fdcf5c92b42b8e0a7fa288f2f4e">mf</a></td></tr>
+<tr class="memdesc:aa40d3fdcf5c92b42b8e0a7fa288f2f4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Membership function for this term.  <br /></td></tr>
 <tr class="separator:aa40d3fdcf5c92b42b8e0a7fa288f2f4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae9885cb59c1aaec1d553db791995c0a6" id="r_ae9885cb59c1aaec1d553db791995c0a6"><td class="memItemLeft" align="right" valign="top">std::optional&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LinguisticTerm.html#ae9885cb59c1aaec1d553db791995c0a6">peak</a> = std::nullopt</td></tr>
+<tr class="memdesc:ae9885cb59c1aaec1d553db791995c0a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Explicit peak location for weighted-average defuzzification.  <br /></td></tr>
 <tr class="separator:ae9885cb59c1aaec1d553db791995c0a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00100">100</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<div class="textblock"><p>A named fuzzy term with its membership function and optional peak location. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00146">146</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="aa40d3fdcf5c92b42b8e0a7fa288f2f4e" name="aa40d3fdcf5c92b42b8e0a7fa288f2f4e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa40d3fdcf5c92b42b8e0a7fa288f2f4e">&#9670;&#160;</a></span>mf</h2>
@@ -108,7 +115,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00102">102</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>Membership function for this term. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00148">148</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>
@@ -124,7 +133,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00101">101</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>Human-readable label (e.g., "Negative Large"). </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00147">147</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>
@@ -140,7 +151,10 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00107">107</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p>Explicit peak location for weighted-average defuzzification. </p>
+<p>Set automatically by <a class="el" href="namespacectrl.html#a8f1dad886251652b6661dd678241730e" title="Build a fully specified LinguisticTerm for a Takagi-Sugeno singleton output.">ltSingleton()</a>. Can be set manually for any unimodal <a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">MF</a> when grid-search peak-finding would be ambiguous or too coarse. When <code>nullopt</code>, defuzzWeightedAvg falls back to a grid search. </p>
+
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00157">157</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>

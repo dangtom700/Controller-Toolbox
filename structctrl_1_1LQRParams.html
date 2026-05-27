@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -81,18 +81,24 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p>LQR weighting matrices.  
+ <a href="structctrl_1_1LQRParams.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a2519111db115bc6ce3760e63fca054e3" id="r_a2519111db115bc6ce3760e63fca054e3"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LQRParams.html#a2519111db115bc6ce3760e63fca054e3">Q</a></td></tr>
+<tr class="memdesc:a2519111db115bc6ce3760e63fca054e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">State cost (n × n, positive semi-definite). Increase Q_ii to tighten tracking of state i.  <br /></td></tr>
 <tr class="separator:a2519111db115bc6ce3760e63fca054e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2e060a8d2cb1b80bbaf93d9e7f22fc3" id="r_ab2e060a8d2cb1b80bbaf93d9e7f22fc3"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1LQRParams.html#ab2e060a8d2cb1b80bbaf93d9e7f22fc3">R</a></td></tr>
+<tr class="memdesc:ab2e060a8d2cb1b80bbaf93d9e7f22fc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control cost (m × m, positive definite). Increase R_jj to penalise actuator j.  <br /></td></tr>
 <tr class="separator:ab2e060a8d2cb1b80bbaf93d9e7f22fc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00034">34</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<div class="textblock"><p>LQR weighting matrices. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00052">52</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a2519111db115bc6ce3760e63fca054e3" name="a2519111db115bc6ce3760e63fca054e3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2519111db115bc6ce3760e63fca054e3">&#9670;&#160;</a></span>Q</h2>
@@ -106,7 +112,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00036">36</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p>State cost (n × n, positive semi-definite). Increase Q_ii to tighten tracking of state i. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00054">54</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="ControllerTuner_8cpp_source.html#l00238">ctrl::LQRWeightTuner::brysonMethod()</a>, <a class="el" href="DiscreteLQR_8cpp_source.html#l00137">ctrl::DiscreteLQR::DiscreteLQR()</a>, and <a class="el" href="ControllerTuner_8cpp_source.html#l00247">ctrl::LQRWeightTuner::polePlacementHint()</a>.</p>
 
@@ -124,7 +132,9 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00038">38</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p>Control cost (m × m, positive definite). Increase R_jj to penalise actuator j. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00055">55</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="ControllerTuner_8cpp_source.html#l00238">ctrl::LQRWeightTuner::brysonMethod()</a>, and <a class="el" href="DiscreteLQR_8cpp_source.html#l00137">ctrl::DiscreteLQR::DiscreteLQR()</a>.</p>
 

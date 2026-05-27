@@ -21,7 +21,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.1</span>
+   <div id="projectname">Controller Toolbox<span id="projectnumber">&#160;1.0.0</span>
    </div>
    <div id="projectbrief">Discrete-time C++ control library — 20+ controllers, HAL, estimation, tuning</div>
   </td>
@@ -87,79 +87,47 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;Eigen/Dense&gt;</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;mutex&gt;</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// SimPlant - discrete-time plant simulator shared by SimSensor and SimActuator.</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">//</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// Owns the state-space model and its current state vector.  Both simulation</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">// adapters hold a reference to the same SimPlant instance so that sensor</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// readings and actuator commands remain consistent within one sample step.</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">//</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// Typical closed-loop simulation pattern (one step k):</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">//   double y = sensor.read();             // 1. read current output y[k]</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">//   double u = controller.compute(r - y); // 2. compute control action</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">//   actuator.write(u);                    // 3. write u[k] -&gt; advances plant to x[k+1]</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">//</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">// The step order matters: read() must be called BEFORE write() in the same</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">// sample because write() advances the state.  If the step order is reversed</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">// the simulation models a one-step computational delay (which is also valid</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">// for hardware - just document the convention and stick to it).</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">//</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">// Thread safety: step(), setState(), reset(), and output() are all protected</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">// by an internal std::mutex and are safe to call from separate threads.</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">// This enables Hardware-in-the-Loop (HIL) setups where the plant runs in a</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment">// background thread while a logger or visualiser reads output() concurrently.</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment">// Note: each call acquires the mutex independently - a read-then-step sequence</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">// is NOT atomic without an external lock.  For simulation-only use from a</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">// single thread the mutex overhead is negligible.</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacectrl.html">ctrl</a> {</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="foldopen" id="foldopen00032" data-start="{" data-end="};">
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="classctrl_1_1SimPlant.html">   32</a></span><span class="keyword">class </span><a class="code hl_class" href="classctrl_1_1SimPlant.html">SimPlant</a> {</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="comment">// Construct with a discrete-time state-space model.</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="comment">// x0 is optional; defaults to the zero state (plant starts at rest).</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">explicit</span> <a class="code hl_class" href="classctrl_1_1SimPlant.html">SimPlant</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1StateSpace.html">StateSpace</a>&amp;       <a class="code hl_function" href="classctrl_1_1SimPlant.html#ad71a6b423717b13f00d648b5aca5d941">model</a>,</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>                      <span class="keyword">const</span> Eigen::VectorXd&amp;  x0 = Eigen::VectorXd());</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="comment">// Advance one sample: x[k+1] = A.x[k] + B.u[k],  y[k] = C.x[k] + D.u[k].</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="comment">// The output y[k] is cached internally; call output() after step() to read it.</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73">step</a>(<span class="keywordtype">double</span> u);</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="comment">// Returns the cached output from the last step() call (mutex-protected).</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="comment">// On construction (before any step), returns C.x0 + D.0.</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1SimPlant.html#a53edf7706f7e6e6a1abdfb0df7dbdd7f">output</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="comment">// Direct state access - useful for injecting Kalman estimates or</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="comment">// for initialising the plant at a non-zero operating point.</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="classctrl_1_1SimPlant.html#ac3b58cddcff6463bc1fb32c5240b2e48">   49</a></span>    <span class="keyword">const</span> Eigen::VectorXd&amp; <a class="code hl_function" href="classctrl_1_1SimPlant.html#ac3b58cddcff6463bc1fb32c5240b2e48">state</a>()<span class="keyword">                    const </span>{ <span class="keywordflow">return</span> x_; }</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keywordtype">void</span>                   <a class="code hl_function" href="classctrl_1_1SimPlant.html#a38e25cd4e6417a64e5f30a25dbd5dfd3">setState</a>(<span class="keyword">const</span> Eigen::VectorXd&amp; x);</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="comment">// Reset to the initial state (zero unless overridden by setState before reset).</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1SimPlant.html#a528345d5dac29ded6fd04378ed6dcb4b">reset</a>();</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="classctrl_1_1SimPlant.html#ad71a6b423717b13f00d648b5aca5d941">   55</a></span>    <span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1StateSpace.html">StateSpace</a>&amp; <a class="code hl_function" href="classctrl_1_1SimPlant.html#ad71a6b423717b13f00d648b5aca5d941">model</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> model_; }</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keyword">mutable</span> std::mutex mu_;        <span class="comment">// guards x_, y_cached_</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <a class="code hl_struct" href="structctrl_1_1StateSpace.html">StateSpace</a>       model_;</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    Eigen::VectorXd  x_;           <span class="comment">// current state x[k]</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    Eigen::VectorXd  x0_;          <span class="comment">// initial state (stored for reset)</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keywordtype">double</span>           y_cached_;    <span class="comment">// last output - avoids recomputing in output()</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keywordtype">void</span> updateOutput(<span class="keywordtype">double</span> u);   <span class="comment">// recomputes y_cached_ from current x_ and u (caller holds mu_)</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>};</div>
-</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacectrl.html">ctrl</a> {</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="};">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="classctrl_1_1SimPlant.html">   39</a></span><span class="keyword">class </span><a class="code hl_class" href="classctrl_1_1SimPlant.html">SimPlant</a> {</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keyword">explicit</span> <a class="code hl_class" href="classctrl_1_1SimPlant.html">SimPlant</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1StateSpace.html">StateSpace</a>&amp;       <a class="code hl_function" href="classctrl_1_1SimPlant.html#ad71a6b423717b13f00d648b5aca5d941">model</a>,</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>                      <span class="keyword">const</span> Eigen::VectorXd&amp;  x0 = Eigen::VectorXd());</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73">step</a>(<span class="keywordtype">double</span> u);</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1SimPlant.html#a53edf7706f7e6e6a1abdfb0df7dbdd7f">output</a>() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>} <span class="comment">// namespace ctrl</span></div>
-<div class="ttc" id="aclassctrl_1_1SimPlant_html"><div class="ttname"><a href="classctrl_1_1SimPlant.html">ctrl::SimPlant</a></div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8h_source.html#l00032">SimPlant.h:32</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SimPlant_html_a1bd8fa92d3fd14548ad06912eba68f73"><div class="ttname"><a href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73">ctrl::SimPlant::step</a></div><div class="ttdeci">void step(double u)</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8cpp_source.html#l00014">SimPlant.cpp:14</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SimPlant_html_a38e25cd4e6417a64e5f30a25dbd5dfd3"><div class="ttname"><a href="classctrl_1_1SimPlant.html#a38e25cd4e6417a64e5f30a25dbd5dfd3">ctrl::SimPlant::setState</a></div><div class="ttdeci">void setState(const Eigen::VectorXd &amp;x)</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8cpp_source.html#l00031">SimPlant.cpp:31</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SimPlant_html_a528345d5dac29ded6fd04378ed6dcb4b"><div class="ttname"><a href="classctrl_1_1SimPlant.html#a528345d5dac29ded6fd04378ed6dcb4b">ctrl::SimPlant::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8cpp_source.html#l00039">SimPlant.cpp:39</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SimPlant_html_a53edf7706f7e6e6a1abdfb0df7dbdd7f"><div class="ttname"><a href="classctrl_1_1SimPlant.html#a53edf7706f7e6e6a1abdfb0df7dbdd7f">ctrl::SimPlant::output</a></div><div class="ttdeci">double output() const</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8cpp_source.html#l00025">SimPlant.cpp:25</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SimPlant_html_ac3b58cddcff6463bc1fb32c5240b2e48"><div class="ttname"><a href="classctrl_1_1SimPlant.html#ac3b58cddcff6463bc1fb32c5240b2e48">ctrl::SimPlant::state</a></div><div class="ttdeci">const Eigen::VectorXd &amp; state() const</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8h_source.html#l00049">SimPlant.h:49</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SimPlant_html_ad71a6b423717b13f00d648b5aca5d941"><div class="ttname"><a href="classctrl_1_1SimPlant.html#ad71a6b423717b13f00d648b5aca5d941">ctrl::SimPlant::model</a></div><div class="ttdeci">const StateSpace &amp; model() const</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8h_source.html#l00055">SimPlant.h:55</a></div></div>
-<div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AtomicParamBuffer_8h_source.html#l00046">AtomicParamBuffer.h:46</a></div></div>
-<div class="ttc" id="astructctrl_1_1StateSpace_html"><div class="ttname"><a href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a></div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00047">PlantModel.h:48</a></div></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="classctrl_1_1SimPlant.html#ac3b58cddcff6463bc1fb32c5240b2e48">   71</a></span>    <span class="keyword">const</span> Eigen::VectorXd&amp; <a class="code hl_function" href="classctrl_1_1SimPlant.html#ac3b58cddcff6463bc1fb32c5240b2e48">state</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> x_; }</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1SimPlant.html#a38e25cd4e6417a64e5f30a25dbd5dfd3">setState</a>(<span class="keyword">const</span> Eigen::VectorXd&amp; x);</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1SimPlant.html#a528345d5dac29ded6fd04378ed6dcb4b">reset</a>();</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="classctrl_1_1SimPlant.html#ad71a6b423717b13f00d648b5aca5d941">   85</a></span>    <span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1StateSpace.html">StateSpace</a>&amp; <a class="code hl_function" href="classctrl_1_1SimPlant.html#ad71a6b423717b13f00d648b5aca5d941">model</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> model_; }</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keyword">mutable</span> std::mutex mu_;     </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <a class="code hl_struct" href="structctrl_1_1StateSpace.html">StateSpace</a>       model_;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    Eigen::VectorXd  x_;        </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    Eigen::VectorXd  x0_;       </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keywordtype">double</span>           y_cached_; </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keywordtype">void</span> updateOutput(<span class="keywordtype">double</span> u); </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>};</div>
+</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="ttc" id="aclassctrl_1_1SimPlant_html"><div class="ttname"><a href="classctrl_1_1SimPlant.html">ctrl::SimPlant</a></div><div class="ttdoc">Thread-safe discrete-time plant simulator.</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8h_source.html#l00039">SimPlant.h:39</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SimPlant_html_a1bd8fa92d3fd14548ad06912eba68f73"><div class="ttname"><a href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73">ctrl::SimPlant::step</a></div><div class="ttdeci">void step(double u)</div><div class="ttdoc">Advance one sample: x[k+1] = A·x[k] + B·u[k], y[k] = C·x[k] + D·u[k].</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8cpp_source.html#l00014">SimPlant.cpp:14</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SimPlant_html_a38e25cd4e6417a64e5f30a25dbd5dfd3"><div class="ttname"><a href="classctrl_1_1SimPlant.html#a38e25cd4e6417a64e5f30a25dbd5dfd3">ctrl::SimPlant::setState</a></div><div class="ttdeci">void setState(const Eigen::VectorXd &amp;x)</div><div class="ttdoc">Inject a state vector (for Kalman initialisation or non-zero operating point).</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8cpp_source.html#l00031">SimPlant.cpp:31</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SimPlant_html_a528345d5dac29ded6fd04378ed6dcb4b"><div class="ttname"><a href="classctrl_1_1SimPlant.html#a528345d5dac29ded6fd04378ed6dcb4b">ctrl::SimPlant::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdoc">Reset the plant to the initial state (zero unless overridden by setState before reset()).</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8cpp_source.html#l00039">SimPlant.cpp:39</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SimPlant_html_a53edf7706f7e6e6a1abdfb0df7dbdd7f"><div class="ttname"><a href="classctrl_1_1SimPlant.html#a53edf7706f7e6e6a1abdfb0df7dbdd7f">ctrl::SimPlant::output</a></div><div class="ttdeci">double output() const</div><div class="ttdoc">Return the cached output from the last step() call.</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8cpp_source.html#l00025">SimPlant.cpp:25</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SimPlant_html_ac3b58cddcff6463bc1fb32c5240b2e48"><div class="ttname"><a href="classctrl_1_1SimPlant.html#ac3b58cddcff6463bc1fb32c5240b2e48">ctrl::SimPlant::state</a></div><div class="ttdeci">const Eigen::VectorXd &amp; state() const</div><div class="ttdoc">Read-only access to the current state x[k].</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8h_source.html#l00071">SimPlant.h:71</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SimPlant_html_ad71a6b423717b13f00d648b5aca5d941"><div class="ttname"><a href="classctrl_1_1SimPlant.html#ad71a6b423717b13f00d648b5aca5d941">ctrl::SimPlant::model</a></div><div class="ttdeci">const StateSpace &amp; model() const</div><div class="ttdoc">Read-only access to the state-space model.</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8h_source.html#l00085">SimPlant.h:85</a></div></div>
+<div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AtomicParamBuffer_8h_source.html#l00045">AtomicParamBuffer.h:45</a></div></div>
+<div class="ttc" id="astructctrl_1_1StateSpace_html"><div class="ttname"><a href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a></div><div class="ttdoc">Discrete-time state-space model.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00067">PlantModel.h:68</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
