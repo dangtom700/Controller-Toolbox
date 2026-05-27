@@ -1,0 +1,8 @@
+var searchData=
+[
+  ['warned_0',['warned',['../structctrl_1_1TuningResultBase.html#a46a48ca5d07af7f910c53e321cbd225c',1,'ctrl::TuningResultBase']]],
+  ['warning_1',['warning',['../structctrl_1_1TuningResultBase.html#a7ae8d074fd1836f905c9829d6302ddb1',1,'ctrl::TuningResultBase']]],
+  ['wcrossovergain_2',['wCrossoverGain',['../structctrl_1_1StabilityMargins.html#ad3881a81fafb13778a075225a406a6a6',1,'ctrl::StabilityMargins']]],
+  ['wcrossoverphase_3',['wCrossoverPhase',['../structctrl_1_1StabilityMargins.html#a3e1fcf9625811ebe2c2b31ace3caf21e',1,'ctrl::StabilityMargins']]],
+  ['weight_4',['weight',['../structctrl_1_1StackEntry.html#a0a4f3bfacc0249d7d3099be1f34d2f40',1,'ctrl::StackEntry::weight'],['../structctrl_1_1Rule.html#a7af26a558ec583f686650a0fae5af059',1,'ctrl::Rule::weight']]]
+];

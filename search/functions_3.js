@@ -1,0 +1,17 @@
+var searchData=
+[
+  ['dareconverged_0',['dareConverged',['../classctrl_1_1DiscreteLQR.html#a0de8244c86cf4050bc76044631b3ca87',1,'ctrl::DiscreteLQR']]],
+  ['dareiterations_1',['dareIterations',['../classctrl_1_1DiscreteLQR.html#ad1df51e3428bb40132c415cf6dbe5b8a',1,'ctrl::DiscreteLQR']]],
+  ['degree_2',['degree',['../classctrl_1_1TaylorApproximator.html#ac807dd845bc42a0b2088834f379ff323',1,'ctrl::TaylorApproximator']]],
+  ['dendegree_3',['denDegree',['../classctrl_1_1PadeApproximator.html#a59ce8bab488d35fecd13592472701604',1,'ctrl::PadeApproximator']]],
+  ['denominator_4',['denominator',['../classctrl_1_1PadeApproximator.html#a3cd7c894c4b8d0762de8183f210026c4',1,'ctrl::PadeApproximator::denominator()'],['../classctrl_1_1RecursiveLeastSquares.html#a7c72a2ff75c00356032afe9d05c72e77',1,'ctrl::RecursiveLeastSquares::denominator()']]],
+  ['discreteadrc_5',['DiscreteADRC',['../classctrl_1_1DiscreteADRC.html#ac0eebddd0d049969da56832720dd86ec',1,'ctrl::DiscreteADRC']]],
+  ['discretehinf_6',['DiscreteHinf',['../classctrl_1_1DiscreteHinf.html#a169f8969ecf4fa37c73bda8a77e7696a',1,'ctrl::DiscreteHinf']]],
+  ['discreteleadlag_7',['DiscreteLeadLag',['../classctrl_1_1DiscreteLeadLag.html#acc32b8b2b2ecc777f052cc13aa247a35',1,'ctrl::DiscreteLeadLag']]],
+  ['discretelqg_8',['DiscreteLQG',['../classctrl_1_1DiscreteLQG.html#a91c2edd5c98c322e663ec6ead1e0e9c9',1,'ctrl::DiscreteLQG']]],
+  ['discretelqr_9',['DiscreteLQR',['../classctrl_1_1DiscreteLQR.html#a36a13a6e38e680d7ec1fbfebc899e4cd',1,'ctrl::DiscreteLQR']]],
+  ['discretempc_10',['DiscreteMPC',['../classctrl_1_1DiscreteMPC.html#a88ffdafcdd2e4e4ac9c2b9fe5dc18597',1,'ctrl::DiscreteMPC']]],
+  ['discretepid_11',['DiscretePID',['../classctrl_1_1DiscretePID.html#a735631c0cad0a4fe8a0b9348767b3b8d',1,'ctrl::DiscretePID']]],
+  ['discretesmc_12',['DiscreteSMC',['../classctrl_1_1DiscreteSMC.html#a6c50a3767e0c08a76090581e6bbca4d0',1,'ctrl::DiscreteSMC']]],
+  ['dk_13',['Dk',['../classctrl_1_1DiscreteHinf.html#aedfaa56f189618aae1ba741ef0ae7b43',1,'ctrl::DiscreteHinf']]]
+];

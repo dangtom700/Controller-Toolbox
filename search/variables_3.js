@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['d_0',['D',['../structctrl_1_1StateSpace.html#a29841a16218926079b626c4661444ccd',1,'ctrl::StateSpace']]],
+  ['d11_1',['D11',['../structctrl_1_1GeneralisedPlant.html#a9f56e7c4cad2e976feef9a43ead4a689',1,'ctrl::GeneralisedPlant']]],
+  ['d12_2',['D12',['../structctrl_1_1GeneralisedPlant.html#a2c2da8f7502d66d70f08971e8b008c35',1,'ctrl::GeneralisedPlant']]],
+  ['d21_3',['D21',['../structctrl_1_1GeneralisedPlant.html#afe5eb397ca69850658347c97e8154446',1,'ctrl::GeneralisedPlant']]],
+  ['d22_4',['D22',['../structctrl_1_1GeneralisedPlant.html#a924f0882e1caa9a0c265f0f5b9e4dfaf',1,'ctrl::GeneralisedPlant']]],
+  ['dareconvx_5',['dareConvX',['../structctrl_1_1HinfResult.html#a5c5632b057f7cd2d623f911a57dad68c',1,'ctrl::HinfResult']]],
+  ['dareconvy_6',['dareConvY',['../structctrl_1_1HinfResult.html#aa9a8e4e4f82b94957c301a6f8df1bac0',1,'ctrl::HinfResult']]],
+  ['dareitersx_7',['dareItersX',['../structctrl_1_1HinfResult.html#adeaa917643fafae2086fbe1374494184',1,'ctrl::HinfResult']]],
+  ['dareitersy_8',['dareItersY',['../structctrl_1_1HinfResult.html#a3dd9cdaea4da1bbb5c66aff7723e04f3',1,'ctrl::HinfResult']]],
+  ['daremaxiter_9',['dareMaxIter',['../structctrl_1_1HinfParams.html#a9cb1f9756c8a624785110bde5eaf1a58',1,'ctrl::HinfParams']]],
+  ['daretol_10',['dareTol',['../structctrl_1_1HinfParams.html#a152a50ca216431d041d6e5dac8187a28',1,'ctrl::HinfParams']]],
+  ['de_5fscale_11',['de_scale',['../structctrl_1_1FuzzyPDParams.html#a94f3b20e0b6c859e4d2c93549feabd74',1,'ctrl::FuzzyPDParams']]],
+  ['defuzz_12',['defuzz',['../structctrl_1_1FuzzySystemParams.html#a0d62ad033d88241aaad197c27d3b15c1',1,'ctrl::FuzzySystemParams']]],
+  ['den_13',['den',['../structctrl_1_1TransferFunction.html#a137ed1576cb50e7ee0ed6e5fe1491436',1,'ctrl::TransferFunction']]],
+  ['dk_14',['Dk',['../structctrl_1_1HinfResult.html#a15e297860c8ceea12c34e052d0024d35',1,'ctrl::HinfResult']]],
+  ['dumax_15',['dumax',['../structctrl_1_1MPCParams.html#a0ac4045664a9990c14bb4488563d5891',1,'ctrl::MPCParams::duMax'],['../structctrl_1_1GPCParams.html#a1e2582585b776464456fdcd9f4831f27',1,'ctrl::GPCParams::duMax']]],
+  ['dumin_16',['dumin',['../structctrl_1_1MPCParams.html#abd6b7302a4bd41fd59268c4c73a079d6',1,'ctrl::MPCParams::duMin'],['../structctrl_1_1GPCParams.html#a34f1dae381d27a812cf721fd99975c7d',1,'ctrl::GPCParams::duMin']]]
+];
