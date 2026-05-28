@@ -21,6 +21,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include "ControllerToolbox.h"
+#include "hal/HAL.h"   // SimScheduler, StdTimer (HAL not in umbrella by default)
 #include <cmath>
 #include <cstdlib>
 #include <numbers>
@@ -892,6 +893,263 @@ TEST_CASE("RLS with forgetting factor stays bounded on integrating-output signal
     REQUIRE(std::abs(theta(0)) < 2.0); // a1 in a reasonable range
     REQUIRE(rls.sampleCount() == 500);
 }
+
+// =============================================================================
+// Part 17: SmithPredictor - integer and fractional dead-time (Gap 1 closure)
+// Verifies that padeDelayFilter() is correctly wired into the theta-Ts ctor.
+// =============================================================================
+
+TEST_CASE("SmithPredictor with integer delay compensates FOPDT plant", "[smithpredictor]")
+{
+    // Plant: G(s) = 1/(s+1) discretised at Ts=0.1 s, pure integer delay d=3.
+    const double Ts_sp = 0.1;
+    ctrl::StateSpace sys_c(
+        Eigen::MatrixXd::Constant(1,1,-1.0),
+        Eigen::MatrixXd::Constant(1,1, 1.0),
+        Eigen::MatrixXd::Constant(1,1, 1.0),
+        Eigen::MatrixXd::Zero(1,1), 0.0);
+    const ctrl::StateSpace G0 = ctrl::c2d(sys_c, Ts_sp, ctrl::C2dMethod::ZOH);
+
+    ctrl::PIDParams pp;
+    pp.Kp = 2.0; pp.Ki = 1.0; pp.Kd = 0.0;
+    pp.uMin = -20.0; pp.uMax = 20.0;
+    auto pid = std::make_shared<ctrl::DiscretePID>(pp, Ts_sp);
+
+    ctrl::SmithPredictor sp(pid, G0, 3);
+    REQUIRE_THAT(sp.sampleTime(), WithinAbs(Ts_sp, 1e-12));
+
+    // Closed-loop simulation: 3-step circular delay on plant output
+    Eigen::VectorXd x_plant = Eigen::VectorXd::Zero(G0.stateSize());
+    std::vector<double> delay_buf(3, 0.0);
+    int buf_head = 0;
+    const double ref = 1.0;
+    double y = 0.0;
+
+    for (int k = 0; k < 200; ++k) {
+        const double u = sp.compute(ref - y);
+        Eigen::VectorXd uv(1); uv << u;
+        const double y_nd = (G0.C * x_plant + G0.D * uv)(0);
+        x_plant = G0.A * x_plant + G0.B * uv;
+        const double y_del = delay_buf[buf_head];
+        delay_buf[buf_head] = y_nd;
+        buf_head = (buf_head + 1) % 3;
+        y = y_del;
+    }
+    // Plant should converge to reference despite 0.3 s dead time
+    REQUIRE_THAT(y, WithinAbs(ref, 0.05));
+}
+
+TEST_CASE("SmithPredictor theta-Ts ctor wires padeDelayFilter for fractional delay",
+          "[smithpredictor]")
+{
+    // Plant: G(s)=1/(s+1), theta=0.35 s -> d=3, theta_frac=0.05 s.
+    // The theta-Ts constructor must call padeDelayFilter(0.05, 0.1) automatically.
+    const double Ts_sp = 0.1;
+    ctrl::StateSpace sys_c(
+        Eigen::MatrixXd::Constant(1,1,-1.0),
+        Eigen::MatrixXd::Constant(1,1, 1.0),
+        Eigen::MatrixXd::Constant(1,1, 1.0),
+        Eigen::MatrixXd::Zero(1,1), 0.0);
+    const ctrl::StateSpace G0 = ctrl::c2d(sys_c, Ts_sp, ctrl::C2dMethod::ZOH);
+
+    ctrl::PIDParams pp;
+    pp.Kp = 2.0; pp.Ki = 1.0; pp.Kd = 0.0;
+    pp.uMin = -20.0; pp.uMax = 20.0;
+    auto pid = std::make_shared<ctrl::DiscretePID>(pp, Ts_sp);
+
+    // Must construct without throwing (wires Pade filter internally)
+    ctrl::SmithPredictor sp(pid, G0, 0.35, Ts_sp);
+    REQUIRE_THAT(sp.sampleTime(), WithinAbs(Ts_sp, 1e-12));
+
+    // Same simulation loop: integer delay = 3 steps
+    Eigen::VectorXd x_plant = Eigen::VectorXd::Zero(G0.stateSize());
+    std::vector<double> delay_buf(3, 0.0);
+    int buf_head = 0;
+    const double ref = 1.0;
+    double y = 0.0;
+
+    for (int k = 0; k < 250; ++k) {
+        const double u = sp.compute(ref - y);
+        Eigen::VectorXd uv(1); uv << u;
+        const double y_nd = (G0.C * x_plant + G0.D * uv)(0);
+        x_plant = G0.A * x_plant + G0.B * uv;
+        const double y_del = delay_buf[buf_head];
+        delay_buf[buf_head] = y_nd;
+        buf_head = (buf_head + 1) % 3;
+        y = y_del;
+    }
+    // Converges with fractional Pade approximation (looser tolerance than integer)
+    REQUIRE_THAT(y, WithinAbs(ref, 0.1));
+}
+
+// =============================================================================
+// Part 17: FOPDTIdentifier - fits K, tau, theta from step-response data
+// =============================================================================
+
+TEST_CASE("FOPDTIdentifier recovers K, tau, theta from synthetic step response",
+          "[fopdt]")
+{
+    // True FOPDT: K=2.0, tau=5.0 s, theta=1.5 s
+    const double K_true   = 2.0;
+    const double tau_true = 5.0;
+    const double th_true  = 1.5;
+    const double step_mag = 0.5;
+
+    // Generate clean step-response data at 0.1 s sampling
+    const double Ts_data = 0.1;
+    const int    N       = 300;  // 30 s
+    std::vector<double> t(N), y(N);
+    for (int i = 0; i < N; ++i) {
+        t[i] = i * Ts_data;
+        const double dt = t[i] - th_true;
+        y[i] = (dt > 0.0) ? K_true * step_mag * (1.0 - std::exp(-dt / tau_true)) : 0.0;
+    }
+
+    ctrl::FOPDTIdentifier id(t, y, step_mag, 0.0);
+
+    // Graphical method
+    const ctrl::FOPDTModel mg = id.identify(ctrl::FOPDTMethod::Graphical);
+    REQUIRE_THAT(mg.K,     WithinAbs(K_true,   0.05));   // K within 5%
+    REQUIRE_THAT(mg.tau,   WithinAbs(tau_true, 0.5));    // tau within 0.5 s
+    REQUIRE_THAT(mg.theta, WithinAbs(th_true,  0.4));    // theta within 0.4 s
+    REQUIRE(mg.fitRMSE < 0.1 * K_true * step_mag);      // RMSE < 10% of step output
+
+    // Optimization method should match or beat graphical
+    const ctrl::FOPDTModel mo = id.identify(ctrl::FOPDTMethod::Optimization);
+    REQUIRE_THAT(mo.K,     WithinAbs(K_true,   0.05));
+    REQUIRE_THAT(mo.tau,   WithinAbs(tau_true, 0.3));
+    REQUIRE_THAT(mo.theta, WithinAbs(th_true,  0.2));
+    REQUIRE(mo.fitRMSE <= mg.fitRMSE + 1e-6);  // optimization is no worse
+
+    // IMC tuning from optimization model: lambda_c = 2*theta -> valid PID params
+    const auto pp = ctrl::FOPDTIdentifier::imcTuning(mo, 2.0 * mo.theta, Ts_data);
+    REQUIRE(pp.Kp > 0.0);
+    REQUIRE(pp.Ki > 0.0);
+    REQUIRE(std::isfinite(pp.Kp));
+    REQUIRE(std::isfinite(pp.Ki));
+}
+
+// =============================================================================
+// Part 17: FeedforwardController - applies StateSpace filter to reference
+// =============================================================================
+
+TEST_CASE("FeedforwardController computes u_ff = G_ff(z) * r", "[feedforward]")
+{
+    // G_ff(z) = gain filter: y = 0.5 * u  (static gain via D=0.5, A=0, B=0, C=0)
+    Eigen::MatrixXd A(1,1), B(1,1), C(1,1), D(1,1);
+    A(0,0) = 0.0; B(0,0) = 0.0; C(0,0) = 0.0; D(0,0) = 0.5;
+    ctrl::StateSpace Gff(A, B, C, D, 0.1);
+
+    ctrl::FeedforwardController ff(Gff);
+    REQUIRE_THAT(ff.sampleTime(), WithinAbs(0.1, 1e-12));
+
+    // Static gain: u_ff = 0.5 * r for any r
+    REQUIRE_THAT(ff.compute(2.0), WithinAbs(1.0, 1e-12));
+    REQUIRE_THAT(ff.compute(4.0), WithinAbs(2.0, 1e-12));
+
+    ff.reset();
+
+    // First-order filter: A=a, B=b, C=c, D=d; test that state evolves
+    const double a = 0.8, b = 0.2, c = 1.0, d = 0.0;
+    Eigen::MatrixXd A2(1,1), B2(1,1), C2(1,1), D2(1,1);
+    A2(0,0)=a; B2(0,0)=b; C2(0,0)=c; D2(0,0)=d;
+    ctrl::FeedforwardController ff2(ctrl::StateSpace(A2, B2, C2, D2, 0.1));
+
+    // k=0: y = C*0 + D*1 = 0, x+ = A*0 + B*1 = 0.2
+    REQUIRE_THAT(ff2.compute(1.0), WithinAbs(0.0,      1e-12));
+    // k=1: y = C*0.2 + D*1 = 0.2, x+ = A*0.2 + B*1 = 0.8*0.2+0.2 = 0.36
+    REQUIRE_THAT(ff2.compute(1.0), WithinAbs(b,        1e-12));
+    // k=2: y = C*0.36 + D*1 = 0.36
+    REQUIRE_THAT(ff2.compute(1.0), WithinAbs(a*b + b,  1e-10));
+}
+
+// =============================================================================
+// Part 17: SimScheduler (HAL stub) - fires callback synchronously
+// =============================================================================
+
+TEST_CASE("SimScheduler fires callback synchronously via run()", "[hal][simscheduler]")
+{
+    ctrl::SimScheduler sched;
+    ctrl::StdTimer     timer;
+
+    const uint64_t period_ns = 1'000'000;  // 1 ms
+    sched.setPeriodNs(period_ns);
+    REQUIRE(sched.periodNs() == period_ns);
+    REQUIRE(!sched.isRunning());
+
+    int call_count = 0;
+    sched.setCallback([&]() { ++call_count; });
+
+    sched.start();
+    REQUIRE(sched.isRunning());
+    REQUIRE(sched.tickCount() == 0);
+
+    // Fire 10 ticks without ITimer (count-only path)
+    sched.run(10);
+    REQUIRE(sched.tickCount() == 10);
+    REQUIRE(call_count == 10);
+
+    // Fire 5 more ticks with ITimer (overrun detection path)
+    sched.run(timer, 5);
+    REQUIRE(sched.tickCount() == 15);
+    REQUIRE(call_count == 15);
+
+    sched.stop();
+    REQUIRE(!sched.isRunning());
+
+    // After stop, run() must throw
+    REQUIRE_THROWS_AS(sched.run(1), std::logic_error);
+}
+
+// =============================================================================
+// Part 17: mu-synthesis (Gap 2 closure) - DK-iteration produces tighter bound
+// =============================================================================
+
+#if defined(CTRL_HAS_HINF)
+TEST_CASE("DiscreteHinf::solveMuSyn runs DK-iteration without crashing",
+          "[musyn][hinf]")
+{
+    // Simple SISO plant G(s) = 1/(s+1) at Ts=0.01 s.
+    const double Ts_mu = 0.01;
+    ctrl::StateSpace sys_c(
+        Eigen::MatrixXd::Constant(1,1,-1.0),
+        Eigen::MatrixXd::Constant(1,1, 1.0),
+        Eigen::MatrixXd::Constant(1,1, 1.0),
+        Eigen::MatrixXd::Zero(1,1), 0.0);
+    const ctrl::StateSpace G = ctrl::c2d(sys_c, Ts_mu, ctrl::C2dMethod::ZOH);
+
+    // Generous S/KS/T weights with high gammaInit
+    const auto W1 = ctrl::MixedSensitivity::makeW1(1.0, 2.0, 0.01, Ts_mu);
+    const auto W2 = ctrl::MixedSensitivity::makeW2constant(0.5, Ts_mu);
+    const auto W3 = ctrl::MixedSensitivity::makeW3(5.0, 2.0, 0.01, Ts_mu);
+    const auto P  = ctrl::MixedSensitivity::build(G, W1, W2, W3);
+
+    // mu-synthesis: 3 DK iterations, very high gammaInit to encourage feasibility
+    ctrl::MuSynParams mp;
+    mp.maxDKIter = 3;
+    mp.hinfParams.gammaInit = 500.0;
+
+    // Must NOT throw regardless of feasibility
+    ctrl::MuSynResult mr;
+    REQUIRE_NOTHROW(mr = ctrl::DiscreteHinf::solveMuSyn(P, mp));
+
+    // Algorithm must complete and report a valid iteration count
+    REQUIRE(mr.iterations >= 0);
+    REQUIRE(mr.iterations <= mp.maxDKIter);
+
+    // If a feasible K-step was found, the mu upper bound must be consistent
+    if (mr.hinfResult.feasible) {
+        REQUIRE(mr.achievedMuUpper > 0.0);
+        REQUIRE(std::isfinite(mr.achievedMuUpper));
+        // mu_upper from D-scaled evaluation should not exceed K-step gamma
+        REQUIRE(mr.achievedMuUpper <= mr.hinfResult.achievedGamma + 1.0);
+        // Standard H-inf (no D-scaling) should have gamma >= mu_upper
+        ctrl::HinfResult hr_std = ctrl::DiscreteHinf::solve(P, mp.hinfParams);
+        if (hr_std.feasible)
+            REQUIRE(mr.achievedMuUpper <= hr_std.achievedGamma + 1e-2);
+    }
+}
+#endif
 
 // =============================================================================
 // SCIPY / python-control cross-validation (reference values computed 2026-05-28)

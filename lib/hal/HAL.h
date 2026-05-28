@@ -52,3 +52,4 @@
 #include "SimSensor.h"
 #include "SimActuator.h"
 #include "SafeSensor.h"
+#include "SimScheduler.h"

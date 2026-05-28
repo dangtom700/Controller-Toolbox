@@ -36,6 +36,7 @@ set(CTRL_CORE_SOURCES
     MetricsAnalyzer.cpp
     SystemAnalysis.cpp
     hal/SimPlant.cpp
+    FOPDTIdentifier.cpp
     RecursiveLeastSquares.cpp
     RepetitiveController.cpp
     GeneralizedPredictiveControl.cpp

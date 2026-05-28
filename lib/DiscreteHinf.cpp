@@ -808,4 +808,234 @@ GeneralisedPlant MixedSensitivity::build(const StateSpace &G,
     return P;
 }
 
+// =============================================================================
+// mu-synthesis: DK-iteration with constant amplitude-balance D-scaling
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// buildClosedLoop - lower LFT F_l(P, K): w -> z state-space
+//
+// Given P and K (xk+ = Ak*xk + Bk*y, u = Ck*xk + Dk*y), compute:
+//   [x;  xk]+ = A_cl [x; xk] + B_cl w
+//   z         = C_cl [x; xk] + D_cl w
+//
+// Derivation: eliminate y and u from the plant/controller equations.
+//   u = Dk*(C2 x + D21 w + D22 u) + Ck*xk  =>  u = E*(Dk*C2*x + Dk*D21*w + Ck*xk)
+//   where E = (I - Dk*D22)^{-1}
+// -----------------------------------------------------------------------------
+void DiscreteHinf::buildClosedLoop(
+    const GeneralisedPlant &P,
+    const Eigen::MatrixXd  &Ak, const Eigen::MatrixXd &Bk,
+    const Eigen::MatrixXd  &Ck, const Eigen::MatrixXd &Dk,
+    Eigen::MatrixXd &A_cl, Eigen::MatrixXd &B_cl,
+    Eigen::MatrixXd &C_cl, Eigen::MatrixXd &D_cl)
+{
+    const int n  = P.stateSize();
+    const int nk = static_cast<int>(Ak.rows());
+    const int nu = P.nu();
+    const int nc = n + nk;
+
+    // E = (I - Dk*D22)^{-1}
+    const Eigen::MatrixXd I_nu = Eigen::MatrixXd::Identity(nu, nu);
+    const Eigen::MatrixXd E    = (I_nu - Dk * P.D22).inverse();
+
+    // Pre-compute common products
+    const Eigen::MatrixXd EDkC2  = E * Dk * P.C2;   // nu x n
+    const Eigen::MatrixXd EDkD21 = E * Dk * P.D21;  // nu x nw
+    const Eigen::MatrixXd ECk    = E * Ck;           // nu x nk
+
+    A_cl.resize(nc, nc);
+    B_cl.resize(nc, P.nw());
+    C_cl.resize(P.nz(), nc);
+    D_cl.resize(P.nz(), P.nw());
+
+    A_cl.topLeftCorner(n, n)       = P.A   + P.B2 * EDkC2;
+    A_cl.topRightCorner(n, nk)     = P.B2  * ECk;
+    A_cl.bottomLeftCorner(nk, n)   = Bk    * P.C2 + Bk * P.D22 * EDkC2;
+    A_cl.bottomRightCorner(nk, nk) = Ak    + Bk * P.D22 * ECk;
+
+    B_cl.topRows(n)    = P.B1  + P.B2 * EDkD21;
+    B_cl.bottomRows(nk) = Bk   * P.D21 + Bk * P.D22 * EDkD21;
+
+    C_cl.leftCols(n)   = P.C1  + P.D12 * EDkC2;
+    C_cl.rightCols(nk) = P.D12 * ECk;
+
+    D_cl = P.D11 + P.D12 * EDkD21;
+}
+
+// -----------------------------------------------------------------------------
+// evalFreqResponse - M(z) = C(zI-A)^{-1}B + D at z = e^{j*w*Ts}
+// -----------------------------------------------------------------------------
+Eigen::MatrixXcd DiscreteHinf::evalFreqResponse(
+    const Eigen::MatrixXd &A, const Eigen::MatrixXd &B,
+    const Eigen::MatrixXd &C, const Eigen::MatrixXd &D,
+    double w, double Ts)
+{
+    const int n = static_cast<int>(A.rows());
+    const std::complex<double> z(std::cos(w * Ts), std::sin(w * Ts));
+    const Eigen::MatrixXcd zImA =
+        z * Eigen::MatrixXcd::Identity(n, n) - A.cast<std::complex<double>>();
+    return C.cast<std::complex<double>>()
+           * zImA.colPivHouseholderQr().solve(B.cast<std::complex<double>>())
+           + D.cast<std::complex<double>>();
+}
+
+// -----------------------------------------------------------------------------
+// amplitudeBalance - Sinkhorn-Knopp iteration to equalize row/col norms of
+//                   diag(d_L) * Mabs * diag(1/d_R).
+//
+// Initialises d_L = 1_{nz}, d_R = 1_{nw} then alternates:
+//   Row step: d_L[i] set so row i norm = geometric-mean row norm.
+//   Col step: d_R[j] set so col j norm = geometric-mean col norm.
+// Convergence: norms are equalised, minimising an upper bound on sigma_max.
+// -----------------------------------------------------------------------------
+void DiscreteHinf::amplitudeBalance(const Eigen::MatrixXd &Mabs,
+                                     int max_iter,
+                                     Eigen::VectorXd &d_L,
+                                     Eigen::VectorXd &d_R)
+{
+    const int nz = static_cast<int>(Mabs.rows());
+    const int nw = static_cast<int>(Mabs.cols());
+    d_L = Eigen::VectorXd::Ones(nz);
+    d_R = Eigen::VectorXd::Ones(nw);
+
+    for (int iter = 0; iter < max_iter; ++iter) {
+        // Row step: compute unnormalised row norms (without d_L, with 1/d_R)
+        Eigen::VectorXd raw_row(nz);
+        for (int i = 0; i < nz; ++i) {
+            double s = 0.0;
+            for (int j = 0; j < nw; ++j) { double v = Mabs(i,j)/d_R(j); s += v*v; }
+            raw_row(i) = std::sqrt(std::max(s, 1e-32));
+        }
+        const double gm_row = std::exp(raw_row.array().log().mean());
+        for (int i = 0; i < nz; ++i)
+            d_L(i) = (raw_row(i) > 1e-16) ? std::sqrt(gm_row) / raw_row(i) : 1.0;
+
+        // Col step: compute col norms with updated d_L
+        Eigen::VectorXd raw_col(nw);
+        for (int j = 0; j < nw; ++j) {
+            double s = 0.0;
+            for (int i = 0; i < nz; ++i) { double v = d_L(i)*Mabs(i,j); s += v*v; }
+            raw_col(j) = std::sqrt(std::max(s, 1e-32));
+        }
+        const double gm_col = std::exp(raw_col.array().log().mean());
+        for (int j = 0; j < nw; ++j)
+            d_R(j) = (gm_col > 1e-16) ? raw_col(j) / std::sqrt(gm_col) : 1.0;
+    }
+}
+
+// -----------------------------------------------------------------------------
+// applyDScaling - scale P's performance/exogenous channels by constant D_L, D_R.
+//
+// The resulting plant P_scaled satisfies:
+//   F_l(P_scaled, K) = D_L * F_l(P, K) * D_R^{-1}
+//
+// Only the channels connected to uncertainty (z, w) are touched; the
+// measurement y and control u channels (C2, B2, D22) are unchanged.
+// -----------------------------------------------------------------------------
+GeneralisedPlant DiscreteHinf::applyDScaling(const GeneralisedPlant &P,
+                                              const Eigen::VectorXd  &d_L,
+                                              const Eigen::VectorXd  &d_R)
+{
+    GeneralisedPlant Ps = P;
+    Ps.B1  = P.B1 * d_R.asDiagonal();          // B1 * D_R
+    Ps.C1  = d_L.asDiagonal() * P.C1;          // D_L * C1
+    Ps.D11 = d_L.asDiagonal() * P.D11 * d_R.asDiagonal(); // D_L * D11 * D_R
+    Ps.D12 = d_L.asDiagonal() * P.D12;         // D_L * D12
+    Ps.D21 = P.D21 * d_R.asDiagonal();         // D21 * D_R
+    return Ps;
+}
+
+// -----------------------------------------------------------------------------
+// solveMuSyn - outer DK-iteration loop
+// -----------------------------------------------------------------------------
+MuSynResult DiscreteHinf::solveMuSyn(const GeneralisedPlant &P,
+                                       const MuSynParams &params)
+{
+    MuSynResult best;
+    best.achievedMuUpper = std::numeric_limits<double>::infinity();
+
+    const int nz = P.nz(), nw = P.nw();
+    const double Ts = P.Ts;
+    const double pi = std::acos(-1.0);
+
+    // Initial D-scaling: identity
+    Eigen::VectorXd d_L = Eigen::VectorXd::Ones(nz);
+    Eigen::VectorXd d_R = Eigen::VectorXd::Ones(nw);
+
+    double mu_prev = std::numeric_limits<double>::infinity();
+
+    for (int dk = 0; dk < params.maxDKIter; ++dk) {
+
+        // ----------------------------------------------------------------
+        // K-step: H-inf synthesis on D-scaled plant
+        // ----------------------------------------------------------------
+        const GeneralisedPlant Ps = applyDScaling(P, d_L, d_R);
+        const HinfResult hr = DiscreteHinf::solve(Ps, params.hinfParams);
+        if (!hr.feasible) break;  // infeasible at this D - stop
+
+        // ----------------------------------------------------------------
+        // Build closed-loop F_l(P, K) (unscaled plant, scaled controller)
+        // ----------------------------------------------------------------
+        Eigen::MatrixXd A_cl, B_cl, C_cl, D_cl;
+        buildClosedLoop(P, hr.Ak, hr.Bk, hr.Ck, hr.Dk,
+                        A_cl, B_cl, C_cl, D_cl);
+
+        // ----------------------------------------------------------------
+        // Evaluate mu upper bound over log-spaced frequency grid and
+        // accumulate element-wise max of |M(jw)| for D-step
+        // ----------------------------------------------------------------
+        const int nf = params.nFreqPoints;
+        Eigen::MatrixXd M_peak = Eigen::MatrixXd::Zero(nz, nw);
+        double mu_upper = 0.0;
+
+        for (int fi = 0; fi < nf; ++fi) {
+            // Log-spaced from 0.01*pi/Ts to pi/Ts (Nyquist)
+            const double w = (pi / Ts)
+                           * std::pow(0.01, 1.0 - static_cast<double>(fi) / (nf - 1));
+
+            const Eigen::MatrixXcd Mw = evalFreqResponse(A_cl, B_cl, C_cl, D_cl, w, Ts);
+
+            // Element-wise peak across frequencies (for D-step amplitude balance)
+            for (int i = 0; i < nz; ++i)
+                for (int j = 0; j < nw; ++j)
+                    M_peak(i, j) = std::max(M_peak(i, j), std::abs(Mw(i, j)));
+
+            // sigma_max(D_L * Mw * D_R^{-1}) with current D
+            Eigen::MatrixXcd Mw_sc = Mw;
+            for (int i = 0; i < nz; ++i)
+                for (int j = 0; j < nw; ++j)
+                    Mw_sc(i, j) *= d_L(i) / d_R(j);
+            Eigen::JacobiSVD<Eigen::MatrixXcd> svd(Mw_sc, Eigen::ComputeThinU | Eigen::ComputeThinV);
+            mu_upper = std::max(mu_upper, svd.singularValues()(0));  // singular values are real
+        }
+
+        // ----------------------------------------------------------------
+        // Track best result
+        // ----------------------------------------------------------------
+        if (mu_upper < best.achievedMuUpper) {
+            best.achievedMuUpper = mu_upper;
+            best.hinfResult      = hr;
+        }
+        best.iterations = dk + 1;
+
+        // ----------------------------------------------------------------
+        // Convergence check
+        // ----------------------------------------------------------------
+        if (mu_prev < std::numeric_limits<double>::infinity()) {
+            const double rel_change = std::abs(mu_prev - mu_upper)
+                                    / std::max(mu_prev, 1e-10);
+            if (rel_change < params.muTol) { best.converged = true; break; }
+        }
+        mu_prev = mu_upper;
+
+        // ----------------------------------------------------------------
+        // D-step: Sinkhorn-Knopp amplitude balance on M_peak
+        // ----------------------------------------------------------------
+        amplitudeBalance(M_peak, params.dScaleMaxIter, d_L, d_R);
+    }
+
+    return best;
+}
+
 } // namespace ctrl

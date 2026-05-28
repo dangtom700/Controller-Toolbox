@@ -14,9 +14,12 @@
  *
  * **Modified error delivered to the inner controller:**
  * @code
- *   e_sp[k] = (r[k] - y[k]) + (yhat_model[k] - yhat_model[k-d])
- *            = error + (current model output - d-step-delayed model output)
+ *   e_sp[k] = (r[k] - y[k]) - (yhat_model[k] - yhat_model[k-d])
+ *            = error - (current model output - d-step-delayed model output)
  * @endcode
+ * Subtracting the model correction removes the delay: the inner controller C(z)
+ * sees the delay-free error r[k] - yhat_model[k] as if no dead time existed.
+ * Ref: Astrom & Wittenmark, CCS eq. (6.36); Smith, Chem. Eng. Prog. 53 (1957).
  *
  * **Requirements:** the @p delayModel must represent the delay-**free** plant P0(z).
  *

@@ -127,6 +127,49 @@ struct HinfResult
     /** @} */
 };
 
+// -----------------------------------------------------------------------------
+
+/**
+ * @brief Parameters for mu-synthesis via DK-iteration.
+ *
+ * DK-iteration alternates between:
+ * - **K-step:** H-infinity synthesis on the D-scaled plant.
+ * - **D-step:** Amplitude-balance D-scaling that minimises an upper bound on
+ *               the structured singular value mu over a frequency grid.
+ *
+ * The D-scaling is held **constant** (frequency-independent), which avoids
+ * rational-function fitting of D(jw) while still providing a tighter mu bound
+ * than plain H-infinity. The resulting controller satisfies:
+ * @code
+ *   mu_upper <= sigma_max(D * F_l(P, K)(jw) * D^{-1})   for all w
+ * @endcode
+ * where D is an element-wise positive diagonal scaling found by the
+ * amplitude-balance algorithm (Sinkhorn-Knopp style).
+ *
+ * @note For full DK-iteration with frequency-dependent rational D(jw) fitting,
+ *       the D-step requires an additional Pade/curve-fit pass per element -
+ *       this is a planned extension (see cumulative_bug_report.md Part 17).
+ */
+struct MuSynParams
+{
+    int    maxDKIter     = 20;    ///< Maximum DK-iteration rounds.
+    double muTol         = 0.02; ///< Stop when relative change in mu_upper < this.
+    int    nFreqPoints   = 80;   ///< Frequency grid size for D-step (log-spaced, Nyquist).
+    int    dScaleMaxIter = 30;   ///< Inner Sinkhorn-Knopp iterations per D-step.
+    HinfParams hinfParams;       ///< H-inf sub-problem parameters for each K-step.
+};
+
+/**
+ * @brief Result of mu-synthesis via solveMuSyn().
+ */
+struct MuSynResult
+{
+    bool   converged       = false; ///< @c true if relative mu improvement < MuSynParams::muTol.
+    int    iterations      = 0;    ///< DK-iteration rounds completed.
+    double achievedMuUpper = 0.0;  ///< Best mu upper bound achieved (sigma_max of D-scaled closed-loop).
+    HinfResult hinfResult;         ///< H-infinity synthesis result for the best K found.
+};
+
 /**
  * @brief Discrete-time dynamic output-feedback Hinf controller.
  *
@@ -157,6 +200,40 @@ public:
      *         Check result.feasible before constructing a DiscreteHinf.
      */
     static HinfResult solve(const GeneralisedPlant &P, const HinfParams &params = {});
+
+    /**
+     * @brief Mu-synthesis via DK-iteration (constant D-scaling).
+     *
+     * Iterates between an H-infinity K-step (solving the scaled plant) and a
+     * D-step (amplitude-balance Sinkhorn-Knopp scaling to tighten the mu upper
+     * bound). Returns the best controller found across all iterations.
+     *
+     * **Algorithm:**
+     * 1. Initialise D = I.
+     * 2. **K-step:** solve H-inf for D-scaled plant P_d.
+     * 3. Build closed-loop M = F_l(P, K).
+     * 4. **D-step:** evaluate M(jw) at @p nFreqPoints log-spaced frequencies;
+     *    apply Sinkhorn-Knopp balancing to minimise sigma_max(D*M*D^{-1}).
+     * 5. Compute mu_upper = max_w sigma_max(D*M(jw)*D^{-1}).
+     * 6. Check convergence; if |delta mu| / mu < muTol or K-step infeasible: stop.
+     *
+     * **Typical usage:**
+     * @code
+     *   ctrl::MuSynParams mp;
+     *   mp.hinfParams.gammaInit = 20.0;
+     *   auto r = ctrl::DiscreteHinf::solveMuSyn(P, mp);
+     *   if (r.hinfResult.feasible) {
+     *       ctrl::DiscreteHinf K(r.hinfResult);
+     *       std::cout << "mu_upper = " << r.achievedMuUpper << "\n";
+     *   }
+     * @endcode
+     *
+     * @param P      Generalised plant (same format as for solve()).
+     * @param params Mu-synthesis parameters.
+     * @return MuSynResult with the best K and its mu upper bound.
+     */
+    static MuSynResult solveMuSyn(const GeneralisedPlant &P,
+                                   const MuSynParams &params = {});
 
     /**
      * @brief Compute u[k] - SISO interface (ny = 1, nu = 1).
@@ -209,6 +286,38 @@ private:
     static bool trySolve(const GeneralisedPlant &P, double gamma,
                          double dareTol, int dareMaxIter,
                          HinfResult &out);
+
+    // --- mu-synthesis helpers ------------------------------------------------
+
+    // Build closed-loop state-space F_l(P, K): exogenous w -> performance z.
+    static void buildClosedLoop(const GeneralisedPlant    &P,
+                                const Eigen::MatrixXd     &Ak,
+                                const Eigen::MatrixXd     &Bk,
+                                const Eigen::MatrixXd     &Ck,
+                                const Eigen::MatrixXd     &Dk,
+                                Eigen::MatrixXd           &A_cl,
+                                Eigen::MatrixXd           &B_cl,
+                                Eigen::MatrixXd           &C_cl,
+                                Eigen::MatrixXd           &D_cl);
+
+    // Evaluate M(e^{j*w*Ts}) for the state-space (A,B,C,D).
+    static Eigen::MatrixXcd evalFreqResponse(const Eigen::MatrixXd &A,
+                                             const Eigen::MatrixXd &B,
+                                             const Eigen::MatrixXd &C,
+                                             const Eigen::MatrixXd &D,
+                                             double w, double Ts);
+
+    // Sinkhorn-Knopp amplitude balance: find d_L, d_R that equalise row/col
+    // norms of diag(d_L)*Mabs*diag(1/d_R).
+    static void amplitudeBalance(const Eigen::MatrixXd &Mabs,
+                                 int max_iter,
+                                 Eigen::VectorXd &d_L,
+                                 Eigen::VectorXd &d_R);
+
+    // Apply constant D-scaling to plant performance/exogenous channels only.
+    static GeneralisedPlant applyDScaling(const GeneralisedPlant &P,
+                                          const Eigen::VectorXd  &d_L,
+                                          const Eigen::VectorXd  &d_R);
 };
 
 // -----------------------------------------------------------------------------

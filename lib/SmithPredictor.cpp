@@ -110,7 +110,11 @@ double SmithPredictor::compute(double error)
     }
 
     // Step 4: modified Smith error
-    const double e_sp = error + (y_now - y_delayed);
+    // e_sp = (r - y_actual) - (yhat_nodelay - yhat_delayed)
+    // Subtracting the model correction compensates for the dead-time: if the model
+    // has already predicted movement yhat_nodelay, the controller reduces its effort
+    // accordingly. Ref: Astrom & Wittenmark, CCS Section 6.4 eq. (6.36).
+    const double e_sp = error - (y_now - y_delayed);
 
     // Step 5: inner controller
     const double u = inner_->compute(e_sp);

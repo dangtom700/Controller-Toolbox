@@ -78,6 +78,8 @@
 #include "RepetitiveController.h"         ///< RC  - plug-in periodic disturbance/reference cancellation.
 #include "GeneralizedPredictiveControl.h" ///< GPC - velocity-form MPC with reference trajectory (CARIMA).
 #include "GradientProjectionQP.h"         ///< Shared gradient-projection solver used by MPC and GPC.
+#include "FOPDTIdentifier.h"              ///< FOPDT - step-response identification (K, tau, theta) + IMC-PID tuning.
+#include "FeedforwardController.h"        ///< Feedforward - G_ff(z)*r, combinable with feedback via ControllerStack.
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,

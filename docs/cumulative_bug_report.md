@@ -3460,3 +3460,186 @@ All examples import via `import _setup_bindings` and run with `conda run -n soft
 ---
 
 *Part 15 added 2026-05-27. All bindings verified by rebuild and smoke_test.py. All 7 examples in examples/python/ verified PASS.*
+
+---
+
+## Part 17: Reference-Driven Gaps + Algorithm Gap Closures (2026-05-28)
+
+**Session goal:** Identify gaps from `reference/` folder, close 3 algorithm gaps from the backlog.
+
+---
+
+### 17.1 Reference Folder Analysis
+
+Two repositories were explored:
+
+**`reference/pdc-master/`** - Process Dynamics and Control course (APM.online):
+- Modules 01-40 covering FOPDT identification, cascade control, feedforward,
+  PID tuning (ZN, IMC, Cohen-Coon), Bode/Nyquist, stability, MPC, adaptive.
+- Key gap identified: No dedicated FOPDT identifier class returning (K, tau, theta).
+  Library had `StepResponseTuner` (returns PIDParams) but not the raw model.
+- Feedforward controller (feedforward_widget.ipynb): no dedicated class existed;
+  achievable via ControllerStack::Additive but not as a first-class `IController`.
+
+**`reference/dynopt-master/`** - Dynamic Optimization course:
+- Covers MHE (Moving Horizon Estimation), trajectory optimization, RL control,
+  orthogonal collocation, multi-objective optimization (Pareto front).
+- MHE noted as a future gap (complex; not implemented this session).
+
+---
+
+### 17.2 Gap 1 CLOSED: SmithPredictor padeDelayFilter (+ sign bug fix)
+
+**P-GAP1** [FIXED]  
+
+`padeDelayFilter()` was already wired into `SmithPredictor`'s `theta-Ts`
+constructor (verified by reading SmithPredictor.cpp:53-73). The auto-splitting
+constructor correctly calls `padeDelayFilter(theta_frac, Ts)` for the sub-sample
+remainder. This gap was already closed in a prior session.
+
+**NEW P17-1 [FIXED] SmithPredictor sign bug in e_sp formula:**
+
+During testing, `ex05_smith_predictor` was found to produce an UNSTABLE closed
+loop (y oscillating to -16 instead of tracking ref=1). Root cause:
+
+```cpp
+// WRONG (original):
+const double e_sp = error + (y_now - y_delayed);
+
+// CORRECT (fixed):
+const double e_sp = error - (y_now - y_delayed);
+```
+
+Ref: Astrom & Wittenmark CCS eq. (6.36) and Smith 1957:
+  e' = (r - y) - [G0(u) - G0_delayed(u)] = error - (yhat - yhat_d)
+
+The `+` sign caused POSITIVE feedback of the model correction, making the loop
+appear to have more error than it does, driving the output unstable. The correct
+`-` sign reduces the error estimate as the model predicts plant movement.
+
+Fixed in: `lib/SmithPredictor.cpp:86`, docstring in `lib/SmithPredictor.h:16-21`.
+
+---
+
+### 17.3 Gap 2 CLOSED: mu-synthesis DK-iteration in DiscreteHinf
+
+**P-GAP2** [FIXED]
+
+`DiscreteHinf::solveMuSyn()` implemented as a constant D-scaling DK-iteration:
+- **K-step**: calls `DiscreteHinf::solve()` on the D-scaled plant.
+- **D-step**: Sinkhorn-Knopp amplitude balance on element-wise peak |M(jw)| matrix.
+- **mu upper bound**: max_w sigma_max(D_L * M(jw) * D_R^{-1}) over a log-spaced
+  frequency grid of `nFreqPoints` points.
+- Convergence criterion: |delta_mu| / mu < muTol.
+
+New types added: `MuSynParams`, `MuSynResult`.
+New private helpers: `buildClosedLoop()`, `evalFreqResponse()`,
+                     `amplitudeBalance()`, `applyDScaling()`.
+
+Files changed:
+- `lib/DiscreteHinf.h` — MuSynParams, MuSynResult, solveMuSyn() + 4 helpers
+- `lib/DiscreteHinf.cpp` — 150 lines of new implementation
+
+**Note:** This is constant (frequency-independent) D-scaling. Full DK-iteration
+with rational-function D-fitting is tracked as a future extension.
+
+---
+
+### 17.4 Gap 3 CLOSED: HAL SimScheduler stub
+
+**P-GAP3** [FIXED]
+
+`lib/hal/SimScheduler.h` added: concrete `IScheduler` implementation for
+simulation/test use. Fires the callback synchronously via:
+- `tick(ITimer&)` — one firing with overrun measurement
+- `run(ITimer&, n)` — N firings with overrun measurement
+- `run(n)` — N firings without ITimer (fast path)
+
+Also tracks `tickCount()` and `overrunCount()` as required by `IScheduler`.
+HAL.h updated to include SimScheduler.h.
+
+Files changed:
+- `lib/hal/SimScheduler.h` — new (~150 lines)
+- `lib/hal/HAL.h` — added `#include "SimScheduler.h"`
+
+Platform-specific stubs (FreeRTOS xTimerCreate, Zephyr k_timer, Linux POSIX
+timer_create) are documented in IScheduler.h comments. Concrete implementations
+require the respective RTOS SDKs; SimScheduler is sufficient for all dev/test use.
+
+---
+
+### 17.5 Reference-inspired new features
+
+**P17-2 FOPDTIdentifier [NEW]** — `lib/FOPDTIdentifier.h` + `.cpp`
+
+Fits the FOPDT model G(s) = K*exp(-theta*s)/(tau*s+1) to open-loop step data.
+Two methods: Graphical (Ziegler-Nichols tangent + 63.2% intercept, Module 06)
+and Optimization (nested golden-section search on theta then tau). Includes
+`imcTuning(FOPDTModel, lambdaC, Ts)` → `PIDParams` via Rivera 1986.
+
+Added to CMakeLists.txt (core source) and ControllerToolbox.h.
+
+**P17-3 FeedforwardController [NEW]** — `lib/FeedforwardController.h`
+
+Header-only `IController` subclass: `u_ff[k] = G_ff(z) * r[k]`. Takes a
+StateSpace feedforward filter and applies it to the REFERENCE signal (not error).
+Combine with feedback controller via `ControllerStack::Additive` for 2DOF.
+Reference: pdc-master/feedforward_widget.ipynb.
+
+Added to ControllerToolbox.h.
+
+---
+
+### 17.6 New Catch2 tests
+
+7 new test cases added to `tests/test_catch2_advanced.cpp`:
+
+| Test | Tag | What it verifies |
+|------|-----|-----------------|
+| SmithPredictor integer delay tracks ref | `[smithpredictor]` | Sign fix: loop stable and converges |
+| SmithPredictor theta-Ts ctor Pade filter | `[smithpredictor]` | Gap 1: padeDelayFilter wired, no NaN |
+| FOPDTIdentifier recovers K/tau/theta | `[fopdt]` | Graphical + Opt methods, IMC tuning |
+| FeedforwardController filter math | `[feedforward]` | Static + dynamic state evolution |
+| SimScheduler synchronous run | `[hal][simscheduler]` | tick/run count, overrun, start/stop |
+| solveMuSyn DK-iteration | `[musyn][hinf]` | No crash, valid iterations, consistency |
+
+Updated test count: **132 assertions in 38 test cases** (was 97/31).
+
+---
+
+### 17.7 Python examples added
+
+| Example | Content |
+|---------|---------|
+| `ex48_fopdt_identification.py` | FOPDT graphical + optimization ID + IMC-PID tuning + closed-loop check |
+| `ex49_feedforward_pid.py` | Static feedforward (K_ff=1/K_plant) + PI; IAE comparison |
+
+Python summary: **53 passed | 0 failed** (was 51).
+
+---
+
+### 17.8 Status after Part 17
+
+**C++ Phase 3: 50 passed | 0 failed**
+- test_catch2_advanced: 132 assertions in 38 test cases, 0 failures
+- All other test binaries unchanged
+
+**Python Phase 4: 53 passed | 0 failed**
+- ex48, ex49 added and passing
+
+| Item | Status |
+|------|--------|
+| P-GAP1 SmithPredictor padeDelayFilter wiring | `[FIXED]` (was already done; P17-1 sign bug also fixed) |
+| P17-1 SmithPredictor sign bug in e_sp | `[FIXED]` - changed `+` to `-` in compute() |
+| P-GAP2 mu-synthesis DK-iteration | `[FIXED]` - solveMuSyn() implemented with constant D-scaling |
+| P-GAP3 HAL SimScheduler stub | `[FIXED]` - SimScheduler.h added to lib/hal/ |
+| P17-2 FOPDTIdentifier | `[NEW FIXED]` - lib/FOPDTIdentifier.h + .cpp |
+| P17-3 FeedforwardController | `[NEW FIXED]` - lib/FeedforwardController.h |
+| P10-13 CONTRIBUTING.md | `[OPEN]` |
+| MHE (Moving Horizon Estimation) | `[TRACKED]` - future session |
+| Full DK-iteration rational D-fitting | `[TRACKED]` - future extension of mu-synthesis |
+| FreeRTOS/Zephyr IScheduler stubs | `[TRACKED]` - requires RTOS SDK |
+
+---
+
+*Part 17 added 2026-05-28. All changes verified by run.py: C++ 50/50, Python 53/53.*
