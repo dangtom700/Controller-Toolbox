@@ -60,7 +60,7 @@ class DiscreteLQR:
                 u_ff: float = 0.0) -> float:
         if x_ref is None:
             x_ref = np.zeros_like(x)
-        u = float(-self.K @ (x - x_ref)) + u_ff
+        u = float(np.squeeze(-self.K @ (x - x_ref))) + u_ff
         return float(np.clip(u, self.u_min, self.u_max))
 
 
@@ -90,7 +90,7 @@ class KalmanFilter:
         S = self.C @ self.P @ self.C.T + self.R
         L = self.P @ self.C.T @ np.linalg.inv(S)
         innov = np.array([y]) - self.C @ self.x_hat
-        self.x_hat = self.x_hat + L.ravel() * float(innov)
+        self.x_hat = self.x_hat + L.ravel() * float(np.squeeze(innov))
         I_LC = np.eye(len(self.x_hat)) - L @ self.C
         self.P = I_LC @ self.P @ I_LC.T + L @ self.R @ L.T  # Joseph form
 

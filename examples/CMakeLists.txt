@@ -36,6 +36,13 @@ add_example(ex24_fuzzy_pid_dc_motor)
 add_example(ex25_fuzzy_supervisor_mpc)
 add_example(ex26_fuzzy_ts_gain_scheduler)
 
+# Advanced controller examples (ex27-ex31)
+add_example(ex27_function_approximator)
+add_example(ex28_gpc_adaptive)
+add_example(ex29_repetitive_controller)
+add_example(ex30_ekf_nonlinear)
+add_example(ex31_subspace_id)
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)

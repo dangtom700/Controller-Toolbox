@@ -61,6 +61,15 @@ for %%T in (
     ex20_system_identification_data
     ex21_boiler_turbine_case_study
     ex22_full_pipeline_robustness
+    ex23_fuzzy_pd_temperature
+    ex24_fuzzy_pid_dc_motor
+    ex25_fuzzy_supervisor_mpc
+    ex26_fuzzy_ts_gain_scheduler
+    ex27_function_approximator
+    ex28_gpc_adaptive
+    ex29_repetitive_controller
+    ex30_ekf_nonlinear
+    ex31_subspace_id
     example_pid_feedback
     mimo_known
     mimo_unknown
@@ -72,6 +81,9 @@ for %%T in (
     boiler_sim
     tug_sim
     toolbox_examples
+    test_catch2_pilot
+    test_catch2_advanced
+    test_tugsim_regression
 ) do (
     echo.
     echo ----------------------------------------------------------

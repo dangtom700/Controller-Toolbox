@@ -82,7 +82,7 @@ def ss_step(plant: StateSpace, u: float) -> float:
     Returns scalar output y.
     """
     u_vec = np.array([[u]])
-    y = float(plant.C @ plant.x + plant.D @ u_vec[0])
+    y = float(np.squeeze(plant.C @ plant.x + plant.D @ u_vec[0]))
     plant.x = plant.A @ plant.x + (plant.B @ u_vec).ravel()
     return y
 

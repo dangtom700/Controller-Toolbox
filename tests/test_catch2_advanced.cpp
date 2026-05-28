@@ -15,6 +15,7 @@
  *   - LQRAdapter MIMO (m=2): computeVec() returns full vector, compute() truncates (P12-20)
  *   - c2d() ZOH accuracy on stiff plant cond(A)=100 (P12-20)
  *   - RLS forgetting factor prevents covariance blow-up on integrating signal (P12-20)
+ *   - scipy/control cross-validation: c2d ZOH/Tustin, LQR K matrix, step response
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -890,4 +891,136 @@ TEST_CASE("RLS with forgetting factor stays bounded on integrating-output signal
     // (large tolerance because short data, but clearly not diverged)
     REQUIRE(std::abs(theta(0)) < 2.0); // a1 in a reasonable range
     REQUIRE(rls.sampleCount() == 500);
+}
+
+// =============================================================================
+// SCIPY / python-control cross-validation (reference values computed 2026-05-28)
+// Each constant below was verified by running the corresponding scipy/control call.
+// Tolerances match what ex43-ex47 Python scripts use (1e-6 relative or 1e-8 abs).
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// c2d ZOH vs scipy.signal.cont2discrete - G(s)=1/(s^2+1.5s+1), Ts=0.01
+// Reference: scipy.signal.cont2discrete((Ac, Bc, I2, 0), 0.01, 'zoh')
+// Verified 2026-05-28.
+// -----------------------------------------------------------------------------
+TEST_CASE("c2d ZOH matches scipy.signal.cont2discrete: G(s)=1/(s^2+1.5s+1)", "[c2d][scipy]")
+{
+    // Controllable canonical form of G(s)=1/(s^2+1.5s+1)
+    Eigen::Matrix2d Ac;
+    Ac << 0.0, 1.0, -1.0, -1.5;
+    Eigen::Vector2d Bc;
+    Bc << 0.0, 1.0;
+    Eigen::Matrix2d Cc = Eigen::Matrix2d::Identity();
+    Eigen::MatrixXd Dc = Eigen::MatrixXd::Zero(2, 1);
+
+    ctrl::StateSpace sys_c(Ac, Bc, Cc, Dc, 0.0);
+    const ctrl::StateSpace sys_d = ctrl::c2d(sys_c, Ts, ctrl::C2dMethod::ZOH);
+
+    // scipy reference values (10-digit precision)
+    REQUIRE_THAT(sys_d.A(0, 0), WithinAbs( 0.9999502495, 1e-6));
+    REQUIRE_THAT(sys_d.A(0, 1), WithinAbs( 0.0099252082, 1e-6));
+    REQUIRE_THAT(sys_d.A(1, 0), WithinAbs(-0.0099252082, 1e-6));
+    REQUIRE_THAT(sys_d.A(1, 1), WithinAbs( 0.9850624372, 1e-6));
+    REQUIRE_THAT(sys_d.B(0, 0), WithinAbs( 0.0000497505, 1e-8));
+    REQUIRE_THAT(sys_d.B(1, 0), WithinAbs( 0.0099252082, 1e-6));
+}
+
+TEST_CASE("c2d ZOH matches exact exponential: G(s)=1/(s+1), Ts=0.1", "[c2d][scipy]")
+{
+    // ZOH exact: Ad = exp(-Ts), Bd = 1 - exp(-Ts)
+    // scipy: signal.cont2discrete(([-1],[1],[1],[0]),0.1,'zoh') -> Ad=0.904837418036
+    ctrl::StateSpace sys_c(
+        Eigen::MatrixXd::Constant(1,1,-1.0),
+        Eigen::MatrixXd::Constant(1,1, 1.0),
+        Eigen::MatrixXd::Constant(1,1, 1.0),
+        Eigen::MatrixXd::Zero(1,1), 0.0);
+
+    const ctrl::StateSpace sys_d_zoh    = ctrl::c2d(sys_c, 0.1, ctrl::C2dMethod::ZOH);
+    const ctrl::StateSpace sys_d_tustin = ctrl::c2d(sys_c, 0.1, ctrl::C2dMethod::Tustin);
+
+    // ZOH: exact values from scipy and analytical formula
+    const double ad_zoh_exact = std::exp(-0.1);             // 0.904837418036
+    const double bd_zoh_exact = 1.0 - std::exp(-0.1);       // 0.095162581964
+    REQUIRE_THAT(sys_d_zoh.A(0,0), WithinAbs(ad_zoh_exact, 1e-10));
+    REQUIRE_THAT(sys_d_zoh.B(0,0), WithinAbs(bd_zoh_exact, 1e-10));
+
+    // Tustin: exact bilinear transform (s -> 2/Ts*(z-1)/(z+1))
+    // Ad = (1 - Ts/2)/(1 + Ts/2) = 0.904761904762
+    const double ad_tustin_exact = (1.0 - 0.1/2.0) / (1.0 + 0.1/2.0);
+    const double bd_tustin_exact = 0.1 / (1.0 + 0.1/2.0);
+    REQUIRE_THAT(sys_d_tustin.A(0,0), WithinAbs(ad_tustin_exact, 1e-10));
+    REQUIRE_THAT(sys_d_tustin.B(0,0), WithinAbs(bd_tustin_exact, 1e-10));
+
+    // ZOH and Tustin give different results (non-interchangeable methods).
+    // Difference approx = 7.55e-5 for Ts=0.1 (scipy.signal.cont2discrete verified).
+    REQUIRE(std::abs(sys_d_zoh.A(0,0) - sys_d_tustin.A(0,0)) > 1e-5);
+}
+
+// -----------------------------------------------------------------------------
+// DiscreteLQR gain vs scipy DARE / control.dlqr
+// Reference: control.dlqr(Ad, Bd, Q, R) verified 2026-05-28.
+// -----------------------------------------------------------------------------
+TEST_CASE("DiscreteLQR gain matches control.dlqr: double integrator Ts=0.01 Q=10I R=I", "[lqr][scipy]")
+{
+    // control.dlqr(Ad_int, Bd_int, 10*I2, I1) -> K = [3.0990370926, 3.9751861701]
+    // Verified 2026-05-28 with python-control 0.10.2 and scipy 1.17.1.
+    auto plant = makeDoubleIntegrator();
+
+    ctrl::LQRParams lqr_p;
+    lqr_p.Q = 10.0 * Eigen::Matrix2d::Identity();
+    lqr_p.R = Eigen::MatrixXd::Identity(1, 1);
+    ctrl::DiscreteLQR lqr(plant, lqr_p);
+
+    REQUIRE(lqr.dareConverged());
+    const Eigen::MatrixXd &K = lqr.gainMatrix();
+    REQUIRE(K.rows() == 1);
+    REQUIRE(K.cols() == 2);
+
+    // scipy reference: K = [3.0990370926, 3.9751861701] (1e-6 relative tolerance)
+    REQUIRE_THAT(K(0,0), WithinRel(3.0990370926, 1e-6));
+    REQUIRE_THAT(K(0,1), WithinRel(3.9751861701, 1e-6));
+
+    // Closed-loop eigenvalues must all be inside the unit disk
+    const Eigen::Matrix2d Acl = plant.A - plant.B * K;
+    Eigen::EigenSolver<Eigen::Matrix2d> eig(Acl);
+    for (int i = 0; i < 2; ++i)
+        REQUIRE(std::abs(eig.eigenvalues()(i)) < 1.0);
+}
+
+// -----------------------------------------------------------------------------
+// KalmanFilter step response: ss_step_copy matches scipy.signal.dlsim
+// Reference: scipy.signal.dlsim on first-order ZOH plant, 10 steps.
+// Verified 2026-05-28.
+// -----------------------------------------------------------------------------
+TEST_CASE("ss_step_copy matches exact first-order ZOH step response", "[c2d][simulation][scipy]")
+{
+    // G(s) = 1/(s+1), ZOH @ Ts=0.1s
+    // Exact step response: y[k] = D*u  for k=0 (D=0 so y[0]=0),
+    //                              y[k] = 1 - exp(-k*Ts)  for k >= 1
+    ctrl::StateSpace sys_c(
+        Eigen::MatrixXd::Constant(1,1,-1.0),
+        Eigen::MatrixXd::Constant(1,1, 1.0),
+        Eigen::MatrixXd::Constant(1,1, 1.0),
+        Eigen::MatrixXd::Zero(1,1), 0.0);
+    const ctrl::StateSpace sys_d = ctrl::c2d(sys_c, 0.1, ctrl::C2dMethod::ZOH);
+
+    Eigen::VectorXd x(1);
+    x << 0.0;
+    Eigen::VectorXd u(1);
+    u << 1.0;
+
+    // k=0: y = C*x + D*u = 0 + 0 = 0 (output before advancing)
+    const Eigen::VectorXd y0 = ctrl::ssStep(sys_d, x, u);
+    REQUIRE_THAT(y0(0), WithinAbs(0.0, 1e-12));
+
+    // k=1: after one step x = Bd, y = C*x = (1-exp(-0.1))
+    const Eigen::VectorXd y1 = ctrl::ssStep(sys_d, x, u);
+    const double y1_exact = 1.0 - std::exp(-0.1);  // = 0.09516258196
+    REQUIRE_THAT(y1(0), WithinAbs(y1_exact, 1e-10));
+
+    // k=5: y = 1 - exp(-0.5) = 0.39346934
+    for (int k = 2; k < 5; ++k) ctrl::ssStep(sys_d, x, u);
+    const Eigen::VectorXd y5 = ctrl::ssStep(sys_d, x, u);
+    REQUIRE_THAT(y5(0), WithinAbs(1.0 - std::exp(-0.5), 1e-8));
 }

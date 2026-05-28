@@ -66,7 +66,7 @@ def sim_lqg():
     plant = tf2ss(EXAMPLE_NUM, EXAMPLE_DEN)
     y = np.zeros(STEPS)
     for k in range(STEPS):
-        y_meas = float(C @ plant.x)
+        y_meas = float(np.squeeze(C @ plant.x))
         u = lqg.compute(y_meas)
         plant.x = A @ plant.x + B.ravel() * u
         y[k] = y_meas

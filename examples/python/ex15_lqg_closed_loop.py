@@ -66,7 +66,7 @@ def run_lqg(snr_db_val, x_ref=None):
 
     for k in range(STEPS):
         x_true_traj[k] = plant.x.copy()
-        y_clean = float(C @ plant.x + D @ np.array([lqg.u_prev]))
+        y_clean = float(np.squeeze(C @ plant.x + D @ np.array([lqg.u_prev])))
         y_noisy = y_clean + rng.normal(0, sigma_meas)
         u = lqg.compute(y_noisy, x_ref)
         plant.x = A @ plant.x + B.ravel() * u

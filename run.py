@@ -472,6 +472,99 @@ def phase_run():
 
 
 # ---------------------------------------------------------------------------
+# Phase 4 — Run Python binding examples
+# ---------------------------------------------------------------------------
+
+def phase_python():
+    """Run Python examples that use the ctrl_toolbox C++ bindings.
+
+    Discovers all exNN_*.py files in examples/python/ and runs them via
+    `conda run -n soft_robotics -- python <script>`.  Each script must exit 0 to pass.
+    Scripts that import _setup_bindings require the .pyd to be built first.
+    """
+    _divider()
+    print('  Phase 4 — Python binding examples')
+    _divider()
+    print()
+
+    py_dir = os.path.join('examples', 'python')
+    if not os.path.isdir(py_dir):
+        print(f'[SKIP] {py_dir} not found\n')
+        return
+
+    import re as _re
+    scripts = sorted([
+        os.path.join(py_dir, f)
+        for f in os.listdir(py_dir)
+        if _re.match(r'ex\d+_.*\.py$', f)
+    ])
+
+    if not scripts:
+        print('No exNN_*.py scripts found.\n')
+        return
+
+    total = len(scripts)
+    print(f'Found {total} Python example(s):')
+    for i, s in enumerate(scripts, 1):
+        print(f'  [{i:>2}] {s}')
+    print()
+
+    py_passed, py_failed = [], []
+
+    for i, script in enumerate(scripts, 1):
+        _divider('-')
+        print(f'  [{i}/{total}]  {script}')
+        _divider('-')
+        print()
+
+        # Run each script from its own directory so relative paths (data/, utils/) resolve.
+        script_dir  = os.path.dirname(os.path.abspath(script))
+        script_abs  = os.path.abspath(script)
+        cmd = ['conda', 'run', '-n', 'soft_robotics', '--', 'python', script_abs]
+        try:
+            with subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding='utf-8',
+                errors='backslashreplace',
+                cwd=script_dir
+            ) as proc:
+                for line in proc.stdout:
+                    sys.stdout.write(line)
+                proc.wait()
+                rc = proc.returncode
+        except Exception as exc:
+            print(f'\n  ERROR launching: {exc}')
+            py_failed.append(script)
+            continue
+
+        print()
+        if rc == 0:
+            py_passed.append(script)
+            print('  EXIT 0 - PASSED')
+        else:
+            py_failed.append(script)
+            print(f'  EXIT {rc} - FAILED')
+        print()
+
+    _divider()
+    print(f'  Python summary: {len(py_passed)} passed  |  {len(py_failed)} failed')
+    _divider()
+
+    if py_failed:
+        print('\n  Failed Python scripts:')
+        for s in py_failed:
+            print(f'    {s}')
+        print()
+        # Don't abort: Python failures are separate from C++ test failures.
+        # They require the binding .pyd to be built; raise a warning instead.
+        print('  WARNING: some Python examples failed. '
+              'Re-build with -DCTRL_BUILD_PYTHON_BINDINGS=ON and retry.\n')
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
@@ -486,6 +579,7 @@ if __name__ == '__main__':
         phase_clean()
         phase_compile()
         phase_run()
+        phase_python()
     finally:
         sys.stdout = sys.__stdout__
         _log_file.close()
