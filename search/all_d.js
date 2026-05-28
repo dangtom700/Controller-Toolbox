@@ -17,5 +17,6 @@ var searchData=
   ['getpoles_14',['getPoles',['../classctrl_1_1SystemAnalysis.html#ae9fd5f69fc3911297a2c09a3832dac2b',1,'ctrl::SystemAnalysis']]],
   ['gpcparams_15',['GPCParams',['../structctrl_1_1GPCParams.html',1,'ctrl']]],
   ['gradientprojectionqp_2eh_16',['GradientProjectionQP.h',['../GradientProjectionQP_8h.html',1,'']]],
-  ['guide_17',['guide',['../md_docs_2DOCUMENTATION.html#autotoc_md31',1,'2. Compilation Guide'],['../md_docs_2DOCUMENTATION.html#autotoc_md46',1,'4. Usage Guide'],['../md_docs_2DEPLOYMENT.html',1,'Controller Toolbox - Deployment Guide']]]
+  ['graphical_17',['Graphical',['../namespacectrl.html#afe5d6d219bd6cb8e4f6b4d0d3b9225b8a5772f5928c9d3f31259d15041bfe260f',1,'ctrl']]],
+  ['guide_18',['guide',['../md_docs_2DOCUMENTATION.html#autotoc_md31',1,'2. Compilation Guide'],['../md_docs_2DOCUMENTATION.html#autotoc_md46',1,'4. Usage Guide'],['../md_docs_2DEPLOYMENT.html',1,'Controller Toolbox - Deployment Guide']]]
 ];

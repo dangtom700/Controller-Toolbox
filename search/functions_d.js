@@ -9,5 +9,5 @@ var searchData=
   ['output_6',['output',['../classctrl_1_1SimPlant.html#a53edf7706f7e6e6a1abdfb0df7dbdd7f',1,'ctrl::SimPlant']]],
   ['outputsize_7',['outputSize',['../structctrl_1_1StateSpace.html#ae4ad7c88e0250e0c5648204a56365d2e',1,'ctrl::StateSpace']]],
   ['outputvar_8',['outputVar',['../classctrl_1_1FuzzySystem.html#aba2bbae46a0ab2d642f1da28c592385a',1,'ctrl::FuzzySystem']]],
-  ['overruncount_9',['overrunCount',['../classctrl_1_1IScheduler.html#af311374b124ab032bcbe401849c74cd1',1,'ctrl::IScheduler']]]
+  ['overruncount_9',['overruncount',['../classctrl_1_1IScheduler.html#af311374b124ab032bcbe401849c74cd1',1,'ctrl::IScheduler::overrunCount()'],['../classctrl_1_1SimScheduler.html#a7d312095c089b7606019ed1f526de4ae',1,'ctrl::SimScheduler::overrunCount()']]]
 ];

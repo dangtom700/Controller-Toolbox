@@ -1,17 +1,18 @@
 var searchData=
 [
-  ['identify_0',['identify',['../classctrl_1_1StepResponseTuner.html#ab2b49beb2dc2105275ad5c9f4d23e422',1,'ctrl::StepResponseTuner']]],
+  ['identify_0',['identify',['../classctrl_1_1FOPDTIdentifier.html#a525a8bced2446c0bd374acb1e1fa6185',1,'ctrl::FOPDTIdentifier::identify()'],['../classctrl_1_1StepResponseTuner.html#ab2b49beb2dc2105275ad5c9f4d23e422',1,'ctrl::StepResponseTuner::identify()']]],
   ['imcpid_1',['imcPID',['../classctrl_1_1TunerSuite.html#a1d27ab9e2492f07053ddbcab32d1867e',1,'ctrl::TunerSuite']]],
-  ['innercontroller_2',['innercontroller',['../classctrl_1_1RepetitiveController.html#af4eb67a6db60d8da059b01e6d9115353',1,'ctrl::RepetitiveController::innerController()'],['../classctrl_1_1SmithPredictor.html#ade9087f18b2bcc12b13ab5ad780a02f6',1,'ctrl::SmithPredictor::innerController()']]],
-  ['inputsize_3',['inputSize',['../structctrl_1_1StateSpace.html#a7ad091cf54b39bd4564617daf686b104',1,'ctrl::StateSpace']]],
-  ['inputvar_4',['inputVar',['../classctrl_1_1FuzzySystem.html#a47d87d9b8e284b847ede07937b10b5f7',1,'ctrl::FuzzySystem']]],
-  ['isdiscretestable_5',['isDiscreteStable',['../classctrl_1_1SystemAnalysis.html#a2f243ec5de8087ffd338ac6cd3ea8fc6',1,'ctrl::SystemAnalysis']]],
-  ['isdone_6',['isDone',['../classctrl_1_1RelayAutoTuner.html#a776a5bd2d3aeb831a88009fef9dc2e55',1,'ctrl::RelayAutoTuner']]],
-  ['ishealthy_7',['ishealthy',['../classctrl_1_1GeneralizedPredictiveController.html#a6f4220ef0b13ee07e868518c3c607a33',1,'ctrl::GeneralizedPredictiveController::isHealthy()'],['../classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b',1,'ctrl::IController::isHealthy()'],['../classctrl_1_1DiscreteMPC.html#aa5db42f01b9bf5a603608c37964085e0',1,'ctrl::DiscreteMPC::isHealthy()'],['../classctrl_1_1LQRAdapter.html#a9825d348f0818b3c4e850596c13beb3b',1,'ctrl::LQRAdapter::isHealthy()']]],
-  ['isotropic_8',['isotropic',['../classctrl_1_1KalmanWeightTuner.html#ad8b8a7c1c18590f4f26a0ed5b90464ed',1,'ctrl::KalmanWeightTuner']]],
-  ['isotropicfor_9',['isotropicFor',['../classctrl_1_1KalmanWeightTuner.html#aedee53ffc6ae41d40282d91265712f96',1,'ctrl::KalmanWeightTuner']]],
-  ['ispbhdetectable_10',['isPBHDetectable',['../namespacectrl.html#a7f88ce31d2b44d52a66fee321e29391d',1,'ctrl']]],
-  ['ispbhstabilizable_11',['isPBHStabilizable',['../namespacectrl.html#a847d18f960deac4bd58803a0cf34d11b',1,'ctrl']]],
-  ['isrunning_12',['isRunning',['../classctrl_1_1IScheduler.html#ab1fd616c4008ee63a7d519c2998814e1',1,'ctrl::IScheduler']]],
-  ['isvalid_13',['isvalid',['../classctrl_1_1ISensor.html#a366745c03cda60b3c91f2e5425e818d7',1,'ctrl::ISensor::isValid()'],['../classctrl_1_1SafeSensor.html#a2588ae59386c9d31ab7c7c21309cff78',1,'ctrl::SafeSensor::isValid()'],['../classctrl_1_1SimSensor.html#aab8b15621d8bf66b61b7d237a5396046',1,'ctrl::SimSensor::isValid()']]]
+  ['imctuning_2',['imcTuning',['../classctrl_1_1FOPDTIdentifier.html#a28a8991295b2bf716ad60c44e984aa8d',1,'ctrl::FOPDTIdentifier']]],
+  ['innercontroller_3',['innercontroller',['../classctrl_1_1RepetitiveController.html#af4eb67a6db60d8da059b01e6d9115353',1,'ctrl::RepetitiveController::innerController()'],['../classctrl_1_1SmithPredictor.html#ade9087f18b2bcc12b13ab5ad780a02f6',1,'ctrl::SmithPredictor::innerController()']]],
+  ['inputsize_4',['inputSize',['../structctrl_1_1StateSpace.html#a7ad091cf54b39bd4564617daf686b104',1,'ctrl::StateSpace']]],
+  ['inputvar_5',['inputVar',['../classctrl_1_1FuzzySystem.html#a47d87d9b8e284b847ede07937b10b5f7',1,'ctrl::FuzzySystem']]],
+  ['isdiscretestable_6',['isDiscreteStable',['../classctrl_1_1SystemAnalysis.html#a2f243ec5de8087ffd338ac6cd3ea8fc6',1,'ctrl::SystemAnalysis']]],
+  ['isdone_7',['isDone',['../classctrl_1_1RelayAutoTuner.html#a776a5bd2d3aeb831a88009fef9dc2e55',1,'ctrl::RelayAutoTuner']]],
+  ['ishealthy_8',['ishealthy',['../classctrl_1_1DiscreteMPC.html#aa5db42f01b9bf5a603608c37964085e0',1,'ctrl::DiscreteMPC::isHealthy()'],['../classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b',1,'ctrl::IController::isHealthy()'],['../classctrl_1_1GeneralizedPredictiveController.html#a6f4220ef0b13ee07e868518c3c607a33',1,'ctrl::GeneralizedPredictiveController::isHealthy()'],['../classctrl_1_1LQRAdapter.html#a9825d348f0818b3c4e850596c13beb3b',1,'ctrl::LQRAdapter::isHealthy()']]],
+  ['isotropic_9',['isotropic',['../classctrl_1_1KalmanWeightTuner.html#ad8b8a7c1c18590f4f26a0ed5b90464ed',1,'ctrl::KalmanWeightTuner']]],
+  ['isotropicfor_10',['isotropicFor',['../classctrl_1_1KalmanWeightTuner.html#aedee53ffc6ae41d40282d91265712f96',1,'ctrl::KalmanWeightTuner']]],
+  ['ispbhdetectable_11',['isPBHDetectable',['../namespacectrl.html#a7f88ce31d2b44d52a66fee321e29391d',1,'ctrl']]],
+  ['ispbhstabilizable_12',['isPBHStabilizable',['../namespacectrl.html#a847d18f960deac4bd58803a0cf34d11b',1,'ctrl']]],
+  ['isrunning_13',['isrunning',['../classctrl_1_1IScheduler.html#ab1fd616c4008ee63a7d519c2998814e1',1,'ctrl::IScheduler::isRunning()'],['../classctrl_1_1SimScheduler.html#a1a7495ef8ace37059de896a4ba03eb76',1,'ctrl::SimScheduler::isRunning()']]],
+  ['isvalid_14',['isvalid',['../classctrl_1_1ISensor.html#a366745c03cda60b3c91f2e5425e818d7',1,'ctrl::ISensor::isValid()'],['../classctrl_1_1SafeSensor.html#a2588ae59386c9d31ab7c7c21309cff78',1,'ctrl::SafeSensor::isValid()'],['../classctrl_1_1SimSensor.html#aab8b15621d8bf66b61b7d237a5396046',1,'ctrl::SimSensor::isValid()']]]
 ];

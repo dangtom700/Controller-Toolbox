@@ -63,12 +63,13 @@ var searchData=
   ['discretesmc_2ecpp_60',['DiscreteSMC.cpp',['../DiscreteSMC_8cpp.html',1,'']]],
   ['discretesmc_2eh_61',['DiscreteSMC.h',['../DiscreteSMC_8h.html',1,'']]],
   ['divergence_62',['Kalman Filter Divergence',['../md_docs_2DEPLOYMENT.html#autotoc_md139',1,'']]],
-  ['dk_63',['dk',['../structctrl_1_1HinfResult.html#a15e297860c8ceea12c34e052d0024d35',1,'ctrl::HinfResult::Dk'],['../classctrl_1_1DiscreteHinf.html#aedfaa56f189618aae1ba741ef0ae7b43',1,'ctrl::DiscreteHinf::Dk()']]],
+  ['dk_63',['dk',['../classctrl_1_1DiscreteHinf.html#aedfaa56f189618aae1ba741ef0ae7b43',1,'ctrl::DiscreteHinf::Dk()'],['../structctrl_1_1HinfResult.html#a15e297860c8ceea12c34e052d0024d35',1,'ctrl::HinfResult::Dk']]],
   ['docker_20build_64',['Docker build',['../index.html#autotoc_md4',1,'']]],
   ['docker_20usage_65',['Docker Usage',['../index.html#autotoc_md12',1,'']]],
   ['documentation_66',['documentation',['../md_docs_2DOCUMENTATION.html',1,'Controller Toolbox - Technical Documentation'],['../index.html#autotoc_md8',1,'Documentation']]],
   ['documentation_2emd_67',['DOCUMENTATION.md',['../DOCUMENTATION_8md.html',1,'']]],
   ['doxygen_20api_20output_20optional_68',['2.5 Doxygen API Output (Optional)',['../md_docs_2DOCUMENTATION.html#autotoc_md36',1,'']]],
-  ['dumax_69',['dumax',['../structctrl_1_1MPCParams.html#a0ac4045664a9990c14bb4488563d5891',1,'ctrl::MPCParams::duMax'],['../structctrl_1_1GPCParams.html#a1e2582585b776464456fdcd9f4831f27',1,'ctrl::GPCParams::duMax']]],
-  ['dumin_70',['dumin',['../structctrl_1_1MPCParams.html#abd6b7302a4bd41fd59268c4c73a079d6',1,'ctrl::MPCParams::duMin'],['../structctrl_1_1GPCParams.html#a34f1dae381d27a812cf721fd99975c7d',1,'ctrl::GPCParams::duMin']]]
+  ['dscalemaxiter_69',['dScaleMaxIter',['../structctrl_1_1MuSynParams.html#aa97638ab1a133ed16ec61e61d723245e',1,'ctrl::MuSynParams']]],
+  ['dumax_70',['dumax',['../structctrl_1_1MPCParams.html#a0ac4045664a9990c14bb4488563d5891',1,'ctrl::MPCParams::duMax'],['../structctrl_1_1GPCParams.html#a1e2582585b776464456fdcd9f4831f27',1,'ctrl::GPCParams::duMax']]],
+  ['dumin_71',['dumin',['../structctrl_1_1MPCParams.html#abd6b7302a4bd41fd59268c4c73a079d6',1,'ctrl::MPCParams::duMin'],['../structctrl_1_1GPCParams.html#a34f1dae381d27a812cf721fd99975c7d',1,'ctrl::GPCParams::duMin']]]
 ];

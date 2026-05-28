@@ -85,6 +85,15 @@ $(function() {
  <a href="classctrl_1_1IScheduler.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="IScheduler_8h_source.html">IScheduler.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for ctrl::IScheduler:</div>
+<div class="dyncontent">
+ <div class="center">
+  <img src="classctrl_1_1IScheduler.png" usemap="#ctrl::IScheduler_map" alt=""/>
+  <map id="ctrl::IScheduler_map" name="ctrl::IScheduler_map">
+<area href="classctrl_1_1SimScheduler.html" title="Synchronous test scheduler - fires callback immediately on tick()." alt="ctrl::SimScheduler" shape="rect" coords="0,56,114,80"/>
+  </map>
+</div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -172,6 +181,8 @@ Public Member Functions</h2></td></tr>
 <p>True while the scheduler is running (between <a class="el" href="classctrl_1_1IScheduler.html#ab50a72aa8611627889166a49bdcd22fb" title="Start the periodic timer.">start()</a> and <a class="el" href="classctrl_1_1IScheduler.html#ac5957a15af672cea12c8fa63634494b6" title="Stop the periodic timer.">stop()</a>). </p>
 <dl class="section return"><dt>Returns</dt><dd>Running state. </dd></dl>
 
+<p>Implemented in <a class="el" href="classctrl_1_1SimScheduler.html#a1a7495ef8ace37059de896a4ba03eb76">ctrl::SimScheduler</a>.</p>
+
 </div>
 </div>
 <a id="af311374b124ab032bcbe401849c74cd1" name="af311374b124ab032bcbe401849c74cd1"></a>
@@ -201,6 +212,8 @@ Public Member Functions</h2></td></tr>
 <p>Reset to zero on each <a class="el" href="classctrl_1_1IScheduler.html#ab50a72aa8611627889166a49bdcd22fb" title="Start the periodic timer.">start()</a> call.</p>
 <dl class="section return"><dt>Returns</dt><dd>Overrun count since last <a class="el" href="classctrl_1_1IScheduler.html#ab50a72aa8611627889166a49bdcd22fb" title="Start the periodic timer.">start()</a>. </dd></dl>
 
+<p>Implemented in <a class="el" href="classctrl_1_1SimScheduler.html#a7d312095c089b7606019ed1f526de4ae">ctrl::SimScheduler</a>.</p>
+
 </div>
 </div>
 <a id="ad752ef72e0333e71da7f03c965b96c6b" name="ad752ef72e0333e71da7f03c965b96c6b"></a>
@@ -228,6 +241,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Period in nanoseconds as configured (0 if not set). </p>
 <dl class="section return"><dt>Returns</dt><dd>Configured period [ns]. </dd></dl>
+
+<p>Implemented in <a class="el" href="classctrl_1_1SimScheduler.html#a33418d7253c0b59d3f901cf5c59f7972">ctrl::SimScheduler</a>.</p>
 
 </div>
 </div>
@@ -265,6 +280,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
+<p>Implemented in <a class="el" href="classctrl_1_1SimScheduler.html#a7e4478b429b76dde019ced463a2c3177">ctrl::SimScheduler</a>.</p>
+
 </div>
 </div>
 <a id="a355ce44465302f1f0df46c02e37511bf" name="a355ce44465302f1f0df46c02e37511bf"></a>
@@ -299,6 +316,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
+<p>Implemented in <a class="el" href="classctrl_1_1SimScheduler.html#a6b1fc9ef410fd204a4e3f0b0dc7c39dd">ctrl::SimScheduler</a>.</p>
+
 </div>
 </div>
 <a id="ab50a72aa8611627889166a49bdcd22fb" name="ab50a72aa8611627889166a49bdcd22fb"></a>
@@ -326,6 +345,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Start the periodic timer. </p>
 <p>After this call, the callback fires every <code><a class="el" href="classctrl_1_1IScheduler.html#ad752ef72e0333e71da7f03c965b96c6b" title="Period in nanoseconds as configured (0 if not set).">periodNs()</a></code> nanoseconds. Calling <code><a class="el" href="classctrl_1_1IScheduler.html#ab50a72aa8611627889166a49bdcd22fb" title="Start the periodic timer.">start()</a></code> when already running is a no-op. </p>
+
+<p>Implemented in <a class="el" href="classctrl_1_1SimScheduler.html#acf9edcae574fb19fde73051a4764002d">ctrl::SimScheduler</a>.</p>
 
 </div>
 </div>
@@ -355,6 +376,8 @@ Public Member Functions</h2></td></tr>
 <p>Stop the periodic timer. </p>
 <p>Blocks until any in-progress callback invocation completes before returning. </p>
 
+<p>Implemented in <a class="el" href="classctrl_1_1SimScheduler.html#aef95864b20bc4d8f081981aa3e506428">ctrl::SimScheduler</a>.</p>
+
 </div>
 </div>
 <a id="a9c43823a6e0a8eea0768982fae1b05dd" name="a9c43823a6e0a8eea0768982fae1b05dd"></a>
@@ -383,6 +406,8 @@ Public Member Functions</h2></td></tr>
 <p>Number of timer ticks fired since the last <a class="el" href="classctrl_1_1IScheduler.html#ab50a72aa8611627889166a49bdcd22fb" title="Start the periodic timer.">start()</a> call. </p>
 <p>Useful for drift measurement and missed-tick detection.</p>
 <dl class="section return"><dt>Returns</dt><dd>Tick count since last <a class="el" href="classctrl_1_1IScheduler.html#ab50a72aa8611627889166a49bdcd22fb" title="Start the periodic timer.">start()</a>. </dd></dl>
+
+<p>Implemented in <a class="el" href="classctrl_1_1SimScheduler.html#a3704fbe278ade6408daccb541d7e2f3f">ctrl::SimScheduler</a>.</p>
 
 </div>
 </div>

@@ -6,5 +6,7 @@ var searchData=
   ['modelpredictive_3',['ModelPredictive',['../structctrl_1_1tag_1_1ModelPredictive.html',1,'ctrl::tag']]],
   ['mpchorizontuner_4',['MPCHorizonTuner',['../classctrl_1_1MPCHorizonTuner.html',1,'ctrl']]],
   ['mpcparams_5',['MPCParams',['../structctrl_1_1MPCParams.html',1,'ctrl']]],
-  ['mpctuneresult_6',['MPCTuneResult',['../structctrl_1_1MPCTuneResult.html',1,'ctrl']]]
+  ['mpctuneresult_6',['MPCTuneResult',['../structctrl_1_1MPCTuneResult.html',1,'ctrl']]],
+  ['musynparams_7',['MuSynParams',['../structctrl_1_1MuSynParams.html',1,'ctrl']]],
+  ['musynresult_8',['MuSynResult',['../structctrl_1_1MuSynResult.html',1,'ctrl']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['inferencemethod_0',['InferenceMethod',['../namespacectrl.html#a73e0367e44b7fe77d1b4948481380c22',1,'ctrl']]]
+  ['fopdtmethod_0',['FOPDTMethod',['../namespacectrl.html#afe5d6d219bd6cb8e4f6b4d0d3b9225b8',1,'ctrl']]]
 ];

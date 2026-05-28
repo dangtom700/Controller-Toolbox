@@ -12,7 +12,7 @@ var searchData=
   ['pd_9',['pd',['../structctrl_1_1FuzzyPIDParams.html#a5a6e49517cf4cf754bbce4297ca34446',1,'ctrl::FuzzyPIDParams']]],
   ['peak_10',['peak',['../structctrl_1_1LinguisticTerm.html#ae9885cb59c1aaec1d553db791995c0a6',1,'ctrl::LinguisticTerm']]],
   ['peakovershoot_11',['peakOvershoot',['../structctrl_1_1TimeDomainMetrics.html#aff23807d649f13918861122f8ec67cde',1,'ctrl::TimeDomainMetrics']]],
-  ['periodns_12',['periodNs',['../classctrl_1_1IScheduler.html#ad752ef72e0333e71da7f03c965b96c6b',1,'ctrl::IScheduler']]],
+  ['periodns_12',['periodns',['../classctrl_1_1IScheduler.html#ad752ef72e0333e71da7f03c965b96c6b',1,'ctrl::IScheduler::periodNs()'],['../classctrl_1_1SimScheduler.html#a33418d7253c0b59d3f901cf5c59f7972',1,'ctrl::SimScheduler::periodNs()']]],
   ['periodsteps_13',['periodSteps',['../structctrl_1_1RepetitiveParams.html#aba6e5280caafbfa9d160cb9b0f16ff46',1,'ctrl::RepetitiveParams']]],
   ['perturbamp_14',['perturbAmp',['../structctrl_1_1ExtremumSeekerParams.html#aeb0dcdf9b480e273010906f7b45dd1c6',1,'ctrl::ExtremumSeekerParams']]],
   ['perturbfreq_15',['perturbFreq',['../structctrl_1_1ExtremumSeekerParams.html#ab5a5da5018272465b8cecc576a7ce0aa',1,'ctrl::ExtremumSeekerParams']]],

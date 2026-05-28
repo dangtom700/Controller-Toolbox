@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['k_0',['k',['../structctrl_1_1SMCParams.html#a3fa027ba3dfca3725f172fabd129a455',1,'ctrl::SMCParams::K'],['../structctrl_1_1StepResponseTuner_1_1FOPDTModel.html#a460937f55af87daa10c5a85cf6f1d733',1,'ctrl::StepResponseTuner::FOPDTModel::K']]],
+  ['k_0',['k',['../structctrl_1_1SMCParams.html#a3fa027ba3dfca3725f172fabd129a455',1,'ctrl::SMCParams::K'],['../structctrl_1_1FOPDTModel.html#af72773456be131c21f8f9106bea9bc2e',1,'ctrl::FOPDTModel::K'],['../structctrl_1_1StepResponseTuner_1_1FOPDTModel.html#a460937f55af87daa10c5a85cf6f1d733',1,'ctrl::StepResponseTuner::FOPDTModel::K']]],
   ['k1_1',['K1',['../structctrl_1_1SuperTwistingParams.html#a72c3177b49aaecceeeffa5a45d692538',1,'ctrl::SuperTwistingParams']]],
   ['k2_2',['K2',['../structctrl_1_1SuperTwistingParams.html#ad6c93df7b0bc89c26e0b296d9f5f6a1c',1,'ctrl::SuperTwistingParams']]],
   ['kalmangain_3',['kalmanGain',['../structctrl_1_1SubspaceIDResult.html#ac0a3c0cbe4e80c8a31969e26d1c0171d',1,'ctrl::SubspaceIDResult']]],

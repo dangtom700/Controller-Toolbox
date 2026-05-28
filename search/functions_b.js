@@ -15,6 +15,6 @@ var searchData=
   ['mftriangular_12',['mfTriangular',['../namespacectrl.html#a210a1ff6e7c04e4d043ed83f0ad3a129',1,'ctrl']]],
   ['minreal_13',['minreal',['../namespacectrl.html#a336b6d277ba94f21f11fcb2e5283952d',1,'ctrl']]],
   ['mode_14',['mode',['../classctrl_1_1ControllerStack.html#a7699dc65172c47b782b42d668a718cde',1,'ctrl::ControllerStack']]],
-  ['model_15',['model',['../classctrl_1_1SimPlant.html#ad71a6b423717b13f00d648b5aca5d941',1,'ctrl::SimPlant']]],
+  ['model_15',['model',['../classctrl_1_1SimPlant.html#ad71a6b423717b13f00d648b5aca5d941',1,'ctrl::SimPlant::model()'],['../classctrl_1_1FeedforwardController.html#a4daefd82286a5f235ce6dcdb396a95d8',1,'ctrl::FeedforwardController::model()']]],
   ['mpchorizon_16',['mpcHorizon',['../classctrl_1_1TunerSuite.html#a73582e0e3f826ebcfbdb9b64644e9a87',1,'ctrl::TunerSuite']]]
 ];

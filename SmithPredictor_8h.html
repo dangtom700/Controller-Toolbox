@@ -105,9 +105,10 @@ Namespaces</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Smith Predictor - compensates for pure dead-time in discrete plants. </p>
 <p>Replaces the dead-time delay in the feedback path with a prediction from an internal model, so the inner controller C(z) sees a delay-free loop.</p>
-<p><b>Modified error delivered to the inner controller:</b> </p><div class="fragment"><div class="line">e_sp[k] = (r[k] - y[k]) + (yhat_model[k] - yhat_model[k-d])</div>
-<div class="line">         = error + (current model output - d-step-delayed model output)</div>
-</div><!-- fragment --><p><b>Requirements:</b> the <code>delayModel</code> must represent the delay-**free** plant P0(z).</p>
+<p><b>Modified error delivered to the inner controller:</b> </p><div class="fragment"><div class="line">e_sp[k] = (r[k] - y[k]) - (yhat_model[k] - yhat_model[k-d])</div>
+<div class="line">         = error - (current model output - d-step-delayed model output)</div>
+</div><!-- fragment --><p> Subtracting the model correction removes the delay: the inner controller C(z) sees the delay-free error r[k] - yhat_model[k] as if no dead time existed. Ref: Astrom &amp; Wittenmark, CCS eq. (6.36); Smith, Chem. Eng. Prog. 53 (1957).</p>
+<p><b>Requirements:</b> the <code>delayModel</code> must represent the delay-**free** plant P0(z).</p>
 <p><b>Fractional dead-time support:</b> If the true dead time theta is not an integer multiple of Ts, pass a first-order Pade filter (from FunctionApproximator::padeDelayFilter()) for the sub-sample remainder. The filter H_frac is connected in series with the delay model so the effective model is P0_eff(z) = H_frac(z).P0(z), matching e^{-theta_frac.s} to first order without rounding.</p>
 <dl class="section see"><dt>See also</dt><dd>Smith, "Closed control of loops with dead time", Chem. Eng. Prog. 53 (1957). </dd>
 <dd>
