@@ -168,7 +168,8 @@ Example
     // -----------------------------------------------------------------------
     // IController (abstract base - Python can subclass)
     // -----------------------------------------------------------------------
-    py::class_<ctrl::IController, PyIController>(m, "IController", R"doc(
+    py::class_<ctrl::IController, PyIController,
+               std::shared_ptr<ctrl::IController>>(m, "IController", R"doc(
 Abstract base for all discrete-time controllers.
 
 Override compute(), reset(), and sample_time() to create a custom controller

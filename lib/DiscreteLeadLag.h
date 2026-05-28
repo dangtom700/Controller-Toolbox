@@ -78,7 +78,7 @@ public:
     /**
      * @brief Phase contribution at a given frequency (continuous-domain approximation).
      *
-     * Returns the phase angle of C(jomega) = K.(jomega + zc)/(jomega + pc) in degrees.
+     * Returns the phase angle of C(jomega) = K.(jomega + zc)/(jomega + pc) in radians.
      * Useful for verifying that the compensator provides the intended phase lead/lag.
      *
      * @param omega_rad_s Frequency [rad/s].

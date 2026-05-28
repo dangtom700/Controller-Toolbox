@@ -153,7 +153,7 @@ public:
         double eps_scale = 1e-4);
 
 private:
-    int n_, p_;
+    int n_states_, n_outputs_;
     StateFunc  f_;
     MeasFunc   h_;
     JacobianFn Fjac_, Hjac_;

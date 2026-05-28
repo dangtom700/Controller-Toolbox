@@ -19,13 +19,12 @@ endif()
 add_compile_definitions(M_PI=3.14159265358979323846)
 
 add_subdirectory(lib)
-add_subdirectory(tests)
-add_subdirectory(examples)
-add_subdirectory(scripts)
 
-# nlohmann/json - required by case-study executables.
+# nlohmann/json - required by case-study executables and test_tugsim_regression.
 # Prefer a system/vcpkg installation; fall back to FetchContent so
 # the build works out-of-the-box without pre-installed packages.
+# Must be fetched BEFORE add_subdirectory(tests) and add_subdirectory(case-study)
+# so that nlohmann_json::nlohmann_json is a valid target in both.
 find_package(nlohmann_json CONFIG QUIET)
 if(NOT nlohmann_json_FOUND)
     include(FetchContent)
@@ -39,6 +38,9 @@ if(NOT nlohmann_json_FOUND)
     FetchContent_MakeAvailable(nlohmann_json)
 endif()
 
+add_subdirectory(tests)
+add_subdirectory(examples)
+add_subdirectory(scripts)
 add_subdirectory(case-study)
 
 option(CTRL_BUILD_BENCHMARKS "Build latency benchmarks (bench_controllers)" OFF)

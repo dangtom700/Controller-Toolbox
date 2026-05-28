@@ -110,7 +110,7 @@ private:
     Eigen::MatrixXd K_; ///< Optimal feedback gain (m * n).
     Eigen::MatrixXd P_; ///< DARE stabilising solution (n * n).
     double Ts_;
-    int n_, m_;
+    int n_states_, n_inputs_;
     bool dare_converged_;
     int  dare_iterations_;
 

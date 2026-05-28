@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
+#include <pybind11/functional.h>
 
 #include "ControllerToolbox.h"
 
@@ -121,20 +122,169 @@ Example
 Extended Kalman filter for nonlinear state estimation.
 
 Linearises the dynamics at each step using analytical or numerical Jacobians.
+Process model:  x[k+1] = f(x[k], u[k]) + w,   w ~ N(0, Q)
+Measurement:    y[k]   = h(x[k], u[k]) + v,   v ~ N(0, R)
+
+f, h, F_jac, H_jac are Python callables with signature (x: np.ndarray, u: np.ndarray) -> np.ndarray.
+Use numerical_jacobian() to generate Jacobians automatically when analytical forms are unavailable.
+
+Example
+-------
+>>> def f(x, u): return A @ x + B @ u
+>>> def h(x, u): return C @ x
+>>> def Fj(x, u): return A   # analytical Jacobian df/dx
+>>> def Hj(x, u): return C   # analytical Jacobian dh/dx
+>>>
+>>> ekf = ctrl.ExtendedKalmanFilter(n=2, p=1, f=f, h=h,
+...         F_jac=Fj, H_jac=Hj, Q=Q, R=R, Ts=0.01)
+>>> for k in range(N):
+...     ekf.step(y[k], u[k-1])
+...     x_hat = ekf.state()
+
+Numerical Jacobian example
+--------------------------
+>>> Fj_num = lambda x, u: ctrl.ExtendedKalmanFilter.numerical_jacobian(
+...     lambda xx: f(xx, u), x)
 )doc")
-        // TODO: bind constructor (takes f, h callables, Q, R, P0, Ts)
-        // TODO: bind predict(u), update(y, u), step(y, u_prev, u_current)
-        // TODO: bind state(), covariance(), sample_time(), reset()
-        // TODO: bind static numerical_jacobian(f, x, eps_scale=1e-4)
-        // Note: f and h are std::function<VectorXd(VectorXd)>;
-        //       wrap Python callables via py::cpp_function
-        ;
+        .def(py::init(
+             [](int n, int p,
+                py::object f_obj,  py::object h_obj,
+                py::object Fj_obj, py::object Hj_obj,
+                const Eigen::MatrixXd &Q,
+                const Eigen::MatrixXd &R,
+                double Ts,
+                py::object P0_obj) -> ctrl::ExtendedKalmanFilter* {
+                 // Capture py::object (not py::cpp_function) to avoid overload-deduction
+                 // errors in pybind11's function_signature_t machinery.
+                 ctrl::StateFunc  f  = [f_obj] (const Eigen::VectorXd &x, const Eigen::VectorXd &u)
+                     -> Eigen::VectorXd { return f_obj(x, u).cast<Eigen::VectorXd>(); };
+                 ctrl::MeasFunc   h  = [h_obj] (const Eigen::VectorXd &x, const Eigen::VectorXd &u)
+                     -> Eigen::VectorXd { return h_obj(x, u).cast<Eigen::VectorXd>(); };
+                 ctrl::JacobianFn Fj = [Fj_obj](const Eigen::VectorXd &x, const Eigen::VectorXd &u)
+                     -> Eigen::MatrixXd { return Fj_obj(x, u).cast<Eigen::MatrixXd>(); };
+                 ctrl::JacobianFn Hj = [Hj_obj](const Eigen::VectorXd &x, const Eigen::VectorXd &u)
+                     -> Eigen::MatrixXd { return Hj_obj(x, u).cast<Eigen::MatrixXd>(); };
+
+                 Eigen::MatrixXd P0;
+                 if (!P0_obj.is_none()) P0 = P0_obj.cast<Eigen::MatrixXd>();
+
+                 return new ctrl::ExtendedKalmanFilter(
+                     n, p, std::move(f), std::move(h),
+                     std::move(Fj), std::move(Hj), Q, R, Ts, P0);
+             }),
+             py::arg("n"), py::arg("p"),
+             py::arg("f"), py::arg("h"),
+             py::arg("F_jac"), py::arg("H_jac"),
+             py::arg("Q"), py::arg("R"),
+             py::arg("Ts"),
+             py::arg("P0") = py::none(),
+             "Construct EKF. P0=None initialises covariance to identity.")
+        .def("predict",    &ctrl::ExtendedKalmanFilter::predict, py::arg("u"),
+             "Prediction step: x^[k+1|k] = f(x^[k|k], u), P propagated via F Jacobian.")
+        .def("update",     &ctrl::ExtendedKalmanFilter::update,
+             py::arg("y"), py::arg("u"),
+             "Update step: incorporate measurement y[k] via H Jacobian.")
+        .def("step",       &ctrl::ExtendedKalmanFilter::step,
+             py::arg("y"), py::arg("u_prev"),
+             "Combined predict+update.  u_prev is the input applied at the previous step.")
+        .def("reset",      &ctrl::ExtendedKalmanFilter::reset)
+        .def("set_state",  &ctrl::ExtendedKalmanFilter::setState, py::arg("x0"),
+             "Inject an initial state estimate.")
+        .def("state",      &ctrl::ExtendedKalmanFilter::state,
+             py::return_value_policy::copy,
+             "Current state estimate x^[k|k] (n,).")
+        .def("covariance", &ctrl::ExtendedKalmanFilter::covariance,
+             py::return_value_policy::copy,
+             "Current error covariance P[k|k] (n, n).")
+        .def("sample_time",&ctrl::ExtendedKalmanFilter::sampleTime)
+        .def_static("numerical_jacobian",
+             [](py::object func, const Eigen::VectorXd &x, double eps_scale)
+                 -> Eigen::MatrixXd {
+                 return ctrl::ExtendedKalmanFilter::numericalJacobian(
+                     [func](const Eigen::VectorXd &xx) -> Eigen::VectorXd {
+                         return func(xx).cast<Eigen::VectorXd>();
+                     }, x, eps_scale);
+             },
+             py::arg("func"), py::arg("x"), py::arg("eps_scale") = 1e-4,
+             "Central-difference numerical Jacobian of func(x) -> array at point x. "
+             "eps_i = eps_scale * max(|x_i|, 1) per element.",
+             py::return_value_policy::copy);
 
     py::class_<ctrl::UnscentedKalmanFilter>(m, "UnscentedKalmanFilter", R"doc(
-Unscented Kalman filter - sigma-point nonlinear estimator (no Jacobians required).
+Unscented Kalman filter (UKF) - sigma-point nonlinear estimator (no Jacobians required).
+
+Propagates 2n+1 deterministically chosen sigma points through the exact nonlinear
+functions, capturing mean and covariance to third order.
+
+f, h are Python callables with signature (x: np.ndarray, u: np.ndarray) -> np.ndarray.
+
+Tuning guidance:
+  alpha = 1e-3 (default): tightly clustered sigma points, good for n <= 3.
+  alpha = 0.1-1.0: better for n >= 4 (avoids large negative Wc0 weight).
+  beta  = 2.0 (default): optimal for Gaussian priors (encodes kurtosis in Wc0).
+  kappa = 0.0 (default): standard scaling. Use 3-n for minimum-variance when n <= 3.
+
+Example
+-------
+>>> def f(x, u): return np.array([x[0] + dt*x[1], x[1] + dt*u[0]])
+>>> def h(x, u): return x[:1]   # measure position only
+>>> ukf = ctrl.UnscentedKalmanFilter(n=2, p=1, f=f, h=h, Q=Q, R=R, Ts=dt)
+>>> for k in range(N):
+...     ukf.step(y[k], u[k-1])
+...     x_hat = ukf.state()
 )doc")
-        // TODO: bind constructor and methods (same pattern as EKF)
-        ;
+        .def(py::init(
+             [](int n, int p,
+                py::object f_obj, py::object h_obj,
+                const Eigen::MatrixXd &Q,
+                const Eigen::MatrixXd &R,
+                double Ts,
+                py::object P0_obj,
+                double alpha, double beta, double kappa)
+                 -> ctrl::UnscentedKalmanFilter* {
+                 std::function<Eigen::VectorXd(const Eigen::VectorXd &,
+                                               const Eigen::VectorXd &)>
+                     f_wrap = [f_obj](const Eigen::VectorXd &x, const Eigen::VectorXd &u)
+                         -> Eigen::VectorXd { return f_obj(x, u).cast<Eigen::VectorXd>(); };
+                 std::function<Eigen::VectorXd(const Eigen::VectorXd &,
+                                               const Eigen::VectorXd &)>
+                     h_wrap = [h_obj](const Eigen::VectorXd &x, const Eigen::VectorXd &u)
+                         -> Eigen::VectorXd { return h_obj(x, u).cast<Eigen::VectorXd>(); };
+
+                 Eigen::MatrixXd P0;
+                 if (!P0_obj.is_none()) P0 = P0_obj.cast<Eigen::MatrixXd>();
+
+                 return new ctrl::UnscentedKalmanFilter(
+                     n, p, std::move(f_wrap), std::move(h_wrap),
+                     Q, R, Ts, P0, alpha, beta, kappa);
+             }),
+             py::arg("n"), py::arg("p"),
+             py::arg("f"), py::arg("h"),
+             py::arg("Q"), py::arg("R"),
+             py::arg("Ts"),
+             py::arg("P0")    = py::none(),
+             py::arg("alpha") = 1e-3,
+             py::arg("beta")  = 2.0,
+             py::arg("kappa") = 0.0,
+             "Construct UKF. P0=None initialises covariance to identity.")
+        .def("predict",    &ctrl::UnscentedKalmanFilter::predict, py::arg("u"),
+             "Prediction step: propagate sigma points through f.")
+        .def("update",     &ctrl::UnscentedKalmanFilter::update,
+             py::arg("y"), py::arg("u"),
+             "Update step: propagate predicted sigma points through h, compute Kalman gain.")
+        .def("step",       &ctrl::UnscentedKalmanFilter::step,
+             py::arg("y"), py::arg("u_prev"),
+             "Combined predict+update.")
+        .def("reset",      &ctrl::UnscentedKalmanFilter::reset)
+        .def("set_state",  &ctrl::UnscentedKalmanFilter::setState, py::arg("x0"),
+             "Inject an initial state estimate.")
+        .def("state",      &ctrl::UnscentedKalmanFilter::state,
+             py::return_value_policy::copy,
+             "Current state estimate x^[k|k] (n,).")
+        .def("covariance", &ctrl::UnscentedKalmanFilter::covariance,
+             py::return_value_policy::copy,
+             "Current error covariance P[k|k] (n, n).")
+        .def("sample_time",&ctrl::UnscentedKalmanFilter::sampleTime);
 #endif
 
     // -----------------------------------------------------------------------

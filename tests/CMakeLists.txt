@@ -39,9 +39,31 @@ add_executable(tune_controllers tune_controllers.cpp)
 target_link_libraries(tune_controllers PRIVATE controller_toolbox)
 target_include_directories(tune_controllers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
+# -- Tug Boat S2 SMC regression test (P9-1) ------------------------------------
+set(TUG_SIM_ROOT "${CMAKE_SOURCE_DIR}/case-study/Tug Boat Numerical Simulation")
+add_executable(test_tugsim_regression
+    test_tugsim_regression.cpp
+    ${TUG_SIM_ROOT}/sim/src/plant_parameters.cpp
+    ${TUG_SIM_ROOT}/sim/src/environment.cpp
+    ${TUG_SIM_ROOT}/sim/src/physics_plant.cpp
+    ${TUG_SIM_ROOT}/sim/src/thrust_allocator.cpp
+    ${TUG_SIM_ROOT}/sim/src/controllers.cpp
+)
+target_include_directories(test_tugsim_regression PRIVATE
+    ${TUG_SIM_ROOT}/sim/include
+)
+target_link_libraries(test_tugsim_regression PRIVATE
+    controller_toolbox Catch2::Catch2WithMain nlohmann_json::nlohmann_json
+)
+target_compile_features(test_tugsim_regression PRIVATE cxx_std_20)
+target_compile_definitions(test_tugsim_regression PRIVATE
+    TUG_SIM_SOURCE_DIR="${TUG_SIM_ROOT}"
+)
+
 enable_testing()
 catch_discover_tests(test_catch2_pilot)
 catch_discover_tests(test_catch2_advanced)
+catch_discover_tests(test_tugsim_regression)
 add_test(NAME controller_tests  COMMAND test_controllers)
 add_test(NAME tuner_tests       COMMAND test_tuners_extended)
 add_test(NAME integration_tests COMMAND test_integration)

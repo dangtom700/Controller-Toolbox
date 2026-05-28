@@ -11,7 +11,7 @@ namespace ctrl
         const Eigen::MatrixXd &R_noise,
         double Ts,
         const Eigen::MatrixXd &P0)
-        : n_(n), p_(p),
+        : n_states_(n), n_outputs_(p),
           f_(std::move(f)), h_(std::move(h)),
           Fjac_(std::move(Fjac)), Hjac_(std::move(Hjac)),
           Q_(Q_noise), R_(R_noise), Ts_(Ts)
@@ -46,12 +46,12 @@ namespace ctrl
             return;
 
         const Eigen::MatrixXd K =
-            P_ * H.transpose() * ldlt.solve(Eigen::MatrixXd::Identity(p_, p_));
+            P_ * H.transpose() * ldlt.solve(Eigen::MatrixXd::Identity(n_outputs_, n_outputs_));
 
         x_hat_.noalias() += K * (y - h_(x_hat_, u));
 
         // Joseph form: P = (I-KH).P.(I-KH)' + K.R.K'
-        const Eigen::MatrixXd IKH = Eigen::MatrixXd::Identity(n_, n_) - K * H;
+        const Eigen::MatrixXd IKH = Eigen::MatrixXd::Identity(n_states_, n_states_) - K * H;
         P_ = IKH * P_ * IKH.transpose() + K * R_safe * K.transpose();
     }
 
@@ -65,7 +65,7 @@ namespace ctrl
     void ExtendedKalmanFilter::reset()
     {
         x_hat_.setZero();
-        P_ = Eigen::MatrixXd::Identity(n_, n_);
+        P_ = Eigen::MatrixXd::Identity(n_states_, n_states_);
     }
 
     Eigen::MatrixXd ExtendedKalmanFilter::numericalJacobian(

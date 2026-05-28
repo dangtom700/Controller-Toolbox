@@ -135,7 +135,7 @@ namespace ctrl
     }
 
     DiscreteLQR::DiscreteLQR(const StateSpace &plant, const LQRParams &params)
-        : Ts_(plant.Ts), n_(plant.stateSize()), m_(plant.inputSize()),
+        : Ts_(plant.Ts), n_states_(plant.stateSize()), n_inputs_(plant.inputSize()),
           dare_converged_(false), dare_iterations_(0)
     {
         if (!isPBHStabilizable(plant.A, plant.B))
@@ -173,21 +173,21 @@ namespace ctrl
                                          const Eigen::VectorXd &x_ref,
                                          const Eigen::VectorXd &u_ff) const
     {
-        if (x_ref.size() != 0 && x_ref.size() != n_)
+        if (x_ref.size() != 0 && x_ref.size() != n_states_)
             throw std::invalid_argument(
                 "DiscreteLQR::compute: x_ref has wrong size (" +
-                std::to_string(x_ref.size()) + "), expected 0 or " + std::to_string(n_));
-        if (u_ff.size() != 0 && u_ff.size() != m_)
+                std::to_string(x_ref.size()) + "), expected 0 or " + std::to_string(n_states_));
+        if (u_ff.size() != 0 && u_ff.size() != n_inputs_)
             throw std::invalid_argument(
                 "DiscreteLQR::compute: u_ff has wrong size (" +
-                std::to_string(u_ff.size()) + "), expected 0 or " + std::to_string(m_));
+                std::to_string(u_ff.size()) + "), expected 0 or " + std::to_string(n_inputs_));
 
         Eigen::VectorXd xe = x;
-        if (x_ref.size() == n_)
+        if (x_ref.size() == n_states_)
             xe -= x_ref;
 
         Eigen::VectorXd u = -K_ * xe;
-        if (u_ff.size() == m_)
+        if (u_ff.size() == n_inputs_)
             u += u_ff;
         return u;
     }

@@ -130,7 +130,7 @@ private:
      */
     Eigen::MatrixXd sigmaPoints() const;
 
-    int n_, p_;
+    int n_states_, n_outputs_;
     std::function<Eigen::VectorXd(const Eigen::VectorXd &, const Eigen::VectorXd &)> f_, h_;
     Eigen::MatrixXd Q_, R_;
     Eigen::VectorXd x_hat_;

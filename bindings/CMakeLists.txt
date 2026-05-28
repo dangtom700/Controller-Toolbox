@@ -33,6 +33,7 @@ pybind11_add_module(ctrl_toolbox
     plantmodel_bindings.cpp
     controllers_bindings.cpp
     estimation_bindings.cpp
+    advanced_bindings.cpp
     analysis_bindings.cpp
 )
 

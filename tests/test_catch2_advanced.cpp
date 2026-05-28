@@ -12,6 +12,9 @@
  *   - SuperTwistingSMC tracking
  *   - DiscreteLeadLag phaseAt() returns radians (P12-21 regression guard)
  *   - IControllerObserver wired through ControllerStack
+ *   - LQRAdapter MIMO (m=2): computeVec() returns full vector, compute() truncates (P12-20)
+ *   - c2d() ZOH accuracy on stiff plant cond(A)=100 (P12-20)
+ *   - RLS forgetting factor prevents covariance blow-up on integrating signal (P12-20)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -745,4 +748,146 @@ TEST_CASE("suggestOrder returns 1 for a first-order system singular values", "[s
 
     const int order = ctrl::suggestOrder(sv, 0.01, -1);
     REQUIRE(order == 1);
+}
+
+// -----------------------------------------------------------------------------
+// P12-20: LQRAdapter on a true MIMO plant (m=2)
+// -----------------------------------------------------------------------------
+
+TEST_CASE("LQRAdapter computeVec returns full vector for MIMO plant (m=2)", "[lqr][adapter][mimo][p12-20]")
+{
+    // Decoupled 2-state, 2-input plant: each input controls its own state independently.
+    // A = diag(0.9, 0.8), B = diag(0.1, 0.2).
+    // This is the minimal plant where m=2 causes silent truncation in compute().
+    Eigen::Matrix2d A, B;
+    A << 0.9, 0.0, 0.0, 0.8;
+    B << 0.1, 0.0, 0.0, 0.2;
+    Eigen::MatrixXd C = Eigen::Matrix2d::Identity();
+    Eigen::MatrixXd D = Eigen::MatrixXd::Zero(2, 2);
+    ctrl::StateSpace plant(A, B, C, D, Ts);
+
+    ctrl::LQRParams lqr_p;
+    lqr_p.Q = Eigen::Matrix2d::Identity() * 10.0;
+    lqr_p.R = Eigen::Matrix2d::Identity();
+    ctrl::DiscreteLQR lqr(plant, lqr_p);
+    REQUIRE(lqr.dareConverged());
+
+    // Non-zero state on both axes so both control outputs are non-zero
+    Eigen::Vector2d x_state;
+    x_state << 1.0, -0.5;
+
+    ctrl::LQRAdapter adapter(lqr,
+        [&x_state]() -> Eigen::VectorXd { return x_state; });
+
+    // computeVec() must return all m=2 control inputs, not silently truncate to 1
+    const Eigen::VectorXd u_vec = adapter.computeVec(Eigen::VectorXd());
+    REQUIRE(u_vec.size() == 2);
+
+    // Both components must be non-zero (each state drives its own actuator)
+    REQUIRE(std::abs(u_vec(0)) > 1e-10);
+    REQUIRE(std::abs(u_vec(1)) > 1e-10);
+
+    // compute() scalar path: must equal u_vec(0) exactly (not a separate computation)
+    const double u_scalar = adapter.compute(0.0);
+    REQUIRE_THAT(u_scalar, WithinRel(u_vec(0), 1e-12));
+
+    // Closed-loop: both states should converge to zero under MIMO LQR
+    for (int k = 0; k < 300; ++k)
+    {
+        const Eigen::VectorXd u = lqr.compute(x_state);
+        ctrl::ssStep(plant, x_state, u);
+    }
+    REQUIRE(x_state.norm() < 0.05);
+}
+
+// -----------------------------------------------------------------------------
+// P12-20: c2d() ZOH accuracy on a stiff plant (cond(A) >= 100)
+// -----------------------------------------------------------------------------
+
+TEST_CASE("c2d ZOH is accurate for a stiff plant with cond(A) = 100", "[c2d][numerical][p12-20]")
+{
+    // Continuous: Ac = diag(-1, -100) - slow pole at -1, fast pole at -100.
+    // Condition number of Ac = 100/1 = 100 (stiff).
+    // Exact ZOH matrix exponential at Ts = 0.01:
+    //   Ad(0,0) = exp(-0.01) ~ 0.99004983
+    //   Ad(1,1) = exp(-1.0)  ~ 0.36787944
+    // Off-diagonal entries are exactly zero (decoupled system).
+    Eigen::Matrix2d Ac;
+    Ac << -1.0,    0.0,
+           0.0, -100.0;
+    Eigen::MatrixXd Bc(2, 1);
+    Bc << 1.0, 1.0;
+    Eigen::MatrixXd Cc(1, 2);
+    Cc << 1.0, 1.0;
+    Eigen::MatrixXd Dc(1, 1);
+    Dc << 0.0;
+
+    ctrl::StateSpace sys_c(Ac, Bc, Cc, Dc, 0.0);
+    const ctrl::StateSpace sys_d = ctrl::c2d(sys_c, Ts, ctrl::C2dMethod::ZOH);
+
+    const double a00_exact = std::exp(-1.0   * Ts);  // slow pole: exp(-0.01)
+    const double a11_exact = std::exp(-100.0 * Ts);  // fast pole: exp(-1.0)
+
+    // Diagonal elements must match the exact exponential to 8 significant figures
+    REQUIRE_THAT(sys_d.A(0, 0), WithinAbs(a00_exact, 1e-8));
+    REQUIRE_THAT(sys_d.A(1, 1), WithinAbs(a11_exact, 1e-8));
+
+    // Off-diagonal entries must be (near) zero for the decoupled system
+    REQUIRE_THAT(sys_d.A(0, 1), WithinAbs(0.0, 1e-10));
+    REQUIRE_THAT(sys_d.A(1, 0), WithinAbs(0.0, 1e-10));
+
+    // Advance one step with x=[1,0]^T and u=0: x_next = A_d*[1,0]^T = [a00, 0].
+    // ssStep mutates x in-place; check x directly after the step.
+    Eigen::Vector2d x;
+    x << 1.0, 0.0;
+    Eigen::VectorXd u_zero(1);
+    u_zero << 0.0;
+    ctrl::ssStep(sys_d, x, u_zero);  // x is now [a00, 0]
+    REQUIRE_THAT(x(0), WithinAbs(a00_exact, 1e-8));   // slow pole decayed by exp(-0.01)
+    REQUIRE_THAT(x(1), WithinAbs(0.0,       1e-10));  // fast pole was 0, stays 0 (decoupled)
+}
+
+// -----------------------------------------------------------------------------
+// P12-20: RLS with forgetting factor stays bounded on integrating plant
+// -----------------------------------------------------------------------------
+
+TEST_CASE("RLS with forgetting factor stays bounded on integrating-output signal", "[rls][numerical][p12-20]")
+{
+    // True model: y[k] = y[k-1] + u[k-1]  (pure integrator, pole at z=1).
+    // An integrating output y grows as a random walk, making the RLS information
+    // matrix R_N = sum(phi*phi') potentially ill-conditioned without forgetting.
+    // A forgetting factor lambda < 1 keeps the effective window to ~1/(1-lambda) steps,
+    // preventing covariance blow-up.
+    //
+    // ARX form: y[k] + a1*y[k-1] = b1*u[k-1]  -> true params: a1=-1, b1=1.
+    // RLS theta = [a1, b1] after identification.
+    const double lambda_f = 0.95;
+    ctrl::RecursiveLeastSquares rls(1, 1, lambda_f, Ts);
+
+    double y = 0.0, u_prev = 0.0;
+    std::srand(42);
+
+    for (int k = 0; k < 500; ++k)
+    {
+        // Integrating plant: y[k] = y[k-1] + u[k-1]
+        y = y + u_prev;
+        const double u = 0.1 * (static_cast<double>(std::rand()) / RAND_MAX - 0.5);
+        rls.update(y, u);
+        u_prev = u;
+    }
+
+    // With forgetting, covariance P must remain finite (not blow up to inf/nan)
+    const Eigen::MatrixXd &P = rls.covariance();
+    REQUIRE(std::isfinite(P.norm()));
+    REQUIRE(P.norm() < 1e8); // bounded; not exploding
+
+    // Both parameter estimates must be finite
+    const Eigen::VectorXd theta = rls.params();
+    REQUIRE(std::isfinite(theta(0)));
+    REQUIRE(std::isfinite(theta(1)));
+
+    // The integrator pole identified near z=1 means |a1| should be close to 1
+    // (large tolerance because short data, but clearly not diverged)
+    REQUIRE(std::abs(theta(0)) < 2.0); // a1 in a reasonable range
+    REQUIRE(rls.sampleCount() == 500);
 }

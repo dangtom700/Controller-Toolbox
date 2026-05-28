@@ -84,4 +84,260 @@ gain = Gain(3.0, 0.01)
 assert abs(gain.compute(2.0) - 6.0) < 1e-12
 print(f'Python IController subclass: gain.compute(2.0) = {gain.compute(2.0)}')
 
+# ---------------------------------------------------------------------------
+# 8. DiscreteMPC
+# ---------------------------------------------------------------------------
+# Stable 2nd-order plant: damped oscillator ZOH @ Ts=0.1s
+# Continuous: x_dot = Ac*x + Bc*u,  Ac=[[0,1],[-1,-1.5]],  Bc=[[0],[1]]
+# ZOH @ 0.1s gives discrete poles at ~0.926+-0.062j (stable)
+Ts2 = 0.1
+Ac = np.array([[0.0, 1.0], [-1.0, -1.5]])
+Bc = np.array([[0.0], [1.0]])
+Cc = np.array([[1.0, 0.0]])
+Dc = np.zeros((1, 1))
+plant2 = ctrl.c2d(ctrl.StateSpace(Ac, Bc, Cc, Dc, 0.0), Ts2, ctrl.C2dMethod.ZOH)
+mp = ctrl.MPCParams()
+mp.Np = 15; mp.Nc = 4; mp.rho_y = 1.0; mp.rho_u = 0.01
+mp.uMin = -5.0; mp.uMax = 5.0
+mpc = ctrl.DiscreteMPC(plant2, mp)
+
+x0 = np.zeros(plant2.state_size())
+r0 = np.ones(plant2.output_size())
+u_mpc = mpc.compute_ref(x0, r0)
+print(f'MPC compute_ref -> u={u_mpc}')
+assert u_mpc.shape == (plant2.input_size(),), "MPC output wrong shape"
+assert mpc.last_qp_converged(), "MPC QP did not converge"
+assert mp.Np == 15
+print(f'MPCParams: Np={mp.Np}, Nc={mp.Nc}, rho_y={mp.rho_y}')
+
+# ---------------------------------------------------------------------------
+# 9. DiscreteLQR + LQRAdapter
+# ---------------------------------------------------------------------------
+lqr_p = ctrl.LQRParams()
+lqr_p.Q = np.diag([10.0, 1.0])
+lqr_p.R = np.array([[0.1]])
+lqr = ctrl.DiscreteLQR(plant2, lqr_p)
+print(f'LQR dare_converged={lqr.dare_converged()}, K={lqr.gain_matrix()}')
+assert lqr.dare_converged(), "LQR DARE did not converge"
+assert lqr.gain_matrix().shape == (plant2.input_size(), plant2.state_size())
+
+x_state = np.zeros(plant2.state_size())
+u_lqr = lqr.compute(x_state)
+print(f'LQR compute(zeros) = {u_lqr}')
+assert u_lqr.shape == (plant2.input_size(),)
+
+# LQRAdapter with Python lambda callbacks
+x_current = np.array([0.1, 0.05])
+x_ref_val  = np.zeros(plant2.state_size())
+adapter = ctrl.LQRAdapter(lqr,
+    state_fn=lambda: x_current,
+    ref_fn=lambda: x_ref_val)
+u_adapt = adapter.compute_vec()
+print(f'LQRAdapter compute_vec() = {u_adapt}')
+assert u_adapt.shape == (plant2.input_size(),)
+assert adapter.is_healthy()
+
+# ---------------------------------------------------------------------------
+# 10. DiscreteLQG
+# ---------------------------------------------------------------------------
+Q_noise = np.eye(plant2.state_size()) * 1e-4
+R_noise = np.eye(plant2.output_size()) * 0.01
+lqg = ctrl.DiscreteLQG(plant2, lqr_p, Q_noise, R_noise)
+u_prev_lqg = np.zeros(plant2.input_size())
+y_meas = np.array([0.1])
+u_lqg = lqg.step(y_meas, u_prev_lqg)
+print(f'LQG step -> u={u_lqg}, x^={lqg.state_estimate()}')
+assert u_lqg.shape == (plant2.input_size(),)
+assert lqg.state_estimate().shape == (plant2.state_size(),)
+
+# ---------------------------------------------------------------------------
+# 11. GeneralizedPredictiveController (GPC)
+# ---------------------------------------------------------------------------
+gp = ctrl.GPCParams()
+gp.Np = 15; gp.Nu = 4; gp.rho_y = 1.0; gp.rho_u = 0.1; gp.alpha = 0.2
+gpc = ctrl.GeneralizedPredictiveController(plant2, gp)
+u_gpc = gpc.compute_ref(0.0, 1.0)   # y=0 (at origin), r=1 (step)
+print(f'GPC compute_ref(y=0, r=1) = {u_gpc:.4f}')
+assert isinstance(u_gpc, float), "GPC output should be scalar"
+assert gpc.last_qp_converged(), "GPC QP did not converge"
+aug_state = gpc.augmented_state()
+print(f'GPC augmented state shape: {aug_state.shape}')
+
+# ---------------------------------------------------------------------------
+# 12. ControllerStack (Supervisory fallback)
+# ---------------------------------------------------------------------------
+stack = ctrl.ControllerStack(ctrl.StackMode.Supervisory, 0.01)
+pid3 = ctrl.DiscretePID(p, 0.01)
+stack.add_controller(
+    pid3, "PID_fallback", weight=1.0, condition=None)
+u_stack = stack.compute(0.5)
+print(f'ControllerStack(Supervisory) compute(0.5) = {u_stack:.4f}')
+assert isinstance(u_stack, float)
+print(f'Active controller: {stack.active_controller_name()}')
+
+# Weighted stack
+stack_w = ctrl.ControllerStack(ctrl.StackMode.Weighted, 0.01)
+pid_a = ctrl.DiscretePID(p, 0.01)
+pid_b = ctrl.DiscretePID(p, 0.01)
+stack_w.add_controller(pid_a, "A", weight=0.7)
+stack_w.add_controller(pid_b, "B", weight=0.3)
+u_w = stack_w.compute(1.0)
+print(f'ControllerStack(Weighted) compute(1.0) = {u_w:.4f}')
+assert abs(u_w - pid_a.last_output()) < 0.01, "Weighted blend should match single PID (both equal)"
+
+# StackMode enum values
+assert ctrl.StackMode.Supervisory != ctrl.StackMode.Additive
+assert ctrl.StackMode.Weighted != ctrl.StackMode.Supervisory
+print(f'StackMode.Supervisory = {ctrl.StackMode.Supervisory}')
+
+# ---------------------------------------------------------------------------
+# 13. EKF + UKF  (if CTRL_HAS_ADVANCED_KALMAN)
+# ---------------------------------------------------------------------------
+feats = ctrl.features()
+if feats.get('advanced_kalman', False):
+    Ts_ekf = 0.01
+    A_lin = np.array([[1.0, Ts_ekf], [0.0, 1.0]])
+    B_lin = np.array([[0.0], [Ts_ekf]])
+    C_lin = np.array([[1.0, 0.0]])
+
+    def f_lin(x, u): return A_lin @ x + B_lin @ u
+    def h_lin(x, u): return C_lin @ x
+    def Fj(x, u):   return A_lin
+    def Hj(x, u):   return C_lin
+
+    Q_ekf = np.eye(2) * 1e-4
+    R_ekf = np.eye(1) * 0.01
+
+    ekf = ctrl.ExtendedKalmanFilter(n=2, p=1,
+        f=f_lin, h=h_lin, F_jac=Fj, H_jac=Hj,
+        Q=Q_ekf, R=R_ekf, Ts=Ts_ekf)
+
+    ekf.step(np.array([0.1]), np.array([0.5]))
+    x_ekf = ekf.state()
+    print(f'EKF state after step: {x_ekf}')
+    assert x_ekf.shape == (2,), "EKF state wrong shape"
+
+    # Numerical Jacobian utility
+    Fj_num = ctrl.ExtendedKalmanFilter.numerical_jacobian(
+        lambda xx: A_lin @ xx, np.zeros(2))
+    print(f'EKF numerical_jacobian:\n{Fj_num}')
+    assert Fj_num.shape == (2, 2)
+    assert np.allclose(Fj_num, A_lin, atol=1e-6), "Numerical Jacobian inaccurate"
+
+    # UKF
+    ukf = ctrl.UnscentedKalmanFilter(n=2, p=1,
+        f=f_lin, h=h_lin, Q=Q_ekf, R=R_ekf, Ts=Ts_ekf)
+    ukf.step(np.array([0.1]), np.array([0.5]))
+    x_ukf = ukf.state()
+    print(f'UKF state after step: {x_ukf}')
+    assert x_ukf.shape == (2,), "UKF state wrong shape"
+    print('EKF + UKF smoke tests passed.')
+else:
+    print('Skipping EKF/UKF: advanced_kalman not compiled in.')
+
+# ---------------------------------------------------------------------------
+# 14. RepetitiveController
+# ---------------------------------------------------------------------------
+pid_inner = ctrl.DiscretePID(p, 0.01)
+rp = ctrl.RepetitiveParams()
+rp.period_steps = 50; rp.Krc = 0.5; rp.Q = 0.98
+rp.uMin = -10.0; rp.uMax = 10.0
+rc = ctrl.RepetitiveController(pid_inner, rp, 0.01)
+u_rc = rc.compute(1.0)
+print(f'RepetitiveController compute(1.0) = {u_rc:.4f}  correction={rc.correction():.4f}')
+assert isinstance(u_rc, float), "RC output should be float"
+assert abs(rc.correction()) < abs(u_rc) + 0.01   # correction starts at 0
+
+# ---------------------------------------------------------------------------
+# 15. Fuzzy (FuzzyPD, FuzzyPID, FuzzySupervisor)
+# ---------------------------------------------------------------------------
+if feats.get('fuzzy', False):
+    # FuzzyPD
+    fpd_p = ctrl.FuzzyPDParams()
+    fpd_p.e_scale = 1.0; fpd_p.de_scale = 0.1; fpd_p.u_scale = 5.0
+    fpd_p.uMin = -5.0; fpd_p.uMax = 5.0
+    fpd = ctrl.FuzzyPD(fpd_p, 0.01)
+    u_fpd = fpd.compute(0.5)
+    print(f'FuzzyPD compute(0.5) = {u_fpd:.4f}')
+    assert fpd_p.uMin <= u_fpd <= fpd_p.uMax, "FuzzyPD output out of range"
+
+    # FuzzyPID
+    fpid_p = ctrl.FuzzyPIDParams()
+    fpid_p.pd.e_scale = 1.0; fpid_p.pd.u_scale = 5.0; fpid_p.Ki = 0.1
+    fpid_p.uMin = -5.0; fpid_p.uMax = 5.0
+    fpid = ctrl.FuzzyPID(fpid_p, 0.01)
+    u_fpid = fpid.compute(0.5)
+    print(f'FuzzyPID compute(0.5) = {u_fpid:.4f}')
+    assert fpid_p.uMin <= u_fpid <= fpid_p.uMax, "FuzzyPID output out of range"
+
+    # FuzzySupervisor
+    sp = ctrl.SupervisorParams()
+    sp.e_threshold = 5.0; sp.trend_threshold = 0.5; sp.signal_threshold = 0.5
+    sup = ctrl.FuzzySupervisor(sp, 0.01)
+    # Warm up: call several times with constant small error to zero the trend
+    for _ in range(20):
+        sup.update(0.1)
+    dec = sup.update(0.1)   # steady small error + zero trend: should NOT relinearise
+    print(f'FuzzySupervisor: signal={dec.relinearize_signal:.3f} relinearize={dec.relinearize}')
+    assert not dec.relinearize, "Steady small error should not trigger relinearisation"
+    dec_big = sup.update(10.0)   # large error
+    assert isinstance(dec_big.relinearize_signal, float)
+    print('Fuzzy smoke tests passed.')
+else:
+    print('Skipping Fuzzy: not compiled in.')
+
+# ---------------------------------------------------------------------------
+# 16. SubspaceID (n4sid + suggest_order)
+# ---------------------------------------------------------------------------
+if feats.get('subspace', False):
+    # Generate data from a known first-order system: y[k+1] = 0.8*y + 0.2*u
+    rng_id = np.random.default_rng(1)
+    N_id = 500
+    y_id = np.zeros(N_id); u_id = rng_id.standard_normal(N_id)
+    for k in range(1, N_id):
+        y_id[k] = 0.8*y_id[k-1] + 0.2*u_id[k-1] + 0.01*rng_id.standard_normal()
+    Y_mat = y_id[np.newaxis, :]   # (1 x N)
+    U_mat = u_id[np.newaxis, :]   # (1 x N)
+
+    res = ctrl.n4sid(Y_mat, U_mat, n_order=1, i_horizon=10, Ts=0.01)
+    print(f'n4sid: success={res.success}, sv_count={len(res.singular_values)}')
+    assert res.success, f"n4sid failed: {res.message}"
+    model = res.get_model()
+    assert model.state_size() == 1
+    order = ctrl.suggest_order(res.singular_values, threshold=0.01)
+    print(f'suggest_order -> {order}')
+    assert 1 <= order <= 5, f"suggest_order returned unexpected value: {order}"
+    print('SubspaceID smoke tests passed.')
+else:
+    print('Skipping SubspaceID: not compiled in.')
+
+# ---------------------------------------------------------------------------
+# 17. DiscreteHinf + MixedSensitivity
+# ---------------------------------------------------------------------------
+if feats.get('hinf', False):
+    # Simple stable first-order plant: G(s) = 1/(s+1), ZOH @ Ts=0.1s
+    Ts_h = 0.1
+    G_h = ctrl.c2d(ctrl.StateSpace(
+        np.array([[-1.0]]), np.array([[1.0]]),
+        np.array([[1.0]]), np.zeros((1,1)), 0.0), Ts_h, ctrl.C2dMethod.ZOH)
+
+    W1 = ctrl.MixedSensitivity.make_W1(omega_B=2.0, M=2.0, eps=0.01, Ts=Ts_h)
+    W2 = ctrl.MixedSensitivity.make_W2_constant(gain=0.1, Ts=Ts_h)
+    W3 = ctrl.MixedSensitivity.make_W3(omega_T=30.0, Mt=1.5, eps=0.01, Ts=Ts_h)
+    P  = ctrl.MixedSensitivity.build(G_h, W1, W2, W3)
+    print(f'GeneralisedPlant: n={P.state_size()}, nw={P.nw()}, nu={P.nu()}, nz={P.nz()}, ny={P.ny()}')
+
+    hp = ctrl.HinfParams(); hp.gamma_init = 50.0
+    result = ctrl.DiscreteHinf.solve(P, hp)
+    print(f'Hinf: feasible={result.feasible}  gamma={result.achieved_gamma:.3f}')
+    if result.feasible:
+        hinf = ctrl.DiscreteHinf(result)
+        u_h = hinf.compute(0.1)   # measurement input (NOT error)
+        print(f'DiscreteHinf compute(0.1) = {u_h:.4f}')
+        assert isinstance(u_h, float)
+        assert hinf.achieved_gamma() > 0
+    print('Hinf smoke tests passed.')
+else:
+    print('Skipping Hinf: not compiled in.')
+
 print('\nAll smoke tests passed.')

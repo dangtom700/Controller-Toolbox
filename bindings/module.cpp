@@ -12,6 +12,7 @@ namespace py = pybind11;
 void bind_plantmodel(py::module_ &m);
 void bind_controllers(py::module_ &m);
 void bind_estimation(py::module_ &m);
+void bind_advanced(py::module_ &m);   // RepetitiveController, Fuzzy, SubspaceID, DiscreteHinf
 void bind_analysis(py::module_ &m);
 
 PYBIND11_MODULE(ctrl_toolbox, m)
@@ -51,5 +52,6 @@ Quick start
     bind_plantmodel(m);
     bind_controllers(m);
     bind_estimation(m);
+    bind_advanced(m);
     bind_analysis(m);
 }

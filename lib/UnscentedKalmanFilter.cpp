@@ -14,7 +14,7 @@ namespace ctrl
         double Ts,
         const Eigen::MatrixXd &P0,
         double alpha, double beta, double kappa)
-        : n_(n), p_(p), f_(std::move(f)), h_(std::move(h)),
+        : n_states_(n), n_outputs_(p), f_(std::move(f)), h_(std::move(h)),
           Q_(Q_noise), R_(R_noise), Ts_(Ts)
     {
         x_hat_ = Eigen::VectorXd::Zero(n);
@@ -54,14 +54,14 @@ namespace ctrl
     Eigen::MatrixXd UnscentedKalmanFilter::sigmaPoints() const
     {
         const Eigen::MatrixXd S =
-            ((n_ + lambda_) * P_).llt().matrixL(); // lower triangular sqrt
+            ((n_states_ + lambda_) * P_).llt().matrixL(); // lower triangular sqrt
 
-        Eigen::MatrixXd X(n_, 2 * n_ + 1);
+        Eigen::MatrixXd X(n_states_, 2 * n_states_ + 1);
         X.col(0) = x_hat_;
-        for (int i = 0; i < n_; ++i)
+        for (int i = 0; i < n_states_; ++i)
         {
-            X.col(i + 1)      = x_hat_ + S.col(i);
-            X.col(i + 1 + n_) = x_hat_ - S.col(i);
+            X.col(i + 1)             = x_hat_ + S.col(i);
+            X.col(i + 1 + n_states_) = x_hat_ - S.col(i);
         }
         return X;
     }
@@ -69,10 +69,10 @@ namespace ctrl
     void UnscentedKalmanFilter::predict(const Eigen::VectorXd &u)
     {
         const Eigen::MatrixXd X = sigmaPoints();
-        const int L = 2 * n_ + 1;
+        const int L = 2 * n_states_ + 1;
 
         // Propagate sigma points through f
-        Eigen::MatrixXd Xp(n_, L);
+        Eigen::MatrixXd Xp(n_states_, L);
         for (int i = 0; i < L; ++i)
             Xp.col(i) = f_(X.col(i), u);
 
@@ -94,15 +94,15 @@ namespace ctrl
                                        const Eigen::VectorXd &u)
     {
         const Eigen::MatrixXd X = sigmaPoints();
-        const int L = 2 * n_ + 1;
+        const int L = 2 * n_states_ + 1;
 
         // Propagate sigma points through h
-        Eigen::MatrixXd Y(p_, L);
+        Eigen::MatrixXd Y(n_outputs_, L);
         for (int i = 0; i < L; ++i)
             Y.col(i) = h_(X.col(i), u);
 
         // Predicted measurement mean
-        Eigen::VectorXd y_hat = Eigen::VectorXd::Zero(p_);
+        Eigen::VectorXd y_hat = Eigen::VectorXd::Zero(n_outputs_);
         for (int i = 0; i < L; ++i)
             y_hat.noalias() += Wm_(i) * Y.col(i);
 
@@ -111,7 +111,7 @@ namespace ctrl
 
         // Innovation covariance Syy and cross-covariance Pxy
         Eigen::MatrixXd Syy = R_safe;
-        Eigen::MatrixXd Pxy = Eigen::MatrixXd::Zero(n_, p_);
+        Eigen::MatrixXd Pxy = Eigen::MatrixXd::Zero(n_states_, n_outputs_);
         for (int i = 0; i < L; ++i)
         {
             const Eigen::VectorXd dx = X.col(i) - x_hat_;
@@ -124,7 +124,7 @@ namespace ctrl
         if (ldlt.info() != Eigen::Success)
             return;
 
-        const Eigen::MatrixXd K = Pxy * ldlt.solve(Eigen::MatrixXd::Identity(p_, p_));
+        const Eigen::MatrixXd K = Pxy * ldlt.solve(Eigen::MatrixXd::Identity(n_outputs_, n_outputs_));
 
         x_hat_.noalias() += K * (y - y_hat);
 
@@ -143,7 +143,7 @@ namespace ctrl
         Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig(P_);
         if (eig.eigenvalues().minCoeff() < 0.0)
             P_ += (-eig.eigenvalues().minCoeff() + 1e-10) *
-                  Eigen::MatrixXd::Identity(n_, n_);
+                  Eigen::MatrixXd::Identity(n_states_, n_states_);
     }
 
     void UnscentedKalmanFilter::step(const Eigen::VectorXd &y,
@@ -156,7 +156,7 @@ namespace ctrl
     void UnscentedKalmanFilter::reset()
     {
         x_hat_.setZero();
-        P_ = Eigen::MatrixXd::Identity(n_, n_);
+        P_ = Eigen::MatrixXd::Identity(n_states_, n_states_);
     }
 
 } // namespace ctrl
