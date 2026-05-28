@@ -52,6 +52,7 @@
 
 #include "IController.h"         ///< Abstract controller interface.
 #include "IControllerObserver.h" ///< Observer hook for non-intrusive controller telemetry.
+#include "Features.h"            ///< ctrl::features() - runtime optional-module discovery.
 #include "PlantModel.h"       ///< TransferFunction, StateSpace, tf2ss, ssStep, c2d.
 #include "DiscretePID.h"      ///< PID - backward-Euler, derivative filter, anti-windup.
 #include "DiscreteMPC.h"      ///< MPC - condensed receding-horizon QP.

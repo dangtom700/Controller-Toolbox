@@ -205,7 +205,7 @@ double FuzzySystem::ruleStrength(const Rule& r,
     return strength;
 }
 
-double FuzzySystem::evaluate(const std::vector<double>& inputs)
+double FuzzySystem::evaluate(const std::vector<double>& inputs) const
 {
     if (inputs.size() != inputs_.size())
         throw std::invalid_argument("FuzzySystem::evaluate: wrong number of inputs");

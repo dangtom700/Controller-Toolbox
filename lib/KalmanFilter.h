@@ -94,6 +94,20 @@ public:
               const Eigen::VectorXd &u_prev,
               std::optional<std::reference_wrapper<const Eigen::VectorXd>> u_current = std::nullopt);
 
+    /**
+     * @brief Plain-reference overload of step() - preferred from Python bindings.
+     *
+     * Equivalent to step(y, u_prev, std::cref(u_current)).  Exists because
+     * std::optional<std::reference_wrapper<...>> is not directly bindable by pybind11.
+     *
+     * @param y         Measurement vector y[k].
+     * @param u_prev    Control input u[k-1] (predict step).
+     * @param u_current Control input u[k]   (update step, D.u feedthrough).
+     */
+    void step(const Eigen::VectorXd &y,
+              const Eigen::VectorXd &u_prev,
+              const Eigen::VectorXd &u_current);
+
     /** @brief Reset state estimate to zero and covariance to P0 (or identity). */
     void reset();
 

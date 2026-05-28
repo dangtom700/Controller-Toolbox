@@ -40,7 +40,11 @@ if(NOT nlohmann_json_FOUND)
 endif()
 
 add_subdirectory(case-study)
-# benchmarks are intentionally excluded from the default build
+
+option(CTRL_BUILD_BENCHMARKS "Build latency benchmarks (bench_controllers)" OFF)
+if(CTRL_BUILD_BENCHMARKS)
+    add_subdirectory(benchmark)
+endif()
 
 find_package(Doxygen QUIET)
 if(DOXYGEN_FOUND)

@@ -9,14 +9,14 @@
  *
  * Minimises a receding-horizon cost over predicted outputs and control moves:
  * @code
- *   J = Sigma_i₌1ᴺᵖ rhoy.||yhat[k+i|k] - r||^2 + Sigma_j₌0ᴺᶜ^-^1 rhou.||Deltau[k+j]||^2
+ *   J = Sigma_i=1ᴺᵖ rhoy.||yhat[k+i|k] - r||^2 + Sigma_j=0ᴺᶜ^-^1 rhou.||Deltau[k+j]||^2
  * @endcode
  *
  * **Condensed prediction:**
  * @code
  *   Ŷ = F.x[k] + Gu.u[k-1] + Phi.DeltaU
  * @endcode
- * where Phi(i,j) = C.A^(i-j).B (j <= i, else 0) and Gu(i) = Sigma_j₌0ⁱ C.Aʲ.B.
+ * where Phi(i,j) = C.A^(i-j).B (j <= i, else 0) and Gu(i) = Sigma_j=0ⁱ C.Aʲ.B.
  *
  * **Unconstrained optimum:**
  * @code

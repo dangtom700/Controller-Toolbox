@@ -87,40 +87,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Extract version
-        id: version
-        run: |
-          VERSION=$(grep -oP 'project\(ControllerToolbox VERSION \K[0-9]+\.[0-9]+\.[0-9]+' CMakeLists.txt)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Check if tag exists
-        id: check_tag
-        run: |
-          git fetch --tags
-          if git rev-parse "${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-            echo "tag_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "tag_exists=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Create tag
-        if: steps.check_tag.outputs.tag_exists == 'false'
-        run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action"
-          git tag -a "${{ steps.version.outputs.version }}" \
-            -m "Release ${{ steps.version.outputs.version }}"
-          git push origin "${{ steps.version.outputs.version }}"
-
-      - name: Generate changelog
-        run: |
-          PREV=$(git describe --tags --abbrev=0 --match "*.*.*" \
-            $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
-          if [ -n "$PREV" ]; then
-            git log --no-merges --pretty="- %s (%an)" "$PREV"..HEAD > CHANGELOG.md
-          else
-            git log --no-merges --pretty="- %s (%an)" > CHANGELOG.md
-          fi
+      - name: Prepare release (tag + changelog)
+        id: prep
+        uses: ./.github/actions/prepare-release
 
       - name: Download x86_64 artifact
         uses: actions/download-artifact@v4
@@ -132,13 +101,11 @@ jobs:
         with:
           name: linux-x86
 
-      - name: Create release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create or update release
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.version.outputs.version }}
-          name: Release ${{ steps.version.outputs.version }}
+          tag_name: ${{ steps.prep.outputs.version }}
+          name: Release ${{ steps.prep.outputs.version }}
           body_path: CHANGELOG.md
           fail_on_unmatched_files: true
           files: |

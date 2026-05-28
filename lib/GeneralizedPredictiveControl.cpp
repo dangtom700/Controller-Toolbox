@@ -136,6 +136,32 @@ namespace ctrl
             }
         }
 
+        // Output constraint tightening (diagonal approximation).
+        // For horizon step j, the SISO output prediction is approximately:
+        //   y[j] = Fa[j,:]*xa + Ga[j,j]*DeltaU[j]  (diagonal term only)
+        // where Ga[j,j] = Ca*Ba (first Markov parameter, constant on the G diagonal).
+        // Rearranging gives a tightened box on DeltaU[j]:
+        //   if Ga[j,j] > 0: (yMin - f_j)/g_jj <= DeltaU[j] <= (yMax - f_j)/g_jj
+        //   if Ga[j,j] < 0: bounds are flipped.
+        // This is exact for j=0; conservative for j>0 (off-diagonal coupling ignored).
+        if (p_.yMin > -1e8 || p_.yMax < 1e8)
+        {
+            const int p = plant_.outputSize();
+            for (int j = 0; j < Nu; ++j)
+            {
+                const double g = Ga_(j * p, j * m); // Ga diagonal element (= Ca*Ba)
+                if (std::abs(g) < 1e-14) continue;
+                const double f = Fa_.row(j * p).dot(xa_); // Fa[j,:]*xa
+                double lo_y = (p_.yMin - f) / g;
+                double hi_y = (p_.yMax - f) / g;
+                if (g < 0.0) std::swap(lo_y, hi_y); // negative gain flips inequality
+                const int idx = j * m;
+                lb_(idx) = std::max(lb_(idx), lo_y);
+                ub_(idx) = std::min(ub_(idx), hi_y);
+                if (ub_(idx) < lb_(idx)) ub_(idx) = lb_(idx); // infeasible: hold
+            }
+        }
+
         // Gradient projection - all work vectors pre-allocated; zero per-step allocation.
         const auto qp = solveGradientProjectionQP(
             H_, grad_, lb_, ub_, ldlt_, L_, p_.qpMaxIter, p_.qpTol,

@@ -94,6 +94,15 @@ namespace ctrl
         return y;
     }
 
+    std::pair<Eigen::VectorXd, Eigen::VectorXd> ssStepCopy(
+        const StateSpace &sys,
+        const Eigen::VectorXd &x,
+        const Eigen::VectorXd &u)
+    {
+        return {sys.C * x + sys.D * u,   // y[k]
+                sys.A * x + sys.B * u};  // x[k+1]
+    }
+
     // ---------------------------------------------------------------------------
     // ss2tf - SISO state-space to transfer function via Markov parameters.
     //

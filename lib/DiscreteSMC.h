@@ -158,7 +158,7 @@ struct SuperTwistingParams
  * @endcode
  *
  * **Gain selection (Moreno & Osorio 2008):** K1 > 0 and K2 > K1^2/4 is sufficient for
- * finite-time convergence in continuous time. In discrete time, keep K2.Ts ≪ K1 to
+ * finite-time convergence in continuous time. In discrete time, keep K2.Ts << K1 to
  * limit discretisation error.
  */
 class SuperTwistingSMC : public IController

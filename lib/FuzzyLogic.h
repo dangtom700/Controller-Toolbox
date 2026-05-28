@@ -55,7 +55,7 @@ struct MF {
      */
     enum class Type {
         Triangular,    ///< /\  peaks at p[1]=c, zero at p[0]=a and p[2]=b.
-        Trapezoidal,   ///< /‾\ flat-top from p[1]=b to p[2]=c, zero outside [p[0]=a, p[3]=d].
+        Trapezoidal,   ///< /-\ flat-top from p[1]=b to p[2]=c, zero outside [p[0]=a, p[3]=d].
         Gaussian,      ///< exp(-0.5.((x-p[0])/p[1])^2).
         Singleton,     ///< 1 at x == p[0], 0 elsewhere.
         ShoulderLeft,  ///< 1 for x <= p[0], linear 1->0 from p[0]=a to p[1]=b.
@@ -86,7 +86,7 @@ struct MF {
 MF mfTriangular(double a, double c, double b);
 
 /**
- * @brief Trapezoidal membership function: /‾\ flat-top from @p b to @p c, zero outside [@p a, @p d].
+ * @brief Trapezoidal membership function: /-\ flat-top from @p b to @p c, zero outside [@p a, @p d].
  * @param a Left zero-crossing (a <= b).
  * @param b Left shoulder start.
  * @param c Right shoulder start (b <= c).
@@ -290,8 +290,11 @@ public:
      * @brief Run inference and return the crisp defuzzified output.
      * @param inputs Crisp values for each registered input variable (in registration order).
      * @return Defuzzified output clamped to [uMin, uMax].
+     * @warning This method is NOT thread-safe. Concurrent calls on the same instance
+     *          result in a data race on the pre-allocated workspace. Use one FuzzySystem
+     *          per thread, or serialize access externally with a mutex.
      */
-    double evaluate(const std::vector<double>& inputs);
+    double evaluate(const std::vector<double>& inputs) const;
 
     int numInputs()  const { return static_cast<int>(inputs_.size());  }  ///< Number of registered input variables.
     int numOutputs() const { return static_cast<int>(outputs_.size()); }  ///< Always 0 or 1.
@@ -309,8 +312,9 @@ private:
 
     // Pre-allocated workspace sized in addInput/addOutput, reused every evaluate()
     // call to avoid per-call heap allocation on RT targets.
-    std::vector<std::vector<double>> mu_;        ///< mu_[i][t] = membership of input i, term t.
-    std::vector<double>              strengths_; ///< Per-output-term rule activation strength.
+    // Declared mutable so evaluate() can be const while updating the scratch buffers.
+    mutable std::vector<std::vector<double>> mu_;        ///< mu_[i][t] = membership of input i, term t.
+    mutable std::vector<double>              strengths_; ///< Per-output-term rule activation strength.
 
     void rebuildWorkspace();
 

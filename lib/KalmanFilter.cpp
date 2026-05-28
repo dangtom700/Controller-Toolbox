@@ -64,6 +64,15 @@ namespace ctrl
         update(y, u_current.has_value() ? u_current->get() : u_prev);
     }
 
+    // Plain-reference overload - avoids std::optional<std::reference_wrapper<...>> for pybind11.
+    void KalmanFilter::step(const Eigen::VectorXd &y,
+                            const Eigen::VectorXd &u_prev,
+                            const Eigen::VectorXd &u_current)
+    {
+        predict(u_prev);
+        update(y, u_current);
+    }
+
     void KalmanFilter::reset()
     {
         x_hat_.setZero();

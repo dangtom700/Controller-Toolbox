@@ -12,7 +12,7 @@
  * @endcode
  *
  * **Algorithm:** Projected gradient descent with constant step alpha = 1/L, where L = lambdamax(H)
- * is the Lipschitz constant of the gradient ∇f = Hx + g. Warm-started from the clamped
+ * is the Lipschitz constant of the gradient nablaf = Hx + g. Warm-started from the clamped
  * unconstrained optimum x0 = clamp(-H^-^1g, lb, ub).
  *
  * **Zero-allocation hot path:** All temporaries are passed in by the caller as pre-sized

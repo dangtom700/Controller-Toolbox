@@ -1,15 +1,15 @@
 # Tuned controller parameters
 # Plant: G(s)=1/(s^2+1.5s+1), ZOH Ts=0.010000
-# FOPDT: K=0.897738 tau=1.140000 theta=0.530000
+# FOPDT: K=0.897445 tau=1.140000 theta=0.530000
 
 [PID_IMC]
-Kp=1.422768
-Ki=1.012646
-Kd=0.305920
+Kp=1.423232
+Ki=1.012977
+Kd=0.306020
 N=20.000000
 uMin=-10.000000
 uMax=10.000000
-Kb=0.556587
+Kb=0.556769
 
 [LQR_Bryson]
 Q_diag=1.000000,1.000000
@@ -45,7 +45,7 @@ uMin=-10.000000
 uMax=10.000000
 
 [ADRC_Gao2003]
-b0=0.787489
+b0=0.787232
 omega_c=3.000000
 omega_o=15.000000
 uMin=-20.000000
@@ -60,9 +60,9 @@ integGain=0.500000
 seekMinimum=1
 
 [SmithPredictor_IMC]
-inner_Kp=1.422768
-inner_Ki=1.012646
-inner_Kd=0.305920
+inner_Kp=1.423232
+inner_Ki=1.012977
+inner_Kd=0.306020
 inner_N=20.000000
 delaySteps=5
 

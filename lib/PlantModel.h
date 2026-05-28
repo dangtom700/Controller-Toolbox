@@ -148,6 +148,24 @@ Eigen::VectorXd ssStep(const StateSpace &sys,
                        const Eigen::VectorXd &u);
 
 /**
+ * @brief Non-mutating variant of ssStep - returns {y[k], x[k+1]}.
+ *
+ * Identical semantics to ssStep() but takes x by value and returns the
+ * updated state alongside the output, so the caller's state is never
+ * modified in-place.  Preferred for Python bindings where Eigen::Ref
+ * in-place mutation is not directly supported.
+ *
+ * @param sys Plant model.
+ * @param x   State vector x[k] (not modified).
+ * @param u   Input vector u[k].
+ * @return {y[k], x[k+1]}.
+ */
+std::pair<Eigen::VectorXd, Eigen::VectorXd> ssStepCopy(
+    const StateSpace &sys,
+    const Eigen::VectorXd &x,
+    const Eigen::VectorXd &u);
+
+/**
  * @brief Discretisation method selector for c2d().
  */
 enum class C2dMethod

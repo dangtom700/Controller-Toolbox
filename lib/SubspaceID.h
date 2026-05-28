@@ -13,17 +13,57 @@
  *   y[k]   = C.x[k] + D.u[k] + v[k]
  * @endcode
  *
- * **Algorithm - MOESP oblique-projection variant (Verhaegen & Dewilde 1992):**
- * 1. Build 2i-block Hankel matrices from (Y, U): Z = [Uf; Wp; Yf], Wp = [Up; Yp].
- * 2. Thin LQ decomposition isolates the (3,2) block L32 (oblique projection of Yf onto Wp \perp Uf).
- * 3. SVD(L32): singular values reveal system order; left singular vectors form the
- *    extended observability matrix Gamma = U[:, :n].\sqrt(S[:n]).
- * 4. Extract C = Gamma[:p, :], A from shift-invariance of Gamma (least squares).
- * 5. Least-squares regression for B and D from the state sequence.
+ * **Algorithm - MOESP oblique-projection (Verhaegen & Dewilde 1992), 6 steps:**
+ * @code
+ *   INPUT  : Y (p*N), U (m*N), n (order), i (block rows), Ts
+ *   OUTPUT : A (n*n), B (n*m), C (p*n), D (p*m), K_kalman (n*p), Lambda (p*p)
+ *   s = N - 2.i    (Hankel column count)
+ *
+ *   Step 1 - Build Hankel matrices and partition past / future
+ *     Yp = Y_hankel[:i.p, :]        (past outputs,   i.p * s)
+ *     Yf = Y_hankel[i.p:, :]        (future outputs, i.p * s)
+ *     Up, Uf  similarly from U.
+ *     Wp = [Up; Yp]                  (past I/O,   i.(m+p) * s)
+ *     Z  = [Uf; Wp; Yf]             (stacked,    (r_Uf+r_Wp+r_Yf) * s)
+ *
+ *   Step 2 - LQ decomposition  ->  oblique projection L32
+ *     Z^T = Q . R^T   (Q column-orthonormal, R lower-triangular)
+ *     L32 = R[r_Uf+r_Wp:, r_Uf : r_Uf+r_Wp]      (i.p * i.(m+p))
+ *     Interpretation: L32 = oblique projection  Yf /_{Uf} Wp
+ *                     (projects Yf onto row(Wp) along row(Uf))
+ *                     Satisfies O_i . X_i = L32 . Q_Wp^T   (MOESP Eq. 4.3)
+ *
+ *   Step 3 - SVD of L32  ->  extended observability matrix Gamma
+ *     [U, S, V^T] = svd(L32,  "thin")
+ *     Gamma = U[:, :n] . diag(\sqrtS[:n])                 (i.p * n)
+ *     Plot S to choose n: elbow = signal / noise boundary
+ *     (suggestOrder() automates this via max-consecutive-ratio heuristic)
+ *
+ *   Step 4 - Extract C and A  (shift-invariance of Gamma)
+ *     C  = Gamma[:p, :]                                (p * n)
+ *     Gamma_up   = Gamma[:(i-1).p, :]
+ *     Gamma_down = Gamma[p:,       :]
+ *     A  = Gamma_up^+ . Gamma_down   (least squares)       (n * n)
+ *
+ *   Step 5 - Least-squares regression for B and D
+ *     X^ = Gamma^+ . Yf                                 (state sequence, n * s)
+ *     for k = 0 ... T-1  (T = s-1):
+ *       D: solve  y[k] - C.x^[k]    = D.u[k]        (p * m)
+ *       B: solve  x^[k+1] - A.x^[k] = B.u[k]        (n * m)
+ *     (separate colPivHouseholderQr solves, batched over all T columns)
+ *
+ *   Step 6 - Stochastic realisation  (Kalman gain K, innovation cov Lambda)
+ *     epsilon[k] = y[k]   - C.x^[k]   - D.u[k]   (innovation,    p * T)
+ *     eta[k] = x^[k+1] - A.x^[k]  - B.u[k]   (state residual, n * T)
+ *     Lambda = (1/T) . epsilon . epsilon^T                   (innovation cov, p * p)
+ *     K = (eta . epsilon^T) . (epsilon . epsilon^T)^{-1}       (Kalman gain,    n * p)
+ *     -> pass K to KalmanFilter::KalmanFilter(sys, Q, R) or
+ *       DiscreteLQG to skip manual Q/R tuning.
+ * @endcode
  *
  * @par Data requirements
  * - Persistent excitation: input must excite at least n_order frequencies.
- * - N ≫ 2.i.(m+p): more samples -> better estimates.
+ * - N >> 2.i.(m+p): more samples -> better estimates.
  * - i >= n_order/p (i_horizon must be large enough to capture all modes).
  *
  * @par Similarity transform note

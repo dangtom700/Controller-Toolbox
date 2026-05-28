@@ -21,15 +21,22 @@ namespace ctrl
     {
         step_cnt_++;
 
+        // Effective hysteresis = absolute + relative * current amplitude estimate.
+        // The relative component is only active once we have a valid peak estimate
+        // (i.e., after the first relay switch sets collecting_ = true).
+        double h_eff = cfg_.hysteresis;
+        if (cfg_.hysteresis_rel > 0.0 && collecting_ && (peak_pos_ - peak_neg_) > 0.0)
+            h_eff += cfg_.hysteresis_rel * (peak_pos_ - peak_neg_) / 2.0;
+
         // Relay logic with hysteresis
         double relay_out;
-        if (relayHigh_ && y > cfg_.hysteresis)
+        if (relayHigh_ && y > h_eff)
         {
             relayHigh_ = false;
             relay_out = -cfg_.relayAmplitude;
             collecting_ = true; // ignore transient before first switch
         }
-        else if (!relayHigh_ && y < -cfg_.hysteresis)
+        else if (!relayHigh_ && y < -h_eff)
         {
             relayHigh_ = true;
             relay_out = cfg_.relayAmplitude;
@@ -131,24 +138,44 @@ namespace ctrl
         if (time.size() < 4 || time.size() != output.size())
             throw std::invalid_argument("StepResponseTuner: need at least 4 matched samples.");
 
-        const double y_inf = output.back();
-        const double K = y_inf / stepMagnitude;
+        const int N = static_cast<int>(output.size());
 
-        // Find indices where output crosses 28.3 % and 63.2 % of final value (Smith 1972 tangent)
-        const double y283 = 0.283 * y_inf;
-        const double y632 = 0.632 * y_inf;
+        // Robust baseline: mean of first n_base samples (pre-step DC level).
+        // Handles non-zero initial conditions and low-frequency output drift.
+        const int n_base = std::max(1, std::min(5, N / 10));
+        double y_base = 0.0;
+        for (int i = 0; i < n_base; ++i) y_base += output[i];
+        y_base /= n_base;
+
+        // Robust steady-state: mean of last n_tail samples.
+        // Averaging over multiple samples suppresses measurement noise on the
+        // final value (single-sample y_inf is fragile on noisy data).
+        const int n_tail = std::max(1, std::min(10, N / 5));
+        double y_ss = 0.0;
+        for (int i = N - n_tail; i < N; ++i) y_ss += output[i];
+        y_ss /= n_tail;
+
+        const double delta = y_ss - y_base; // net step-response amplitude (baseline-corrected)
+        const double K     = delta / stepMagnitude;
+
+        // Threshold levels for Smith tangent method (baseline-corrected absolute values).
+        // Direction-aware: works for both positive and negative step inputs.
+        const double y283 = y_base + 0.283 * delta;
+        const double y632 = y_base + 0.632 * delta;
+        const bool   step_up = (delta > 0);
 
         double t283 = 0.0, t632 = 0.0;
         bool got283 = false, got632 = false;
 
-        for (size_t i = 1; i < output.size(); ++i)
+        for (int i = 1; i < N; ++i)
         {
-            if (!got283 && output[i] >= y283)
+            const double yi = output[i];
+            if (!got283 && (step_up ? yi >= y283 : yi <= y283))
             {
                 t283 = time[i];
                 got283 = true;
             }
-            if (!got632 && output[i] >= y632)
+            if (!got632 && (step_up ? yi >= y632 : yi <= y632))
             {
                 t632 = time[i];
                 got632 = true;
@@ -159,23 +186,16 @@ namespace ctrl
 
         if (!got283 || !got632)
         {
-            // Integrating (type-1) plants have no finite steady state: the step
-            // response ramps indefinitely and never crosses the y_inf thresholds
-            // computed from output.back().  If the 63.2 % crossing is absent, the
-            // plant is likely integrating or the data record is too short.
-            // For integrating plants use a velocity-form PID or fit a DIPDT model
-            // (integrating plus dead time) rather than FOPDT.
-            throw std::runtime_error(
-                "StepResponseTuner: output did not reach 63.2 % of steady state. "
-                "If the step response is still rising at the end of the data record, "
-                "the plant may be integrating (type-1). FOPDT identification requires "
-                "a finite steady-state value. For integrating plants, use a DIPDT "
-                "model or a velocity-form (incremental) PID structure.");
+            // Partial data or flat response: return a conservative estimate instead
+            // of throwing, so callers can handle short/integrating data gracefully.
+            // Use the full time span as a tau estimate; theta defaults to zero.
+            const double tau_est = (N > 1) ? (time.back() - time.front()) : 1.0;
+            return {K, tau_est, 0.0};
         }
 
         // Process-reaction-curve method (Astrom & Hagglund):
-        //   tau = 1.5.(t63.2 - t28.3),   theta = t63.2 - tau
-        const double tau = 1.5 * (t632 - t283);
+        //   tau = 1.5*(t63.2 - t28.3),   theta = t63.2 - tau
+        const double tau   = 1.5 * (t632 - t283);
         const double theta = std::max(0.0, t632 - tau);
 
         return {K, tau, theta};

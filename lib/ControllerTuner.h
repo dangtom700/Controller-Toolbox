@@ -72,7 +72,17 @@ enum class PIDTuningRule
 struct RelayTunerConfig
 {
     double relayAmplitude = 1.0; ///< Relay output amplitude +/-d.
-    double hysteresis     = 0.0; ///< Dead-band [same units as y] to suppress noise-driven chatter.
+    double hysteresis     = 0.0; ///< Absolute dead-band [same units as y].
+    /**
+     * @brief Relative dead-band: effective_hysteresis += hysteresis_rel * current_amplitude_estimate.
+     *
+     * Scales the threshold with the observed oscillation amplitude - useful when the output
+     * magnitude is not known in advance.  A value of 0.02-0.05 suppresses noise that is a
+     * few percent of the limit-cycle amplitude without delaying switching on clean signals.
+     * Applied only after the first relay switch (i.e., once an amplitude estimate exists).
+     * The effective threshold = hysteresis + hysteresis_rel * (peak_pos - peak_neg) / 2.
+     */
+    double hysteresis_rel = 0.0;
     int    cyclesRequired = 3;   ///< Stable oscillation cycles required before the tuner exits.
 };
 
@@ -202,9 +212,18 @@ public:
 
     /**
      * @brief Identify a FOPDT model from open-loop step-response data.
+     *
+     * Uses the Smith process-reaction-curve tangent method:
+     * - **Baseline** is estimated as the mean of the first min(5, N/10) samples,
+     *   correcting for non-zero initial conditions and low-frequency drift.
+     * - **Steady-state** is estimated as the mean of the last min(10, N/5) samples,
+     *   which suppresses measurement noise compared to using the single last sample.
+     * - Threshold crossings (28.3 %, 63.2 %) are direction-aware: works for both
+     *   positive and negative step magnitudes.
+     *
      * @param time          Time vector [s], strictly increasing.
      * @param output        Plant output vector (same length as time).
-     * @param stepMagnitude Magnitude of the applied step input.
+     * @param stepMagnitude Magnitude of the applied step input (positive or negative).
      * @return Identified FOPDTModel (K, tau, theta).
      */
     static FOPDTModel identify(const std::vector<double> &time,

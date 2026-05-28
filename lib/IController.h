@@ -1,6 +1,7 @@
 #pragma once
 #include "IControllerObserver.h"
 #include <Eigen/Dense>
+#include <memory>
 #include <stdexcept>
 
 namespace ctrl
@@ -115,10 +116,23 @@ public:
      *
      * @param obs Pointer to the observer; may be @c nullptr to detach.
      */
-    void attachObserver(IControllerObserver *obs) { observer_ = obs; }
+    void attachObserver(IControllerObserver *obs) { observer_owned_.reset(); observer_ = obs; }
+
+    /**
+     * @brief Lifetime-safe overload - controller co-owns the observer via shared_ptr.
+     *
+     * Prevents dangling-pointer UB when the observer is held only from Python (where
+     * the C++ raw pointer has no reference from the caller's side).
+     * Replaces any previously attached raw-pointer observer.
+     */
+    void attachObserver(std::shared_ptr<IControllerObserver> obs)
+    {
+        observer_owned_ = obs;
+        observer_       = obs.get();
+    }
 
     /** @brief Detach the current observer (if any). */
-    void detachObserver() { observer_ = nullptr; }
+    void detachObserver() { observer_ = nullptr; observer_owned_.reset(); }
 
     /** @brief @c true if an observer is currently attached. */
     bool hasObserver() const { return observer_ != nullptr; }
@@ -161,6 +175,7 @@ protected:
 
 private:
     IControllerObserver *observer_ = nullptr;
+    std::shared_ptr<IControllerObserver> observer_owned_; ///< Keeps shared_ptr observers alive.
 };
 
 } // namespace ctrl

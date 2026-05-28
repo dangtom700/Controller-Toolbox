@@ -163,14 +163,14 @@ TEST_CASE("DiscretePID::computeDoM suppresses derivative spike on setpoint step"
 
     SECTION("DoM and standard converge after several steps with constant setpoint")
     {
-        // Advance both controllers for 20 steps with the same y (plant at 0, no dynamics)
+        // Advance both controllers for 200 steps so the derivative filter fully decays
         double y_sim = 0.0;
-        for (int k = 1; k < 20; ++k)
+        for (int k = 1; k < 200; ++k)
         {
             pid_dom.computeDoM(y_sim, 1.0);
             pid_std.compute(1.0 - y_sim);
         }
-        // After transient, both should be mainly proportional+integral on error
+        // After transient (~5 time constants), both outputs converge to Kp*e = 1.0
         const double u_dom_final = pid_dom.computeDoM(y_sim, 1.0);
         const double u_std_final = pid_std.compute(1.0 - y_sim);
         REQUIRE_THAT(u_dom_final, WithinRel(u_std_final, 0.1)); // within 10%

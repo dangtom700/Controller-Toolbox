@@ -67,6 +67,9 @@ endif()
 
 add_library(controller_toolbox STATIC ${CTRL_CORE_SOURCES})
 
+# Required so the static library can be linked into a pybind11 shared module on Linux/macOS.
+set_target_properties(controller_toolbox PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 # --- Compile definitions reflecting enabled modules --------------------------
 # Headers use these to conditionally include optional sections.
 if(CTRL_ENABLE_HINF)
@@ -94,4 +97,15 @@ target_compile_features(controller_toolbox PUBLIC cxx_std_20)
 target_compile_options(controller_toolbox PRIVATE
     $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
+)
+
+# --- Install rules (consumed by pip/scikit-build and system packaging) -------
+include(GNUInstallDirs)
+install(TARGETS controller_toolbox
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/controller_toolbox
+    FILES_MATCHING PATTERN "*.h"
 )

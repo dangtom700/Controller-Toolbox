@@ -29,7 +29,7 @@
  * @endcode
  *
  * @par Separation of timescales requirement
- * For correct gradient estimation: plant settling time ≪ 1/fp ≪ 1/flpf.
+ * For correct gradient estimation: plant settling time << 1/fp << 1/flpf.
  * The plant must respond quasi-statically to the dither frequency, and the LPF must cleanly
  * extract the gradient from the demodulated signal. Violating this causes a biased gradient
  * estimate and slow or no convergence.
