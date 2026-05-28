@@ -6,5 +6,5 @@ var searchData=
   ['qpsolveresult_3',['QPSolveResult',['../structctrl_1_1QPSolveResult.html',1,'ctrl']]],
   ['qptol_4',['qptol',['../structctrl_1_1MPCParams.html#a69b1dd9c27d3b993002628dde3cfebad',1,'ctrl::MPCParams::qpTol'],['../structctrl_1_1GPCParams.html#a2b94cd8e07a684a3034391cbf91e6e9b',1,'ctrl::GPCParams::qpTol']]],
   ['quick_20start_5',['Quick Start',['../index.html#autotoc_md2',1,'']]],
-  ['quick_20start_20parameter_20tables_6',['4. Quick-Start Parameter Tables',['../md_docs_2DEPLOYMENT.html#autotoc_md145',1,'']]]
+  ['quick_20start_20parameter_20tables_6',['4. Quick-Start Parameter Tables',['../md_docs_2DEPLOYMENT.html#autotoc_md147',1,'']]]
 ];

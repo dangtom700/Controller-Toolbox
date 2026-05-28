@@ -7,8 +7,8 @@ var searchData=
   ['2_205_20doxygen_20api_20output_20optional_4',['2.5 Doxygen API Output (Optional)',['../md_docs_2DOCUMENTATION.html#autotoc_md36',1,'']]],
   ['2_20auto_20tuning_20workflow_20relay_20pid_5',['4.2 Auto-Tuning Workflow (Relay -&gt; PID)',['../md_docs_2DOCUMENTATION.html#autotoc_md48',1,'']]],
   ['2_20compilation_20guide_6',['2. Compilation Guide',['../md_docs_2DOCUMENTATION.html#autotoc_md31',1,'']]],
-  ['2_20controllers_7',['5.2 Controllers',['../md_docs_2DOCUMENTATION.html#autotoc_md63',1,'']]],
+  ['2_20controllers_7',['5.2 Controllers',['../md_docs_2DOCUMENTATION.html#autotoc_md65',1,'']]],
   ['2_20examples_20tt_20examples_20tt_8',['3.2 Examples (&lt;tt&gt;examples/&lt;/tt&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md40',1,'']]],
   ['2_20optional_20python_20tooling_9',['1.2 Optional Python Tooling',['../md_docs_2DOCUMENTATION.html#autotoc_md28',1,'']]],
-  ['2_20real_20time_20integration_10',['2. Real-Time Integration',['../md_docs_2DEPLOYMENT.html#autotoc_md125',1,'']]]
+  ['2_20real_20time_20integration_10',['2. Real-Time Integration',['../md_docs_2DEPLOYMENT.html#autotoc_md127',1,'']]]
 ];

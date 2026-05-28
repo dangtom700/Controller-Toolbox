@@ -13,7 +13,7 @@ var searchData=
   ['optional_10',['2.5 Doxygen API Output (Optional)',['../md_docs_2DOCUMENTATION.html#autotoc_md36',1,'']]],
   ['optional_20python_20tooling_11',['1.2 Optional Python Tooling',['../md_docs_2DOCUMENTATION.html#autotoc_md28',1,'']]],
   ['or_20script_12',['Run any example or script',['../index.html#autotoc_md15',1,'']]],
-  ['orchestration_13',['5.5 Composition &amp; Orchestration',['../md_docs_2DOCUMENTATION.html#autotoc_md93',1,'']]],
+  ['orchestration_13',['5.5 Composition &amp; Orchestration',['../md_docs_2DOCUMENTATION.html#autotoc_md95',1,'']]],
   ['order_14',['order',['../structctrl_1_1TransferFunction.html#a4ceaf021d217e8bafd64c2bd5c172d73',1,'ctrl::TransferFunction']]],
   ['output_15',['output',['../classctrl_1_1SimPlant.html#a53edf7706f7e6e6a1abdfb0df7dbdd7f',1,'ctrl::SimPlant']]],
   ['output_20feedback_16',['4.3 LQR + Kalman = LQG (Output Feedback)',['../md_docs_2DOCUMENTATION.html#autotoc_md49',1,'']]],
