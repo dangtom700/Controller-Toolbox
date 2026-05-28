@@ -46,6 +46,14 @@ if(CTRL_BUILD_BENCHMARKS)
     add_subdirectory(benchmark)
 endif()
 
+# Python bindings via pybind11.
+# Enable:  cmake .. -DCTRL_BUILD_PYTHON_BINDINGS=ON
+# Requires Python 3.8+ development headers and pybind11 (conda: pybind11; vcpkg: pybind11).
+option(CTRL_BUILD_PYTHON_BINDINGS "Build pybind11 Python bindings (ctrl_toolbox module)" OFF)
+if(CTRL_BUILD_PYTHON_BINDINGS)
+    add_subdirectory(bindings)
+endif()
+
 find_package(Doxygen QUIET)
 if(DOXYGEN_FOUND)
     add_custom_target(docs

@@ -1,6 +1,6 @@
 # Controller Toolbox - Technical Documentation
 
-*Discrete-time control library in modern C++17 (Eigen 3.4+).
+*Discrete-time control library in modern C++20 (Eigen 3.4+).
 Target audience: control engineers and software developers familiar with discrete-time control theory who want to integrate, extend, or deploy the library.*
 
 ---
@@ -29,7 +29,7 @@ Target audience: control engineers and software developers familiar with discret
 
 | Component | Version | Purpose |
 |-----------|---------|---------|
-| C++ compiler | C++17 (GCC >= 9, Clang >= 10, MSVC >= 19.20) | Source language |
+| C++ compiler | C++20 (GCC >= 10, Clang >= 12, MSVC >= 19.29) | Source language |
 | CMake | >= 3.16 | Build system |
 | Eigen | >= 3.4 (`find_package(Eigen3 3.4 REQUIRED)`) | Linear algebra |
 | Doxygen | optional | API documentation target (`make docs`) |
@@ -91,7 +91,7 @@ The library publishes `lib/` as its include root, so consumers write `#include "
 
 ```cmake
 target_link_libraries(your_target PRIVATE controller_toolbox)
-target_compile_features(your_target PRIVATE cxx_std_17)
+target_compile_features(your_target PRIVATE cxx_std_20)
 ```
 
 Eigen is propagated as a `PUBLIC` dependency of `controller_toolbox`, so the consumer does not need to link it explicitly.
@@ -121,8 +121,9 @@ cmake --build build --target docs
 | Header | Component(s) |
 |--------|--------------|
 | [ControllerToolbox.h](lib/ControllerToolbox.h) | Umbrella include - pulls in every public header |
-| [IController.h](lib/IController.h) | Abstract controller interface |
-| [PlantModel.h](lib/PlantModel.h) | `TransferFunction`, `StateSpace`, `tf2ss`, `ssStep` |
+| [IController.h](lib/IController.h) | Abstract controller interface (`IController`, `IControllerObserver`) |
+| [Features.h](lib/Features.h) | `ctrl::features()` - runtime optional-module discovery |
+| [PlantModel.h](lib/PlantModel.h) | `TransferFunction`, `StateSpace`, `tf2ss`, `ssStep`, `ssStepCopy` |
 | [DiscretePID.h](lib/DiscretePID.h) | PID with derivative filter + anti-windup |
 | [DiscreteLQR.h](lib/DiscreteLQR.h) | Infinite-horizon LQR, DARE solver, `LQRAdapter` |
 | [DiscreteMPC.h](lib/DiscreteMPC.h) | Condensed receding-horizon QP, `setPlant()` for adaptive MPC |
@@ -168,10 +169,12 @@ The Python folder `examples/python/` mirrors many of the C++ demos for cross-val
 
 ### 3.4 Tests (`tests/`)
 
-- `test_controllers.cpp` - per-class unit tests
+- `test_controllers.cpp` - per-class unit tests (custom `test_framework.h` harness)
 - `test_tuners_extended.cpp` - tuner suite tests (covers all 8 strategies)
 - `test_integration.cpp` - end-to-end closed-loop tests
-- `test_framework.h` - lightweight assertion macros
+- `test_catch2_advanced.cpp` - Catch2 v3 regression suite (25 test cases, 58 assertions): GPC tracking, LQR convergence, SMC sign convention, ADRC double-integrator, n4sid identification
+- `test_catch2_pilot.cpp` - Catch2 v3 pilot tests (5 test cases, 21 assertions): LQRAdapter MIMO `computeVec()`, EKF scaled-epsilon Jacobian, PID DoM derivative suppression, 2DOF b_weight overshoot reduction, observer telemetry wiring
+- `test_framework.h` - lightweight assertion macros for the custom harness
 
 ### 3.5 Scripts (`scripts/`)
 
@@ -347,10 +350,20 @@ SISO TF -> controllable canonical SS conversion.
 #### `Eigen::VectorXd ssStep(const StateSpace&, Eigen::Ref<Eigen::VectorXd> x, const Eigen::VectorXd& u)`
 - **Returns:** `y[k] = C x + D u`. **Side effect:** updates `x` in-place to `x[k+1]`.
 
+#### `std::pair<Eigen::VectorXd, Eigen::VectorXd> ssStepCopy(const StateSpace&, const Eigen::VectorXd& x, const Eigen::VectorXd& u)`
+- **Returns:** `{y[k], x[k+1]}` without modifying `x`. Semantically identical to `ssStep` but non-mutating.
+- **When to use:** Preferred from Python bindings (pybind11 cannot bind `Eigen::Ref<>` out-params to NumPy arrays); also useful in functional-style simulation loops where mutation of `x` is undesirable.
+
+#### `std::unordered_map<std::string, bool> ctrl::features()` ([Features.h](lib/Features.h))
+- **Purpose:** Runtime discovery of which optional modules were compiled in.
+- **Returns:** Map with keys `"hinf"`, `"subspace"`, `"fuzzy"`, `"function_approx"`, `"advanced_kalman"` each mapping to `true` if the corresponding `CTRL_HAS_*` flag was defined at compile time.
+- **Typical use:** Python bindings and plugin-discovery code that cannot inspect compile-time `#if` guards.
+
 #### `IController` ([IController.h](lib/IController.h))
 - **Purpose:** Abstract base for all SISO controllers; uniform interface for stacking and tuning.
 - **Pure-virtual:** `compute(double signal) -> double`, `reset()`, `sampleTime() const -> double`.
 - **Convention:** `signal` is the **error** `e = r - y` for tracking controllers, the **plant output** for optimisation controllers (ESC) and observer-based controllers (ADRC, LQG).
+- **Observer (telemetry):** `attachObserver(IControllerObserver*)` stores a non-owning raw pointer — caller must ensure the observer outlives the controller. `attachObserver(std::shared_ptr<IControllerObserver>)` co-owns the observer, safe for Python bindings and dynamically-allocated observers. `detachObserver()` releases both.
 
 ---
 
@@ -484,7 +497,10 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 #### `KalmanFilter` ([KalmanFilter.h](lib/KalmanFilter.h))
 - **Purpose:** Linear discrete Kalman filter (predict / update) with Joseph-form covariance update.
 - **Constructor:** `(plant, Q_noise, R_noise, P0 = I)`.
-- **Methods:** `predict(u)`, `update(y, u_current)`, `step(y, u_prev)` (one-call), `state()`, `covariance()`, `reset()`.
+- **Methods:** `predict(u)`, `update(y, u_current)`, `state()`, `covariance()`, `reset()`.
+- **`step()` overloads:**
+  - `step(y, u_prev)` — combined predict+update; `u_current` defaults to `u_prev` (correct for `D = 0` plants).
+  - `step(y, u_prev, u_current)` — plain-reference overload; explicit current input for `D != 0` plants. Preferred from Python bindings (the default overload uses `std::optional<std::reference_wrapper<...>>` which pybind11 cannot auto-convert).
 - **Floor:** `R_noise` has an automatic floor of `1e-12` per diagonal element to avoid division by zero.
 
 ---
