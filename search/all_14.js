@@ -12,7 +12,7 @@ var searchData=
   ['notifyobservervec_9',['notifyObserverVec',['../classctrl_1_1IController.html#a94a7fb5d63afdf74ace190fd5b2ee8fe',1,'ctrl::IController']]],
   ['nowns_10',['nowns',['../classctrl_1_1ITimer.html#af3c2fa16d291acbefd92b5bedc8d160c',1,'ctrl::ITimer::nowNs()'],['../classctrl_1_1StdTimer.html#a0802afe91b9abe2278aa6443c931fa97',1,'ctrl::StdTimer::nowNs()']]],
   ['np_11',['np',['../structctrl_1_1GPCParams.html#ac973ff63905d8be6ffbc6a71a7174b3a',1,'ctrl::GPCParams::Np'],['../structctrl_1_1MPCHorizonTuner_1_1Recommendation.html#afae61ac2f1102b1449c485d46fb5f24e',1,'ctrl::MPCHorizonTuner::Recommendation::Np'],['../structctrl_1_1MPCParams.html#af9281564b038417138f22da60f5708bd',1,'ctrl::MPCParams::Np']]],
-  ['nu_12',['nu',['../structctrl_1_1GPCParams.html#ae456e552591711cddf0be7c36e260270',1,'ctrl::GPCParams::Nu'],['../structctrl_1_1GeneralisedPlant.html#a6e8d9e00ba64b8e752a0805184898b43',1,'ctrl::GeneralisedPlant::nu()']]],
+  ['nu_12',['nu',['../structctrl_1_1GeneralisedPlant.html#a6e8d9e00ba64b8e752a0805184898b43',1,'ctrl::GeneralisedPlant::nu()'],['../structctrl_1_1GPCParams.html#ae456e552591711cddf0be7c36e260270',1,'ctrl::GPCParams::Nu']]],
   ['num_13',['num',['../structctrl_1_1TransferFunction.html#a5d019a4f6f10e99341ecd27e6d9403d6',1,'ctrl::TransferFunction']]],
   ['numdegree_14',['numDegree',['../classctrl_1_1PadeApproximator.html#a48f445660e01ba2f702ad028855a0083',1,'ctrl::PadeApproximator']]],
   ['numerator_15',['numerator',['../classctrl_1_1PadeApproximator.html#a690d045d93ba530795c7b5103852d936',1,'ctrl::PadeApproximator::numerator()'],['../classctrl_1_1RecursiveLeastSquares.html#aae077fa95d60789bbbbb1959caf93fb6',1,'ctrl::RecursiveLeastSquares::numerator()']]],

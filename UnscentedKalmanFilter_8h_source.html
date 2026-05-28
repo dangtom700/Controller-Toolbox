@@ -125,7 +125,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="keyword">private</span>:</div>
 <div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    Eigen::MatrixXd sigmaPoints() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="keywordtype">int</span> n_, p_;</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="keywordtype">int</span> n_states_, n_outputs_;</div>
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    std::function&lt;Eigen::VectorXd(<span class="keyword">const</span> Eigen::VectorXd &amp;, <span class="keyword">const</span> Eigen::VectorXd &amp;)&gt; f_, h_;</div>
 <div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    Eigen::MatrixXd Q_, R_;</div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    Eigen::VectorXd x_hat_;</div>
