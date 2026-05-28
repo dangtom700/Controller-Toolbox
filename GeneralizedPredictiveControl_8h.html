@@ -114,7 +114,7 @@ Namespaces</h2></td></tr>
 <li>alpha -&gt; 1: very soft approach; reduces overshoot without derivative weights.</li>
 </ul>
 <p>The plant model can be hot-swapped via setPlant() for adaptive GPC (pair with RecursiveLeastSquares::toStateSpace() for a self-tuning loop).</p>
-<dl class="section note"><dt>Note</dt><dd>Output constraints (y_min, y_max) are <b>not</b> supported. For hard output constraints, use DiscreteMPC with a slack-variable formulation instead.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Output constraints are supported via diagonal constraint tightening (see GPCParams::yMin / yMax). The approximation is exact for the first prediction step and conservative thereafter. For hard polytopic output constraints across all horizons, use DiscreteMPC instead.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd>Clarke et al., "Generalised Predictive Control", Automatica (1987). </dd>
 <dd>
 Maciejowski, "Predictive Control with Constraints" (2002) Ch. 3. </dd></dl>

@@ -109,7 +109,7 @@ Functions</h2></td></tr>
 <div class="textblock"><p>Header-only gradient-projection solver for box-constrained convex QPs. </p>
 <p>Solves: </p><div class="fragment"><div class="line">min_{x}   ½ xᵀHx + gᵀx</div>
 <div class="line">s.t.      lb &lt;= x &lt;= ub</div>
-</div><!-- fragment --><p><b>Algorithm:</b> Projected gradient descent with constant step alpha = 1/L, where L = lambdamax(H) is the Lipschitz constant of the gradient ∇f = Hx + g. Warm-started from the clamped unconstrained optimum x0 = clamp(-H^-^1g, lb, ub).</p>
+</div><!-- fragment --><p><b>Algorithm:</b> Projected gradient descent with constant step alpha = 1/L, where L = lambdamax(H) is the Lipschitz constant of the gradient nablaf = Hx + g. Warm-started from the clamped unconstrained optimum x0 = clamp(-H^-^1g, lb, ub).</p>
 <p><b>Zero-allocation hot path:</b> All temporaries are passed in by the caller as pre-sized scratch vectors. DiscreteMPC and GeneralizedPredictiveController use this to eliminate per-step heap allocation.</p>
 <p><b>Convergence:</b> The iteration terminates when ||x_new - x_old||inf &lt; tol. For typical MPC horizons (Nc &lt;= 10, well-conditioned H), this converges in O(10) iterations.</p>
 <dl class="section see"><dt>See also</dt><dd>Camacho &amp; Bordons, "Model Predictive Control" (2007), Ch. 3. </dd>

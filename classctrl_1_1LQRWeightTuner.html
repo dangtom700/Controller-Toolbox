@@ -110,7 +110,7 @@ Static Public Member Functions</h2></td></tr>
 <li><b>Pole-placement hint</b> - iterative Q/R search to steer closed-loop poles toward desired locations. </li>
 </ul>
 
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00267">267</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00286">286</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a59deb8f98e587269d8cc14ac2e696f49" name="a59deb8f98e587269d8cc14ac2e696f49"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a59deb8f98e587269d8cc14ac2e696f49">&#9670;&#160;</a></span>brysonMethod()</h2>
@@ -156,11 +156,11 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1LQRParams.html" title="LQR weighting matrices.">LQRParams</a> with diagonal Q and R. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8cpp_source.html#l00238">238</a> of file <a class="el" href="ControllerTuner_8cpp_source.html">ControllerTuner.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8cpp_source.html#l00258">258</a> of file <a class="el" href="ControllerTuner_8cpp_source.html">ControllerTuner.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="DiscreteLQR_8h_source.html#l00044">ctrl::LQRParams::Q</a>, and <a class="el" href="DiscreteLQR_8h_source.html#l00045">ctrl::LQRParams::R</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="TunerSuite_8cpp_source.html#l00365">ctrl::TunerSuite::bryson()</a>, <a class="el" href="ControllerTuner_8h_source.html#l00295">brysonMethodFor()</a>, and <a class="el" href="ControllerTuner_8cpp_source.html#l00247">polePlacementHint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="TunerSuite_8cpp_source.html#l00365">ctrl::TunerSuite::bryson()</a>, <a class="el" href="ControllerTuner_8h_source.html#l00314">brysonMethodFor()</a>, and <a class="el" href="ControllerTuner_8cpp_source.html#l00267">polePlacementHint()</a>.</p>
 
 </div>
 </div>
@@ -208,9 +208,9 @@ template&lt;typename C &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00295">295</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00314">314</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
 
-<p class="reference">References <a class="el" href="ControllerTuner_8cpp_source.html#l00238">brysonMethod()</a>.</p>
+<p class="reference">References <a class="el" href="ControllerTuner_8cpp_source.html#l00258">brysonMethod()</a>.</p>
 
 </div>
 </div>
@@ -265,11 +265,11 @@ template&lt;typename C &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1LQRParams.html" title="LQR weighting matrices.">LQRParams</a> that approximate the desired pole locations. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8cpp_source.html#l00247">247</a> of file <a class="el" href="ControllerTuner_8cpp_source.html">ControllerTuner.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8cpp_source.html#l00267">267</a> of file <a class="el" href="ControllerTuner_8cpp_source.html">ControllerTuner.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00238">brysonMethod()</a>, <a class="el" href="DiscreteLQR_8h_source.html#l00095">ctrl::DiscreteLQR::gainMatrix()</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="DiscreteLQR_8h_source.html#l00044">ctrl::LQRParams::Q</a>, and <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="ControllerTuner_8cpp_source.html#l00258">brysonMethod()</a>, <a class="el" href="DiscreteLQR_8h_source.html#l00095">ctrl::DiscreteLQR::gainMatrix()</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="DiscreteLQR_8h_source.html#l00044">ctrl::LQRParams::Q</a>, and <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ControllerTuner_8h_source.html#l00323">polePlacementHintFor()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ControllerTuner_8h_source.html#l00342">polePlacementHintFor()</a>.</p>
 
 </div>
 </div>
@@ -324,9 +324,9 @@ template&lt;typename C &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00323">323</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00342">342</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
 
-<p class="reference">References <a class="el" href="ControllerTuner_8cpp_source.html#l00247">polePlacementHint()</a>.</p>
+<p class="reference">References <a class="el" href="ControllerTuner_8cpp_source.html#l00267">polePlacementHint()</a>.</p>
 
 </div>
 </div>

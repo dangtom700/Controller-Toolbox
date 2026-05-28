@@ -21,7 +21,7 @@ var searchData=
   ['the_20test_20suite_20default_20tt_20cmd_20tt_18',['Run the test suite (default &lt;tt&gt;CMD&lt;/tt&gt;)',['../index.html#autotoc_md14',1,'']]],
   ['theta_19',['theta',['../structctrl_1_1StepResponseTuner_1_1FOPDTModel.html#a207e53d49fcd4d0931a3996910d55290',1,'ctrl::StepResponseTuner::FOPDTModel']]],
   ['tickcount_20',['tickCount',['../classctrl_1_1IScheduler.html#a9c43823a6e0a8eea0768982fae1b05dd',1,'ctrl::IScheduler']]],
-  ['tier_21',['tier',['../namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0',1,'ctrl::Tier'],['../namespacectrl.html#a932227b39a676cf6614adbc574457f5a',1,'ctrl::tier(const char *tuner, CtrlKind k)']]],
+  ['tier_21',['tier',['../namespacectrl.html#a932227b39a676cf6614adbc574457f5a',1,'ctrl::tier(const char *tuner, CtrlKind k)'],['../namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0',1,'ctrl::Tier']]],
   ['time_20build_20flags_22',['2.4 Real-Time Build Flags',['../md_docs_2DOCUMENTATION.html#autotoc_md35',1,'']]],
   ['time_20integration_23',['2. Real-Time Integration',['../md_docs_2DEPLOYMENT.html#autotoc_md125',1,'']]],
   ['time_20utilities_20hal_24',['5.7 Real-Time Utilities &amp; HAL',['../md_docs_2DOCUMENTATION.html#autotoc_md100',1,'']]],

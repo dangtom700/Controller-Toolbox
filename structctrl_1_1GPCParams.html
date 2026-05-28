@@ -115,6 +115,12 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a1e2582585b776464456fdcd9f4831f27" id="r_a1e2582585b776464456fdcd9f4831f27"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GPCParams.html#a1e2582585b776464456fdcd9f4831f27">duMax</a> = 1e9</td></tr>
 <tr class="memdesc:a1e2582585b776464456fdcd9f4831f27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hard upper limit on Deltau.  <br /></td></tr>
 <tr class="separator:a1e2582585b776464456fdcd9f4831f27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba8cd01282626a3046ed8aff446c5b42" id="r_aba8cd01282626a3046ed8aff446c5b42"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GPCParams.html#aba8cd01282626a3046ed8aff446c5b42">yMin</a> = -1e9</td></tr>
+<tr class="memdesc:aba8cd01282626a3046ed8aff446c5b42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output bounds yMin / yMax enforced via diagonal constraint tightening.  <br /></td></tr>
+<tr class="separator:aba8cd01282626a3046ed8aff446c5b42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a475a872939da2061ade940fe57d3899c" id="r_a475a872939da2061ade940fe57d3899c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GPCParams.html#a475a872939da2061ade940fe57d3899c">yMax</a> = 1e9</td></tr>
+<tr class="memdesc:a475a872939da2061ade940fe57d3899c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Soft upper bound on predicted output (SISO: scalar).  <br /></td></tr>
+<tr class="separator:a475a872939da2061ade940fe57d3899c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a22be725bbd88ccfdfba1e5fa0a768ce5" id="r_a22be725bbd88ccfdfba1e5fa0a768ce5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1GPCParams.html#a22be725bbd88ccfdfba1e5fa0a768ce5">qpMaxIter</a> = 200</td></tr>
 <tr class="memdesc:a22be725bbd88ccfdfba1e5fa0a768ce5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gradient-projection iteration limit.  <br /></td></tr>
 <tr class="separator:a22be725bbd88ccfdfba1e5fa0a768ce5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -125,7 +131,7 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Tuning and horizon parameters for <a class="el" href="classctrl_1_1GeneralizedPredictiveController.html" title="Discrete-time Generalised Predictive Controller.">GeneralizedPredictiveController</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00043">43</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00044">44</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a10fb636e34f7fac3b77bec9ec907cbf0" name="a10fb636e34f7fac3b77bec9ec907cbf0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a10fb636e34f7fac3b77bec9ec907cbf0">&#9670;&#160;</a></span>alpha</h2>
@@ -142,7 +148,7 @@ Public Attributes</h2></td></tr>
 <p>Reference trajectory softening factor alpha \in [0, 1). </p>
 <p>alpha = 0 recovers a step reference (same as <a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>). alpha -&gt; 1 produces a very soft approach, reducing overshoot without tuning derivative weights. </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00056">56</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00057">57</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>.</p>
 
@@ -162,7 +168,7 @@ Public Attributes</h2></td></tr>
 
 <p>Hard upper limit on Deltau. </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00061">61</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00062">62</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>.</p>
 
@@ -182,7 +188,7 @@ Public Attributes</h2></td></tr>
 
 <p>Hard lower limit on Deltau. </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00060">60</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00061">61</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>.</p>
 
@@ -202,7 +208,7 @@ Public Attributes</h2></td></tr>
 
 <p>Prediction horizon [steps]. </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00045">45</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00046">46</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>.</p>
 
@@ -222,7 +228,7 @@ Public Attributes</h2></td></tr>
 
 <p>Control horizon [steps], Nu &lt;= Np. </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00046">46</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00047">47</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>.</p>
 
@@ -242,7 +248,7 @@ Public Attributes</h2></td></tr>
 
 <p>Gradient-projection iteration limit. </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00062">62</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00084">84</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>.</p>
 
@@ -262,7 +268,7 @@ Public Attributes</h2></td></tr>
 
 <p>Convergence tolerance (||Deltax||inf). </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00063">63</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00085">85</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>.</p>
 
@@ -282,7 +288,7 @@ Public Attributes</h2></td></tr>
 
 <p>Move suppression weight (Ru = rhou.I). </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00048">48</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00049">49</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 </div>
 </div>
@@ -300,7 +306,7 @@ Public Attributes</h2></td></tr>
 
 <p>Output tracking weight (Qy = rhoy.I). </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00047">47</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00048">48</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 </div>
 </div>
@@ -318,7 +324,7 @@ Public Attributes</h2></td></tr>
 
 <p>Hard upper limit on u. </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00059">59</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00060">60</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>.</p>
 
@@ -338,7 +344,51 @@ Public Attributes</h2></td></tr>
 
 <p>Hard lower limit on u. </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00058">58</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00059">59</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>.</p>
+
+</div>
+</div>
+<a id="a475a872939da2061ade940fe57d3899c" name="a475a872939da2061ade940fe57d3899c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a475a872939da2061ade940fe57d3899c">&#9670;&#160;</a></span>yMax</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ctrl::GPCParams::yMax = 1e9</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Soft upper bound on predicted output (SISO: scalar). </p>
+
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00082">82</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>.</p>
+
+</div>
+</div>
+<a id="aba8cd01282626a3046ed8aff446c5b42" name="aba8cd01282626a3046ed8aff446c5b42"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba8cd01282626a3046ed8aff446c5b42">&#9670;&#160;</a></span>yMin</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ctrl::GPCParams::yMin = -1e9</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Output bounds yMin / yMax enforced via diagonal constraint tightening. </p>
+<p>For each horizon step j, the constraint yMin &lt;= y_pred[j] &lt;= yMax is mapped to an implied DeltaU[j] box bound using the diagonal of the condensed step-response matrix G: g_jj = Ca * Ba (the first Markov parameter, constant along the diagonal).</p>
+<p><b>Accuracy</b>: Exact for j=0 (first prediction step). Conservative for j&gt;1 because the off-diagonal coupling terms (earlier DeltaU values shifting y[j]) are ignored. For strong cross-step coupling or MIMO plants (p&gt;1), use <a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a> with explicit output-constraint rows instead.</p>
+<p><b>Infeasibility</b>: If a bound cannot be satisfied simultaneously with u/du limits, the u/du limits take precedence (the y-bound contribution to lb/ub is silently clipped).</p>
+<p>Default (+/-1e9): inactive - no output constraint applied. Soft lower bound on predicted output (SISO: scalar). </p>
+
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00081">81</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>.</p>
 

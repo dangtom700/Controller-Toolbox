@@ -22,7 +22,7 @@ var searchData=
   ['a_20href_20lib_20smithpredictor_20h_20smithpredictor_20h_20a_19',['&lt;tt&gt;SmithPredictor&lt;/tt&gt; (&lt;a href=&quot;lib/SmithPredictor.h&quot; &gt;SmithPredictor.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md71',1,'']]],
   ['a_20href_20lib_20systemanalysis_20h_20systemanalysis_20h_20a_20',['&lt;tt&gt;SystemAnalysis&lt;/tt&gt; (&lt;a href=&quot;lib/SystemAnalysis.h&quot; &gt;SystemAnalysis.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md98',1,'']]],
   ['a_20href_20lib_20tunersuite_20h_20tunersuite_20h_20a_21',['&lt;tt&gt;TunerSuite&lt;/tt&gt; (&lt;a href=&quot;lib/TunerSuite.h&quot; &gt;TunerSuite.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md90',1,'']]],
-  ['achievedgamma_22',['achievedgamma',['../classctrl_1_1DiscreteHinf.html#a7a8bdbbdf385d798f2e6a338911c382f',1,'ctrl::DiscreteHinf::achievedGamma()'],['../structctrl_1_1HinfResult.html#a1a500f78778309d1a83d6c5d649fe46b',1,'ctrl::HinfResult::achievedGamma']]],
+  ['achievedgamma_22',['achievedgamma',['../structctrl_1_1HinfResult.html#a1a500f78778309d1a83d6c5d649fe46b',1,'ctrl::HinfResult::achievedGamma'],['../classctrl_1_1DiscreteHinf.html#a7a8bdbbdf385d798f2e6a338911c382f',1,'ctrl::DiscreteHinf::achievedGamma()']]],
   ['activationcondition_23',['activationCondition',['../structctrl_1_1StackEntry.html#a9371582306ca70e3f37d2515b724cd84',1,'ctrl::StackEntry']]],
   ['active_24',['active',['../structctrl_1_1StackEntry.html#a1b8579344546ccd78f602cfb11f9b104',1,'ctrl::StackEntry']]],
   ['activecontrollername_25',['activeControllerName',['../classctrl_1_1ControllerStack.html#a5163b3d2876650be029c3e782a8b68ff',1,'ctrl::ControllerStack']]],
@@ -53,7 +53,7 @@ var searchData=
   ['atomicparambuffer_20lock_20free_20parameter_20updates_50',['AtomicParamBuffer - Lock-Free Parameter Updates',['../md_docs_2DEPLOYMENT.html#autotoc_md128',1,'']]],
   ['atomicparambuffer_20params_20tt_20a_20href_20lib_20atomicparambuffer_20h_20atomicparambuffer_20h_20a_51',['&lt;tt&gt;AtomicParamBuffer&lt;Params&gt;&lt;/tt&gt; (&lt;a href=&quot;lib/AtomicParamBuffer.h&quot; &gt;AtomicParamBuffer.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md101',1,'']]],
   ['atomicparambuffer_2eh_52',['AtomicParamBuffer.h',['../AtomicParamBuffer_8h.html',1,'']]],
-  ['attachobserver_53',['attachObserver',['../classctrl_1_1IController.html#abe5b62c21069e869261e870363ee8ab5',1,'ctrl::IController']]],
+  ['attachobserver_53',['attachobserver',['../classctrl_1_1IController.html#aa7968139f4c0d447b54e60ca1dfedd19',1,'ctrl::IController::attachObserver(std::shared_ptr&lt; IControllerObserver &gt; obs)'],['../classctrl_1_1IController.html#abe5b62c21069e869261e870363ee8ab5',1,'ctrl::IController::attachObserver(IControllerObserver *obs)']]],
   ['augmentedstate_54',['augmentedState',['../classctrl_1_1GeneralizedPredictiveController.html#a9f5a55b9cbccce5786740f80c70505e4',1,'ctrl::GeneralizedPredictiveController']]],
   ['auto_20tuning_20workflow_20relay_20pid_55',['4.2 Auto-Tuning Workflow (Relay -&gt; PID)',['../md_docs_2DOCUMENTATION.html#autotoc_md48',1,'']]]
 ];

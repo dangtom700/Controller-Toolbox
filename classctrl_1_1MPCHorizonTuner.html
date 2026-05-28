@@ -109,7 +109,7 @@ Static Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>MPC horizon and weight recommender for <a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00353">353</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00372">372</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a9bba8df599eff0fe5b9e6c215e444b8a" name="a9bba8df599eff0fe5b9e6c215e444b8a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9bba8df599eff0fe5b9e6c215e444b8a">&#9670;&#160;</a></span>estimateSettlingTime()</h2>
@@ -155,11 +155,11 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Estimated settling time [s], or maxSteps.Ts if not settled. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8cpp_source.html#l00295">295</a> of file <a class="el" href="ControllerTuner_8cpp_source.html">ControllerTuner.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8cpp_source.html#l00315">315</a> of file <a class="el" href="ControllerTuner_8cpp_source.html">ControllerTuner.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ControllerTuner_8cpp_source.html#l00323">recommend()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ControllerTuner_8cpp_source.html#l00343">recommend()</a>.</p>
 
 </div>
 </div>
@@ -221,11 +221,11 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1MPCHorizonTuner_1_1Recommendation.html" title="Recommended horizon and weight parameters for DiscreteMPC.">Recommendation</a> with Np and Nc scaled to the plant settling time. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8cpp_source.html#l00323">323</a> of file <a class="el" href="ControllerTuner_8cpp_source.html">ControllerTuner.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8cpp_source.html#l00343">343</a> of file <a class="el" href="ControllerTuner_8cpp_source.html">ControllerTuner.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="ControllerTuner_8cpp_source.html#l00295">estimateSettlingTime()</a>.</p>
+<p class="reference">References <a class="el" href="ControllerTuner_8cpp_source.html#l00315">estimateSettlingTime()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="TunerSuite_8cpp_source.html#l00441">ctrl::TunerSuite::mpcHorizon()</a>, and <a class="el" href="ControllerTuner_8h_source.html#l00394">recommendFor()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="TunerSuite_8cpp_source.html#l00441">ctrl::TunerSuite::mpcHorizon()</a>, and <a class="el" href="ControllerTuner_8h_source.html#l00413">recommendFor()</a>.</p>
 
 </div>
 </div>
@@ -285,9 +285,9 @@ template&lt;typename C &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00394">394</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00413">413</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
 
-<p class="reference">References <a class="el" href="ControllerTuner_8cpp_source.html#l00323">recommend()</a>.</p>
+<p class="reference">References <a class="el" href="ControllerTuner_8cpp_source.html#l00343">recommend()</a>.</p>
 
 </div>
 </div>

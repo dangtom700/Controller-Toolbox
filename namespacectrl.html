@@ -476,6 +476,9 @@ Functions</h2></td></tr>
 <tr class="separator:a847d18f960deac4bd58803a0cf34d11b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f88ce31d2b44d52a66fee321e29391d" id="r_a7f88ce31d2b44d52a66fee321e29391d"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a7f88ce31d2b44d52a66fee321e29391d">isPBHDetectable</a> (const Eigen::MatrixXd &amp;A, const Eigen::MatrixXd &amp;Q)</td></tr>
 <tr class="separator:a7f88ce31d2b44d52a66fee321e29391d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c5350675a644a3ab773529c5aea79ca" id="r_a2c5350675a644a3ab773529c5aea79ca"><td class="memItemLeft" align="right" valign="top">std::unordered_map&lt; std::string, bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a2c5350675a644a3ab773529c5aea79ca">features</a> ()</td></tr>
+<tr class="memdesc:a2c5350675a644a3ab773529c5aea79ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runtime query of optional modules compiled into the library.  <br /></td></tr>
+<tr class="separator:a2c5350675a644a3ab773529c5aea79ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9a02758f980949ccd582565a29640613" id="r_a9a02758f980949ccd582565a29640613"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a9a02758f980949ccd582565a29640613">padeDelayFilter</a> (double theta_frac, double Ts)</td></tr>
 <tr class="memdesc:a9a02758f980949ccd582565a29640613"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a first-order Pade filter for fractional dead-time compensation.  <br /></td></tr>
 <tr class="separator:a9a02758f980949ccd582565a29640613"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -483,7 +486,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:a210a1ff6e7c04e4d043ed83f0ad3a129"><td class="mdescLeft">&#160;</td><td class="mdescRight">Triangular membership function: /\ peaks at <code>c</code>, zero at <code>a</code> and <code>b</code>.  <br /></td></tr>
 <tr class="separator:a210a1ff6e7c04e4d043ed83f0ad3a129"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3bbf52403d666ffe411d11dc25482996" id="r_a3bbf52403d666ffe411d11dc25482996"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a3bbf52403d666ffe411d11dc25482996">mfTrapezoidal</a> (double a, double b, double c, double d)</td></tr>
-<tr class="memdesc:a3bbf52403d666ffe411d11dc25482996"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trapezoidal membership function: /‾\ flat-top from <code>b</code> to <code>c</code>, zero outside [<code>a</code>, <code>d</code>].  <br /></td></tr>
+<tr class="memdesc:a3bbf52403d666ffe411d11dc25482996"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trapezoidal membership function: /-\ flat-top from <code>b</code> to <code>c</code>, zero outside [<code>a</code>, <code>d</code>].  <br /></td></tr>
 <tr class="separator:a3bbf52403d666ffe411d11dc25482996"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b22feed3a0eeddddf10263fa0d8529f" id="r_a0b22feed3a0eeddddf10263fa0d8529f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1MF.html">MF</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a0b22feed3a0eeddddf10263fa0d8529f">mfGaussian</a> (double mean, double sigma)</td></tr>
 <tr class="memdesc:a0b22feed3a0eeddddf10263fa0d8529f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gaussian membership function: exp(-0.5.  <br /></td></tr>
@@ -511,6 +514,9 @@ Functions</h2></td></tr>
 <tr class="memitem:aea7d2241a62dea05772df99d95464b53" id="r_aea7d2241a62dea05772df99d95464b53"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#aea7d2241a62dea05772df99d95464b53">ssStep</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys, Eigen::Ref&lt; Eigen::VectorXd &gt; x, const Eigen::VectorXd &amp;u)</td></tr>
 <tr class="memdesc:aea7d2241a62dea05772df99d95464b53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simulate one step of a state-space model with an in-place state update.  <br /></td></tr>
 <tr class="separator:aea7d2241a62dea05772df99d95464b53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d48e4e9125785f0b52589b6017d6cfa" id="r_a9d48e4e9125785f0b52589b6017d6cfa"><td class="memItemLeft" align="right" valign="top">std::pair&lt; Eigen::VectorXd, Eigen::VectorXd &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a9d48e4e9125785f0b52589b6017d6cfa">ssStepCopy</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys, const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)</td></tr>
+<tr class="memdesc:a9d48e4e9125785f0b52589b6017d6cfa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Non-mutating variant of ssStep - returns {y[k], x[k+1]}.  <br /></td></tr>
+<tr class="separator:a9d48e4e9125785f0b52589b6017d6cfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad7110422057b1f806de5faebd00d3b7d" id="r_ad7110422057b1f806de5faebd00d3b7d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1TransferFunction.html">TransferFunction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ad7110422057b1f806de5faebd00d3b7d">ss2tf</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys)</td></tr>
 <tr class="memdesc:ad7110422057b1f806de5faebd00d3b7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a SISO discrete state-space model to transfer function form.  <br /></td></tr>
 <tr class="separator:ad7110422057b1f806de5faebd00d3b7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -635,7 +641,7 @@ Variables</h2></td></tr>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00153">153</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00171">171</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
 </div>
 </div>
@@ -1004,9 +1010,9 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Equivalent discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> model. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00185">185</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00194">194</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8cpp_source.html#l00164">checkDiscreteStability()</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>, <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156a0032796475fd7203f9b920f1a59b969f">TustinPrewarped</a>, and <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd">ZOH</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8cpp_source.html#l00173">checkDiscreteStability()</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>, <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156a0032796475fd7203f9b920f1a59b969f">TustinPrewarped</a>, and <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd">ZOH</a>.</p>
 
 </div>
 </div>
@@ -1044,9 +1050,9 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00164">164</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00173">173</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00185">c2d()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00194">c2d()</a>.</p>
 
 </div>
 </div>
@@ -1088,6 +1094,40 @@ Variables</h2></td></tr>
 <p class="reference">References <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa7f41193a18ce16e7f583c1ee5098a28a">ADRC</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa6351aefd1e5e1b62c76f8580116964be">ESC</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa8045a0a6c688b0635e3caccc408a1446">Generic</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa7cacc882b6fbe96bad6aa3c3a0ea6677">LeadLag</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa21d16cd097fc5e73bbaf35a33f632f74">LQG</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aaa6e6a19e8d19a6641a626a0bf2a39919">LQR</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aad1738fdc0b25022b98c832d0c0417080">MPC</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa2d73559f294204a42bda2e926d094612">PID</a>, <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa381f153a0e6e6dc7d3bf5dbef251b370">SMC</a>, and <a class="el" href="namespacectrl.html#ae9f75df6083768f99f318568d9b9038aae95f770ac4fb91ac2e4873e4b2dfc0e6">Smith</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="TunerSuite_8cpp_source.html#l00189">buildWarnMsg()</a>.</p>
+
+</div>
+</div>
+<a id="a2c5350675a644a3ab773529c5aea79ca" name="a2c5350675a644a3ab773529c5aea79ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c5350675a644a3ab773529c5aea79ca">&#9670;&#160;</a></span>features()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::unordered_map&lt; std::string, bool &gt; ctrl::features </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Runtime query of optional modules compiled into the library. </p>
+<p>Returns a map of feature-name -&gt; bool reflecting the CTRL_HAS_* preprocessor flags that were active when the library was built. Intended for Python bindings and plugin-discovery code that cannot rely on compile-time conditionals.</p>
+<div class="fragment"><div class="line"><span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> &amp;[name, on] : <a class="code hl_namespace" href="namespacectrl.html">ctrl</a>::<a class="code hl_function" href="namespacectrl.html#a2c5350675a644a3ab773529c5aea79ca">features</a>())</div>
+<div class="line">    std::printf(<span class="stringliteral">&quot;  %-20s %s\n&quot;</span>, name.c_str(), on ? <span class="stringliteral">&quot;yes&quot;</span> : <span class="stringliteral">&quot;no&quot;</span>);</div>
+<div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AtomicParamBuffer_8h_source.html#l00045">AtomicParamBuffer.h:45</a></div></div>
+<div class="ttc" id="anamespacectrl_html_a2c5350675a644a3ab773529c5aea79ca"><div class="ttname"><a href="namespacectrl.html#a2c5350675a644a3ab773529c5aea79ca">ctrl::features</a></div><div class="ttdeci">std::unordered_map&lt; std::string, bool &gt; features()</div><div class="ttdoc">Runtime query of optional modules compiled into the library.</div><div class="ttdef"><b>Definition</b> <a href="Features_8h_source.html#l00020">Features.h:20</a></div></div>
+</div><!-- fragment --> 
+<p class="definition">Definition at line <a class="el" href="Features_8h_source.html#l00020">20</a> of file <a class="el" href="Features_8h_source.html">Features.h</a>.</p>
 
 </div>
 </div>
@@ -1450,7 +1490,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Trapezoidal membership function: /‾\ flat-top from <code>b</code> to <code>c</code>, zero outside [<code>a</code>, <code>d</code>]. </p>
+<p>Trapezoidal membership function: /-\ flat-top from <code>b</code> to <code>c</code>, zero outside [<code>a</code>, <code>d</code>]. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">a</td><td>Left zero-crossing (a &lt;= b). </td></tr>
@@ -1556,7 +1596,7 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Minimal-order <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> model. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00268">268</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00277">277</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00096">ctrl::StateSpace::outputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
@@ -1629,7 +1669,7 @@ Variables</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="SubspaceID_8cpp_source.html#l00029">29</a> of file <a class="el" href="SubspaceID_8cpp_source.html">SubspaceID.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="SubspaceID_8h_source.html#l00066">ctrl::SubspaceIDResult::innovCov</a>, <a class="el" href="SubspaceID_8h_source.html#l00059">ctrl::SubspaceIDResult::kalmanGain</a>, <a class="el" href="SubspaceID_8h_source.html#l00069">ctrl::SubspaceIDResult::message</a>, <a class="el" href="SubspaceID_8h_source.html#l00049">ctrl::SubspaceIDResult::model</a>, <a class="el" href="SubspaceID_8h_source.html#l00050">ctrl::SubspaceIDResult::singularValues</a>, and <a class="el" href="SubspaceID_8h_source.html#l00068">ctrl::SubspaceIDResult::success</a>.</p>
+<p class="reference">References <a class="el" href="SubspaceID_8h_source.html#l00106">ctrl::SubspaceIDResult::innovCov</a>, <a class="el" href="SubspaceID_8h_source.html#l00099">ctrl::SubspaceIDResult::kalmanGain</a>, <a class="el" href="SubspaceID_8h_source.html#l00109">ctrl::SubspaceIDResult::message</a>, <a class="el" href="SubspaceID_8h_source.html#l00089">ctrl::SubspaceIDResult::model</a>, <a class="el" href="SubspaceID_8h_source.html#l00090">ctrl::SubspaceIDResult::singularValues</a>, and <a class="el" href="SubspaceID_8h_source.html#l00108">ctrl::SubspaceIDResult::success</a>.</p>
 
 </div>
 </div>
@@ -1836,7 +1876,7 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00110">110</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00119">119</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00096">ctrl::StateSpace::outputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
@@ -1895,6 +1935,56 @@ Variables</h2></td></tr>
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, and <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="TunerSuite_8cpp_source.html#l00722">ctrl::TunerSuite::makeISECost()</a>, and <a class="el" href="TunerSuite_8cpp_source.html#l00777">ctrl::TunerSuite::makeITAECost()</a>.</p>
+
+</div>
+</div>
+<a id="a9d48e4e9125785f0b52589b6017d6cfa" name="a9d48e4e9125785f0b52589b6017d6cfa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d48e4e9125785f0b52589b6017d6cfa">&#9670;&#160;</a></span>ssStepCopy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; Eigen::VectorXd, Eigen::VectorXd &gt; ctrl::ssStepCopy </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;&#160;</td>
+          <td class="paramname"><em>sys</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>u</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Non-mutating variant of ssStep - returns {y[k], x[k+1]}. </p>
+<p>Identical semantics to <a class="el" href="namespacectrl.html#aea7d2241a62dea05772df99d95464b53" title="Simulate one step of a state-space model with an in-place state update.">ssStep()</a> but takes x by value and returns the updated state alongside the output, so the caller's state is never modified in-place. Preferred for Python bindings where Eigen::Ref in-place mutation is not directly supported.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Plant model. </td></tr>
+    <tr><td class="paramname">x</td><td>State vector x[k] (not modified). </td></tr>
+    <tr><td class="paramname">u</td><td>Input vector u[k]. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>{y[k], x[k+1]}. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00097">97</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, and <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>.</p>
 
 </div>
 </div>

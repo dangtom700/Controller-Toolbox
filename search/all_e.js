@@ -52,5 +52,6 @@ var searchData=
   ['href_20lib_20smithpredictor_20h_20smithpredictor_20h_20a_49',['&lt;tt&gt;SmithPredictor&lt;/tt&gt; (&lt;a href=&quot;lib/SmithPredictor.h&quot; &gt;SmithPredictor.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md71',1,'']]],
   ['href_20lib_20systemanalysis_20h_20systemanalysis_20h_20a_50',['&lt;tt&gt;SystemAnalysis&lt;/tt&gt; (&lt;a href=&quot;lib/SystemAnalysis.h&quot; &gt;SystemAnalysis.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md98',1,'']]],
   ['href_20lib_20tunersuite_20h_20tunersuite_20h_20a_51',['&lt;tt&gt;TunerSuite&lt;/tt&gt; (&lt;a href=&quot;lib/TunerSuite.h&quot; &gt;TunerSuite.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md90',1,'']]],
-  ['hysteresis_52',['hysteresis',['../structctrl_1_1RelayTunerConfig.html#a55f1bb1c0100e0c089bf1191b180e280',1,'ctrl::RelayTunerConfig']]]
+  ['hysteresis_52',['hysteresis',['../structctrl_1_1RelayTunerConfig.html#a55f1bb1c0100e0c089bf1191b180e280',1,'ctrl::RelayTunerConfig']]],
+  ['hysteresis_5frel_53',['hysteresis_rel',['../structctrl_1_1RelayTunerConfig.html#a8ee1199d4e0e1b07e7ea978df78576df',1,'ctrl::RelayTunerConfig']]]
 ];

@@ -98,9 +98,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad8afab5d63d24f72e386ca5b4d5cc443" id="r_ad8afab5d63d24f72e386ca5b4d5cc443"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FuzzySystem.html#ad8afab5d63d24f72e386ca5b4d5cc443">addRule</a> (const <a class="el" href="structctrl_1_1Rule.html">Rule</a> &amp;rule)</td></tr>
 <tr class="memdesc:ad8afab5d63d24f72e386ca5b4d5cc443"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a rule and validate all indices against registered variables.  <br /></td></tr>
 <tr class="separator:ad8afab5d63d24f72e386ca5b4d5cc443"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0f2d7610438bde490d23d2744619205c" id="r_a0f2d7610438bde490d23d2744619205c"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FuzzySystem.html#a0f2d7610438bde490d23d2744619205c">evaluate</a> (const std::vector&lt; double &gt; &amp;inputs)</td></tr>
-<tr class="memdesc:a0f2d7610438bde490d23d2744619205c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run inference and return the crisp defuzzified output.  <br /></td></tr>
-<tr class="separator:a0f2d7610438bde490d23d2744619205c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a722e9aaa50e0ad1451a6586be6b09ddd" id="r_a722e9aaa50e0ad1451a6586be6b09ddd"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FuzzySystem.html#a722e9aaa50e0ad1451a6586be6b09ddd">evaluate</a> (const std::vector&lt; double &gt; &amp;inputs) const</td></tr>
+<tr class="memdesc:a722e9aaa50e0ad1451a6586be6b09ddd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run inference and return the crisp defuzzified output.  <br /></td></tr>
+<tr class="separator:a722e9aaa50e0ad1451a6586be6b09ddd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3ed5ae109474e817ad7bdf372e3045c" id="r_ad3ed5ae109474e817ad7bdf372e3045c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FuzzySystem.html#ad3ed5ae109474e817ad7bdf372e3045c">numInputs</a> () const</td></tr>
 <tr class="memdesc:ad3ed5ae109474e817ad7bdf372e3045c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of registered input variables.  <br /></td></tr>
 <tr class="separator:ad3ed5ae109474e817ad7bdf372e3045c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -125,7 +125,7 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Core Mamdani / Takagi-Sugeno fuzzy inference engine. </p>
-<p>Build the system by calling <a class="el" href="classctrl_1_1FuzzySystem.html#ae6fe4e0105b744cfa11aa4b887215e21" title="Register an input linguistic variable.">addInput()</a>, <a class="el" href="classctrl_1_1FuzzySystem.html#af71d26718be8572a8772f797a9a89694" title="Register the single output linguistic variable.">addOutput()</a>, then <a class="el" href="classctrl_1_1FuzzySystem.html#ad8afab5d63d24f72e386ca5b4d5cc443" title="Add a rule and validate all indices against registered variables.">addRule()</a> for each rule. Then call <a class="el" href="classctrl_1_1FuzzySystem.html#a0f2d7610438bde490d23d2744619205c" title="Run inference and return the crisp defuzzified output.">evaluate()</a> with a vector of crisp inputs to get the defuzzified output.</p>
+<p>Build the system by calling <a class="el" href="classctrl_1_1FuzzySystem.html#ae6fe4e0105b744cfa11aa4b887215e21" title="Register an input linguistic variable.">addInput()</a>, <a class="el" href="classctrl_1_1FuzzySystem.html#af71d26718be8572a8772f797a9a89694" title="Register the single output linguistic variable.">addOutput()</a>, then <a class="el" href="classctrl_1_1FuzzySystem.html#ad8afab5d63d24f72e386ca5b4d5cc443" title="Add a rule and validate all indices against registered variables.">addRule()</a> for each rule. Then call <a class="el" href="classctrl_1_1FuzzySystem.html#a722e9aaa50e0ad1451a6586be6b09ddd" title="Run inference and return the crisp defuzzified output.">evaluate()</a> with a vector of crisp inputs to get the defuzzified output.</p>
 <dl class="section note"><dt>Note</dt><dd>Only a single output variable is supported. For MIMO fuzzy control, instantiate one <a class="el" href="classctrl_1_1FuzzySystem.html" title="Core Mamdani / Takagi-Sugeno fuzzy inference engine.">FuzzySystem</a> per output axis. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00256">256</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
@@ -231,8 +231,8 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a0f2d7610438bde490d23d2744619205c" name="a0f2d7610438bde490d23d2744619205c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0f2d7610438bde490d23d2744619205c">&#9670;&#160;</a></span>evaluate()</h2>
+<a id="a722e9aaa50e0ad1451a6586be6b09ddd" name="a722e9aaa50e0ad1451a6586be6b09ddd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a722e9aaa50e0ad1451a6586be6b09ddd">&#9670;&#160;</a></span>evaluate()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -242,7 +242,7 @@ Public Attributes</h2></td></tr>
           <td>(</td>
           <td class="paramtype">const std::vector&lt; double &gt; &amp;&#160;</td>
           <td class="paramname"><em>inputs</em></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -255,6 +255,7 @@ Public Attributes</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Defuzzified output clamped to [uMin, uMax]. </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>This method is NOT thread-safe. Concurrent calls on the same instance result in a data race on the pre-allocated workspace. Use one <a class="el" href="classctrl_1_1FuzzySystem.html" title="Core Mamdani / Takagi-Sugeno fuzzy inference engine.">FuzzySystem</a> per thread, or serialize access externally with a mutex. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8cpp_source.html#l00208">208</a> of file <a class="el" href="FuzzyLogic_8cpp_source.html">FuzzyLogic.cpp</a>.</p>
 
@@ -290,7 +291,7 @@ Public Attributes</h2></td></tr>
 
 <p>Read-only access to input variable <code>i</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00301">301</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00304">304</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>
@@ -319,7 +320,7 @@ Public Attributes</h2></td></tr>
 
 <p>Number of registered input variables. </p>
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00296">296</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00299">299</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>
@@ -348,7 +349,7 @@ Public Attributes</h2></td></tr>
 
 <p>Always 0 or 1. </p>
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00297">297</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00300">300</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>
@@ -377,7 +378,7 @@ Public Attributes</h2></td></tr>
 
 <p>Number of registered rules. </p>
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00298">298</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00301">301</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>
@@ -407,7 +408,7 @@ Public Attributes</h2></td></tr>
 
 <p>Read-only access to output variable <code>i</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00303">303</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00306">306</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>

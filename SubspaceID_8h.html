@@ -114,16 +114,53 @@ Functions</h2></td></tr>
 <div class="textblock"><p>Batch subspace state-space system identification (N4SID / MOESP). </p>
 <p>Identifies a linear discrete-time state-space model from batch I/O data: </p><div class="fragment"><div class="line">x[k+1] = A.x[k] + B.u[k] + w[k]</div>
 <div class="line">y[k]   = C.x[k] + D.u[k] + v[k]</div>
-</div><!-- fragment --><p><b>Algorithm - MOESP oblique-projection variant (Verhaegen &amp; Dewilde 1992):</b></p><ol type="1">
-<li>Build 2i-block Hankel matrices from (Y, U): Z = [Uf; Wp; Yf], Wp = [Up; Yp].</li>
-<li>Thin LQ decomposition isolates the (3,2) block L32 (oblique projection of Yf onto Wp \perp Uf).</li>
-<li>SVD(L32): singular values reveal system order; left singular vectors form the extended observability matrix Gamma = U[:, :n].\sqrt(S[:n]).</li>
-<li>Extract C = Gamma[:p, :], A from shift-invariance of Gamma (least squares).</li>
-<li>Least-squares regression for B and D from the state sequence.</li>
-</ol>
-<dl class="section user"><dt>Data requirements</dt><dd><ul>
+</div><!-- fragment --><p><b>Algorithm - MOESP oblique-projection (Verhaegen &amp; Dewilde 1992), 6 steps:</b> </p><div class="fragment"><div class="line">INPUT  : Y (p*N), U (m*N), n (order), i (block rows), Ts</div>
+<div class="line">OUTPUT : A (n*n), B (n*m), C (p*n), D (p*m), K_kalman (n*p), Lambda (p*p)</div>
+<div class="line">s = N - 2.i    (Hankel column count)</div>
+<div class="line"> </div>
+<div class="line">Step 1 - Build Hankel matrices and partition past / future</div>
+<div class="line">  Yp = Y_hankel[:i.p, :]        (past outputs,   i.p * s)</div>
+<div class="line">  Yf = Y_hankel[i.p:, :]        (future outputs, i.p * s)</div>
+<div class="line">  Up, Uf  similarly from U.</div>
+<div class="line">  Wp = [Up; Yp]                  (past I/O,   i.(m+p) * s)</div>
+<div class="line">  Z  = [Uf; Wp; Yf]             (stacked,    (r_Uf+r_Wp+r_Yf) * s)</div>
+<div class="line"> </div>
+<div class="line">Step 2 - LQ decomposition  -&gt;  oblique projection L32</div>
+<div class="line">  Z^T = Q . R^T   (Q column-orthonormal, R lower-triangular)</div>
+<div class="line">  L32 = R[r_Uf+r_Wp:, r_Uf : r_Uf+r_Wp]      (i.p * i.(m+p))</div>
+<div class="line">  Interpretation: L32 = oblique projection  Yf /_{Uf} Wp</div>
+<div class="line">                  (projects Yf onto row(Wp) along row(Uf))</div>
+<div class="line">                  Satisfies O_i . X_i = L32 . Q_Wp^T   (MOESP Eq. 4.3)</div>
+<div class="line"> </div>
+<div class="line">Step 3 - SVD of L32  -&gt;  extended observability matrix Gamma</div>
+<div class="line">  [U, S, V^T] = svd(L32,  <span class="stringliteral">&quot;thin&quot;</span>)</div>
+<div class="line">  Gamma = U[:, :n] . diag(\sqrtS[:n])                 (i.p * n)</div>
+<div class="line">  Plot S to choose n: elbow = signal / noise boundary</div>
+<div class="line">  (suggestOrder() automates this via max-consecutive-ratio heuristic)</div>
+<div class="line"> </div>
+<div class="line">Step 4 - Extract C and A  (shift-invariance of Gamma)</div>
+<div class="line">  C  = Gamma[:p, :]                                (p * n)</div>
+<div class="line">  Gamma_up   = Gamma[:(i-1).p, :]</div>
+<div class="line">  Gamma_down = Gamma[p:,       :]</div>
+<div class="line">  A  = Gamma_up^+ . Gamma_down   (least squares)       (n * n)</div>
+<div class="line"> </div>
+<div class="line">Step 5 - Least-squares regression for B and D</div>
+<div class="line">  X^ = Gamma^+ . Yf                                 (state sequence, n * s)</div>
+<div class="line">  for k = 0 ... T-1  (T = s-1):</div>
+<div class="line">    D: solve  y[k] - C.x^[k]    = D.u[k]        (p * m)</div>
+<div class="line">    B: solve  x^[k+1] - A.x^[k] = B.u[k]        (n * m)</div>
+<div class="line">  (separate colPivHouseholderQr solves, batched over all T columns)</div>
+<div class="line"> </div>
+<div class="line">Step 6 - Stochastic realisation  (Kalman gain K, innovation cov Lambda)</div>
+<div class="line">  epsilon[k] = y[k]   - C.x^[k]   - D.u[k]   (innovation,    p * T)</div>
+<div class="line">  eta[k] = x^[k+1] - A.x^[k]  - B.u[k]   (state residual, n * T)</div>
+<div class="line">  Lambda = (1/T) . epsilon . epsilon^T                   (innovation cov, p * p)</div>
+<div class="line">  K = (eta . epsilon^T) . (epsilon . epsilon^T)^{-1}       (Kalman gain,    n * p)</div>
+<div class="line">  -&gt; pass K to KalmanFilter::KalmanFilter(sys, Q, R) or</div>
+<div class="line">    DiscreteLQG to skip manual Q/R tuning.</div>
+</div><!-- fragment --><dl class="section user"><dt>Data requirements</dt><dd><ul>
 <li>Persistent excitation: input must excite at least n_order frequencies.</li>
-<li>N ≫ 2.i.(m+p): more samples -&gt; better estimates.</li>
+<li>N &gt;&gt; 2.i.(m+p): more samples -&gt; better estimates.</li>
 <li>i &gt;= n_order/p (i_horizon must be large enough to capture all modes).</li>
 </ul>
 </dd></dl>

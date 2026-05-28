@@ -119,7 +119,7 @@ Namespaces</h2></td></tr>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Gradient-descent integration:</span></div>
 <div class="line">theta[k+1]  = theta[k] + sign_dir.kint.Ts.ghat[k]      <span class="comment">// sign_dir = -1 (min) or +1 (max)</span></div>
-</div><!-- fragment --><dl class="section user"><dt>Separation of timescales requirement</dt><dd>For correct gradient estimation: plant settling time ≪ 1/fp ≪ 1/flpf. The plant must respond quasi-statically to the dither frequency, and the LPF must cleanly extract the gradient from the demodulated signal. Violating this causes a biased gradient estimate and slow or no convergence.</dd></dl>
+</div><!-- fragment --><dl class="section user"><dt>Separation of timescales requirement</dt><dd>For correct gradient estimation: plant settling time &lt;&lt; 1/fp &lt;&lt; 1/flpf. The plant must respond quasi-statically to the dither frequency, and the LPF must cleanly extract the gradient from the demodulated signal. Violating this causes a biased gradient estimate and slow or no convergence.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd>Ariyur &amp; Krstic, "Real-Time Optimisation by Extremum-Seeking Control" (2003). </dd>
 <dd>
 Tan et al., "On non-local stability of ESC" (2006). </dd>

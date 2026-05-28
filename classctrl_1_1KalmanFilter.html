@@ -100,6 +100,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3ef0abd00aa2240bc3c065f19ea34b52" id="r_a3ef0abd00aa2240bc3c065f19ea34b52"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#a3ef0abd00aa2240bc3c065f19ea34b52">step</a> (const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u_prev, std::optional&lt; std::reference_wrapper&lt; const Eigen::VectorXd &gt; &gt; u_current=std::nullopt)</td></tr>
 <tr class="memdesc:a3ef0abd00aa2240bc3c065f19ea34b52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Combined predict + update - most common usage pattern.  <br /></td></tr>
 <tr class="separator:a3ef0abd00aa2240bc3c065f19ea34b52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53de1e13bd1f5c18018b40f420a2e940" id="r_a53de1e13bd1f5c18018b40f420a2e940"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#a53de1e13bd1f5c18018b40f420a2e940">step</a> (const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u_prev, const Eigen::VectorXd &amp;u_current)</td></tr>
+<tr class="memdesc:a53de1e13bd1f5c18018b40f420a2e940"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plain-reference overload of <a class="el" href="classctrl_1_1KalmanFilter.html#a3ef0abd00aa2240bc3c065f19ea34b52" title="Combined predict + update - most common usage pattern.">step()</a> - preferred from Python bindings.  <br /></td></tr>
+<tr class="separator:a53de1e13bd1f5c18018b40f420a2e940"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1aae1aea67146371347c0a2cf3ca7c76" id="r_a1aae1aea67146371347c0a2cf3ca7c76"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#a1aae1aea67146371347c0a2cf3ca7c76">reset</a> ()</td></tr>
 <tr class="memdesc:a1aae1aea67146371347c0a2cf3ca7c76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset state estimate to zero and covariance to P0 (or identity).  <br /></td></tr>
 <tr class="separator:a1aae1aea67146371347c0a2cf3ca7c76"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -199,7 +202,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Current error covariance P[k|k] (n * n). </p>
 
-<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00104">104</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00118">118</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -231,7 +234,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, and <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="KalmanFilter_8cpp_source.html#l00058">step()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="KalmanFilter_8cpp_source.html#l00068">step()</a>, and <a class="el" href="KalmanFilter_8cpp_source.html#l00058">step()</a>.</p>
 
 </div>
 </div>
@@ -252,7 +255,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Reset state estimate to zero and covariance to P0 (or identity). </p>
 
-<p class="definition">Definition at line <a class="el" href="KalmanFilter_8cpp_source.html#l00067">67</a> of file <a class="el" href="KalmanFilter_8cpp_source.html">KalmanFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8cpp_source.html#l00076">76</a> of file <a class="el" href="KalmanFilter_8cpp_source.html">KalmanFilter.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>.</p>
 
@@ -283,7 +286,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Sample time Ts [s]. </p>
 
-<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00107">107</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00121">121</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -312,12 +315,61 @@ Public Member Functions</h2></td></tr>
 
 <p>Current state estimate x^[k|k] (n * 1). </p>
 
-<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00101">101</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00115">115</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
+
+</div>
+</div>
+<a id="a53de1e13bd1f5c18018b40f420a2e940" name="a53de1e13bd1f5c18018b40f420a2e940"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53de1e13bd1f5c18018b40f420a2e940">&#9670;&#160;</a></span>step() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ctrl::KalmanFilter::step </td>
+          <td>(</td>
+          <td class="paramtype">const Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>u_prev</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>u_current</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Plain-reference overload of <a class="el" href="classctrl_1_1KalmanFilter.html#a3ef0abd00aa2240bc3c065f19ea34b52" title="Combined predict + update - most common usage pattern.">step()</a> - preferred from Python bindings. </p>
+<p>Equivalent to step(y, u_prev, std::cref(u_current)). Exists because std::optional&lt;std::reference_wrapper&lt;...&gt;&gt; is not directly bindable by pybind11.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">y</td><td>Measurement vector y[k]. </td></tr>
+    <tr><td class="paramname">u_prev</td><td>Control input u[k-1] (predict step). </td></tr>
+    <tr><td class="paramname">u_current</td><td>Control input u[k] (update step, D.u feedthrough). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8cpp_source.html#l00068">68</a> of file <a class="el" href="KalmanFilter_8cpp_source.html">KalmanFilter.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="KalmanFilter_8cpp_source.html#l00019">predict()</a>, and <a class="el" href="KalmanFilter_8cpp_source.html#l00027">update()</a>.</p>
 
 </div>
 </div>
 <a id="a3ef0abd00aa2240bc3c065f19ea34b52" name="a3ef0abd00aa2240bc3c065f19ea34b52"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3ef0abd00aa2240bc3c065f19ea34b52">&#9670;&#160;</a></span>step()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ef0abd00aa2240bc3c065f19ea34b52">&#9670;&#160;</a></span>step() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -404,7 +456,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00096">ctrl::StateSpace::outputSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="KalmanFilter_8cpp_source.html#l00058">step()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="KalmanFilter_8cpp_source.html#l00068">step()</a>, and <a class="el" href="KalmanFilter_8cpp_source.html#l00058">step()</a>.</p>
 
 </div>
 </div>

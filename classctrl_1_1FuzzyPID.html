@@ -132,6 +132,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController" id="r_abe5b62c21069e869261e870363ee8ab5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#abe5b62c21069e869261e870363ee8ab5">attachObserver</a> (<a class="el" href="classctrl_1_1IControllerObserver.html">IControllerObserver</a> *obs)</td></tr>
 <tr class="memdesc:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attach a telemetry observer.  <br /></td></tr>
 <tr class="separator:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7968139f4c0d447b54e60ca1dfedd19 inherit pub_methods_classctrl_1_1IController" id="r_aa7968139f4c0d447b54e60ca1dfedd19"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#aa7968139f4c0d447b54e60ca1dfedd19">attachObserver</a> (std::shared_ptr&lt; <a class="el" href="classctrl_1_1IControllerObserver.html">IControllerObserver</a> &gt; obs)</td></tr>
+<tr class="memdesc:aa7968139f4c0d447b54e60ca1dfedd19 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lifetime-safe overload - controller co-owns the observer via shared_ptr.  <br /></td></tr>
+<tr class="separator:aa7968139f4c0d447b54e60ca1dfedd19 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a34b9f274c8ee52dc4cd46302389fecfa inherit pub_methods_classctrl_1_1IController" id="r_a34b9f274c8ee52dc4cd46302389fecfa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a34b9f274c8ee52dc4cd46302389fecfa">detachObserver</a> ()</td></tr>
 <tr class="memdesc:a34b9f274c8ee52dc4cd46302389fecfa inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Detach the current observer (if any).  <br /></td></tr>
 <tr class="separator:a34b9f274c8ee52dc4cd46302389fecfa inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -157,10 +160,10 @@ Additional Inherited Members</h2></td></tr>
 <p>Architecture - three decoupled blocks: </p><div class="fragment"><div class="line">u_P  = <a class="code hl_class" href="classctrl_1_1FuzzyPD.html">FuzzyPD</a>(e, de)</div>
 <div class="line">u_I += Ki * Ts * e  +  Kb * (u_sat - u_unsat)     <span class="comment">// back-calculation anti-windup</span></div>
 <div class="line">u    = clamp(u_P + u_I, uMin, uMax)</div>
-<div class="ttc" id="aclassctrl_1_1FuzzyPD_html"><div class="ttname"><a href="classctrl_1_1FuzzyPD.html">ctrl::FuzzyPD</a></div><div class="ttdoc">5-term PD fuzzy controller implementing IController.</div><div class="ttdef"><b>Definition</b> <a href="FuzzyLogic_8h_source.html#l00356">FuzzyLogic.h:356</a></div></div>
+<div class="ttc" id="aclassctrl_1_1FuzzyPD_html"><div class="ttname"><a href="classctrl_1_1FuzzyPD.html">ctrl::FuzzyPD</a></div><div class="ttdoc">5-term PD fuzzy controller implementing IController.</div><div class="ttdef"><b>Definition</b> <a href="FuzzyLogic_8h_source.html#l00360">FuzzyLogic.h:360</a></div></div>
 </div><!-- fragment --><p>Setting Ki = 0 recovers pure <a class="el" href="classctrl_1_1FuzzyPD.html" title="5-term PD fuzzy controller implementing IController.">FuzzyPD</a> behaviour. </p>
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00424">424</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00428">428</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a8510a0956b6e268755bbead778b0e54b" name="a8510a0956b6e268755bbead778b0e54b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8510a0956b6e268755bbead778b0e54b">&#9670;&#160;</a></span>FuzzyPID()</h2>
@@ -298,7 +301,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8cpp_source.html#l00410">410</a> of file <a class="el" href="FuzzyLogic_8cpp_source.html">FuzzyLogic.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="FuzzyLogic_8cpp_source.html#l00369">ctrl::FuzzyPD::compute()</a>, <a class="el" href="FuzzyLogic_8h_source.html#l00407">ctrl::FuzzyPIDParams::Kb</a>, <a class="el" href="FuzzyLogic_8h_source.html#l00406">ctrl::FuzzyPIDParams::Ki</a>, <a class="el" href="FuzzyLogic_8h_source.html#l00409">ctrl::FuzzyPIDParams::uMax</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00408">ctrl::FuzzyPIDParams::uMin</a>.</p>
+<p class="reference">References <a class="el" href="FuzzyLogic_8cpp_source.html#l00369">ctrl::FuzzyPD::compute()</a>, <a class="el" href="FuzzyLogic_8h_source.html#l00411">ctrl::FuzzyPIDParams::Kb</a>, <a class="el" href="FuzzyLogic_8h_source.html#l00410">ctrl::FuzzyPIDParams::Ki</a>, <a class="el" href="FuzzyLogic_8h_source.html#l00413">ctrl::FuzzyPIDParams::uMax</a>, and <a class="el" href="FuzzyLogic_8h_source.html#l00412">ctrl::FuzzyPIDParams::uMin</a>.</p>
 
 </div>
 </div>
@@ -327,7 +330,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Last computed control output u[k-1]. </p>
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00452">452</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00456">456</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>
@@ -354,7 +357,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00449">449</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00453">453</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>
@@ -419,7 +422,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac1d1ab003ea7fa4f0ab49291d97473a0">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00442">442</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="FuzzyLogic_8h_source.html#l00446">446</a> of file <a class="el" href="FuzzyLogic_8h_source.html">FuzzyLogic.h</a>.</p>
 
 </div>
 </div>
@@ -449,7 +452,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="FuzzyLogic_8cpp_source.html#l00404">404</a> of file <a class="el" href="FuzzyLogic_8cpp_source.html">FuzzyLogic.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="FuzzyLogic_8h_source.html#l00405">ctrl::FuzzyPIDParams::pd</a>, and <a class="el" href="FuzzyLogic_8cpp_source.html#l00363">ctrl::FuzzyPD::setParams()</a>.</p>
+<p class="reference">References <a class="el" href="FuzzyLogic_8h_source.html#l00409">ctrl::FuzzyPIDParams::pd</a>, and <a class="el" href="FuzzyLogic_8cpp_source.html#l00363">ctrl::FuzzyPD::setParams()</a>.</p>
 
 </div>
 </div>

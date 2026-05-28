@@ -105,9 +105,9 @@ Namespaces</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete-time Model Predictive Controller - condensed incremental QP formulation. </p>
-<p>Minimises a receding-horizon cost over predicted outputs and control moves: </p><div class="fragment"><div class="line">J = Sigma_i₌1ᴺᵖ rhoy.||yhat[k+i|k] - r||^2 + Sigma_j₌0ᴺᶜ^-^1 rhou.||Deltau[k+j]||^2</div>
+<p>Minimises a receding-horizon cost over predicted outputs and control moves: </p><div class="fragment"><div class="line">J = Sigma_i=1ᴺᵖ rhoy.||yhat[k+i|k] - r||^2 + Sigma_j=0ᴺᶜ^-^1 rhou.||Deltau[k+j]||^2</div>
 </div><!-- fragment --><p><b>Condensed prediction:</b> </p><div class="fragment"><div class="line">Ŷ = F.x[k] + Gu.u[k-1] + Phi.DeltaU</div>
-</div><!-- fragment --><p> where Phi(i,j) = C.A^(i-j).B (j &lt;= i, else 0) and Gu(i) = Sigma_j₌0ⁱ C.Aʲ.B.</p>
+</div><!-- fragment --><p> where Phi(i,j) = C.A^(i-j).B (j &lt;= i, else 0) and Gu(i) = Sigma_j=0ⁱ C.Aʲ.B.</p>
 <p><b>Unconstrained optimum:</b> </p><div class="fragment"><div class="line">DeltaU* = -(Phiᵀ.Qy.Phi + Ru)^-^1.Phiᵀ.Qy.(F.x[k] - R_stacked)</div>
 <div class="line">u[k] = u[k-1] + DeltaU*[0:m]</div>
 </div><!-- fragment --><p>Box constraints on Deltau and u are solved via gradient projection (step size 1/L, L = lambdamax(H), precomputed). Convergence is controlled by MPCParams::qpMaxIter and qpTol.</p>

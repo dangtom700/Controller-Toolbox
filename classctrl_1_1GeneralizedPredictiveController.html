@@ -148,6 +148,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController" id="r_abe5b62c21069e869261e870363ee8ab5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#abe5b62c21069e869261e870363ee8ab5">attachObserver</a> (<a class="el" href="classctrl_1_1IControllerObserver.html">IControllerObserver</a> *obs)</td></tr>
 <tr class="memdesc:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attach a telemetry observer.  <br /></td></tr>
 <tr class="separator:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7968139f4c0d447b54e60ca1dfedd19 inherit pub_methods_classctrl_1_1IController" id="r_aa7968139f4c0d447b54e60ca1dfedd19"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#aa7968139f4c0d447b54e60ca1dfedd19">attachObserver</a> (std::shared_ptr&lt; <a class="el" href="classctrl_1_1IControllerObserver.html">IControllerObserver</a> &gt; obs)</td></tr>
+<tr class="memdesc:aa7968139f4c0d447b54e60ca1dfedd19 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lifetime-safe overload - controller co-owns the observer via shared_ptr.  <br /></td></tr>
+<tr class="separator:aa7968139f4c0d447b54e60ca1dfedd19 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a34b9f274c8ee52dc4cd46302389fecfa inherit pub_methods_classctrl_1_1IController" id="r_a34b9f274c8ee52dc4cd46302389fecfa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a34b9f274c8ee52dc4cd46302389fecfa">detachObserver</a> ()</td></tr>
 <tr class="memdesc:a34b9f274c8ee52dc4cd46302389fecfa inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Detach the current observer (if any).  <br /></td></tr>
 <tr class="separator:a34b9f274c8ee52dc4cd46302389fecfa inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -172,7 +175,7 @@ Additional Inherited Members</h2></td></tr>
 <div class="textblock"><p>Discrete-time Generalised Predictive Controller. </p>
 <p>Internally uses the same gradient-projection QP solver as <a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a>. The health interface reflects QP convergence for <a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a> fallback. </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00072">72</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00094">94</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ad1792bab7b62f22a676cb2efe79d2579" name="ad1792bab7b62f22a676cb2efe79d2579"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad1792bab7b62f22a676cb2efe79d2579">&#9670;&#160;</a></span>GeneralizedPredictiveController()</h2>
@@ -242,7 +245,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Current augmented state xₐ = [Deltax; y] (size n+p). </p>
 <p>Useful for monitoring the velocity-form integrator state. </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00140">140</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00162">162</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 </div>
 </div>
@@ -282,7 +285,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00170">170</a> of file <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html">GeneralizedPredictiveControl.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00196">196</a> of file <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html">GeneralizedPredictiveControl.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">computeRef()</a>.</p>
 
@@ -327,9 +330,9 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">96</a> of file <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html">GeneralizedPredictiveControl.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00056">ctrl::GPCParams::alpha</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00061">ctrl::GPCParams::duMax</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00060">ctrl::GPCParams::duMin</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00045">ctrl::GPCParams::Np</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00046">ctrl::GPCParams::Nu</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00062">ctrl::GPCParams::qpMaxIter</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00063">ctrl::GPCParams::qpTol</a>, <a class="el" href="GradientProjectionQP_8h_source.html#l00065">ctrl::solveGradientProjectionQP()</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00059">ctrl::GPCParams::uMax</a>, and <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00058">ctrl::GPCParams::uMin</a>.</p>
+<p class="reference">References <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00057">ctrl::GPCParams::alpha</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00062">ctrl::GPCParams::duMax</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00061">ctrl::GPCParams::duMin</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00046">ctrl::GPCParams::Np</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00047">ctrl::GPCParams::Nu</a>, <a class="el" href="PlantModel_8h_source.html#l00096">ctrl::StateSpace::outputSize()</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00084">ctrl::GPCParams::qpMaxIter</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00085">ctrl::GPCParams::qpTol</a>, <a class="el" href="GradientProjectionQP_8h_source.html#l00065">ctrl::solveGradientProjectionQP()</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00060">ctrl::GPCParams::uMax</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00059">ctrl::GPCParams::uMin</a>, <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00082">ctrl::GPCParams::yMax</a>, and <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00081">ctrl::GPCParams::yMin</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00170">compute()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00196">compute()</a>.</p>
 
 </div>
 </div>
@@ -361,7 +364,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00156">156</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00178">178</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 </div>
 </div>
@@ -391,7 +394,7 @@ Additional Inherited Members</h2></td></tr>
 <p><code>true</code> if the most recent QP converged within qpMaxIter iterations. </p>
 <p>Repeated <code>false</code> indicates qpMaxIter is too small or H is ill-conditioned. </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00147">147</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00169">169</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 </div>
 </div>
@@ -420,7 +423,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Actual gradient-projection iterations used in the most recent <a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#ad571aad123993961b3e44a6a36b64eee" title="Full interface - supply plant output y and setpoint r separately.">computeRef()</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00150">150</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00172">172</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 </div>
 </div>
@@ -449,7 +452,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Read-only access to current parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00121">121</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00143">143</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 </div>
 </div>
@@ -480,7 +483,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac69ef6691d5831cda3adcdc59971fcac">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00193">193</a> of file <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html">GeneralizedPredictiveControl.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00219">219</a> of file <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html">GeneralizedPredictiveControl.cpp</a>.</p>
 
 </div>
 </div>
@@ -511,7 +514,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac1d1ab003ea7fa4f0ab49291d97473a0">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00133">133</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00155">155</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 </div>
 </div>
@@ -539,7 +542,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00187">187</a> of file <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html">GeneralizedPredictiveControl.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00213">213</a> of file <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html">GeneralizedPredictiveControl.cpp</a>.</p>
 
 </div>
 </div>
@@ -567,7 +570,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00177">177</a> of file <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html">GeneralizedPredictiveControl.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00203">203</a> of file <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html">GeneralizedPredictiveControl.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00096">ctrl::StateSpace::outputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
@@ -605,7 +608,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00127">127</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GeneralizedPredictiveControl_8h_source.html#l00149">149</a> of file <a class="el" href="GeneralizedPredictiveControl_8h_source.html">GeneralizedPredictiveControl.h</a>.</p>
 
 </div>
 </div>

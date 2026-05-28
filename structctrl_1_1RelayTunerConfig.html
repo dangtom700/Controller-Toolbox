@@ -92,8 +92,11 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a64273cf3502e05d816b9034078ef2a9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relay output amplitude +/-d.  <br /></td></tr>
 <tr class="separator:a64273cf3502e05d816b9034078ef2a9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55f1bb1c0100e0c089bf1191b180e280" id="r_a55f1bb1c0100e0c089bf1191b180e280"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RelayTunerConfig.html#a55f1bb1c0100e0c089bf1191b180e280">hysteresis</a> = 0.0</td></tr>
-<tr class="memdesc:a55f1bb1c0100e0c089bf1191b180e280"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dead-band [same units as y] to suppress noise-driven chatter.  <br /></td></tr>
+<tr class="memdesc:a55f1bb1c0100e0c089bf1191b180e280"><td class="mdescLeft">&#160;</td><td class="mdescRight">Absolute dead-band [same units as y].  <br /></td></tr>
 <tr class="separator:a55f1bb1c0100e0c089bf1191b180e280"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ee1199d4e0e1b07e7ea978df78576df" id="r_a8ee1199d4e0e1b07e7ea978df78576df"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RelayTunerConfig.html#a8ee1199d4e0e1b07e7ea978df78576df">hysteresis_rel</a> = 0.0</td></tr>
+<tr class="memdesc:a8ee1199d4e0e1b07e7ea978df78576df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative dead-band: effective_hysteresis += hysteresis_rel * current_amplitude_estimate.  <br /></td></tr>
+<tr class="separator:a8ee1199d4e0e1b07e7ea978df78576df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac6cae77f414d8d71797db566d10e9881" id="r_ac6cae77f414d8d71797db566d10e9881"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1RelayTunerConfig.html#ac6cae77f414d8d71797db566d10e9881">cyclesRequired</a> = 3</td></tr>
 <tr class="memdesc:ac6cae77f414d8d71797db566d10e9881"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stable oscillation cycles required before the tuner exits.  <br /></td></tr>
 <tr class="separator:ac6cae77f414d8d71797db566d10e9881"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -117,7 +120,7 @@ Public Attributes</h2></td></tr>
 
 <p>Stable oscillation cycles required before the tuner exits. </p>
 
-<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00076">76</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00086">86</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="ControllerTuner_8cpp_source.html#l00020">ctrl::RelayAutoTuner::step()</a>.</p>
 
@@ -135,9 +138,30 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Dead-band [same units as y] to suppress noise-driven chatter. </p>
+<p>Absolute dead-band [same units as y]. </p>
 
 <p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00075">75</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="ControllerTuner_8cpp_source.html#l00020">ctrl::RelayAutoTuner::step()</a>.</p>
+
+</div>
+</div>
+<a id="a8ee1199d4e0e1b07e7ea978df78576df" name="a8ee1199d4e0e1b07e7ea978df78576df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ee1199d4e0e1b07e7ea978df78576df">&#9670;&#160;</a></span>hysteresis_rel</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ctrl::RelayTunerConfig::hysteresis_rel = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Relative dead-band: effective_hysteresis += hysteresis_rel * current_amplitude_estimate. </p>
+<p>Scales the threshold with the observed oscillation amplitude - useful when the output magnitude is not known in advance. A value of 0.02-0.05 suppresses noise that is a few percent of the limit-cycle amplitude without delaying switching on clean signals. Applied only after the first relay switch (i.e., once an amplitude estimate exists). The effective threshold = hysteresis + hysteresis_rel * (peak_pos - peak_neg) / 2. </p>
+
+<p class="definition">Definition at line <a class="el" href="ControllerTuner_8h_source.html#l00085">85</a> of file <a class="el" href="ControllerTuner_8h_source.html">ControllerTuner.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="ControllerTuner_8cpp_source.html#l00020">ctrl::RelayAutoTuner::step()</a>.</p>
 
