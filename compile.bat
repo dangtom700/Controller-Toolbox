@@ -80,6 +80,19 @@ for %%T in (
     ex39_repetitive_with_ekf
     ex40_ukf_quadrotor
     ex41_lpv_gain_scheduling
+    ex42_pid_inner_mpc_outer
+    ex43_smc_inner_lqr_outer
+    ex44_fuzzy_pd_inner_pid_outer
+    ex45_adrc_inner_outer_pid
+    ex46_leadlag_inner_repetitive_outer
+    ex47_esc_additive_pid
+    ex48_fuzzy_chattering_smc
+    ex49_leadlag_integrator
+    ex50_ekf_mpc
+    ex51_ukf_smc
+    ex52_dob_pi
+    ex53_mhe_mpc_dual
+    ex54_bumpless_transfer
     example_pid_feedback
     mimo_known
     mimo_unknown
