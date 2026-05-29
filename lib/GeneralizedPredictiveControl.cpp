@@ -169,11 +169,11 @@ namespace ctrl
         last_qp_converged_ = qp.converged;
         last_qp_iters_     = qp.iters;
 
+#ifndef NDEBUG
         if (!last_qp_converged_)
-        {
-            std::clog << "[GPC] WARNING: QP solver reached max iterations (" << p_.qpMaxIter
-                      << ") without converging. Consider increasing qpMaxIter or relaxing tuning.\n";
-        }
+            std::clog << "[GPC] WARNING: QP solver reached max iterations ("
+                      << p_.qpMaxIter << "). Use lastQPConverged() to check per step.\n";
+#endif
 
         // Apply first control increment and enforce absolute u bounds.
         Eigen::VectorXd du = DeltaU_.head(m);

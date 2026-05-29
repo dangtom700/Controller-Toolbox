@@ -47,6 +47,8 @@ set(CTRL_CORE_SOURCES
     MRACController.cpp
     BalancedTruncation.cpp
     ZeroPhaseTrackingFilter.cpp
+    GapMetric.cpp
+    LPVSystemID.cpp
 )
 
 # --- Optional sources --------------------------------------------------------

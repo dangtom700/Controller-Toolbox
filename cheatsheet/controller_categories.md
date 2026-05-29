@@ -179,10 +179,10 @@ key **Tier 2**, **Tier 3**, **Tier 4**, and **Tier 5** controllers:
 | `FeedforwardController.h/.cpp` | Static and dynamic feedforward (reference model-based) |
 | `GeneralizedPredictiveControl.h/.cpp` | GPC (CARIMA predictor + RLS adaptive update, Tier 2) |
 | `DiscreteHinf.h/.cpp` | H-infinity (gamma bisection), mixed sensitivity, mu-synthesis DK-iteration (Tier 5) |
-| `MRACController.h/.cpp` | MRAC — Lyapunov adaptation + σ-modification + projection; SISO reference model tracking (Tier 3 adaptive) |
-| `FeedbackLinearisation.h/.cpp` | Exact FL — DriftFn+GainFn algebraic inversion + inner IController; SISO relative degree 1 (Tier 1 nonlinear) |
+| `MRACController.h/.cpp` | MRAC - Lyapunov adaptation + sigma-modification + projection; SISO reference model tracking (Tier 3 adaptive) |
+| `FeedbackLinearisation.h/.cpp` | Exact FL - DriftFn+GainFn algebraic inversion + inner IController; SISO relative degree 1 (Tier 1 nonlinear) |
 | `LinearisationHelper.h/.cpp` | Numerical Jacobians (jacobianX/U) + lineariseAtPoint (ZOH); scaled-epsilon central difference |
-| `BalancedTruncation.h/.cpp` | Model order reduction — balanced realisation, H∞ error bound, suggestOrder; O(n⁶) Lyapunov |
+| `BalancedTruncation.h/.cpp` | Model order reduction - balanced realisation, Hinf error bound, suggestOrder; O(n⁶) Lyapunov |
 | `ZeroPhaseTrackingFilter.h/.cpp` | ZPETC prefilter + transmissionZeros via GeneralizedEigenSolver pencil |
 | `ExtremumSeeker.h/.cpp` | Perturbation-based ESC (Tier 1 / Tier 3 adaptive) |
 | `FuzzyLogic.h/.cpp` | Mamdani/TS inference engine; `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor` (Tier 4) |

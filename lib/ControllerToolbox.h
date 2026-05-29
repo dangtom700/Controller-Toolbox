@@ -87,6 +87,11 @@
 #include "MRACController.h"              ///< MRAC - Lyapunov-based MRAC with sigma-modification and parameter projection.
 #include "BalancedTruncation.h"          ///< balancedTruncate, suggestOrder - H-infinity-bounded model order reduction.
 #include "ZeroPhaseTrackingFilter.h"     ///< designZPETC, transmissionZeros - causal zero-phase feedforward prefilter.
+#include "GainScheduledController.h"    ///< GainScheduledController - p-scheduled IController wrapper (LinearBlend / NearestNeighbor).
+#include "GapMetric.h"                  ///< nuGap, nuGapMatrix, chordalDist, freqResponseGrid - nu-gap metric for gain scheduling.
+#include "LinearModelCluster.h"         ///< clusterByGap, suggestGapThreshold, ClusterResult - nu-gap agglomerative clustering.
+#include "LPVSystemID.h"                ///< identifyLPV, identifyLPVFromIO, LPVModel - polynomial LPV system identification.
+#include "AutoGainScheduler.h"          ///< buildAutoGainScheduler, findEquilibrium, OperatingPoint - automated gain-scheduling pipeline.
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,

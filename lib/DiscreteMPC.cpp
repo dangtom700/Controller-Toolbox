@@ -182,11 +182,15 @@ namespace ctrl
         last_qp_converged_ = qp.converged;
         last_qp_iters_     = qp.iters;
 
+        // Non-convergence is queryable via lastQPConverged() / isHealthy().
+        // The clog print is debug-only: it produces ~50 k lines per boiler run at
+        // default qpMaxIter=200 and corrupts stdout.  Use lastQPConverged() in
+        // application code to detect and handle non-convergence.
+#ifndef NDEBUG
         if (!last_qp_converged_)
-        {
-            std::clog << "[DiscreteMPC] WARNING: QP solver reached max iterations (" << p_.qpMaxIter
-                      << ") without converging. Consider increasing qpMaxIter or relaxing tuning.\n";
-        }
+            std::clog << "[DiscreteMPC] WARNING: QP solver reached max iterations ("
+                      << p_.qpMaxIter << "). Use lastQPConverged() to check per step.\n";
+#endif
 
         // Apply first control increment
         const Eigen::VectorXd du = DeltaU_.head(m);

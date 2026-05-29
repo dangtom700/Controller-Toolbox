@@ -22,6 +22,11 @@ add_executable(test_catch2_advanced test_catch2_advanced.cpp)
 target_link_libraries(test_catch2_advanced PRIVATE controller_toolbox Catch2::Catch2WithMain)
 target_include_directories(test_catch2_advanced PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
+# -- Catch2 auto-scheduling test suite (Part 20) ---------------------------
+add_executable(test_autoscheduling test_autoscheduling.cpp)
+target_link_libraries(test_autoscheduling PRIVATE controller_toolbox Catch2::Catch2WithMain)
+target_include_directories(test_autoscheduling PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
 # -- Legacy hand-rolled test executables (kept unchanged) -------------------
 add_executable(test_controllers test_controllers.cpp)
 target_link_libraries(test_controllers PRIVATE controller_toolbox)

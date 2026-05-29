@@ -273,8 +273,9 @@ MPCController::MPCController(const PlantParameters& p) : pp_(p)
     // For xy: tau_xy = M_re/D_re ~ 1.35e8/6e5 = 225s = 450 steps - impractical.
     // Use a moderate horizon (60 steps = 30s) to capture short-term dynamics.
     // Yaw time constant: 4.67e13/3.12e12 = 15s = 30 steps - Np=60 is sufficient.
-    mp.Np = 60;
-    mp.Nc = 5;
+    mp.Np        = 60;
+    mp.Nc        = 5;
+    mp.qpMaxIter = 500;  // well-conditioned xy/yaw Hessians; FISTA converges well under 100
 
     // Input in kN (see buildAxisSS). Bd_sway ~ 5.75e-6 m/s per kN per step.
     // Bd_yaw ~ 1.07e-11 rad/s per kN-torque per step.
@@ -496,7 +497,9 @@ FuzzySupervised_MPC::FuzzySupervised_MPC(const PlantParameters& p)
 {
     // Build MPC instances at zero-velocity linearisation (same as MPCController)
     ctrl::MPCParams mp;
-    mp.Np = 60; mp.Nc = 5;
+    mp.Np        = 60;
+    mp.Nc        = 5;
+    mp.qpMaxIter = 500;  // consistent with MPCController
     const double kN = 1.0e3;
     const double rho_y[3] = {1e3, 1e3, 1e3};
     const double rho_u[3] = {1e-3, 1e-3, 1.0};

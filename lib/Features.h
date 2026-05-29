@@ -62,6 +62,11 @@ inline std::unordered_map<std::string, bool> features()
         {"mrac",                    true},  // always compiled (MRACController.cpp in core sources)
         {"balanced_truncation",     true},  // always compiled (BalancedTruncation.cpp in core sources)
         {"zpetc",                   true},  // always compiled (ZeroPhaseTrackingFilter.cpp in core sources)
+        {"gap_metric",              true},  // always compiled (GapMetric.cpp in core sources)
+        {"lpv_system_id",           true},  // always compiled (LPVSystemID.cpp in core sources)
+        {"gain_scheduled_ctrl",     true},  // always compiled (header-only GainScheduledController.h)
+        {"auto_gain_scheduler",     true},  // always compiled (header-only AutoGainScheduler.h)
+        {"linear_model_cluster",    true},  // always compiled (header-only LinearModelCluster.h)
     };
 }
 

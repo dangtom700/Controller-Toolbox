@@ -3783,3 +3783,538 @@ Phase 4: 64/64.
 ---
 
 *Part 18 added 2026-05-28. All changes verified by run.py: C++ 60/60, Python 64/64.*
+
+---
+
+## Part 19: Corrector Patterns + Algorithm Extensions E1-E5 (2026-05-28)
+
+### 19.1 Overview
+
+Part 19 adds 13 corrector-pattern C++ examples (ex42-ex54), 10 corrector-pattern Python
+examples (ex61-ex70), 5 new algorithm-extension library classes (E1-E5) with matching
+C++ examples (ex55-ex59) and Python examples (ex71-ex75), and a new test_catch2_pilot.cpp
+test file (5 test cases, 20 assertions).
+
+**C++ Phase 3: 78 passed | 0 failed** (was 60; +18 new examples + test_catch2_pilot + case-study bins)
+**Python Phase 4: 79 passed | 0 failed** (was 64; +15 new Python examples)
+
+---
+
+### 19.2 Corrector pattern examples
+
+C++ examples ex42-ex54 and Python examples ex61-ex70 demonstrate every composition mode
+of ControllerStack using pairs of real controllers on simulated plants.
+
+| Pattern | C++ | Python | Inner controller | Outer / Additive controller |
+|---------|-----|--------|------------------|-----------------------------|
+| CASCADE | ex42 | ex61 | DiscretePID (inner) | DiscreteMPC (outer) |
+| CASCADE | ex43 | ex62 | DiscreteSMC (inner) | DiscreteLQR (outer) |
+| CASCADE | ex44 | -- | FuzzyPD (inner) | DiscretePID (outer) |
+| CASCADE | ex45 | ex63 | DiscreteADRC (inner) | DiscretePID (outer) |
+| CASCADE | ex46 | -- | DiscreteLeadLag (inner) | RepetitiveController (outer) |
+| ADDITIVE | ex47 | ex66 | DiscretePID (baseline) | ExtremumSeeker (additive) |
+| ADDITIVE | ex48 | ex69 | DiscreteSMC (baseline) | FuzzyPD (chattering reduction) |
+| ADDITIVE | ex49 | ex70 | DiscreteLeadLag (baseline) | pure integrator (additive) |
+| OBSERVER+SF | ex50 | -- | EKF (observer) | DiscreteMPC (state-feedback) |
+| OBSERVER+SF | ex51 | ex64 | UKF (observer) | DiscreteSMC (state-feedback) |
+| OBSERVER+SF | ex52 | ex67 | Disturbance Observer | DiscretePID (PI correction) |
+| OBSERVER+SF | ex53 | ex65 | MHE (observer) | DiscreteMPC (state-feedback) |
+| SUPERVISORY | ex54 | ex68 | Two DiscretePIDs | Bumpless transfer via FuzzySupervisor |
+
+All examples: compile + run without crash + print PASS/summary.
+
+---
+
+### 19.3 Extensions E1-E5
+
+#### Extension E1: lib/BalancedTruncation.{h,cpp} [NEW]
+
+Gramian-based model order reduction.
+
+- **`balancedTruncate(sys, r)`**: Cholesky factorisation of controllability and
+  observability Gramians; SelfAdjointEigenSolver on balanced product;
+  returns TruncationResult { reduced StateSpace, Hankel singular values (descending),
+  H-inf error bound = 2 * sum(sigma_i for i > r) }.
+- **`suggestOrder(res, tol=0.01)`**: returns smallest r such that H-inf error <= tol.
+- **Python binding**: `TruncationResult`, `balanced_truncate`, `suggest_order`
+  in `analysis_bindings.cpp`.
+- **DISAMBIGUATION**: `suggest_order` is also registered in `advanced_bindings.cpp`
+  for the SubspaceID path (VectorXd Hankel singular values). Both overloads are
+  registered; pybind11 dispatches by argument type.
+- **Catch2**: [btm] x2 - descending singular values + DC gain within H-inf bound.
+- **C++ example**: ex58_balanced_truncation.cpp
+- **Python example**: ex74_balanced_truncation.py
+
+#### Extension E2: lib/LinearisationHelper.{h,cpp} [NEW]
+
+Numerical Jacobian computation and ZOH linearisation.
+
+- **`jacobianX(f, x, u, eps_scale)`**: central-difference dF/dx with scaled eps.
+- **`jacobianU(f, x, u, eps_scale)`**: central-difference dF/du with scaled eps.
+- **`lineariseAtPoint(f, g, x_eq, u_eq, Ts)`**: calls jacobianX/U, then c2d ZOH
+  to produce a discrete-time StateSpace from a nonlinear continuous-time model.
+- **`lineariseAtPointWithOutput(f, g, h, x_eq, u_eq, Ts)`**: also computes C matrix.
+- **Python binding**: `jacobian_x`, `jacobian_u`, `linearise_at_point`,
+  `linearise_at_point_with_output` in `analysis_bindings.cpp`.
+- **Catch2**: [linearisation] x2 - Van der Pol Jacobian against analytical +
+  lineariseAtPoint stability check via DiscreteLQR.
+- **C++ example**: ex55_linearisation_helper.cpp
+- **Python example**: ex71_linearisation_helper.py
+
+#### Extension E3: lib/MRACController.{h,cpp} [NEW]
+
+Lyapunov-based Model Reference Adaptive Control with sigma-modification.
+
+- **`MRACParams`**: `{Am, Bm, gamma_theta, sigma, uMin, uMax}`.
+  `Am` is the reference model A matrix (must be Hurwitz).
+- **`compute(y_plant)`**: ADRC convention - takes plant output, NOT error.
+  Call `setReference(r)` before each step.
+- **Adaptation law**: theta_dot = -gamma * B_m^T * P_m * e * u_ad - sigma * theta
+  (sigma-modification prevents parameter drift under persistent disturbances).
+- **`reset()`**: restores initial theta and clears model state.
+- **Python binding**: `MRACParams`, `MRACController` in `controllers_bindings.cpp`.
+- **Catch2**: [mrac] x2 - tracking convergence on nominal plant (500 steps) + reset.
+- **C++ example**: ex57_mrac.cpp
+- **Python example**: ex73_mrac.py
+
+#### Extension E4: lib/FeedbackLinearisation.{h,cpp} [NEW]
+
+Exact feedback linearisation for input-affine systems xdot = f(x) + g(x)*u.
+
+- **`FLParams`**: `{Kp, Kd, uMin, uMax, n_states}`.
+- **`FeedbackLinearisationController : IController`**.
+  `DriftFn = std::function<double(VectorXd,double)>` (the f(x) term).
+  `GainFn  = std::function<double(VectorXd,double)>` (the g(x) term).
+- **`setState(x)`**: REQUIRED before each `compute(error)` call. Stores x for
+  the next linearisation evaluation.
+- **KEY FIX**: `evalTF` must use `MatrixXcd C_c` cast (not `VectorXcd`) to avoid
+  ambiguous Eigen-complex conversions.
+- **Python binding**: `FLParams`, `FeedbackLinearisationController`
+  in `controllers_bindings.cpp`.
+- **Catch2**: [fl] x2 - cubic drift xdot = -x^3 + u tracks ref=1.0 within 500
+  steps + lastOutput/sampleTime accessors.
+- **C++ example**: ex56_feedback_linearisation.cpp
+- **Python example**: ex72_feedback_linearisation.py
+
+#### Extension E5: lib/ZeroPhaseTrackingFilter.{h,cpp} [NEW]
+
+ZPETC (Zero Phase Error Tracking Controller) - Tomizuka 1987.
+
+- **`transmissionZeros(sys)`**: GeneralizedEigenSolver on the (E, A) matrix
+  pencil from the state-space; returns complex zeros.
+- **`designZPETC(sys)`**: b_gain-normalised partial inversion of the numerator.
+  For minimum-phase plants: unit composite magnitude at all frequencies.
+  For non-minimum-phase (NMP) plants: detects and reports NMP zeros, unit DC gain.
+- **`ZPETCResult`**: `{filter StateSpace, zeros, isMinimumPhase, nmpZeros}`.
+- **Python binding**: `ZPETCResult`, `transmission_zeros`, `design_zpetc`
+  in `analysis_bindings.cpp`.
+- **Catch2**: [zpetc] x3 - correct zeros for SISO plant + min-phase unit magnitude
+  + NMP detection and unit DC gain.
+- **C++ example**: ex59_zpetc.cpp
+- **Python example**: ex75_zpetc.py
+
+---
+
+### 19.4 test_catch2_pilot.cpp
+
+New Catch2 file with 5 test cases (20 assertions) that cover hard-won fixes
+from the Part 12-15 era, now promoted to a permanent regression suite.
+
+| Test case | Tag | What it verifies |
+|-----------|-----|-----------------|
+| LQRAdapter computeVec returns full vector | `[lqr][adapter][mimo]` | MIMO truncation fix P12-16 |
+| EKF numericalJacobian accurate for heterogeneous states | `[ekf][jacobian]` | Scaled eps P12-17 |
+| DiscretePID::computeDoM suppresses derivative spike on setpoint step | `[pid][dom]` | DoM correctness |
+| PIDParams::b_weight reduces proportional setpoint kick | `[pid][b_weight]` | b-weighting path |
+| IControllerObserver receives callbacks from DiscretePID | `[observer]` | Observer pattern |
+
+---
+
+### 19.5 Documentation comprehensive pass
+
+All documentation updated to reflect extensions E1-E5, corrector patterns, and final counts.
+
+| File | What changed |
+|------|-------------|
+| README.md | Algorithm table + example count (78 C++ / 79 Python) |
+| docs/DOCUMENTATION.md | New sections for MRAC, FL, MHE, LinearisationHelper, BalancedTruncation, ZPETC, FOPDT/SOPDT identifiers |
+| docs/DEPLOYMENT.md | Updated deployment checklist |
+| docs/TEST_UPDATE.md (Rev 4) | test_catch2_pilot added; assertion counts updated |
+| docs/CONTROL_STRATEGIES_DEEP_DIVE.md | MRAC, FL, MHE, ZPETC strategy sections |
+| docs/reference.html | New sidebar ★ sections for all E1-E5 classes |
+| cheatsheet/controller_list.md | MRAC, FL, ZPETC, BalancedTruncation entries |
+| cheatsheet/controller_categories.md | Adaptive + Model-reduction categories |
+| cheatsheet/tuning_methods.md | MRAC sigma-modification note |
+| cheatsheet/system_identification.md | SOPDT + FOPDT graphical/opt methods |
+| cheatsheet/control_design_pipeline.md | Extension E1-E5 in pipeline stages |
+| cheatsheet/system_identification/fopdt.md | Detailed FOPDT/SOPDT identifier guide |
+
+---
+
+### 19.6 Open items after Part 19
+
+| Item | Status | Priority |
+|------|--------|----------|
+| P10-13 CONTRIBUTING.md | `[OPEN]` | LOW (legacy) |
+| Full DK-iteration with vector-fitting rational D(jw) | `[TRACKED]` | LOW |
+| MHE state constraints (linear inequality bounds) | `[TRACKED]` | MEDIUM |
+| MuSynParams Python binding (ex53 uses H-inf baseline) | `[TRACKED]` | LOW |
+| FreeRTOS/Zephyr IScheduler concrete implementations | `[TRACKED NEW]` | HIGH |
+| Anti-windup wrapper for generic controllers | `[TRACKED NEW]` | HIGH |
+| Nonlinear MPC (NMPC, SQP + EKF prediction) | `[TRACKED NEW]` | MEDIUM |
+| Gain-scheduled controller (interpolating blend) | `[TRACKED NEW]` | MEDIUM |
+| LPV plant model (A(p), B(p), C(p), D(p)) | `[TRACKED NEW]` | MEDIUM |
+| Adaptive Smith Predictor (online delay estimation) | `[TRACKED NEW]` | MEDIUM |
+| Automated benchmark suite (google/benchmark) | `[TRACKED NEW]` | MEDIUM |
+| AutoTuner (CMA-ES / Bayesian optimisation) | `[TRACKED NEW]` | MEDIUM |
+| Frequency-domain system ID (Levy's method) | `[TRACKED NEW]` | LOW |
+| SDRE controller (pointwise DARE) | `[TRACKED NEW]` | LOW |
+| RL bridge (Python-only gym.Env wrapper) | `[TRACKED NEW]` | LOW |
+| Real-time live plotting (matplotlib.animation) | `[TRACKED NEW]` | LOW |
+| CI cross-platform PyPI wheels (cibuildwheel) | `[TRACKED NEW]` | LOW |
+| ex76: Fault-tolerant control example | `[TRACKED NEW]` | MEDIUM |
+| ex77: ESC with RLS-based gradient estimation | `[TRACKED NEW]` | MEDIUM |
+| ex78 (Python): Deep learning surrogate for MPC | `[TRACKED NEW]` | LOW |
+| ex79: Multi-rate control (SimScheduler, multiple timers) | `[TRACKED NEW]` | MEDIUM |
+| ex80: Non-minimum phase plant (RHP zeros, LQR/H-inf/SMC) | `[TRACKED NEW]` | MEDIUM |
+| tests/test_stability_margins.cpp | `[TRACKED NEW]` | MEDIUM |
+| tools/compare_controllers.py (benchmark table) | `[TRACKED NEW]` | LOW |
+
+---
+
+*Part 19 added 2026-05-29. All changes verified by run.py: C++ 78/78, Python 79/79.*
+
+---
+
+## Part 20: Automated Gain Scheduling + LPV Identification (2026-05-29)
+
+### 20.1 Overview
+
+Implements the full automated gain-scheduling pipeline proposed in the 2026-05-29 gap analysis.
+Adds 5 new library files, 9 Catch2 tests, 3 C++ examples, and 2 Python examples.
+
+**C++ Phase 3: 82 passed | 0 failed** (was 78; +3 examples + test_autoscheduling)
+**Python Phase 4: 81 passed | 0 failed** (was 79; +ex76, ex77)
+
+---
+
+### 20.2 New library files
+
+#### `lib/GainScheduledController.h` [NEW, header-only]
+
+IController subclass holding a sorted list of (p, IController) pairs.
+
+- **`addSchedulePoint(p, shared_ptr<IController>)`**: inserts in sorted position.
+- **`setSchedulingParam(double p)`**: must be called before each `compute()`.
+- **`GainScheduleMode::NearestNeighbor`**: hard-switch to closest point.
+- **`GainScheduleMode::LinearBlend`**: weighted average of two adjacent outputs.
+- **NOTE**: `lastOutput()` exists but is NOT an IController override (IController
+  has no virtual `lastOutput()`). Do not add `override` keyword.
+- **BINDING WARNING**: `add_schedule_point()` in Python accepts `ctrl.IController`;
+  `DiscreteLQR` is NOT bound as IController (use `LQRAdapter` or `DiscretePID`).
+  For gain-scheduled LQR, use `LQRAdapter` wrapping a `DiscreteLQR` with a state function.
+- **BLEND WARNING**: LinearBlend advances BOTH adjacent controllers' state each step.
+  For controllers with integrators (PID, GPC), use NearestNeighbor to avoid
+  dual-integrator windup. LinearBlend is safe for stateless outputs (K*x gains).
+
+#### `lib/GapMetric.{h,cpp}` [NEW]
+
+Nu-gap upper bound via SISO chordal metric.
+
+- **`nuGap(P1, P2, freq_points=200)`**: log-spaced grid from omega_min=0.01 to pi/Ts.
+  Chordal formula: d(p1,p2) = |p1-p2| / sqrt((1+|p1|^2)(1+|p2|^2)).
+  Returns value in [0,1]. 0 iff identical; <0.5 = single robust controller works.
+  SISO only (throws `std::invalid_argument` for MIMO).
+- **`nuGapMatrix(models)`**: N*N symmetric matrix, O(N^2) nuGap calls.
+- **`freqResponseGrid(sys, omega)`**: C*(zI-A)^{-1}B+D via fullPivLu. Used by nuGap.
+- **SISO ONLY**: for MIMO systems, the user must project to SISO (e.g., provide a
+  scalar-output MeasFunc h(x,u) = x(0) when calling lineariseAtPoint).
+
+#### `lib/LinearModelCluster.h` [NEW, header-only]
+
+Single-linkage agglomerative clustering by nu-gap.
+
+- **`clusterByGap(gapMatrix, threshold=0.5)`**: Union-Find merge for pairs with gap < threshold.
+  Representative = member minimising average in-cluster gap.
+  Returns `ClusterResult` {labels, representatives, maxIntraGap, numClusters, threshold}.
+- **`clusterByGap(models, threshold)`**: convenience overload (calls nuGapMatrix).
+- **`suggestGapThreshold(gapMatrix)`**: sweeps [0.1, 0.9], returns first plateau.
+- **Single-linkage sufficiency**: Vinnicombe (2001) guarantees one controller stabilises
+  all models in a cluster with gap < 0.5. Single-linkage is appropriate; complete-linkage
+  is not needed.
+
+#### `lib/LPVSystemID.{h,cpp}` [NEW]
+
+Polynomial LPV identification via linear regression.
+
+- **`identifyLPV(X, U, Y, sched, degree, Ts)`**: requires state sequence X (n*N).
+  Regressor: phi_k = [x, p*x, ..., p^d*x | u, p*u, ..., p^d*u].
+  Solved via `colPivHouseholderQr()` for rank-deficiency robustness.
+  Coefficient extraction: A_i = Theta_AB[i*n:(i+1)*n, :].transpose().
+- **`identifyLPVFromIO(U, Y, sched, n_states)`**: uses n4sid to estimate state sequence.
+  The n4sid model is LTI at the average p; used only for state-sequence propagation.
+- **`LPVModel::frozen(p)`**: returns frozen discrete-time StateSpace at scheduling value p.
+- **IDENTIFIABILITY**: if a state x_j never gets direct input (B[:,j]=0) and starts at 0,
+  then x_j stays zero and the A-column multiplying x_j cannot be identified.
+  Fix: provide non-zero initial conditions or add input paths to all states.
+- **EXCITATION**: p must vary independently of x and u for rank to hold.
+  Use different frequencies for p sweep and u excitation.
+
+#### `lib/AutoGainScheduler.h` [NEW, header-only]
+
+Full pipeline builder: grid sweep -> equilibrium -> linearise -> cluster -> design -> assemble.
+
+- **`findEquilibrium(f, u_eq, x0, max_iter=50, tol=1e-8)`**: Newton-Raphson using jacobianX.
+  Loose-tolerance fallback: accepts if ||f|| < tol*1000 after max_iter.
+  Throws `std::runtime_error` on convergence failure.
+- **`buildAutoGainScheduler(f, p_min, p_max, density, u_eq_fn, x0_fn, design_fn, Ts)`**.
+- **CRITICAL LAMBDA PATTERN**: `design_fn` must have explicit trailing return type:
+  ```cpp
+  auto design_fn = [Ts](const StateSpace& sys, double p)
+          -> std::shared_ptr<IController> {
+      return std::make_shared<DiscretePID>(pp, Ts);  // OK
+      // NOT: return std::make_shared<DiscreteLQR>(sys, lp);  // LQR is not IController!
+  };
+  ```
+  GCC cannot implicitly convert `shared_ptr<Derived>` -> `shared_ptr<IController>` without
+  the trailing return type. Without it, the std::function construction fails at link time.
+- **SCALAR COMPATIBILITY**: GainScheduledController uses `IController::compute(double)`.
+  Only IController subclasses with scalar `compute()` work: DiscretePID, DiscreteSMC,
+  DiscreteADRC, SmithPredictor, GPC, DiscreteLQG, etc.
+  DiscreteLQR and DiscreteMPC do NOT have scalar compute() - use LQRAdapter for LQR.
+
+---
+
+### 20.3 New Catch2 tests (`tests/test_autoscheduling.cpp`)
+
+| Test | Tag | What it verifies |
+|------|-----|-----------------|
+| nuGap is zero for identical systems | `[gap][autosched]` | chordalDist = 0 for P==P |
+| nuGap bounded [0,1] for different SISO | `[gap][autosched]` | range check |
+| nuGap larger for more different systems | `[gap][autosched]` | monotonicity |
+| clusterByGap groups 2 pairs into 2 clusters | `[clustering][autosched]` | Union-Find correctness |
+| nuGapMatrix symmetric, zero diagonal | `[clustering][autosched]` | matrix properties |
+| identifyLPV recovers noise-free coefficients | `[lpv_id][autosched]` | error < 1e-4 |
+| LPVModel::frozen returns correct StateSpace | `[lpv_id][autosched]` | evalA/frozen |
+| buildAutoGainScheduler end-to-end | `[autosched]` | valid controller, finite output |
+| GainScheduledController NearestNeighbor | `[autosched]` | correct hard-switch |
+
+Total: 9 test cases, 36 assertions.
+
+---
+
+### 20.4 C++ examples
+
+| Example | Content |
+|---------|---------|
+| `ex60_gap_clustering.cpp` | Pendulum grid sweep, nuGapMatrix, cluster with suggestGapThreshold. Uses h(x,u)=x(0) SISO output for gap metric. |
+| `ex61_lpv_identification.cpp` | 2-state affine LPV system; identify from N=600 steps; machine-precision coefficient errors; LQR regulation. Non-zero x0=[0.5,0.3] to ensure identifiability. |
+| `ex62_auto_gain_scheduler.cpp` | buildAutoGainScheduler on first-order plant; PID design_fn; IAE comparison. |
+
+---
+
+### 20.5 Python examples and bindings
+
+New bindings in `analysis_bindings.cpp`:
+- `ctrl.nu_gap(P1, P2, freq_points=200)` -> float
+- `ctrl.nu_gap_matrix(models, freq_points=200)` -> ndarray(N,N)
+- `ctrl.ClusterResult` with `.labels`, `.representatives`, `.max_intra_gap`, `.num_clusters`, `.threshold`
+- `ctrl.cluster_by_gap(gap_matrix, threshold=0.5)` -> ClusterResult
+- `ctrl.suggest_gap_threshold(gap_matrix)` -> float
+- `ctrl.LPVModel` with eval_a/b/c/d(p), frozen(p), A/B/C/D_coeffs, degree/n_states/Ts
+- `ctrl.identify_lpv(X, U, Y, sched, degree, Ts)` -> LPVModel
+- `ctrl.identify_lpv_from_io(U, Y, sched, n_states, degree, Ts)` -> LPVModel
+- `ctrl.GainScheduleMode` enum (LinearBlend, NearestNeighbor)
+- `ctrl.GainScheduledController(Ts, mode=LinearBlend)` with add_schedule_point, set_scheduling_param, compute, reset
+
+| Example | Content |
+|---------|---------|
+| `ex76_auto_gain_scheduling_demo.py` | P-controller gain scheduling over 6 grid points; NearestNeighbor mode (avoids integral windup). |
+| `ex77_crossval_gap.py` | Python reference nu-gap vs C++ binding; 4 test pairs; nuGapMatrix symmetry/diagonal checks. |
+
+---
+
+### 20.6 Open items after Part 20
+
+| Item | Status | Priority |
+|------|--------|----------|
+| P10-13 CONTRIBUTING.md | `[OPEN]` | LOW |
+| LQRAdapter as design_fn in buildAutoGainScheduler | `[TRACKED]` | MEDIUM - document pattern |
+| MIMO nu-gap (subspace chordal distance) | `[TRACKED]` | MEDIUM |
+| Full DK-iteration with vector-fitting rational D(jw) | `[TRACKED]` | LOW |
+| MHE state constraints (linear inequalities) | `[TRACKED]` | MEDIUM |
+| Anti-windup wrapper for generic controllers | `[TRACKED NEW]` | HIGH |
+| FreeRTOS/Zephyr IScheduler concrete implementations | `[TRACKED NEW]` | HIGH |
+| Nonlinear MPC (NMPC) | `[TRACKED NEW]` | MEDIUM |
+| GainScheduledController for LQR (needs LQRAdapter integration) | `[TRACKED NEW]` | MEDIUM |
+| ex76 with integral controllers + bumpless transfer on switch | `[TRACKED NEW]` | MEDIUM |
+| Full LPV cross-validation script (ex78) | `[TRACKED NEW]` | MEDIUM |
+| SOPDT identification Python binding verified | `[TRACKED]` | LOW |
+| MuSynParams Python binding | `[TRACKED]` | LOW |
+| P10-13 CONTRIBUTING.md | `[OPEN]` | LOW |
+
+---
+
+*Part 20 added 2026-05-29. C++ 82/82, Python 81/81.*
+
+---
+
+## Part 21: QP Solver Upgrade + Case Study Controller Revisions (2026-05-29)
+
+### 21.1 Overview
+
+Log investigation of `run_20260529_081203.log` found 53,679 warnings (90% of the log),
+all from `boiler_sim.exe`. Three root causes: (1) constant-step PGD converges too slowly
+for ill-conditioned MPC Hessians, (2) `std::clog` WARNING prints violate the "no production
+std::cerr" rule and corrupt stdout output lines, (3) three controller implementations had
+tuning or sign errors. This part fixes all three.
+
+**C++ Phase 3: 82 passed | 0 failed** (unchanged)
+**Python Phase 4: 81 passed | 0 failed** (unchanged)
+
+---
+
+### 21.2 lib/GradientProjectionQP.h — FISTA upgrade [FIXED]
+
+**Problem:** Constant-step projected gradient descent (PGD) has convergence rate O(1/κ)
+where κ = λ_max(H)/λ_min(H) is the Hessian condition number. The boiler MPC Hessian with
+auto-tuned weights has κ ≈ 20-50, causing PGD to need ~1000 iterations to hit tol=1e-8
+— far exceeding the default qpMaxIter=200.
+
+**Fix:** Replace PGD with **FISTA** (Beck & Teboulle 2009) which achieves O(1/k²) objective
+convergence (O(1/√κ) iterations per decade of tolerance). For κ=50, FISTA converges in
+~15 iterations vs ~1000 for PGD at tol=1e-8.
+
+**Algorithm (FISTA for box-constrained QP):**
+```
+y_0 = x_0 = clamp(-H^{-1}g, lb, ub),  t_0 = 1
+for k = 0, 1, ..., maxIter:
+  x_{k+1} = proj(y_k - (1/L)(H*y_k + g), lb, ub)
+  t_{k+1} = (1 + sqrt(1 + 4*t_k^2)) / 2
+  beta_k   = (t_k - 1) / t_{k+1}
+  y_{k+1}  = x_{k+1} + beta_k * (x_{k+1} - x_k)
+```
+
+**API:** Identical to the old `solveGradientProjectionQP()` call sites. One internal
+`Eigen::VectorXd y` allocated per QP solve (not per iteration — acceptable overhead).
+
+**Verification:** All 51 `test_catch2_advanced` tests (including `[qp]` x2, `[mpc]` x2)
+pass unchanged, confirming backward compatibility.
+
+---
+
+### 21.3 DiscreteMPC.cpp + GeneralizedPredictiveControl.cpp — WARNING guard [FIXED]
+
+**Problem:** `std::clog << "[DiscreteMPC] WARNING: QP solver..."` on every non-converged
+step produced 42,981 MPC + 10,285 GPC warning lines in a single boiler run. This (a) violates
+the "no production std::cerr/clog" rule from Part 5, and (b) corrupts stdout output lines
+(result IAE printouts were split mid-word by warning text).
+
+**Fix:** Both `std::clog` prints are now guarded with `#ifndef NDEBUG`. In Release builds
+(`-DCMAKE_BUILD_TYPE=Release`), they are completely silenced. Application code should use
+`lastQPConverged()` / `isHealthy()` to detect non-convergence per step.
+
+**Why `#ifndef NDEBUG` over deletion:** Retains developer visibility during Debug builds.
+
+---
+
+### 21.4 Boiler case study controller revisions [FIXED]
+
+**File:** `case-study/Boiler Control/sim/src/controllers.cpp`
+
+#### (a) MPCController + FuzzySupMPCController: qpMaxIter [FIXED]
+
+Both MPC instances now set `mp.qpMaxIter = 1000`. With FISTA, the boiler Hessian (κ≈50)
+converges in <50 iterations, but 1000 provides headroom for numerical variation across
+the 8×18=144 scenario/controller combinations.
+
+#### (b) GPCController: qpMaxIter [FIXED]
+
+GPC now sets `gp.qpMaxIter = 1000`. The 3×3 GPC Hessian (Nu=3, SISO) converges fast
+with FISTA but 1000 is consistent with the MPC setting.
+
+#### (c) SMCController: sign convention bug [FIXED P21-1]
+
+**Bug:** The boiler computed `e = ref_dy - dy` (r - y) then passed `e` to `DiscreteSMC::compute(e)`.
+But DiscreteSMC uses the convention `error = y - ref` for the sliding surface `s = c_e*(y-r) + ...`.
+With the wrong sign, positive sliding surface s triggered u = -K*sat(s) < 0 (downward control
+when output is BELOW setpoint) — causing divergence.
+
+**Symptom:** SMC IAE for axis 0 was 72,579 (before fix) vs 186 (after fix) — a 391x improvement.
+
+**Fix:** Pass `e_smc = dy - ref_dy` to the SMC compute call. Added clarifying comment.
+
+#### (d) SMCController: per-axis boundary layer phi [IMPROVED]
+
+Axis 1 (steam flow) has larger error excursions than axis 0/2, causing its sliding surface
+to spend more time in the relay region (chattering, high E_valve). Per-axis phi values:
+- Axis 0 (drum pressure): phi=0.10
+- Axis 1 (steam flow): phi=0.20  (wider boundary layer, reduces chattering)
+- Axis 2 (evaporation): phi=0.05
+
+Also doubled K from 0.05 → 0.10 for better disturbance rejection in all axes.
+
+#### (e) ADRCController: bandwidth increase [IMPROVED, with stability note]
+
+Bandwidths increased from the original (omega_o=0.05-0.10, omega_c=0.01-0.02) to
+(omega_o=0.40-0.50, omega_c=0.08-0.10), giving ~5x faster closed-loop response.
+
+**STABILITY WARNING discovered:** omega_o=0.75 at Ts=1s caused divergence. Root cause:
+backward-Euler DiscreteADRC has a stability constraint: `omega_o * Ts < ~0.5`. Safe limit
+at Ts=1s: `omega_o ≤ 0.5`. This is now documented in the ADRCParams comment.
+
+---
+
+### 21.5 Tug Boat case study: defensive qpMaxIter [IMPROVED]
+
+Both `MPCController` and `FuzzySupervised_MPC` now set `mp.qpMaxIter = 500`. The tug MPC
+Hessian is well-conditioned (small Bd values dominate rho_y*Phi^T*Phi, keeping condition
+number near 1), so FISTA converges in <10 iterations. The 500 limit is conservative headroom.
+
+---
+
+### 21.6 Warning count comparison
+
+| Metric | Before Part 21 | After Part 21 |
+|--------|----------------|---------------|
+| Total log lines | 59,416 | ~6,000 |
+| Lines that are WARNING | 53,679 (90%) | 48 (<1%) |
+| boiler_sim QP warnings | 53,290 | 0 |
+| Remaining warnings | — | 48 (plant.D≠0 x40, UKF alpha x8) |
+
+The 48 remaining are legitimate one-time configuration warnings (not per-step). They should
+be addressed at the call site (set D=0 in the boiler MIMO plant model, or use `computeRef`;
+set UKF alpha=sqrt((n+kappa)/n)).
+
+---
+
+### 21.7 SMC/ADRC baseline comparison (boiler s01_lowload_regulation)
+
+| Controller | Before Part 21 (axis 0) | After Part 21 (axis 0) | Improvement |
+|------------|-------------------------|------------------------|-------------|
+| SMC        | 72,579                  | 186                    | 391x        |
+| ADRC       | 13,216                  | 5,029                  | 2.6x        |
+| MPC        | 124                     | 130                    | ~same       |
+| PID        | 379                     | 379                    | baseline    |
+
+SMC is now **better than PID** on axis 0 (186 vs 379). ADRC improvement is limited by
+the fundamental accuracy of the backward-Euler ESO at Ts=1s and the decentralized
+coupling-ignorant architecture.
+
+---
+
+### 21.8 Remaining known issues (not blocking)
+
+| Issue | Status |
+|-------|--------|
+| Boiler plant.D≠0: MPC/LQG use stale u[k-1] for D*u in compute(error) wrapper | `[OPEN]` - use computeRef() directly; set D=0 or fix call site |
+| UKF alpha in boiler UKF-LQR: Wc(0)<0 | `[OPEN]` - set alpha=sqrt((n+kappa)/n) in boiler controllers |
+| SMC axis 1 chattering in med/high load (E_valve~3-5) | `[OPEN]` - fundamental MIMO coupling; SISO SMC limitation |
+| ADRC limited to omega_o*Ts < 0.5 with backward Euler | `[DOCUMENTED]` - comment added in boiler controllers.cpp |
+| ADRC 10x worse than PID | `[OPEN]` - fundamental limitation of decentralized SISO on coupled MIMO |
+| GPC-RLS tracking scenarios diverge | `[OPEN]` - CARIMA RLS model diverges under large setpoint changes |
+| MPC axis 2 tracking (s04-s08): high IAE | `[OPEN]` - pre-existing; computeRef feeds absolute y not delta y |
+
+---
+
+*Part 21 added 2026-05-29. All changes verified by run.py: C++ 82/82, Python 81/81.*

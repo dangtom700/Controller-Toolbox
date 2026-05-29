@@ -101,13 +101,13 @@ for (int k = 0; k < 500; ++k) {
 | **Classical** | PID (backward-Euler, anti-windup, DoM, 2-DOF, b_weight), Lead-Lag, Smith Predictor (integer + fractional Pade), Feedforward, Repetitive Control |
 | **Optimal** | LQR (DARE doubling), LQG (LQR+KF), MPC (condensed QP + box constraints), GPC (CARIMA+RLS adaptive), H-infinity (gamma bisection, mixed sensitivity, DK mu-synthesis with rational D) |
 | **Robust / Nonlinear** | SMC (saturation boundary layer), ADRC (2nd-order LADRC + ESO), Extremum Seeker |
-| **Adaptive** | MRACController (Lyapunov + σ-modification + Euclidean projection), GPC::setPlant (RLS adaptive) |
+| **Adaptive** | MRACController (Lyapunov + sigma-modification + Euclidean projection), GPC::setPlant (RLS adaptive) |
 | **Nonlinear** | FeedbackLinearisationController (affine-in-control SISO, relative degree 1; DriftFn+GainFn) |
 | **Intelligent** | FuzzyPD, FuzzyPID, FuzzySupervisor (Mamdani & Takagi-Sugeno) |
-| **Composition** | ControllerStack (Supervisory, Additive, Weighted) — cascade, observer+SF, bumpless transfer |
+| **Composition** | ControllerStack (Supervisory, Additive, Weighted) - cascade, observer+SF, bumpless transfer |
 | **Estimators** | KalmanFilter, EKF (analytical/numerical Jacobians), UKF (sigma-point), MovingHorizonEstimator (condensed QP) |
 | **Identification** | FOPDTIdentifier, SOPDTIdentifier + Rivera 1986 IMC, RecursiveLeastSquares, SubspaceID (N4SID) |
-| **Model utilities** | LinearisationHelper (jacobianX/U, lineariseAtPoint ZOH), BalancedTruncation (H∞ bound), ZeroPhaseTrackingFilter (ZPETC + transmissionZeros) |
+| **Model utilities** | LinearisationHelper (jacobianX/U, lineariseAtPoint ZOH), BalancedTruncation (Hinf bound), ZeroPhaseTrackingFilter (ZPETC + transmissionZeros) |
 
 ---
 
@@ -177,15 +177,15 @@ test_catch2_advanced: 51 test cases, 189 assertions. All Catch2 tags: [qp][mpc][
 - `DiscreteHinf::solveMuSyn` extended with full rational D-scaling (first-order D_j(z) fit per channel, plant state augmentation).
 - 23 new C++ examples (ex32-ex54) and 21 new Python examples (ex50-ex70) covering corrector patterns: Cascade, Additive, Observer+SF, Supervisory.
 
-**Extension session (2026-05-28, E1–E5 all implemented):**
-- `MRACController` — Lyapunov MRAC with σ-modification and parameter projection; ADRC-convention `compute(y_plant)`. Examples: ex57/ex73.
-- `FeedbackLinearisationController` — exact FL for SISO affine-in-control; DriftFn+GainFn; `setState(x)` required each step. Examples: ex56/ex72.
-- `LinearisationHelper` — `jacobianX/U` (central-diff, scaled ε); `lineariseAtPoint` ZOH. Examples: ex55/ex71.
-- `BalancedTruncation` — `balancedTruncate(sys, r)` with H∞ error bound 2·Σσᵢ; `suggestOrder`. Examples: ex58/ex74.
-- `ZeroPhaseTrackingFilter` — ZPETC (Tomizuka 1987); `transmissionZeros` via `GeneralizedEigenSolver`. Examples: ex59/ex75.
+**Extension session (2026-05-28, E1-E5 all implemented):**
+- `MRACController` - Lyapunov MRAC with sigma-modification and parameter projection; ADRC-convention `compute(y_plant)`. Examples: ex57/ex73.
+- `FeedbackLinearisationController` - exact FL for SISO affine-in-control; DriftFn+GainFn; `setState(x)` required each step. Examples: ex56/ex72.
+- `LinearisationHelper` - `jacobianX/U` (central-diff, scaled epsilon); `lineariseAtPoint` ZOH. Examples: ex55/ex71.
+- `BalancedTruncation` - `balancedTruncate(sys, r)` with Hinf error bound 2.Sigmasigma_i; `suggestOrder`. Examples: ex58/ex74.
+- `ZeroPhaseTrackingFilter` - ZPETC (Tomizuka 1987); `transmissionZeros` via `GeneralizedEigenSolver`. Examples: ex59/ex75.
 
 **Earlier additions:**
-- `FuzzyLogic` module (2026-05-23): Mamdani and Takagi-Sugeno inference engines, `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor` — see [docs/DOCUMENTATION.md Section 5.2](docs/DOCUMENTATION.md).
+- `FuzzyLogic` module (2026-05-23): Mamdani and Takagi-Sugeno inference engines, `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor` - see [docs/DOCUMENTATION.md Section 5.2](docs/DOCUMENTATION.md).
 - `ExtendedKalmanFilter`, `UnscentedKalmanFilter`, `RepetitiveController`, `GeneralizedPredictiveController`, `SubspaceID`, `DiscreteHinf`, `FOPDTIdentifier`, `SOPDTIdentifier`, `MovingHorizonEstimator`, `FeedforwardController`, `GradientProjectionQP`.
 - Five math corrections (2026-05-22): MPC condensed prediction formula, PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor feedthrough, SMC `c_de` Ts-absorption.
 

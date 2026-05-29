@@ -123,12 +123,13 @@ MPCController::MPCController(const ctrl::StateSpace& ss, const OperatingPoint& o
     : mpc_([&] {
         auto rec = ctrl::MPCHorizonTuner::recommend(ss, ss.Ts);
         ctrl::MPCParams mp;
-        mp.Np   = std::min(rec.Np, 20);
-        mp.Nc   = std::min(rec.Nc,  5);
-        mp.rho_y = rec.rho_y;
-        mp.rho_u = rec.rho_u;
-        mp.uMin  = -0.5;
-        mp.uMax  =  0.5;
+        mp.Np        = std::min(rec.Np, 20);
+        mp.Nc        = std::min(rec.Nc,  5);
+        mp.rho_y     = rec.rho_y;
+        mp.rho_u     = rec.rho_u;
+        mp.uMin      = -0.5;
+        mp.uMax      =  0.5;
+        mp.qpMaxIter = 1000;  // boiler Hessian kappa~50; FISTA needs ~sqrt(50)*log(1/tol) < 500
         return ctrl::DiscreteMPC(ss, mp);
     }())
 {
@@ -151,33 +152,44 @@ void MPCController::reset()
 // 5. SMC
 // ============================================================================
 
-static ctrl::SMCParams smcParams()
+// Per-axis SMC params: boundary layer phi sized to expected steady-state |s| = c_e*|e_ss|.
+// Axis 0 (drum pressure): |e_ss| ~ 0.03 -> phi = 0.10 (3x headroom)
+// Axis 1 (steam flow rate): larger excursions |e_ss| ~ 0.07 -> phi = 0.20
+// Axis 2 (evaporation rate): |e_ss| ~ 0.01 -> phi = 0.05
+// Larger phi suppresses chattering; K/phi sets the effective P-gain in the boundary layer.
+static ctrl::SMCParams smcParamsFor(int axis)
 {
     ctrl::SMCParams p;
     p.c_e  = 1.0;
-    p.c_de = 0.2;
-    p.K    = 0.05;
-    p.phi  = 0.3;
+    p.c_de = 0.2;  // lambda = c_de/Ts = 0.2 rad/s sliding-surface derivative weight
+    p.K    = 0.10; // switching gain; K/phi = effective P-gain when |s| < phi
     p.uMin = -0.5;
     p.uMax =  0.5;
+    switch (axis) {
+        case 0:  p.phi = 0.10; break;  // drum pressure axis
+        case 1:  p.phi = 0.20; break;  // steam flow axis (larger fluctuations -> wider layer)
+        default: p.phi = 0.05; break;  // evaporation rate (tight, small deviations)
+    }
     return p;
 }
 
 SMCController::SMCController(const ctrl::StateSpace& ss, const OperatingPoint& op)
-    : smcs_{ ctrl::DiscreteSMC(smcParams(), ss.Ts),
-             ctrl::DiscreteSMC(smcParams(), ss.Ts),
-             ctrl::DiscreteSMC(smcParams(), ss.Ts) }
+    : smcs_{ ctrl::DiscreteSMC(smcParamsFor(0), ss.Ts),
+             ctrl::DiscreteSMC(smcParamsFor(1), ss.Ts),
+             ctrl::DiscreteSMC(smcParamsFor(2), ss.Ts) }
 {
     (void)op;
 }
 
 Vector3d SMCController::compute(const Vector3d& ref_dy, const Vector3d& dy)
 {
-    Vector3d e = ref_dy - dy;
+    // DiscreteSMC::compute() expects error = y - ref (sliding surface s = c_e*(y-r) + c_de*ds).
+    // A positive s -> output above ref -> u = -K*sat(s) drives output down. Pass dy-ref_dy.
+    Vector3d e_smc = dy - ref_dy;
     return Vector3d(
-        smcs_[0].compute(e(0)),
-        smcs_[1].compute(e(1)),
-        smcs_[2].compute(e(2)));
+        smcs_[0].compute(e_smc(0)),
+        smcs_[1].compute(e_smc(1)),
+        smcs_[2].compute(e_smc(2)));
 }
 
 void SMCController::reset()
@@ -232,9 +244,13 @@ ADRCController::ADRCController(const ctrl::StateSpace& ss, const OperatingPoint&
         const double x1_98 = std::pow(op.x1, 9.0 / 8.0);
         const double Ts    = ss.Ts;
 
-        ctrl::ADRCParams p0; p0.omega_o=0.10; p0.omega_c=0.02; p0.b0=0.9*Ts;       p0.uMin=-0.5; p0.uMax=0.5;
-        ctrl::ADRCParams p1; p1.omega_o=0.05; p1.omega_c=0.01; p1.b0=0.073*x1_98*Ts; p1.uMin=-0.5; p1.uMax=0.5;
-        ctrl::ADRCParams p2; p2.omega_o=0.05; p2.omega_c=0.01; p2.b0=(141.0/85.0)*Ts; p2.uMin=-0.5; p2.uMax=0.5;
+        // Bandwidth tuning (Ts=1s). Stability constraint for backward-Euler ADRC:
+        // omega_o*Ts < ~0.5 and omega_c*Ts < ~0.2 to avoid closed-loop instability from
+        // discretisation error in the ESO (verified empirically: omega_o=0.75 diverges).
+        // Safe choice: omega_o=0.5/Ts=0.5, omega_c=omega_o/5=0.10.
+        ctrl::ADRCParams p0; p0.omega_o=0.50; p0.omega_c=0.10; p0.b0=0.9*Ts;         p0.uMin=-0.5; p0.uMax=0.5;
+        ctrl::ADRCParams p1; p1.omega_o=0.40; p1.omega_c=0.08; p1.b0=0.073*x1_98*Ts; p1.uMin=-0.5; p1.uMax=0.5;
+        ctrl::ADRCParams p2; p2.omega_o=0.40; p2.omega_c=0.08; p2.b0=(141.0/85.0)*Ts; p2.uMin=-0.5; p2.uMax=0.5;
 
         return std::array<ctrl::DiscreteADRC, 3>{
             ctrl::DiscreteADRC(p0, Ts),
@@ -357,13 +373,14 @@ void SmithPredictorController::reset()
 GPCController::GPCController(const ctrl::StateSpace& ss, const OperatingPoint& op)
     : gpcs_([&] {
         ctrl::GPCParams gp;
-        gp.Np    = 10;
-        gp.Nu    = 3;
-        gp.rho_y = 1.0;
-        gp.rho_u = 0.1;
-        gp.alpha = 0.1;
-        gp.uMin  = -0.5;
-        gp.uMax  =  0.5;
+        gp.Np        = 10;
+        gp.Nu        = 3;
+        gp.rho_y     = 1.0;
+        gp.rho_u     = 0.1;
+        gp.alpha     = 0.1;
+        gp.uMin      = -0.5;
+        gp.uMax      =  0.5;
+        gp.qpMaxIter = 1000;  // GPC 3x3 Hessian; FISTA converges in <200 but set headroom
         auto ch0 = diagonalChannel(ss, 0);
         auto ch1 = diagonalChannel(ss, 1);
         auto ch2 = diagonalChannel(ss, 2);
@@ -624,12 +641,13 @@ FuzzySupMPCController::FuzzySupMPCController(const ctrl::StateSpace& ss,
     , mpcs_([&] {
         auto rec = ctrl::MPCHorizonTuner::recommend(ss, ss.Ts);
         ctrl::MPCParams mp;
-        mp.Np   = std::min(rec.Np, 20);
-        mp.Nc   = std::min(rec.Nc,  5);
-        mp.rho_y = rec.rho_y;
-        mp.rho_u = rec.rho_u;
-        mp.uMin  = -0.5;
-        mp.uMax  =  0.5;
+        mp.Np        = std::min(rec.Np, 20);
+        mp.Nc        = std::min(rec.Nc,  5);
+        mp.rho_y     = rec.rho_y;
+        mp.rho_u     = rec.rho_u;
+        mp.uMin      = -0.5;
+        mp.uMax      =  0.5;
+        mp.qpMaxIter = 1000;  // match MPCController; FISTA needs <500 for this Hessian
         return std::array<ctrl::DiscreteMPC, 3>{
             ctrl::DiscreteMPC(ss, mp),
             ctrl::DiscreteMPC(ss, mp),
@@ -707,7 +725,7 @@ SupervisoryStackController::SupervisoryStackController(const ctrl::StateSpace& s
         auto make_stack = [&](int axis) {
             ctrl::ControllerStack stack(ctrl::StackMode::Supervisory, ss.Ts);
 
-            auto smc_ctrl = std::make_shared<ctrl::DiscreteSMC>(smcParams(), ss.Ts);
+            auto smc_ctrl = std::make_shared<ctrl::DiscreteSMC>(smcParamsFor(axis), ss.Ts);
             auto lqr_p    = brysonLQRParams();
             // SISO LQR approximation via PID with LQR-tuned gains
             auto pid_p    = pidParamsFor(axis);

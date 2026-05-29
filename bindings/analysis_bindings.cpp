@@ -354,4 +354,197 @@ ZPETCResult with filter StateSpace and diagnostics.
     // Key challenge: HinfResult contains two StateSpace objects (K and CL)
     // TODO: bind MixedSensitivity helper class
 #endif
+
+    // -----------------------------------------------------------------------
+    // Gap metric + LPV identification + gain scheduling  (Part 20)
+    // -----------------------------------------------------------------------
+
+    // nuGap - two overloads
+    m.def("nu_gap",
+        py::overload_cast<const ctrl::StateSpace&, const ctrl::StateSpace&, int, double>(
+            &ctrl::nuGap),
+        py::arg("P1"), py::arg("P2"),
+        py::arg("freq_points") = 200, py::arg("omega_min") = 1e-2,
+        R"doc(
+Nu-gap upper bound between two SISO discrete-time state-space systems.
+
+Parameters
+----------
+P1, P2      : ctrl.StateSpace (both SISO, same Ts)
+freq_points : frequency grid size (default 200)
+omega_min   : lowest frequency [rad/s] (default 0.01)
+
+Returns
+-------
+float in [0, 1] -- nu-gap upper bound (chordal metric, Vinnicombe 2001).
+)doc");
+
+    m.def("nu_gap_matrix",
+        &ctrl::nuGapMatrix,
+        py::arg("models"), py::arg("freq_points") = 200,
+        R"doc(
+Compute the symmetric N*N nu-gap distance matrix for a list of SISO models.
+
+Parameters
+----------
+models      : list of ctrl.StateSpace (all SISO, same Ts)
+freq_points : frequency resolution per pair (default 200)
+
+Returns
+-------
+numpy.ndarray of shape (N, N), dtype float64
+)doc");
+
+    // ClusterResult
+    py::class_<ctrl::ClusterResult>(m, "ClusterResult",
+        "Result of gap-metric agglomerative clustering.")
+        .def_readonly("labels",          &ctrl::ClusterResult::labels,
+            "List[int]: cluster label (0..k-1) for each input model.")
+        .def_readonly("representatives", &ctrl::ClusterResult::representatives,
+            "List[int]: index in original list of each cluster's representative.")
+        .def_readonly("max_intra_gap",   &ctrl::ClusterResult::maxIntraGap,
+            "List[float]: maximum nu-gap within each cluster.")
+        .def_readonly("num_clusters",    &ctrl::ClusterResult::numClusters,
+            "int: total number of clusters.")
+        .def_readonly("threshold",       &ctrl::ClusterResult::threshold,
+            "float: threshold used for clustering.");
+
+    m.def("cluster_by_gap",
+        py::overload_cast<const Eigen::MatrixXd&, double>(&ctrl::clusterByGap),
+        py::arg("gap_matrix"), py::arg("threshold") = 0.5,
+        R"doc(
+Cluster N models using a pre-computed nu-gap distance matrix.
+
+Parameters
+----------
+gap_matrix : numpy.ndarray (N, N) symmetric distance matrix.
+threshold  : maximum intra-cluster gap (default 0.5).
+
+Returns
+-------
+ClusterResult
+)doc");
+
+    m.def("suggest_gap_threshold",
+        &ctrl::suggestGapThreshold,
+        py::arg("gap_matrix"),
+        py::arg("lo") = 0.1, py::arg("hi") = 0.9, py::arg("steps") = 20,
+        "Suggest a clustering threshold by finding the knee of the cluster-count curve.");
+
+    // LPVModel
+    py::class_<ctrl::LPVModel>(m, "LPVModel", R"doc(
+Identified LPV model with polynomial parameter dependence.
+
+Attributes
+----------
+degree, n_states, n_inputs, n_outputs, Ts : model dimensions.
+A_coeffs, B_coeffs, C_coeffs, D_coeffs   : list of coefficient matrices.
+
+Methods
+-------
+eval_a(p), eval_b(p), eval_c(p), eval_d(p) : evaluate at scheduling param p.
+frozen(p)                                    : return frozen StateSpace at p.
+)doc")
+        .def(py::init<>(), "Default-construct an empty LPVModel (populate manually or use identify_lpv).")
+        .def_readonly("degree",    &ctrl::LPVModel::degree)
+        .def_readonly("n_states",  &ctrl::LPVModel::n_states)
+        .def_readonly("n_inputs",  &ctrl::LPVModel::n_inputs)
+        .def_readonly("n_outputs", &ctrl::LPVModel::n_outputs)
+        .def_readonly("Ts",        &ctrl::LPVModel::Ts)
+        .def_readonly("A_coeffs",  &ctrl::LPVModel::A_coeffs)
+        .def_readonly("B_coeffs",  &ctrl::LPVModel::B_coeffs)
+        .def_readonly("C_coeffs",  &ctrl::LPVModel::C_coeffs)
+        .def_readonly("D_coeffs",  &ctrl::LPVModel::D_coeffs)
+        .def("eval_a",  &ctrl::LPVModel::evalA,  py::arg("p"),
+             "Evaluate A(p) at scheduling parameter p.")
+        .def("eval_b",  &ctrl::LPVModel::evalB,  py::arg("p"))
+        .def("eval_c",  &ctrl::LPVModel::evalC,  py::arg("p"))
+        .def("eval_d",  &ctrl::LPVModel::evalD,  py::arg("p"))
+        .def("frozen",  &ctrl::LPVModel::frozen, py::arg("p"),
+             "Return the frozen (LTI) StateSpace at scheduling parameter p.");
+
+    m.def("identify_lpv",
+        &ctrl::identifyLPV,
+        py::arg("X"), py::arg("U"), py::arg("Y"), py::arg("sched"),
+        py::arg("degree") = 1, py::arg("Ts") = 0.01,
+        R"doc(
+Identify an LPV model from state, input, output, and scheduling data.
+
+Parameters
+----------
+X      : numpy.ndarray (n, N) - state sequence.
+U      : numpy.ndarray (m, N) - input sequence.
+Y      : numpy.ndarray (p, N) - output sequence.
+sched  : List[float] of length >= N - scheduling parameter values.
+degree : polynomial degree (default 1 = affine).
+Ts     : sample time [s].
+
+Returns
+-------
+LPVModel
+)doc");
+
+    m.def("identify_lpv_from_io",
+        &ctrl::identifyLPVFromIO,
+        py::arg("U"), py::arg("Y"), py::arg("sched"),
+        py::arg("n_states"), py::arg("degree") = 1,
+        py::arg("Ts") = 0.01, py::arg("n4sid_i") = 10,
+        R"doc(
+Identify an LPV model from I/O data only (state sequence estimated via n4sid).
+
+Parameters
+----------
+U       : numpy.ndarray (m, N)
+Y       : numpy.ndarray (p_out, N)
+sched   : List[float]
+n_states: desired model order
+degree  : polynomial degree (default 1)
+Ts      : sample time
+n4sid_i : N4SID block-rows parameter (default 10)
+
+Returns
+-------
+LPVModel
+)doc");
+
+    // GainScheduleMode enum
+    py::enum_<ctrl::GainScheduleMode>(m, "GainScheduleMode")
+        .value("NearestNeighbor", ctrl::GainScheduleMode::NearestNeighbor,
+               "Hard-switch: only closest schedule point is evaluated.")
+        .value("LinearBlend",     ctrl::GainScheduleMode::LinearBlend,
+               "Weighted blend: outputs of two adjacent controllers are combined.")
+        .export_values();
+
+    // GainScheduledController
+    py::class_<ctrl::GainScheduledController, ctrl::IController,
+               std::shared_ptr<ctrl::GainScheduledController>>(
+        m, "GainScheduledController", R"doc(
+Gain-scheduled IController: blends or switches between a set of controllers
+parameterised by a scalar scheduling variable p.
+
+Usage
+-----
+sched = ctrl.GainScheduledController(Ts)
+sched.add_schedule_point(0.0, lqr_0)
+sched.add_schedule_point(1.0, lqr_1)
+
+# In the control loop:
+sched.set_scheduling_param(p_measured)
+u = sched.compute(error)
+)doc")
+        .def(py::init<double, ctrl::GainScheduleMode>(),
+             py::arg("Ts"),
+             py::arg("mode") = ctrl::GainScheduleMode::LinearBlend)
+        .def("add_schedule_point", &ctrl::GainScheduledController::addSchedulePoint,
+             py::arg("p"), py::arg("ctrl"),
+             "Add a controller at scheduling parameter value p.")
+        .def("set_scheduling_param", &ctrl::GainScheduledController::setSchedulingParam,
+             py::arg("p"), "Update the scheduling variable before compute().")
+        .def("scheduling_param", &ctrl::GainScheduledController::schedulingParam)
+        .def_property_readonly("num_points", &ctrl::GainScheduledController::numPoints)
+        .def("point_p",          &ctrl::GainScheduledController::pointP, py::arg("i"))
+        .def("compute",          &ctrl::GainScheduledController::compute, py::arg("error"))
+        .def("reset",            &ctrl::GainScheduledController::reset)
+        .def("sample_time",      &ctrl::GainScheduledController::sampleTime)
+        .def("last_output",      &ctrl::GainScheduledController::lastOutput);
 }

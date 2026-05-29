@@ -162,9 +162,9 @@ $$\text{ITAE} = \int_0^T t\,|e(t)|\,dt$$
 
 ## 8. MRAC Parameter Tuning
 
-**Mechanism.** Model Reference Adaptive Control adjusts its own gains online to force the plant output to track a reference model M(z). Two parameters adapt: θ_r (reference feed-forward) and θ_y (output feedback).
+**Mechanism.** Model Reference Adaptive Control adjusts its own gains online to force the plant output to track a reference model M(z). Two parameters adapt: theta_r (reference feed-forward) and theta_y (output feedback).
 
-**Key equations (discrete Lyapunov, σ-modification):**
+**Key equations (discrete Lyapunov, sigma-modification):**
 
 $$\theta_r[k+1] = \theta_r[k] - T_s(\gamma_r \cdot e_m[k] \cdot r[k] + \sigma \cdot \theta_r[k])$$
 $$\theta_y[k+1] = \theta_y[k] - T_s(\gamma_y \cdot e_m[k] \cdot y[k] + \sigma \cdot \theta_y[k])$$
@@ -174,15 +174,15 @@ where $e_m = y - y_m$ is the model tracking error.
 **Tuning procedure:**
 1. Choose reference model: `a_m = exp(-Ts / tau_desired)`, `b_m = 1 - a_m` (unity DC gain).
 2. Start with small adaptation rates: `gamma_r = gamma_y = 0.1`.
-3. Increase gradually until tracking converges within 200–500 steps. Reduce if oscillation appears.
-4. Set `sigma = 0.01–0.05` (small positive value) to prevent parameter drift under constant reference.
-5. Set `theta_max` to 3–5× the expected ideal parameter magnitudes (θ*_r = b_m/b_p, θ*_y = (a_m−a_p)/b_p).
+3. Increase gradually until tracking converges within 200-500 steps. Reduce if oscillation appears.
+4. Set `sigma = 0.01-0.05` (small positive value) to prevent parameter drift under constant reference.
+5. Set `theta_max` to 3-5* the expected ideal parameter magnitudes (theta*_r = b_m/b_p, theta*_y = (a_m-a_p)/b_p).
 
 **Applications.** Plants with slowly varying gain or time constant (motor drives, HVAC, aircraft with changing fuel load).
 
-**Pros.** Single tuning parameter per direction (γ); adapts online without re-identification; robustified by σ-modification.
+**Pros.** Single tuning parameter per direction (gamma); adapts online without re-identification; robustified by sigma-modification.
 
-**Cons.** Requires minimum-phase plant; persistent excitation for θ convergence; may exhibit transient bursting under rapid parameter changes.
+**Cons.** Requires minimum-phase plant; persistent excitation for theta convergence; may exhibit transient bursting under rapid parameter changes.
 
 **Toolbox:** `ctrl::MRACController` with `MRACParams`. See `ex57_mrac.cpp` for a gain-jump demonstration.
 

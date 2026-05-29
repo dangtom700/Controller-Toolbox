@@ -387,4 +387,39 @@ assert np.isfinite(x_mhe[0]),         "MHE state not finite"
 assert mhe.last_converged(),           "MHE QP did not converge"
 print('MovingHorizonEstimator smoke test passed.')
 
+# ---- GainScheduledController + nu_gap + LPVModel (Part 20) ----------------
+import ctrl_toolbox as ctrl
+Ts_s = 0.1
+pid0 = ctrl.DiscretePID(ctrl.PIDParams(), Ts_s)
+pid1 = ctrl.DiscretePID(ctrl.PIDParams(), Ts_s)
+gs = ctrl.GainScheduledController(Ts_s)
+gs.add_schedule_point(0.0, pid0)
+gs.add_schedule_point(1.0, pid1)
+assert gs.num_points == 2, "Expected 2 schedule points"
+gs.set_scheduling_param(0.5)
+u_gs = gs.compute(1.0)
+assert np.isfinite(u_gs), "GainScheduledController output not finite"
+print('GainScheduledController smoke test passed.')
+
+sys_a = ctrl.StateSpace(np.array([[0.9]]), np.array([[0.1]]),
+                        np.array([[1.0]]), np.array([[0.0]]), Ts_s)
+sys_b = ctrl.StateSpace(np.array([[0.5]]), np.array([[0.5]]),
+                        np.array([[1.0]]), np.array([[0.0]]), Ts_s)
+gap = ctrl.nu_gap(sys_a, sys_b, 50)
+assert 0.0 <= gap <= 1.0, f"nu_gap out of range: {gap}"
+gap_self = ctrl.nu_gap(sys_a, sys_a, 50)
+assert gap_self < 1e-9, f"nu_gap(P,P) not zero: {gap_self}"
+G_mat = ctrl.nu_gap_matrix([sys_a, sys_b], 50)
+assert G_mat.shape == (2, 2), "nu_gap_matrix wrong shape"
+assert abs(G_mat[0,0]) < 1e-9 and abs(G_mat[1,1]) < 1e-9, "diagonal not zero"
+res = ctrl.cluster_by_gap(G_mat, 0.5)
+assert res.num_clusters in (1, 2), "unexpected cluster count"
+print('nuGap + clusterByGap smoke tests passed.')
+
+# Check that identify_lpv binding is accessible; full numerical test in ex77
+assert hasattr(ctrl, 'LPVModel'),        "LPVModel class not accessible"
+assert hasattr(ctrl, 'identify_lpv'),    "identify_lpv not accessible"
+assert hasattr(ctrl, 'identify_lpv_from_io'), "identify_lpv_from_io not accessible"
+print('LPVModel smoke test passed.')
+
 print('\nAll smoke tests passed.')

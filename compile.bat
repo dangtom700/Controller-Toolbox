@@ -98,6 +98,10 @@ for %%T in (
     ex57_mrac
     ex58_balanced_truncation
     ex59_zpetc
+    ex60_gap_clustering
+    ex61_lpv_identification
+    ex62_auto_gain_scheduler
+    test_autoscheduling
     example_pid_feedback
     mimo_known
     mimo_unknown

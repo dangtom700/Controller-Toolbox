@@ -77,6 +77,11 @@ add_example(ex57_mrac)
 add_example(ex58_balanced_truncation)
 add_example(ex59_zpetc)
 
+# Part 20: gap-metric clustering + LPV identification + auto gain scheduling
+add_example(ex60_gap_clustering)
+add_example(ex61_lpv_identification)
+add_example(ex62_auto_gain_scheduler)
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)
