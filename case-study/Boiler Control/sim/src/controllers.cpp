@@ -129,6 +129,10 @@ MPCController::MPCController(const ctrl::StateSpace& ss, const OperatingPoint& o
         mp.rho_u     = rec.rho_u;
         mp.uMin      = -0.5;
         mp.uMax      =  0.5;
+        // Rate constraints from plant_params.json du_max values (most restrictive = 0.020 steam valve).
+        // Prevents the MPC from requesting physically impossible fast valve movements.
+        mp.duMin     = -0.020;
+        mp.duMax     =  0.020;
         mp.qpMaxIter = 1000;  // boiler Hessian kappa~50; FISTA needs ~sqrt(50)*log(1/tol) < 500
         return ctrl::DiscreteMPC(ss, mp);
     }())
@@ -373,14 +377,20 @@ void SmithPredictorController::reset()
 GPCController::GPCController(const ctrl::StateSpace& ss, const OperatingPoint& op)
     : gpcs_([&] {
         ctrl::GPCParams gp;
-        gp.Np        = 10;
+        // Np=20: covers ~20 steps for a boiler with 100s time constant (need at least tau/Ts=100 steps,
+        // but Np=20 is a practical compromise — more steps improves tracking at increased compute cost).
+        // Nu=3: 3 control moves balances lookahead vs computation.
+        // alpha=0.8: reference trajectory filter. alpha=0.1 reaches setpoint in ~1 step (physically
+        // impossible for slow boiler -> saturates every step -> diverges). 0.8 gives ~10-step approach.
+        // rho_u=0.5: higher than 0.1 to penalise fast valve movements and prevent saturation.
+        gp.Np        = 20;
         gp.Nu        = 3;
         gp.rho_y     = 1.0;
-        gp.rho_u     = 0.1;
-        gp.alpha     = 0.1;
+        gp.rho_u     = 0.5;
+        gp.alpha     = 0.8;
         gp.uMin      = -0.5;
         gp.uMax      =  0.5;
-        gp.qpMaxIter = 1000;  // GPC 3x3 Hessian; FISTA converges in <200 but set headroom
+        gp.qpMaxIter = 1000;  // GPC Hessian; FISTA converges well under 200 with these params
         auto ch0 = diagonalChannel(ss, 0);
         auto ch1 = diagonalChannel(ss, 1);
         auto ch2 = diagonalChannel(ss, 2);
@@ -390,9 +400,11 @@ GPCController::GPCController(const ctrl::StateSpace& ss, const OperatingPoint& o
             ctrl::GeneralizedPredictiveController(ch2, gp)
         };
     }())
-    , rls_{ ctrl::RecursiveLeastSquares(2, 2, ss.Ts, 0.98),
-            ctrl::RecursiveLeastSquares(2, 2, ss.Ts, 0.98),
-            ctrl::RecursiveLeastSquares(2, 2, ss.Ts, 0.98) }
+    // Forgetting factor 0.98 -> RLS half-life ~ 34 steps (too aggressive; model drifts under
+    // large setpoint changes). 0.995 -> half-life ~ 138 steps for better stability.
+    , rls_{ ctrl::RecursiveLeastSquares(2, 2, ss.Ts, 0.995),
+            ctrl::RecursiveLeastSquares(2, 2, ss.Ts, 0.995),
+            ctrl::RecursiveLeastSquares(2, 2, ss.Ts, 0.995) }
     , u_prev_(Vector3d::Zero())
 {
     (void)op;
@@ -536,7 +548,14 @@ UKFLQRController::UKFLQRController(const ctrl::StateSpace& ss, const OperatingPo
             0.25,  0,   0,
             0,   1.0,   0,
             0,   0,  25.0).finished();
-        return ctrl::UnscentedKalmanFilter(3, 3, boilerF, boilerH, Qn, Rn, ss.Ts);
+        // alpha = sqrt((n+kappa)/n) with n=3, kappa=0 gives Wc0 = 0 (avoids negative weights).
+        // Default alpha=1e-3 gives Wc0 << 0 for n=3, causing covariance indefiniteness.
+        // alpha = sqrt((n+kappa)/n) = 1.0 for n=3, kappa=0 -> Wc0 = 0 (avoids negativity).
+        const Eigen::MatrixXd Qn_d = Qn;
+        const Eigen::MatrixXd Rn_d = Rn;
+        return ctrl::UnscentedKalmanFilter(3, 3, boilerF, boilerH, Qn_d, Rn_d, ss.Ts,
+                                           Eigen::MatrixXd{},  // default P0
+                                           1.0, 2.0, 0.0);    // alpha, beta, kappa
     }())
     , du_prev_(Vector3d::Zero())
     , op_(op)
@@ -647,6 +666,8 @@ FuzzySupMPCController::FuzzySupMPCController(const ctrl::StateSpace& ss,
         mp.rho_u     = rec.rho_u;
         mp.uMin      = -0.5;
         mp.uMax      =  0.5;
+        mp.duMin     = -0.020;
+        mp.duMax     =  0.020;
         mp.qpMaxIter = 1000;  // match MPCController; FISTA needs <500 for this Hessian
         return std::array<ctrl::DiscreteMPC, 3>{
             ctrl::DiscreteMPC(ss, mp),

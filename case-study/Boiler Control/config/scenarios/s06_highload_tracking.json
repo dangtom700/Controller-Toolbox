@@ -1,10 +1,10 @@
 {
   "id": "s06_highload_tracking",
-  "description": "Load-step tracking at High Load: demand +10 bar, +20 MW (op C)",
+  "description": "Load-step tracking at High Load: +2 bar, +3 MW from op C (within linearisation range)",
   "operating_point": "C",
   "mode": "tracking",
   "dx0": [0.0, 0.0, 0.0],
-  "setpoint_dy": [10.0, 20.0, 0.0],
+  "setpoint_dy": [2.0, 3.0, 0.0],
   "duration_s": 3600,
   "Ts": 1.0
 }

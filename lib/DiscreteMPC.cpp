@@ -10,12 +10,12 @@ namespace ctrl
     DiscreteMPC::DiscreteMPC(const StateSpace &plant, const MPCParams &params)
         : plant_(plant), p_(params), Ts_(plant.Ts)
     {
+#ifndef NDEBUG
         if (plant.D.norm() > 1e-12)
             std::cerr << "[DiscreteMPC] WARNING: plant.D != 0. The compute(error) SISO "
-                         "wrapper reconstructs the reference as r = C*x + D*u_prev + error, "
-                         "which uses u[k-1] for the D*u term (one step stale). "
-                         "For D != 0 plants, use computeRef(x, r) directly and supply "
-                         "the current reference explicitly.\n";
+                         "wrapper uses u[k-1] for the D*u term (one step stale). "
+                         "Use computeRef(x, r) directly for D != 0 plants.\n";
+#endif
 
         x_hat_ = Eigen::VectorXd::Zero(plant_.stateSize());
         u_prev_ = Eigen::VectorXd::Zero(plant_.inputSize());

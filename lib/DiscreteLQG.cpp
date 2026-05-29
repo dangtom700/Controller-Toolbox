@@ -13,10 +13,12 @@ namespace ctrl
     {
         // D != 0: the Kalman innovation y - C*x^ - D*u uses u_prev (one step stale)
         // instead of the true u[k]. Accuracy degrades proportionally to D's magnitude.
+#ifndef NDEBUG
         if (!plant.D.isZero(1e-12))
             std::cerr << "[DiscreteLQG] WARNING: plant.D != 0. "
                          "Kalman innovation uses u[k-1] for the D*u term (one step stale). "
                          "For accurate filtering, set D = 0 in the model.\n";
+#endif
 
         lqr_ = std::make_unique<DiscreteLQR>(plant, lqr_p);
         kf_ = std::make_unique<KalmanFilter>(plant, Q_noise, R_noise, P0);

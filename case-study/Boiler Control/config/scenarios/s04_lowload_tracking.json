@@ -1,10 +1,10 @@
 {
   "id": "s04_lowload_tracking",
-  "description": "Load-step tracking at Low Load: demand +10 bar, +20 MW (op A)",
+  "description": "Load-step tracking at Low Load: +2 bar, +3 MW from op A (within linearisation range; original +10/+20 caused model validity violation)",
   "operating_point": "A",
   "mode": "tracking",
   "dx0": [0.0, 0.0, 0.0],
-  "setpoint_dy": [10.0, 20.0, 0.0],
+  "setpoint_dy": [2.0, 3.0, 0.0],
   "duration_s": 3600,
   "Ts": 1.0
 }
