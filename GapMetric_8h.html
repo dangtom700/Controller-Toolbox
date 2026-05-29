@@ -81,12 +81,13 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Nu-gap (Vinnicombe gap) metric for SISO discrete-time linear systems.  
+<p>Nu-gap (Vinnicombe gap) metric for SISO and MIMO discrete-time linear systems.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>&quot;</code><br />
 <code>#include &lt;complex&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;Eigen/Dense&gt;</code><br />
+<code>#include &lt;Eigen/SVD&gt;</code><br />
 </div>
 <p><a href="GapMetric_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -103,24 +104,27 @@ Functions</h2></td></tr>
 <tr class="memitem:a4ad546d4af8e1245e3dd4336283c94ef" id="r_a4ad546d4af8e1245e3dd4336283c94ef"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a4ad546d4af8e1245e3dd4336283c94ef">ctrl::chordalDist</a> (std::complex&lt; double &gt; p1, std::complex&lt; double &gt; p2)</td></tr>
 <tr class="memdesc:a4ad546d4af8e1245e3dd4336283c94ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">SISO chordal distance on the Riemann sphere.  <br /></td></tr>
 <tr class="separator:a4ad546d4af8e1245e3dd4336283c94ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80e6f60e0afc024c8162eeefe17936cc" id="r_a80e6f60e0afc024c8162eeefe17936cc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a80e6f60e0afc024c8162eeefe17936cc">ctrl::subspaceDist</a> (const Eigen::MatrixXcd &amp;H1, const Eigen::MatrixXcd &amp;H2)</td></tr>
+<tr class="memdesc:a80e6f60e0afc024c8162eeefe17936cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subspace chordal distance between two MIMO frequency-response matrices.  <br /></td></tr>
+<tr class="separator:a80e6f60e0afc024c8162eeefe17936cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9907faa4d8fc82361e6d224da681e0d7" id="r_a9907faa4d8fc82361e6d224da681e0d7"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a9907faa4d8fc82361e6d224da681e0d7">ctrl::nuGap</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;P1, const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;P2, int freq_points=200, double omega_min=1e-2)</td></tr>
-<tr class="memdesc:a9907faa4d8fc82361e6d224da681e0d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the nu-gap upper bound between two SISO discrete-time systems.  <br /></td></tr>
+<tr class="memdesc:a9907faa4d8fc82361e6d224da681e0d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nu-gap upper bound between two discrete-time systems (SISO or MIMO).  <br /></td></tr>
 <tr class="separator:a9907faa4d8fc82361e6d224da681e0d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a201d7a3e48ad1e958337bc19108846c1" id="r_a201d7a3e48ad1e958337bc19108846c1"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a201d7a3e48ad1e958337bc19108846c1">ctrl::nuGap</a> (const <a class="el" href="structctrl_1_1TransferFunction.html">TransferFunction</a> &amp;P1, const <a class="el" href="structctrl_1_1TransferFunction.html">TransferFunction</a> &amp;P2, int freq_points=200, double omega_min=1e-2)</td></tr>
-<tr class="memdesc:a201d7a3e48ad1e958337bc19108846c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the nu-gap upper bound between two SISO discrete TF models.  <br /></td></tr>
+<tr class="memdesc:a201d7a3e48ad1e958337bc19108846c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nu-gap upper bound between two SISO discrete TF models.  <br /></td></tr>
 <tr class="separator:a201d7a3e48ad1e958337bc19108846c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51fde5bfdb017e748806ed5d80959b97" id="r_a51fde5bfdb017e748806ed5d80959b97"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a51fde5bfdb017e748806ed5d80959b97">ctrl::nuGapMatrix</a> (const std::vector&lt; <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &gt; &amp;models, int freq_points=200)</td></tr>
-<tr class="memdesc:a51fde5bfdb017e748806ed5d80959b97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the symmetric N*N nu-gap distance matrix.  <br /></td></tr>
+<tr class="memdesc:a51fde5bfdb017e748806ed5d80959b97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Symmetric N*N nu-gap distance matrix for a collection of systems.  <br /></td></tr>
 <tr class="separator:a51fde5bfdb017e748806ed5d80959b97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Nu-gap (Vinnicombe gap) metric for SISO discrete-time linear systems. </p>
-<p>The nu-gap delta_nu(P1, P2) measures the distance between two plants' closed-loop behaviours on the Riemann sphere of transfer functions. A distance below 0.5 means a single robust controller can stabilise both plants simultaneously (Vinnicombe 2001, "Uncertainty and Feedback").</p>
-<p><b>Implementation:</b> Uses the frequency-domain chordal metric: </p><div class="fragment"><div class="line">delta_nu(P1, P2) ~= sup_omega |P1(e^{j*omega*Ts}) - P2(e^{j*omega*Ts})|</div>
-<div class="line">                    / sqrt((1 + |P1|^2) * (1 + |P2|^2))</div>
-</div><!-- fragment --><p> over a log-spaced grid from omega_min to pi/Ts. This gives an upper bound on the exact nu-gap (which also requires a winding-number check). The upper bound is sufficient for clustering: if it is below the chosen threshold, a single robust controller works for the entire cluster.</p>
-<dl class="section user"><dt>Reference</dt><dd>Vinnicombe, G. (2001). <em>Uncertainty and Feedback: H-infinity Loop-Shaping and the nu-Gap Metric</em>. Imperial College Press.</dd></dl>
-<dl class="section note"><dt>Note</dt><dd>Only SISO (p=1, m=1) systems are accepted. For MIMO, extend using the subspace chordal distance (Skogestad &amp; Postlethwaite Ch. 9). </dd></dl>
+<div class="textblock"><p>Nu-gap (Vinnicombe gap) metric for SISO and MIMO discrete-time linear systems. </p>
+<p>The nu-gap delta_nu(P1, P2) measures the distance between two plants' closed-loop behaviours. A value below 0.5 means a single robust controller can stabilise both (Vinnicombe 2001, "Uncertainty and Feedback").</p>
+<p><b>SISO implementation:</b> chordal metric on the Riemann sphere: </p><div class="fragment"><div class="line">d_chordal(p1, p2) = |p1 - p2| / sqrt((1 + |p1|^2) * (1 + |p2|^2))</div>
+</div><!-- fragment --><p><b>MIMO implementation:</b> subspace chordal distance via normalised graph: </p><div class="fragment"><div class="line">G_i(jw) = col-span of [P_i(jw); I]  (normalised via thin SVD: G_i = U_i S_i V_i^H)</div>
+<div class="line">d_subspace(P1, P2) = sqrt(1 - sigma_min(U1^H * U2)^2)</div>
+</div><!-- fragment --><p> This equals the SISO formula for p=m=1 (verified analytically). For MIMO it measures the largest principal angle between the two normalised-graph subspaces.</p>
+<dl class="section user"><dt>Reference</dt><dd>Vinnicombe, G. (2001). <em>Uncertainty and Feedback</em>. Imperial College Press, Ch. 5. Skogestad, S. &amp; Postlethwaite, I. (2005). <em>Multivariable Feedback Design</em>, Ch. 9. </dd></dl>
 
 <p class="definition">Definition in file <a class="el" href="GapMetric_8h_source.html">GapMetric.h</a>.</p>
 </div></div><!-- contents -->

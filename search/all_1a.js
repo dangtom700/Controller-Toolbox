@@ -30,7 +30,7 @@ var searchData=
   ['threshold_27',['threshold',['../structctrl_1_1ClusterResult.html#a545e7263c0f946328b635cb073262eb8',1,'ctrl::ClusterResult']]],
   ['tick_28',['tick',['../classctrl_1_1SimScheduler.html#ae01ed953e457efe3a25f52a83c4f032f',1,'ctrl::SimScheduler']]],
   ['tickcount_29',['tickcount',['../classctrl_1_1SimScheduler.html#a3704fbe278ade6408daccb541d7e2f3f',1,'ctrl::SimScheduler::tickCount()'],['../classctrl_1_1IScheduler.html#a9c43823a6e0a8eea0768982fae1b05dd',1,'ctrl::IScheduler::tickCount()']]],
-  ['tier_30',['tier',['../namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0',1,'ctrl::Tier'],['../namespacectrl.html#a932227b39a676cf6614adbc574457f5a',1,'ctrl::tier(const char *tuner, CtrlKind k)']]],
+  ['tier_30',['tier',['../namespacectrl.html#a932227b39a676cf6614adbc574457f5a',1,'ctrl::tier(const char *tuner, CtrlKind k)'],['../namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0',1,'ctrl::Tier']]],
   ['time_20build_20flags_31',['2.4 Real-Time Build Flags',['../md_docs_2DOCUMENTATION.html#autotoc_md38',1,'']]],
   ['time_20integration_32',['2. Real-Time Integration',['../md_docs_2DEPLOYMENT.html#autotoc_md156',1,'']]],
   ['time_20utilities_20hal_33',['5.7 Real-Time Utilities &amp; HAL',['../md_docs_2DOCUMENTATION.html#autotoc_md121',1,'']]],

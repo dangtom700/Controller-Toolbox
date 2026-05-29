@@ -599,14 +599,17 @@ Functions</h2></td></tr>
 <tr class="memdesc:a4ad546d4af8e1245e3dd4336283c94ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">SISO chordal distance on the Riemann sphere.  <br /></td></tr>
 <tr class="separator:a4ad546d4af8e1245e3dd4336283c94ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9907faa4d8fc82361e6d224da681e0d7" id="r_a9907faa4d8fc82361e6d224da681e0d7"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a9907faa4d8fc82361e6d224da681e0d7">nuGap</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;P1, const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;P2, int freq_points=200, double omega_min=1e-2)</td></tr>
-<tr class="memdesc:a9907faa4d8fc82361e6d224da681e0d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the nu-gap upper bound between two SISO discrete-time systems.  <br /></td></tr>
+<tr class="memdesc:a9907faa4d8fc82361e6d224da681e0d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nu-gap upper bound between two discrete-time systems (SISO or MIMO).  <br /></td></tr>
 <tr class="separator:a9907faa4d8fc82361e6d224da681e0d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a201d7a3e48ad1e958337bc19108846c1" id="r_a201d7a3e48ad1e958337bc19108846c1"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a201d7a3e48ad1e958337bc19108846c1">nuGap</a> (const <a class="el" href="structctrl_1_1TransferFunction.html">TransferFunction</a> &amp;P1, const <a class="el" href="structctrl_1_1TransferFunction.html">TransferFunction</a> &amp;P2, int freq_points=200, double omega_min=1e-2)</td></tr>
-<tr class="memdesc:a201d7a3e48ad1e958337bc19108846c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the nu-gap upper bound between two SISO discrete TF models.  <br /></td></tr>
+<tr class="memdesc:a201d7a3e48ad1e958337bc19108846c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nu-gap upper bound between two SISO discrete TF models.  <br /></td></tr>
 <tr class="separator:a201d7a3e48ad1e958337bc19108846c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51fde5bfdb017e748806ed5d80959b97" id="r_a51fde5bfdb017e748806ed5d80959b97"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a51fde5bfdb017e748806ed5d80959b97">nuGapMatrix</a> (const std::vector&lt; <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &gt; &amp;models, int freq_points=200)</td></tr>
-<tr class="memdesc:a51fde5bfdb017e748806ed5d80959b97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the symmetric N*N nu-gap distance matrix.  <br /></td></tr>
+<tr class="memdesc:a51fde5bfdb017e748806ed5d80959b97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Symmetric N*N nu-gap distance matrix for a collection of systems.  <br /></td></tr>
 <tr class="separator:a51fde5bfdb017e748806ed5d80959b97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80e6f60e0afc024c8162eeefe17936cc" id="r_a80e6f60e0afc024c8162eeefe17936cc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a80e6f60e0afc024c8162eeefe17936cc">subspaceDist</a> (const Eigen::MatrixXcd &amp;H1, const Eigen::MatrixXcd &amp;H2)</td></tr>
+<tr class="memdesc:a80e6f60e0afc024c8162eeefe17936cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subspace chordal distance between two MIMO frequency-response matrices.  <br /></td></tr>
+<tr class="separator:a80e6f60e0afc024c8162eeefe17936cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35c170c14a2cf3926e4b26bf41a38ff1" id="r_a35c170c14a2cf3926e4b26bf41a38ff1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1QPSolveResult.html">QPSolveResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a35c170c14a2cf3926e4b26bf41a38ff1">solveGradientProjectionQP</a> (const Eigen::MatrixXd &amp;H, const Eigen::VectorXd &amp;g, const Eigen::VectorXd &amp;lb, const Eigen::VectorXd &amp;ub, const Eigen::LDLT&lt; Eigen::MatrixXd &gt; &amp;ldlt, double L, int maxIter, double tol, Eigen::VectorXd &amp;x, Eigen::VectorXd &amp;tmp1, Eigen::VectorXd &amp;tmp2)</td></tr>
 <tr class="memdesc:a35c170c14a2cf3926e4b26bf41a38ff1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve a box-constrained QP via FISTA (zero-allocation per iteration).  <br /></td></tr>
 <tr class="separator:a35c170c14a2cf3926e4b26bf41a38ff1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1488,15 +1491,7 @@ Variables</h2></td></tr>
 
 <p>SISO chordal distance on the Riemann sphere. </p>
 <p>d(p1, p2) = |p1 - p2| / sqrt((1 + |p1|^2) * (1 + |p2|^2))</p>
-<p>Range: [0, 1]. Equals 0 iff p1 == p2; approaches 1 for antipodal points (p2 = -1/conj(p1)).</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">p1</td><td>First complex frequency-response value. </td></tr>
-    <tr><td class="paramname">p2</td><td>Second complex frequency-response value. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Chordal distance in [0, 1]. </dd></dl>
+<p>Range [0, 1]. Equals 0 iff p1 == p2. </p>
 
 <p class="definition">Definition at line <a class="el" href="GapMetric_8cpp_source.html#l00052">52</a> of file <a class="el" href="GapMetric_8cpp_source.html">GapMetric.cpp</a>.</p>
 
@@ -1874,7 +1869,6 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Evaluate the discrete-time frequency response P(e^{j*omega*Ts}). </p>
-<p>Computes P(z) = C * (z*I - A)^{-1} * B + D at z = e^{j*omega*Ts} for each frequency in omega_grid. Uses full-pivot LU for numerical robustness near resonant frequencies.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">sys</td><td>Discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> model (any MIMO dimensions). </td></tr>
@@ -2887,20 +2881,21 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Compute the nu-gap upper bound between two SISO discrete-time systems. </p>
+<p>Nu-gap upper bound between two discrete-time systems (SISO or MIMO). </p>
+<p>Dispatches to the scalar chordal formula (SISO) or the subspace formula (MIMO). Both systems must have identical dimensions and the same Ts.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">P1</td><td>First system (must be SISO: outputSize=1, inputSize=1). </td></tr>
-    <tr><td class="paramname">P2</td><td>Second system (same Ts and SISO as P1). </td></tr>
-    <tr><td class="paramname">freq_points</td><td>Frequency grid size (default 200). More points = tighter bound. </td></tr>
-    <tr><td class="paramname">omega_min</td><td>Minimum frequency [rad/s] for the grid (default 0.01). </td></tr>
+    <tr><td class="paramname">P1</td><td>First discrete-time system. </td></tr>
+    <tr><td class="paramname">P2</td><td>Second system (same p, m, Ts). </td></tr>
+    <tr><td class="paramname">freq_points</td><td>Log-spaced frequency grid size (default 200). </td></tr>
+    <tr><td class="paramname">omega_min</td><td>Minimum frequency [rad/s] (default 0.01). </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Nu-gap upper bound in [0, 1]. </dd></dl>
 <dl class="exception"><dt>Exceptions</dt><dd>
   <table class="exception">
-    <tr><td class="paramname">std::invalid_argument</td><td>If systems are not SISO or have different Ts. </td></tr>
+    <tr><td class="paramname">std::invalid_argument</td><td>On dimension or Ts mismatch. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2951,16 +2946,8 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Compute the nu-gap upper bound between two SISO discrete TF models. </p>
-<p>Converts both to state-space form internally.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">P1</td><td>First transfer function. </td></tr>
-    <tr><td class="paramname">P2</td><td>Second transfer function (same Ts as P1). </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Nu-gap upper bound. </dd></dl>
+<p>Nu-gap upper bound between two SISO discrete TF models. </p>
+<p>Converts both to state-space internally. </p>
 
 <p class="definition">Definition at line <a class="el" href="GapMetric_8cpp_source.html#l00085">85</a> of file <a class="el" href="GapMetric_8cpp_source.html">GapMetric.cpp</a>.</p>
 
@@ -2994,12 +2981,12 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Compute the symmetric N*N nu-gap distance matrix. </p>
-<p>Diagonal entries are 0. Off-diagonal (i,j) is nuGap(models[i], models[j]). All models must be SISO with the same Ts.</p>
+<p>Symmetric N*N nu-gap distance matrix for a collection of systems. </p>
+<p>All systems must have the same p, m, and Ts.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">models</td><td>Collection of discrete-time SISO state-space models. </td></tr>
-    <tr><td class="paramname">freq_points</td><td>Frequency grid resolution per pair. </td></tr>
+    <tr><td class="paramname">models</td><td>Collection of discrete-time state-space models. </td></tr>
+    <tr><td class="paramname">freq_points</td><td>Frequency resolution per pair. </td></tr>
   </table>
   </dd>
 </dl>
@@ -3443,6 +3430,46 @@ Variables</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00097">97</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, and <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>.</p>
+
+</div>
+</div>
+<a id="a80e6f60e0afc024c8162eeefe17936cc" name="a80e6f60e0afc024c8162eeefe17936cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80e6f60e0afc024c8162eeefe17936cc">&#9670;&#160;</a></span>subspaceDist()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ctrl::subspaceDist </td>
+          <td>(</td>
+          <td class="paramtype">const Eigen::MatrixXcd &amp;&#160;</td>
+          <td class="paramname"><em>H1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::MatrixXcd &amp;&#160;</td>
+          <td class="paramname"><em>H2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Subspace chordal distance between two MIMO frequency-response matrices. </p>
+<p>Forms the normalised graphs [P1; I] and [P2; I], computes their thin SVDs to extract column spaces U1, U2, and returns sqrt(1 - sigma_min(U1^H * U2)^2).</p>
+<p>Reduces to <a class="el" href="namespacectrl.html#a4ad546d4af8e1245e3dd4336283c94ef" title="SISO chordal distance on the Riemann sphere.">chordalDist()</a> for p=m=1 (SISO).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">H1</td><td>p*m complex frequency-response matrix of P1 at one frequency. </td></tr>
+    <tr><td class="paramname">H2</td><td>p*m complex frequency-response matrix of P2 at one frequency. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Subspace chordal distance in [0, 1]. </dd></dl>
 
 </div>
 </div>
