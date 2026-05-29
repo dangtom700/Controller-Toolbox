@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['write_0',['write',['../classctrl_1_1IActuator.html#ac6546d74dfc79167c6de08f6b218141c',1,'ctrl::IActuator::write()'],['../classctrl_1_1SimActuator.html#aeeedd4bb19bd1bcbbe968d1c851ba98e',1,'ctrl::SimActuator::write()']]]
+  ['validate_0',['validate',['../structctrl_1_1StateSpace.html#aa2ade49d4760438060a3335c1b019c40',1,'ctrl::StateSpace']]]
 ];

@@ -10,7 +10,7 @@ var searchData=
   ['mamdani_7',['Mamdani',['../namespacectrl.html#a73e0367e44b7fe77d1b4948481380c22a9143c38c21671f0ff420d7e14388bdf9',1,'ctrl']]],
   ['maxdkiter_8',['maxDKIter',['../structctrl_1_1MuSynParams.html#a719ce3510c8bffcab81b8bd8c34eaa23',1,'ctrl::MuSynParams']]],
   ['maxiter_9',['maxIter',['../structctrl_1_1HinfParams.html#a10e224f1e822233258ffbc2240707326',1,'ctrl::HinfParams']]],
-  ['measfunc_10',['MeasFunc',['../namespacectrl.html#aee8aa60f7a448b1cb384efdf32eada41',1,'ctrl']]],
+  ['measfunc_10',['MeasFunc',['../namespacectrl.html#a769cb9afa3b7f334221a10089e948da1',1,'ctrl']]],
   ['membership_20function_20factories_11',['Membership function factories',['../md_docs_2DOCUMENTATION.html#autotoc_md83',1,'']]],
   ['message_12',['message',['../structctrl_1_1SubspaceIDResult.html#ab11bfc9d8aa33ea86ee77445613957d8',1,'ctrl::SubspaceIDResult']]],
   ['metrics_13',['5.6 Analysis &amp; Metrics',['../md_docs_2DOCUMENTATION.html#autotoc_md112',1,'']]],

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['measfunc_0',['MeasFunc',['../namespacectrl.html#aee8aa60f7a448b1cb384efdf32eada41',1,'ctrl']]]
+  ['gainfn_0',['GainFn',['../classctrl_1_1FeedbackLinearisationController.html#af62aa17695f5350aa96f35147de9908e',1,'ctrl::FeedbackLinearisationController']]]
 ];

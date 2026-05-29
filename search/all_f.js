@@ -22,7 +22,7 @@ var searchData=
   ['inference_19',['inference',['../structctrl_1_1FuzzySystemParams.html#a42ec07ae20adb847e85d690a70e9900d',1,'ctrl::FuzzySystemParams']]],
   ['inferencemethod_20',['InferenceMethod',['../namespacectrl.html#a73e0367e44b7fe77d1b4948481380c22',1,'ctrl']]],
   ['initialize_21',['initialize',['../classctrl_1_1MovingHorizonEstimator.html#a42277bfca145640558c59eca6b249b5d',1,'ctrl::MovingHorizonEstimator']]],
-  ['innercontroller_22',['innercontroller',['../classctrl_1_1SmithPredictor.html#ade9087f18b2bcc12b13ab5ad780a02f6',1,'ctrl::SmithPredictor::innerController()'],['../classctrl_1_1RepetitiveController.html#af4eb67a6db60d8da059b01e6d9115353',1,'ctrl::RepetitiveController::innerController()']]],
+  ['innercontroller_22',['innercontroller',['../classctrl_1_1SmithPredictor.html#ade9087f18b2bcc12b13ab5ad780a02f6',1,'ctrl::SmithPredictor::innerController()'],['../classctrl_1_1RepetitiveController.html#af4eb67a6db60d8da059b01e6d9115353',1,'ctrl::RepetitiveController::innerController()'],['../classctrl_1_1FeedbackLinearisationController.html#ad8d39059fcc0b04adab16bc13708fb18',1,'ctrl::FeedbackLinearisationController::innerController()']]],
   ['innovcov_23',['innovCov',['../structctrl_1_1SubspaceIDResult.html#a938133873cfb3e4521051e1017cc2982',1,'ctrl::SubspaceIDResult']]],
   ['input_24',['input',['../structctrl_1_1LoopShapingTuner_1_1Input.html',1,'ctrl::LoopShapingTuner::Input'],['../structctrl_1_1ZieglerNicholsTuner_1_1Input.html',1,'ctrl::ZieglerNicholsTuner::Input']]],
   ['input_5fidx_25',['input_idx',['../structctrl_1_1Antecedent.html#aaa1dfde7424b7169afffa45e16ce5370',1,'ctrl::Antecedent']]],

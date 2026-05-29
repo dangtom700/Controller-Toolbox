@@ -173,7 +173,7 @@ Controller Inventory</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><b>Intelligent</b>   </td><td class="markdownTableBodyNone">FuzzyPD, FuzzyPID, FuzzySupervisor (Mamdani &amp; Takagi-Sugeno)    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>Composition</b>   </td><td class="markdownTableBodyNone">ControllerStack (Supervisory, Additive, Weighted) — cascade, observer+SF, bumpless transfer    </td></tr>
+<td class="markdownTableBodyNone"><b>Composition</b>   </td><td class="markdownTableBodyNone">ControllerStack (Supervisory, Additive, Weighted) - cascade, observer+SF, bumpless transfer    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><b>Estimators</b>   </td><td class="markdownTableBodyNone">KalmanFilter, EKF, UKF, MovingHorizonEstimator    </td></tr>
 <tr class="markdownTableRowOdd">
@@ -225,13 +225,13 @@ Tested Compilers</h1>
 Project Status</h1>
 <p><b>Current test counts (2026-05-28):</b> 73 C++ executables pass | 74 Python examples pass | 0 failures.</p>
 <p><b>Part 18 additions (2026-05-28):</b></p><ul>
-<li><code>SOPDTIdentifier</code> — graphical (ZN tangent + 28.3%/63.2% crossings) and optimization (nested golden-section) SOPDT step-response identification; Rivera 1986 IMC-PID tuning for SOPDT models.</li>
-<li><code>MovingHorizonEstimator</code> — condensed QP dual of MPC; reuses <code>GradientProjectionQP</code>; box constraints on process noise; horizon ramp-up from 1 to N.</li>
+<li><code>SOPDTIdentifier</code> - graphical (ZN tangent + 28.3%/63.2% crossings) and optimization (nested golden-section) SOPDT step-response identification; Rivera 1986 IMC-PID tuning for SOPDT models.</li>
+<li><code>MovingHorizonEstimator</code> - condensed QP dual of MPC; reuses <code>GradientProjectionQP</code>; box constraints on process noise; horizon ramp-up from 1 to N.</li>
 <li><code>DiscreteHinf::solveMuSyn</code> extended with full rational D-scaling (first-order D_j(z) fit per channel, plant state augmentation).</li>
 <li>23 new C++ examples (ex32-ex54) and 21 new Python examples (ex50-ex70) covering corrector patterns: Cascade, Additive, Observer+SF, Supervisory.</li>
 </ul>
 <p><b>Earlier additions:</b></p><ul>
-<li><code>FuzzyLogic</code> module (2026-05-23): Mamdani and Takagi-Sugeno inference engines, <code>FuzzyPD</code>, <code>FuzzyPID</code>, <code>FuzzySupervisor</code> — see <a class="el" href="md_docs_2DOCUMENTATION.html">docs/DOCUMENTATION.md Section 5.2</a>.</li>
+<li><code>FuzzyLogic</code> module (2026-05-23): Mamdani and Takagi-Sugeno inference engines, <code>FuzzyPD</code>, <code>FuzzyPID</code>, <code>FuzzySupervisor</code> - see <a class="el" href="md_docs_2DOCUMENTATION.html">docs/DOCUMENTATION.md Section 5.2</a>.</li>
 <li><code>ExtendedKalmanFilter</code>, <code>UnscentedKalmanFilter</code>, <code>RepetitiveController</code>, <code>GeneralizedPredictiveController</code>, <code>SubspaceID</code>, <code>DiscreteHinf</code>, <code>FOPDTIdentifier</code>, <code>FeedforwardController</code>, <code>GradientProjectionQP</code>.</li>
 <li>Five math corrections (2026-05-22): MPC condensed prediction formula, PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor feedthrough, SMC <code>c_de</code> Ts-absorption.</li>
 </ul>

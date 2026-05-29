@@ -185,8 +185,14 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ExtremumSeekerParams.html">ExtremumSeekerParams</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1ExtremumSeeker.html" title="Perturbation-based Extremum Seeking Controller.">ExtremumSeeker</a>.  <a href="structctrl_1_1ExtremumSeekerParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FeedbackLinearisationController.html">FeedbackLinearisationController</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Feedback linearisation controller - SISO, relative degree 1.  <a href="classctrl_1_1FeedbackLinearisationController.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FeedforwardController.html">FeedforwardController</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Feedforward controller: u_ff[k] = G_ff(z) * r[k].  <a href="classctrl_1_1FeedforwardController.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1FLParams.html">FLParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1FeedbackLinearisationController.html" title="Feedback linearisation controller - SISO, relative degree 1.">FeedbackLinearisationController</a>.  <a href="structctrl_1_1FLParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1FOPDTIdentifier.html">FOPDTIdentifier</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">First-Order Plus Dead-Time step-response identifier.  <a href="classctrl_1_1FOPDTIdentifier.html#details">More...</a><br /></td></tr>
@@ -434,12 +440,12 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:ad5cf392399fd6913c6c79ca43b0db5ed" id="r_ad5cf392399fd6913c6c79ca43b0db5ed"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ad5cf392399fd6913c6c79ca43b0db5ed">StateFunc</a> = std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td></tr>
-<tr class="memdesc:ad5cf392399fd6913c6c79ca43b0db5ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for the nonlinear process model: x[k+1] = f(x[k], u[k]).  <br /></td></tr>
-<tr class="separator:ad5cf392399fd6913c6c79ca43b0db5ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aee8aa60f7a448b1cb384efdf32eada41" id="r_aee8aa60f7a448b1cb384efdf32eada41"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#aee8aa60f7a448b1cb384efdf32eada41">MeasFunc</a> = std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td></tr>
-<tr class="memdesc:aee8aa60f7a448b1cb384efdf32eada41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for the nonlinear measurement model: y[k] = h(x[k], u[k]).  <br /></td></tr>
-<tr class="separator:aee8aa60f7a448b1cb384efdf32eada41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a084e413f17f1128b83fe38d6ebc6c289" id="r_a084e413f17f1128b83fe38d6ebc6c289"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a084e413f17f1128b83fe38d6ebc6c289">StateFunc</a> = std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td></tr>
+<tr class="memdesc:a084e413f17f1128b83fe38d6ebc6c289"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for the nonlinear process model: x[k+1] = f(x[k], u[k]).  <br /></td></tr>
+<tr class="separator:a084e413f17f1128b83fe38d6ebc6c289"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a769cb9afa3b7f334221a10089e948da1" id="r_a769cb9afa3b7f334221a10089e948da1"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a769cb9afa3b7f334221a10089e948da1">MeasFunc</a> = std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td></tr>
+<tr class="memdesc:a769cb9afa3b7f334221a10089e948da1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for the nonlinear measurement model: y[k] = h(x[k], u[k]).  <br /></td></tr>
+<tr class="separator:a769cb9afa3b7f334221a10089e948da1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b4f19ebb433c185c5b7a561cec22f20" id="r_a2b4f19ebb433c185c5b7a561cec22f20"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a2b4f19ebb433c185c5b7a561cec22f20">JacobianFn</a> = std::function&lt; Eigen::MatrixXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td></tr>
 <tr class="memdesc:a2b4f19ebb433c185c5b7a561cec22f20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for a Jacobian: returns an (n*n) or (p*n) matrix given (x, u).  <br /></td></tr>
 <tr class="separator:a2b4f19ebb433c185c5b7a561cec22f20"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -548,6 +554,20 @@ Functions</h2></td></tr>
 <tr class="memitem:a35c170c14a2cf3926e4b26bf41a38ff1" id="r_a35c170c14a2cf3926e4b26bf41a38ff1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1QPSolveResult.html">QPSolveResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a35c170c14a2cf3926e4b26bf41a38ff1">solveGradientProjectionQP</a> (const Eigen::MatrixXd &amp;H, const Eigen::VectorXd &amp;g, const Eigen::VectorXd &amp;lb, const Eigen::VectorXd &amp;ub, const Eigen::LDLT&lt; Eigen::MatrixXd &gt; &amp;ldlt, double L, int maxIter, double tol, Eigen::VectorXd &amp;x, Eigen::VectorXd &amp;tmp1, Eigen::VectorXd &amp;tmp2)</td></tr>
 <tr class="memdesc:a35c170c14a2cf3926e4b26bf41a38ff1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve a box-constrained QP via gradient projection (zero-allocation).  <br /></td></tr>
 <tr class="separator:a35c170c14a2cf3926e4b26bf41a38ff1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a250ebc9ea0eab12cf24cb43d45c7241e" id="r_a250ebc9ea0eab12cf24cb43d45c7241e"><td class="memItemLeft" align="right" valign="top">static Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a250ebc9ea0eab12cf24cb43d45c7241e">numJacImpl</a> (const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x0, double eps_scale)</td></tr>
+<tr class="separator:a250ebc9ea0eab12cf24cb43d45c7241e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6cc60eb5b71614401fe3c46d67629805" id="r_a6cc60eb5b71614401fe3c46d67629805"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a6cc60eb5b71614401fe3c46d67629805">jacobianX</a> (const <a class="el" href="namespacectrl.html#a084e413f17f1128b83fe38d6ebc6c289">StateFunc</a> &amp;func, const Eigen::VectorXd &amp;x0, const Eigen::VectorXd &amp;u0, double eps_scale=1e-4)</td></tr>
+<tr class="memdesc:a6cc60eb5b71614401fe3c46d67629805"><td class="mdescLeft">&#160;</td><td class="mdescRight">Central-difference Jacobian of func with respect to x at (x0, u0).  <br /></td></tr>
+<tr class="separator:a6cc60eb5b71614401fe3c46d67629805"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7828478a94fc9582ec07f78dcea2286d" id="r_a7828478a94fc9582ec07f78dcea2286d"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a7828478a94fc9582ec07f78dcea2286d">jacobianU</a> (const <a class="el" href="namespacectrl.html#a084e413f17f1128b83fe38d6ebc6c289">StateFunc</a> &amp;func, const Eigen::VectorXd &amp;x0, const Eigen::VectorXd &amp;u0, double eps_scale=1e-4)</td></tr>
+<tr class="memdesc:a7828478a94fc9582ec07f78dcea2286d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Central-difference Jacobian of func with respect to u at (x0, u0).  <br /></td></tr>
+<tr class="separator:a7828478a94fc9582ec07f78dcea2286d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2fc008e90dd6887e79f686a96c5ddc3" id="r_ac2fc008e90dd6887e79f686a96c5ddc3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ac2fc008e90dd6887e79f686a96c5ddc3">lineariseAtPoint</a> (const <a class="el" href="namespacectrl.html#a084e413f17f1128b83fe38d6ebc6c289">StateFunc</a> &amp;f_continuous, const <a class="el" href="namespacectrl.html#a769cb9afa3b7f334221a10089e948da1">MeasFunc</a> &amp;h, const Eigen::VectorXd &amp;x0, const Eigen::VectorXd &amp;u0, double Ts, double eps_scale=1e-4)</td></tr>
+<tr class="memdesc:ac2fc008e90dd6887e79f686a96c5ddc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearise a continuous-time nonlinear system at (x0, u0) and discretise via ZOH.  <br /></td></tr>
+<tr class="separator:ac2fc008e90dd6887e79f686a96c5ddc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaae0366d018b76c601905f757643273d" id="r_aaae0366d018b76c601905f757643273d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#aaae0366d018b76c601905f757643273d">lineariseAtPoint</a> (const <a class="el" href="namespacectrl.html#a084e413f17f1128b83fe38d6ebc6c289">StateFunc</a> &amp;f_continuous, const Eigen::VectorXd &amp;x0, const Eigen::VectorXd &amp;u0, double Ts, double eps_scale=1e-4)</td></tr>
+<tr class="memdesc:aaae0366d018b76c601905f757643273d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearise a continuous-time system at (x0, u0) with identity output (y = x).  <br /></td></tr>
+<tr class="separator:aaae0366d018b76c601905f757643273d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f658728be7420e427723b3d0eb389d9" id="r_a4f658728be7420e427723b3d0eb389d9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a4f658728be7420e427723b3d0eb389d9">tf2ss</a> (const <a class="el" href="structctrl_1_1TransferFunction.html">TransferFunction</a> &amp;tf)</td></tr>
 <tr class="memdesc:a4f658728be7420e427723b3d0eb389d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a SISO discrete transfer function to controllable canonical state-space form.  <br /></td></tr>
 <tr class="separator:a4f658728be7420e427723b3d0eb389d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -614,37 +634,39 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="aee8aa60f7a448b1cb384efdf32eada41" name="aee8aa60f7a448b1cb384efdf32eada41"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aee8aa60f7a448b1cb384efdf32eada41">&#9670;&#160;</a></span>MeasFunc</h2>
+<a id="a769cb9afa3b7f334221a10089e948da1" name="a769cb9afa3b7f334221a10089e948da1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a769cb9afa3b7f334221a10089e948da1">&#9670;&#160;</a></span>MeasFunc</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="namespacectrl.html#aee8aa60f7a448b1cb384efdf32eada41">ctrl::MeasFunc</a> = typedef std::function&lt;Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td>
+          <td class="memname">typedef std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt; <a class="el" href="namespacectrl.html#a769cb9afa3b7f334221a10089e948da1">ctrl::MeasFunc</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Function type for the nonlinear measurement model: y[k] = h(x[k], u[k]). </p>
+<p>Measurement function: y = h(x, u). </p>
 
 <p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00055">55</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
 
 </div>
 </div>
-<a id="ad5cf392399fd6913c6c79ca43b0db5ed" name="ad5cf392399fd6913c6c79ca43b0db5ed"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad5cf392399fd6913c6c79ca43b0db5ed">&#9670;&#160;</a></span>StateFunc</h2>
+<a id="a084e413f17f1128b83fe38d6ebc6c289" name="a084e413f17f1128b83fe38d6ebc6c289"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a084e413f17f1128b83fe38d6ebc6c289">&#9670;&#160;</a></span>StateFunc</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="namespacectrl.html#ad5cf392399fd6913c6c79ca43b0db5ed">ctrl::StateFunc</a> = typedef std::function&lt;Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td>
+          <td class="memname">typedef std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt; <a class="el" href="namespacectrl.html#a084e413f17f1128b83fe38d6ebc6c289">ctrl::StateFunc</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Function type for the nonlinear process model: x[k+1] = f(x[k], u[k]). </p>
+<p>Continuous-time dynamics: x_dot = f(x, u). </p>
 
 <p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00051">51</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
 
@@ -1118,6 +1140,8 @@ Variables</h2></td></tr>
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8cpp_source.html#l00173">checkDiscreteStability()</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>, <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156a0032796475fd7203f9b920f1a59b969f">TustinPrewarped</a>, and <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd">ZOH</a>.</p>
 
+<p class="reference">Referenced by <a class="el" href="LinearisationHelper_8cpp_source.html#l00056">lineariseAtPoint()</a>.</p>
+
 </div>
 </div>
 <a id="ae8d35eaeeec8b5f5e41ef5ef8da359dc" name="ae8d35eaeeec8b5f5e41ef5ef8da359dc"></a>
@@ -1314,6 +1338,262 @@ Variables</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="DiscreteLQR_8cpp_source.html#l00015">15</a> of file <a class="el" href="DiscreteLQR_8cpp_source.html">DiscreteLQR.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscreteLQR_8cpp_source.html#l00137">ctrl::DiscreteLQR::DiscreteLQR()</a>, and <a class="el" href="DiscreteLQR_8cpp_source.html#l00114">isPBHDetectable()</a>.</p>
+
+</div>
+</div>
+<a id="a7828478a94fc9582ec07f78dcea2286d" name="a7828478a94fc9582ec07f78dcea2286d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7828478a94fc9582ec07f78dcea2286d">&#9670;&#160;</a></span>jacobianU()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXd ctrl::jacobianU </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacectrl.html#a084e413f17f1128b83fe38d6ebc6c289">StateFunc</a> &amp;&#160;</td>
+          <td class="paramname"><em>func</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>x0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>u0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>eps_scale</em> = <code>1e-4</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Central-difference Jacobian of func with respect to u at (x0, u0). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">func</td><td>Function (x, u) -&gt; VectorXd to differentiate. </td></tr>
+    <tr><td class="paramname">x0</td><td>Operating point state (n * 1). </td></tr>
+    <tr><td class="paramname">u0</td><td>Operating point input (m * 1). </td></tr>
+    <tr><td class="paramname">eps_scale</td><td>Relative step scale (default 1e-4). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Jacobian matrix B_c = df/du (output_dim * m). </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="LinearisationHelper_8cpp_source.html#l00047">47</a> of file <a class="el" href="LinearisationHelper_8cpp_source.html">LinearisationHelper.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="LinearisationHelper_8cpp_source.html#l00010">numJacImpl()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="LinearisationHelper_8cpp_source.html#l00056">lineariseAtPoint()</a>.</p>
+
+</div>
+</div>
+<a id="a6cc60eb5b71614401fe3c46d67629805" name="a6cc60eb5b71614401fe3c46d67629805"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6cc60eb5b71614401fe3c46d67629805">&#9670;&#160;</a></span>jacobianX()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXd ctrl::jacobianX </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacectrl.html#a084e413f17f1128b83fe38d6ebc6c289">StateFunc</a> &amp;&#160;</td>
+          <td class="paramname"><em>func</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>x0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>u0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>eps_scale</em> = <code>1e-4</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Central-difference Jacobian of func with respect to x at (x0, u0). </p>
+<p>Step size per element: h_i = eps_scale * max(|x0_i|, 1). This gives O(eps_scale^2) truncation error independent of state magnitude - critical for heterogeneous states (e.g., positions in metres and angles in radians in the same vector).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">func</td><td>Function (x, u) -&gt; VectorXd to differentiate. </td></tr>
+    <tr><td class="paramname">x0</td><td>Operating point state (n * 1). </td></tr>
+    <tr><td class="paramname">u0</td><td>Operating point input (m * 1). </td></tr>
+    <tr><td class="paramname">eps_scale</td><td>Relative step scale (default 1e-4). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Jacobian matrix A_c = df/dx (output_dim * n). </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="LinearisationHelper_8cpp_source.html#l00038">38</a> of file <a class="el" href="LinearisationHelper_8cpp_source.html">LinearisationHelper.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="LinearisationHelper_8cpp_source.html#l00010">numJacImpl()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="LinearisationHelper_8cpp_source.html#l00056">lineariseAtPoint()</a>.</p>
+
+</div>
+</div>
+<a id="aaae0366d018b76c601905f757643273d" name="aaae0366d018b76c601905f757643273d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaae0366d018b76c601905f757643273d">&#9670;&#160;</a></span>lineariseAtPoint() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> ctrl::lineariseAtPoint </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacectrl.html#a084e413f17f1128b83fe38d6ebc6c289">StateFunc</a> &amp;&#160;</td>
+          <td class="paramname"><em>f_continuous</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>x0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>u0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>Ts</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>eps_scale</em> = <code>1e-4</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Linearise a continuous-time system at (x0, u0) with identity output (y = x). </p>
+<p>Equivalent to the two-argument overload with h(x,u) = x (C = I, D = 0). Convenient when full-state measurement is assumed (e.g., for LQR design).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">f_continuous</td><td>Continuous-time dynamics xdot = f(x, u). </td></tr>
+    <tr><td class="paramname">x0</td><td>Operating point state. </td></tr>
+    <tr><td class="paramname">u0</td><td>Operating point input. </td></tr>
+    <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
+    <tr><td class="paramname">eps_scale</td><td>Jacobian step scale (default 1e-4). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> with C = I, D = 0. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="LinearisationHelper_8cpp_source.html#l00080">80</a> of file <a class="el" href="LinearisationHelper_8cpp_source.html">LinearisationHelper.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="LinearisationHelper_8cpp_source.html#l00056">lineariseAtPoint()</a>.</p>
+
+</div>
+</div>
+<a id="ac2fc008e90dd6887e79f686a96c5ddc3" name="ac2fc008e90dd6887e79f686a96c5ddc3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2fc008e90dd6887e79f686a96c5ddc3">&#9670;&#160;</a></span>lineariseAtPoint() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> ctrl::lineariseAtPoint </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacectrl.html#a084e413f17f1128b83fe38d6ebc6c289">StateFunc</a> &amp;&#160;</td>
+          <td class="paramname"><em>f_continuous</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacectrl.html#a769cb9afa3b7f334221a10089e948da1">MeasFunc</a> &amp;&#160;</td>
+          <td class="paramname"><em>h</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>x0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>u0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>Ts</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>eps_scale</em> = <code>1e-4</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Linearise a continuous-time nonlinear system at (x0, u0) and discretise via ZOH. </p>
+<p>Computes continuous-time Jacobians: </p><div class="fragment"><div class="line">A_c = df/dx|_(x0,u0),   B_c = df/du|_(x0,u0)</div>
+<div class="line">C   = dh/dx|_(x0,u0),   D   = dh/du|_(x0,u0)</div>
+</div><!-- fragment --><p>Then applies ctrl::c2d(sys_c, Ts, C2dMethod::ZOH) to produce a discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a>.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">f_continuous</td><td>Continuous-time dynamics xdot = f(x, u). </td></tr>
+    <tr><td class="paramname">h</td><td>Output function y = h(x, u). </td></tr>
+    <tr><td class="paramname">x0</td><td>Operating point state. </td></tr>
+    <tr><td class="paramname">u0</td><td>Operating point input. </td></tr>
+    <tr><td class="paramname">Ts</td><td>Sample time [s] for ZOH discretisation. </td></tr>
+    <tr><td class="paramname">eps_scale</td><td>Jacobian step scale (default 1e-4). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> (ZOH). </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="LinearisationHelper_8cpp_source.html#l00056">56</a> of file <a class="el" href="LinearisationHelper_8cpp_source.html">LinearisationHelper.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="PlantModel_8cpp_source.html#l00194">c2d()</a>, <a class="el" href="LinearisationHelper_8cpp_source.html#l00047">jacobianU()</a>, <a class="el" href="LinearisationHelper_8cpp_source.html#l00038">jacobianX()</a>, <a class="el" href="LinearisationHelper_8cpp_source.html#l00010">numJacImpl()</a>, and <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd">ZOH</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="LinearisationHelper_8cpp_source.html#l00080">lineariseAtPoint()</a>.</p>
 
 </div>
 </div>
@@ -1774,6 +2054,52 @@ Variables</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="SubspaceID_8cpp_source.html#l00029">29</a> of file <a class="el" href="SubspaceID_8cpp_source.html">SubspaceID.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="SubspaceID_8h_source.html#l00106">ctrl::SubspaceIDResult::innovCov</a>, <a class="el" href="SubspaceID_8h_source.html#l00099">ctrl::SubspaceIDResult::kalmanGain</a>, <a class="el" href="SubspaceID_8h_source.html#l00109">ctrl::SubspaceIDResult::message</a>, <a class="el" href="SubspaceID_8h_source.html#l00089">ctrl::SubspaceIDResult::model</a>, <a class="el" href="SubspaceID_8h_source.html#l00090">ctrl::SubspaceIDResult::singularValues</a>, and <a class="el" href="SubspaceID_8h_source.html#l00108">ctrl::SubspaceIDResult::success</a>.</p>
+
+</div>
+</div>
+<a id="a250ebc9ea0eab12cf24cb43d45c7241e" name="a250ebc9ea0eab12cf24cb43d45c7241e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a250ebc9ea0eab12cf24cb43d45c7241e">&#9670;&#160;</a></span>numJacImpl()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static Eigen::MatrixXd ctrl::numJacImpl </td>
+          <td>(</td>
+          <td class="paramtype">const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;&#160;</td>
+          <td class="paramname"><em>func</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramname"><em>x0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>eps_scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="LinearisationHelper_8cpp_source.html#l00010">10</a> of file <a class="el" href="LinearisationHelper_8cpp_source.html">LinearisationHelper.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="LinearisationHelper_8cpp_source.html#l00047">jacobianU()</a>, <a class="el" href="LinearisationHelper_8cpp_source.html#l00038">jacobianX()</a>, and <a class="el" href="LinearisationHelper_8cpp_source.html#l00056">lineariseAtPoint()</a>.</p>
 
 </div>
 </div>

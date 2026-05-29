@@ -1,9 +1,4 @@
 var searchData=
 [
-  ['_7eiactuator_0',['~IActuator',['../classctrl_1_1IActuator.html#a04954bfa36bd3ba79e3cd50d4ab92984',1,'ctrl::IActuator']]],
-  ['_7eicontroller_1',['~IController',['../classctrl_1_1IController.html#a209dd6532b22278f93430a0757aae4c7',1,'ctrl::IController']]],
-  ['_7eicontrollerobserver_2',['~IControllerObserver',['../classctrl_1_1IControllerObserver.html#a01b6055ee06cc5eea2921bad53090844',1,'ctrl::IControllerObserver']]],
-  ['_7eischeduler_3',['~IScheduler',['../classctrl_1_1IScheduler.html#a9199442669390f1553fc7fd3707e9d74',1,'ctrl::IScheduler']]],
-  ['_7eisensor_4',['~ISensor',['../classctrl_1_1ISensor.html#a7d48f47d37701465bf558e62295ae647',1,'ctrl::ISensor']]],
-  ['_7eitimer_5',['~ITimer',['../classctrl_1_1ITimer.html#a52b3fc9c30e56f81b3922f83b27e278c',1,'ctrl::ITimer']]]
+  ['write_0',['write',['../classctrl_1_1IActuator.html#ac6546d74dfc79167c6de08f6b218141c',1,'ctrl::IActuator::write()'],['../classctrl_1_1SimActuator.html#aeeedd4bb19bd1bcbbe968d1c851ba98e',1,'ctrl::SimActuator::write()']]]
 ];

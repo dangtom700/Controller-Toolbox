@@ -1,8 +1,5 @@
 var searchData=
 [
-  ['readme_2emd_0',['README.md',['../README_8md.html',1,'']]],
-  ['recursiveleastsquares_2ecpp_1',['RecursiveLeastSquares.cpp',['../RecursiveLeastSquares_8cpp.html',1,'']]],
-  ['recursiveleastsquares_2eh_2',['RecursiveLeastSquares.h',['../RecursiveLeastSquares_8h.html',1,'']]],
-  ['repetitivecontroller_2ecpp_3',['RepetitiveController.cpp',['../RepetitiveController_8cpp.html',1,'']]],
-  ['repetitivecontroller_2eh_4',['RepetitiveController.h',['../RepetitiveController_8h.html',1,'']]]
+  ['plantmodel_2ecpp_0',['PlantModel.cpp',['../PlantModel_8cpp.html',1,'']]],
+  ['plantmodel_2eh_1',['PlantModel.h',['../PlantModel_8h.html',1,'']]]
 ];

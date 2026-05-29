@@ -13,15 +13,16 @@ var searchData=
   ['notifyobservervec_10',['notifyObserverVec',['../classctrl_1_1IController.html#a94a7fb5d63afdf74ace190fd5b2ee8fe',1,'ctrl::IController']]],
   ['nowns_11',['nowns',['../classctrl_1_1ITimer.html#af3c2fa16d291acbefd92b5bedc8d160c',1,'ctrl::ITimer::nowNs()'],['../classctrl_1_1StdTimer.html#a0802afe91b9abe2278aa6443c931fa97',1,'ctrl::StdTimer::nowNs()']]],
   ['np_12',['np',['../structctrl_1_1MPCParams.html#af9281564b038417138f22da60f5708bd',1,'ctrl::MPCParams::Np'],['../structctrl_1_1GPCParams.html#ac973ff63905d8be6ffbc6a71a7174b3a',1,'ctrl::GPCParams::Np'],['../structctrl_1_1MPCHorizonTuner_1_1Recommendation.html#afae61ac2f1102b1449c485d46fb5f24e',1,'ctrl::MPCHorizonTuner::Recommendation::Np']]],
-  ['nu_13',['nu',['../structctrl_1_1GeneralisedPlant.html#a6e8d9e00ba64b8e752a0805184898b43',1,'ctrl::GeneralisedPlant::nu()'],['../structctrl_1_1GPCParams.html#ae456e552591711cddf0be7c36e260270',1,'ctrl::GPCParams::Nu']]],
+  ['nu_13',['nu',['../structctrl_1_1GPCParams.html#ae456e552591711cddf0be7c36e260270',1,'ctrl::GPCParams::Nu'],['../structctrl_1_1GeneralisedPlant.html#a6e8d9e00ba64b8e752a0805184898b43',1,'ctrl::GeneralisedPlant::nu()']]],
   ['num_14',['num',['../structctrl_1_1TransferFunction.html#a5d019a4f6f10e99341ecd27e6d9403d6',1,'ctrl::TransferFunction']]],
   ['numdegree_15',['numDegree',['../classctrl_1_1PadeApproximator.html#a48f445660e01ba2f702ad028855a0083',1,'ctrl::PadeApproximator']]],
   ['numerator_16',['numerator',['../classctrl_1_1PadeApproximator.html#a690d045d93ba530795c7b5103852d936',1,'ctrl::PadeApproximator::numerator()'],['../classctrl_1_1RecursiveLeastSquares.html#aae077fa95d60789bbbbb1959caf93fb6',1,'ctrl::RecursiveLeastSquares::numerator()']]],
   ['numericaljacobian_17',['numericalJacobian',['../classctrl_1_1ExtendedKalmanFilter.html#a6bdfea525d975b161d6f1b11a9bffc5a',1,'ctrl::ExtendedKalmanFilter']]],
   ['numinputs_18',['numInputs',['../classctrl_1_1FuzzySystem.html#ad3ed5ae109474e817ad7bdf372e3045c',1,'ctrl::FuzzySystem']]],
-  ['numoutputs_19',['numOutputs',['../classctrl_1_1FuzzySystem.html#a218de117a949095f6c3339e4b9544fc6',1,'ctrl::FuzzySystem']]],
-  ['numrules_20',['numRules',['../classctrl_1_1FuzzySystem.html#a8ae2c712059bfb3c0135ebd7b2669e37',1,'ctrl::FuzzySystem']]],
-  ['nw_21',['nw',['../structctrl_1_1GeneralisedPlant.html#ad4ae87bda2fbc2dc52fe7a5ebf28b8f4',1,'ctrl::GeneralisedPlant']]],
-  ['ny_22',['ny',['../structctrl_1_1GeneralisedPlant.html#a14bdecd70266428b8fa5956fb210d286',1,'ctrl::GeneralisedPlant']]],
-  ['nz_23',['nz',['../structctrl_1_1GeneralisedPlant.html#afdccb80dcf48063e46e3c1adbcba6b7e',1,'ctrl::GeneralisedPlant']]]
+  ['numjacimpl_19',['numJacImpl',['../namespacectrl.html#a250ebc9ea0eab12cf24cb43d45c7241e',1,'ctrl']]],
+  ['numoutputs_20',['numOutputs',['../classctrl_1_1FuzzySystem.html#a218de117a949095f6c3339e4b9544fc6',1,'ctrl::FuzzySystem']]],
+  ['numrules_21',['numRules',['../classctrl_1_1FuzzySystem.html#a8ae2c712059bfb3c0135ebd7b2669e37',1,'ctrl::FuzzySystem']]],
+  ['nw_22',['nw',['../structctrl_1_1GeneralisedPlant.html#ad4ae87bda2fbc2dc52fe7a5ebf28b8f4',1,'ctrl::GeneralisedPlant']]],
+  ['ny_23',['ny',['../structctrl_1_1GeneralisedPlant.html#a14bdecd70266428b8fa5956fb210d286',1,'ctrl::GeneralisedPlant']]],
+  ['nz_24',['nz',['../structctrl_1_1GeneralisedPlant.html#afdccb80dcf48063e46e3c1adbcba6b7e',1,'ctrl::GeneralisedPlant']]]
 ];

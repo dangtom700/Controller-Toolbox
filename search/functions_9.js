@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['kalmanfilter_0',['KalmanFilter',['../classctrl_1_1KalmanFilter.html#a226052d8a01efa2589f81e7c52964d0c',1,'ctrl::KalmanFilter']]],
-  ['kalmannoise_1',['kalmanNoise',['../classctrl_1_1TunerSuite.html#aae8b0a08e8163a2b97a7a3ac72f90875',1,'ctrl::TunerSuite']]]
+  ['jacobianu_0',['jacobianU',['../namespacectrl.html#a7828478a94fc9582ec07f78dcea2286d',1,'ctrl']]],
+  ['jacobianx_1',['jacobianX',['../namespacectrl.html#a6cc60eb5b71614401fe3c46d67629805',1,'ctrl']]]
 ];

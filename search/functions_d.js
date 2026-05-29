@@ -1,13 +1,19 @@
 var searchData=
 [
-  ['oncompute_0',['onCompute',['../classctrl_1_1IControllerObserver.html#a8fdee178803e03dfb2ba1af3044558d6',1,'ctrl::IControllerObserver']]],
-  ['oncomputevec_1',['onComputeVec',['../classctrl_1_1IControllerObserver.html#af1d51da10240290fa672f0f7e945f6ff',1,'ctrl::IControllerObserver']]],
-  ['onreset_2',['onReset',['../classctrl_1_1IControllerObserver.html#abebcb63f9bc7300642df4b8b833adab6',1,'ctrl::IControllerObserver']]],
-  ['operator_28_29_3',['operator()',['../structctrl_1_1MF.html#aea9e4bb7700c6ba5d5ba05004ac68edd',1,'ctrl::MF']]],
-  ['optimise_4',['optimise',['../classctrl_1_1TunerSuite.html#a9c32b9bf224d2b1fe4ff2c40e334b41e',1,'ctrl::TunerSuite']]],
-  ['order_5',['order',['../structctrl_1_1TransferFunction.html#a4ceaf021d217e8bafd64c2bd5c172d73',1,'ctrl::TransferFunction']]],
-  ['output_6',['output',['../classctrl_1_1SimPlant.html#a53edf7706f7e6e6a1abdfb0df7dbdd7f',1,'ctrl::SimPlant']]],
-  ['outputsize_7',['outputSize',['../structctrl_1_1StateSpace.html#ae4ad7c88e0250e0c5648204a56365d2e',1,'ctrl::StateSpace']]],
-  ['outputvar_8',['outputVar',['../classctrl_1_1FuzzySystem.html#aba2bbae46a0ab2d642f1da28c592385a',1,'ctrl::FuzzySystem']]],
-  ['overruncount_9',['overruncount',['../classctrl_1_1IScheduler.html#af311374b124ab032bcbe401849c74cd1',1,'ctrl::IScheduler::overrunCount()'],['../classctrl_1_1SimScheduler.html#a7d312095c089b7606019ed1f526de4ae',1,'ctrl::SimScheduler::overrunCount()']]]
+  ['n4sid_0',['n4sid',['../namespacectrl.html#ac04c2f87d749604186fa29b45048e9a3',1,'ctrl']]],
+  ['notifyobserver_1',['notifyObserver',['../classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301',1,'ctrl::IController']]],
+  ['notifyobserverreset_2',['notifyObserverReset',['../classctrl_1_1IController.html#add3b2b28b1048f8cd5c1130b80676138',1,'ctrl::IController']]],
+  ['notifyobservervec_3',['notifyObserverVec',['../classctrl_1_1IController.html#a94a7fb5d63afdf74ace190fd5b2ee8fe',1,'ctrl::IController']]],
+  ['nowns_4',['nowns',['../classctrl_1_1ITimer.html#af3c2fa16d291acbefd92b5bedc8d160c',1,'ctrl::ITimer::nowNs()'],['../classctrl_1_1StdTimer.html#a0802afe91b9abe2278aa6443c931fa97',1,'ctrl::StdTimer::nowNs()']]],
+  ['nu_5',['nu',['../structctrl_1_1GeneralisedPlant.html#a6e8d9e00ba64b8e752a0805184898b43',1,'ctrl::GeneralisedPlant']]],
+  ['numdegree_6',['numDegree',['../classctrl_1_1PadeApproximator.html#a48f445660e01ba2f702ad028855a0083',1,'ctrl::PadeApproximator']]],
+  ['numerator_7',['numerator',['../classctrl_1_1PadeApproximator.html#a690d045d93ba530795c7b5103852d936',1,'ctrl::PadeApproximator::numerator()'],['../classctrl_1_1RecursiveLeastSquares.html#aae077fa95d60789bbbbb1959caf93fb6',1,'ctrl::RecursiveLeastSquares::numerator()']]],
+  ['numericaljacobian_8',['numericalJacobian',['../classctrl_1_1ExtendedKalmanFilter.html#a6bdfea525d975b161d6f1b11a9bffc5a',1,'ctrl::ExtendedKalmanFilter']]],
+  ['numinputs_9',['numInputs',['../classctrl_1_1FuzzySystem.html#ad3ed5ae109474e817ad7bdf372e3045c',1,'ctrl::FuzzySystem']]],
+  ['numjacimpl_10',['numJacImpl',['../namespacectrl.html#a250ebc9ea0eab12cf24cb43d45c7241e',1,'ctrl']]],
+  ['numoutputs_11',['numOutputs',['../classctrl_1_1FuzzySystem.html#a218de117a949095f6c3339e4b9544fc6',1,'ctrl::FuzzySystem']]],
+  ['numrules_12',['numRules',['../classctrl_1_1FuzzySystem.html#a8ae2c712059bfb3c0135ebd7b2669e37',1,'ctrl::FuzzySystem']]],
+  ['nw_13',['nw',['../structctrl_1_1GeneralisedPlant.html#ad4ae87bda2fbc2dc52fe7a5ebf28b8f4',1,'ctrl::GeneralisedPlant']]],
+  ['ny_14',['ny',['../structctrl_1_1GeneralisedPlant.html#a14bdecd70266428b8fa5956fb210d286',1,'ctrl::GeneralisedPlant']]],
+  ['nz_15',['nz',['../structctrl_1_1GeneralisedPlant.html#afdccb80dcf48063e46e3c1adbcba6b7e',1,'ctrl::GeneralisedPlant']]]
 ];

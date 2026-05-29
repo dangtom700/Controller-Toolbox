@@ -1,12 +1,13 @@
 var searchData=
 [
-  ['padeapproximator_0',['PadeApproximator',['../classctrl_1_1PadeApproximator.html#a29bb8876f20cee739fb91815215542ad',1,'ctrl::PadeApproximator']]],
-  ['padedelayfilter_1',['padeDelayFilter',['../namespacectrl.html#a9a02758f980949ccd582565a29640613',1,'ctrl']]],
-  ['params_2',['params',['../classctrl_1_1RecursiveLeastSquares.html#afe2305bf3b9e0e0af862413c7c1b4c46',1,'ctrl::RecursiveLeastSquares::params()'],['../classctrl_1_1RepetitiveController.html#a8c6698a74f4010e5fa8381609dc7f863',1,'ctrl::RepetitiveController::params()'],['../classctrl_1_1GeneralizedPredictiveController.html#a6392060275492b5e9cb6fbf554b3a522',1,'ctrl::GeneralizedPredictiveController::params()'],['../classctrl_1_1FuzzySupervisor.html#a6851fba43ab453be554212bab54daf85',1,'ctrl::FuzzySupervisor::params()'],['../classctrl_1_1FuzzyPID.html#a95b6d11eb466fedb57bcb2e4d3e0c888',1,'ctrl::FuzzyPID::params()'],['../classctrl_1_1FuzzyPD.html#ae4c811460986ea826a572bf1ff3f762c',1,'ctrl::FuzzyPD::params()'],['../classctrl_1_1ExtremumSeeker.html#a26e8d0226a99f4803eea979bd39c347c',1,'ctrl::ExtremumSeeker::params()'],['../classctrl_1_1SuperTwistingSMC.html#a6fafb02b3038f5ee0fc8e655561ba440',1,'ctrl::SuperTwistingSMC::params()'],['../classctrl_1_1DiscreteSMC.html#aca78145037c891d96bc9de372e7d6d61',1,'ctrl::DiscreteSMC::params()'],['../classctrl_1_1DiscretePID.html#a62f27538545caac7a595568064087125',1,'ctrl::DiscretePID::params()'],['../classctrl_1_1DiscreteMPC.html#ae84b5bd0e343344b35df1d90b3f1e49f',1,'ctrl::DiscreteMPC::params()'],['../classctrl_1_1DiscreteLeadLag.html#aeabf84bdc743e7a9ab9f2fedc6e90116',1,'ctrl::DiscreteLeadLag::params()'],['../classctrl_1_1DiscreteADRC.html#a56c2090eefaa3a8165ca2eb2ccfc1c24',1,'ctrl::DiscreteADRC::params()']]],
-  ['periodns_3',['periodns',['../classctrl_1_1IScheduler.html#ad752ef72e0333e71da7f03c965b96c6b',1,'ctrl::IScheduler::periodNs()'],['../classctrl_1_1SimScheduler.html#a33418d7253c0b59d3f901cf5c59f7972',1,'ctrl::SimScheduler::periodNs()']]],
-  ['phaseat_4',['phaseAt',['../classctrl_1_1DiscreteLeadLag.html#a70d9221a783ccd2094c38d6a8d5c9236',1,'ctrl::DiscreteLeadLag']]],
-  ['poleplacementhint_5',['polePlacementHint',['../classctrl_1_1LQRWeightTuner.html#a48adb0f63d70dc532542cc146defb8c9',1,'ctrl::LQRWeightTuner']]],
-  ['poleplacementhintfor_6',['polePlacementHintFor',['../classctrl_1_1LQRWeightTuner.html#aa93940d396731dbc46963a9840f0b655',1,'ctrl::LQRWeightTuner']]],
-  ['predict_7',['predict',['../classctrl_1_1ExtendedKalmanFilter.html#ad718e7997865127cfac7a43acc196c70',1,'ctrl::ExtendedKalmanFilter::predict()'],['../classctrl_1_1KalmanFilter.html#acf9a9b384da9b6fa0decdaf86b3dd778',1,'ctrl::KalmanFilter::predict()'],['../classctrl_1_1UnscentedKalmanFilter.html#adc51914e927920bed3e3275ce833af58',1,'ctrl::UnscentedKalmanFilter::predict()']]],
-  ['publish_8',['publish',['../classctrl_1_1AtomicParamBuffer.html#aa6028fb6a06f978ea60a53945c3963f5',1,'ctrl::AtomicParamBuffer']]]
+  ['oncompute_0',['onCompute',['../classctrl_1_1IControllerObserver.html#a8fdee178803e03dfb2ba1af3044558d6',1,'ctrl::IControllerObserver']]],
+  ['oncomputevec_1',['onComputeVec',['../classctrl_1_1IControllerObserver.html#af1d51da10240290fa672f0f7e945f6ff',1,'ctrl::IControllerObserver']]],
+  ['onreset_2',['onReset',['../classctrl_1_1IControllerObserver.html#abebcb63f9bc7300642df4b8b833adab6',1,'ctrl::IControllerObserver']]],
+  ['operator_28_29_3',['operator()',['../structctrl_1_1MF.html#aea9e4bb7700c6ba5d5ba05004ac68edd',1,'ctrl::MF']]],
+  ['optimise_4',['optimise',['../classctrl_1_1TunerSuite.html#a9c32b9bf224d2b1fe4ff2c40e334b41e',1,'ctrl::TunerSuite']]],
+  ['order_5',['order',['../structctrl_1_1TransferFunction.html#a4ceaf021d217e8bafd64c2bd5c172d73',1,'ctrl::TransferFunction']]],
+  ['output_6',['output',['../classctrl_1_1SimPlant.html#a53edf7706f7e6e6a1abdfb0df7dbdd7f',1,'ctrl::SimPlant']]],
+  ['outputsize_7',['outputSize',['../structctrl_1_1StateSpace.html#ae4ad7c88e0250e0c5648204a56365d2e',1,'ctrl::StateSpace']]],
+  ['outputvar_8',['outputVar',['../classctrl_1_1FuzzySystem.html#aba2bbae46a0ab2d642f1da28c592385a',1,'ctrl::FuzzySystem']]],
+  ['overruncount_9',['overruncount',['../classctrl_1_1IScheduler.html#af311374b124ab032bcbe401849c74cd1',1,'ctrl::IScheduler::overrunCount()'],['../classctrl_1_1SimScheduler.html#a7d312095c089b7606019ed1f526de4ae',1,'ctrl::SimScheduler::overrunCount()']]]
 ];

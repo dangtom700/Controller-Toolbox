@@ -111,7 +111,7 @@ var searchData=
   ['tustin_108',['Tustin',['../namespacectrl.html#adca30ca249ad63cca5be491ba5520156aa56934567c0b3ed078a9a0e3197525c8',1,'ctrl']]],
   ['tustinfirstorder_109',['tustinFirstOrder',['../namespacectrl.html#a449f238a5061ab8128fb4a095784a94a',1,'ctrl']]],
   ['tustinprewarped_110',['TustinPrewarped',['../namespacectrl.html#adca30ca249ad63cca5be491ba5520156a0032796475fd7203f9b920f1a59b969f',1,'ctrl']]],
-  ['type_111',['type',['../structctrl_1_1MF.html#abed9454a2e06d1052b9f6b8128e02e34',1,'ctrl::MF::type'],['../structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3',1,'ctrl::MF::Type']]],
+  ['type_111',['type',['../structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3',1,'ctrl::MF::Type'],['../structctrl_1_1MF.html#abed9454a2e06d1052b9f6b8128e02e34',1,'ctrl::MF::type']]],
   ['types_20a_20href_20lib_20plantmodel_20h_20plantmodel_20h_20a_112',['5.1 Core Types (&lt;a href=&quot;lib/PlantModel.h&quot; &gt;PlantModel.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md59',1,'']]],
   ['typical_20starting_20points_20for_20an_20unknown_20siso_20plant_113',['Typical starting points for an unknown SISO plant',['../md_docs_2DEPLOYMENT.html#autotoc_md166',1,'']]],
   ['tyreusluyben_114',['TyreusLuyben',['../namespacectrl.html#ac903a5a20ba43db1acb05d549374197fa96062f227af0e4f48b5754f935e3fc63',1,'ctrl']]]

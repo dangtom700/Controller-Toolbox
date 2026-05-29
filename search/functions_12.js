@@ -1,7 +1,16 @@
 var searchData=
 [
-  ['ultimategain_0',['ultimateGain',['../classctrl_1_1RelayAutoTuner.html#a091fd779e24f5d8b570067a16718b291',1,'ctrl::RelayAutoTuner']]],
-  ['ultimateperiod_1',['ultimatePeriod',['../classctrl_1_1RelayAutoTuner.html#ab3b84f85821f4449d5b16ab912906a5d',1,'ctrl::RelayAutoTuner']]],
-  ['unscentedkalmanfilter_2',['UnscentedKalmanFilter',['../classctrl_1_1UnscentedKalmanFilter.html#a2226c7379bfb4766065bbf77b5599c48',1,'ctrl::UnscentedKalmanFilter']]],
-  ['update_3',['update',['../classctrl_1_1ExtendedKalmanFilter.html#afc408ef1287096c22669ed8a711a8a0f',1,'ctrl::ExtendedKalmanFilter::update()'],['../classctrl_1_1FuzzySupervisor.html#aba8d2cc89d3bf8d527de92b9790dd062',1,'ctrl::FuzzySupervisor::update()'],['../classctrl_1_1KalmanFilter.html#a555b459680345323b9670665dfa9417c',1,'ctrl::KalmanFilter::update()'],['../classctrl_1_1RecursiveLeastSquares.html#af55260afe405c204d29f2a26e46dbfb9',1,'ctrl::RecursiveLeastSquares::update()'],['../classctrl_1_1UnscentedKalmanFilter.html#aa1a98e133e6a1c0eca2a52ccc5cb7861',1,'ctrl::UnscentedKalmanFilter::update()']]]
+  ['taylorapproximator_0',['TaylorApproximator',['../classctrl_1_1TaylorApproximator.html#a884164e3048d8946d5f22b1fec32bbd0',1,'ctrl::TaylorApproximator']]],
+  ['termindex_1',['termIndex',['../structctrl_1_1LinguisticVariable.html#a491421de48a5ed16d6468f043da26a0c',1,'ctrl::LinguisticVariable']]],
+  ['tf2ss_2',['tf2ss',['../namespacectrl.html#a4f658728be7420e427723b3d0eb389d9',1,'ctrl']]],
+  ['tick_3',['tick',['../classctrl_1_1SimScheduler.html#ae01ed953e457efe3a25f52a83c4f032f',1,'ctrl::SimScheduler']]],
+  ['tickcount_4',['tickcount',['../classctrl_1_1IScheduler.html#a9c43823a6e0a8eea0768982fae1b05dd',1,'ctrl::IScheduler::tickCount()'],['../classctrl_1_1SimScheduler.html#a3704fbe278ade6408daccb541d7e2f3f',1,'ctrl::SimScheduler::tickCount()']]],
+  ['tier_5',['tier',['../namespacectrl.html#a932227b39a676cf6614adbc574457f5a',1,'ctrl']]],
+  ['todiscretefilter_6',['toDiscreteFilter',['../classctrl_1_1PadeApproximator.html#abad5a9ee7014f065d0e4992ed91d5ed4',1,'ctrl::PadeApproximator']]],
+  ['tostatespace_7',['toStateSpace',['../classctrl_1_1RecursiveLeastSquares.html#aee7e96824c4ab6e4a454dfe29c7d0293',1,'ctrl::RecursiveLeastSquares']]],
+  ['totransferfunction_8',['toTransferFunction',['../classctrl_1_1RecursiveLeastSquares.html#aaa12ce8181db2cf1cf39b757431f535d',1,'ctrl::RecursiveLeastSquares']]],
+  ['transferfunction_9',['TransferFunction',['../structctrl_1_1TransferFunction.html#ae16f0d0e9aca025d8f3ed2514fe3a8e6',1,'ctrl::TransferFunction']]],
+  ['tunefor_10',['tunefor',['../classctrl_1_1ZieglerNicholsTuner.html#a231e843bc80159426bc654db2b61acb5',1,'ctrl::ZieglerNicholsTuner::tuneFor()'],['../classctrl_1_1LoopShapingTuner.html#a4b7c906dada079f112679ea4d3f949b0',1,'ctrl::LoopShapingTuner::tuneFor()'],['../classctrl_1_1CohenCoonTuner.html#a5c146227e48a93d01a6280c2cfdc398a',1,'ctrl::CohenCoonTuner::tuneFor()']]],
+  ['tuneimpl_11',['tuneimpl',['../classctrl_1_1ZieglerNicholsTuner.html#adcb1e3a95c75bcd448b75e0862ff5dc9',1,'ctrl::ZieglerNicholsTuner::tuneImpl()'],['../classctrl_1_1CohenCoonTuner.html#a335b1cb5ea52f3a5b02864cd0ec41882',1,'ctrl::CohenCoonTuner::tuneImpl()'],['../classctrl_1_1LoopShapingTuner.html#a84f00307a5826a9024a490d3e4578591',1,'ctrl::LoopShapingTuner::tuneImpl()']]],
+  ['tustinfirstorder_12',['tustinFirstOrder',['../namespacectrl.html#a449f238a5061ab8128fb4a095784a94a',1,'ctrl']]]
 ];
