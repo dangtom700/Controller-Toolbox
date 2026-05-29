@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['optimization_0',['optimization',['../namespacectrl.html#afe5d6d219bd6cb8e4f6b4d0d3b9225b8a15970c4fdbca1fc48c5b412d94e798c0',1,'ctrl::Optimization'],['../namespacectrl.html#ab1f13895423e788521b5365061b1b850a15970c4fdbca1fc48c5b412d94e798c0',1,'ctrl::Optimization']]]
+  ['nearestneighbor_0',['NearestNeighbor',['../namespacectrl.html#ac4b116227149e74ff44404995b9b5f9faaa020331bb30d2fa2ecf7c3a0777823f',1,'ctrl']]]
 ];

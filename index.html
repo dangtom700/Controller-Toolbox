@@ -171,19 +171,19 @@ Controller Inventory</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>Robust / Nonlinear</b>   </td><td class="markdownTableBodyNone">SMC (saturation boundary layer), ADRC (2nd-order LADRC + ESO), Extremum Seeker    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>Adaptive</b>   </td><td class="markdownTableBodyNone">MRACController (Lyapunov + σ-modification + Euclidean projection), GPC::setPlant (RLS adaptive)    </td></tr>
+<td class="markdownTableBodyNone"><b>Adaptive</b>   </td><td class="markdownTableBodyNone">MRACController (Lyapunov + sigma-modification + Euclidean projection), GPC::setPlant (RLS adaptive)    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>Nonlinear</b>   </td><td class="markdownTableBodyNone">FeedbackLinearisationController (affine-in-control SISO, relative degree 1; DriftFn+GainFn)    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><b>Intelligent</b>   </td><td class="markdownTableBodyNone">FuzzyPD, FuzzyPID, FuzzySupervisor (Mamdani &amp; Takagi-Sugeno)    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>Composition</b>   </td><td class="markdownTableBodyNone">ControllerStack (Supervisory, Additive, Weighted) — cascade, observer+SF, bumpless transfer    </td></tr>
+<td class="markdownTableBodyNone"><b>Composition</b>   </td><td class="markdownTableBodyNone">ControllerStack (Supervisory, Additive, Weighted) - cascade, observer+SF, bumpless transfer    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><b>Estimators</b>   </td><td class="markdownTableBodyNone">KalmanFilter, EKF (analytical/numerical Jacobians), UKF (sigma-point), MovingHorizonEstimator (condensed QP)    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>Identification</b>   </td><td class="markdownTableBodyNone">FOPDTIdentifier, SOPDTIdentifier + Rivera 1986 IMC, RecursiveLeastSquares, SubspaceID (N4SID)    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>Model utilities</b>   </td><td class="markdownTableBodyNone">LinearisationHelper (jacobianX/U, lineariseAtPoint ZOH), BalancedTruncation (H∞ bound), ZeroPhaseTrackingFilter (ZPETC + transmissionZeros)   </td></tr>
+<td class="markdownTableBodyNone"><b>Model utilities</b>   </td><td class="markdownTableBodyNone">LinearisationHelper (jacobianX/U, lineariseAtPoint ZOH), BalancedTruncation (Hinf bound), ZeroPhaseTrackingFilter (ZPETC + transmissionZeros)   </td></tr>
 </table>
 <hr  />
 <h1><a class="anchor" id="autotoc_md15"></a>
@@ -236,15 +236,15 @@ Project Status</h1>
 <li><code>DiscreteHinf::solveMuSyn</code> extended with full rational D-scaling (first-order D_j(z) fit per channel, plant state augmentation).</li>
 <li>23 new C++ examples (ex32-ex54) and 21 new Python examples (ex50-ex70) covering corrector patterns: Cascade, Additive, Observer+SF, Supervisory.</li>
 </ul>
-<p><b>Extension session (2026-05-28, E1–E5 all implemented):</b></p><ul>
-<li><code>MRACController</code> — Lyapunov MRAC with σ-modification and parameter projection; ADRC-convention <code>compute(y_plant)</code>. Examples: ex57/ex73.</li>
-<li><code>FeedbackLinearisationController</code> — exact FL for SISO affine-in-control; DriftFn+GainFn; <code>setState(x)</code> required each step. Examples: ex56/ex72.</li>
-<li><code>LinearisationHelper</code> — <code>jacobianX/U</code> (central-diff, scaled ε); <code>lineariseAtPoint</code> ZOH. Examples: ex55/ex71.</li>
-<li><code>BalancedTruncation</code> — <code>balancedTruncate(sys, r)</code> with H∞ error bound 2·Σσᵢ; <code>suggestOrder</code>. Examples: ex58/ex74.</li>
-<li><code>ZeroPhaseTrackingFilter</code> — ZPETC (Tomizuka 1987); <code>transmissionZeros</code> via <code>GeneralizedEigenSolver</code>. Examples: ex59/ex75.</li>
+<p><b>Extension session (2026-05-28, E1-E5 all implemented):</b></p><ul>
+<li><code>MRACController</code> - Lyapunov MRAC with sigma-modification and parameter projection; ADRC-convention <code>compute(y_plant)</code>. Examples: ex57/ex73.</li>
+<li><code>FeedbackLinearisationController</code> - exact FL for SISO affine-in-control; DriftFn+GainFn; <code>setState(x)</code> required each step. Examples: ex56/ex72.</li>
+<li><code>LinearisationHelper</code> - <code>jacobianX/U</code> (central-diff, scaled epsilon); <code>lineariseAtPoint</code> ZOH. Examples: ex55/ex71.</li>
+<li><code>BalancedTruncation</code> - <code>balancedTruncate(sys, r)</code> with Hinf error bound 2.Sigmasigma_i; <code>suggestOrder</code>. Examples: ex58/ex74.</li>
+<li><code>ZeroPhaseTrackingFilter</code> - ZPETC (Tomizuka 1987); <code>transmissionZeros</code> via <code>GeneralizedEigenSolver</code>. Examples: ex59/ex75.</li>
 </ul>
 <p><b>Earlier additions:</b></p><ul>
-<li><code>FuzzyLogic</code> module (2026-05-23): Mamdani and Takagi-Sugeno inference engines, <code>FuzzyPD</code>, <code>FuzzyPID</code>, <code>FuzzySupervisor</code> — see <a class="el" href="md_docs_2DOCUMENTATION.html">docs/DOCUMENTATION.md Section 5.2</a>.</li>
+<li><code>FuzzyLogic</code> module (2026-05-23): Mamdani and Takagi-Sugeno inference engines, <code>FuzzyPD</code>, <code>FuzzyPID</code>, <code>FuzzySupervisor</code> - see <a class="el" href="md_docs_2DOCUMENTATION.html">docs/DOCUMENTATION.md Section 5.2</a>.</li>
 <li><code>ExtendedKalmanFilter</code>, <code>UnscentedKalmanFilter</code>, <code>RepetitiveController</code>, <code>GeneralizedPredictiveController</code>, <code>SubspaceID</code>, <code>DiscreteHinf</code>, <code>FOPDTIdentifier</code>, <code>SOPDTIdentifier</code>, <code>MovingHorizonEstimator</code>, <code>FeedforwardController</code>, <code>GradientProjectionQP</code>.</li>
 <li>Five math corrections (2026-05-22): MPC condensed prediction formula, PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor feedthrough, SMC <code>c_de</code> Ts-absorption.</li>
 </ul>

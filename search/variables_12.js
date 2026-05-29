@@ -9,9 +9,10 @@ var searchData=
   ['theta_5fmax_6',['theta_max',['../structctrl_1_1MRACParams.html#abbd602b0aeed16233d4bc0bfe1fb65fc',1,'ctrl::MRACParams']]],
   ['theta_5fr0_7',['theta_r0',['../structctrl_1_1MRACParams.html#a64d917abf55aaf0bae2d11cee71fde2d',1,'ctrl::MRACParams']]],
   ['theta_5fy0_8',['theta_y0',['../structctrl_1_1MRACParams.html#ac2a12366248114f90f46bf1db6d0fdd1',1,'ctrl::MRACParams']]],
-  ['trend_9',['trend',['../structctrl_1_1SupervisorDecision.html#a8713ecebf6d251e071844373912ac324',1,'ctrl::SupervisorDecision']]],
-  ['trend_5fthreshold_10',['trend_threshold',['../structctrl_1_1SupervisorParams.html#a8c497ea5b6a80340113a41e14311dfa8',1,'ctrl::SupervisorParams']]],
-  ['ts_11',['ts',['../structctrl_1_1GeneralisedPlant.html#a6627378f5653ce8ca392374bbeee703a',1,'ctrl::GeneralisedPlant::Ts'],['../structctrl_1_1HinfResult.html#a8c12b3560c577ebec538ddab1eba56d1',1,'ctrl::HinfResult::Ts'],['../structctrl_1_1TransferFunction.html#ae97ba6406688b691461c2e86beb8181e',1,'ctrl::TransferFunction::Ts'],['../structctrl_1_1StateSpace.html#ad6ed610dbd71a5f06d923a224e6371a4',1,'ctrl::StateSpace::Ts']]],
-  ['tu_12',['Tu',['../structctrl_1_1ZieglerNicholsTuner_1_1Input.html#a1974a022f5980baa19b3644e0d370b32',1,'ctrl::ZieglerNicholsTuner::Input']]],
-  ['type_13',['type',['../structctrl_1_1MF.html#abed9454a2e06d1052b9f6b8128e02e34',1,'ctrl::MF']]]
+  ['threshold_9',['threshold',['../structctrl_1_1ClusterResult.html#a545e7263c0f946328b635cb073262eb8',1,'ctrl::ClusterResult']]],
+  ['trend_10',['trend',['../structctrl_1_1SupervisorDecision.html#a8713ecebf6d251e071844373912ac324',1,'ctrl::SupervisorDecision']]],
+  ['trend_5fthreshold_11',['trend_threshold',['../structctrl_1_1SupervisorParams.html#a8c497ea5b6a80340113a41e14311dfa8',1,'ctrl::SupervisorParams']]],
+  ['ts_12',['ts',['../structctrl_1_1GeneralisedPlant.html#a6627378f5653ce8ca392374bbeee703a',1,'ctrl::GeneralisedPlant::Ts'],['../structctrl_1_1HinfResult.html#a8c12b3560c577ebec538ddab1eba56d1',1,'ctrl::HinfResult::Ts'],['../structctrl_1_1LPVModel.html#a2ad74eef0d4592daa7346797b4019ad5',1,'ctrl::LPVModel::Ts'],['../structctrl_1_1TransferFunction.html#ae97ba6406688b691461c2e86beb8181e',1,'ctrl::TransferFunction::Ts'],['../structctrl_1_1StateSpace.html#ad6ed610dbd71a5f06d923a224e6371a4',1,'ctrl::StateSpace::Ts']]],
+  ['tu_13',['Tu',['../structctrl_1_1ZieglerNicholsTuner_1_1Input.html#a1974a022f5980baa19b3644e0d370b32',1,'ctrl::ZieglerNicholsTuner::Input']]],
+  ['type_14',['type',['../structctrl_1_1MF.html#abed9454a2e06d1052b9f6b8128e02e34',1,'ctrl::MF']]]
 ];

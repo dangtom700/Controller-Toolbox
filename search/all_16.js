@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['p_0',['p',['../structctrl_1_1MF.html#a2fec41d0a687a97cb2babd5d06e0175b',1,'ctrl::MF::p'],['../structctrl_1_1DareResult.html#a41de4c889ede14c44c1f771f3e08e8da',1,'ctrl::DareResult::P']]],
+  ['p_0',['p',['../structctrl_1_1MF.html#a2fec41d0a687a97cb2babd5d06e0175b',1,'ctrl::MF::p'],['../structctrl_1_1OperatingPoint.html#a1f1e54d3c5f154c5b1d3a8c58437848b',1,'ctrl::OperatingPoint::p'],['../structctrl_1_1DareResult.html#a41de4c889ede14c44c1f771f3e08e8da',1,'ctrl::DareResult::P']]],
   ['p0_1',['P0',['../structctrl_1_1KalmanNoiseParams.html#a4469154d68973e0e228414ab833b671d',1,'ctrl::KalmanNoiseParams']]],
   ['padeapproximator_2',['padeapproximator',['../classctrl_1_1PadeApproximator.html',1,'ctrl::PadeApproximator'],['../classctrl_1_1PadeApproximator.html#a29bb8876f20cee739fb91815215542ad',1,'ctrl::PadeApproximator::PadeApproximator()']]],
   ['padedelayfilter_3',['padeDelayFilter',['../namespacectrl.html#a9a02758f980949ccd582565a29640613',1,'ctrl']]],
@@ -29,16 +29,18 @@ var searchData=
   ['plantmodel_20h_20plantmodel_20h_20a_26',['5.1 Core Types (&lt;a href=&quot;lib/PlantModel.h&quot; &gt;PlantModel.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md59',1,'']]],
   ['plantmodel_2ecpp_27',['PlantModel.cpp',['../PlantModel_8cpp.html',1,'']]],
   ['plantmodel_2eh_28',['PlantModel.h',['../PlantModel_8h.html',1,'']]],
-  ['points_20for_20an_20unknown_20siso_20plant_29',['Typical starting points for an unknown SISO plant',['../md_docs_2DEPLOYMENT.html#autotoc_md177',1,'']]],
-  ['poleplacementhint_30',['polePlacementHint',['../classctrl_1_1LQRWeightTuner.html#a48adb0f63d70dc532542cc146defb8c9',1,'ctrl::LQRWeightTuner']]],
-  ['poleplacementhintfor_31',['polePlacementHintFor',['../classctrl_1_1LQRWeightTuner.html#aa93940d396731dbc46963a9840f0b655',1,'ctrl::LQRWeightTuner']]],
-  ['polymulroot_32',['polyMulRoot',['../namespacectrl.html#a674a4cb5443c9785e4a3f39a97044253',1,'ctrl']]],
-  ['predict_33',['predict',['../classctrl_1_1UnscentedKalmanFilter.html#adc51914e927920bed3e3275ce833af58',1,'ctrl::UnscentedKalmanFilter::predict()'],['../classctrl_1_1ExtendedKalmanFilter.html#ad718e7997865127cfac7a43acc196c70',1,'ctrl::ExtendedKalmanFilter::predict()'],['../classctrl_1_1KalmanFilter.html#acf9a9b384da9b6fa0decdaf86b3dd778',1,'ctrl::KalmanFilter::predict()']]],
-  ['predictedcrossoverfreq_34',['predictedCrossoverFreq',['../structctrl_1_1TuningResultBase.html#a40e273dd00b5617da70596b2ec5be355',1,'ctrl::TuningResultBase']]],
-  ['predicteddampingratio_35',['predictedDampingRatio',['../structctrl_1_1TuningResultBase.html#a8845ae86ce6d01d58399a10dd5d52f48',1,'ctrl::TuningResultBase']]],
-  ['project_20status_36',['Project Status',['../index.html#autotoc_md24',1,'']]],
-  ['project_20structure_37',['3. Project Structure',['../md_docs_2DOCUMENTATION.html#autotoc_md41',1,'']]],
-  ['propagation_38',['NaN / Inf Propagation',['../md_docs_2DEPLOYMENT.html#autotoc_md174',1,'']]],
-  ['publish_39',['publish',['../classctrl_1_1AtomicParamBuffer.html#aa6028fb6a06f978ea60a53945c3963f5',1,'ctrl::AtomicParamBuffer']]],
-  ['python_20tooling_40',['1.2 Optional Python Tooling',['../md_docs_2DOCUMENTATION.html#autotoc_md31',1,'']]]
+  ['pointcontroller_29',['pointController',['../classctrl_1_1GainScheduledController.html#a5b6776dbb568e1c41f8888409ed8faa4',1,'ctrl::GainScheduledController']]],
+  ['pointp_30',['pointP',['../classctrl_1_1GainScheduledController.html#a85896d61a6353dca8aeb9bd740ebecc2',1,'ctrl::GainScheduledController']]],
+  ['points_20for_20an_20unknown_20siso_20plant_31',['Typical starting points for an unknown SISO plant',['../md_docs_2DEPLOYMENT.html#autotoc_md177',1,'']]],
+  ['poleplacementhint_32',['polePlacementHint',['../classctrl_1_1LQRWeightTuner.html#a48adb0f63d70dc532542cc146defb8c9',1,'ctrl::LQRWeightTuner']]],
+  ['poleplacementhintfor_33',['polePlacementHintFor',['../classctrl_1_1LQRWeightTuner.html#aa93940d396731dbc46963a9840f0b655',1,'ctrl::LQRWeightTuner']]],
+  ['polymulroot_34',['polyMulRoot',['../namespacectrl.html#a674a4cb5443c9785e4a3f39a97044253',1,'ctrl']]],
+  ['predict_35',['predict',['../classctrl_1_1KalmanFilter.html#acf9a9b384da9b6fa0decdaf86b3dd778',1,'ctrl::KalmanFilter::predict()'],['../classctrl_1_1UnscentedKalmanFilter.html#adc51914e927920bed3e3275ce833af58',1,'ctrl::UnscentedKalmanFilter::predict()'],['../classctrl_1_1ExtendedKalmanFilter.html#ad718e7997865127cfac7a43acc196c70',1,'ctrl::ExtendedKalmanFilter::predict()']]],
+  ['predictedcrossoverfreq_36',['predictedCrossoverFreq',['../structctrl_1_1TuningResultBase.html#a40e273dd00b5617da70596b2ec5be355',1,'ctrl::TuningResultBase']]],
+  ['predicteddampingratio_37',['predictedDampingRatio',['../structctrl_1_1TuningResultBase.html#a8845ae86ce6d01d58399a10dd5d52f48',1,'ctrl::TuningResultBase']]],
+  ['project_20status_38',['Project Status',['../index.html#autotoc_md24',1,'']]],
+  ['project_20structure_39',['3. Project Structure',['../md_docs_2DOCUMENTATION.html#autotoc_md41',1,'']]],
+  ['propagation_40',['NaN / Inf Propagation',['../md_docs_2DEPLOYMENT.html#autotoc_md174',1,'']]],
+  ['publish_41',['publish',['../classctrl_1_1AtomicParamBuffer.html#aa6028fb6a06f978ea60a53945c3963f5',1,'ctrl::AtomicParamBuffer']]],
+  ['python_20tooling_42',['1.2 Optional Python Tooling',['../md_docs_2DOCUMENTATION.html#autotoc_md31',1,'']]]
 ];

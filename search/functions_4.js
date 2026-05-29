@@ -6,8 +6,12 @@ var searchData=
   ['esostate_3',['esoState',['../classctrl_1_1DiscreteADRC.html#a760f92489a75869283cf62fa1558b821',1,'ctrl::DiscreteADRC']]],
   ['estimate_4',['estimate',['../classctrl_1_1MovingHorizonEstimator.html#aca478abc3185eaabcc8679d76d8b6c1f',1,'ctrl::MovingHorizonEstimator']]],
   ['estimatesettlingtime_5',['estimateSettlingTime',['../classctrl_1_1MPCHorizonTuner.html#a9bba8df599eff0fe5b9e6c215e444b8a',1,'ctrl::MPCHorizonTuner']]],
-  ['evaltf_6',['evalTF',['../namespacectrl.html#a32d69a3f458a5c43e08701fece754247',1,'ctrl']]],
-  ['evaluate_7',['evaluate',['../classctrl_1_1FOPDTIdentifier.html#a4a8f268e5a27385587068fcc3afc5f46',1,'ctrl::FOPDTIdentifier::evaluate()'],['../classctrl_1_1TaylorApproximator.html#ab2710a7e2217ec953f1700b69a3369ba',1,'ctrl::TaylorApproximator::evaluate()'],['../classctrl_1_1PadeApproximator.html#ae16f151cf3ae9a30534696b9ff713fdc',1,'ctrl::PadeApproximator::evaluate()'],['../classctrl_1_1FuzzySystem.html#a722e9aaa50e0ad1451a6586be6b09ddd',1,'ctrl::FuzzySystem::evaluate()'],['../classctrl_1_1SOPDTIdentifier.html#ac6471c94e7d7d0eca41b44b2e7265797',1,'ctrl::SOPDTIdentifier::evaluate()']]],
-  ['extendedkalmanfilter_8',['ExtendedKalmanFilter',['../classctrl_1_1ExtendedKalmanFilter.html#ae3841dcb576b5053ea00c4681f4ca8ff',1,'ctrl::ExtendedKalmanFilter']]],
-  ['extremumseeker_9',['ExtremumSeeker',['../classctrl_1_1ExtremumSeeker.html#a895d8b270843de817861413166b5d516',1,'ctrl::ExtremumSeeker']]]
+  ['evala_6',['evalA',['../structctrl_1_1LPVModel.html#a2a6773203a2ad0720fac5a35ab4620bf',1,'ctrl::LPVModel']]],
+  ['evalb_7',['evalB',['../structctrl_1_1LPVModel.html#a2adea8b7a176640a7d37c5d209332b1d',1,'ctrl::LPVModel']]],
+  ['evalc_8',['evalC',['../structctrl_1_1LPVModel.html#a1fb18fc3e9d4dabc195ecd08ae1984b8',1,'ctrl::LPVModel']]],
+  ['evald_9',['evalD',['../structctrl_1_1LPVModel.html#a5ef215c99dc70996015b8654ed9d0b36',1,'ctrl::LPVModel']]],
+  ['evaltf_10',['evalTF',['../namespacectrl.html#a32d69a3f458a5c43e08701fece754247',1,'ctrl']]],
+  ['evaluate_11',['evaluate',['../classctrl_1_1PadeApproximator.html#ae16f151cf3ae9a30534696b9ff713fdc',1,'ctrl::PadeApproximator::evaluate()'],['../classctrl_1_1FuzzySystem.html#a722e9aaa50e0ad1451a6586be6b09ddd',1,'ctrl::FuzzySystem::evaluate()'],['../classctrl_1_1SOPDTIdentifier.html#ac6471c94e7d7d0eca41b44b2e7265797',1,'ctrl::SOPDTIdentifier::evaluate()'],['../classctrl_1_1TaylorApproximator.html#ab2710a7e2217ec953f1700b69a3369ba',1,'ctrl::TaylorApproximator::evaluate()'],['../classctrl_1_1FOPDTIdentifier.html#a4a8f268e5a27385587068fcc3afc5f46',1,'ctrl::FOPDTIdentifier::evaluate()']]],
+  ['extendedkalmanfilter_12',['ExtendedKalmanFilter',['../classctrl_1_1ExtendedKalmanFilter.html#ae3841dcb576b5053ea00c4681f4ca8ff',1,'ctrl::ExtendedKalmanFilter']]],
+  ['extremumseeker_13',['ExtremumSeeker',['../classctrl_1_1ExtremumSeeker.html#a895d8b270843de817861413166b5d516',1,'ctrl::ExtremumSeeker']]]
 ];

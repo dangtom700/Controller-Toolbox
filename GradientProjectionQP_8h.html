@@ -82,9 +82,10 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>Header-only gradient-projection solver for box-constrained convex QPs.  
+<p>Header-only FISTA solver for box-constrained convex QPs.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;Eigen/Dense&gt;</code><br />
+<code>#include &lt;cmath&gt;</code><br />
 </div>
 <p><a href="GradientProjectionQP_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -102,19 +103,27 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a35c170c14a2cf3926e4b26bf41a38ff1" id="r_a35c170c14a2cf3926e4b26bf41a38ff1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1QPSolveResult.html">QPSolveResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a35c170c14a2cf3926e4b26bf41a38ff1">ctrl::solveGradientProjectionQP</a> (const Eigen::MatrixXd &amp;H, const Eigen::VectorXd &amp;g, const Eigen::VectorXd &amp;lb, const Eigen::VectorXd &amp;ub, const Eigen::LDLT&lt; Eigen::MatrixXd &gt; &amp;ldlt, double L, int maxIter, double tol, Eigen::VectorXd &amp;x, Eigen::VectorXd &amp;tmp1, Eigen::VectorXd &amp;tmp2)</td></tr>
-<tr class="memdesc:a35c170c14a2cf3926e4b26bf41a38ff1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve a box-constrained QP via gradient projection (zero-allocation).  <br /></td></tr>
+<tr class="memdesc:a35c170c14a2cf3926e4b26bf41a38ff1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve a box-constrained QP via FISTA (zero-allocation per iteration).  <br /></td></tr>
 <tr class="separator:a35c170c14a2cf3926e4b26bf41a38ff1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Header-only gradient-projection solver for box-constrained convex QPs. </p>
-<p>Solves: </p><div class="fragment"><div class="line">min_{x}   ½ xᵀHx + gᵀx</div>
+<div class="textblock"><p>Header-only FISTA solver for box-constrained convex QPs. </p>
+<p>Solves: </p><div class="fragment"><div class="line">min_{x}   1/2 x<span class="stringliteral">&#39;Hx + g&#39;</span>x</div>
 <div class="line">s.t.      lb &lt;= x &lt;= ub</div>
-</div><!-- fragment --><p><b>Algorithm:</b> Projected gradient descent with constant step alpha = 1/L, where L = lambdamax(H) is the Lipschitz constant of the gradient nablaf = Hx + g. Warm-started from the clamped unconstrained optimum x0 = clamp(-H^-^1g, lb, ub).</p>
-<p><b>Zero-allocation hot path:</b> All temporaries are passed in by the caller as pre-sized scratch vectors. DiscreteMPC and GeneralizedPredictiveController use this to eliminate per-step heap allocation.</p>
-<p><b>Convergence:</b> The iteration terminates when ||x_new - x_old||inf &lt; tol. For typical MPC horizons (Nc &lt;= 10, well-conditioned H), this converges in O(10) iterations.</p>
-<dl class="section see"><dt>See also</dt><dd>Camacho &amp; Bordons, "Model Predictive Control" (2007), Ch. 3. </dd>
+</div><!-- fragment --><p><b>Algorithm:</b> FISTA (Fast Iterative Shrinkage-Thresholding Algorithm, Beck &amp; Teboulle 2009) with step alpha = 1/L, L = lambda_max(H).</p>
+<p>Convergence rate: O(1/k^2) objective error, i.e., O(1/sqrt(kappa)) per decade of tolerance compared to O(1/kappa) for plain projected gradient descent. For a Hessian condition number kappa, FISTA converges in O(sqrt(kappa)) iterations vs O(kappa) for PGD &ndash; typically 10-100x fewer iterations on ill-conditioned MPC Hessians (large prediction horizon, weight ratio rho_y/rho_u &gt;&gt; 1).</p>
+<p><b>Warm start:</b> x_0 = clamp(-H^{-1}g, lb, ub) (unconstrained optimum projected).</p>
+<p><b>Zero-allocation hot path (iterations):</b> All per-iteration work uses pre-sized scratch vectors passed by the caller. One VectorXd of size n is allocated per QP solve (for the FISTA momentum point y); this is not per-iteration.</p>
+<dl class="section user"><dt>FISTA update equations</dt><dd><div class="fragment"><div class="line">y_0    = x_0  (warm start)</div>
+<div class="line">t_0    = 1</div>
+<div class="line">x_{k+1} = proj( y_k - (1/L)(Hy_k + g), lb, ub )</div>
+<div class="line">t_{k+1} = (1 + sqrt(1 + 4*t_k^2)) / 2</div>
+<div class="line">beta_k  = (t_k - 1) / t_{k+1}</div>
+<div class="line">y_{k+1} = x_{k+1} + beta_k * (x_{k+1} - x_k)</div>
+</div><!-- fragment --></dd></dl>
+<dl class="section see"><dt>See also</dt><dd>Beck, A. &amp; Teboulle, M. (2009). A fast iterative shrinkage-thresholding algorithm for linear inverse problems. SIAM J. Imag. Sci. 2(1):183-202. </dd>
 <dd>
-Bertsekas, "Nonlinear Programming" (1999), Section 2.3 (projected gradient). </dd></dl>
+Camacho &amp; Bordons, "Model Predictive Control" (2007), Ch. 3. </dd></dl>
 
 <p class="definition">Definition in file <a class="el" href="GradientProjectionQP_8h_source.html">GradientProjectionQP.h</a>.</p>
 </div></div><!-- contents -->
