@@ -43,11 +43,35 @@ $$K_p = \frac{2\tau + \theta}{2K(\lambda + \theta)}, \quad T_i = \tau + \frac{\t
 
 where lambda is the closed-loop time constant (tuning knob). Increasing lambda sacrifices speed for robustness.
 
-**Applications.** Chemical process loops; anywhere a FOPDT step-response identification is available (use `StepResponseTuner::identify` + `computePIDParams(IMC)`).
+**Applications.** Chemical process loops; anywhere a FOPDT step-response identification is available (use `FOPDTIdentifier::identify` + `StepResponseTuner::computePIDParams(IMC)`).
 
 **Pros.** Single tuning parameter (lambda); predictable closed-loop bandwidth; guaranteed stability for stable, minimum-phase plants.
 
 **Cons.** Requires an explicit FOPDT model; performance degrades when the true plant deviates significantly from the model.
+
+---
+
+## 2a. SOPDT IMC-PID (Rivera 1986 Extension)
+
+**Mechanism.** When the plant exhibits two distinct time constants (oscillatory or over-damped second-order behaviour plus dead time), a SOPDT model provides a better fit. Rivera (1986) extends the IMC-PID derivation to SOPDT.
+
+**SOPDT model:** $G(s) = \frac{K}{(\tau_1 s + 1)(\tau_2 s + 1)}\,e^{-\theta s}$ with $\tau_1 \geq \tau_2$.
+
+**Key equations (Rivera 1986):**
+
+$$\tau_{eq} = \tau_1 + \tau_2, \quad K_p = \frac{\tau_{eq}}{K\left(\lambda_c + \frac{\theta}{2}\right)}, \quad T_i = \tau_{eq}, \quad T_d = \frac{\tau_1 \tau_2}{\tau_{eq}}$$
+
+Integral time equals the sum of the two time constants; derivative time equals their product divided by sum.
+
+**Identification:** Use `SOPDTIdentifier` with graphical (ZN tangent + 28.3%/63.2% crossings to split tau1/tau2) or optimization (nested golden-section) method. Then call `SOPDTIdentifier::imcTuning(model, lambdaC)`.
+
+**Applications.** Second-order chemical processes (CSTR, heat exchangers), mechanical systems with two dominant modes, any plant where FOPDT overfits (large RMSE).
+
+**Lambda_c selection:** Same rule as FOPDT IMC: `lambda_c = theta` gives a good robustness/performance trade-off. Increase lambda_c for more conservative tuning.
+
+**Pros.** More accurate than FOPDT IMC when two time constants are separable; still a single tuning knob.
+
+**Cons.** Requires reliable identification of tau1 and tau2; graphical tau1/tau2 split relies on 28.3% crossing accuracy (sensitive to noise).
 
 ---
 

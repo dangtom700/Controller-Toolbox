@@ -119,9 +119,22 @@ $$x(k+1) = A\,x(k) + B\,u(k) + K\,e(k), \quad y(k) = C\,x(k) + D\,u(k) + e(k)$$
 
 **Mechanism.** Fit a continuous-time low-order transfer function with explicit dead time to step-response or frequency-response data.
 
-$$G(s) = \frac{K}{(\tau s + 1)}\,e^{-T_d s} \quad \text{(FOPDT)}$$
+$$G(s) = \frac{K}{(\tau s + 1)}\,e^{-\theta s} \quad \text{(FOPDT)}$$
 
-Parameters $K$, $\tau$, $T_d$ estimated via the tangent/area method or nonlinear least squares (`procest` in MATLAB).
+$$G(s) = \frac{K}{(\tau_1 s + 1)(\tau_2 s + 1)}\,e^{-\theta s} \quad \text{(SOPDT)}$$
+
+Parameters estimated via the tangent/area method or nonlinear least squares (`procest` in MATLAB, or the toolbox identifiers below).
+
+**Toolbox implementations:**
+
+| Class | Header | Method |
+|-------|--------|--------|
+| `FOPDTIdentifier` | `lib/FOPDTIdentifier.h` | Graphical (ZN tangent + 63.2% crossing) or golden-section optimization |
+| `SOPDTIdentifier` | `lib/SOPDTIdentifier.h` | Graphical (ZN tangent + 63.2% + 28.3% crossings for tau1/tau2 split) or nested golden-section |
+
+**SOPDT tau1/tau2 split (graphical):** The 28.3% crossing time normalised to the 63.2% crossing time encodes the tau1/tau2 asymmetry. An FOPDT response reaches 28.3% at t/tau ≈ 0.332 (normalized); a critically-damped SOPDT reaches 28.3% at ≈ 0.530. Interpolating between these limits gives an `alpha` that splits `tau_sum = tau1 + tau2` into `tau1 >= tau2`.
+
+**IMC-PID tuning from SOPDT (Rivera 1986):** Call `SOPDTIdentifier::imcTuning(model, lambdaC)`. See `cheatsheet/tuning_methods.md` Section 2a for the full formula.
 
 **Applications.** Process control tuning (IMC-PID, Cohen-Coon, AMIGO); wherever a physical interpretation of gain, time constant, and dead time is needed.
 

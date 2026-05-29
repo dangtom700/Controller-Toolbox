@@ -14,7 +14,7 @@ Target audience: control engineers and software developers familiar with discret
 5. [Class Reference](#5-class-reference)
    - 5.1 [Core Types](#51-core-types-iplantmodel)
    - 5.2 [Controllers](#52-controllers) (incl. Fuzzy Logic Module)
-   - 5.3 [Estimators](#53-estimators)
+   - 5.3 [Estimators & Identification](#53-estimators--identification)
    - 5.4 [Tuning Layer](#54-tuning-layer)
    - 5.5 [Composition & Orchestration](#55-composition--orchestration)
    - 5.6 [Analysis & Metrics](#56-analysis--metrics)
@@ -121,45 +121,58 @@ cmake --build build --target docs
 | Header | Component(s) |
 |--------|--------------|
 | [ControllerToolbox.h](lib/ControllerToolbox.h) | Umbrella include - pulls in every public header |
-| [IController.h](lib/IController.h) | Abstract controller interface (`IController`, `IControllerObserver`) |
+| [IController.h](lib/IController.h) | Abstract controller interface (`IController`) |
+| [IControllerObserver.h](lib/IControllerObserver.h) | Observer/telemetry callback interface |
 | [Features.h](lib/Features.h) | `ctrl::features()` - runtime optional-module discovery |
-| [PlantModel.h](lib/PlantModel.h) | `TransferFunction`, `StateSpace`, `tf2ss`, `ssStep`, `ssStepCopy` |
-| [DiscretePID.h](lib/DiscretePID.h) | PID with derivative filter + anti-windup |
+| [PlantModel.h](lib/PlantModel.h) | `TransferFunction`, `StateSpace`, `tf2ss`, `c2d`, `ssStep`, `ssStepCopy` |
+| [DiscretePID.h](lib/DiscretePID.h) | PID with derivative filter + anti-windup (DoM, 2-DOF) |
 | [DiscreteLQR.h](lib/DiscreteLQR.h) | Infinite-horizon LQR, DARE solver, `LQRAdapter` |
 | [DiscreteMPC.h](lib/DiscreteMPC.h) | Condensed receding-horizon QP, `setPlant()` for adaptive MPC |
 | [DiscreteLQG.h](lib/DiscreteLQG.h) | LQR + Kalman output-feedback combo |
 | [DiscreteSMC.h](lib/DiscreteSMC.h) | First-order sliding mode with boundary layer |
 | [DiscreteADRC.h](lib/DiscreteADRC.h) | 2nd-order LADRC (ESO + PD) |
 | [DiscreteLeadLag.h](lib/DiscreteLeadLag.h) | Tustin-discretised lead-lag biquad |
-| [SmithPredictor.h](lib/SmithPredictor.h) | Dead-time compensator wrapper |
+| [SmithPredictor.h](lib/SmithPredictor.h) | Dead-time compensator wrapper (integer + fractional Pade delay) |
 | [ExtremumSeeker.h](lib/ExtremumSeeker.h) | Perturbation-based ESC |
+| [RepetitiveController.h](lib/RepetitiveController.h) | Internal-model repetitive control (IMP with Q-filter) |
+| [FeedforwardController.h](lib/FeedforwardController.h) | Static / dynamic feedforward (reference model + gain) |
+| [GeneralizedPredictiveControl.h](lib/GeneralizedPredictiveControl.h) | GPC (CARIMA predictor, RLS online adaptation, `setPlant()`) |
+| [DiscreteHinf.h](lib/DiscreteHinf.h) | H-infinity (gamma iteration, mixed sensitivity) + mu-synthesis DK-iteration |
 | [FuzzyLogic.h](lib/FuzzyLogic.h) | Mamdani/TS inference engine, `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor` |
-| [KalmanFilter.h](lib/KalmanFilter.h) | Standalone linear KF |
+| [KalmanFilter.h](lib/KalmanFilter.h) | Standalone linear Kalman filter (predict / update / step) |
+| [ExtendedKalmanFilter.h](lib/ExtendedKalmanFilter.h) | EKF with user-supplied Jacobians or numerical differentiation |
+| [UnscentedKalmanFilter.h](lib/UnscentedKalmanFilter.h) | UKF with scaled sigma-point parametrisation (alpha, beta, kappa) |
+| [MovingHorizonEstimator.h](lib/MovingHorizonEstimator.h) | MHE via condensed QP; box constraints on process noise |
+| [FOPDTIdentifier.h](lib/FOPDTIdentifier.h) | FOPDT step-response identification (graphical + golden-section) |
+| [SOPDTIdentifier.h](lib/SOPDTIdentifier.h) | SOPDT step-response identification + Rivera 1986 IMC-PID tuning |
+| [RecursiveLeastSquares.h](lib/RecursiveLeastSquares.h) | Online ARX identification, `toTransferFunction`, `toStateSpace` |
+| [SubspaceID.h](lib/SubspaceID.h) | N4SID subspace identification, `suggestOrder` |
+| [FunctionApproximator.h](lib/FunctionApproximator.h) | Pade delay filter, polynomial approximators |
+| [GradientProjectionQP.h](lib/GradientProjectionQP.h) | Projected gradient QP solver (shared by MPC, GPC, MHE) |
 | [ControllerStack.h](lib/ControllerStack.h) | Supervisory / Additive / Weighted composition |
 | [ControllerTuner.h](lib/ControllerTuner.h) | Per-family tuners (Relay, FOPDT, Bryson, MPC, ...) |
 | [TunerSuite.h](lib/TunerSuite.h) | Unified runtime-dispatched tuner with soft warnings |
-| [ControllerTraits.h](lib/ControllerTraits.h) | Compile-time traits for tuner \leftrightarrow controller compatibility |
+| [ControllerTraits.h](lib/ControllerTraits.h) | Compile-time traits for tuner <-> controller compatibility |
 | [MetricsAnalyzer.h](lib/MetricsAnalyzer.h) | Time-domain step-response metrics |
-| [SystemAnalysis.h](lib/SystemAnalysis.h) | Poles, margins, Hinf, Lyapunov |
+| [SystemAnalysis.h](lib/SystemAnalysis.h) | Poles, margins, H-infinity norm, Lyapunov |
 | [AtomicParamBuffer.h](lib/AtomicParamBuffer.h) | Lock-free param double-buffer for RT updates |
 | [hal/HAL.h](lib/hal/HAL.h) | `ISensor`, `IActuator`, `SimPlant`, `SimSensor`, `SimActuator` |
 
 ### 3.2 Examples (`examples/`)
 
-27 single-file programs numbered `ex01_*` through `ex26_*` plus `example_pid_feedback`. Each demonstrates one controller or composition pattern (see [examples/CMakeLists.txt](examples/CMakeLists.txt) for the full enumeration). The `examples/cpp/` subdirectory contains MIMO / coupled-plant scenarios (`mimo_known`, `mimo_unknown`, `siso_coupled`, `siso_unknown`).
+54 single-file C++ programs (`ex01_*` through `ex54_*`) plus `example_pid_feedback`. Each demonstrates one controller, composition pattern, identification method, or corrector architecture. See [examples/CMakeLists.txt](examples/CMakeLists.txt) for the full enumeration.
 
-The fuzzy examples `ex23`-`ex26` cover four distinct application domains:
+**Example groups:**
 
-| Example | Application | Fuzzy element |
-|---------|-------------|---------------|
-| `ex23_fuzzy_pd_temperature` | HVAC zone temperature | `FuzzyPD` vs PID |
-| `ex24_fuzzy_pid_dc_motor` | DC motor speed ramp | `FuzzyPID` anti-windup |
-| `ex25_fuzzy_supervisor_mpc` | pH neutralisation (nonlinear) | `FuzzySupervisor` driving adaptive MPC |
-| `ex26_fuzzy_ts_gain_scheduler` | Inverted pendulum balancing | Hand-built TS `FuzzySystem` blending two PIDs |
+| Range | Theme |
+|-------|-------|
+| ex01-ex22 | Core controllers: PID, LQR, MPC, SMC, ADRC, ESC, Lead-Lag, Smith Predictor, LQG, stacks |
+| ex23-ex26 | Fuzzy Logic: FuzzyPD, FuzzyPID, FuzzySupervisor+MPC, TS gain scheduling |
+| ex27-ex31 | Advanced: function approximator, GPC, repetitive control, EKF, subspace ID |
+| ex32-ex41 | Part 18 algorithms: SOPDT ID, MHE, rational mu-synthesis, cascade/feedforward/smith/ESC/UKF/LPV |
+| ex42-ex54 | Corrector patterns: Cascade (PID+MPC, SMC+LQR, Fuzzy+PID, ADRC+PID, LeadLag+RC), Additive (ESC+PID, Fuzzy+SMC, LeadLag+I), Observer+SF (EKF+MPC, UKF+SMC, DOB+PI, MHE+MPC), Supervisory (bumpless transfer) |
 
-Companion Python scripts in `examples/python/` (ex23-ex26) generate identical data via self-contained Python implementations and produce comparison plots saved to `examples/data/`.
-
-The Python folder `examples/python/` mirrors many of the C++ demos for cross-validation against `python-control`.
+**Python examples** (`examples/python/`, `ex01_*` through `ex70_*`): NumPy/python-control cross-validation and pybind11 binding demonstrations for every C++ class. Python examples 61-70 mirror the corrector pattern C++ examples.
 
 ### 3.3 Case Study (`case-study/`)
 
@@ -171,10 +184,12 @@ The Python folder `examples/python/` mirrors many of the C++ demos for cross-val
 
 - `test_controllers.cpp` - per-class unit tests (custom `test_framework.h` harness)
 - `test_tuners_extended.cpp` - tuner suite tests (covers all 8 strategies)
-- `test_integration.cpp` - end-to-end closed-loop tests
-- `test_catch2_advanced.cpp` - Catch2 v3 regression suite (25 test cases, 58 assertions): GPC tracking, LQR convergence, SMC sign convention, ADRC double-integrator, n4sid identification
+- `test_integration.cpp` - end-to-end closed-loop tests (c2d+MPC, N4SID+GPC adaptive pipeline)
+- `test_catch2_advanced.cpp` - Catch2 v3 regression suite (**40 test cases, 150 assertions**): GPC tracking, LQR convergence, SMC sign convention, ADRC double-integrator, n4sid identification, EKF/UKF, repetitive control, H-infinity, **SOPDTIdentifier** [sopdt], **MovingHorizonEstimator** [mhe]
 - `test_catch2_pilot.cpp` - Catch2 v3 pilot tests (5 test cases, 21 assertions): LQRAdapter MIMO `computeVec()`, EKF scaled-epsilon Jacobian, PID DoM derivative suppression, 2DOF b_weight overshoot reduction, observer telemetry wiring
 - `test_framework.h` - lightweight assertion macros for the custom harness
+
+**Current totals (2026-05-28):** 73 C++ executables pass | 74 Python examples pass | 0 failures.
 
 ### 3.5 Scripts (`scripts/`)
 
@@ -306,9 +321,17 @@ double w = sys.evaluate({std::abs(theta)});   // weight for gain-scheduled blend
 auto stack = std::make_shared<ctrl::ControllerStack>(ctrl::StackMode::Supervisory, Ts);
 stack->addController(std::make_shared<ctrl::DiscretePID>(pp, Ts), "PID");
 stack->addController(std::make_shared<ctrl::DiscreteSMC>(sp, Ts), "SMC",
-                     1.0, [](double e, double){ return std::abs(e) > 5.0; });   // SMC only when error large
+    1.0, [](double e, double /*last_out*/){ return std::abs(e) > 5.0; });  // SMC only when error large
 double u = stack->compute(error);
 ```
+
+**Condition callback signature:** `std::function<bool(double error, double last_output)>` — both arguments are always passed; use `(double e, double)` to ignore `last_output`.
+
+**Corrector patterns supported:**
+- **Cascade** (`Additive` mode): inner loop runs at fast rate, outer provides setpoint — see `ex42_pid_inner_mpc_outer.cpp`.
+- **Additive** (`Additive` mode): `u_total = u_primary + u_corrector` — see `ex47_esc_additive_pid.cpp`.
+- **Observer+SF** (manual, not via stack): estimator provides `setState()` to feedback law — see `ex50_ekf_mpc.cpp`.
+- **Supervisory / Bumpless** (`Supervisory` mode): condition switches between controllers — see `ex54_bumpless_transfer.cpp`.
 
 ### 4.7 Background Tuning, RT Reads
 
@@ -440,6 +463,35 @@ SISO TF -> controllable canonical SS conversion.
 - **Methods:** `currentEstimate()` -> integrator state theta.
 - **Convergence:** ESC does not declare convergence; user must implement a stagnation window.
 
+#### `RepetitiveController` ([RepetitiveController.h](lib/RepetitiveController.h))
+- **Purpose:** Internal Model Principle (IMP) controller for periodic reference/disturbance rejection. Stores one period of correction signal in a circular buffer and blends it with current error via a Q-filter.
+- **Parameters (`RepetitiveParams`):** `periodSteps` (period length in samples), `gain`, `qCutoff` (Q-filter cutoff, stability robustness knob).
+- **Inputs:** `compute(error)` - standard error `e = r - y`.
+- **Returns:** Control correction `u_rc[k]` to add to a primary controller's output.
+- **Methods:** `compute(e)`, `reset()`, `bufferSize()`.
+
+#### `FeedforwardController` ([FeedforwardController.h](lib/FeedforwardController.h))
+- **Purpose:** Reference model feedforward - computes `u_ff = Kff * r` (static) or filters the reference through a model-inverse transfer function. Use additively with a feedback controller: `u = u_feedback + u_ff`.
+- **Parameters (`FeedforwardParams`):** `gain` (static gain), optional `referenceModel` (`StateSpace` for dynamic FF).
+- **Inputs:** `compute(reference)` - the setpoint signal.
+- **Returns:** Feedforward control signal.
+
+#### `GeneralizedPredictiveController` ([GeneralizedPredictiveControl.h](lib/GeneralizedPredictiveControl.h))
+- **Purpose:** GPC based on the CARIMA (Controlled AutoRegressive Integrated Moving Average) process model. Supports online model adaptation via RLS using `setPlant()`.
+- **Parameters (`GPCParams`):** `Np` (prediction horizon), `Nu` (control horizon), `rho_y` (output weight), `rho_u` (move-suppression weight), `uMin/uMax`.
+- **Inputs:** `computeRef(y_current, r_ref)` — current plant output and reference.
+- **Returns:** Optimal delta-u (first move of the receding horizon).
+- **Methods:** `computeRef(y, r)`, `setPlant(plant)` (hot-swap for adaptive MPC), `augmentedState()`, `reset()`.
+- **Prediction model:** CARIMA `A(q^-1) * Delta * y = B(q^-1) * u + e`; augmented state includes integrator state; Ga (CARIMA step-response matrix) differs from standard MPC Phi by a `C*B` correction term.
+- **Difference from MPC:** GPC operates on `Delta u` (increments) without requiring an initial state `x`; adaptive to unknown plants via RLS feedback.
+
+#### `DiscreteHinf` ([DiscreteHinf.h](lib/DiscreteHinf.h))
+- **Purpose:** H-infinity synthesis via gamma-bisection. Also supports mixed-sensitivity design (`mixedSensitivity()`) and mu-synthesis via full DK-iteration (`solveMuSyn()`).
+- **Parameters (`HinfParams`):** `gammaInit` (initial gamma upper bound), `gammaTol` (bisection tolerance), `maxIter`.
+- **`solve(plant, W1, W2, W3)` -> `HinfResult`:** Solves the standard weighted H-infinity problem. `HinfResult` fields: `controller` (`StateSpace`), `achievedGamma` (actual H-infinity norm), `converged`.
+- **`mixedSensitivity(plant, W1, W2, W3)` -> `HinfResult`:** Convenience wrapper for `[W1*S; W2*KS; W3*T]` mixed-sensitivity design.
+- **`solveMuSyn(plant, params)` -> `MuSynResult`:** Full DK-iteration mu-synthesis. `MuSynParams` fields: `maxDKIter`, `useRationalD` (if true, fits first-order rational D_j(z) per frequency channel). `MuSynResult` includes `controller`, `dFilters_L`, `dFilters_R` (rational D filters per channel), `muHistory` (mu upper bound per iteration).
+
 #### Fuzzy Logic Module ([FuzzyLogic.h](lib/FuzzyLogic.h))
 
 The fuzzy module provides a self-contained Mamdani / Takagi-Sugeno inference engine together with three ready-to-use `IController` wrappers. All classes live in the `ctrl` namespace and are included via `ControllerToolbox.h`.
@@ -492,7 +544,7 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 
 ---
 
-### 5.3 Estimators
+### 5.3 Estimators & Identification
 
 #### `KalmanFilter` ([KalmanFilter.h](lib/KalmanFilter.h))
 - **Purpose:** Linear discrete Kalman filter (predict / update) with Joseph-form covariance update.
@@ -502,6 +554,53 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
   - `step(y, u_prev)` — combined predict+update; `u_current` defaults to `u_prev` (correct for `D = 0` plants).
   - `step(y, u_prev, u_current)` — plain-reference overload; explicit current input for `D != 0` plants. Preferred from Python bindings (the default overload uses `std::optional<std::reference_wrapper<...>>` which pybind11 cannot auto-convert).
 - **Floor:** `R_noise` has an automatic floor of `1e-12` per diagonal element to avoid division by zero.
+
+#### `ExtendedKalmanFilter` ([ExtendedKalmanFilter.h](lib/ExtendedKalmanFilter.h))
+- **Purpose:** EKF for nonlinear state estimation. Linearises the dynamics and measurement functions around the current estimate at each step.
+- **Constructor:** `(n, p, f, h, Fjac, Hjac, Q, R, Ts)` — `n` states, `p` outputs, nonlinear functions `f(x,u)` and `h(x,u)`, Jacobian functions `Fjac(x,u)` and `Hjac(x,u)` (or pass `nullptr` for numerical differentiation with scaled epsilon).
+- **Methods:** `predict(u)`, `update(y, u)`, `step(y, u_prev)`, `state()`, `covariance()`, `setState(x)`, `reset()`.
+- **Numerical Jacobian:** When `Fjac = nullptr`, finite differences use `eps = max(1e-5 * |x_i|, 1e-8)` per element to handle heterogeneous state magnitudes (see [test_catch2_pilot.cpp] P12-17 fix).
+
+#### `UnscentedKalmanFilter` ([UnscentedKalmanFilter.h](lib/UnscentedKalmanFilter.h))
+- **Purpose:** UKF using the unscented transform (2n+1 sigma points) for higher-order nonlinear estimation accuracy without Jacobians.
+- **Constructor:** `(n, p, f, h, Q, R, Ts, MatrixXd(), alpha, beta, kappa)`.
+- **Methods:** `predict(u)`, `update(y, u)`, `state()`, `covariance()`, `setState(x)`, `reset()`.
+- **Alpha/kappa guidance:** For n=2, kappa=0: use `alpha >= 1/sqrt(n) = 0.707` to avoid negative `Wc0 = 1 - alpha^2 + beta`. With `alpha=1.0, beta=2.0, kappa=0`: `lambda=0`, `Wm0=0`, `Wc0=2 > 0`. This is the recommended configuration for 2-state systems.
+
+#### `MovingHorizonEstimator` ([MovingHorizonEstimator.h](lib/MovingHorizonEstimator.h))
+- **Purpose:** MHE via condensed QP — the dual of MPC for state estimation. Optimises the state trajectory over a moving window of N measurements with box constraints on process noise.
+- **Constructor:** `(plant, Q_noise, R_noise, params)`.
+- **Parameters (`MHEParams`):** `N` (horizon length), `wMin/wMax` (process noise bounds), `qpMaxIter`, `qpTol`.
+- **Methods:** `initialize(x0, P0)`, `estimate(y, u)` -> `VectorXd x_hat`, `setHorizon(N)`, `setWeightMatrices(Q, R)`, `reset()`, `state()`, `lastConverged()`, `lastQpIters()`, `sampleTime()`.
+- **Decision variable:** `z = [x_0; w_0; ...; w_{N-1}]` of size `n*(N+1)`. Condensed matrices `Psi_`, `Gamma_u_`, `C_bar_` are pre-built; per-step cost is one `GradientProjectionQP` solve.
+- **Horizon ramp-up:** First N-1 calls use an effective horizon shorter than N; arrival cost `P0inv` weights the initial state uncertainty.
+- **Backend:** Shared `GradientProjectionQP` solver (same as MPC and GPC); zero heap allocation after construction.
+
+#### `FOPDTIdentifier` ([FOPDTIdentifier.h](lib/FOPDTIdentifier.h))
+- **Purpose:** Identifies a First-Order Plus Dead-Time (FOPDT) model from open-loop step response data.
+- **Methods:** `identify(t, y, stepMag, method)` -> `FOPDTModel {K, tau, theta, fitRMSE}`; `evaluate(model, t, stepMag)` -> simulated response.
+- **Methods:** Graphical (ZN tangent + 63.2% crossing) or optimization (golden-section on theta and tau).
+- **Integration:** Result feeds directly into `StepResponseTuner::computePIDParams()` for IMC, ZN, Cohen-Coon, AMIGO tuning.
+
+#### `SOPDTIdentifier` ([SOPDTIdentifier.h](lib/SOPDTIdentifier.h))
+- **Purpose:** Identifies a Second-Order Plus Dead-Time (SOPDT) model from open-loop step response data. Convention: `tau1 >= tau2`.
+- **Constructor:** `(t_data, y_data, stepMag)`.
+- **Methods:** `identify(method)` -> `SOPDTModel {K, tau1, tau2, theta, fitRMSE}`; `evaluate(model, t, stepMag)` -> simulated response; `static imcTuning(model, lambdaC)` -> `PIDParams`.
+- **`SOPDTMethod`:** `Graphical` or `Optimization`.
+- **Graphical algorithm:** ZN tangent -> `theta`; 63.2% crossing -> `tau_sum = tau1+tau2`; 28.3% crossing ratio `r` interpolated between FOPDT limit (r≈0.332) and critically-damped SOPDT limit (r≈0.530) to split into `tau1` and `tau2`.
+- **Optimization:** Nested golden-section search on `(theta, tau1, tau2)` minimising RMSE.
+- **IMC-PID (Rivera 1986):** `tau_eq = tau1+tau2`, `Kp = tau_eq / (K*(lambdaC + theta/2))`, `Ti = tau_eq`, `Td = tau1*tau2/tau_eq`.
+
+#### `RecursiveLeastSquares` ([RecursiveLeastSquares.h](lib/RecursiveLeastSquares.h))
+- **Purpose:** Online ARX parameter estimation using exponential forgetting (`lambda` factor).
+- **Constructor:** `(na, nb, nk, lambda, P0_scale)` — output order, input order, delay, forgetting factor, initial covariance scale.
+- **Methods:** `update(y, u)` -> current ARX coefficients; `reset()`, `toTransferFunction()`, `toStateSpace()`.
+- **Typical use:** Feed identified `StateSpace` into `GPC::setPlant()` for adaptive GPC (see `ex28_gpc_adaptive.cpp`).
+
+#### `SubspaceID` ([SubspaceID.h](lib/SubspaceID.h))
+- **Purpose:** N4SID subspace identification of MIMO state-space models from PRBS or arbitrary excitation data.
+- **Methods:** `n4sid(y, u, n, i)` -> `StateSpace`; `suggestOrder(y, u, maxOrder)` -> recommended model order from singular value elbow detection.
+- **Inputs:** `y` (p x N output data matrix), `u` (m x N input data matrix), `n` (model order), `i` (block-row factor, typically n <= i <= 2n).
 
 ---
 

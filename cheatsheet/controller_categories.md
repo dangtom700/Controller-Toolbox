@@ -152,26 +152,46 @@ Controller structure is fixed, but parameters evolve online.
 
 | Tier | Description | Controllers |
 |---|---|---|
-| **Tier 1 - Core** | Closed-form, real-time, no external libraries | PID (all variants), LQR, LQI, Pole Placement, Observer, Deadbeat, Lead-Lag, Smith Predictor, Cascade, Feedforward, SMC (basic), ADRC, DOBC, ESC |
-| **Tier 2 - Optimisation** | Requires embedded QP solver (e.g., OSQP, qpOASES) | Linear MPC, GPC, DMC, Robust MPC, Explicit MPC (offline), LQG |
-| **Tier 3 - Advanced Adaptive** | Requires RLS / EKF / gradient update | MRAC, STR, Adaptive MPC, ILC, L1 Adaptive, MFAC |
-| **Tier 4 - Intelligent** | Requires inference engine (ONNX, TensorFlow Lite, or native fuzzy) | Fuzzy PID, NN Control, ANFIS, RL Policy |
-| **Tier 5 - Offline / External Tool** | Controller synthesised offline (MATLAB, CVXPY); only the gain matrix runs online | Hinf, H2, mu-Synthesis, LMI-Based, NMPC, Economic MPC |
+| **Tier 1 - Core** | Closed-form, real-time, no external libraries | PID (all variants), LQR, LQI, Pole Placement, Observer, Lead-Lag, Smith Predictor, Cascade, Feedforward, SMC (basic), ADRC, DOBC, ESC, Repetitive Control |
+| **Tier 2 - Optimisation** | Requires embedded QP solver (built-in `GradientProjectionQP`) | Linear MPC, GPC, MHE, LQG |
+| **Tier 3 - Advanced Adaptive** | Requires RLS / EKF / gradient update | MRAC, STR, Adaptive GPC (RLS+setPlant), ILC, L1 Adaptive, MFAC |
+| **Tier 4 - Intelligent** | Requires inference engine (native fuzzy implemented) | FuzzyPD, FuzzyPID, FuzzySupervisor (Mamdani/TS — implemented), ANFIS, NN Control (external) |
+| **Tier 5 - Offline / External Tool** | Controller synthesised offline; gain matrix runs online | H-infinity (implemented with gamma-bisection), mu-Synthesis DK-iteration (implemented), H2, LMI-Based, NMPC, Economic MPC |
 
 ---
 
 ## Toolbox Implementation Mapping
 
 The files in this repository implement the highlighted **Tier 1** controllers plus
-key **Tier 2** and **Tier 4** controllers:
+key **Tier 2**, **Tier 3**, **Tier 4**, and **Tier 5** controllers:
 
-| File | Controllers Covered |
+| File | Controllers / Components Covered |
 |---|---|
-| `DiscretePID.h/.cpp` | P, PI, PD, PID, 2-DOF (via Kd=0/Ki=0), anti-windup |
+| `DiscretePID.h/.cpp` | P, PI, PD, PID, 2-DOF (via b_weight), DoM derivative, anti-windup |
 | `DiscreteLQR.h/.cpp` | Discrete LQR (DARE), LQI (augment state externally), LQRAdapter |
-| `DiscreteMPC.h/.cpp` | Linear MPC (condensed QP, unconstrained + box constraints) |
-| `ExtremumSeeker.h/.cpp` | Perturbation-based ESC (Tier 1 adaptive) |
+| `DiscreteMPC.h/.cpp` | Linear MPC (condensed QP, box constraints on u and Delta u) |
+| `DiscreteLQG.h/.cpp` | LQG = LQR + Kalman output-feedback (separation principle) |
+| `DiscreteSMC.h/.cpp` | First-order SMC with saturation boundary layer (Tier 1) |
+| `DiscreteADRC.h/.cpp` | 2nd-order LADRC: ESO (3-state) + PD law; ADRC bandwidth parameterisation |
+| `DiscreteLeadLag.h/.cpp` | Tustin-discretised lead / lag / lead-lag compensator |
+| `SmithPredictor.h/.cpp` | Dead-time compensator (integer + fractional Pade delay) |
+| `RepetitiveController.h/.cpp` | Internal-model repetitive control with Q-filter (Tier 3 adaptive) |
+| `FeedforwardController.h/.cpp` | Static and dynamic feedforward (reference model-based) |
+| `GeneralizedPredictiveControl.h/.cpp` | GPC (CARIMA predictor + RLS adaptive update, Tier 2) |
+| `DiscreteHinf.h/.cpp` | H-infinity (gamma bisection), mixed sensitivity, mu-synthesis DK-iteration (Tier 5) |
+| `ExtremumSeeker.h/.cpp` | Perturbation-based ESC (Tier 1 / Tier 3 adaptive) |
 | `FuzzyLogic.h/.cpp` | Mamdani/TS inference engine; `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor` (Tier 4) |
-| `ControllerTuner.h/.cpp` | Relay auto-tune, Step-response FOPDT, Bryson LQR weights, MPC horizon |
-| `ControllerStack.h/.cpp` | Supervisory, Additive, Weighted stacks (gain scheduling architecture) |
-| `PlantModel.h/.cpp` | TransferFunction, StateSpace, tf2ss, ssStep |
+| `KalmanFilter.h/.cpp` | Standalone linear KF (predict / update / step) |
+| `ExtendedKalmanFilter.h/.cpp` | EKF with user Jacobians or numerical differentiation |
+| `UnscentedKalmanFilter.h/.cpp` | UKF with scaled sigma-point parametrisation |
+| `MovingHorizonEstimator.h/.cpp` | MHE via condensed QP; box constraints on process noise |
+| `FOPDTIdentifier.h/.cpp` | FOPDT step-response identification (graphical + golden-section) |
+| `SOPDTIdentifier.h/.cpp` | SOPDT identification + Rivera 1986 IMC-PID tuning |
+| `RecursiveLeastSquares.h/.cpp` | Online ARX identification with forgetting factor |
+| `SubspaceID.h/.cpp` | N4SID subspace identification, `suggestOrder` |
+| `FunctionApproximator.h/.cpp` | Pade delay filter, polynomial approximation |
+| `GradientProjectionQP.h` | Shared projected gradient QP solver (MPC / GPC / MHE backend) |
+| `ControllerTuner.h/.cpp` | Relay auto-tune, FOPDT step-response, Bryson LQR weights, MPC horizon |
+| `TunerSuite.h/.cpp` | Unified tuner dispatcher (8 strategies, soft warnings) |
+| `ControllerStack.h/.cpp` | Supervisory, Additive, Weighted stacks — cascade, observer+SF, bumpless |
+| `PlantModel.h/.cpp` | TransferFunction, StateSpace, tf2ss, c2d (ZOH / Tustin), ssStep |

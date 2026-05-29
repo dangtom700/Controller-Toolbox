@@ -27,8 +27,32 @@ This structure is directly compatible with widely used tuning rules like Ziegler
   - `tau` ($\tau$): Process time constant (time to reach 63.2% of final response after dead time)
   - `theta` ($\theta$): Process dead time (delay before the process starts responding)
 
-## Example Usage
-Our C++ library already contains `ctrl::StepResponseTuner::identify()` for this purpose. If you need to perform it in Python offline, you can use the tangent method or nonlinear curve fitting.
+## Example Usage (C++)
+The library provides `ctrl::FOPDTIdentifier` in `lib/FOPDTIdentifier.h`:
+
+```cpp
+#include "ControllerToolbox.h"
+
+// t_data, y_data: std::vector<double> from step test
+ctrl::FOPDTIdentifier ident(t_data, y_data, stepMag);
+ctrl::FOPDTModel model = ident.identify(ctrl::FOPDTMethod::Optimization);
+// model.K, model.tau, model.theta, model.fitRMSE
+
+ctrl::PIDParams pp = ctrl::StepResponseTuner::computePIDParams(model, Ts, ctrl::PIDTuningRule::IMC);
+```
+
+For SOPDT plants, use `ctrl::SOPDTIdentifier`:
+
+```cpp
+ctrl::SOPDTIdentifier ident2(t_data, y_data, stepMag);
+ctrl::SOPDTModel m2 = ident2.identify(ctrl::SOPDTMethod::Optimization);
+// m2.K, m2.tau1 (>=tau2), m2.tau2, m2.theta, m2.fitRMSE
+
+ctrl::PIDParams pp2 = ctrl::SOPDTIdentifier::imcTuning(m2, /*lambdaC=*/m2.theta);
+```
+
+## Python Example
+If you need to perform FOPDT identification in Python offline, you can use the tangent method or nonlinear curve fitting.
 
 ```python
 import pandas as pd

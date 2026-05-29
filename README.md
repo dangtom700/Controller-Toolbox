@@ -1,8 +1,10 @@
 # Controller Toolbox
 
-A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, Hinf, Lead-Lag, Smith Predictor, Extremum Seeking, Kalman/EKF/UKF filtering, Fuzzy Logic inference, RLS and N4SID system identification, plus an integrated tuner suite and analysis layer.
+A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H-infinity, Lead-Lag, Smith Predictor, Repetitive Control, Feedforward, Extremum Seeking, Kalman/EKF/UKF/MHE filtering, Fuzzy Logic inference, SOPDT/FOPDT identification, RLS and N4SID system identification, plus an integrated tuner suite and analysis layer.
 
-Twenty-plus controller implementations, eight tuning families, frequency- and time-domain analysis, controller composition (Supervisory / Additive / Weighted), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.
+Thirty-plus controller implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.
+
+Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. 54 C++ example programs and 70 Python example scripts cover every controller, tuning method, identification approach, and corrector pattern.
 
 ---
 
@@ -12,11 +14,20 @@ Twenty-plus controller implementations, eight tuning families, frequency- and ti
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --parallel
+cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
 Requires **C++20**, **CMake >= 3.16**, and **Eigen >= 3.4**.
+
+### Run all examples
+
+```bash
+conda activate soft_robotics
+python run.py
+```
+
+`run.py` compiles every C++ target sequentially, runs each executable, then runs all Python examples and reports a pass/fail summary.
 
 ### Docker build
 
@@ -60,8 +71,10 @@ for (int k = 0; k < 500; ++k) {
 |---|---|
 | [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md) | Full API reference, class-by-class breakdown, usage workflows |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Parameter constraints, RT/RTOS integration, troubleshooting recipes |
+| [docs/TEST_UPDATE.md](docs/TEST_UPDATE.md) | Test suite history, regression coverage, sign-convention notes |
+| [docs/CONTROL_STRATEGIES_DEEP_DIVE.md](docs/CONTROL_STRATEGIES_DEEP_DIVE.md) | Taxonomy of strategy families, plant model interference, decision framework, proposed extensions |
 | [cheatsheet/](cheatsheet/) | Tuning methods, controller categories, system identification notes |
-| [case-study/](case-study/) | Nonlinear 3*3 boiler-turbine multivariable study |
+| [case-study/](case-study/) | Nonlinear 3x3 boiler-turbine and Tug Boat multivariable studies |
 
 ---
 
@@ -69,13 +82,29 @@ for (int k = 0; k < 500; ++k) {
 
 ```
 |-- lib/             # Library sources -> target: controller_toolbox
-|-- examples/        # ex01..ex26 single-file demos + cpp/ MIMO examples
+|-- examples/        # ex01..ex54 single-file C++ demos (corrector patterns, new algorithms)
+|-- examples/python/ # ex01..ex70 Python companion scripts and binding demos
 |-- case-study/      # Boiler-turbine MIMO benchmark + Tug Boat numerical simulation
-|-- tests/           # CTest-driven unit + integration tests
+|-- tests/           # CTest-driven unit + integration tests (Catch2 v3)
+|-- bindings/        # pybind11 binding source files
 |-- scripts/         # tune_all / simulate_all / realtime_all
 |-- cheatsheet/      # Reference notes
 |-- docs/            # Documentation & deployment guides
 ```
+
+---
+
+## Controller Inventory
+
+| Category | Implementations |
+|---|---|
+| **Classical** | PID (backward-Euler, anti-windup, DoM, 2-DOF), Lead-Lag, Smith Predictor, Feedforward, Repetitive Control |
+| **Optimal** | LQR (DARE), LQG (LQR+KF), MPC (condensed QP), GPC (CARIMA+RLS), H-infinity (gamma iteration + DK mu-synthesis) |
+| **Robust / Nonlinear** | SMC (saturation boundary layer), ADRC (2nd-order LADRC + ESO), Extremum Seeker |
+| **Intelligent** | FuzzyPD, FuzzyPID, FuzzySupervisor (Mamdani & Takagi-Sugeno) |
+| **Composition** | ControllerStack (Supervisory, Additive, Weighted) — cascade, observer+SF, bumpless transfer |
+| **Estimators** | KalmanFilter, EKF, UKF, MovingHorizonEstimator |
+| **Identification** | FOPDTIdentifier, SOPDTIdentifier, RecursiveLeastSquares, SubspaceID (N4SID) |
 
 ---
 
@@ -117,7 +146,7 @@ docker run --rm -it --entrypoint /bin/bash controller-toolbox
 ```bash
 docker run --rm -it -v "$(pwd):/work" -w /work \
     --entrypoint /bin/bash controller-toolbox:builder \
-    -c "cmake -S . -B build && cmake --build build --parallel"
+    -c "cmake -S . -B build && cmake --build build"
 ```
 
 (Use the `builder` stage tag - see the Dockerfile for details.)
@@ -136,4 +165,17 @@ docker run --rm -it -v "$(pwd):/work" -w /work \
 
 ## Project Status
 
-Twenty-plus controllers implemented and unit-tested. `FuzzyLogic` module added 2026-05-23: Mamdani and Takagi-Sugeno inference engines, `FuzzyPD`, `FuzzyPID`, and `FuzzySupervisor` classes - see [docs/DOCUMENTATION.md Section 5.2](docs/DOCUMENTATION.md). Four fuzzy application examples added (`ex23`-`ex26`). Five earlier math corrections (2026-05-22): MPC condensed prediction formula (`G_u.u_prev` term), PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor D.u_prev feedthrough, and SMC `c_de` Ts-absorption documentation - details in [docs/cumulative_bug_report.md](docs/cumulative_bug_report.md). Real-time deployment guidance in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+**Current test counts (2026-05-28):** 73 C++ executables pass | 74 Python examples pass | 0 failures.
+
+**Part 18 additions (2026-05-28):**
+- `SOPDTIdentifier` — graphical (ZN tangent + 28.3%/63.2% crossings) and optimization (nested golden-section) SOPDT step-response identification; Rivera 1986 IMC-PID tuning for SOPDT models.
+- `MovingHorizonEstimator` — condensed QP dual of MPC; reuses `GradientProjectionQP`; box constraints on process noise; horizon ramp-up from 1 to N.
+- `DiscreteHinf::solveMuSyn` extended with full rational D-scaling (first-order D_j(z) fit per channel, plant state augmentation).
+- 23 new C++ examples (ex32-ex54) and 21 new Python examples (ex50-ex70) covering corrector patterns: Cascade, Additive, Observer+SF, Supervisory.
+
+**Earlier additions:**
+- `FuzzyLogic` module (2026-05-23): Mamdani and Takagi-Sugeno inference engines, `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor` — see [docs/DOCUMENTATION.md Section 5.2](docs/DOCUMENTATION.md).
+- `ExtendedKalmanFilter`, `UnscentedKalmanFilter`, `RepetitiveController`, `GeneralizedPredictiveController`, `SubspaceID`, `DiscreteHinf`, `FOPDTIdentifier`, `FeedforwardController`, `GradientProjectionQP`.
+- Five math corrections (2026-05-22): MPC condensed prediction formula, PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor feedthrough, SMC `c_de` Ts-absorption.
+
+Details in [docs/cumulative_bug_report.md](docs/cumulative_bug_report.md). Real-time deployment guidance in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).

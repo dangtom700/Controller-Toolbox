@@ -1,22 +1,22 @@
 ### 1. Classical Control (SISO & Frequency-Domain)
 - **On/Off (Bang-Bang) Control**
-- **P, PI, PD, PID** (and variants: Ideal, Parallel, Series/Interacting)
-- **Lead, Lag, Lead-Lag Compensators**
+- **P, PI, PD, PID** (and variants: Ideal, Parallel, Series/Interacting) — **implemented: `DiscretePID`** (DoM, 2-DOF, anti-windup)
+- **Lead, Lag, Lead-Lag Compensators** — **implemented: `DiscreteLeadLag`**
 - **Phase-Lead / Phase-Lag Networks**
-- **Feedforward Control** (static or dynamic)
-- **Cascade Control**
+- **Feedforward Control** (static or dynamic) — **implemented: `FeedforwardController`**
+- **Cascade Control** — **implemented via `ControllerStack::Additive`** (see ex42-ex46)
 - **Ratio Control**
 - **Override / Selector Control**
 - **Split-Range Control**
-- **Smith Predictor** (for dominant time delays)
+- **Smith Predictor** (for dominant time delays) — **implemented: `SmithPredictor`** (integer + fractional Pade)
 - **Internal Model Control (IMC)**
-- **IMC-PID** (PID tuning via IMC)
+- **IMC-PID** (PID tuning via IMC) — **implemented: `FOPDTIdentifier::imcTuning`, `SOPDTIdentifier::imcTuning`**
 
 ---
 
 ### 2. State-Space and Optimal Control
-- **Linear Quadratic Regulator (LQR)** - infinite & finite horizon
-- **Linear Quadratic Gaussian (LQG)** - LQR + Kalman filter
+- **Linear Quadratic Regulator (LQR)** - infinite & finite horizon — **implemented: `DiscreteLQR`** (DARE, LQRAdapter)
+- **Linear Quadratic Gaussian (LQG)** - LQR + Kalman filter — **implemented: `DiscreteLQG`**
 - **LQG with Loop Transfer Recovery (LQG/LTR)**
 - **Linear Quadratic Integral (LQI)** - LQR with integral action
 - **Linear Quadratic Tracking (LQT)**
@@ -28,10 +28,10 @@
 ---
 
 ### 3. Model Predictive Control (MPC) Family
-- **Linear MPC** (Quadratic programming based)
+- **Linear MPC** (Quadratic programming based) — **implemented: `DiscreteMPC`** (condensed QP, box constraints)
 - **Dynamic Matrix Control (DMC)**
 - **Model Algorithmic Control (MAC)**
-- **Generalized Predictive Control (GPC)**
+- **Generalized Predictive Control (GPC)** — **implemented: `GeneralizedPredictiveController`** (CARIMA + RLS adaptive)
 - **Explicit MPC** (pre-computed PWA control law)
 - **Nonlinear MPC (NMPC)**
 - **Economic MPC** (non-quadratic cost)
@@ -43,11 +43,11 @@
 ---
 
 ### 4. Robust Control
-- **Hinf (H-infinity) Control** (mixed sensitivity, loop-shaping)
+- **Hinf (H-infinity) Control** (mixed sensitivity, loop-shaping) — **implemented: `DiscreteHinf`** (gamma-bisection, mixed sensitivity)
 - **H2 Control**
-- **mu-Synthesis** (structured singular value)
+- **mu-Synthesis** (structured singular value) — **implemented: `DiscreteHinf::solveMuSyn`** (DK-iteration with rational D-scaling)
 - **Quantitative Feedback Theory (QFT)**
-- **Sliding Mode Control (SMC)** - classical first-order
+- **Sliding Mode Control (SMC)** - classical first-order — **implemented: `DiscreteSMC`** (saturation boundary layer)
 - **Integral Sliding Mode Control**
 - **Higher-Order Sliding Mode** (Super-Twisting, Twisting, Prescribed-time)
 - **Kharitonov-Based Robust Design**
@@ -59,12 +59,12 @@
 ### 5. Adaptive Control
 - **Model Reference Adaptive Control (MRAC)** - direct & indirect
 - **Self-Tuning Regulator (STR)**
-- **Gain Scheduling** (classical, parameter-dependent)
+- **Gain Scheduling** (classical, parameter-dependent) — **implemented via `ControllerStack::Weighted`** + blended gains (see ex41)
 - **Adaptive PID**
 - **L1 Adaptive Control**
 - **Iterative Learning Control (ILC)**
-- **Repetitive Control (RC)**
-- **Extremum Seeking Control** (model-free adaptive)
+- **Repetitive Control (RC)** — **implemented: `RepetitiveController`** (IMP Q-filter)
+- **Extremum Seeking Control** (model-free adaptive) — **implemented: `ExtremumSeeker`**
 - **Multiple-Model Adaptive Control (MMAC)**
 - **Adaptive Sliding Mode Control**
 
@@ -85,7 +85,7 @@
 ---
 
 ### 7. Intelligent and Soft-Computing Control
-- **Fuzzy Logic Control** (Mamdani, Takagi-Sugeno) - **implemented: `FuzzyLogic.h`** (`FuzzySystem`, `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor`)
+- **Fuzzy Logic Control** (Mamdani, Takagi-Sugeno) — **implemented: `FuzzyLogic.h`** (`FuzzySystem`, `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor`)
 - **Neuro-Fuzzy Control (ANFIS)**
 - **Neural Network Control** (off-line trained, model-inverse)
 - **Adaptive Neural Network Control** (online learning)
@@ -97,9 +97,10 @@
 ---
 
 ### 8. Stochastic and Estimation-Centric Control
-- **LQG** (already optimal + estimation)
-- **Kalman-Filter Based State Feedback**
-- **Certainty-Equivalence Control**
+- **LQG** (already optimal + estimation) — **implemented: `DiscreteLQG`**
+- **Kalman-Filter Based State Feedback** — **implemented: `KalmanFilter`, `ExtendedKalmanFilter`, `UnscentedKalmanFilter`**
+- **Certainty-Equivalence Control** — **implemented pattern** (EKF/UKF/MHE state → MPC/LQR, see ex50-ex53)
+- **Moving Horizon Estimation (MHE)** — **implemented: `MovingHorizonEstimator`** (condensed QP dual of MPC)
 - **Risk-Sensitive Control (LEQG)**
 - **Dual Control** (probing + regulating)
 - **Stochastic Optimal Control** (HJB equation)
@@ -121,7 +122,7 @@
 ---
 
 ### 10. Hybrid / Mixed Control Architectures (mixtures)
-- **Fuzzy-PID** (Fuzzy gain scheduling, Fuzzy-tuned PID) - **implemented: `FuzzyPID`** in `FuzzyLogic.h`
+- **Fuzzy-PID** (Fuzzy gain scheduling, Fuzzy-tuned PID) — **implemented: `FuzzyPID`** in `FuzzyLogic.h`
 - **Neuro-PID**
 - **Sliding Mode + PID** (SM-PID, reaching-law based)
 - **Fuzzy Sliding Mode Control**
@@ -135,7 +136,7 @@
 - **IMC-PID** (PID synthesized from IMC)
 - **Smith Predictor + PID**
 - **Fractional-Order PID (FOPID)**
-- **Active Disturbance Rejection Control (ADRC)** - Extended State Observer + PD/PID
+- **Active Disturbance Rejection Control (ADRC)** - Extended State Observer + PD/PID — **implemented: `DiscreteADRC`**
 - **Two-Degree-of-Freedom (2-DOF) PID** (separate servo/regulator tuning)
 - **Composite Nonlinear Feedback (CNF) Control**
 - **Disturbance Observer Based Control (DOBC) + PID/LQR**

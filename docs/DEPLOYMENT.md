@@ -1,6 +1,6 @@
 # Controller Toolbox - Deployment Guide
 
-*Version 1.0 - 2026-05-19*
+*Version 1.3 - 2026-05-28*
 
 This document covers three areas required before deploying this library to a production control
 system: (1) per-controller parameter constraints and stability conditions; (2) real-time
@@ -100,6 +100,36 @@ watchdog that resets the filter if max(|residual|) > threshold for more than K c
 
 ---
 
+### ExtendedKalmanFilter / UnscentedKalmanFilter
+
+| Parameter | Constraint | Note |
+|-----------|-----------|------|
+| `Q_noise` (process noise) | Symmetric, PSD | Must cover modelling error, not just state noise |
+| `R_noise` (measurement noise) | Symmetric, PD | Same floor as KalmanFilter (1e-12 per diagonal) |
+| EKF Jacobians | Must be correct at each linearisation point | Numerical Jacobians (pass `nullptr`) use scaled epsilon; safe but ~3x slower |
+| UKF `alpha` | `alpha >= 1/sqrt(n)` recommended for n=2 | Avoids negative `Wc0`; use `alpha=1.0, beta=2.0, kappa=0` for n=2 |
+
+**UKF sigma-point stability check:** After construction, verify `Wc0 = 1 - alpha^2 + beta > 0`. For `n=2, kappa=0, alpha=1.0, beta=2.0`: `Wc0 = 2 > 0`. If negative, the covariance update can produce a non-PSD matrix.
+
+---
+
+### MovingHorizonEstimator
+
+| Parameter | Constraint | Note |
+|-----------|-----------|------|
+| `N` (horizon) | `N >= 1`; practical range `[5, 30]` | Larger N improves estimation quality but scales QP cost as O(N^2) |
+| `wMin/wMax` | `wMin < wMax` | Box constraints on process noise; tighter bounds = faster QP |
+| `Q_noise` | Symmetric, PSD | Weights process noise in cost: `z^T Q^-1 z` |
+| `R_noise` | Symmetric, PD | Weights measurement residuals: `(y-Cx)^T R^-1 (y-Cx)` |
+| `qpMaxIter` | `>= 10`; typical: 50-100 | QP iteration limit per step |
+| `P0` (in `initialize`) | Symmetric, PD | Arrival cost weight for initial state uncertainty |
+
+**Real-time latency:** MHE solve time scales as O(N^2 * n^2) for the condensed QP Hessian build plus O(qpMaxIter * N * n) for the projected gradient iterations. For `N=10, n=2`, expect ~20 µs per step on a 3 GHz core. Budget at least 3x for jitter.
+
+**Zero-allocation note:** `GradientProjectionQP` pre-allocates all work vectors at construction. No heap allocation occurs inside `estimate()` after `initialize()` is called.
+
+---
+
 ### DiscreteADRC
 
 | Parameter | Constraint | Note |
@@ -176,9 +206,14 @@ internal stack for small matrices (which is stack-allocated for `Matrix<double,N
 | DiscreteADRC | ~256 bytes (Vector3d ESO) |
 | SmithPredictor | < 128 bytes (wraps inner controller) |
 | KalmanFilter | O(n^2) - ~512 bytes for n=4 |
+| ExtendedKalmanFilter | O(n^2) - ~512 bytes for n=4 (+ Jacobian eval stack) |
+| UnscentedKalmanFilter | O(n^2) - ~1 KB for n=4 (2n+1 sigma points on stack) |
+| MovingHorizonEstimator | O(N*n) - ~4 KB for N=10, n=2 (condensed QP work vectors) |
 | DiscreteLQR | < 128 bytes (gain multiply only) |
 | DiscreteMPC | O(Nc.m) - ~256 bytes for Nc=3, m=1 |
+| GeneralizedPredictiveController | O(Nu.m) - similar to MPC |
 | ExtremumSeeker | < 256 bytes |
+| RepetitiveController | O(periodSteps) - stack for period buffer copy |
 | ControllerStack | Sum of active controllers |
 
 Add a 2* safety margin for OS/RTOS frame overhead and nested function calls.
@@ -367,7 +402,7 @@ measurement drives the estimate.
 Fix: increase `R_noise`; the floor of 1e-12 prevents exact zero but does not prevent small values.
 
 **Cause 3 - Plant non-linearity:** True dynamics are not captured by the linear model.
-Fix: use an Extended Kalman Filter (EKF) or Unscented KF - not currently in this toolbox.
+Fix: use `ExtendedKalmanFilter` (EKF) or `UnscentedKalmanFilter` (UKF) from `lib/ExtendedKalmanFilter.h` / `lib/UnscentedKalmanFilter.h`. Both are included in this toolbox.
 
 **Reset policy:**
 ```cpp

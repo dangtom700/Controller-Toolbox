@@ -1,7 +1,40 @@
 # Test Suite Update - Controller Toolbox
 
-**Date:** 2026-05-27 (Rev 2)
+**Date:** 2026-05-28 (Rev 3)
 **Scope:** `tests/test_catch2_advanced.cpp`, `tests/test_catch2_pilot.cpp`, `tests/test_controllers.cpp`
+
+---
+
+## Rev 3 — Part 18 Test Additions (2026-05-28)
+
+**Current totals: 73 C++ executables pass | 74 Python examples pass | 0 failures.**
+
+### New Catch2 test cases in `test_catch2_advanced.cpp`
+
+Two new Catch2 test cases were added for the Part 18 algorithms, bringing the total to **40 test cases, 150 assertions**.
+
+#### `[sopdt]` — SOPDTIdentifier regression (new)
+
+Tests `SOPDTIdentifier` on synthetic SOPDT data generated from known parameters (K=2, tau1=5, tau2=2, theta=1.5).
+
+| Check | Assertion |
+|-------|-----------|
+| Graphical K within 15% | `|K_est / K_true - 1| < 0.15` |
+| Graphical theta within 1 s | `|theta_est - 1.5| < 1.0` |
+| Convention enforced | `tau1_est >= tau2_est` |
+| Optimization not worse | `rmse_opt <= rmse_graphical + 0.05` |
+| IMC-PID positive | `Kp > 0`, `Ti > 0`, `Td > 0` |
+| Closed-loop PI convergence | Tracking within 10% after 500 steps |
+
+#### `[mhe]` — MovingHorizonEstimator regression (new)
+
+Tests `MovingHorizonEstimator` on a scalar first-order plant (a=0.8) with noise-free measurements over 60 steps.
+
+| Check | Assertion |
+|-------|-----------|
+| State is finite | `isfinite(x_hat)` |
+| Error bounded | `|x_hat - x_true| < 5` |
+| QP converged | `mhe.lastConverged() == true` |
 
 ---
 
@@ -23,9 +56,9 @@ Regression tests for bugs confirmed fixed in Parts 10–12 of the cumulative bug
 | `PIDParams::b_weight reduces proportional setpoint kick` | P11-8 2DOF weight | `peak(b=0.0) <= peak(b=1.0)` on 1st-order plant; both reach steady-state within 0.01 |
 | `IControllerObserver receives callbacks from DiscretePID` | Observer wiring | `onCompute` fires after `compute()`; `onReset` fires after `reset()`; no callbacks after `detachObserver()` |
 
-#### `test_catch2_advanced.cpp` — 25 test cases, 58 assertions
+#### `test_catch2_advanced.cpp` — 40 test cases, 150 assertions (Rev 3 total)
 
-Broader regression coverage addressing each test failure traced in the 2026-05-27 audit (see Part 13 of the cumulative bug report). Includes GPC tracking, LQR convergence, SMC sign convention, ADRC double-integrator plant, and n4sid DC gain tolerance tests.
+Broader regression coverage. Includes GPC tracking, LQR convergence, SMC sign convention, ADRC double-integrator, n4sid DC gain tolerance, EKF/UKF, repetitive control, H-infinity, SOPDTIdentifier [sopdt], and MovingHorizonEstimator [mhe] (see Rev 3 section above).
 
 ### Test failures fixed in Rev 2
 
@@ -42,7 +75,9 @@ All 8 failing tests resolved. Root causes:
 | `test_catch2_pilot` | DoM PID convergence | Filter pole 0.8^20 = 0.012; outputs differ by 47% | Extended loop from 20 to 200 steps |
 | `test_controllers` | StepResponseTuner no-throw | Implementation threw on partial data | Changed to return conservative `{K, tau_est, 0.0}` |
 
-**Final result:** All three Catch2 executables pass with 0 failures. Total test suite: 58 + 21 + 382 + ~19 integration assertions = **480+ assertions, 0 failures**.
+**Rev 2 final result:** All three Catch2 executables pass with 0 failures. test_catch2_advanced: 25 cases, 58 assertions; test_catch2_pilot: 5 cases, 21 assertions; test_controllers: 154 unit tests; test_integration: 19 regression tests.
+
+**Rev 3 update:** test_catch2_advanced extended to 40 cases, 150 assertions (two new SOPDTIdentifier and MHE cases). Overall: 73 C++ executables pass | 74 Python examples pass | 0 failures.
 
 ---
 
