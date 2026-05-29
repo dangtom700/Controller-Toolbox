@@ -1,7 +1,51 @@
 # Test Suite Update - Controller Toolbox
 
-**Date:** 2026-05-28 (Rev 3)
+**Date:** 2026-05-28 (Rev 4)
 **Scope:** `tests/test_catch2_advanced.cpp`, `tests/test_catch2_pilot.cpp`, `tests/test_controllers.cpp`
+
+---
+
+## Rev 4 — Algorithm Extension Tests (2026-05-28)
+
+**Current totals: 78 C++ executables pass | 79 Python examples pass | 0 failures.**
+
+### New Catch2 test cases — 11 tests, 39 assertions
+
+#### `[linearisation]` — LinearisationHelper (2 tests, 9 assertions)
+
+| Test | Key assertions |
+|------|---------------|
+| `jacobianX/U match analytical for Van der Pol at origin` | A_err < 1e-4, B_err < 1e-4 vs analytical A=[[0,1],[-1,μ]], B=[[0],[1]] |
+| `lineariseAtPoint produces stable LQR gain for Van der Pol` | DARE converges; all CL poles inside unit circle; ‖x(500)‖ < 0.05 |
+
+#### `[fl]` — FeedbackLinearisationController (2 tests, 7 assertions)
+
+| Test | Key assertions |
+|------|---------------|
+| `FL drives cubic drift ẋ=-x³+u to 1.0` | `isfinite(x)`, `|y-1.0| < 0.05` after 500 steps |
+| `FL lastOutput and sampleTime API` | sampleTime==Ts, lastOutput==0 before compute, u≈Kp·e for f=0/g=1, reset clears |
+
+#### `[mrac]` — MRACController (2 tests, 7 assertions)
+
+| Test | Key assertions |
+|------|---------------|
+| `MRAC tracks reference model within 500 steps` | `|e_m| < 0.05`, θ within theta_max |
+| `reset restores initial theta and clears model state` | θ_r→b_m, θ_y→0, y_m→0 after reset |
+
+#### `[btm]` — BalancedTruncation (2 tests, 8 assertions)
+
+| Test | Key assertions |
+|------|---------------|
+| `HSVs are descending and non-negative` | σ₁ ≥ σ₂ ≥ 0; errorBound = 2·σ₂; reduced model stable; r=1 |
+| `DC gain deviation within H∞ error bound` | `|dc_full - dc_red| ≤ errorBound + 1e-8` |
+
+#### `[zpetc]` — ZeroPhaseTrackingFilter (3 tests, 8 assertions)
+
+| Test | Key assertions |
+|------|---------------|
+| `transmissionZeros finds z=-0.5` | `|zeros[0].real() - (-0.5)| < 1e-6`, `|imag| < 1e-6` |
+| `designZPETC min-phase: unit amplitude everywhere` | `!hasNMPZeros`, `dcAmplitudeError < 1e-8` |
+| `designZPETC NMP: detects NMP zeros and unit DC gain` | `hasNMPZeros`, NMP zero at 1.5, DC composite gain within 0.05 of 1.0 |
 
 ---
 

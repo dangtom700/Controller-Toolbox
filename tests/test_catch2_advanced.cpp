@@ -1573,3 +1573,171 @@ TEST_CASE("FL lastOutput and sampleTime return correct values", "[fl]")
     fl.reset();
     REQUIRE_THAT(fl.lastOutput(), WithinAbs(0.0, 1e-12));
 }
+
+// =============================================================================
+// MRACController - model reference adaptive control
+// =============================================================================
+
+TEST_CASE("MRAC tracks reference model on nominal plant within 500 steps", "[mrac]")
+{
+    // Plant: y[k+1] = 0.7*y[k] + 0.5*u[k]
+    // Reference model: a_m=0.5, b_m=0.5, r=1 (step)
+    constexpr double Ts_m = 0.1;
+    ctrl::MRACParams mp;
+    mp.a_m = 0.5; mp.b_m = 0.5;
+    mp.gamma_r = 3.0; mp.gamma_y = 1.5;
+    mp.sigma = 0.02; mp.theta_max = 20.0;
+
+    ctrl::MRACController mrac(mp, Ts_m);
+
+    double y = 0.0;
+    double em_final = 1e9;
+    for (int k = 0; k < 500; ++k)
+    {
+        mrac.setReference(1.0);
+        const double u = mrac.compute(y);
+        y = 0.7 * y + 0.5 * u;
+        em_final = mrac.modelError();
+    }
+
+    // Model tracking error must converge
+    REQUIRE(std::isfinite(em_final));
+    REQUIRE_THAT(std::abs(em_final), WithinAbs(0.0, 0.05));
+
+    // Parameters must stay within bound
+    const double theta_norm = std::sqrt(mrac.theta_r() * mrac.theta_r() +
+                                        mrac.theta_y() * mrac.theta_y());
+    REQUIRE(theta_norm <= mp.theta_max + 1e-6);
+}
+
+TEST_CASE("MRAC reset restores initial theta and clears model state", "[mrac]")
+{
+    ctrl::MRACParams mp;
+    mp.a_m = 0.5; mp.b_m = 0.5;
+    mp.gamma_r = 1.0; mp.gamma_y = 1.0;
+    mp.sigma = 0.01; mp.theta_max = 10.0;
+
+    ctrl::MRACController mrac(mp, 0.1);
+
+    // Run a few steps to change theta
+    for (int k = 0; k < 50; ++k)
+    {
+        mrac.setReference(1.0);
+        mrac.compute(0.5);
+    }
+
+    const double theta_r_pre  = mrac.theta_r();
+    const double model_out_pre = mrac.modelOutput();
+
+    mrac.reset();
+
+    // After reset: theta should return to initial value (b_m) and model to 0
+    REQUIRE_THAT(mrac.theta_r(),    WithinAbs(mp.b_m, 1e-10));
+    REQUIRE_THAT(mrac.theta_y(),    WithinAbs(0.0, 1e-10));
+    REQUIRE_THAT(mrac.modelOutput(), WithinAbs(0.0, 1e-10));
+
+    // sampleTime is preserved
+    REQUIRE_THAT(mrac.sampleTime(), WithinAbs(0.1, 1e-12));
+}
+
+// =============================================================================
+// BalancedTruncation - model order reduction
+// =============================================================================
+
+TEST_CASE("balancedTruncate returns descending Hankel singular values", "[btm]")
+{
+    // Second-order stable plant: poles at 0.5, 0.8
+    Eigen::Matrix2d A; A << 0.5, 0.0, 0.0, 0.8;
+    Eigen::Vector2d B; B << 1.0, 1.0;
+    Eigen::RowVector2d C; C << 1.0, 1.0;
+    Eigen::MatrixXd D = Eigen::MatrixXd::Zero(1, 1);
+    ctrl::StateSpace sys(A, B.reshaped(2,1), C.reshaped(1,2), D, 0.05);
+
+    ctrl::TruncationResult res = ctrl::balancedTruncate(sys, 1);
+
+    // Two HSVs, descending
+    REQUIRE(res.hankelSingularValues.size() == 2);
+    REQUIRE(res.hankelSingularValues(0) >= res.hankelSingularValues(1));
+    REQUIRE(res.hankelSingularValues(1) >= 0.0);
+
+    // Error bound = 2 * sigma_2
+    REQUIRE_THAT(res.errorBound,
+                 WithinAbs(2.0 * res.hankelSingularValues(1), 1e-8));
+
+    // Reduced model is stable
+    REQUIRE(res.isStable);
+    REQUIRE(res.reduced.stateSize() == 1);
+}
+
+TEST_CASE("balancedTruncate DC gain within Hinf error bound", "[btm]")
+{
+    // 3rd-order stable plant with widely separated poles
+    Eigen::Matrix3d A = Eigen::Matrix3d::Zero();
+    A(0,0) = 0.9; A(1,1) = 0.5; A(2,2) = 0.1;
+    Eigen::Vector3d B; B << 1.0, 1.0, 1.0;
+    Eigen::RowVector3d C; C << 0.5, 0.3, 0.2;
+    Eigen::MatrixXd D = Eigen::MatrixXd::Zero(1, 1);
+    ctrl::StateSpace sys(A, B.reshaped(3,1), C.reshaped(1,3), D, 0.01);
+
+    ctrl::TruncationResult res = ctrl::balancedTruncate(sys, 2);
+
+    // DC gains
+    const double dc_full = (sys.C * (Eigen::MatrixXd::Identity(3,3) - sys.A)
+                                        .inverse() * sys.B)(0,0);
+    const Eigen::MatrixXd &Ar = res.reduced.A, &Br = res.reduced.B, &Cr = res.reduced.C;
+    const double dc_red  = (Cr * (Eigen::MatrixXd::Identity(2,2) - Ar)
+                                        .inverse() * Br)(0,0);
+
+    REQUIRE(std::abs(dc_full - dc_red) <= res.errorBound + 1e-8);
+}
+
+// =============================================================================
+// ZeroPhaseTrackingFilter - ZPETC prefilter design
+// =============================================================================
+
+TEST_CASE("transmissionZeros finds correct zeros for a SISO system", "[zpetc]")
+{
+    // G(z) = 0.2*(z+0.5) / ((z-0.8)*(z-0.6)) - one zero at z=-0.5
+    ctrl::TransferFunction tf({0.2, 0.1}, {1.0, -1.4, 0.48}, 0.01);
+    ctrl::StateSpace sys = ctrl::tf2ss(tf);
+
+    auto zeros = ctrl::transmissionZeros(sys);
+
+    REQUIRE(zeros.size() == 1);
+    // The zero should be near z = -0.5
+    REQUIRE_THAT(std::abs(zeros[0].real() - (-0.5)), WithinAbs(0.0, 1e-6));
+    REQUIRE_THAT(std::abs(zeros[0].imag()), WithinAbs(0.0, 1e-6));
+}
+
+TEST_CASE("designZPETC min-phase: unit composite magnitude everywhere", "[zpetc]")
+{
+    // Minimum-phase: G(z) = 0.2*(z+0.5) / ((z-0.8)*(z-0.6))
+    ctrl::TransferFunction tf({0.2, 0.1}, {1.0, -1.4, 0.48}, 0.01);
+    ctrl::StateSpace sys = ctrl::tf2ss(tf);
+
+    auto res = ctrl::designZPETC(sys);
+
+    REQUIRE_FALSE(res.hasNMPZeros);
+    // For a minimum-phase plant, G*G_ff = z^{-1} (unit magnitude everywhere)
+    REQUIRE_THAT(res.dcAmplitudeError, WithinAbs(0.0, 1e-8));
+}
+
+TEST_CASE("designZPETC NMP: detects NMP zeros and unit DC gain", "[zpetc]")
+{
+    // NMP: G(z) = 0.1*(z-1.5) / ((z-0.9)*(z-0.7)) - zero at z=1.5
+    ctrl::TransferFunction tf({0.1, -0.15}, {1.0, -1.6, 0.63}, 0.01);
+    ctrl::StateSpace sys = ctrl::tf2ss(tf);
+
+    auto res = ctrl::designZPETC(sys);
+
+    REQUIRE(res.hasNMPZeros);
+    REQUIRE(res.nmpZeros.size() == 1);
+    REQUIRE_THAT(std::abs(res.nmpZeros[0].real() - 1.5), WithinAbs(0.0, 1e-6));
+
+    // DC gain of G*G_ff must be 1 (by normalization)
+    const double omega_dc = 1e-4;
+    auto resp_plant  = ctrl::SystemAnalysis::getFrequencyResponse(sys,       {omega_dc});
+    auto resp_filter = ctrl::SystemAnalysis::getFrequencyResponse(res.filter, {omega_dc});
+    const double dc_composite = std::abs(resp_plant[0] * resp_filter[0]);
+    REQUIRE_THAT(dc_composite, WithinAbs(1.0, 0.05));
+}

@@ -34,11 +34,12 @@ After estimating parameters, you must **prove the model is good enough**:
 
 ### 4. Control-Oriented Model Transformation
 The identified model is rarely in the exact form your control method needs:
-- Convert continuous \leftrightarrow discrete (with proper sampling time selection).
-- Model reduction (balanced truncation, Hankel norm) to get a low-order design model.
+- Convert continuous ↔ discrete with proper sampling time selection: `ctrl::c2d(sys_c, Ts, ZOH)`.
+- **Model reduction (balanced truncation)** to get a low-order design model: `ctrl::balancedTruncate(sys, r)` — returns H∞ error bound and HSVs. Call `ctrl::suggestOrder(res, tol)` to find the minimum r meeting a tolerance. Suitable for n ≤ 10 (O(n⁶) solver).
+- **Linearisation at operating points** for gain-scheduled or adaptive designs: `ctrl::lineariseAtPoint(f, x0, u0, Ts)`.
 - Augmentation with disturbance models (integrators for offset-free tracking, ARIMA for MPC).
-- Delay approximation (Pade, or exact state augmentation for MPC).
-- Uncertainty representation (extracting multiplicative/additive weight for Hinf).
+- Delay approximation: `ctrl::padeDelayFilter(theta_frac, Ts)` from `FunctionApproximator.h`.
+- Uncertainty representation for H∞ design: use `MixedSensitivity::build(G, W1, W2, W3)`.
 
 *This bridge between identification and controller design is often messy and iterative.*
 

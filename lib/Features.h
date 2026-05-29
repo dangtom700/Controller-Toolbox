@@ -59,6 +59,9 @@ inline std::unordered_map<std::string, bool> features()
         {"mhe",                     true},  // always compiled (MovingHorizonEstimator.cpp in core sources)
         {"linearisation_helper",    true},  // always compiled (LinearisationHelper.cpp in core sources)
         {"feedback_linearisation",  true},  // always compiled (FeedbackLinearisation.cpp in core sources)
+        {"mrac",                    true},  // always compiled (MRACController.cpp in core sources)
+        {"balanced_truncation",     true},  // always compiled (BalancedTruncation.cpp in core sources)
+        {"zpetc",                   true},  // always compiled (ZeroPhaseTrackingFilter.cpp in core sources)
     };
 }
 

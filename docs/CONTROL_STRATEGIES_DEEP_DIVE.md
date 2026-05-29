@@ -1044,17 +1044,24 @@ ZPETCResult designZPETC(const StateSpace& plant, double Ts);
 
 ---
 
-### Implementation Priority Order
+### Implementation Status (all 5 DONE — 2026-05-28)
 
-| Priority | Feature | Blocking dependency | Effort estimate |
-|----------|---------|---------------------|-----------------|
-| 1 | `LinearisationHelper.h` (E2) | None — reuses EKF Jacobian code | 1 session |
-| 2 | `FeedbackLinearisation.h` (E4) | E2 (Jacobian for f, g evaluation) | 1 session |
-| 3 | `MRACController.h` (E3) | `RecursiveLeastSquares` (EXISTS) | 1–2 sessions |
-| 4 | `BalancedTruncation.h` (E1) | Discrete Lyapunov (uses Eigen SelfAdjointEigenSolver) | 2 sessions |
-| 5 | `ZeroPhaseTrackingFilter.h` (E5) | Polynomial root finder (Eigen EigenSolver companion) | 1–2 sessions |
+| Extension | Status | Key files | Tests |
+|-----------|--------|-----------|-------|
+| E2 `LinearisationHelper.h` | **DONE** | `lib/LinearisationHelper.h/.cpp` | `[linearisation]` × 2 |
+| E4 `FeedbackLinearisation.h` | **DONE** | `lib/FeedbackLinearisation.h/.cpp` | `[fl]` × 2 |
+| E3 `MRACController.h` | **DONE** | `lib/MRACController.h/.cpp` | `[mrac]` × 2 |
+| E1 `BalancedTruncation.h` | **DONE** | `lib/BalancedTruncation.h/.cpp` | `[btm]` × 2 |
+| E5 `ZeroPhaseTrackingFilter.h` | **DONE** | `lib/ZeroPhaseTrackingFilter.h/.cpp` | `[zpetc]` × 3 |
 
-All five are compatible with the existing `IController` interface, `StateSpace` / `ssStep()` infrastructure, and `GradientProjectionQP` backend. None require external dependencies beyond Eigen 3.4.
+**Final counts after all extensions:** 78 C++ passed | 79 Python passed | 0 failures.
+
+**Key fixes discovered during implementation:**
+- E5 `evalTF`: C matrix must be `MatrixXcd`, not `VectorXcd` — Eigen's implicit reshape transposes a (1×n) row to (n×1) column, producing ×50 amplitude error.
+- E5 `suggest_order` Python binding: name clash with SubspaceID's `suggestOrder(VectorXd)` — resolved by wrapping both in lambdas so pybind11 type dispatch selects the correct overload at runtime.
+- FL pendulum (relative degree 2): inner PID must be tuned for a virtual double integrator, not the plant directly; use characteristic polynomial placement.
+
+All five are compatible with the existing `IController` interface, `StateSpace` / `ssStep()` infrastructure, and `GradientProjectionQP` backend. No external dependencies beyond Eigen 3.4.
 
 ---
 

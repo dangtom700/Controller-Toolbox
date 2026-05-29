@@ -57,7 +57,7 @@
 ---
 
 ### 5. Adaptive Control
-- **Model Reference Adaptive Control (MRAC)** - direct & indirect
+- **Model Reference Adaptive Control (MRAC)** - direct & indirect — **implemented: `MRACController`** (Lyapunov adaptation, σ-modification, parameter projection)
 - **Self-Tuning Regulator (STR)**
 - **Gain Scheduling** (classical, parameter-dependent) - **implemented via `ControllerStack::Weighted`** + blended gains (see ex41)
 - **Adaptive PID**
@@ -71,7 +71,7 @@
 ---
 
 ### 6. Nonlinear Control
-- **Feedback Linearization** (input-output, full-state)
+- **Feedback Linearization** (input-output, full-state) — **implemented: `FeedbackLinearisationController`** (SISO, relative degree 1, DriftFn+GainFn)
 - **Backstepping** (integrator backstepping)
 - **Passivity-Based Control (PBC)**
 - **Interconnection and Damping Assignment (IDA-PBC)**

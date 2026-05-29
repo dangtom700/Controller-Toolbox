@@ -84,6 +84,9 @@
 #include "MovingHorizonEstimator.h"       ///< MHE - moving horizon state estimator (condensed QP, box constraints on process noise).
 #include "LinearisationHelper.h"         ///< jacobianX/U, lineariseAtPoint - numerical Jacobians and ZOH linearisation at operating point.
 #include "FeedbackLinearisation.h"       ///< FeedbackLinearisationController - exact FL for affine-in-control SISO systems (relative degree 1).
+#include "MRACController.h"              ///< MRAC - Lyapunov-based MRAC with sigma-modification and parameter projection.
+#include "BalancedTruncation.h"          ///< balancedTruncate, suggestOrder - H-infinity-bounded model order reduction.
+#include "ZeroPhaseTrackingFilter.h"     ///< designZPETC, transmissionZeros - causal zero-phase feedforward prefilter.
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,

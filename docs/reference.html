@@ -115,16 +115,25 @@
   <a href="#leadlag">Lead-Lag</a>
   <a href="#smith">Smith Predictor</a>
   <a href="#repetitive">Repetitive</a>
+  <a href="#feedforward">Feedforward</a>
   <a href="#esc">Extremum Seeking</a>
-  <a href="#hinf">H-infinity</a>
+  <a href="#hinf">H-infinity / mu</a>
   <a href="#fuzzy">Fuzzy Logic</a>
+  <a href="#mrac">MRAC ★</a>
+  <a href="#fl">Feedback Linearisation ★</a>
   <h2>Estimation</h2>
   <a href="#kf">Kalman Filter</a>
   <a href="#ekf">EKF</a>
   <a href="#ukf">UKF</a>
+  <a href="#mhe">MHE ★</a>
   <h2>Identification</h2>
+  <a href="#fopdt-id">FOPDT / SOPDT Identifier ★</a>
   <a href="#rls">RLS</a>
   <a href="#subspace">SubspaceID</a>
+  <h2>Model Utilities</h2>
+  <a href="#linhelper">Linearisation Helper ★</a>
+  <a href="#btm">Balanced Truncation ★</a>
+  <a href="#zpetc">ZPETC ★</a>
   <h2>Tuning</h2>
   <a href="#tuners">Tuner Suite</a>
   <a href="#traits">Controller Traits</a>
@@ -151,7 +160,7 @@
 
 <h1>Controller Toolbox</h1>
 <p style="color:var(--muted);margin-bottom:24px">
-  Discrete-time control library &mdash; C++17 &middot; Eigen 3.4 &middot; 20+ controllers &middot; 8 tuning families
+  Discrete-time control library &mdash; C++20 &middot; Eigen 3.4+ &middot; 30+ controllers &middot; 9 tuning families &middot; pybind11 Python bindings
 </p>
 
 <!-- ────────────────────────────────────── OVERVIEW -->
@@ -162,33 +171,42 @@
   interface and can be freely composed via <code>ControllerStack</code>.
 </p>
 <div class="card-row">
-  <div class="card-sm"><h4>Controllers</h4>PID &middot; LQR &middot; LQG &middot; MPC &middot; GPC &middot; ADRC &middot; SMC &middot; LeadLag &middot; Smith &middot; Repetitive &middot; ESC &middot; H&#8734; &middot; Fuzzy</div>
-  <div class="card-sm"><h4>Estimation</h4>Kalman (KF) &middot; Extended KF (EKF) &middot; Unscented KF (UKF)</div>
-  <div class="card-sm"><h4>Identification</h4>Recursive Least Squares (RLS) &middot; N4SID / MOESP subspace ID</div>
-  <div class="card-sm"><h4>Tuning</h4>Relay ZN &middot; IMC &middot; Cohen-Coon &middot; AMIGO &middot; Bryson &middot; Nelder-Mead &middot; Loop-shaping &middot; Kalman noise</div>
+  <div class="card-sm"><h4>Controllers</h4>PID (DoM, 2-DOF) &middot; LQR &middot; LQG &middot; MPC &middot; GPC &middot; ADRC &middot; SMC &middot; LeadLag &middot; Smith &middot; Repetitive &middot; Feedforward &middot; ESC &middot; H&#8734; &middot; mu-synthesis &middot; Fuzzy &middot; MRAC &middot; FeedbackLinearisation</div>
+  <div class="card-sm"><h4>Estimation</h4>Kalman (KF) &middot; Extended KF (EKF) &middot; Unscented KF (UKF) &middot; Moving Horizon (MHE)</div>
+  <div class="card-sm"><h4>Identification &amp; Reduction</h4>FOPDT / SOPDT identifier &middot; Recursive Least Squares (RLS) &middot; N4SID subspace ID &middot; Balanced Truncation &middot; ZPETC prefilter</div>
+  <div class="card-sm"><h4>Linearisation</h4>Numerical Jacobians (jacobianX/U) &middot; lineariseAtPoint (ZOH) &middot; transmission zeros</div>
+  <div class="card-sm"><h4>Tuning</h4>Relay ZN &middot; FOPDT/SOPDT IMC &middot; Cohen-Coon &middot; AMIGO &middot; Bryson &middot; Nelder-Mead &middot; Loop-shaping &middot; Kalman noise</div>
   <div class="card-sm"><h4>HAL / RT</h4>ISensor &middot; IActuator &middot; ITimer &middot; IScheduler &middot; SimPlant &middot; SimSensor &middot; SimActuator &middot; SafeSensor &middot; StdTimer</div>
 </div>
 
 <!-- ────────────────────────────────────── ARCHITECTURE -->
 <h2 id="architecture" class="anchor">Architecture</h2>
 <pre><code>IController (abstract)
- ├── DiscretePID
- ├── LQRAdapter          (wraps DiscreteLQR)
- ├── DiscreteMPC
- ├── GeneralizedPredictiveController
- ├── DiscreteADRC
+ ├── DiscretePID           (backward-Euler, anti-windup, DoM, 2-DOF, b_weight)
+ ├── LQRAdapter            (wraps DiscreteLQR for IController interface)
+ ├── DiscreteMPC           (condensed QP, box constraints on u and Δu)
+ ├── GeneralizedPredictiveController  (CARIMA + RLS adaptive, velocity-form)
+ ├── DiscreteADRC          (2nd-order LADRC — ESO + PD)
  ├── DiscreteSMC / SuperTwistingSMC
- ├── DiscreteLeadLag
- ├── SmithPredictor      (wraps any IController)
- ├── RepetitiveController (wraps any IController)
- ├── ExtremumSeeker
- ├── DiscreteHinf
- └── ControllerStack     (Supervisory | Additive | Weighted)
+ ├── DiscreteLeadLag       (Tustin biquad)
+ ├── SmithPredictor        (wraps any IController; integer + Pade fractional delay)
+ ├── RepetitiveController  (IMP Q-filter plug-in)
+ ├── FeedforwardController (static / dynamic G_ff(z)·r)
+ ├── ExtremumSeeker        (perturbation-based ESC)
+ ├── MRACController        (Lyapunov adaptation + σ-modification + projection)  ← NEW
+ ├── FeedbackLinearisationController  (affine-in-control, relative degree 1)    ← NEW
+ ├── DiscreteHinf          (γ-bisection, mixed sensitivity, DK mu-synthesis)
+ └── ControllerStack       (Supervisory | Additive | Weighted)
 
 Stand-alone (not IController):
  DiscreteLQR, DiscreteLQG
  KalmanFilter, ExtendedKalmanFilter, UnscentedKalmanFilter
+ MovingHorizonEstimator    (condensed QP dual of MPC)               ← NEW
+ FOPDTIdentifier, SOPDTIdentifier
  RecursiveLeastSquares, SubspaceID (n4sid)
+ LinearisationHelper       (jacobianX/U, lineariseAtPoint)           ← NEW
+ BalancedTruncation        (Moore 1981, H∞ error bound)              ← NEW
+ ZeroPhaseTrackingFilter   (ZPETC, transmissionZeros)                ← NEW
  SystemAnalysis, MetricsAnalyzer, TunerSuite</code></pre>
 
 <div class="note">
@@ -519,6 +537,80 @@ if (result.feasible) {
 </table></div>
 </div>
 
+<!-- ────────────────────────────────────── FEEDFORWARD -->
+<h2 id="feedforward" class="anchor">FeedforwardController</h2>
+<div class="ctrl-block">
+<h3>Purpose</h3>
+<p>Pre-multiplies a reference signal by a static gain or a discrete-time StateSpace filter to add feedforward action. Add its output to any feedback controller's output (ControllerStack::Additive):</p>
+<pre><code>u_total = u_feedback + u_ff
+u_ff    = Kff * r        // static
+u_ff    = G_ff(z) * r   // dynamic (model-inverse, ZPETC)</code></pre>
+<h4>Key parameter</h4>
+<p><code>FeedforwardParams::gain</code> — static gain (default 1.0). Supply a <code>referenceModel</code> StateSpace for dynamic feedforward.</p>
+<div class="note">For zero-phase exact inversion of a minimum-phase plant, use <code>designZPETC()</code> to generate the feedforward StateSpace automatically.</div>
+</div>
+
+<!-- ────────────────────────────────────── MRAC ★ -->
+<h2 id="mrac" class="anchor">MRACController <span class="badge b-ok">NEW</span></h2>
+<div class="ctrl-block">
+<h3>Two-parameter Lyapunov MRAC</h3>
+<p>Forces the plant output <span class="math">y[k]</span> to track the output of a first-order reference model:</p>
+<pre><code>y_m[k+1] = a_m * y_m[k] + b_m * r[k]    // reference model
+u[k]     = θ_r[k]*r + θ_y[k]*y           // two-parameter control law
+e_m[k]   = y[k] - y_m[k]                 // model tracking error</code></pre>
+<h3>Adaptation law with σ-modification (Ioannou-Kokotovic 1983)</h3>
+<pre><code>θ_r[k+1] = θ_r[k] − Ts·(γ_r·e_m·r  + σ·θ_r[k])
+θ_y[k+1] = θ_y[k] − Ts·(γ_y·e_m·y  + σ·θ_y[k])
+// parameter projection: if ‖[θ_r, θ_y]‖₂ > theta_max → normalise</code></pre>
+<p>σ-modification prevents parameter drift when the reference is constant (non-PE). Projection bounds ensure finite-gain stability under bounded disturbances.</p>
+<div class="warn-box">
+  <strong>ADRC convention:</strong> <code>compute(y_plant)</code> takes the plant output — not the error — consistent with <code>DiscreteADRC</code>. Always call <code>setReference(r)</code> before <code>compute()</code> each step.
+</div>
+<div class="warn-box">
+  <strong>Feasibility:</strong> plant must be minimum-phase; gain sign must be known (positive ↔ γ_r, γ_y &gt; 0; negative ↔ negate both). Constant references converge but θ may not reach the true ideal values without persistent excitation.
+</div>
+<h3>Parameters <span class="badge b-info">MRACParams</span></h3>
+<div class="tbl-wrap"><table>
+<tr><th>Field</th><th>Default</th><th>Meaning</th></tr>
+<tr><td class="param-name">a_m</td><td>0.5</td><td>Reference model pole (|a_m| &lt; 1). Controls desired response speed.</td></tr>
+<tr><td class="param-name">b_m</td><td>0.5</td><td>Reference model input gain. Set b_m = 1 − a_m for unity DC gain.</td></tr>
+<tr><td class="param-name">gamma_r</td><td>1.0</td><td>Adaptation rate for θ_r. Larger = faster but noisier.</td></tr>
+<tr><td class="param-name">gamma_y</td><td>1.0</td><td>Adaptation rate for θ_y.</td></tr>
+<tr><td class="param-name">sigma</td><td>0.005</td><td>σ-modification damping. 0 = off; 0.005–0.05 typical.</td></tr>
+<tr><td class="param-name">theta_max</td><td>50.0</td><td>L₂ parameter projection bound. Prevents finite-escape.</td></tr>
+</table></div>
+<h3>Diagnostic getters</h3>
+<p><code>theta_r()</code>, <code>theta_y()</code> — current adaptive parameters &middot; <code>modelOutput()</code> — y_m[k] &middot; <code>modelError()</code> — e_m[k]</p>
+</div>
+
+<!-- ────────────────────────────────────── FL ★ -->
+<h2 id="fl" class="anchor">FeedbackLinearisationController <span class="badge b-ok">NEW</span></h2>
+<div class="ctrl-block">
+<h3>Exact feedback linearisation — SISO, relative degree 1</h3>
+<p>For a plant of the form <span class="math">ẋ = f(x) + g(x)·u</span>, the FL control law cancels the nonlinear terms and exposes a virtual integrator to the inner controller:</p>
+<pre><code>v[k]  = inner.compute(r - y[k])           // virtual control from inner PID/PD
+u[k]  = clamp( (v - f(x[k], u[k-1])) / g_eff(x[k], u[k-1]),  uMin, uMax )
+// g_eff = copysign(max(|g|, eps), g)      // regularised to prevent /0</code></pre>
+<div class="danger-box">
+  <strong>setState(x) must be called before each compute().</strong> The FL controller does not integrate the plant state — that is the plant's responsibility. Provide x[k] from full state measurement or an EKF/UKF estimate.
+</div>
+<div class="warn-box">
+  <strong>Feasibility conditions:</strong>
+  (1) Relative degree 1: u appears in ẏ directly.
+  (2) Minimum phase: zero dynamics when y=0 must be stable — unstable zeros cause internal blow-up even while y tracks.
+  (3) g(x) ≠ 0 across the operating region.
+  (4) Model f and g must be accurate — model error enters as unmatched disturbance.
+</div>
+<h3>Parameters <span class="badge b-info">FLParams</span></h3>
+<div class="tbl-wrap"><table>
+<tr><th>Field</th><th>Default</th><th>Meaning</th></tr>
+<tr><td class="param-name">uMin / uMax</td><td>±1e6</td><td>Output saturation limits</td></tr>
+<tr><td class="param-name">regularisationEps</td><td>1e-6</td><td>Minimum |g| before clamping. Choose &lt; expected min |g| in operating region.</td></tr>
+</table></div>
+<h3>Relative degree 2 (pendulum) — inner PID tuning</h3>
+<p>When the output y has relative degree 2 (e.g., angle in θ̈ = v), the inner controller drives a virtual double integrator. Tune for closed-loop characteristic polynomial <span class="math">(s+a)(s²+bs+c)</span> to achieve the desired settling time. Example: poles at {−1, −2±j} → K_d=5, K_p=9, K_i=5 (see <code>ex56_feedback_linearisation.cpp</code>).</p>
+</div>
+
 <!-- ────────────────────────────────────── KF -->
 <h2 id="kf" class="anchor">KalmanFilter (Linear)</h2>
 <div class="ctrl-block">
@@ -575,6 +667,49 @@ X_0 = x^,   X_i = x^ ± sqrt((n+lambda)*P)_i  (i=1..n)</code></pre>
 </table></div>
 </div>
 
+<!-- ────────────────────────────────────── MHE ★ -->
+<h2 id="mhe" class="anchor">MovingHorizonEstimator (MHE) <span class="badge b-ok">NEW</span></h2>
+<div class="ctrl-block">
+<h3>Condensed QP dual of MPC</h3>
+<p>MHE minimises a finite-horizon sum of process noise costs and measurement residuals to find the best state estimate, subject to box constraints on the process noise sequence:</p>
+<pre><code>// Decision variable: z = [x₀; w₀; w₁; ...; w_{N-1}]  (size n*(N+1))
+// min   (x₀-x̄)ᵀ P₀⁻¹(x₀-x̄) + Σ wₖᵀQ⁻¹wₖ + Σ (yₖ-Cxₖ)ᵀR⁻¹(yₖ-Cxₖ)
+// s.t.  wMin ≤ wₖ ≤ wMax   (process noise box constraints)
+//       xₖ₊₁ = A·xₖ + B·uₖ + wₖ   (plant dynamics)</code></pre>
+<p>Condensed matrices Ψ, Γ_u, C̄ are pre-built at construction; per-step cost is one <code>GradientProjectionQP</code> solve (same backend as MPC and GPC).</p>
+<div class="note">Certainty-equivalence pattern: inject the MHE estimate into MPC via <code>mpc.setState(mhe.estimate(y, u))</code>. See <code>ex53_mhe_mpc_dual.cpp</code>.</div>
+<h3>Horizon ramp-up</h3>
+<p>First N-1 calls use a shorter effective horizon; the arrival cost P₀ weights the initial state uncertainty during the warm-up phase.</p>
+<h3>Parameters <span class="badge b-info">MHEParams</span></h3>
+<div class="tbl-wrap"><table>
+<tr><th>Field</th><th>Default</th><th>Meaning</th></tr>
+<tr><td class="param-name">N</td><td>10</td><td>Horizon length. Larger = better estimate, slower QP (O(N²n²)).</td></tr>
+<tr><td class="param-name">wMin / wMax</td><td>−0.5 / +0.5</td><td>Box constraints on process noise. Tighter = faster QP.</td></tr>
+<tr><td class="param-name">qpMaxIter</td><td>50</td><td>Gradient-projection iteration limit per step.</td></tr>
+</table></div>
+<h3>API</h3>
+<p><code>initialize(x0, P0)</code> — set initial state and arrival cost covariance &middot; <code>estimate(y, u) → VectorXd</code> — run one MHE step and return x_hat &middot; <code>lastConverged()</code> — true if QP converged within qpMaxIter.</p>
+</div>
+
+<!-- ────────────────────────────────────── FOPDT/SOPDT Identifier ★ -->
+<h2 id="fopdt-id" class="anchor">FOPDT / SOPDT Identifier <span class="badge b-ok">NEW</span></h2>
+<div class="ctrl-block">
+<h3>Step-response process identification</h3>
+<p>Two classes identify reduced-order process models from open-loop step response data.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Class</th><th>Model</th><th>Methods</th><th>Output</th></tr>
+<tr><td class="param-name">FOPDTIdentifier</td><td>K·e<sup>−θs</sup>/(τs+1)</td><td>Graphical (ZN tangent + 63.2% crossing) or golden-section optimisation</td><td>FOPDTModel {K, tau, theta, fitRMSE}</td></tr>
+<tr><td class="param-name">SOPDTIdentifier</td><td>K·e<sup>−θs</sup>/((τ₁s+1)(τ₂s+1))</td><td>Graphical (ZN + 63.2% + 28.3% crossings for τ₁/τ₂ split) or nested golden-section</td><td>SOPDTModel {K, tau1, tau2, theta, fitRMSE} with τ₁≥τ₂</td></tr>
+</table></div>
+<h3>τ₁/τ₂ split algorithm (SOPDT graphical)</h3>
+<p>The 28.3% crossing time normalised to the 63.2% crossing time encodes the asymmetry between the two time constants. Interpolates between the FOPDT limit (ratio≈0.332) and the critically-damped SOPDT limit (ratio≈0.530) to give α, then: τ₁ = α·τ_sum, τ₂ = (1−α)·τ_sum.</p>
+<h3>IMC-PID tuning from SOPDT (Rivera 1986)</h3>
+<pre><code>auto pp = ctrl::SOPDTIdentifier::imcTuning(model, lambda_c);
+// Kp = tau_eq / (K*(lambda_c + theta/2)),  Ti = tau_eq,  Td = tau1*tau2/tau_eq
+// where tau_eq = tau1 + tau2</code></pre>
+<p>The result feeds directly into <code>DiscretePID</code>. See <code>ex38_sopdt_pid_tuning.cpp</code> for a ZN vs IMC benchmark.</p>
+</div>
+
 <!-- ────────────────────────────────────── RLS -->
 <h2 id="rls" class="anchor">RecursiveLeastSquares (RLS)</h2>
 <div class="ctrl-block">
@@ -618,6 +753,99 @@ res  = ctrl::n4sid(Y, U, n, i_horizon, Ts);       // rerun with chosen order</co
 <pre><code>// Skip manual Q/R tuning — use what n4sid extracted:
 ctrl::KalmanFilter kf(res.model.value(), /*Q=*/res.kalmanGain * res.innovCov * res.kalmanGain.transpose(),
                                           /*R=*/res.innovCov);</code></pre>
+</div>
+
+<!-- ────────────────────────────────────── LINEARISATION HELPER ★ -->
+<h2 id="linhelper" class="anchor">LinearisationHelper <span class="badge b-ok">NEW</span></h2>
+<div class="ctrl-block">
+<h3>Numerical Jacobians and ZOH linearisation at an operating point</h3>
+<p>Free functions in <code>namespace ctrl</code> for Jacobian-based linearisation of continuous-time nonlinear models. The central-difference step uses <span class="math">h_i = ε·max(|x_i|,1)</span> to handle heterogeneous state magnitudes (positions, angles, velocities).</p>
+<pre><code>// Define Van der Pol dynamics: xdot = f(x, u)
+ctrl::StateFunc vdp = [mu](const Eigen::VectorXd&amp; x, const Eigen::VectorXd&amp; u) {
+    Eigen::VectorXd xd(2);
+    xd(0) = x(1);
+    xd(1) = mu*(1 - x(0)*x(0))*x(1) - x(0) + u(0);
+    return xd;
+};
+
+// Linearise at origin, ZOH-discretise at Ts = 0.05 s
+ctrl::StateSpace sys = ctrl::lineariseAtPoint(vdp, x0, u0, Ts);
+// → A = [[0,1],[-1,mu]], B = [[0],[1]]  (within eps)
+
+// Use for LQR design:
+ctrl::DiscreteLQR lqr(sys, lqr_params);</code></pre>
+<div class="tbl-wrap"><table>
+<tr><th>Function</th><th>Returns</th><th>Notes</th></tr>
+<tr><td class="param-name">jacobianX(f, x0, u0)</td><td>MatrixXd ∂f/∂x</td><td>n function evaluations; O(eps²) accuracy</td></tr>
+<tr><td class="param-name">jacobianU(f, x0, u0)</td><td>MatrixXd ∂f/∂u</td><td>m function evaluations</td></tr>
+<tr><td class="param-name">lineariseAtPoint(f, x0, u0, Ts)</td><td>StateSpace (ZOH)</td><td>Identity output y=x (C=I, D=0)</td></tr>
+<tr><td class="param-name">lineariseAtPoint(f, h, x0, u0, Ts)</td><td>StateSpace (ZOH)</td><td>Custom output y=h(x,u); C=∂h/∂x, D=∂h/∂u</td></tr>
+</table></div>
+<div class="note">
+  The same scaled-epsilon algorithm is used internally by <code>ExtendedKalmanFilter::numericalJacobian()</code>.
+  Passing <code>nullptr</code> for the EKF Jacobian functions automatically falls back to this implementation.
+</div>
+</div>
+
+<!-- ────────────────────────────────────── BALANCED TRUNCATION ★ -->
+<h2 id="btm" class="anchor">BalancedTruncation <span class="badge b-ok">NEW</span></h2>
+<div class="ctrl-block">
+<h3>Moore (1981) balanced truncation with guaranteed H∞ error bound</h3>
+<p>Replaces an n-th order stable state-space model with an r-th order approximation that preserves the most input-output energetically significant modes:</p>
+<pre><code>ctrl::TruncationResult res = ctrl::balancedTruncate(sys_full, r);
+// res.reduced                — r-th order StateSpace approximation
+// res.hankelSingularValues   — all n HSVs in descending order
+// res.errorBound             — 2·Σᵢ₌ᵣ₊₁ⁿ σᵢ  (H∞ norm bound)
+// res.isStable               — true if reduced model is strictly stable
+
+int r_best = ctrl::suggestOrder(res, 0.01);  // tol = 1% of total gain</code></pre>
+<h3>Algorithm</h3>
+<ol>
+<li>Solve discrete Lyapunov equations → controllability gramian P_c, observability gramian P_o.</li>
+<li>Cholesky of P_c → L_c; symmetric eigendecomposition of M = L_c'·P_o·L_c → HSVs σᵢ.</li>
+<li>Balancing transformation T_r = L_c·U·Σ^{−½}, T_l = T_r⁻¹.</li>
+<li>Balanced realisation A_bal = T_l·A·T_r, B_bal = T_l·B, C_bal = C·T_r.</li>
+<li>Truncate: keep top r rows/columns.</li>
+</ol>
+<div class="warn-box">
+  The Lyapunov solver uses Kronecker vectorisation (O(n⁶)) — suitable for n ≤ 10. For n &gt; 10, the Bartels-Stewart algorithm (O(n³)) is preferred. Use the reduced model for controller design, not the full model directly.
+</div>
+<div class="note">
+  <strong>Correct usage:</strong> design the controller (LQR, MPC) on the reduced model, then apply the gain to the full system. The H∞ error bound guarantees that performance degrades by at most 2·Σ σᵢ from the reduced design. See <code>ex58_balanced_truncation.cpp</code>.
+</div>
+</div>
+
+<!-- ────────────────────────────────────── ZPETC ★ -->
+<h2 id="zpetc" class="anchor">ZeroPhaseTrackingFilter (ZPETC) <span class="badge b-ok">NEW</span></h2>
+<div class="ctrl-block">
+<h3>Tomizuka (1987) zero-phase error tracking prefilter</h3>
+<p>Designs a causal feedforward filter G_ff(z) such that G(z)·G_ff(z) has:</p>
+<ul>
+<li><strong>Zero phase error</strong> for the minimum-phase zeros of G(z).</li>
+<li><strong>Unit DC gain</strong> by normalising the non-minimum-phase contribution.</li>
+<li><strong>No unstable pole-zero cancellations</strong> — G_ff inverts only stable zeros.</li>
+</ul>
+<pre><code>ctrl::ZPETCResult res = ctrl::designZPETC(plant);
+// res.filter        — causal G_ff(z) as StateSpace
+// res.hasNMPZeros   — true if any |zero| ≥ 1
+// res.dcAmplitudeError  — max ||G·G_ff|(ω) − 1| over [0,Nyquist]
+// res.zeros         — all transmission zeros (complex)
+
+// Use as feedforward prefilter:
+double u_ff = ctrl::ssStep(res.filter, x_ff, r_vec)(0);
+double u    = u_feedback + u_ff;</code></pre>
+<h3>Composite response</h3>
+<pre><code>G(z)·G_ff(z) = B⁻(z) / B⁻(1)
+// min-phase (B⁻=1): G·G_ff = z^{-d}  →  unit magnitude everywhere
+// NMP plant:        DC gain = 1, amplitude varies ∝ |B⁻(e^{jω})|</code></pre>
+<h3>Transmission zero computation</h3>
+<p><code>transmissionZeros(sys)</code> uses the generalised eigenvalue problem <span class="math">det([[A−λI, B],[C, D]]) = 0</span> via Eigen's <code>GeneralizedEigenSolver</code>. Finite eigenvalues are transmission zeros.</p>
+<div class="warn-box">
+  <strong>Implementation note:</strong> when evaluating the composite frequency response to compute the amplitude error metric, the C matrix must be kept as a MatrixXcd (not reshaped to a column VectorXcd). Eigen's implicit reshape transposes a (1×n) matrix to (n×1), silently corrupting the frequency response computation.
+</div>
+<div class="note">
+  <strong>Non-minimum-phase plants</strong> (flexible structures, non-collocated sensors): ZPETC gives zero phase error (the main problem) at the cost of amplitude variation away from DC. This is always better than attempting unstable exact inversion. See <code>ex59_zpetc.cpp</code>.
+</div>
 </div>
 
 <!-- ────────────────────────────────────── TUNERS -->
@@ -849,15 +1077,24 @@ for (int k = 0; k &lt; N; ++k) {
 <h2 id="gaps" class="anchor">Algorithm Gap Analysis</h2>
 <div class="tbl-wrap"><table>
 <tr><th>Feature</th><th>Status</th><th>Notes</th></tr>
-<tr><td>Explicit MPC (mp-QP)</td><td class="badge b-warn">Out of scope</td><td>Exponential region count; online QP is preferred</td></tr>
-<tr><td>Adaptive / self-tuning (MRAC, IFT, VRFT)</td><td class="badge b-warn">Out of scope</td><td>Use RLS + TunerSuite as building blocks</td></tr>
-<tr><td>Tube MPC / robust MPC</td><td class="badge b-warn">Out of scope</td><td>Requires external convex solver</td></tr>
-<tr><td>Continuous-time H∞ synthesis</td><td class="badge b-warn">Not implemented</td><td>Only discrete-time DGKF is available</td></tr>
-<tr><td>Fractional-order dead-time (Smith)</td><td class="badge b-warn">Not implemented</td><td>Padé approximant for fractional Ts remainder; integer only</td></tr>
-<tr><td>UKF augmented noise model</td><td class="badge b-warn">Additive only</td><td>State-dependent / multiplicative noise requires augmented sigma points</td></tr>
-<tr><td>MPC output constraints (y bounds)</td><td class="badge b-warn">Not implemented</td><td>Only u and Δu are constrained; y constraints need extra QP rows</td></tr>
-<tr><td>Distributed / multi-agent control</td><td class="badge b-warn">Out of scope</td><td>Single-agent by design</td></tr>
-<tr><td>Non-convex optimisation (GA, PSO)</td><td class="badge b-warn">Out of scope</td><td>Use Optuna / DEAP externally</td></tr>
+<tr><td>MRAC (Lyapunov + σ-modification)</td><td><span class="badge b-ok">DONE</span></td><td><code>MRACController</code> — first-order reference model, two-parameter adaptation</td></tr>
+<tr><td>Feedback linearisation (SISO, rel.deg.1)</td><td><span class="badge b-ok">DONE</span></td><td><code>FeedbackLinearisationController</code> — DriftFn + GainFn functors</td></tr>
+<tr><td>Moving Horizon Estimation (MHE)</td><td><span class="badge b-ok">DONE</span></td><td><code>MovingHorizonEstimator</code> — condensed QP, box noise constraints</td></tr>
+<tr><td>Balanced truncation model reduction</td><td><span class="badge b-ok">DONE</span></td><td><code>balancedTruncate()</code> — Cholesky+SVD, H∞ error bound</td></tr>
+<tr><td>ZPETC zero-phase feedforward</td><td><span class="badge b-ok">DONE</span></td><td><code>designZPETC()</code> — min-phase inversion + DC normalisation</td></tr>
+<tr><td>SOPDT step-response identification</td><td><span class="badge b-ok">DONE</span></td><td><code>SOPDTIdentifier</code> + Rivera 1986 IMC-PID tuning</td></tr>
+<tr><td>Numerical Jacobians + lineariseAtPoint</td><td><span class="badge b-ok">DONE</span></td><td><code>LinearisationHelper</code> — central-difference, scaled epsilon</td></tr>
+<tr><td>mu-synthesis DK-iteration (rational D)</td><td><span class="badge b-ok">DONE</span></td><td><code>DiscreteHinf::solveMuSyn</code> — first-order D_j(z) filter per channel</td></tr>
+<tr><td>Explicit MPC (mp-QP)</td><td><span class="badge b-warn">Out of scope</span></td><td>Exponential region count; online QP is preferred</td></tr>
+<tr><td>Bartels-Stewart Lyapunov solver (O(n³))</td><td><span class="badge b-warn">Not implemented</span></td><td>Current Kronecker solver is O(n⁶) — use for n ≤ 10 only</td></tr>
+<tr><td>Tube MPC / robust MPC</td><td><span class="badge b-warn">Out of scope</span></td><td>Requires external convex solver</td></tr>
+<tr><td>Continuous-time H∞ synthesis</td><td><span class="badge b-warn">Not implemented</span></td><td>Only discrete-time DGKF is available</td></tr>
+<tr><td>MHE state inequality constraints</td><td><span class="badge b-warn">Not implemented</span></td><td>Only box constraints on process noise; full state constraints need extra QP rows</td></tr>
+<tr><td>Fractional-order PID (FOPID)</td><td><span class="badge b-warn">Not implemented</span></td><td>IIR Oustaloup approximation; use FunctionApproximator.h as starting point</td></tr>
+<tr><td>UKF augmented noise model</td><td><span class="badge b-warn">Additive only</span></td><td>State-dependent / multiplicative noise requires augmented sigma points</td></tr>
+<tr><td>MPC output constraints (y bounds)</td><td><span class="badge b-warn">Not implemented</span></td><td>Only u and Δu are constrained; y constraints need extra QP rows</td></tr>
+<tr><td>Distributed / multi-agent control</td><td><span class="badge b-warn">Out of scope</span></td><td>Single-agent by design</td></tr>
+<tr><td>CONTRIBUTING.md</td><td><span class="badge b-warn">Low priority</span></td><td>Tracked as P10-13; no concrete timeline</td></tr>
 </table></div>
 
 <!-- ────────────────────────────────────── NUMERICS -->
@@ -880,43 +1117,61 @@ for (int k = 0; k &lt; N; ++k) {
 </div>
 
 <!-- ────────────────────────────────────── KNOWN ISSUES -->
-<h2 id="known-issues" class="anchor">Known Issues (as of 2026-05-25)</h2>
+<h2 id="known-issues" class="anchor">Known Issues (as of 2026-05-28)</h2>
 <div class="tbl-wrap"><table>
-<tr><th>#</th><th>Issue</th><th>Severity</th><th>File</th></tr>
+<tr><th>#</th><th>Issue</th><th>Severity</th><th>File / Fix</th></tr>
 <tr>
   <td>1</td>
-  <td>UKF covariance can go non-PSD without eigenvalue floor (now applied, but worth monitoring in long runs)</td>
+  <td>UKF covariance can go non-PSD without eigenvalue floor (floor applied post-update, but long-run drift is possible)</td>
   <td><span class="badge b-warn">Medium</span></td>
-  <td>UnscentedKalmanFilter.cpp:130</td>
+  <td>UnscentedKalmanFilter.cpp — monitor <code>covariance().eigenvalues()</code> in production</td>
 </tr>
 <tr>
   <td>2</td>
-  <td><code>DiscreteADRC::compute()</code> silent wrong answer if <code>setReference()</code> not called before use in ControllerStack</td>
+  <td><code>DiscreteADRC::compute()</code> silent wrong answer if <code>setReference()</code> not called — defaults to regulating output to zero</td>
   <td><span class="badge b-warn">Low</span></td>
-  <td>DiscreteADRC.h — documented</td>
+  <td>DiscreteADRC.h — documented. Same convention applies to <code>MRACController</code>.</td>
 </tr>
 <tr>
   <td>3</td>
   <td><code>DiscreteMPC::compute(error)</code> open-loop state drift for disturbance-affected or integrating plants</td>
   <td><span class="badge b-warn">Low-Med</span></td>
-  <td>DiscreteMPC.cpp — documented; use <code>setState()</code></td>
+  <td>DiscreteMPC.cpp — documented. Mitigate by calling <code>setState(kf.state())</code> before <code>computeRef()</code>.</td>
 </tr>
 <tr>
   <td>4</td>
-  <td>DiscreteHinf temporarily excluded from single-include ControllerToolbox.h</td>
-  <td><span class="badge b-info">Info</span></td>
-  <td>ControllerToolbox.h — see docs/bug_report_2026_05_25.md P.S.</td>
+  <td><code>BalancedTruncation</code> Lyapunov solver is O(n⁶) — unusable for n &gt; 15</td>
+  <td><span class="badge b-warn">Medium</span></td>
+  <td>BalancedTruncation.cpp — Bartels-Stewart O(n³) replacement is a tracked future work item.</td>
 </tr>
 <tr>
   <td>5</td>
+  <td><code>evalTF</code> in ZeroPhaseTrackingFilter: C matrix must be stored as MatrixXcd not VectorXcd — Eigen silently transposes (1×n) to (n×1) when assigned to VectorXcd, producing ×50 amplitude error</td>
+  <td><span class="badge b-ok">FIXED</span></td>
+  <td>ZeroPhaseTrackingFilter.cpp — fixed in 2026-05-28. Test: [zpetc] dcAmplitudeError &lt; 1e-8 for min-phase.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>suggestOrder</code> name clash: SubspaceID (VectorXd argument) and BalancedTruncation (TruncationResult argument) — both bound to the same Python name</td>
+  <td><span class="badge b-ok">FIXED</span></td>
+  <td>advanced_bindings.cpp + analysis_bindings.cpp — both wrapped in lambdas; pybind11 dispatches by type at runtime.</td>
+</tr>
+<tr>
+  <td>7</td>
   <td>SubspaceID B/D regression test has 50% DC-gain tolerance (not a tight correctness check)</td>
   <td><span class="badge b-info">Info</span></td>
-  <td>test_controllers.cpp — tracked in bug_report_2026_05_25.md §2.3</td>
+  <td>test_controllers.cpp — tracked; N4SID accuracy depends on data quality and block row factor.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td>Van der Pol ZOH warning: continuous-time eigenvalues exactly on the unit circle → discrete A has |λ|≈1.01 (rounding in matrix exponential). LQR still converges because it sees a slightly unstable model.</td>
+  <td><span class="badge b-info">Info</span></td>
+  <td>LinearisationHelper / PlantModel — expected for marginally-stable continuous systems. Use Ts smaller than 1/|λ_max| for accuracy.</td>
 </tr>
 </table></div>
 
 <p style="margin-top:40px;color:var(--muted);font-size:12px">
-  Generated 2026-05-25 &middot; Controller Toolbox &middot; C++17 / Eigen 3.4
+  Generated 2026-05-28 &middot; Controller Toolbox &middot; C++20 / Eigen 3.4+ &middot; 78 C++ executables · 79 Python examples · 0 failures
 </p>
 
 </main>

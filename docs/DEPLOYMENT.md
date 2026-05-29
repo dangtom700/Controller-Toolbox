@@ -100,6 +100,57 @@ watchdog that resets the filter if max(|residual|) > threshold for more than K c
 
 ---
 
+### MRACController
+
+| Parameter | Constraint | Note |
+|-----------|-----------|------|
+| `a_m` | `|a_m| < 1` | Reference model stability — constructor throws if violated |
+| `gamma_r`, `gamma_y` | Same sign as plant input gain b_p | Positive for positive-gain plants; negate both for negative-gain |
+| `sigma` | `>= 0`; typical 0.005–0.05 | 0 disables σ-modification (parameter drift risk under constant reference) |
+| `theta_max` | `> 0` | Projection bound — prevents finite-escape under large disturbances |
+| `uMin / uMax` | `uMin < uMax` | Output saturation |
+
+**Stability note:** σ-modification provides bounded-input-bounded-output (BIIBO) stability for bounded disturbances. Without σ (sigma=0), persistent excitation (PE) of the reference is required to prevent parameter drift.
+
+**Real-time:** `compute()` is O(1) — one inner product, one scalar division, and a norm check. No heap allocation.
+
+---
+
+### FeedbackLinearisationController
+
+| Requirement | Constraint | Consequence if violated |
+|-------------|-----------|------------------------|
+| `setState(x)` called before `compute()` | State must be current | Controller uses stale state → wrong inversion of f(x) and g(x) |
+| `|g(x)| >= regularisationEps` | g must be non-zero in operating region | Division by zero; clamped to regularisationEps with sign preserved |
+| Relative degree 1 | u must appear in ẏ directly | Higher relative degree: cascade the FL with additional integrators |
+| Minimum-phase zeros | All zeros of the effective plant must be inside unit circle | Internal states grow unboundedly even when y tracks the reference |
+
+**Inner controller tuning for relative degree 2:**
+When the output y has relative degree 2 (u appears in ÿ, not ẏ), the inner controller drives a virtual double integrator. Use characteristic polynomial `(s+a)(s²+bs+c)` for the desired poles. Example: poles {−1, −2±j} → Kp=9, Ki=5, Kd=5.
+
+**Real-time:** `compute()` calls the two user functors f_ and g_ plus the inner controller's `compute()`. No matrix operations for SISO — suitable for embedded targets.
+
+---
+
+### BalancedTruncation
+
+| Parameter | Constraint |
+|-----------|-----------|
+| `sys` | Must be strictly stable (`isDiscreteStable(sys) == true`) |
+| `r` | `1 ≤ r < n = sys.stateSize()` |
+| Gramian conditioning | `Pc` must be positive definite; throws if Cholesky fails (near-uncontrollable modes) |
+
+**Usage pattern:** `balancedTruncate` is an offline design tool — call it once before the control loop. The reduced model is then used for controller design (LQR, MPC, H∞). Do not call `balancedTruncate` inside a real-time loop.
+
+**Cholesky failure remedy:** If Pc is near-singular, add a small regularisation before calling:
+```cpp
+// In C++:
+Eigen::MatrixXd Pc_reg = Pc + 1e-8 * Eigen::MatrixXd::Identity(n, n);
+```
+Or pass a regularised system: `sys_reg.A = sys.A; sys_reg.B = sys.B * (1 + 1e-8)`.
+
+---
+
 ### ExtendedKalmanFilter / UnscentedKalmanFilter
 
 | Parameter | Constraint | Note |

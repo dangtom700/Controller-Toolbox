@@ -95,6 +95,9 @@ for %%T in (
     ex54_bumpless_transfer
     ex55_linearisation_helper
     ex56_feedback_linearisation
+    ex57_mrac
+    ex58_balanced_truncation
+    ex59_zpetc
     example_pid_feedback
     mimo_known
     mimo_unknown

@@ -232,6 +232,114 @@ StateSpace : Discrete-time linearised model with C = dh/dx, D = dh/du.
 )doc");
 
     // -----------------------------------------------------------------------
+    // BalancedTruncation
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::TruncationResult>(m, "TruncationResult",
+        "Result of balanced truncation: reduced-order StateSpace model + diagnostics.")
+        .def_readonly("reduced",                &ctrl::TruncationResult::reduced,
+                      "Reduced-order StateSpace model (order r).")
+        .def_readonly("hankel_singular_values", &ctrl::TruncationResult::hankelSingularValues,
+                      "All n Hankel singular values in descending order.")
+        .def_readonly("error_bound",            &ctrl::TruncationResult::errorBound,
+                      "H-infinity error bound 2*sum(sigma_{r+1}..sigma_n).")
+        .def_readonly("is_stable",              &ctrl::TruncationResult::isStable,
+                      "True if all poles of reduced model are strictly inside the unit disk.");
+
+    m.def("balanced_truncate",
+          [](const ctrl::StateSpace &sys, int r) { return ctrl::balancedTruncate(sys, r); },
+          py::arg("sys"), py::arg("r"),
+          R"doc(
+Balanced truncation of a discrete-time system to order r.
+
+Parameters
+----------
+sys : StateSpace  - strictly stable discrete-time system (all |poles| < 1).
+r   : int         - target reduced order (1 <= r < n).
+
+Returns
+-------
+TruncationResult with reduced model, Hankel singular values, H-infinity error bound.
+
+Raises
+------
+ValueError if sys is not stable, r is out of range, or gramians are ill-conditioned.
+)doc");
+
+    m.def("suggest_order",
+          [](const ctrl::TruncationResult &res, double tol) { return ctrl::suggestOrder(res, tol); },
+          py::arg("result"), py::arg("tol") = 0.01,
+          R"doc(
+Suggest a reduced order based on a relative H-infinity tolerance.
+
+Returns the smallest r such that the error bound for the truncated modes is
+less than tol * total_norm (where total_norm = 2*sum(all HSVs)).
+
+Parameters
+----------
+result : TruncationResult - from balanced_truncate (any r; all HSVs are returned).
+tol    : float            - relative tolerance (default 0.01 = 1%).
+
+Returns
+-------
+int : suggested order, clamped to [1, n-1].
+)doc");
+
+    // -----------------------------------------------------------------------
+    // ZeroPhaseTrackingFilter
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::ZPETCResult>(m, "ZPETCResult",
+        "Result of ZPETC prefilter design.")
+        .def_readonly("filter",            &ctrl::ZPETCResult::filter,
+                      "Causal ZPETC prefilter G_ff(z) as a StateSpace.")
+        .def_readonly("dc_amplitude_error",&ctrl::ZPETCResult::dcAmplitudeError,
+                      "Max ||G*G_ff|(omega) - 1| over [0, Nyquist]. 0 for min-phase.")
+        .def_readonly("has_nmp_zeros",     &ctrl::ZPETCResult::hasNMPZeros,
+                      "True if any transmission zero satisfies |z| >= 1.")
+        .def_readonly("zeros",             &ctrl::ZPETCResult::zeros,
+                      "All transmission zeros of the plant (complex list).")
+        .def_readonly("nmp_zeros",         &ctrl::ZPETCResult::nmpZeros,
+                      "Non-minimum-phase zeros only (|z| >= 1).");
+
+    m.def("transmission_zeros",
+          [](const ctrl::StateSpace &sys) { return ctrl::transmissionZeros(sys); },
+          py::arg("sys"),
+          R"doc(
+Compute the transmission zeros of a SISO discrete-time system.
+
+Uses the generalised eigenvalue problem: det([[A-lambdaI, B],[C, D]]) = 0.
+Returns finite eigenvalues only (infinite eigenvalues are excluded).
+
+Parameters
+----------
+sys : SISO StateSpace.
+
+Returns
+-------
+list of complex : transmission zeros.
+)doc");
+
+    m.def("design_zpetc",
+          [](const ctrl::StateSpace &plant) { return ctrl::designZPETC(plant); },
+          py::arg("plant"),
+          R"doc(
+Design a ZPETC prefilter for a SISO discrete-time plant.
+
+The causal prefilter G_ff(z) satisfies:
+  G(z) * G_ff(z) = B^-(z) / B^-(1)   (unit DC, zero phase from min-phase zeros)
+
+For minimum-phase plants (all zeros inside UC): G*G_ff = z^{-d} (unit magnitude).
+For NMP plants: G*G_ff has unit DC gain but amplitude error away from DC.
+
+Parameters
+----------
+plant : SISO StateSpace.
+
+Returns
+-------
+ZPETCResult with filter StateSpace and diagnostics.
+)doc");
+
+    // -----------------------------------------------------------------------
     // RepetitiveController
     // -----------------------------------------------------------------------
     // TODO: bind RepetitiveController

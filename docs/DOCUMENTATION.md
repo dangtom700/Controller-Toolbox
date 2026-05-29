@@ -171,8 +171,10 @@ cmake --build build --target docs
 | ex27-ex31 | Advanced: function approximator, GPC, repetitive control, EKF, subspace ID |
 | ex32-ex41 | Part 18 algorithms: SOPDT ID, MHE, rational mu-synthesis, cascade/feedforward/smith/ESC/UKF/LPV |
 | ex42-ex54 | Corrector patterns: Cascade (PID+MPC, SMC+LQR, Fuzzy+PID, ADRC+PID, LeadLag+RC), Additive (ESC+PID, Fuzzy+SMC, LeadLag+I), Observer+SF (EKF+MPC, UKF+SMC, DOB+PI, MHE+MPC), Supervisory (bumpless transfer) |
+| ex55-ex56 | E2/E4 extensions: LinearisationHelper (Van der Pol + CSTR), FeedbackLinearisation (cubic drift + pendulum) |
+| ex57-ex59 | E3/E1/E5 extensions: MRAC with gain jump, BalancedTruncation (4th-order plant), ZPETC (min-phase + NMP) |
 
-**Python examples** (`examples/python/`, `ex01_*` through `ex70_*`): NumPy/python-control cross-validation and pybind11 binding demonstrations for every C++ class. Python examples 61-70 mirror the corrector pattern C++ examples.
+**Python examples** (`examples/python/`, `ex01_*` through `ex75_*`): NumPy/python-control cross-validation and pybind11 binding demonstrations for every C++ class. Python examples 61-70 mirror corrector patterns; 71-75 mirror the new algorithm extensions.
 
 ### 3.3 Case Study (`case-study/`)
 
@@ -185,11 +187,11 @@ cmake --build build --target docs
 - `test_controllers.cpp` - per-class unit tests (custom `test_framework.h` harness)
 - `test_tuners_extended.cpp` - tuner suite tests (covers all 8 strategies)
 - `test_integration.cpp` - end-to-end closed-loop tests (c2d+MPC, N4SID+GPC adaptive pipeline)
-- `test_catch2_advanced.cpp` - Catch2 v3 regression suite (**40 test cases, 150 assertions**): GPC tracking, LQR convergence, SMC sign convention, ADRC double-integrator, n4sid identification, EKF/UKF, repetitive control, H-infinity, **SOPDTIdentifier** [sopdt], **MovingHorizonEstimator** [mhe]
+- `test_catch2_advanced.cpp` - Catch2 v3 regression suite (**51 test cases, 189 assertions**): GPC tracking, LQR convergence, SMC sign convention, ADRC double-integrator, n4sid identification, EKF/UKF, repetitive control, H-infinity, SOPDTIdentifier [sopdt], MovingHorizonEstimator [mhe], **LinearisationHelper** [linearisation], **FeedbackLinearisationController** [fl], **MRACController** [mrac], **BalancedTruncation** [btm], **ZeroPhaseTrackingFilter** [zpetc]
 - `test_catch2_pilot.cpp` - Catch2 v3 pilot tests (5 test cases, 21 assertions): LQRAdapter MIMO `computeVec()`, EKF scaled-epsilon Jacobian, PID DoM derivative suppression, 2DOF b_weight overshoot reduction, observer telemetry wiring
 - `test_framework.h` - lightweight assertion macros for the custom harness
 
-**Current totals (2026-05-28):** 73 C++ executables pass | 74 Python examples pass | 0 failures.
+**Current totals (2026-05-28):** 78 C++ executables pass | 79 Python examples pass | 0 failures.
 
 ### 3.5 Scripts (`scripts/`)
 
@@ -591,11 +593,58 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 - **Optimization:** Nested golden-section search on `(theta, tau1, tau2)` minimising RMSE.
 - **IMC-PID (Rivera 1986):** `tau_eq = tau1+tau2`, `Kp = tau_eq / (K*(lambdaC + theta/2))`, `Ti = tau_eq`, `Td = tau1*tau2/tau_eq`.
 
+#### `MRACController` ([MRACController.h](lib/MRACController.h))
+- **Purpose:** Discrete-time Model Reference Adaptive Control — SISO, first-order reference model. Forces plant output to track y_m[k+1] = a_m·y_m + b_m·r via two-parameter Lyapunov adaptation with σ-modification and Euclidean projection.
+- **Constructor:** `(MRACParams, Ts)`.
+- **Convention:** `compute(y_plant)` takes plant output (ADRC convention, not error). Call `setReference(r)` before each `compute()`.
+- **Adaptation law:** `θ[k+1] = θ[k] − Ts·(γ·e_m·φ + σ·θ[k])` with projection: if ‖θ‖ > theta_max → θ ← θ·theta_max/‖θ‖.
+- **Parameters (`MRACParams`):** `a_m`, `b_m` (reference model), `gamma_r`, `gamma_y` (rates), `sigma` (σ-modification, 0=off), `theta_max` (projection bound), `uMin/uMax`.
+- **Methods:** `compute(y)`, `setReference(r)`, `reset()`, `theta_r()`, `theta_y()`, `modelOutput()`, `modelError()`.
+- **Feasibility:** Minimum-phase plant required; gain sign must match γ_r, γ_y sign; persistent excitation needed for θ convergence.
+
+#### `FeedbackLinearisationController` ([FeedbackLinearisation.h](lib/FeedbackLinearisation.h))
+- **Purpose:** Exact feedback linearisation for SISO affine-in-control systems ẋ = f(x) + g(x)·u, relative degree 1. Cancels nonlinear terms algebraically; inner IController drives the resulting virtual integrator.
+- **Constructor:** `(DriftFn f, GainFn g, shared_ptr<IController> inner, FLParams, Ts)`.
+- **Control law:** `u[k] = clamp((v − f(x[k], u[k-1])) / g_eff(x[k], u[k-1]), uMin, uMax)` where v = inner→compute(error).
+- **Critical requirement:** `setState(x)` must be called before each `compute()` with the current measured or estimated plant state.
+- **Parameters (`FLParams`):** `uMin`, `uMax`, `regularisationEps` (minimum |g| before clamping; preserves sign).
+- **Feasibility:** Relative degree 1, minimum-phase zeros, g(x) ≠ 0 across operating region.
+- **Relative degree 2 note:** For angle-output systems (pendulum), the inner PID must be tuned for a virtual double integrator; example gains: Kp=9, Ki=5, Kd=5 for poles {−1, −2±j}. See `ex56_feedback_linearisation.cpp`.
+
 #### `RecursiveLeastSquares` ([RecursiveLeastSquares.h](lib/RecursiveLeastSquares.h))
 - **Purpose:** Online ARX parameter estimation using exponential forgetting (`lambda` factor).
 - **Constructor:** `(na, nb, nk, lambda, P0_scale)` — output order, input order, delay, forgetting factor, initial covariance scale.
 - **Methods:** `update(y, u)` -> current ARX coefficients; `reset()`, `toTransferFunction()`, `toStateSpace()`.
 - **Typical use:** Feed identified `StateSpace` into `GPC::setPlant()` for adaptive GPC (see `ex28_gpc_adaptive.cpp`).
+
+#### `LinearisationHelper` ([LinearisationHelper.h](lib/LinearisationHelper.h))
+- **Purpose:** Numerical Jacobians and ZOH linearisation of continuous-time nonlinear models at a given operating point. Central-difference with step `h_i = ε·max(|x_i|, 1)` for heterogeneous state magnitudes.
+- **Key functions:**
+  - `jacobianX(f, x0, u0, eps=1e-4)` → MatrixXd ∂f/∂x (n evaluations of f).
+  - `jacobianU(f, x0, u0, eps=1e-4)` → MatrixXd ∂f/∂u (m evaluations).
+  - `lineariseAtPoint(f, x0, u0, Ts)` → discrete StateSpace (ZOH, C=I, D=0).
+  - `lineariseAtPoint(f, h, x0, u0, Ts)` → discrete StateSpace with custom output h(x,u).
+- **Note:** The `StateFunc`/`MeasFunc` type aliases are identical to those in `ExtendedKalmanFilter.h` — safe to include both (C++ redeclaration of identical alias is valid).
+- **Typical use:** Compute A, B at operating point → `c2d(ZOH)` → `DiscreteLQR` design → apply gain to nonlinear plant.
+
+#### `BalancedTruncation` ([BalancedTruncation.h](lib/BalancedTruncation.h))
+- **Purpose:** Moore (1981) model order reduction via balanced realisation. Replaces an n-state stable system with an r-state approximation preserving the most energetically significant modes. Provides a-priori H∞ error bound.
+- **Functions:**
+  - `balancedTruncate(sys, r)` → `TruncationResult {reduced, hankelSingularValues, errorBound, isStable}`.
+  - `suggestOrder(result, tol=0.01)` → int — smallest r such that error bound < tol × total_norm.
+- **Algorithm:** Solve gramians via `SystemAnalysis::solveDiscreteLyapunov` → Cholesky of P_c → `SelfAdjointEigenSolver` of M = L_c'·P_o·L_c → sort HSVs descending → balanced transformation T_r = L_c·U·Σ^{-½} → truncate.
+- **Error bound:** ‖G − G_r‖∞ ≤ 2·Σᵢ₌ᵣ₊₁ⁿ σᵢ. Verified: actual DC gain deviation is always within this bound.
+- **Constraint:** O(n⁶) Lyapunov solver — use for n ≤ 10. Larger systems require Bartels-Stewart (not yet implemented).
+- **Correct usage:** Design controller on `result.reduced`, then apply to the full-order plant. The error bound quantifies the performance degradation. See `ex58_balanced_truncation.cpp`.
+
+#### `ZeroPhaseTrackingFilter` ([ZeroPhaseTrackingFilter.h](lib/ZeroPhaseTrackingFilter.h))
+- **Purpose:** ZPETC (Tomizuka 1987) feedforward prefilter. Inverts the minimum-phase part of a plant's numerator causally, normalises DC gain to 1, and produces zero phase error for min-phase zeros.
+- **Functions:**
+  - `transmissionZeros(sys)` → `vector<complex<double>>` — finite eigenvalues of the system matrix pencil `[[A−λI, B],[C, D]]` via `GeneralizedEigenSolver`.
+  - `designZPETC(plant)` → `ZPETCResult {filter, dcAmplitudeError, hasNMPZeros, zeros, nmpZeros}`.
+- **Composite response:** G(z)·G_ff(z) = B⁻(z)/B⁻(1). For min-phase plants: G·G_ff = z^{-d} (unit magnitude, pure delay). For NMP: unit DC gain, amplitude error away from DC.
+- **Key implementation detail:** The evaluation function `evalTF` must store C as `MatrixXcd` not `VectorXcd` — Eigen's implicit reshape transposed a (1×n) row into an (n×1) column, producing a ×50 error. Fixed: use matrix products `C_c * zIA.solve(B_c) + D_c`.
+- **Python binding disambiguation:** `suggest_order` is overloaded — VectorXd (SubspaceID) dispatches from `advanced_bindings.cpp`; TruncationResult (BalancedTruncation) from `analysis_bindings.cpp`. Wrapped in lambdas to resolve the C++ overload ambiguity.
 
 #### `SubspaceID` ([SubspaceID.h](lib/SubspaceID.h))
 - **Purpose:** N4SID subspace identification of MIMO state-space models from PRBS or arbitrary excitation data.

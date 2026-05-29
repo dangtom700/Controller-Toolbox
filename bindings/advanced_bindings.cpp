@@ -377,7 +377,9 @@ Example
 )doc");
 
     m.def("suggest_order",
-          &ctrl::suggestOrder,
+          [](const Eigen::VectorXd &sv, double threshold, int max_order) {
+              return ctrl::suggestOrder(sv, threshold, max_order);
+          },
           py::arg("sv"), py::arg("threshold") = 0.01, py::arg("max_order") = -1,
           R"doc(
 Automated system order selection from the singular-value spectrum.

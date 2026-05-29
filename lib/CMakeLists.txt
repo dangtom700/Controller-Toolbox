@@ -44,6 +44,9 @@ set(CTRL_CORE_SOURCES
     GeneralizedPredictiveControl.cpp
     LinearisationHelper.cpp
     FeedbackLinearisation.cpp
+    MRACController.cpp
+    BalancedTruncation.cpp
+    ZeroPhaseTrackingFilter.cpp
 )
 
 # --- Optional sources --------------------------------------------------------

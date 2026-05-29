@@ -70,9 +70,12 @@ add_example(ex52_dob_pi)
 add_example(ex53_mhe_mpc_dual)
 add_example(ex54_bumpless_transfer)
 
-# Linearisation examples (E2 / E4 from CONTROL_STRATEGIES_DEEP_DIVE.md)
+# Linearisation + new algorithm examples (E2/E4/E3/E1/E5)
 add_example(ex55_linearisation_helper)
 add_example(ex56_feedback_linearisation)
+add_example(ex57_mrac)
+add_example(ex58_balanced_truncation)
+add_example(ex59_zpetc)
 
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)

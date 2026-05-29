@@ -576,6 +576,67 @@ Example (weighted blend)
              "Name of the controller selected in the most recent compute() call (Supervisory mode).");
 
     // -----------------------------------------------------------------------
+    // MRACController  (E3 from CONTROL_STRATEGIES_DEEP_DIVE.md)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::MRACParams>(m, "MRACParams",
+        "Parameters for MRACController (Lyapunov-based MRAC with sigma-modification).")
+        .def(py::init<>())
+        .def_readwrite("a_m",       &ctrl::MRACParams::a_m,
+                       "Reference model pole |a_m| < 1. y_m[k+1]=a_m*y_m+b_m*r.")
+        .def_readwrite("b_m",       &ctrl::MRACParams::b_m,
+                       "Reference model gain. Set b_m = 1 - a_m for DC gain 1.")
+        .def_readwrite("gamma_r",   &ctrl::MRACParams::gamma_r,
+                       "Adaptation rate for theta_r (feedforward). Positive for positive-gain plant.")
+        .def_readwrite("gamma_y",   &ctrl::MRACParams::gamma_y,
+                       "Adaptation rate for theta_y (feedback). Positive for positive-gain plant.")
+        .def_readwrite("sigma",     &ctrl::MRACParams::sigma,
+                       "sigma-modification gain >= 0 (0 = off; 0.005-0.05 typical).")
+        .def_readwrite("theta_max", &ctrl::MRACParams::theta_max,
+                       "Parameter projection bound: ||[theta_r, theta_y]||_2 <= theta_max.")
+        .def_readwrite("theta_r0",  &ctrl::MRACParams::theta_r0,
+                       "Initial theta_r (0 -> library sets b_m at construction).")
+        .def_readwrite("theta_y0",  &ctrl::MRACParams::theta_y0, "Initial theta_y.")
+        .def_readwrite("uMin",      &ctrl::MRACParams::uMin, "Lower output saturation.")
+        .def_readwrite("uMax",      &ctrl::MRACParams::uMax, "Upper output saturation.");
+
+    py::class_<ctrl::MRACController, ctrl::IController,
+               std::shared_ptr<ctrl::MRACController>>(m, "MRACController", R"doc(
+Discrete-time MRAC with two-parameter adaptation (theta_r, theta_y).
+
+Uses the ADRC convention: compute(y_plant) takes plant output, not error.
+Call set_reference(r) before each compute().
+
+Example
+-------
+>>> mp = ctrl.MRACParams(); mp.a_m=0.5; mp.b_m=0.5; mp.gamma_r=3.0; mp.gamma_y=1.5
+>>> mrac = ctrl.MRACController(mp, Ts=0.1)
+>>> for k in range(N):
+...     mrac.set_reference(r)
+...     u = mrac.compute(y)   # takes plant output, returns control
+...     y = plant_step(y, u)
+)doc")
+        .def(py::init<const ctrl::MRACParams &, double>(),
+             py::arg("params"), py::arg("Ts"))
+        .def("compute",        &ctrl::MRACController::compute, py::arg("y_plant"),
+             "Compute control u[k] given plant output y[k]. Call set_reference(r) first.")
+        .def("reset",          &ctrl::MRACController::reset)
+        .def("sample_time",    &ctrl::MRACController::sampleTime)
+        .def("set_reference",  &ctrl::MRACController::setReference, py::arg("r"),
+             "Set the current reference r[k]. Must be called before each compute().")
+        .def("theta_r",        &ctrl::MRACController::theta_r,
+             "Current feedforward parameter theta_r.")
+        .def("theta_y",        &ctrl::MRACController::theta_y,
+             "Current feedback parameter theta_y.")
+        .def("model_output",   &ctrl::MRACController::modelOutput,
+             "Reference model output y_m[k].")
+        .def("model_error",    &ctrl::MRACController::modelError,
+             "Tracking error e_m = y - y_m from last compute().")
+        .def("set_params",     &ctrl::MRACController::setParams, py::arg("params"),
+             "Update MRACParams at runtime.")
+        .def("params",         &ctrl::MRACController::params,
+             "Current MRACParams.");
+
+    // -----------------------------------------------------------------------
     // FeedbackLinearisationController  (E4 from CONTROL_STRATEGIES_DEEP_DIVE.md)
     // -----------------------------------------------------------------------
     py::class_<ctrl::FLParams>(m, "FLParams",
