@@ -288,6 +288,73 @@ Example
 #endif
 
     // -----------------------------------------------------------------------
+    // MovingHorizonEstimator + MHEParams  (Part 18)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::MHEParams>(m, "MHEParams",
+        "Parameters for MovingHorizonEstimator.")
+        .def(py::init<>())
+        .def_readwrite("N",          &ctrl::MHEParams::N,
+                       "Estimation horizon [steps].")
+        .def_readwrite("wMin",       &ctrl::MHEParams::wMin,
+                       "Per-element lower bound on process noise w.")
+        .def_readwrite("wMax",       &ctrl::MHEParams::wMax,
+                       "Per-element upper bound on process noise w.")
+        .def_readwrite("qpMaxIter",  &ctrl::MHEParams::qpMaxIter,
+                       "Gradient-projection iteration limit.")
+        .def_readwrite("qpTol",      &ctrl::MHEParams::qpTol,
+                       "QP convergence tolerance.");
+
+    py::class_<ctrl::MovingHorizonEstimator>(m, "MovingHorizonEstimator", R"doc(
+Moving Horizon Estimator (MHE) - batch state estimator via condensed QP.
+
+Minimises a windowed sum of measurement residuals and process noise cost
+over a receding horizon of N past steps. Equivalent to Kalman filter for
+linear Gaussian systems without constraints; strictly better with constraints.
+
+Example
+-------
+>>> mhe = ctrl.MovingHorizonEstimator(plant, Q_proc, R_meas, params)
+>>> mhe.initialize(np.zeros(n), np.eye(n))
+>>> for k in range(N):
+...     x_hat = mhe.estimate(y[k], u[k])
+)doc")
+        .def(py::init<const ctrl::StateSpace &,
+                      const Eigen::MatrixXd &,
+                      const Eigen::MatrixXd &,
+                      const ctrl::MHEParams &>(),
+             py::arg("plant"), py::arg("Q_proc"), py::arg("R_meas"),
+             py::arg("params") = ctrl::MHEParams(),
+             "Construct MHE and precompute condensed QP matrices.")
+        .def("initialize",
+             &ctrl::MovingHorizonEstimator::initialize,
+             py::arg("x0"), py::arg("P0"),
+             "Set initial state estimate and arrival-cost covariance. Call before estimate().")
+        .def("estimate",
+             &ctrl::MovingHorizonEstimator::estimate,
+             py::arg("y"), py::arg("u"),
+             py::return_value_policy::copy,
+             "Run one MHE step. Returns state estimate x^[k|k] (n,).")
+        .def("set_horizon",
+             &ctrl::MovingHorizonEstimator::setHorizon,
+             py::arg("N"),
+             "Change horizon N (clears history; call initialize() again).")
+        .def("set_weight_matrices",
+             &ctrl::MovingHorizonEstimator::setWeightMatrices,
+             py::arg("Q_proc"), py::arg("R_meas"),
+             "Update process/measurement noise covariances and rebuild condensed matrices.")
+        .def("reset",         &ctrl::MovingHorizonEstimator::reset,
+             "Reset history and state estimate to zero.")
+        .def("state",         &ctrl::MovingHorizonEstimator::state,
+             py::return_value_policy::copy,
+             "Last returned state estimate (n,).")
+        .def("last_converged",&ctrl::MovingHorizonEstimator::lastConverged,
+             "True if the most recent QP converged.")
+        .def("last_qp_iters", &ctrl::MovingHorizonEstimator::lastQPIters,
+             "Gradient-projection iterations used in the most recent solve.")
+        .def("sample_time",   &ctrl::MovingHorizonEstimator::sampleTime,
+             "Sample time Ts [s].");
+
+    // -----------------------------------------------------------------------
     // SubspaceID  (optional - CTRL_HAS_SUBSPACE)
     // -----------------------------------------------------------------------
 #if defined(CTRL_HAS_SUBSPACE)

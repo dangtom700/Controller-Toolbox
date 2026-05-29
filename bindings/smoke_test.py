@@ -340,4 +340,51 @@ if feats.get('hinf', False):
 else:
     print('Skipping Hinf: not compiled in.')
 
+# ---------------------------------------------------------------------------
+# Part 18: SOPDTIdentifier
+# ---------------------------------------------------------------------------
+import math
+t_sop  = [i * 0.2 for i in range(100)]
+y_sop  = [0.0] * 100
+for i, ti in enumerate(t_sop):
+    dt = ti - 1.0
+    if dt > 0:
+        y_sop[i] = 2.0 * 1.0 * (1.0 - (3.0*math.exp(-dt/3.0) - 1.0*math.exp(-dt/1.0))/(3.0-1.0))
+
+sop_id = ctrl.SOPDTIdentifier(t_sop, y_sop, 1.0, 0.0)
+sop_m  = sop_id.identify(ctrl.SOPDTMethod.Optimization)
+print(f'SOPDT Opt: K={sop_m.K:.3f} tau1={sop_m.tau1:.3f} tau2={sop_m.tau2:.3f} theta={sop_m.theta:.3f}')
+assert sop_m.K > 0, "SOPDT K must be > 0"
+assert sop_m.tau1 >= sop_m.tau2, "tau1 must be >= tau2"
+pp_sop = ctrl.SOPDTIdentifier.imc_tuning(sop_m, 2.0 * sop_m.theta, 0.1)
+assert pp_sop.Kp > 0, "IMC-SOPDT Kp must be > 0"
+print('SOPDTIdentifier smoke test passed.')
+
+# ---------------------------------------------------------------------------
+# Part 18: MovingHorizonEstimator
+# ---------------------------------------------------------------------------
+mhe_plant = ctrl.StateSpace(
+    np.array([[0.8]]),
+    np.array([[1.0]]),
+    np.array([[1.0]]),
+    np.zeros((1, 1)), 0.1)
+
+mhe_params = ctrl.MHEParams()
+mhe_params.N       = 5
+mhe_params.wMin    = -1.0
+mhe_params.wMax    =  1.0
+
+mhe = ctrl.MovingHorizonEstimator(mhe_plant,
+    0.01 * np.eye(1), 0.1 * np.eye(1), mhe_params)
+mhe.initialize(np.zeros(1), 10.0 * np.eye(1))
+
+for _ in range(10):
+    x_mhe = mhe.estimate(np.array([0.5]), np.array([1.0]))
+
+print(f'MHE state after 10 steps: {x_mhe}')
+assert x_mhe.shape == (1,),           "MHE state wrong shape"
+assert np.isfinite(x_mhe[0]),         "MHE state not finite"
+assert mhe.last_converged(),           "MHE QP did not converge"
+print('MovingHorizonEstimator smoke test passed.')
+
 print('\nAll smoke tests passed.')

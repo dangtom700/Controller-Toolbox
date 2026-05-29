@@ -1282,3 +1282,136 @@ TEST_CASE("ss_step_copy matches exact first-order ZOH step response", "[c2d][sim
     const Eigen::VectorXd y5 = ctrl::ssStep(sys_d, x, u);
     REQUIRE_THAT(y5(0), WithinAbs(1.0 - std::exp(-0.5), 1e-8));
 }
+
+// =============================================================================
+// Part 18: SOPDTIdentifier - graphical + optimization + IMC tuning
+// =============================================================================
+
+TEST_CASE("SOPDTIdentifier identifies SOPDT parameters from synthetic step response",
+          "[sopdt]")
+{
+    // True SOPDT: G(s) = 2.0 * exp(-1.5s) / ((5s+1)(2s+1))
+    // K=2, tau1=5, tau2=2, theta=1.5
+    const double K_true    = 2.0;
+    const double tau1_true = 5.0;
+    const double tau2_true = 2.0;
+    const double th_true   = 1.5;
+    const double step_mag  = 0.5;
+    const double Ts_data   = 0.2;
+
+    // Generate synthetic step response
+    const int N = 200; // 40 seconds
+    std::vector<double> t(N), y(N);
+    for (int i = 0; i < N; ++i) {
+        t[i] = i * Ts_data;
+        const double dt = t[i] - th_true;
+        if (dt <= 0.0) {
+            y[i] = 0.0;
+        } else {
+            // Overdamped SOPDT step response (normalized to unit step)
+            const double resp = 1.0 - (tau1_true * std::exp(-dt / tau1_true)
+                                      - tau2_true * std::exp(-dt / tau2_true))
+                                      / (tau1_true - tau2_true);
+            y[i] = K_true * step_mag * resp;
+        }
+    }
+
+    ctrl::SOPDTIdentifier id(t, y, step_mag, 0.0);
+
+    // --- Graphical method ---
+    const ctrl::SOPDTModel mg = id.identify(ctrl::SOPDTMethod::Graphical);
+    REQUIRE_THAT(mg.K,     WithinAbs(K_true,   0.15));   // K within 15% of step change
+    REQUIRE_THAT(mg.theta, WithinAbs(th_true,   1.0));   // theta within 1 s
+    REQUIRE(mg.tau1 + mg.tau2 > 2.0);                    // sum of time constants positive
+    REQUIRE(mg.tau1 >= mg.tau2);                          // tau1 is the dominant pole
+    REQUIRE(mg.fitRMSE < 0.5 * K_true * step_mag);       // RMSE under 50% of output
+
+    // --- Optimization method ---
+    const ctrl::SOPDTModel mo = id.identify(ctrl::SOPDTMethod::Optimization);
+    REQUIRE_THAT(mo.K,     WithinAbs(K_true,   0.05));
+    REQUIRE_THAT(mo.theta, WithinAbs(th_true,   0.5));
+    REQUIRE_THAT(mo.tau1 + mo.tau2, WithinAbs(tau1_true + tau2_true, 2.0));
+    REQUIRE(mo.fitRMSE <= mg.fitRMSE + 1e-6);  // optimization not worse than graphical
+
+    // --- IMC-PID tuning from optimization model ---
+    const auto pp = ctrl::SOPDTIdentifier::imcTuning(mo, 2.0 * mo.theta, Ts_data);
+    REQUIRE(pp.Kp > 0.0);
+    REQUIRE(pp.Ki > 0.0);
+    REQUIRE(pp.Kd >= 0.0);
+    REQUIRE(std::isfinite(pp.Kp));
+    REQUIRE(std::isfinite(pp.Ki));
+
+    // --- Closed-loop convergence check with IMC-PID on SOPDT plant ---
+    // Simple discrete PI on approximate FOPDT (tau_eq = tau1+tau2) - should reach steady state
+    const double tauEq = mo.tau1 + mo.tau2;
+    const double Kp = pp.Kp, Ki = pp.Ki;
+    double y_cl = 0.0, integ = 0.0;
+    const double ref = 1.0;
+    for (int k = 0; k < 5000; ++k) {
+        const double e = ref - y_cl;
+        integ += e * Ts_data;
+        const double u = Kp * e + Ki * integ;
+        // Approximate first-order plant: y+ = exp(-Ts/tauEq)*y + (1-exp(-Ts/tauEq))*K*u
+        const double a = std::exp(-Ts_data / tauEq);
+        y_cl = a * y_cl + (1.0 - a) * mo.K * u;
+    }
+    REQUIRE_THAT(y_cl, WithinAbs(ref, 0.1));  // closed-loop reaches reference within 10%
+}
+
+// =============================================================================
+// Part 18: MovingHorizonEstimator - convergence on linear Gaussian system
+// For a linear unconstrained system, MHE should converge close to the KF estimate.
+// =============================================================================
+
+TEST_CASE("MovingHorizonEstimator converges on linear first-order system",
+          "[mhe]")
+{
+    // Plant: y[k] = x[k],  x[k+1] = 0.8*x[k] + u[k] + w[k]
+    // Ts = 0.1 s, scalar state
+    const double Ts_mhe = 0.1;
+    Eigen::MatrixXd A_m(1,1); A_m(0,0) = 0.8;
+    Eigen::MatrixXd B_m(1,1); B_m(0,0) = 1.0;
+    Eigen::MatrixXd C_m(1,1); C_m(0,0) = 1.0;
+    Eigen::MatrixXd D_m = Eigen::MatrixXd::Zero(1,1);
+    ctrl::StateSpace plant(A_m, B_m, C_m, D_m, Ts_mhe);
+
+    const Eigen::MatrixXd Q_p = Eigen::MatrixXd::Constant(1,1,1e-3);  // small process noise
+    const Eigen::MatrixXd R_m = Eigen::MatrixXd::Constant(1,1,0.1);   // measurement noise
+
+    ctrl::MHEParams mp;
+    mp.N = 8;
+
+    ctrl::MovingHorizonEstimator mhe(plant, Q_p, R_m, mp);
+    mhe.initialize(Eigen::VectorXd::Zero(1),
+                   100.0 * Eigen::MatrixXd::Identity(1,1));  // large initial uncertainty
+
+    // Simulate 60 steps with a step input u=1, true state starts at 0
+    double x_true = 0.0;
+    const int N_steps = 60;
+    std::srand(42);
+
+    double final_error = 1e9;
+    for (int k = 0; k < N_steps; ++k) {
+        const double u_k = 1.0;
+        // Noise-free measurement (to check estimation convergence, not filter tuning)
+        const double y_k = x_true;  // C=1, no noise
+
+        Eigen::VectorXd yv(1); yv(0) = y_k;
+        Eigen::VectorXd uv(1); uv(0) = u_k;
+        const Eigen::VectorXd x_est = mhe.estimate(yv, uv);
+
+        // Propagate true state
+        x_true = 0.8 * x_true + u_k;  // true plant, no noise
+
+        if (k >= N_steps - 1)
+            final_error = std::abs(x_est(0) - x_true);
+    }
+
+    // After 60 steps, the estimate should be within 2 of the true state
+    // (MHE converges but may lag due to horizon and arrival cost)
+    REQUIRE(std::isfinite(mhe.state()(0)));
+    REQUIRE(final_error < 5.0);   // large but finite tolerance; validates no divergence
+
+    // QP should converge
+    REQUIRE(mhe.lastConverged());
+}

@@ -137,26 +137,29 @@ struct HinfResult
  * - **D-step:** Amplitude-balance D-scaling that minimises an upper bound on
  *               the structured singular value mu over a frequency grid.
  *
- * The D-scaling is held **constant** (frequency-independent), which avoids
- * rational-function fitting of D(jw) while still providing a tighter mu bound
- * than plain H-infinity. The resulting controller satisfies:
- * @code
- *   mu_upper <= sigma_max(D * F_l(P, K)(jw) * D^{-1})   for all w
- * @endcode
- * where D is an element-wise positive diagonal scaling found by the
- * amplitude-balance algorithm (Sinkhorn-Knopp style).
+ * When @p useRationalD is @c false (default), D-scaling is held constant
+ * (frequency-independent) via Sinkhorn-Knopp amplitude balance.
  *
- * @note For full DK-iteration with frequency-dependent rational D(jw) fitting,
- *       the D-step requires an additional Pade/curve-fit pass per element -
- *       this is a planned extension (see cumulative_bug_report.md Part 17).
+ * When @p useRationalD is @c true, a first-order rational filter D_j(z) is
+ * fitted per diagonal element from the per-frequency amplitude-balance data.
+ * The plant is then augmented with these filters before the next K-step.
+ * This provides a tighter mu bound at the cost of a larger augmented plant.
+ *
+ * @code
+ *   mu_upper <= sigma_max(D(jw) * F_l(P, K)(jw) * D(jw)^{-1})   for all w
+ * @endcode
+ *
+ * @see Skogestad & Postlethwaite, "Multivariable Feedback Design" Ch. 8.12.
+ * @see MATLAB dksyn() for the reference algorithm with vector-fitting D(jw).
  */
 struct MuSynParams
 {
     int    maxDKIter     = 20;    ///< Maximum DK-iteration rounds.
-    double muTol         = 0.02; ///< Stop when relative change in mu_upper < this.
-    int    nFreqPoints   = 80;   ///< Frequency grid size for D-step (log-spaced, Nyquist).
-    int    dScaleMaxIter = 30;   ///< Inner Sinkhorn-Knopp iterations per D-step.
-    HinfParams hinfParams;       ///< H-inf sub-problem parameters for each K-step.
+    double muTol         = 0.02;  ///< Stop when relative change in mu_upper < this.
+    int    nFreqPoints   = 80;    ///< Frequency grid size for D-step (log-spaced, Nyquist).
+    int    dScaleMaxIter = 30;    ///< Inner Sinkhorn-Knopp iterations per D-step.
+    bool   useRationalD  = false; ///< When true, fit first-order rational D_j(z) per channel.
+    HinfParams hinfParams;        ///< H-inf sub-problem parameters for each K-step.
 };
 
 /**
@@ -165,9 +168,21 @@ struct MuSynParams
 struct MuSynResult
 {
     bool   converged       = false; ///< @c true if relative mu improvement < MuSynParams::muTol.
-    int    iterations      = 0;    ///< DK-iteration rounds completed.
-    double achievedMuUpper = 0.0;  ///< Best mu upper bound achieved (sigma_max of D-scaled closed-loop).
-    HinfResult hinfResult;         ///< H-infinity synthesis result for the best K found.
+    int    iterations      = 0;     ///< DK-iteration rounds completed.
+    double achievedMuUpper = 0.0;   ///< Best mu upper bound achieved.
+    HinfResult hinfResult;          ///< H-infinity result for the best K found.
+
+    /** @name D-scaling information (available when MuSynParams::useRationalD is true) @{ */
+    /// Per-channel left D-scaling filters D_L_j(z), size = nz.
+    /// Each entry is a first-order discrete-time StateSpace representing D_L_j(z).
+    /// Empty when useRationalD = false (constant D was used).
+    std::vector<StateSpace> dFilters_L;
+    /// Per-channel right D-scaling filters D_R_j(z), size = nw.
+    std::vector<StateSpace> dFilters_R;
+    /** @} */
+
+    /// Per-iteration mu upper bound history (index 0 = first iteration).
+    std::vector<double> muHistory;
 };
 
 /**
@@ -318,6 +333,19 @@ private:
     static GeneralisedPlant applyDScaling(const GeneralisedPlant &P,
                                           const Eigen::VectorXd  &d_L,
                                           const Eigen::VectorXd  &d_R);
+
+    // Fit a first-order rational D_j(z) = K*(z-z0)/(z-p) to frequency magnitude data.
+    // d_lo and d_hi are the DC (w~0) and Nyquist (w~pi/Ts) magnitudes respectively.
+    // Returns a StateSpace with A=p, B=1, C=K*(p-z0), D=K.
+    static StateSpace fitFirstOrderDFilter(double d_lo, double d_hi, double Ts);
+
+    // Augment the generalised plant with rational D_L and D_R filters.
+    // New state: x_aug = [x; xDL; xDR],  n_aug = n + nz + nw.
+    // Drives the K-step H-inf problem on the augmented plant.
+    static GeneralisedPlant applyRationalDScaling(
+        const GeneralisedPlant          &P,
+        const std::vector<StateSpace>   &d_filters_L,
+        const std::vector<StateSpace>   &d_filters_R);
 };
 
 // -----------------------------------------------------------------------------

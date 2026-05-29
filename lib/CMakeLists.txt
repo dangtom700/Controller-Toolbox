@@ -37,6 +37,8 @@ set(CTRL_CORE_SOURCES
     SystemAnalysis.cpp
     hal/SimPlant.cpp
     FOPDTIdentifier.cpp
+    SOPDTIdentifier.cpp
+    MovingHorizonEstimator.cpp
     RecursiveLeastSquares.cpp
     RepetitiveController.cpp
     GeneralizedPredictiveControl.cpp

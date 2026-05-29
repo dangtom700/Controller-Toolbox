@@ -9,6 +9,52 @@ namespace py = pybind11;
 void bind_analysis(py::module_ &m)
 {
     // -----------------------------------------------------------------------
+    // SOPDTIdentifier + SOPDTModel  (Part 18)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::SOPDTModel>(m, "SOPDTModel",
+        "Identified SOPDT model parameters: K, tau1, tau2, theta, fitRMSE.")
+        .def_readwrite("K",       &ctrl::SOPDTModel::K)
+        .def_readwrite("tau1",    &ctrl::SOPDTModel::tau1)
+        .def_readwrite("tau2",    &ctrl::SOPDTModel::tau2)
+        .def_readwrite("theta",   &ctrl::SOPDTModel::theta)
+        .def_readwrite("fitRMSE", &ctrl::SOPDTModel::fitRMSE);
+
+    py::enum_<ctrl::SOPDTMethod>(m, "SOPDTMethod")
+        .value("Graphical",    ctrl::SOPDTMethod::Graphical)
+        .value("Optimization", ctrl::SOPDTMethod::Optimization)
+        .export_values();
+
+    py::class_<ctrl::SOPDTIdentifier>(m, "SOPDTIdentifier", R"doc(
+Second-Order Plus Dead-Time step-response identifier.
+
+Example
+-------
+>>> id = ctrl.SOPDTIdentifier(t, y, step_mag)
+>>> m  = id.identify()             # graphical (default)
+>>> mo = id.identify(ctrl.SOPDTMethod.Optimization)
+>>> pp = ctrl.SOPDTIdentifier.imc_tuning(mo, 2*mo.theta, Ts)
+)doc")
+        .def(py::init<const std::vector<double> &,
+                      const std::vector<double> &,
+                      double, double>(),
+             py::arg("times"), py::arg("outputs"),
+             py::arg("stepMagnitude"), py::arg("stepTime") = 0.0,
+             "Construct from time/output vectors and step magnitude.")
+        .def("identify",
+             &ctrl::SOPDTIdentifier::identify,
+             py::arg("method") = ctrl::SOPDTMethod::Graphical,
+             "Identify SOPDT parameters. Returns SOPDTModel.")
+        .def("evaluate",
+             &ctrl::SOPDTIdentifier::evaluate,
+             py::arg("m"), py::arg("t"),
+             "Evaluate fitted SOPDT step response at time t.")
+        .def_static("imc_tuning",
+             &ctrl::SOPDTIdentifier::imcTuning,
+             py::arg("model"), py::arg("lambdaC"), py::arg("Ts"),
+             py::arg("piOnly") = false,
+             "IMC-PID tuning from a SOPDT model (Rivera 1986 extended).");
+
+    // -----------------------------------------------------------------------
     // MetricsAnalyzer
     // -----------------------------------------------------------------------
     py::class_<ctrl::TimeDomainMetrics>(m, "TimeDomainMetrics",

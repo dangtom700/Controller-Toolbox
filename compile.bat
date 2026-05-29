@@ -70,6 +70,16 @@ for %%T in (
     ex29_repetitive_controller
     ex30_ekf_nonlinear
     ex31_subspace_id
+    ex32_sopdt_identification
+    ex33_mhe_estimation
+    ex34_mu_synthesis_full_dk
+    ex35_cascade_pid
+    ex36_feedforward_mpc
+    ex37_smith_predictor_fractional
+    ex38_sopdt_pid_tuning
+    ex39_repetitive_with_ekf
+    ex40_ukf_quadrotor
+    ex41_lpv_gain_scheduling
     example_pid_feedback
     mimo_known
     mimo_unknown

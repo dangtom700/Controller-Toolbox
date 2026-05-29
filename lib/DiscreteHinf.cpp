@@ -946,8 +946,166 @@ GeneralisedPlant DiscreteHinf::applyDScaling(const GeneralisedPlant &P,
     return Ps;
 }
 
+// =============================================================================
+// fitFirstOrderDFilter - fit D_j(z) = K*(z-z0)/(z-p) from DC and Nyquist gains
+//
+// Given two magnitude values d_lo (approx at w~0) and d_hi (approx at w~pi/Ts),
+// choose pole p=0.85 (moderate bandwidth) and solve for K and z0 analytically:
+//   |D_j(1)|  = K * |1-z0| / |1-p|   = d_lo
+//   |D_j(-1)| = K * |1+z0| / |1+p|   = d_hi
+//
+// Defining r = (d_lo/d_hi) * (1+p)/(1-p):
+//   |1-z0| / |1+z0| = r
+//   For z0 in (-1,1): z0 = (1-r)/(1+r)
+//   K = d_lo * (1-p) / |1-z0|
+//
+// The resulting D_j(z) is a minimum-phase lead-lag with real coefficients.
+// Returns StateSpace in controllable canonical form: A=p, B=1, C=K*(p-z0), D=K.
+// =============================================================================
+StateSpace DiscreteHinf::fitFirstOrderDFilter(double d_lo, double d_hi, double Ts)
+{
+    // Guard against zero or equal gains -> fall back to constant filter (pure gain)
+    const double eps = 1e-12;
+    if (d_lo < eps || d_hi < eps || std::abs(d_lo - d_hi) < eps * (d_lo + d_hi + 1.0)) {
+        const double d_avg = 0.5 * (d_lo + d_hi);
+        Eigen::MatrixXd A1(1,1); A1(0,0) = 0.0;
+        Eigen::MatrixXd B1(1,1); B1(0,0) = 0.0;
+        Eigen::MatrixXd C1(1,1); C1(0,0) = 0.0;
+        Eigen::MatrixXd D1(1,1); D1(0,0) = d_avg;
+        return StateSpace(A1, B1, C1, D1, Ts);
+    }
+
+    const double p  = 0.85;    // stable pole inside unit disk
+    const double r  = (d_lo / d_hi) * (1.0 + p) / (1.0 - p);
+    // z0 = (1-r)/(1+r), clamped to (-0.99, 0.99) for numerical stability
+    double z0 = std::max(-0.99, std::min(0.99, (1.0 - r) / (1.0 + r)));
+    const double K  = d_lo * (1.0 - p) / std::max(std::abs(1.0 - z0), eps);
+
+    // Controllable canonical form for D_j(z) = K*(z-z0)/(z-p)
+    // x[k+1] = p*x[k] + u[k],  y[k] = K*(p-z0)*x[k] + K*u[k]
+    Eigen::MatrixXd A1(1,1); A1(0,0) = p;
+    Eigen::MatrixXd B1(1,1); B1(0,0) = 1.0;
+    Eigen::MatrixXd C1(1,1); C1(0,0) = K * (p - z0);
+    Eigen::MatrixXd D1(1,1); D1(0,0) = K;
+    return StateSpace(A1, B1, C1, D1, Ts);
+}
+
+// =============================================================================
+// applyRationalDScaling - augment plant with first-order D_L(z) and D_R(z)
+//
+// New augmented state: x_aug = [x; xDL_1; ...; xDL_nz; xDR_1; ...; xDR_nw]
+// where xDL_j is the state of D_L_j(z) (performance output scaling) and
+// xDR_j is the state of D_R_j(z) (exogenous input scaling).
+//
+// Augmented dynamics (for each D filter in controllable canonical form
+// A_Dj = p_j, B_Dj = 1, C_Dj = K_j*(p_j-z0_j), D_Dj = K_j):
+//
+//   x[k+1]      = A*x      + B1 * (D_DR*xDR + D_DRgain*w_d) + B2*u
+//   xDL_j[k+1]  = p_Lj*xDL_j + C1_j*x + D11_j*(D_DR*xDR + D_DRgain*w_d) + D12_j*u
+//   xDR_j[k+1]  = p_Rj*xDR_j + w_d_j
+//
+// Performance output: z_aug_j = C_DLj*xDL_j + K_Lj * (C1_j*x + D11_j*w + D12_j*u)
+// Measurement output: y = C2*x + D21*(D_DR*xDR + D_DRgain*w_d) + D22*u
+// =============================================================================
+GeneralisedPlant DiscreteHinf::applyRationalDScaling(
+    const GeneralisedPlant        &P,
+    const std::vector<StateSpace> &dL,
+    const std::vector<StateSpace> &dR)
+{
+    const int n  = P.stateSize();
+    const int nz = P.nz(), nw = P.nw(), nu = P.nu(), ny = P.ny();
+
+    if ((int)dL.size() != nz || (int)dR.size() != nw)
+        throw std::invalid_argument("applyRationalDScaling: filter count mismatch.");
+
+    const int n_aug = n + nz + nw;
+
+    // Extract D_L scalar parameters: p_Lj, K_Lj, CL_j = K_Lj*(p_Lj-z0_Lj)
+    Eigen::VectorXd p_L(nz), K_L(nz), CL_scalar(nz);
+    for (int j = 0; j < nz; ++j) {
+        p_L(j)       = dL[j].A(0,0);
+        K_L(j)       = dL[j].D(0,0);
+        CL_scalar(j) = dL[j].C(0,0);  // = K_Lj*(p_Lj - z0_Lj)
+    }
+
+    // Extract D_R scalar parameters
+    Eigen::VectorXd p_R(nw), K_R(nw), CR_scalar(nw);
+    for (int j = 0; j < nw; ++j) {
+        p_R(j)       = dR[j].A(0,0);
+        K_R(j)       = dR[j].D(0,0);
+        CR_scalar(j) = dR[j].C(0,0);  // = K_Rj*(p_Rj - z0_Rj)
+    }
+
+    // Diagonal gain matrices
+    const Eigen::MatrixXd D_DRgain = K_R.asDiagonal();  // nw x nw: w = D_DRgain*w_d + ...
+    const Eigen::MatrixXd D_DR     = CR_scalar.asDiagonal(); // nw x nw: coupling from xDR
+    const Eigen::MatrixXd D_DLgain = K_L.asDiagonal();   // nz x nz
+
+    // Augmented A matrix (n_aug x n_aug)
+    // Rows: [x block, xDL block, xDR block]
+    // Cols: [x,       xDL,       xDR      ]
+    Eigen::MatrixXd A_aug = Eigen::MatrixXd::Zero(n_aug, n_aug);
+    // x row: x[k+1] = A*x + B1*(D_DR*xDR + D_DRgain*w_d) + B2*u
+    A_aug.block(0, 0, n, n)         = P.A;
+    A_aug.block(0, n + nz, n, nw)   = P.B1 * D_DR;
+
+    // xDL row: xDL_j[k+1] = p_Lj*xDL_j + C1_j*x + D11_j*(D_DR*xDR + D_DRgain*w_d) + D12_j*u
+    A_aug.block(n, 0, nz, n)         = P.C1;
+    A_aug.block(n, n, nz, nz)        = p_L.asDiagonal();
+    A_aug.block(n, n + nz, nz, nw)   = P.D11 * D_DR;
+
+    // xDR row: xDR_j[k+1] = p_Rj*xDR_j + w_d_j
+    A_aug.block(n + nz, n + nz, nw, nw) = p_R.asDiagonal();
+
+    // Augmented B1 (for w_d), size n_aug x nw
+    Eigen::MatrixXd B1_aug = Eigen::MatrixXd::Zero(n_aug, nw);
+    B1_aug.block(0, 0, n, nw)    = P.B1 * D_DRgain;
+    B1_aug.block(n, 0, nz, nw)   = P.D11 * D_DRgain;
+    B1_aug.block(n + nz, 0, nw, nw) = Eigen::MatrixXd::Identity(nw, nw);
+
+    // Augmented B2 (for u), size n_aug x nu
+    Eigen::MatrixXd B2_aug = Eigen::MatrixXd::Zero(n_aug, nu);
+    B2_aug.block(0, 0, n, nu)  = P.B2;
+    B2_aug.block(n, 0, nz, nu) = P.D12;
+
+    // Augmented C1 (performance output z_aug_j = CL_j*xDL_j + K_Lj*(C1_j*x + ...))
+    // z_aug = D_DLgain*C1*x + CL_scalar*xDL + D_DLgain*D11*(D_DR*xDR + D_DRgain*w_d) + D_DLgain*D12*u
+    Eigen::MatrixXd C1_aug = Eigen::MatrixXd::Zero(nz, n_aug);
+    C1_aug.block(0, 0, nz, n)       = D_DLgain * P.C1;
+    C1_aug.block(0, n, nz, nz)      = CL_scalar.asDiagonal();
+    C1_aug.block(0, n + nz, nz, nw) = D_DLgain * P.D11 * D_DR;
+
+    // Augmented C2 (measurement output y = C2*x + D21*(D_DR*xDR + ...) + D22*u)
+    Eigen::MatrixXd C2_aug = Eigen::MatrixXd::Zero(ny, n_aug);
+    C2_aug.block(0, 0, ny, n)       = P.C2;
+    C2_aug.block(0, n + nz, ny, nw) = P.D21 * D_DR;
+
+    // Augmented D11 (performance from w_d): nz x nw
+    const Eigen::MatrixXd D11_aug = D_DLgain * P.D11 * D_DRgain;
+
+    // Augmented D12 (performance from u): nz x nu
+    const Eigen::MatrixXd D12_aug = D_DLgain * P.D12;
+
+    // Augmented D21 (measurement from w_d): ny x nw
+    const Eigen::MatrixXd D21_aug = P.D21 * D_DRgain;
+
+    GeneralisedPlant Paug;
+    Paug.Ts  = P.Ts;
+    Paug.A   = A_aug;
+    Paug.B1  = B1_aug;
+    Paug.B2  = B2_aug;
+    Paug.C1  = C1_aug;
+    Paug.C2  = C2_aug;
+    Paug.D11 = D11_aug;
+    Paug.D12 = D12_aug;
+    Paug.D21 = D21_aug;
+    Paug.D22 = P.D22;
+    return Paug;
+}
+
 // -----------------------------------------------------------------------------
 // solveMuSyn - outer DK-iteration loop
+// Constant D-scaling (useRationalD=false) or rational D-scaling (useRationalD=true).
 // -----------------------------------------------------------------------------
 MuSynResult DiscreteHinf::solveMuSyn(const GeneralisedPlant &P,
                                        const MuSynParams &params)
@@ -959,9 +1117,25 @@ MuSynResult DiscreteHinf::solveMuSyn(const GeneralisedPlant &P,
     const double Ts = P.Ts;
     const double pi = std::acos(-1.0);
 
-    // Initial D-scaling: identity
+    // Initial D-scaling: identity (constant)
     Eigen::VectorXd d_L = Eigen::VectorXd::Ones(nz);
     Eigen::VectorXd d_R = Eigen::VectorXd::Ones(nw);
+
+    // For rational D-scaling: track per-channel DC and Nyquist values
+    // d_lo_L[j] = D_L_j at low frequencies, d_hi_L[j] at Nyquist
+    Eigen::VectorXd d_lo_L = Eigen::VectorXd::Ones(nz);
+    Eigen::VectorXd d_hi_L = Eigen::VectorXd::Ones(nz);
+    Eigen::VectorXd d_lo_R = Eigen::VectorXd::Ones(nw);
+    Eigen::VectorXd d_hi_R = Eigen::VectorXd::Ones(nw);
+
+    // Current rational D filters (initially pure-gain = constant D)
+    std::vector<StateSpace> cur_dL, cur_dR;
+    if (params.useRationalD) {
+        for (int j = 0; j < nz; ++j)
+            cur_dL.push_back(fitFirstOrderDFilter(1.0, 1.0, Ts));
+        for (int j = 0; j < nw; ++j)
+            cur_dR.push_back(fitFirstOrderDFilter(1.0, 1.0, Ts));
+    }
 
     double mu_prev = std::numeric_limits<double>::infinity();
 
@@ -970,44 +1144,60 @@ MuSynResult DiscreteHinf::solveMuSyn(const GeneralisedPlant &P,
         // ----------------------------------------------------------------
         // K-step: H-inf synthesis on D-scaled plant
         // ----------------------------------------------------------------
-        const GeneralisedPlant Ps = applyDScaling(P, d_L, d_R);
+        GeneralisedPlant Ps;
+        if (params.useRationalD && !cur_dL.empty())
+            Ps = applyRationalDScaling(P, cur_dL, cur_dR);
+        else
+            Ps = applyDScaling(P, d_L, d_R);
+
         const HinfResult hr = DiscreteHinf::solve(Ps, params.hinfParams);
-        if (!hr.feasible) break;  // infeasible at this D - stop
+        if (!hr.feasible) break;
 
         // ----------------------------------------------------------------
-        // Build closed-loop F_l(P, K) (unscaled plant, scaled controller)
+        // Build closed-loop F_l(P, K) using the UNSCALED original plant
         // ----------------------------------------------------------------
         Eigen::MatrixXd A_cl, B_cl, C_cl, D_cl;
         buildClosedLoop(P, hr.Ak, hr.Bk, hr.Ck, hr.Dk,
                         A_cl, B_cl, C_cl, D_cl);
 
         // ----------------------------------------------------------------
-        // Evaluate mu upper bound over log-spaced frequency grid and
-        // accumulate element-wise max of |M(jw)| for D-step
+        // Evaluate mu upper bound over log-spaced frequency grid.
+        // Accumulate: M_peak (element-wise max), M_lo (low-half geo mean),
+        // M_hi (high-half geo mean) for rational D fitting.
         // ----------------------------------------------------------------
-        const int nf = params.nFreqPoints;
-        Eigen::MatrixXd M_peak = Eigen::MatrixXd::Zero(nz, nw);
-        double mu_upper = 0.0;
+        const int nf      = params.nFreqPoints;
+        const int half_nf = nf / 2;
+
+        Eigen::MatrixXd M_peak  = Eigen::MatrixXd::Zero(nz, nw);
+        Eigen::MatrixXd M_lo    = Eigen::MatrixXd::Zero(nz, nw);  // geometric accumulator (log sum)
+        Eigen::MatrixXd M_hi    = Eigen::MatrixXd::Zero(nz, nw);
+        double mu_upper         = 0.0;
 
         for (int fi = 0; fi < nf; ++fi) {
-            // Log-spaced from 0.01*pi/Ts to pi/Ts (Nyquist)
             const double w = (pi / Ts)
                            * std::pow(0.01, 1.0 - static_cast<double>(fi) / (nf - 1));
 
             const Eigen::MatrixXcd Mw = evalFreqResponse(A_cl, B_cl, C_cl, D_cl, w, Ts);
 
-            // Element-wise peak across frequencies (for D-step amplitude balance)
-            for (int i = 0; i < nz; ++i)
-                for (int j = 0; j < nw; ++j)
-                    M_peak(i, j) = std::max(M_peak(i, j), std::abs(Mw(i, j)));
+            for (int i = 0; i < nz; ++i) {
+                for (int j = 0; j < nw; ++j) {
+                    const double abs_ij = std::abs(Mw(i, j));
+                    M_peak(i, j) = std::max(M_peak(i, j), abs_ij);
+                    // accumulate log for geometric mean in each half
+                    if (fi < half_nf)
+                        M_lo(i, j) += std::log(std::max(abs_ij, 1e-30));
+                    else
+                        M_hi(i, j) += std::log(std::max(abs_ij, 1e-30));
+                }
+            }
 
-            // sigma_max(D_L * Mw * D_R^{-1}) with current D
+            // sigma_max(D_L * Mw * D_R^{-1}) with current constant d_L, d_R
             Eigen::MatrixXcd Mw_sc = Mw;
             for (int i = 0; i < nz; ++i)
                 for (int j = 0; j < nw; ++j)
                     Mw_sc(i, j) *= d_L(i) / d_R(j);
             Eigen::JacobiSVD<Eigen::MatrixXcd> svd(Mw_sc, Eigen::ComputeThinU | Eigen::ComputeThinV);
-            mu_upper = std::max(mu_upper, svd.singularValues()(0));  // singular values are real
+            mu_upper = std::max(mu_upper, svd.singularValues()(0));
         }
 
         // ----------------------------------------------------------------
@@ -1016,8 +1206,13 @@ MuSynResult DiscreteHinf::solveMuSyn(const GeneralisedPlant &P,
         if (mu_upper < best.achievedMuUpper) {
             best.achievedMuUpper = mu_upper;
             best.hinfResult      = hr;
+            if (params.useRationalD) {
+                best.dFilters_L = cur_dL;
+                best.dFilters_R = cur_dR;
+            }
         }
         best.iterations = dk + 1;
+        best.muHistory.push_back(mu_upper);
 
         // ----------------------------------------------------------------
         // Convergence check
@@ -1030,9 +1225,50 @@ MuSynResult DiscreteHinf::solveMuSyn(const GeneralisedPlant &P,
         mu_prev = mu_upper;
 
         // ----------------------------------------------------------------
-        // D-step: Sinkhorn-Knopp amplitude balance on M_peak
+        // D-step: amplitude balance (constant D for mu evaluation)
         // ----------------------------------------------------------------
         amplitudeBalance(M_peak, params.dScaleMaxIter, d_L, d_R);
+
+        // ----------------------------------------------------------------
+        // Rational D-step: fit first-order D_j(z) per channel
+        // ----------------------------------------------------------------
+        if (params.useRationalD) {
+            const int nlo = std::max(1, half_nf);
+            const int nhi = std::max(1, nf - half_nf);
+
+            // Left D-scaling filters (for performance outputs)
+            // Each filter j is driven by the j-th performance output z_j.
+            // Use row-wise geometric mean of M_lo / M_hi for each output j.
+            cur_dL.clear();
+            for (int j = 0; j < nz; ++j) {
+                // DC and Nyquist magnitudes for row j (max over nw input channels)
+                double lo_j = 0.0, hi_j = 0.0;
+                for (int k = 0; k < nw; ++k) {
+                    lo_j += M_lo(j, k);
+                    hi_j += M_hi(j, k);
+                }
+                const double d_lo_j = std::exp(lo_j / (nlo * nw));
+                const double d_hi_j = std::exp(hi_j / (nhi * nw));
+                cur_dL.push_back(fitFirstOrderDFilter(d_lo_j, d_hi_j, Ts));
+                d_lo_L(j) = d_lo_j;
+                d_hi_L(j) = d_hi_j;
+            }
+
+            // Right D-scaling filters (for exogenous inputs)
+            cur_dR.clear();
+            for (int j = 0; j < nw; ++j) {
+                double lo_j = 0.0, hi_j = 0.0;
+                for (int k = 0; k < nz; ++k) {
+                    lo_j += M_lo(k, j);
+                    hi_j += M_hi(k, j);
+                }
+                const double d_lo_j = std::exp(lo_j / (nlo * nz));
+                const double d_hi_j = std::exp(hi_j / (nhi * nz));
+                cur_dR.push_back(fitFirstOrderDFilter(d_lo_j, d_hi_j, Ts));
+                d_lo_R(j) = d_lo_j;
+                d_hi_R(j) = d_hi_j;
+            }
+        }
     }
 
     return best;
