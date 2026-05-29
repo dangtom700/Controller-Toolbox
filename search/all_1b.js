@@ -14,5 +14,6 @@ var searchData=
   ['updates_11',['AtomicParamBuffer - Lock-Free Parameter Updates',['../md_docs_2DEPLOYMENT.html#autotoc_md130',1,'']]],
   ['usage_12',['Docker Usage',['../index.html#autotoc_md12',1,'']]],
   ['usage_20guide_13',['4. Usage Guide',['../md_docs_2DOCUMENTATION.html#autotoc_md46',1,'']]],
-  ['utilities_20hal_14',['5.7 Real-Time Utilities &amp; HAL',['../md_docs_2DOCUMENTATION.html#autotoc_md102',1,'']]]
+  ['userationald_14',['useRationalD',['../structctrl_1_1MuSynParams.html#a740af5a43c4d49461244b41ad408359e',1,'ctrl::MuSynParams']]],
+  ['utilities_20hal_15',['5.7 Real-Time Utilities &amp; HAL',['../md_docs_2DOCUMENTATION.html#autotoc_md102',1,'']]]
 ];

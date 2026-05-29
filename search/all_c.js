@@ -11,7 +11,7 @@ var searchData=
   ['feedforwardcontroller_8',['feedforwardcontroller',['../classctrl_1_1FeedforwardController.html#ac4e1b8d223818a505007a9eb38a376ad',1,'ctrl::FeedforwardController::FeedforwardController()'],['../classctrl_1_1FeedforwardController.html',1,'ctrl::FeedforwardController']]],
   ['feedforwardcontroller_2eh_9',['FeedforwardController.h',['../FeedforwardController_8h.html',1,'']]],
   ['filter_20divergence_10',['Kalman Filter Divergence',['../md_docs_2DEPLOYMENT.html#autotoc_md139',1,'']]],
-  ['fitrmse_11',['fitrmse',['../classctrl_1_1TaylorApproximator.html#ab47a41ee9762ae6dcbc026a9aed34724',1,'ctrl::TaylorApproximator::fitRMSE()'],['../structctrl_1_1FOPDTModel.html#ae7acacb2299adc1fe2562f3762897567',1,'ctrl::FOPDTModel::fitRMSE'],['../classctrl_1_1PadeApproximator.html#aeb7998edf017992818ebab1ab546ab69',1,'ctrl::PadeApproximator::fitRMSE()']]],
+  ['fitrmse_11',['fitrmse',['../classctrl_1_1TaylorApproximator.html#ab47a41ee9762ae6dcbc026a9aed34724',1,'ctrl::TaylorApproximator::fitRMSE()'],['../structctrl_1_1SOPDTModel.html#a8f7326d918e7e98eb50341cdd2fc07bc',1,'ctrl::SOPDTModel::fitRMSE'],['../structctrl_1_1FOPDTModel.html#ae7acacb2299adc1fe2562f3762897567',1,'ctrl::FOPDTModel::fitRMSE'],['../classctrl_1_1PadeApproximator.html#aeb7998edf017992818ebab1ab546ab69',1,'ctrl::PadeApproximator::fitRMSE()']]],
   ['flags_12',['2.4 Real-Time Build Flags',['../md_docs_2DOCUMENTATION.html#autotoc_md35',1,'']]],
   ['fopdtidentifier_13',['fopdtidentifier',['../classctrl_1_1FOPDTIdentifier.html#aaa2f91c1d21348a284e1d37fc3f6f5ab',1,'ctrl::FOPDTIdentifier::FOPDTIdentifier()'],['../classctrl_1_1FOPDTIdentifier.html',1,'ctrl::FOPDTIdentifier']]],
   ['fopdtidentifier_2ecpp_14',['FOPDTIdentifier.cpp',['../FOPDTIdentifier_8cpp.html',1,'']]],

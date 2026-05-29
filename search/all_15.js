@@ -9,7 +9,7 @@ var searchData=
   ['onreset_6',['onReset',['../classctrl_1_1IControllerObserver.html#abebcb63f9bc7300642df4b8b833adab6',1,'ctrl::IControllerObserver']]],
   ['operator_28_29_7',['operator()',['../structctrl_1_1MF.html#aea9e4bb7700c6ba5d5ba05004ac68edd',1,'ctrl::MF']]],
   ['optimise_8',['optimise',['../classctrl_1_1TunerSuite.html#a9c32b9bf224d2b1fe4ff2c40e334b41e',1,'ctrl::TunerSuite']]],
-  ['optimization_9',['Optimization',['../namespacectrl.html#afe5d6d219bd6cb8e4f6b4d0d3b9225b8a15970c4fdbca1fc48c5b412d94e798c0',1,'ctrl']]],
+  ['optimization_9',['optimization',['../namespacectrl.html#ab1f13895423e788521b5365061b1b850a15970c4fdbca1fc48c5b412d94e798c0',1,'ctrl::Optimization'],['../namespacectrl.html#afe5d6d219bd6cb8e4f6b4d0d3b9225b8a15970c4fdbca1fc48c5b412d94e798c0',1,'ctrl::Optimization']]],
   ['optimtuneresult_10',['OptimTuneResult',['../structctrl_1_1OptimTuneResult.html',1,'ctrl']]],
   ['optional_11',['2.5 Doxygen API Output (Optional)',['../md_docs_2DOCUMENTATION.html#autotoc_md36',1,'']]],
   ['optional_20python_20tooling_12',['1.2 Optional Python Tooling',['../md_docs_2DOCUMENTATION.html#autotoc_md28',1,'']]],

@@ -1,11 +1,11 @@
 var searchData=
 [
-  ['k_0',['k',['../structctrl_1_1StepResponseTuner_1_1FOPDTModel.html#a460937f55af87daa10c5a85cf6f1d733',1,'ctrl::StepResponseTuner::FOPDTModel::K'],['../structctrl_1_1SMCParams.html#a3fa027ba3dfca3725f172fabd129a455',1,'ctrl::SMCParams::K'],['../structctrl_1_1FOPDTModel.html#af72773456be131c21f8f9106bea9bc2e',1,'ctrl::FOPDTModel::K']]],
+  ['k_0',['k',['../structctrl_1_1SOPDTModel.html#aba033e89517f797fbf276797df24e579',1,'ctrl::SOPDTModel::K'],['../structctrl_1_1FOPDTModel.html#af72773456be131c21f8f9106bea9bc2e',1,'ctrl::FOPDTModel::K'],['../structctrl_1_1StepResponseTuner_1_1FOPDTModel.html#a460937f55af87daa10c5a85cf6f1d733',1,'ctrl::StepResponseTuner::FOPDTModel::K'],['../structctrl_1_1SMCParams.html#a3fa027ba3dfca3725f172fabd129a455',1,'ctrl::SMCParams::K']]],
   ['k1_1',['K1',['../structctrl_1_1SuperTwistingParams.html#a72c3177b49aaecceeeffa5a45d692538',1,'ctrl::SuperTwistingParams']]],
   ['k2_2',['K2',['../structctrl_1_1SuperTwistingParams.html#ad6c93df7b0bc89c26e0b296d9f5f6a1c',1,'ctrl::SuperTwistingParams']]],
   ['kalman_20filter_20divergence_3',['Kalman Filter Divergence',['../md_docs_2DEPLOYMENT.html#autotoc_md139',1,'']]],
   ['kalman_20lqg_20output_20feedback_4',['4.3 LQR + Kalman = LQG (Output Feedback)',['../md_docs_2DOCUMENTATION.html#autotoc_md49',1,'']]],
-  ['kalmanfilter_5',['kalmanfilter',['../classctrl_1_1KalmanFilter.html',1,'ctrl::KalmanFilter'],['../md_docs_2DEPLOYMENT.html#autotoc_md119',1,'KalmanFilter'],['../classctrl_1_1KalmanFilter.html#a226052d8a01efa2589f81e7c52964d0c',1,'ctrl::KalmanFilter::KalmanFilter()']]],
+  ['kalmanfilter_5',['kalmanfilter',['../md_docs_2DEPLOYMENT.html#autotoc_md119',1,'KalmanFilter'],['../classctrl_1_1KalmanFilter.html',1,'ctrl::KalmanFilter'],['../classctrl_1_1KalmanFilter.html#a226052d8a01efa2589f81e7c52964d0c',1,'ctrl::KalmanFilter::KalmanFilter()']]],
   ['kalmanfilter_20tt_20a_20href_20lib_20kalmanfilter_20h_20kalmanfilter_20h_20a_6',['&lt;tt&gt;KalmanFilter&lt;/tt&gt; (&lt;a href=&quot;lib/KalmanFilter.h&quot; &gt;KalmanFilter.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md84',1,'']]],
   ['kalmanfilter_2ecpp_7',['KalmanFilter.cpp',['../KalmanFilter_8cpp.html',1,'']]],
   ['kalmanfilter_2eh_8',['KalmanFilter.h',['../KalmanFilter_8h.html',1,'']]],

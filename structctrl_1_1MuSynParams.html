@@ -100,6 +100,9 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:aa97638ab1a133ed16ec61e61d723245e" id="r_aa97638ab1a133ed16ec61e61d723245e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MuSynParams.html#aa97638ab1a133ed16ec61e61d723245e">dScaleMaxIter</a> = 30</td></tr>
 <tr class="memdesc:aa97638ab1a133ed16ec61e61d723245e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inner Sinkhorn-Knopp iterations per D-step.  <br /></td></tr>
 <tr class="separator:aa97638ab1a133ed16ec61e61d723245e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a740af5a43c4d49461244b41ad408359e" id="r_a740af5a43c4d49461244b41ad408359e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MuSynParams.html#a740af5a43c4d49461244b41ad408359e">useRationalD</a> = false</td></tr>
+<tr class="memdesc:a740af5a43c4d49461244b41ad408359e"><td class="mdescLeft">&#160;</td><td class="mdescRight">When true, fit first-order rational D_j(z) per channel.  <br /></td></tr>
+<tr class="separator:a740af5a43c4d49461244b41ad408359e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a73f1f71c7f69b3fc1fa3ec6725d85b" id="r_a7a73f1f71c7f69b3fc1fa3ec6725d85b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1HinfParams.html">HinfParams</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MuSynParams.html#a7a73f1f71c7f69b3fc1fa3ec6725d85b">hinfParams</a></td></tr>
 <tr class="memdesc:a7a73f1f71c7f69b3fc1fa3ec6725d85b"><td class="mdescLeft">&#160;</td><td class="mdescRight">H-inf sub-problem parameters for each K-step.  <br /></td></tr>
 <tr class="separator:a7a73f1f71c7f69b3fc1fa3ec6725d85b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -110,11 +113,14 @@ Public Attributes</h2></td></tr>
 <li><b>K-step:</b> H-infinity synthesis on the D-scaled plant.</li>
 <li><b>D-step:</b> Amplitude-balance D-scaling that minimises an upper bound on the structured singular value mu over a frequency grid.</li>
 </ul>
-<p>The D-scaling is held <b>constant</b> (frequency-independent), which avoids rational-function fitting of D(jw) while still providing a tighter mu bound than plain H-infinity. The resulting controller satisfies: </p><div class="fragment"><div class="line">mu_upper &lt;= sigma_max(D * F_l(P, K)(jw) * D^{-1})   <span class="keywordflow">for</span> all w</div>
-</div><!-- fragment --><p> where D is an element-wise positive diagonal scaling found by the amplitude-balance algorithm (Sinkhorn-Knopp style).</p>
-<dl class="section note"><dt>Note</dt><dd>For full DK-iteration with frequency-dependent rational D(jw) fitting, the D-step requires an additional Pade/curve-fit pass per element - this is a planned extension (see cumulative_bug_report.md Part 17). </dd></dl>
+<p>When <code>useRationalD</code> is <code>false</code> (default), D-scaling is held constant (frequency-independent) via Sinkhorn-Knopp amplitude balance.</p>
+<p>When <code>useRationalD</code> is <code>true</code>, a first-order rational filter D_j(z) is fitted per diagonal element from the per-frequency amplitude-balance data. The plant is then augmented with these filters before the next K-step. This provides a tighter mu bound at the cost of a larger augmented plant.</p>
+<div class="fragment"><div class="line">mu_upper &lt;= sigma_max(D(jw) * F_l(P, K)(jw) * D(jw)^{-1})   <span class="keywordflow">for</span> all w</div>
+</div><!-- fragment --><dl class="section see"><dt>See also</dt><dd>Skogestad &amp; Postlethwaite, "Multivariable Feedback Design" Ch. 8.12. </dd>
+<dd>
+MATLAB dksyn() for the reference algorithm with vector-fitting D(jw). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00153">153</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00155">155</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="aa97638ab1a133ed16ec61e61d723245e" name="aa97638ab1a133ed16ec61e61d723245e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa97638ab1a133ed16ec61e61d723245e">&#9670;&#160;</a></span>dScaleMaxIter</h2>
@@ -130,9 +136,9 @@ Public Attributes</h2></td></tr>
 
 <p>Inner Sinkhorn-Knopp iterations per D-step. </p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00158">158</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00160">160</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00952">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01110">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
 
 </div>
 </div>
@@ -150,9 +156,9 @@ Public Attributes</h2></td></tr>
 
 <p>H-inf sub-problem parameters for each K-step. </p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00159">159</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00162">162</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00952">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01110">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
 
 </div>
 </div>
@@ -170,9 +176,9 @@ Public Attributes</h2></td></tr>
 
 <p>Maximum DK-iteration rounds. </p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00155">155</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00157">157</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00952">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01110">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
 
 </div>
 </div>
@@ -190,9 +196,9 @@ Public Attributes</h2></td></tr>
 
 <p>Stop when relative change in mu_upper &lt; this. </p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00156">156</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00158">158</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00952">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01110">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
 
 </div>
 </div>
@@ -210,9 +216,29 @@ Public Attributes</h2></td></tr>
 
 <p>Frequency grid size for D-step (log-spaced, Nyquist). </p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00157">157</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00159">159</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00952">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01110">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
+
+</div>
+</div>
+<a id="a740af5a43c4d49461244b41ad408359e" name="a740af5a43c4d49461244b41ad408359e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a740af5a43c4d49461244b41ad408359e">&#9670;&#160;</a></span>useRationalD</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ctrl::MuSynParams::useRationalD = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>When true, fit first-order rational D_j(z) per channel. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00161">161</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01110">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
 
 </div>
 </div>

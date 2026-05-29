@@ -1,11 +1,12 @@
 var searchData=
 [
-  ['lastoutput_0',['lastoutput',['../classctrl_1_1DiscretePID.html#a2181cd169d2691a6d0be718e907a8306',1,'ctrl::DiscretePID::lastOutput()'],['../classctrl_1_1FuzzyPD.html#a2d4fbca77923817e6136b4469ef430cb',1,'ctrl::FuzzyPD::lastOutput()'],['../classctrl_1_1FuzzyPID.html#aa53872025342ddfbc46e165b3e50fb57',1,'ctrl::FuzzyPID::lastOutput()'],['../classctrl_1_1IActuator.html#ad9c35118fbf95b959c85c65296b014ec',1,'ctrl::IActuator::lastOutput()'],['../classctrl_1_1SimActuator.html#ad98fca771aaf43ba231720dff8bbeb53',1,'ctrl::SimActuator::lastOutput()']]],
-  ['lastqpconverged_1',['lastqpconverged',['../classctrl_1_1DiscreteMPC.html#a4f704afde269d8b5f873a9adb6d2b1a2',1,'ctrl::DiscreteMPC::lastQPConverged()'],['../classctrl_1_1GeneralizedPredictiveController.html#a02c58aa49467163557ddc162333d067e',1,'ctrl::GeneralizedPredictiveController::lastQPConverged()']]],
-  ['lastqpiters_2',['lastqpiters',['../classctrl_1_1DiscreteMPC.html#aa4c1215570b8434108bb00ab5aacb741',1,'ctrl::DiscreteMPC::lastQPIters()'],['../classctrl_1_1GeneralizedPredictiveController.html#aad7359afa8988f1de19236714b3a381f',1,'ctrl::GeneralizedPredictiveController::lastQPIters()']]],
-  ['lastvalidreading_3',['lastValidReading',['../classctrl_1_1SafeSensor.html#ae10704d23bbb34984d1c14eb438e2a16',1,'ctrl::SafeSensor']]],
-  ['latest_4',['latest',['../classctrl_1_1AtomicParamBuffer.html#a12b5b74ba394c034f1ea7a461140cb87',1,'ctrl::AtomicParamBuffer']]],
-  ['loopshaping_5',['loopShaping',['../classctrl_1_1TunerSuite.html#a68241e3f0b3f6f4a023ab58ea82bf3f2',1,'ctrl::TunerSuite']]],
-  ['lqradapter_6',['LQRAdapter',['../classctrl_1_1LQRAdapter.html#a83bc714547dbe21e26b898e60bada666',1,'ctrl::LQRAdapter']]],
-  ['ltsingleton_7',['ltSingleton',['../namespacectrl.html#a8f1dad886251652b6661dd678241730e',1,'ctrl']]]
+  ['lastconverged_0',['lastConverged',['../classctrl_1_1MovingHorizonEstimator.html#a88b4ccb7af8e2d8853697b133b77fc3f',1,'ctrl::MovingHorizonEstimator']]],
+  ['lastoutput_1',['lastoutput',['../classctrl_1_1DiscretePID.html#a2181cd169d2691a6d0be718e907a8306',1,'ctrl::DiscretePID::lastOutput()'],['../classctrl_1_1FuzzyPD.html#a2d4fbca77923817e6136b4469ef430cb',1,'ctrl::FuzzyPD::lastOutput()'],['../classctrl_1_1FuzzyPID.html#aa53872025342ddfbc46e165b3e50fb57',1,'ctrl::FuzzyPID::lastOutput()'],['../classctrl_1_1IActuator.html#ad9c35118fbf95b959c85c65296b014ec',1,'ctrl::IActuator::lastOutput()'],['../classctrl_1_1SimActuator.html#ad98fca771aaf43ba231720dff8bbeb53',1,'ctrl::SimActuator::lastOutput()']]],
+  ['lastqpconverged_2',['lastqpconverged',['../classctrl_1_1DiscreteMPC.html#a4f704afde269d8b5f873a9adb6d2b1a2',1,'ctrl::DiscreteMPC::lastQPConverged()'],['../classctrl_1_1GeneralizedPredictiveController.html#a02c58aa49467163557ddc162333d067e',1,'ctrl::GeneralizedPredictiveController::lastQPConverged()']]],
+  ['lastqpiters_3',['lastqpiters',['../classctrl_1_1DiscreteMPC.html#aa4c1215570b8434108bb00ab5aacb741',1,'ctrl::DiscreteMPC::lastQPIters()'],['../classctrl_1_1GeneralizedPredictiveController.html#aad7359afa8988f1de19236714b3a381f',1,'ctrl::GeneralizedPredictiveController::lastQPIters()'],['../classctrl_1_1MovingHorizonEstimator.html#a3169e53700ba2e8896f39f02283d9e4d',1,'ctrl::MovingHorizonEstimator::lastQPIters()']]],
+  ['lastvalidreading_4',['lastValidReading',['../classctrl_1_1SafeSensor.html#ae10704d23bbb34984d1c14eb438e2a16',1,'ctrl::SafeSensor']]],
+  ['latest_5',['latest',['../classctrl_1_1AtomicParamBuffer.html#a12b5b74ba394c034f1ea7a461140cb87',1,'ctrl::AtomicParamBuffer']]],
+  ['loopshaping_6',['loopShaping',['../classctrl_1_1TunerSuite.html#a68241e3f0b3f6f4a023ab58ea82bf3f2',1,'ctrl::TunerSuite']]],
+  ['lqradapter_7',['LQRAdapter',['../classctrl_1_1LQRAdapter.html#a83bc714547dbe21e26b898e60bada666',1,'ctrl::LQRAdapter']]],
+  ['ltsingleton_8',['ltSingleton',['../namespacectrl.html#a8f1dad886251652b6661dd678241730e',1,'ctrl']]]
 ];
