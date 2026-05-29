@@ -82,6 +82,8 @@
 #include "SOPDTIdentifier.h"              ///< SOPDT - second-order plus dead-time identification (K, tau1, tau2, theta) + IMC-PID tuning.
 #include "FeedforwardController.h"        ///< Feedforward - G_ff(z)*r, combinable with feedback via ControllerStack.
 #include "MovingHorizonEstimator.h"       ///< MHE - moving horizon state estimator (condensed QP, box constraints on process noise).
+#include "LinearisationHelper.h"         ///< jacobianX/U, lineariseAtPoint - numerical Jacobians and ZOH linearisation at operating point.
+#include "FeedbackLinearisation.h"       ///< FeedbackLinearisationController - exact FL for affine-in-control SISO systems (relative degree 1).
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,

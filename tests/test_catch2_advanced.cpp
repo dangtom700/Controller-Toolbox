@@ -1415,3 +1415,161 @@ TEST_CASE("MovingHorizonEstimator converges on linear first-order system",
     // QP should converge
     REQUIRE(mhe.lastConverged());
 }
+
+// =============================================================================
+// LinearisationHelper - numerical Jacobians and lineariseAtPoint
+// =============================================================================
+
+TEST_CASE("jacobianX/U match analytical for Van der Pol at origin", "[linearisation]")
+{
+    // Van der Pol: xdot1=x2, xdot2=mu(1-x1^2)x2-x1+u  at x=(0,0), u=0
+    // Analytical: A_c=[[0,1],[-1,mu]], B_c=[[0],[1]]
+    const double mu = 0.5;
+    ctrl::StateFunc vdp = [mu](const Eigen::VectorXd &x,
+                               const Eigen::VectorXd &u) -> Eigen::VectorXd {
+        Eigen::VectorXd xd(2);
+        xd(0) = x(1);
+        xd(1) = mu * (1.0 - x(0) * x(0)) * x(1) - x(0) + u(0);
+        return xd;
+    };
+
+    const Eigen::VectorXd x0 = Eigen::VectorXd::Zero(2);
+    const Eigen::VectorXd u0 = Eigen::VectorXd::Zero(1);
+
+    const Eigen::MatrixXd A_num = ctrl::jacobianX(vdp, x0, u0);
+    const Eigen::MatrixXd B_num = ctrl::jacobianU(vdp, x0, u0);
+
+    Eigen::Matrix2d A_ana;
+    A_ana << 0.0, 1.0, -1.0, mu;
+    Eigen::Vector2d B_ana;
+    B_ana << 0.0, 1.0;
+
+    // Relative error on each matrix
+    const double A_err = (A_num - A_ana).norm() / (A_ana.norm() + 1e-12);
+    const double B_err = (B_num - B_ana).norm() / (B_ana.norm() + 1e-12);
+
+    REQUIRE(A_err < 1e-4);
+    REQUIRE(B_err < 1e-4);
+}
+
+TEST_CASE("lineariseAtPoint produces stable LQR gain for Van der Pol", "[linearisation]")
+{
+    const double mu = 0.5;
+    const double Ts_lin = 0.05;
+
+    ctrl::StateFunc vdp = [mu](const Eigen::VectorXd &x,
+                               const Eigen::VectorXd &u) -> Eigen::VectorXd {
+        Eigen::VectorXd xd(2);
+        xd(0) = x(1);
+        xd(1) = mu * (1.0 - x(0) * x(0)) * x(1) - x(0) + u(0);
+        return xd;
+    };
+
+    const Eigen::VectorXd x0 = Eigen::VectorXd::Zero(2);
+    const Eigen::VectorXd u0 = Eigen::VectorXd::Zero(1);
+
+    ctrl::StateSpace sys_d = ctrl::lineariseAtPoint(vdp, x0, u0, Ts_lin);
+
+    // Dimensions
+    REQUIRE(sys_d.stateSize()  == 2);
+    REQUIRE(sys_d.inputSize()  == 1);
+    REQUIRE(sys_d.outputSize() == 2);
+
+    // DARE must converge
+    ctrl::LQRParams lqr_p;
+    lqr_p.Q = 10.0 * Eigen::Matrix2d::Identity();
+    lqr_p.R = Eigen::MatrixXd::Identity(1, 1);
+    ctrl::DiscreteLQR lqr(sys_d, lqr_p);
+
+    REQUIRE(lqr.dareConverged());
+
+    // Closed-loop poles must be inside the unit circle
+    const Eigen::MatrixXd A_cl = sys_d.A - sys_d.B * lqr.gainMatrix();
+    const auto evs = A_cl.eigenvalues();
+    for (int i = 0; i < evs.size(); ++i)
+        REQUIRE(std::abs(evs(i)) < 1.0);
+
+    // Closed-loop simulation on LINEARISED plant from x0=(0.5,0) -> |x| < 0.05 in 500 steps
+    Eigen::VectorXd x_cl(2);
+    x_cl << 0.5, 0.0;
+    const Eigen::MatrixXd K = lqr.gainMatrix();
+    for (int k = 0; k < 500; ++k)
+    {
+        const Eigen::VectorXd u_ctrl = -K * x_cl;
+        x_cl = sys_d.A * x_cl + sys_d.B * u_ctrl;
+    }
+    REQUIRE(x_cl.norm() < 0.05);
+}
+
+// =============================================================================
+// FeedbackLinearisationController - exact FL for affine-in-control SISO systems
+// =============================================================================
+
+TEST_CASE("FL controller drives cubic drift xdot=-x^3+u to reference 1.0", "[fl]")
+{
+    const double Ts_fl = 0.01;
+
+    ctrl::FeedbackLinearisationController::DriftFn f =
+        [](const Eigen::VectorXd &x, double) { return -x(0) * x(0) * x(0); };
+    ctrl::FeedbackLinearisationController::GainFn g =
+        [](const Eigen::VectorXd &, double) { return 1.0; };
+
+    ctrl::PIDParams pp;
+    pp.Kp = 5.0; pp.Ki = 2.0; pp.Kd = 0.0; pp.N = 100.0;
+    pp.uMin = -100.0; pp.uMax = 100.0;
+    auto inner = std::make_shared<ctrl::DiscretePID>(pp, Ts_fl);
+
+    ctrl::FLParams flp;
+    flp.uMin = -50.0; flp.uMax = 50.0; flp.regularisationEps = 1e-6;
+
+    ctrl::FeedbackLinearisationController fl(f, g, inner, flp, Ts_fl);
+
+    const double ref = 1.0;
+    Eigen::VectorXd x(1);
+    x(0) = 0.0;
+
+    for (int k = 0; k < 500; ++k)
+    {
+        fl.setState(x);
+        const double u = fl.compute(ref - x(0));
+        x(0) += Ts_fl * (-x(0) * x(0) * x(0) + u);   // Euler integration of true plant
+    }
+
+    REQUIRE(std::isfinite(x(0)));
+    REQUIRE_THAT(x(0), WithinAbs(ref, 0.05));
+}
+
+TEST_CASE("FL lastOutput and sampleTime return correct values", "[fl]")
+{
+    const double Ts_fl = 0.02;
+
+    ctrl::FeedbackLinearisationController::DriftFn f =
+        [](const Eigen::VectorXd &, double) { return 0.0; };    // linear: f=0, g=1 -> u=v
+    ctrl::FeedbackLinearisationController::GainFn g =
+        [](const Eigen::VectorXd &, double) { return 1.0; };
+
+    ctrl::PIDParams pp;
+    pp.Kp = 1.0; pp.Ki = 0.0; pp.Kd = 0.0; pp.N = 10.0;
+    pp.uMin = -10.0; pp.uMax = 10.0;
+    auto inner = std::make_shared<ctrl::DiscretePID>(pp, Ts_fl);
+
+    ctrl::FLParams flp;
+    flp.uMin = -10.0; flp.uMax = 10.0;
+
+    ctrl::FeedbackLinearisationController fl(f, g, inner, flp, Ts_fl);
+
+    REQUIRE_THAT(fl.sampleTime(), WithinAbs(Ts_fl, 1e-12));
+    REQUIRE_THAT(fl.lastOutput(), WithinAbs(0.0, 1e-12));
+
+    // With f=0, g=1: u = v - 0 / 1 = v = Kp * error
+    Eigen::VectorXd x0(1);
+    x0(0) = 0.0;
+    fl.setState(x0);
+    const double u = fl.compute(3.0);            // error = 3 -> Kp*3 = 3
+    REQUIRE_THAT(u, WithinAbs(3.0, 0.01));
+    REQUIRE_THAT(fl.lastOutput(), WithinAbs(u, 1e-12));
+
+    // reset() clears u_last and inner state
+    fl.reset();
+    REQUIRE_THAT(fl.lastOutput(), WithinAbs(0.0, 1e-12));
+}

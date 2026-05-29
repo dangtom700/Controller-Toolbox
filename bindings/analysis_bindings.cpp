@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
+#include <pybind11/functional.h>
 
 #include "ControllerToolbox.h"
 
@@ -126,6 +127,109 @@ TimeDomainMetrics
                     &ctrl::SystemAnalysis::calculateHInfinityNorm,
                     py::arg("sys"),
                     "Grid approximation of the H-infinity norm (lower bound).");
+
+    // -----------------------------------------------------------------------
+    // LinearisationHelper  (jacobian_x, jacobian_u, linearise_at_point)
+    // -----------------------------------------------------------------------
+    m.def("jacobian_x",
+        [](const ctrl::StateFunc &f,
+           const Eigen::VectorXd &x0,
+           const Eigen::VectorXd &u0,
+           double eps_scale) {
+            return ctrl::jacobianX(f, x0, u0, eps_scale);
+        },
+        py::arg("f"), py::arg("x0"), py::arg("u0"), py::arg("eps_scale") = 1e-4,
+        R"doc(
+Central-difference Jacobian of f(x, u) with respect to x at (x0, u0).
+
+Parameters
+----------
+f         : callable(x: ndarray, u: ndarray) -> ndarray  - continuous-time dynamics.
+x0        : Operating-point state  (n,).
+u0        : Operating-point input  (m,).
+eps_scale : Relative step size (default 1e-4).
+
+Returns
+-------
+A_c : (output_dim, n) Jacobian matrix  df/dx.
+)doc");
+
+    m.def("jacobian_u",
+        [](const ctrl::StateFunc &f,
+           const Eigen::VectorXd &x0,
+           const Eigen::VectorXd &u0,
+           double eps_scale) {
+            return ctrl::jacobianU(f, x0, u0, eps_scale);
+        },
+        py::arg("f"), py::arg("x0"), py::arg("u0"), py::arg("eps_scale") = 1e-4,
+        R"doc(
+Central-difference Jacobian of f(x, u) with respect to u at (x0, u0).
+
+Returns
+-------
+B_c : (output_dim, m) Jacobian matrix  df/du.
+)doc");
+
+    m.def("linearise_at_point",
+        [](const ctrl::StateFunc &f,
+           const Eigen::VectorXd &x0,
+           const Eigen::VectorXd &u0,
+           double Ts,
+           double eps_scale) {
+            return ctrl::lineariseAtPoint(f, x0, u0, Ts, eps_scale);
+        },
+        py::arg("f"), py::arg("x0"), py::arg("u0"),
+        py::arg("Ts"), py::arg("eps_scale") = 1e-4,
+        R"doc(
+Linearise a continuous-time nonlinear system at (x0, u0) and ZOH-discretise.
+
+Uses identity output (y = x, C = I, D = 0).  For a custom output function use
+linearise_at_point_with_output().
+
+Parameters
+----------
+f    : callable(x: ndarray, u: ndarray) -> ndarray - continuous-time xdot = f(x, u).
+x0   : Operating-point state  (n,).
+u0   : Operating-point input  (m,).
+Ts   : Sample time [s] for ZOH discretisation.
+eps_scale : Jacobian step scale (default 1e-4).
+
+Returns
+-------
+StateSpace : Discrete-time linearised model.
+
+Example
+-------
+>>> sys = ctrl.linearise_at_point(vdp, x0, u0, Ts=0.05)
+>>> lqr = ctrl.DiscreteLQR(sys, lqr_params)
+)doc");
+
+    m.def("linearise_at_point_with_output",
+        [](const ctrl::StateFunc &f,
+           const ctrl::MeasFunc  &h,
+           const Eigen::VectorXd &x0,
+           const Eigen::VectorXd &u0,
+           double Ts,
+           double eps_scale) {
+            return ctrl::lineariseAtPoint(f, h, x0, u0, Ts, eps_scale);
+        },
+        py::arg("f"), py::arg("h"), py::arg("x0"), py::arg("u0"),
+        py::arg("Ts"), py::arg("eps_scale") = 1e-4,
+        R"doc(
+Linearise with a custom output function h(x, u) and ZOH-discretise.
+
+Parameters
+----------
+f  : callable(x, u) -> ndarray - continuous-time dynamics.
+h  : callable(x, u) -> ndarray - output map y = h(x, u).
+x0 : Operating-point state.
+u0 : Operating-point input.
+Ts : Sample time [s].
+
+Returns
+-------
+StateSpace : Discrete-time linearised model with C = dh/dx, D = dh/du.
+)doc");
 
     // -----------------------------------------------------------------------
     // RepetitiveController

@@ -93,6 +93,8 @@ for %%T in (
     ex52_dob_pi
     ex53_mhe_mpc_dual
     ex54_bumpless_transfer
+    ex55_linearisation_helper
+    ex56_feedback_linearisation
     example_pid_feedback
     mimo_known
     mimo_unknown

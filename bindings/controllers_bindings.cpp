@@ -576,6 +576,69 @@ Example (weighted blend)
              "Name of the controller selected in the most recent compute() call (Supervisory mode).");
 
     // -----------------------------------------------------------------------
+    // FeedbackLinearisationController  (E4 from CONTROL_STRATEGIES_DEEP_DIVE.md)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::FLParams>(m, "FLParams",
+        "Parameters for FeedbackLinearisationController.")
+        .def(py::init<>())
+        .def_readwrite("uMin",               &ctrl::FLParams::uMin,
+                       "Lower saturation on physical control u.")
+        .def_readwrite("uMax",               &ctrl::FLParams::uMax,
+                       "Upper saturation on physical control u.")
+        .def_readwrite("regularisation_eps", &ctrl::FLParams::regularisationEps,
+                       "Minimum |g(x)| before clamping (prevents division by zero).");
+
+    py::class_<ctrl::FeedbackLinearisationController, ctrl::IController,
+               std::shared_ptr<ctrl::FeedbackLinearisationController>>(
+        m, "FeedbackLinearisationController", R"doc(
+Exact feedback linearisation controller - SISO, relative degree 1.
+
+Cancels nonlinear terms in xdot = f(x) + g(x).u, then applies an inner linear
+IController on the resulting virtual integrator error dynamics.
+
+Usage
+-----
+>>> def f(x, u_prev): return -float(x[0])**3
+>>> def g(x, u_prev): return 1.0
+>>> inner = ctrl.DiscretePID(pp, Ts)
+>>> fl = ctrl.FeedbackLinearisationController(f, g, inner, flp, Ts)
+>>> fl.set_state(x)        # must call before each compute()
+>>> u = fl.compute(ref - y)
+
+Feasibility conditions
+----------------------
+- Relative degree 1: u appears in ydot without further integration.
+- Minimum phase: zero dynamics must be asymptotically stable.
+- g(x) != 0 across the operating region; tune regularisation_eps accordingly.
+- setState() must be called with the current plant state before each step.
+)doc")
+        .def(py::init<ctrl::FeedbackLinearisationController::DriftFn,
+                      ctrl::FeedbackLinearisationController::GainFn,
+                      std::shared_ptr<ctrl::IController>,
+                      const ctrl::FLParams &,
+                      double>(),
+             py::arg("f"), py::arg("g"), py::arg("inner"),
+             py::arg("params"), py::arg("Ts"),
+             "Construct the FL controller with drift functor f, gain functor g, "
+             "inner IController, FLParams, and sample time Ts.")
+        .def("compute",      &ctrl::FeedbackLinearisationController::compute,
+             py::arg("error"),
+             "Compute u[k]. Call set_state(x) first each step.")
+        .def("reset",        &ctrl::FeedbackLinearisationController::reset)
+        .def("sample_time",  &ctrl::FeedbackLinearisationController::sampleTime)
+        .def("set_state",    &ctrl::FeedbackLinearisationController::setState,
+             py::arg("x"),
+             "Inject current plant state x[k] (must be called before each compute()).")
+        .def("state",        &ctrl::FeedbackLinearisationController::state,
+             "Return the state last set by set_state().")
+        .def("last_output",  &ctrl::FeedbackLinearisationController::lastOutput,
+             "Return u[k-1] from the previous compute() call.")
+        .def("set_params",   &ctrl::FeedbackLinearisationController::setParams,
+             py::arg("params"), "Update FLParams at runtime.")
+        .def("params",       &ctrl::FeedbackLinearisationController::params,
+             "Current FLParams.");
+
+    // -----------------------------------------------------------------------
     // Fuzzy module (optional - guarded by CTRL_HAS_FUZZY)
     // -----------------------------------------------------------------------
 #if defined(CTRL_HAS_FUZZY)

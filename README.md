@@ -102,7 +102,7 @@ for (int k = 0; k < 500; ++k) {
 | **Optimal** | LQR (DARE), LQG (LQR+KF), MPC (condensed QP), GPC (CARIMA+RLS), H-infinity (gamma iteration + DK mu-synthesis) |
 | **Robust / Nonlinear** | SMC (saturation boundary layer), ADRC (2nd-order LADRC + ESO), Extremum Seeker |
 | **Intelligent** | FuzzyPD, FuzzyPID, FuzzySupervisor (Mamdani & Takagi-Sugeno) |
-| **Composition** | ControllerStack (Supervisory, Additive, Weighted) — cascade, observer+SF, bumpless transfer |
+| **Composition** | ControllerStack (Supervisory, Additive, Weighted) - cascade, observer+SF, bumpless transfer |
 | **Estimators** | KalmanFilter, EKF, UKF, MovingHorizonEstimator |
 | **Identification** | FOPDTIdentifier, SOPDTIdentifier, RecursiveLeastSquares, SubspaceID (N4SID) |
 
@@ -168,13 +168,13 @@ docker run --rm -it -v "$(pwd):/work" -w /work \
 **Current test counts (2026-05-28):** 73 C++ executables pass | 74 Python examples pass | 0 failures.
 
 **Part 18 additions (2026-05-28):**
-- `SOPDTIdentifier` — graphical (ZN tangent + 28.3%/63.2% crossings) and optimization (nested golden-section) SOPDT step-response identification; Rivera 1986 IMC-PID tuning for SOPDT models.
-- `MovingHorizonEstimator` — condensed QP dual of MPC; reuses `GradientProjectionQP`; box constraints on process noise; horizon ramp-up from 1 to N.
+- `SOPDTIdentifier` - graphical (ZN tangent + 28.3%/63.2% crossings) and optimization (nested golden-section) SOPDT step-response identification; Rivera 1986 IMC-PID tuning for SOPDT models.
+- `MovingHorizonEstimator` - condensed QP dual of MPC; reuses `GradientProjectionQP`; box constraints on process noise; horizon ramp-up from 1 to N.
 - `DiscreteHinf::solveMuSyn` extended with full rational D-scaling (first-order D_j(z) fit per channel, plant state augmentation).
 - 23 new C++ examples (ex32-ex54) and 21 new Python examples (ex50-ex70) covering corrector patterns: Cascade, Additive, Observer+SF, Supervisory.
 
 **Earlier additions:**
-- `FuzzyLogic` module (2026-05-23): Mamdani and Takagi-Sugeno inference engines, `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor` — see [docs/DOCUMENTATION.md Section 5.2](docs/DOCUMENTATION.md).
+- `FuzzyLogic` module (2026-05-23): Mamdani and Takagi-Sugeno inference engines, `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor` - see [docs/DOCUMENTATION.md Section 5.2](docs/DOCUMENTATION.md).
 - `ExtendedKalmanFilter`, `UnscentedKalmanFilter`, `RepetitiveController`, `GeneralizedPredictiveController`, `SubspaceID`, `DiscreteHinf`, `FOPDTIdentifier`, `FeedforwardController`, `GradientProjectionQP`.
 - Five math corrections (2026-05-22): MPC condensed prediction formula, PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor feedthrough, SMC `c_de` Ts-absorption.
 

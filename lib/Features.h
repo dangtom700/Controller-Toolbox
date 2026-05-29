@@ -55,8 +55,10 @@ inline std::unordered_map<std::string, bool> features()
             false
 #endif
         },
-        {"sopdt_identifier",   true},  // always compiled (SOPDTIdentifier.cpp in core sources)
-        {"mhe",                true},  // always compiled (MovingHorizonEstimator.cpp in core sources)
+        {"sopdt_identifier",        true},  // always compiled (SOPDTIdentifier.cpp in core sources)
+        {"mhe",                     true},  // always compiled (MovingHorizonEstimator.cpp in core sources)
+        {"linearisation_helper",    true},  // always compiled (LinearisationHelper.cpp in core sources)
+        {"feedback_linearisation",  true},  // always compiled (FeedbackLinearisation.cpp in core sources)
     };
 }
 

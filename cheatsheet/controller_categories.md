@@ -155,7 +155,7 @@ Controller structure is fixed, but parameters evolve online.
 | **Tier 1 - Core** | Closed-form, real-time, no external libraries | PID (all variants), LQR, LQI, Pole Placement, Observer, Lead-Lag, Smith Predictor, Cascade, Feedforward, SMC (basic), ADRC, DOBC, ESC, Repetitive Control |
 | **Tier 2 - Optimisation** | Requires embedded QP solver (built-in `GradientProjectionQP`) | Linear MPC, GPC, MHE, LQG |
 | **Tier 3 - Advanced Adaptive** | Requires RLS / EKF / gradient update | MRAC, STR, Adaptive GPC (RLS+setPlant), ILC, L1 Adaptive, MFAC |
-| **Tier 4 - Intelligent** | Requires inference engine (native fuzzy implemented) | FuzzyPD, FuzzyPID, FuzzySupervisor (Mamdani/TS — implemented), ANFIS, NN Control (external) |
+| **Tier 4 - Intelligent** | Requires inference engine (native fuzzy implemented) | FuzzyPD, FuzzyPID, FuzzySupervisor (Mamdani/TS - implemented), ANFIS, NN Control (external) |
 | **Tier 5 - Offline / External Tool** | Controller synthesised offline; gain matrix runs online | H-infinity (implemented with gamma-bisection), mu-Synthesis DK-iteration (implemented), H2, LMI-Based, NMPC, Economic MPC |
 
 ---
@@ -193,5 +193,5 @@ key **Tier 2**, **Tier 3**, **Tier 4**, and **Tier 5** controllers:
 | `GradientProjectionQP.h` | Shared projected gradient QP solver (MPC / GPC / MHE backend) |
 | `ControllerTuner.h/.cpp` | Relay auto-tune, FOPDT step-response, Bryson LQR weights, MPC horizon |
 | `TunerSuite.h/.cpp` | Unified tuner dispatcher (8 strategies, soft warnings) |
-| `ControllerStack.h/.cpp` | Supervisory, Additive, Weighted stacks — cascade, observer+SF, bumpless |
+| `ControllerStack.h/.cpp` | Supervisory, Additive, Weighted stacks - cascade, observer+SF, bumpless |
 | `PlantModel.h/.cpp` | TransferFunction, StateSpace, tf2ss, c2d (ZOH / Tustin), ssStep |

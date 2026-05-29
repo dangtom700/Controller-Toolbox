@@ -42,6 +42,8 @@ set(CTRL_CORE_SOURCES
     RecursiveLeastSquares.cpp
     RepetitiveController.cpp
     GeneralizedPredictiveControl.cpp
+    LinearisationHelper.cpp
+    FeedbackLinearisation.cpp
 )
 
 # --- Optional sources --------------------------------------------------------

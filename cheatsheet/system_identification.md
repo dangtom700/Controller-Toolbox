@@ -132,7 +132,7 @@ Parameters estimated via the tangent/area method or nonlinear least squares (`pr
 | `FOPDTIdentifier` | `lib/FOPDTIdentifier.h` | Graphical (ZN tangent + 63.2% crossing) or golden-section optimization |
 | `SOPDTIdentifier` | `lib/SOPDTIdentifier.h` | Graphical (ZN tangent + 63.2% + 28.3% crossings for tau1/tau2 split) or nested golden-section |
 
-**SOPDT tau1/tau2 split (graphical):** The 28.3% crossing time normalised to the 63.2% crossing time encodes the tau1/tau2 asymmetry. An FOPDT response reaches 28.3% at t/tau ≈ 0.332 (normalized); a critically-damped SOPDT reaches 28.3% at ≈ 0.530. Interpolating between these limits gives an `alpha` that splits `tau_sum = tau1 + tau2` into `tau1 >= tau2`.
+**SOPDT tau1/tau2 split (graphical):** The 28.3% crossing time normalised to the 63.2% crossing time encodes the tau1/tau2 asymmetry. An FOPDT response reaches 28.3% at t/tau approx = 0.332 (normalized); a critically-damped SOPDT reaches 28.3% at approx = 0.530. Interpolating between these limits gives an `alpha` that splits `tau_sum = tau1 + tau2` into `tau1 >= tau2`.
 
 **IMC-PID tuning from SOPDT (Rivera 1986):** Call `SOPDTIdentifier::imcTuning(model, lambdaC)`. See `cheatsheet/tuning_methods.md` Section 2a for the full formula.
 
