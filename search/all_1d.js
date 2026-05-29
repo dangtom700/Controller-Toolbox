@@ -7,9 +7,9 @@ var searchData=
   ['weight_4',['weight',['../structctrl_1_1StackEntry.html#a0a4f3bfacc0249d7d3099be1f34d2f40',1,'ctrl::StackEntry::weight'],['../structctrl_1_1Rule.html#a7af26a558ec583f686650a0fae5af059',1,'ctrl::Rule::weight']]],
   ['weighted_5',['Weighted',['../namespacectrl.html#a4312ec6fe1026061128af26aaf161458a582368ac8232617ead14ac74ccc40ea9',1,'ctrl']]],
   ['weightedaverage_6',['WeightedAverage',['../namespacectrl.html#a6dfa916cba4d5f5b44a2bf5317cd196eaf818fb451ad05227ddf60d3380f8dd99',1,'ctrl']]],
-  ['with_20online_20re_20linearisation_20adaptive_20mpc_7',['4.4 MPC with Online Re-Linearisation (Adaptive MPC)',['../md_docs_2DOCUMENTATION.html#autotoc_md50',1,'']]],
+  ['with_20online_20re_20linearisation_20adaptive_20mpc_7',['4.4 MPC with Online Re-Linearisation (Adaptive MPC)',['../md_docs_2DOCUMENTATION.html#autotoc_md53',1,'']]],
   ['wmax_8',['wMax',['../structctrl_1_1MHEParams.html#a5ad914176dbe63158092528ceb58d5de',1,'ctrl::MHEParams']]],
   ['wmin_9',['wMin',['../structctrl_1_1MHEParams.html#a9666c1322f7c337dddc6ebb6077c5329',1,'ctrl::MHEParams']]],
-  ['workflow_20relay_20pid_10',['4.2 Auto-Tuning Workflow (Relay -&gt; PID)',['../md_docs_2DOCUMENTATION.html#autotoc_md48',1,'']]],
+  ['workflow_20relay_20pid_10',['4.2 Auto-Tuning Workflow (Relay -&gt; PID)',['../md_docs_2DOCUMENTATION.html#autotoc_md51',1,'']]],
   ['write_11',['write',['../classctrl_1_1IActuator.html#ac6546d74dfc79167c6de08f6b218141c',1,'ctrl::IActuator::write()'],['../classctrl_1_1SimActuator.html#aeeedd4bb19bd1bcbbe968d1c851ba98e',1,'ctrl::SimActuator::write()']]]
 ];

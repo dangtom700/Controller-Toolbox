@@ -73,25 +73,31 @@ $(function() {
   <div class="headertitle"><div class="title">Controller Toolbox </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md_README"></a> A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, Hinf, Lead-Lag, Smith Predictor, Extremum Seeking, Kalman/EKF/UKF filtering, Fuzzy Logic inference, RLS and N4SID system identification, plus an integrated tuner suite and analysis layer.</p>
-<p>Twenty-plus controller implementations, eight tuning families, frequency- and time-domain analysis, controller composition (Supervisory / Additive / Weighted), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.</p>
+<div class="textblock"><p><a class="anchor" id="md_README"></a> A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H-infinity, Lead-Lag, Smith Predictor, Repetitive Control, Feedforward, Extremum Seeking, Kalman/EKF/UKF/MHE filtering, Fuzzy Logic inference, SOPDT/FOPDT identification, RLS and N4SID system identification, plus an integrated tuner suite and analysis layer.</p>
+<p>Thirty-plus controller implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.</p>
+<p>Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. 54 C++ example programs and 70 Python example scripts cover every controller, tuning method, identification approach, and corrector pattern.</p>
 <hr  />
 <h1><a class="anchor" id="autotoc_md2"></a>
 Quick Start</h1>
 <h2><a class="anchor" id="autotoc_md3"></a>
 Native build</h2>
 <div class="fragment"><div class="line">cmake -S . -B build -DCMAKE_BUILD_TYPE=Release</div>
-<div class="line">cmake --build build --parallel</div>
+<div class="line">cmake --build build</div>
 <div class="line">ctest --test-dir build --output-on-failure</div>
 </div><!-- fragment --><p>Requires <b>C++20</b>, <b>CMake &gt;= 3.16</b>, and <b>Eigen &gt;= 3.4</b>.</p>
 <h2><a class="anchor" id="autotoc_md4"></a>
+Run all examples</h2>
+<div class="fragment"><div class="line">conda activate soft_robotics</div>
+<div class="line">python run.py</div>
+</div><!-- fragment --><p><code>run.py</code> compiles every C++ target sequentially, runs each executable, then runs all Python examples and reports a pass/fail summary.</p>
+<h2><a class="anchor" id="autotoc_md5"></a>
 Docker build</h2>
 <div class="fragment"><div class="line">docker build -t controller-toolbox .</div>
 <div class="line">docker run --rm controller-toolbox          # runs the test suite</div>
 <div class="line">docker run --rm controller-toolbox ex02_ss_lqr   # runs a specific example</div>
 </div><!-- fragment --><p>See Docker Usage for more.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md6"></a>
+<h1><a class="anchor" id="autotoc_md7"></a>
 Minimal Example</h1>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="ControllerToolbox_8h.html">ControllerToolbox.h</a>&quot;</span></div>
 <div class="line"> </div>
@@ -122,7 +128,7 @@ Minimal Example</h1>
 <div class="ttc" id="astructctrl_1_1StateSpace_html"><div class="ttname"><a href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a></div><div class="ttdoc">Discrete-time state-space model.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00067">PlantModel.h:68</a></div></div>
 <div class="ttc" id="astructctrl_1_1TransferFunction_html"><div class="ttname"><a href="structctrl_1_1TransferFunction.html">ctrl::TransferFunction</a></div><div class="ttdoc">Discrete-time transfer function in z^-^1 polynomial form.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00031">PlantModel.h:32</a></div></div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md8"></a>
+<h1><a class="anchor" id="autotoc_md9"></a>
 Documentation</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -132,50 +138,77 @@ Documentation</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><a class="el" href="md_docs_2DEPLOYMENT.html">docs/DEPLOYMENT.md</a>   </td><td class="markdownTableBodyNone">Parameter constraints, RT/RTOS integration, troubleshooting recipes    </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">docs/TEST_UPDATE.md   </td><td class="markdownTableBodyNone">Test suite history, regression coverage, sign-convention notes    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">docs/CONTROL_STRATEGIES_DEEP_DIVE.md   </td><td class="markdownTableBodyNone">Taxonomy of strategy families, plant model interference, decision framework, proposed extensions    </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><a href="cheatsheet/">cheatsheet/</a>   </td><td class="markdownTableBodyNone">Tuning methods, controller categories, system identification notes    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><a href="case-study/">case-study/</a>   </td><td class="markdownTableBodyNone">Nonlinear 3*3 boiler-turbine multivariable study   </td></tr>
+<td class="markdownTableBodyNone"><a href="case-study/">case-study/</a>   </td><td class="markdownTableBodyNone">Nonlinear 3x3 boiler-turbine and Tug Boat multivariable studies   </td></tr>
 </table>
 <hr  />
-<h1><a class="anchor" id="autotoc_md10"></a>
+<h1><a class="anchor" id="autotoc_md11"></a>
 Repository Layout</h1>
 <div class="fragment"><div class="line">|-- lib/             # Library sources -&gt; target: controller_toolbox</div>
-<div class="line">|-- examples/        # ex01..ex26 single-file demos + cpp/ MIMO examples</div>
+<div class="line">|-- examples/        # ex01..ex54 single-file C++ demos (corrector patterns, new algorithms)</div>
+<div class="line">|-- examples/python/ # ex01..ex70 Python companion scripts and binding demos</div>
 <div class="line">|-- case-study/      # Boiler-turbine MIMO benchmark + Tug Boat numerical simulation</div>
-<div class="line">|-- tests/           # CTest-driven unit + integration tests</div>
+<div class="line">|-- tests/           # CTest-driven unit + integration tests (Catch2 v3)</div>
+<div class="line">|-- bindings/        # pybind11 binding source files</div>
 <div class="line">|-- scripts/         # tune_all / simulate_all / realtime_all</div>
 <div class="line">|-- cheatsheet/      # Reference notes</div>
 <div class="line">|-- docs/            # Documentation &amp; deployment guides</div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md12"></a>
+<h1><a class="anchor" id="autotoc_md13"></a>
+Controller Inventory</h1>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Category   </th><th class="markdownTableHeadNone">Implementations    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><b>Classical</b>   </td><td class="markdownTableBodyNone">PID (backward-Euler, anti-windup, DoM, 2-DOF), Lead-Lag, Smith Predictor, Feedforward, Repetitive Control    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>Optimal</b>   </td><td class="markdownTableBodyNone">LQR (DARE), LQG (LQR+KF), MPC (condensed QP), GPC (CARIMA+RLS), H-infinity (gamma iteration + DK mu-synthesis)    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><b>Robust / Nonlinear</b>   </td><td class="markdownTableBodyNone">SMC (saturation boundary layer), ADRC (2nd-order LADRC + ESO), Extremum Seeker    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>Intelligent</b>   </td><td class="markdownTableBodyNone">FuzzyPD, FuzzyPID, FuzzySupervisor (Mamdani &amp; Takagi-Sugeno)    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><b>Composition</b>   </td><td class="markdownTableBodyNone">ControllerStack (Supervisory, Additive, Weighted) — cascade, observer+SF, bumpless transfer    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>Estimators</b>   </td><td class="markdownTableBodyNone">KalmanFilter, EKF, UKF, MovingHorizonEstimator    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><b>Identification</b>   </td><td class="markdownTableBodyNone">FOPDTIdentifier, SOPDTIdentifier, RecursiveLeastSquares, SubspaceID (N4SID)   </td></tr>
+</table>
+<hr  />
+<h1><a class="anchor" id="autotoc_md15"></a>
 Docker Usage</h1>
 <p>The included [<code>Dockerfile</code>](Dockerfile) uses a two-stage build:</p>
 <ul>
 <li><b>Stage 1 (builder)</b> - Debian Bookworm slim + CMake + g++ + libeigen3-dev, compiles every target with the root <a href="CMakeLists.txt"><code>CMakeLists.txt</code></a>.</li>
 <li><b>Stage 2 (runtime)</b> - Slim image containing only the compiled binaries, ready to run examples, tests, or your own application.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md13"></a>
+<h2><a class="anchor" id="autotoc_md16"></a>
 Build the image</h2>
 <div class="fragment"><div class="line">docker build -t controller-toolbox .</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md14"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md17"></a>
 Run the test suite (default &lt;tt&gt;CMD&lt;/tt&gt;)</h2>
 <div class="fragment"><div class="line">docker run --rm controller-toolbox</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md15"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md18"></a>
 Run any example or script</h2>
 <div class="fragment"><div class="line">docker run --rm controller-toolbox ex07_lqg_kalman</div>
 <div class="line">docker run --rm controller-toolbox boiler_turbine_case_study</div>
 <div class="line">docker run --rm controller-toolbox simulate_all</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md16"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md19"></a>
 Interactive shell for development</h2>
 <div class="fragment"><div class="line">docker run --rm -it --entrypoint /bin/bash controller-toolbox</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md17"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md20"></a>
 Mount your own source for in-container builds</h2>
 <div class="fragment"><div class="line">docker run --rm -it -v &quot;$(pwd):/work&quot; -w /work \</div>
 <div class="line">    --entrypoint /bin/bash controller-toolbox:builder \</div>
-<div class="line">    -c &quot;cmake -S . -B build &amp;&amp; cmake --build build --parallel&quot;</div>
+<div class="line">    -c &quot;cmake -S . -B build &amp;&amp; cmake --build build&quot;</div>
 </div><!-- fragment --><p>(Use the <code>builder</code> stage tag - see the Dockerfile for details.)</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md19"></a>
+<h1><a class="anchor" id="autotoc_md22"></a>
 Tested Compilers</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -188,9 +221,21 @@ Tested Compilers</h1>
 <td class="markdownTableBodyNone">MSVC   </td><td class="markdownTableBodyNone">19.20+ (VS 2019/2022)   </td><td class="markdownTableBodyNone">OK   </td></tr>
 </table>
 <hr  />
-<h1><a class="anchor" id="autotoc_md21"></a>
+<h1><a class="anchor" id="autotoc_md24"></a>
 Project Status</h1>
-<p>Twenty-plus controllers implemented and unit-tested. <code>FuzzyLogic</code> module added 2026-05-23: Mamdani and Takagi-Sugeno inference engines, <code>FuzzyPD</code>, <code>FuzzyPID</code>, and <code>FuzzySupervisor</code> classes - see <a class="el" href="md_docs_2DOCUMENTATION.html">docs/DOCUMENTATION.md Section 5.2</a>. Four fuzzy application examples added (<code>ex23</code>-<code>ex26</code>). Five earlier math corrections (2026-05-22): MPC condensed prediction formula (<code>G_u.u_prev</code> term), PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor D.u_prev feedthrough, and SMC <code>c_de</code> Ts-absorption documentation - details in docs/cumulative_bug_report.md. Real-time deployment guidance in <a class="el" href="md_docs_2DEPLOYMENT.html">docs/DEPLOYMENT.md</a>. </p>
+<p><b>Current test counts (2026-05-28):</b> 73 C++ executables pass | 74 Python examples pass | 0 failures.</p>
+<p><b>Part 18 additions (2026-05-28):</b></p><ul>
+<li><code>SOPDTIdentifier</code> — graphical (ZN tangent + 28.3%/63.2% crossings) and optimization (nested golden-section) SOPDT step-response identification; Rivera 1986 IMC-PID tuning for SOPDT models.</li>
+<li><code>MovingHorizonEstimator</code> — condensed QP dual of MPC; reuses <code>GradientProjectionQP</code>; box constraints on process noise; horizon ramp-up from 1 to N.</li>
+<li><code>DiscreteHinf::solveMuSyn</code> extended with full rational D-scaling (first-order D_j(z) fit per channel, plant state augmentation).</li>
+<li>23 new C++ examples (ex32-ex54) and 21 new Python examples (ex50-ex70) covering corrector patterns: Cascade, Additive, Observer+SF, Supervisory.</li>
+</ul>
+<p><b>Earlier additions:</b></p><ul>
+<li><code>FuzzyLogic</code> module (2026-05-23): Mamdani and Takagi-Sugeno inference engines, <code>FuzzyPD</code>, <code>FuzzyPID</code>, <code>FuzzySupervisor</code> — see <a class="el" href="md_docs_2DOCUMENTATION.html">docs/DOCUMENTATION.md Section 5.2</a>.</li>
+<li><code>ExtendedKalmanFilter</code>, <code>UnscentedKalmanFilter</code>, <code>RepetitiveController</code>, <code>GeneralizedPredictiveController</code>, <code>SubspaceID</code>, <code>DiscreteHinf</code>, <code>FOPDTIdentifier</code>, <code>FeedforwardController</code>, <code>GradientProjectionQP</code>.</li>
+<li>Five math corrections (2026-05-22): MPC condensed prediction formula, PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor feedthrough, SMC <code>c_de</code> Ts-absorption.</li>
+</ul>
+<p>Details in docs/cumulative_bug_report.md. Real-time deployment guidance in <a class="el" href="md_docs_2DEPLOYMENT.html">docs/DEPLOYMENT.md</a>. </p>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->
