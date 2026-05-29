@@ -75,7 +75,7 @@ $(function() {
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="md_README"></a> A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H-infinity, Lead-Lag, Smith Predictor, Repetitive Control, Feedforward, Extremum Seeking, Kalman/EKF/UKF/MHE filtering, Fuzzy Logic inference, SOPDT/FOPDT identification, RLS and N4SID system identification, plus an integrated tuner suite and analysis layer.</p>
 <p>Thirty-plus controller implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.</p>
-<p>Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. 54 C++ example programs and 70 Python example scripts cover every controller, tuning method, identification approach, and corrector pattern.</p>
+<p>Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. 59 C++ example programs and 75 Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and new algorithm extension.</p>
 <hr  />
 <h1><a class="anchor" id="autotoc_md2"></a>
 Quick Start</h1>
@@ -165,19 +165,25 @@ Controller Inventory</h1>
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Category   </th><th class="markdownTableHeadNone">Implementations    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>Classical</b>   </td><td class="markdownTableBodyNone">PID (backward-Euler, anti-windup, DoM, 2-DOF), Lead-Lag, Smith Predictor, Feedforward, Repetitive Control    </td></tr>
+<td class="markdownTableBodyNone"><b>Classical</b>   </td><td class="markdownTableBodyNone">PID (backward-Euler, anti-windup, DoM, 2-DOF, b_weight), Lead-Lag, Smith Predictor (integer + fractional Pade), Feedforward, Repetitive Control    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>Optimal</b>   </td><td class="markdownTableBodyNone">LQR (DARE), LQG (LQR+KF), MPC (condensed QP), GPC (CARIMA+RLS), H-infinity (gamma iteration + DK mu-synthesis)    </td></tr>
+<td class="markdownTableBodyNone"><b>Optimal</b>   </td><td class="markdownTableBodyNone">LQR (DARE doubling), LQG (LQR+KF), MPC (condensed QP + box constraints), GPC (CARIMA+RLS adaptive), H-infinity (gamma bisection, mixed sensitivity, DK mu-synthesis with rational D)    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>Robust / Nonlinear</b>   </td><td class="markdownTableBodyNone">SMC (saturation boundary layer), ADRC (2nd-order LADRC + ESO), Extremum Seeker    </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>Adaptive</b>   </td><td class="markdownTableBodyNone">MRACController (Lyapunov + σ-modification + Euclidean projection), GPC::setPlant (RLS adaptive)    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><b>Nonlinear</b>   </td><td class="markdownTableBodyNone">FeedbackLinearisationController (affine-in-control SISO, relative degree 1; DriftFn+GainFn)    </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><b>Intelligent</b>   </td><td class="markdownTableBodyNone">FuzzyPD, FuzzyPID, FuzzySupervisor (Mamdani &amp; Takagi-Sugeno)    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>Composition</b>   </td><td class="markdownTableBodyNone">ControllerStack (Supervisory, Additive, Weighted) - cascade, observer+SF, bumpless transfer    </td></tr>
+<td class="markdownTableBodyNone"><b>Composition</b>   </td><td class="markdownTableBodyNone">ControllerStack (Supervisory, Additive, Weighted) — cascade, observer+SF, bumpless transfer    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>Estimators</b>   </td><td class="markdownTableBodyNone">KalmanFilter, EKF, UKF, MovingHorizonEstimator    </td></tr>
+<td class="markdownTableBodyNone"><b>Estimators</b>   </td><td class="markdownTableBodyNone">KalmanFilter, EKF (analytical/numerical Jacobians), UKF (sigma-point), MovingHorizonEstimator (condensed QP)    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>Identification</b>   </td><td class="markdownTableBodyNone">FOPDTIdentifier, SOPDTIdentifier, RecursiveLeastSquares, SubspaceID (N4SID)   </td></tr>
+<td class="markdownTableBodyNone"><b>Identification</b>   </td><td class="markdownTableBodyNone">FOPDTIdentifier, SOPDTIdentifier + Rivera 1986 IMC, RecursiveLeastSquares, SubspaceID (N4SID)    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>Model utilities</b>   </td><td class="markdownTableBodyNone">LinearisationHelper (jacobianX/U, lineariseAtPoint ZOH), BalancedTruncation (H∞ bound), ZeroPhaseTrackingFilter (ZPETC + transmissionZeros)   </td></tr>
 </table>
 <hr  />
 <h1><a class="anchor" id="autotoc_md15"></a>
@@ -223,16 +229,23 @@ Tested Compilers</h1>
 <hr  />
 <h1><a class="anchor" id="autotoc_md24"></a>
 Project Status</h1>
-<p><b>Current test counts (2026-05-28):</b> 73 C++ executables pass | 74 Python examples pass | 0 failures.</p>
+<p><b>Current test counts (2026-05-28):</b> 78 C++ executables pass | 79 Python examples pass | 0 failures. test_catch2_advanced: 51 test cases, 189 assertions. All Catch2 tags: [qp][mpc][gpc][kalman][lqr][smc][adrc][leadlag][hinf][ekf][ukf][rc][rls][n4sid][c2d][stack][observer][sopdt][mhe][linearisation][fl][mrac][btm][zpetc].</p>
 <p><b>Part 18 additions (2026-05-28):</b></p><ul>
 <li><code>SOPDTIdentifier</code> - graphical (ZN tangent + 28.3%/63.2% crossings) and optimization (nested golden-section) SOPDT step-response identification; Rivera 1986 IMC-PID tuning for SOPDT models.</li>
 <li><code>MovingHorizonEstimator</code> - condensed QP dual of MPC; reuses <code>GradientProjectionQP</code>; box constraints on process noise; horizon ramp-up from 1 to N.</li>
 <li><code>DiscreteHinf::solveMuSyn</code> extended with full rational D-scaling (first-order D_j(z) fit per channel, plant state augmentation).</li>
 <li>23 new C++ examples (ex32-ex54) and 21 new Python examples (ex50-ex70) covering corrector patterns: Cascade, Additive, Observer+SF, Supervisory.</li>
 </ul>
+<p><b>Extension session (2026-05-28, E1–E5 all implemented):</b></p><ul>
+<li><code>MRACController</code> — Lyapunov MRAC with σ-modification and parameter projection; ADRC-convention <code>compute(y_plant)</code>. Examples: ex57/ex73.</li>
+<li><code>FeedbackLinearisationController</code> — exact FL for SISO affine-in-control; DriftFn+GainFn; <code>setState(x)</code> required each step. Examples: ex56/ex72.</li>
+<li><code>LinearisationHelper</code> — <code>jacobianX/U</code> (central-diff, scaled ε); <code>lineariseAtPoint</code> ZOH. Examples: ex55/ex71.</li>
+<li><code>BalancedTruncation</code> — <code>balancedTruncate(sys, r)</code> with H∞ error bound 2·Σσᵢ; <code>suggestOrder</code>. Examples: ex58/ex74.</li>
+<li><code>ZeroPhaseTrackingFilter</code> — ZPETC (Tomizuka 1987); <code>transmissionZeros</code> via <code>GeneralizedEigenSolver</code>. Examples: ex59/ex75.</li>
+</ul>
 <p><b>Earlier additions:</b></p><ul>
-<li><code>FuzzyLogic</code> module (2026-05-23): Mamdani and Takagi-Sugeno inference engines, <code>FuzzyPD</code>, <code>FuzzyPID</code>, <code>FuzzySupervisor</code> - see <a class="el" href="md_docs_2DOCUMENTATION.html">docs/DOCUMENTATION.md Section 5.2</a>.</li>
-<li><code>ExtendedKalmanFilter</code>, <code>UnscentedKalmanFilter</code>, <code>RepetitiveController</code>, <code>GeneralizedPredictiveController</code>, <code>SubspaceID</code>, <code>DiscreteHinf</code>, <code>FOPDTIdentifier</code>, <code>FeedforwardController</code>, <code>GradientProjectionQP</code>.</li>
+<li><code>FuzzyLogic</code> module (2026-05-23): Mamdani and Takagi-Sugeno inference engines, <code>FuzzyPD</code>, <code>FuzzyPID</code>, <code>FuzzySupervisor</code> — see <a class="el" href="md_docs_2DOCUMENTATION.html">docs/DOCUMENTATION.md Section 5.2</a>.</li>
+<li><code>ExtendedKalmanFilter</code>, <code>UnscentedKalmanFilter</code>, <code>RepetitiveController</code>, <code>GeneralizedPredictiveController</code>, <code>SubspaceID</code>, <code>DiscreteHinf</code>, <code>FOPDTIdentifier</code>, <code>SOPDTIdentifier</code>, <code>MovingHorizonEstimator</code>, <code>FeedforwardController</code>, <code>GradientProjectionQP</code>.</li>
 <li>Five math corrections (2026-05-22): MPC condensed prediction formula, PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor feedthrough, SMC <code>c_de</code> Ts-absorption.</li>
 </ul>
 <p>Details in docs/cumulative_bug_report.md. Real-time deployment guidance in <a class="el" href="md_docs_2DEPLOYMENT.html">docs/DEPLOYMENT.md</a>. </p>

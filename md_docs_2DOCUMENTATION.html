@@ -256,9 +256,13 @@ Table of Contents</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">ex32-ex41   </td><td class="markdownTableBodyNone">Part 18 algorithms: SOPDT ID, MHE, rational mu-synthesis, cascade/feedforward/smith/ESC/UKF/LPV    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">ex42-ex54   </td><td class="markdownTableBodyNone">Corrector patterns: Cascade (PID+MPC, SMC+LQR, Fuzzy+PID, ADRC+PID, LeadLag+RC), Additive (ESC+PID, Fuzzy+SMC, LeadLag+I), Observer+SF (EKF+MPC, UKF+SMC, DOB+PI, MHE+MPC), Supervisory (bumpless transfer)   </td></tr>
+<td class="markdownTableBodyNone">ex42-ex54   </td><td class="markdownTableBodyNone">Corrector patterns: Cascade (PID+MPC, SMC+LQR, Fuzzy+PID, ADRC+PID, LeadLag+RC), Additive (ESC+PID, Fuzzy+SMC, LeadLag+I), Observer+SF (EKF+MPC, UKF+SMC, DOB+PI, MHE+MPC), Supervisory (bumpless transfer)    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">ex55-ex56   </td><td class="markdownTableBodyNone">E2/E4 extensions: LinearisationHelper (Van der Pol + CSTR), FeedbackLinearisation (cubic drift + pendulum)    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">ex57-ex59   </td><td class="markdownTableBodyNone">E3/E1/E5 extensions: MRAC with gain jump, BalancedTruncation (4th-order plant), ZPETC (min-phase + NMP)   </td></tr>
 </table>
-<p><b>Python examples</b> (<code>examples/python/</code>, <code>ex01_*</code> through <code>ex70_*</code>): NumPy/python-control cross-validation and pybind11 binding demonstrations for every C++ class. Python examples 61-70 mirror the corrector pattern C++ examples.</p>
+<p><b>Python examples</b> (<code>examples/python/</code>, <code>ex01_*</code> through <code>ex75_*</code>): NumPy/python-control cross-validation and pybind11 binding demonstrations for every C++ class. Python examples 61-70 mirror corrector patterns; 71-75 mirror the new algorithm extensions.</p>
 <h2><a class="anchor" id="autotoc_md44"></a>
 3.3 Case Study (&lt;tt&gt;case-study/&lt;/tt&gt;)</h2>
 <p><b>Boiler-Turbine:</b> <a href="case-study/boiler_turbine_case_study.cpp">boiler_turbine_case_study.cpp</a> - a 3*3 nonlinear Bell-Astrom boiler-turbine model with linearisation, then LQR / MPC / LQG / PID / SMC / Extremum-Seeker comparison across three operating points (Low / Medium / High Load). See case-study/verdict_boiler_turbine.md for the analysis verdict.</p>
@@ -269,11 +273,11 @@ Table of Contents</h1>
 <li><code>test_controllers.cpp</code> - per-class unit tests (custom <code>test_framework.h</code> harness)</li>
 <li><code>test_tuners_extended.cpp</code> - tuner suite tests (covers all 8 strategies)</li>
 <li><code>test_integration.cpp</code> - end-to-end closed-loop tests (c2d+MPC, N4SID+GPC adaptive pipeline)</li>
-<li><code>test_catch2_advanced.cpp</code> - Catch2 v3 regression suite (<b>40 test cases, 150 assertions</b>): GPC tracking, LQR convergence, SMC sign convention, ADRC double-integrator, n4sid identification, EKF/UKF, repetitive control, H-infinity, <b>SOPDTIdentifier</b> [sopdt], <b>MovingHorizonEstimator</b> [mhe]</li>
+<li><code>test_catch2_advanced.cpp</code> - Catch2 v3 regression suite (<b>51 test cases, 189 assertions</b>): GPC tracking, LQR convergence, SMC sign convention, ADRC double-integrator, n4sid identification, EKF/UKF, repetitive control, H-infinity, SOPDTIdentifier [sopdt], MovingHorizonEstimator [mhe], <b>LinearisationHelper</b> [linearisation], <b>FeedbackLinearisationController</b> [fl], <b>MRACController</b> [mrac], <b>BalancedTruncation</b> [btm], <b>ZeroPhaseTrackingFilter</b> [zpetc]</li>
 <li><code>test_catch2_pilot.cpp</code> - Catch2 v3 pilot tests (5 test cases, 21 assertions): LQRAdapter MIMO <code>computeVec()</code>, EKF scaled-epsilon Jacobian, PID DoM derivative suppression, 2DOF b_weight overshoot reduction, observer telemetry wiring</li>
 <li><code>test_framework.h</code> - lightweight assertion macros for the custom harness</li>
 </ul>
-<p><b>Current totals (2026-05-28):</b> 73 C++ executables pass | 74 Python examples pass | 0 failures.</p>
+<p><b>Current totals (2026-05-28):</b> 78 C++ executables pass | 79 Python examples pass | 0 failures.</p>
 <h2><a class="anchor" id="autotoc_md46"></a>
 3.5 Scripts (&lt;tt&gt;scripts/&lt;/tt&gt;)</h2>
 <ul>
@@ -747,22 +751,22 @@ Membership function factories</h4>
 <p><b><b><b></p><ul>
 <li><b>Purpose:</b> Monitors a closed-loop error channel and returns a <code>SupervisorDecision</code> indicating whether the underlying controller's linearised plant model should be refreshed.</li>
 <li>**Inputs: <code>update(abs_error)</code> - called once per step with the scalar absolute error for this axis.</li>
-<li>**Output (<code>SupervisorDecision</code>):** <code>relinearize_signal</code> [0,1], <code>relinearize</code> (bool, thresholded with cooldown), <code>error_norm</code>, <code>trend</code>.</li>
-<li><b>Internal logic:</b> 9-rule Mamdani system with 2 inputs (normalised error magnitude, normalised error trend) and 1 output (re-linearisation signal). A configurable cooldown prevents rapid oscillatory triggering.</li>
-<li>**Parameters (<code>SupervisorParams</code>):** <code>e_threshold</code> (error at which term "Large" fires), <code>trend_threshold</code> (d|e|/dt at which "Increasing" fires), <code>signal_threshold</code> (threshold for boolean <code>relinearize</code>), <code>cooldown_steps</code>.</li>
-<li><b>Typical integration:</b> call <code>mpc.setPlant(reLinearise(nu))</code> when <code>dec.relinearize == true</code>.</li>
+<li><b>Output (<code>SupervisorDecision</code>):** <code>relinearize_signal</code> [0,1], <code>relinearize</code> (bool, thresholded with cooldown), <code>error_norm</code>, <code>trend</code>.</b></li>
+<li><b><b>Internal logic:</b> 9-rule Mamdani system with 2 inputs (normalised error magnitude, normalised error trend) and 1 output (re-linearisation signal). A configurable cooldown prevents rapid oscillatory triggering.</b></li>
+<li><b>**Parameters (<code>SupervisorParams</code>):** <code>e_threshold</code> (error at which term "Large" fires), <code>trend_threshold</code> (d|e|/dt at which "Increasing" fires), <code>signal_threshold</code> (threshold for boolean <code>relinearize</code>), <code>cooldown_steps</code>.</b></li>
+<li><b><b>Typical integration:</b> call <code>mpc.setPlant(reLinearise(nu))</code> when <code>dec.relinearize == true</code>.</b></li>
 </ul>
 <p></b></b></b></p>
-<p><b><b><b></p><hr  />
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
+<p><b><b><b><b></p><hr  />
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
 <h2><a class="anchor" id="autotoc_md90"></a>
 5.3 Estimators &amp; Identification</h2>
-<p><b><b><b></b></b></b></p>
-<p><b><b><b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
 <h3><a class="anchor" id="autotoc_md91"></a>
 &lt;tt&gt;KalmanFilter&lt;/tt&gt; (&lt;a href="lib/KalmanFilter.h" &gt;KalmanFilter.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Linear discrete Kalman filter (predict / update) with Joseph-form covariance update.</li>
 <li><b>Constructor:</b> <code>(plant, Q_noise, R_noise, P0 = I)</code>.</li>
 <li><b>Methods:</b> <code>predict(u)</code>, <code>update(y, u_current)</code>, <code>state()</code>, <code>covariance()</code>, <code>reset()</code>.</li>
@@ -773,31 +777,31 @@ Membership function factories</h4>
 </li>
 <li><b>Floor:</b> <code>R_noise</code> has an automatic floor of <code>1e-12</code> per diagonal element to avoid division by zero.</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
 <h3><a class="anchor" id="autotoc_md92"></a>
 &lt;tt&gt;ExtendedKalmanFilter&lt;/tt&gt; (&lt;a href="lib/ExtendedKalmanFilter.h" &gt;ExtendedKalmanFilter.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> EKF for nonlinear state estimation. Linearises the dynamics and measurement functions around the current estimate at each step.</li>
 <li><b>Constructor:</b> <code>(n, p, f, h, Fjac, Hjac, Q, R, Ts)</code> — <code>n</code> states, <code>p</code> outputs, nonlinear functions <code>f(x,u)</code> and <code>h(x,u)</code>, Jacobian functions <code>Fjac(x,u)</code> and <code>Hjac(x,u)</code> (or pass <code>nullptr</code> for numerical differentiation with scaled epsilon).</li>
 <li><b>Methods:</b> <code>predict(u)</code>, <code>update(y, u)</code>, <code>step(y, u_prev)</code>, <code>state()</code>, <code>covariance()</code>, <code>setState(x)</code>, <code>reset()</code>.</li>
 <li><b>Numerical Jacobian:</b> When <code>Fjac = nullptr</code>, finite differences use <code>eps = max(1e-5 * |x_i|, 1e-8)</code> per element to handle heterogeneous state magnitudes (see [test_catch2_pilot.cpp] P12-17 fix).</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
 <h3><a class="anchor" id="autotoc_md93"></a>
 &lt;tt&gt;UnscentedKalmanFilter&lt;/tt&gt; (&lt;a href="lib/UnscentedKalmanFilter.h" &gt;UnscentedKalmanFilter.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> UKF using the unscented transform (2n+1 sigma points) for higher-order nonlinear estimation accuracy without Jacobians.</li>
 <li><b>Constructor:</b> <code>(n, p, f, h, Q, R, Ts, MatrixXd(), alpha, beta, kappa)</code>.</li>
 <li><b>Methods:</b> <code>predict(u)</code>, <code>update(y, u)</code>, <code>state()</code>, <code>covariance()</code>, <code>setState(x)</code>, <code>reset()</code>.</li>
 <li><b>Alpha/kappa guidance:</b> For n=2, kappa=0: use <code>alpha &gt;= 1/sqrt(n) = 0.707</code> to avoid negative <code>Wc0 = 1 - alpha^2 + beta</code>. With <code>alpha=1.0, beta=2.0, kappa=0</code>: <code>lambda=0</code>, <code>Wm0=0</code>, <code>Wc0=2 &gt; 0</code>. This is the recommended configuration for 2-state systems.</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
 <h3><a class="anchor" id="autotoc_md94"></a>
 &lt;tt&gt;MovingHorizonEstimator&lt;/tt&gt; (&lt;a href="lib/MovingHorizonEstimator.h" &gt;MovingHorizonEstimator.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> MHE via condensed QP — the dual of MPC for state estimation. Optimises the state trajectory over a moving window of N measurements with box constraints on process noise.</li>
 <li><b>Constructor:</b> <code>(plant, Q_noise, R_noise, params)</code>.</li>
 <li>**Parameters (<code>MHEParams</code>):** <code>N</code> (horizon length), <code>wMin/wMax</code> (process noise bounds), <code>qpMaxIter</code>, <code>qpTol</code>.</li>
@@ -806,21 +810,21 @@ Membership function factories</h4>
 <li><b>Horizon ramp-up:</b> First N-1 calls use an effective horizon shorter than N; arrival cost <code>P0inv</code> weights the initial state uncertainty.</li>
 <li><b>Backend:</b> Shared <code>GradientProjectionQP</code> solver (same as MPC and GPC); zero heap allocation after construction.</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
 <h3><a class="anchor" id="autotoc_md95"></a>
 &lt;tt&gt;FOPDTIdentifier&lt;/tt&gt; (&lt;a href="lib/FOPDTIdentifier.h" &gt;FOPDTIdentifier.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Identifies a First-Order Plus Dead-Time (FOPDT) model from open-loop step response data.</li>
 <li><b>Methods:</b> <code>identify(t, y, stepMag, method)</code> -&gt; <code>FOPDTModel {K, tau, theta, fitRMSE}</code>; <code>evaluate(model, t, stepMag)</code> -&gt; simulated response.</li>
 <li><b>Methods:</b> Graphical (ZN tangent + 63.2% crossing) or optimization (golden-section on theta and tau).</li>
 <li><b>Integration:</b> Result feeds directly into <code>StepResponseTuner::computePIDParams()</code> for IMC, ZN, Cohen-Coon, AMIGO tuning.</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
 <h3><a class="anchor" id="autotoc_md96"></a>
 &lt;tt&gt;SOPDTIdentifier&lt;/tt&gt; (&lt;a href="lib/SOPDTIdentifier.h" &gt;SOPDTIdentifier.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Identifies a Second-Order Plus Dead-Time (SOPDT) model from open-loop step response data. Convention: <code>tau1 &gt;= tau2</code>.</li>
 <li><b>Constructor:</b> <code>(t_data, y_data, stepMag)</code>.</li>
 <li><b>Methods:</b> <code>identify(method)</code> -&gt; <code>SOPDTModel {K, tau1, tau2, theta, fitRMSE}</code>; <code>evaluate(model, t, stepMag)</code> -&gt; simulated response; <code>static imcTuning(model, lambdaC)</code> -&gt; <code>PIDParams</code>.</li>
@@ -829,97 +833,170 @@ Membership function factories</h4>
 <li><b>Optimization:</b> Nested golden-section search on <code>(theta, tau1, tau2)</code> minimising RMSE.</li>
 <li><b>IMC-PID (Rivera 1986):</b> <code>tau_eq = tau1+tau2</code>, <code>Kp = tau_eq / (K*(lambdaC + theta/2))</code>, <code>Ti = tau_eq</code>, <code>Td = tau1*tau2/tau_eq</code>.</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
 <h3><a class="anchor" id="autotoc_md97"></a>
+&lt;tt&gt;MRACController&lt;/tt&gt; (&lt;a href="lib/MRACController.h" &gt;MRACController.h&lt;/a&gt;)</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Discrete-time Model Reference Adaptive Control — SISO, first-order reference model. Forces plant output to track y_m[k+1] = a_m·y_m + b_m·r via two-parameter Lyapunov adaptation with σ-modification and Euclidean projection.</li>
+<li><b>Constructor:</b> <code>(MRACParams, Ts)</code>.</li>
+<li><b>Convention:</b> <code>compute(y_plant)</code> takes plant output (ADRC convention, not error). Call <code>setReference(r)</code> before each <code>compute()</code>.</li>
+<li><b>Adaptation law:</b> <code>θ[k+1] = θ[k] − Ts·(γ·e_m·φ + σ·θ[k])</code> with projection: if ‖θ‖ &gt; theta_max → θ ← θ·theta_max/‖θ‖.</li>
+<li>**Parameters (<code>MRACParams</code>):** <code>a_m</code>, <code>b_m</code> (reference model), <code>gamma_r</code>, <code>gamma_y</code> (rates), <code>sigma</code> (σ-modification, 0=off), <code>theta_max</code> (projection bound), <code>uMin/uMax</code>.</li>
+<li><b>Methods:</b> <code>compute(y)</code>, <code>setReference(r)</code>, <code>reset()</code>, <code>theta_r()</code>, <code>theta_y()</code>, <code>modelOutput()</code>, <code>modelError()</code>.</li>
+<li><b>Feasibility:</b> Minimum-phase plant required; gain sign must match γ_r, γ_y sign; persistent excitation needed for θ convergence.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md98"></a>
+&lt;tt&gt;FeedbackLinearisationController&lt;/tt&gt; (&lt;a href="lib/FeedbackLinearisation.h" &gt;FeedbackLinearisation.h&lt;/a&gt;)</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Exact feedback linearisation for SISO affine-in-control systems ẋ = f(x) + g(x)·u, relative degree 1. Cancels nonlinear terms algebraically; inner IController drives the resulting virtual integrator.</li>
+<li><b>Constructor:</b> <code>(DriftFn f, GainFn g, shared_ptr&lt;IController&gt; inner, FLParams, Ts)</code>.</li>
+<li><b>Control law:</b> <code>u[k] = clamp((v − f(x[k], u[k-1])) / g_eff(x[k], u[k-1]), uMin, uMax)</code> where v = inner→compute(error).</li>
+<li><b>Critical requirement:</b> <code>setState(x)</code> must be called before each <code>compute()</code> with the current measured or estimated plant state.</li>
+<li>**Parameters (<code>FLParams</code>):** <code>uMin</code>, <code>uMax</code>, <code>regularisationEps</code> (minimum |g| before clamping; preserves sign).</li>
+<li><b>Feasibility:</b> Relative degree 1, minimum-phase zeros, g(x) ≠ 0 across operating region.</li>
+<li><b>Relative degree 2 note:</b> For angle-output systems (pendulum), the inner PID must be tuned for a virtual double integrator; example gains: Kp=9, Ki=5, Kd=5 for poles {−1, −2±j}. See <code>ex56_feedback_linearisation.cpp</code>.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md99"></a>
 &lt;tt&gt;RecursiveLeastSquares&lt;/tt&gt; (&lt;a href="lib/RecursiveLeastSquares.h" &gt;RecursiveLeastSquares.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Online ARX parameter estimation using exponential forgetting (<code>lambda</code> factor).</li>
 <li><b>Constructor:</b> <code>(na, nb, nk, lambda, P0_scale)</code> — output order, input order, delay, forgetting factor, initial covariance scale.</li>
 <li><b>Methods:</b> <code>update(y, u)</code> -&gt; current ARX coefficients; <code>reset()</code>, <code>toTransferFunction()</code>, <code>toStateSpace()</code>.</li>
 <li><b>Typical use:</b> Feed identified <code>StateSpace</code> into <code>GPC::setPlant()</code> for adaptive GPC (see <code>ex28_gpc_adaptive.cpp</code>).</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md98"></a>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md100"></a>
+&lt;tt&gt;LinearisationHelper&lt;/tt&gt; (&lt;a href="lib/LinearisationHelper.h" &gt;LinearisationHelper.h&lt;/a&gt;)</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Numerical Jacobians and ZOH linearisation of continuous-time nonlinear models at a given operating point. Central-difference with step <code>h_i = ε·max(|x_i|, 1)</code> for heterogeneous state magnitudes.</li>
+<li><b>Key functions:</b><ul>
+<li><code>jacobianX(f, x0, u0, eps=1e-4)</code> → MatrixXd ∂f/∂x (n evaluations of f).</li>
+<li><code>jacobianU(f, x0, u0, eps=1e-4)</code> → MatrixXd ∂f/∂u (m evaluations).</li>
+<li><code>lineariseAtPoint(f, x0, u0, Ts)</code> → discrete StateSpace (ZOH, C=I, D=0).</li>
+<li><code>lineariseAtPoint(f, h, x0, u0, Ts)</code> → discrete StateSpace with custom output h(x,u).</li>
+</ul>
+</li>
+<li><b>Note:</b> The <code>StateFunc</code>/<code>MeasFunc</code> type aliases are identical to those in <code><a class="el" href="ExtendedKalmanFilter_8h.html" title="Discrete-time Extended Kalman Filter (EKF) for nonlinear systems.">ExtendedKalmanFilter.h</a></code> — safe to include both (C++ redeclaration of identical alias is valid).</li>
+<li><b>Typical use:</b> Compute A, B at operating point → <code>c2d(ZOH)</code> → <code>DiscreteLQR</code> design → apply gain to nonlinear plant.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md101"></a>
+&lt;tt&gt;BalancedTruncation&lt;/tt&gt; (&lt;a href="lib/BalancedTruncation.h" &gt;BalancedTruncation.h&lt;/a&gt;)</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Moore (1981) model order reduction via balanced realisation. Replaces an n-state stable system with an r-state approximation preserving the most energetically significant modes. Provides a-priori H∞ error bound.</li>
+<li><b>Functions:</b><ul>
+<li><code>balancedTruncate(sys, r)</code> → <code>TruncationResult {reduced, hankelSingularValues, errorBound, isStable}</code>.</li>
+<li><code>suggestOrder(result, tol=0.01)</code> → int — smallest r such that error bound &lt; tol × total_norm.</li>
+</ul>
+</li>
+<li><b>Algorithm:</b> Solve gramians via <code>SystemAnalysis::solveDiscreteLyapunov</code> → Cholesky of P_c → <code>SelfAdjointEigenSolver</code> of M = L_c'·P_o·L_c → sort HSVs descending → balanced transformation T_r = L_c·U·Σ^{-½} → truncate.</li>
+<li>**Error bound: ‖G − G_r‖∞ ≤ 2·Σᵢ₌ᵣ₊₁ⁿ σᵢ. Verified: actual DC gain deviation is always within this bound.</li>
+<li><b>Constraint:</b> O(n⁶) Lyapunov solver — use for n ≤ 10. Larger systems require Bartels-Stewart (not yet implemented).</li>
+<li><b>Correct usage:</b> Design controller on <code>result.reduced</code>, then apply to the full-order plant. The error bound quantifies the performance degradation. See <code>ex58_balanced_truncation.cpp</code>.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md102"></a>
+&lt;tt&gt;ZeroPhaseTrackingFilter&lt;/tt&gt; (&lt;a href="lib/ZeroPhaseTrackingFilter.h" &gt;ZeroPhaseTrackingFilter.h&lt;/a&gt;)</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> ZPETC (Tomizuka 1987) feedforward prefilter. Inverts the minimum-phase part of a plant's numerator causally, normalises DC gain to 1, and produces zero phase error for min-phase zeros.</li>
+<li><b>Functions:</b><ul>
+<li><code>transmissionZeros(sys)</code> → <code>vector&lt;complex&lt;double&gt;&gt;</code> — finite eigenvalues of the system matrix pencil <code>[[A−λI, B],[C, D]]</code> via <code>GeneralizedEigenSolver</code>.</li>
+<li><code>designZPETC(plant)</code> → <code>ZPETCResult {filter, dcAmplitudeError, hasNMPZeros, zeros, nmpZeros}</code>.</li>
+</ul>
+</li>
+<li><b>Composite response:</b> G(z)·G_ff(z) = B⁻(z)/B⁻(1). For min-phase plants: G·G_ff = z^{-d} (unit magnitude, pure delay). For NMP: unit DC gain, amplitude error away from DC.</li>
+<li><b>Key implementation detail:</b> The evaluation function <code>evalTF</code> must store C as <code>MatrixXcd</code> not <code>VectorXcd</code> — Eigen's implicit reshape transposed a (1×n) row into an (n×1) column, producing a ×50 error. Fixed: use matrix products <code>C_c * zIA.solve(B_c) + D_c</code>.</li>
+<li><b>Python binding disambiguation:</b> <code>suggest_order</code> is overloaded — VectorXd (SubspaceID) dispatches from <code>advanced_bindings.cpp</code>; TruncationResult (BalancedTruncation) from <code>analysis_bindings.cpp</code>. Wrapped in lambdas to resolve the C++ overload ambiguity.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md103"></a>
 &lt;tt&gt;SubspaceID&lt;/tt&gt; (&lt;a href="lib/SubspaceID.h" &gt;SubspaceID.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> N4SID subspace identification of MIMO state-space models from PRBS or arbitrary excitation data.</li>
 <li><b>Methods:</b> <code>n4sid(y, u, n, i)</code> -&gt; <code>StateSpace</code>; <code>suggestOrder(y, u, maxOrder)</code> -&gt; recommended model order from singular value elbow detection.</li>
 <li><b>Inputs:</b> <code>y</code> (p x N output data matrix), <code>u</code> (m x N input data matrix), <code>n</code> (model order), <code>i</code> (block-row factor, typically n &lt;= i &lt;= 2n).</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></p><hr  />
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h2><a class="anchor" id="autotoc_md100"></a>
+<p></b></b></b></b></p>
+<p><b><b><b><b></p><hr  />
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h2><a class="anchor" id="autotoc_md105"></a>
 5.4 Tuning Layer</h2>
-<p><b><b><b></b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md101"></a>
+<p><b><b><b><b></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md106"></a>
 &lt;tt&gt;RelayAutoTuner&lt;/tt&gt; (&lt;a href="lib/ControllerTuner.h" &gt;ControllerTuner.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Astrom-Hagglund relay-feedback test -&gt; extracts ultimate gain <code>Ku</code> and period <code>Tu</code>.</li>
 <li>**Config (<code>RelayTunerConfig</code>):** <code>relayAmplitude</code>, <code>hysteresis</code>, <code>cyclesRequired</code>.</li>
 <li><b>Usage:</b> Drive <code>step(y)</code> until <code>isDone()</code>; then <code>computePIDParams(rule, lambda)</code> returns <code>PIDParams</code>.</li>
 <li><b>Rules:</b> <code>ZieglerNichols</code>, <code>TyreusLuyben</code>, <code>IMC</code>, <code>AMIGO</code>.</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md102"></a>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md107"></a>
 &lt;tt&gt;StepResponseTuner&lt;/tt&gt;</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Open-loop FOPDT identification (<code>K, tau, theta</code>) from step response data; produces PID gains via IMC.</li>
 <li><b>Methods:</b> <code>identify(t, y, stepMag)</code> -&gt; <code>FOPDTModel</code>; <code>computePIDParams(model, Ts, rule, lambda)</code>.</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md103"></a>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md108"></a>
 &lt;tt&gt;LQRWeightTuner&lt;/tt&gt;</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><code>brysonMethod(xmax, umax)</code> - Bryson's rule: <code>Q = diag(1/xmax^2)</code>, <code>R = diag(1/umax^2)</code>.</li>
 <li><code>polePlacementHint(plant, desiredPoles, maxIter)</code> - iterative pole shaping into <code>LQRParams</code>.</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md104"></a>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md109"></a>
 &lt;tt&gt;MPCHorizonTuner&lt;/tt&gt;</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><code>recommend(plant, Ts, rho_y, rho_u)</code> -&gt; <code>Recommendation { Np, Nc, rho_y, rho_u, estimatedSettlingTime }</code>.</li>
 <li><code>estimateSettlingTime(plant, maxSteps)</code> - used to size <code>Np</code>.</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md105"></a>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md110"></a>
 &lt;tt&gt;ZieglerNicholsTuner&lt;/tt&gt;, &lt;tt&gt;CohenCoonTuner&lt;/tt&gt;, &lt;tt&gt;LoopShapingTuner&lt;/tt&gt;, &lt;tt&gt;KalmanWeightTuner&lt;/tt&gt;</h3>
-<p><b><b><b> Standalone heuristics; each exposes <code>tuneImpl(...)</code> (unchecked) and <code>tuneFor&lt;C&gt;(...)</code> (template wrapper enforcing compile-time <code>ControllerTraits&lt;C&gt;</code> compatibility - produces actionable error messages for incompatible types).</b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md106"></a>
+<p><b><b><b><b> Standalone heuristics; each exposes <code>tuneImpl(...)</code> (unchecked) and <code>tuneFor&lt;C&gt;(...)</code> (template wrapper enforcing compile-time <code>ControllerTraits&lt;C&gt;</code> compatibility - produces actionable error messages for incompatible types).</b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md111"></a>
 &lt;tt&gt;TunerSuite&lt;/tt&gt; (&lt;a href="lib/TunerSuite.h" &gt;TunerSuite.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Unified front-end dispatching to the eight tuning families with <b>runtime soft-warnings</b> (IDEAL -&gt; no warning; SOFT -&gt; diagnostic + <code>result.warned == true</code>; FALLBACK -&gt; default params + <code>success == false</code>).</li>
 <li><b>Methods:</b> <code>relayZN</code>, <code>imcPID</code>, <code>cohenCoon</code>, <code>bryson</code>, <code>kalmanNoise</code>, <code>mpcHorizon</code>, <code>loopShaping</code>, <code>optimise</code> (Nelder-Mead ISE/ITAE black-box).</li>
 <li><b>Helpers:</b> <code>makeISECost</code>, <code>makeITAECost</code> - factory for cost functions used by <code>optimise</code>.</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md107"></a>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md112"></a>
 &lt;tt&gt;ControllerTraits&lt;C&gt;&lt;/tt&gt; (&lt;a href="lib/ControllerTraits.h" &gt;ControllerTraits.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Compile-time mapping from controller type to supported tuners (booleans <code>supports_heuristic_pid</code>, <code>supports_lqr_tuning</code>, <code>supports_mpc_tuning</code>, <code>supports_freq_tuning</code>, <code>supports_kalman_tuning</code>).</li>
 <li><b>Use:</b> <code>tuneFor&lt;C&gt;</code> static asserts fire with a diagnostic naming the correct alternative tuner.</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></p><hr  />
-<p></b></b></b></p>
-<p><b><b><b><a class="anchor" id="55-composition--orchestration"></a> </b></b></b></p>
-<h2><a class="anchor" id="autotoc_md109"></a>
+<p></b></b></b></b></p>
+<p><b><b><b><b></p><hr  />
+<p></b></b></b></b></p>
+<p><b><b><b><b><a class="anchor" id="55-composition--orchestration"></a> </b></b></b></b></p>
+<h2><a class="anchor" id="autotoc_md114"></a>
 5.5 Composition &amp; Orchestration</h2>
-<p><b><b><b></b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md110"></a>
+<p><b><b><b><b></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md115"></a>
 &lt;tt&gt;ControllerStack&lt;/tt&gt; (&lt;a href="lib/ControllerStack.h" &gt;ControllerStack.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Multi-controller orchestrator with three modes.<ul>
 <li><b>Supervisory</b> - first entry whose <code>activationCondition(error, lastOutput)</code> returns <code>true</code> is used; others idle. Use for gain scheduling, fallbacks.</li>
 <li><b>Additive</b> - outputs of all enabled entries are summed. Use for inner/outer cascades.</li>
@@ -928,39 +1005,39 @@ Membership function factories</h4>
 </li>
 <li><b>Methods:</b> <code>addController(ptr, name, weight, condition)</code>, <code>removeController(name)</code>, <code>setActive(name, bool)</code>, <code>setWeight(name, w)</code>, <code>compute(error)</code>, <code>activeControllerName()</code>, <code>entries()</code>.</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></p><hr  />
-<p></b></b></b></p>
-<p><b><b><b><a class="anchor" id="56-analysis--metrics"></a> </b></b></b></p>
-<h2><a class="anchor" id="autotoc_md112"></a>
+<p></b></b></b></b></p>
+<p><b><b><b><b></p><hr  />
+<p></b></b></b></b></p>
+<p><b><b><b><b><a class="anchor" id="56-analysis--metrics"></a> </b></b></b></b></p>
+<h2><a class="anchor" id="autotoc_md117"></a>
 5.6 Analysis &amp; Metrics</h2>
-<p><b><b><b></b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md113"></a>
+<p><b><b><b><b></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md118"></a>
 &lt;tt&gt;MetricsAnalyzer&lt;/tt&gt; (&lt;a href="lib/MetricsAnalyzer.h" &gt;MetricsAnalyzer.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Extract time-domain metrics from step-response data.</li>
 <li><b>Method:</b> <code>calculate(t_data, y_data, reference, finalValueWindow) -&gt; TimeDomainMetrics { riseTime, settlingTime, peakOvershoot, steadyStateError }</code>.</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md114"></a>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md119"></a>
 &lt;tt&gt;SystemAnalysis&lt;/tt&gt; (&lt;a href="lib/SystemAnalysis.h" &gt;SystemAnalysis.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Frequency-domain and stability analysis utilities (static methods).</li>
 <li><b>Methods:</b> <code>getPoles(sys)</code>, <code>isDiscreteStable(sys)</code>, <code>solveDiscreteLyapunov(A, Q)</code>, <code>getFrequencyResponse(sys, freqs)</code>, <code>calculateMargins(sys) -&gt; StabilityMargins { gainMarginDb, phaseMarginDeg, wCrossoverGain, wCrossoverPhase }</code>, <code>calculateHInfinityNorm(sys)</code> (grid approximation - treat as lower bound).</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></p><hr  />
-<p></b></b></b></p>
-<p><b><b><b><a class="anchor" id="57-real-time-utilities--hal"></a> </b></b></b></p>
-<h2><a class="anchor" id="autotoc_md116"></a>
+<p></b></b></b></b></p>
+<p><b><b><b><b></p><hr  />
+<p></b></b></b></b></p>
+<p><b><b><b><b><a class="anchor" id="57-real-time-utilities--hal"></a> </b></b></b></b></p>
+<h2><a class="anchor" id="autotoc_md121"></a>
 5.7 Real-Time Utilities &amp; HAL</h2>
-<p><b><b><b></b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md117"></a>
+<p><b><b><b><b></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md122"></a>
 &lt;tt&gt;AtomicParamBuffer&lt;Params&gt;&lt;/tt&gt; (&lt;a href="lib/AtomicParamBuffer.h" &gt;AtomicParamBuffer.h&lt;/a&gt;)</h3>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Seqlock-based double-buffered parameter handoff between a background tuner and the real-time control thread. Single-writer / single-reader, data-race-free under the C++ memory model.</li>
 <li><b>Constraint:</b> <code>Params</code> must be <code>std::is_trivially_copyable&lt;Params&gt;::value == true</code> (plain-old-data struct).</li>
 <li><b>API:</b><ul>
@@ -970,12 +1047,12 @@ Membership function factories</h4>
 </ul>
 </li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md118"></a>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md123"></a>
 HAL (&lt;a href="lib/hal/HAL.h" &gt;lib/hal/HAL.h&lt;/a&gt;)</h3>
-<p><b><b><b> Bundles <code>ISensor</code>, <code>IActuator</code>, <code>SimPlant</code>, <code>SimSensor</code>, <code>SimActuator</code> for closed-loop simulation against a <code>StateSpace</code> plant. Suitable as a stand-in for real hardware drivers when developing/testing.</b></b></b></p>
-<p><b><b><b></p><div class="fragment"><div class="line"><a class="code hl_class" href="classctrl_1_1SimPlant.html">ctrl::SimPlant</a>    plant(sys);</div>
+<p><b><b><b><b> Bundles <code>ISensor</code>, <code>IActuator</code>, <code>SimPlant</code>, <code>SimSensor</code>, <code>SimActuator</code> for closed-loop simulation against a <code>StateSpace</code> plant. Suitable as a stand-in for real hardware drivers when developing/testing.</b></b></b></b></p>
+<p><b><b><b><b></p><div class="fragment"><div class="line"><a class="code hl_class" href="classctrl_1_1SimPlant.html">ctrl::SimPlant</a>    plant(sys);</div>
 <div class="line"><a class="code hl_class" href="classctrl_1_1SimSensor.html">ctrl::SimSensor</a>   sensor(plant);</div>
 <div class="line"><a class="code hl_class" href="classctrl_1_1SimActuator.html">ctrl::SimActuator</a> actuator(plant, -10.0, +10.0);</div>
 <div class="line"><span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; N; ++k) {</div>
@@ -986,25 +1063,25 @@ HAL (&lt;a href="lib/hal/HAL.h" &gt;lib/hal/HAL.h&lt;/a&gt;)</h3>
 <div class="ttc" id="aclassctrl_1_1SimActuator_html"><div class="ttname"><a href="classctrl_1_1SimActuator.html">ctrl::SimActuator</a></div><div class="ttdoc">IActuator implementation that drives a SimPlant.</div><div class="ttdef"><b>Definition</b> <a href="SimActuator_8h_source.html#l00025">SimActuator.h:25</a></div></div>
 <div class="ttc" id="aclassctrl_1_1SimPlant_html"><div class="ttname"><a href="classctrl_1_1SimPlant.html">ctrl::SimPlant</a></div><div class="ttdoc">Thread-safe discrete-time plant simulator.</div><div class="ttdef"><b>Definition</b> <a href="SimPlant_8h_source.html#l00039">SimPlant.h:39</a></div></div>
 <div class="ttc" id="aclassctrl_1_1SimSensor_html"><div class="ttname"><a href="classctrl_1_1SimSensor.html">ctrl::SimSensor</a></div><div class="ttdoc">ISensor implementation that reads from a SimPlant.</div><div class="ttdef"><b>Definition</b> <a href="SimSensor_8h_source.html#l00029">SimSensor.h:29</a></div></div>
-</div><!-- fragment --><p></b></b></b></p>
-<p><b><b><b></p><hr  />
-<p></b></b></b></p>
-<p><b><b><b></b></b></b></p>
-<h1><a class="anchor" id="autotoc_md120"></a>
+</div><!-- fragment --><p></b></b></b></b></p>
+<p><b><b><b><b></p><hr  />
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h1><a class="anchor" id="autotoc_md125"></a>
 6. Deployment Cross-References</h1>
-<p><b><b><b></b></b></b></p>
-<p><b><b><b>For production deployment, parameter-stability constraints, RTOS integration, and troubleshooting recipes, consult <a class="el" href="md_docs_2DEPLOYMENT.html">DEPLOYMENT.md</a>:</b></b></b></p>
-<p><b><b><b></p><ul>
+<p><b><b><b><b></b></b></b></b></p>
+<p><b><b><b><b>For production deployment, parameter-stability constraints, RTOS integration, and troubleshooting recipes, consult <a class="el" href="md_docs_2DEPLOYMENT.html">DEPLOYMENT.md</a>:</b></b></b></b></p>
+<p><b><b><b><b></p><ul>
 <li><b>Section 1</b> Per-controller parameter constraints (PID <code>Ki.Ts &lt; 2.Kp</code>, ADRC <code>omega_o.Ts &lt; 2</code>, MPC Hessian conditioning, ...).</li>
 <li><b>Section 2</b> Real-time integration: zero-allocation checklist, stack-size estimates, RTOS scheduling.</li>
 <li><b>Section 3</b> Troubleshooting: DARE non-convergence, MPC LDLT failure, Kalman divergence, ADRC ESO instability, Smith-predictor delay mismatch, NaN propagation.</li>
 <li><b>Section 4</b> Quick-start parameter tables for an unknown SISO plant.</li>
 </ul>
-<p></b></b></b></p>
-<p><b><b><b>For tuning workflow choices and history, see cheatsheet/tuning_methods.md and cheatsheet/controller-tuning-reference.md. For system identification, see cheatsheet/system_identification.md and the FOPDT / ARMAX / N4SID sub-notes.</b></b></b></p>
-<p><b><b><b></p><hr  />
-<p></b></b></b></p>
-<p><b><b><b><em>End of documentation.</em> </b></b></b></p>
+<p></b></b></b></b></p>
+<p><b><b><b><b>For tuning workflow choices and history, see cheatsheet/tuning_methods.md and cheatsheet/controller-tuning-reference.md. For system identification, see cheatsheet/system_identification.md and the FOPDT / ARMAX / N4SID sub-notes.</b></b></b></b></p>
+<p><b><b><b><b></p><hr  />
+<p></b></b></b></b></p>
+<p><b><b><b><b><em>End of documentation.</em> </b></b></b></b></p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 <!-- start footer part -->

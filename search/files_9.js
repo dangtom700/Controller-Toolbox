@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['linearisationhelper_2ecpp_0',['LinearisationHelper.cpp',['../LinearisationHelper_8cpp.html',1,'']]],
-  ['linearisationhelper_2eh_1',['LinearisationHelper.h',['../LinearisationHelper_8h.html',1,'']]]
+  ['kalmanfilter_2ecpp_0',['KalmanFilter.cpp',['../KalmanFilter_8cpp.html',1,'']]],
+  ['kalmanfilter_2eh_1',['KalmanFilter.h',['../KalmanFilter_8h.html',1,'']]]
 ];
