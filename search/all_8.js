@@ -9,7 +9,7 @@ var searchData=
   ['b_5fweight_6',['b_weight',['../structctrl_1_1PIDParams.html#aa0cffc00a3934a9687f65bee5c56e97e',1,'ctrl::PIDParams']]],
   ['background_20tuning_20rt_20reads_7',['4.7 Background Tuning, RT Reads',['../md_docs_2DOCUMENTATION.html#autotoc_md56',1,'']]],
   ['balancedtruncate_8',['balancedTruncate',['../namespacectrl.html#abfa309e847017b7503bd3bbbe41871aa',1,'ctrl']]],
-  ['balancedtruncation_9',['BalancedTruncation',['../md_docs_2DEPLOYMENT.html#autotoc_md144',1,'']]],
+  ['balancedtruncation_9',['BalancedTruncation',['../md_docs_2DEPLOYMENT.html#autotoc_md152',1,'']]],
   ['balancedtruncation_20tt_20a_20href_20lib_20balancedtruncation_20h_20balancedtruncation_20h_20a_10',['&lt;tt&gt;BalancedTruncation&lt;/tt&gt; (&lt;a href=&quot;lib/BalancedTruncation.h&quot; &gt;BalancedTruncation.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md101',1,'']]],
   ['balancedtruncation_2ecpp_11',['BalancedTruncation.cpp',['../BalancedTruncation_8cpp.html',1,'']]],
   ['balancedtruncation_2eh_12',['BalancedTruncation.h',['../BalancedTruncation_8h.html',1,'']]],
@@ -29,5 +29,5 @@ var searchData=
   ['builds_26',['Mount your own source for in-container builds',['../index.html#autotoc_md20',1,'']]],
   ['buildwarnmsg_27',['buildWarnMsg',['../namespacectrl.html#aef6c869b488ae749eed6e486ca0b0bd6',1,'ctrl']]],
   ['bumplessinit_28',['bumplessinit',['../classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07',1,'ctrl::IController::bumplessInit()'],['../classctrl_1_1FuzzyPID.html#a6159b3bfa98769ce9415ea34da9adeb8',1,'ctrl::FuzzyPID::bumplessInit()'],['../classctrl_1_1DiscretePID.html#affdf4f330e63da4691d4b462b02d197e',1,'ctrl::DiscretePID::bumplessInit()']]],
-  ['by_20controller_29',['1. Parameter Constraints by Controller',['../md_docs_2DEPLOYMENT.html#autotoc_md129',1,'']]]
+  ['by_20controller_29',['1. Parameter Constraints by Controller',['../md_docs_2DEPLOYMENT.html#autotoc_md137',1,'']]]
 ];

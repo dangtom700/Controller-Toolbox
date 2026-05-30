@@ -85,7 +85,7 @@ Table of Contents</h1>
 <li>Class Reference<ul>
 <li>5.1 Core Types</li>
 <li>5.2 Controllers (incl. Fuzzy Logic Module)</li>
-<li>5.3 Estimators &amp; Identification</li>
+<li>5.3 Estimators, Identification &amp; Optimisation (incl. GainScheduledController, GapMetric, LPVSystemID, NonlinearMPC, AdaptiveSmithPredictor, AutoTuner)</li>
 <li>5.4 Tuning Layer</li>
 <li>5.5 Composition &amp; Orchestration</li>
 <li>5.6 Analysis &amp; Metrics</li>
@@ -926,14 +926,91 @@ Membership function factories</h4>
 <li><b>Inputs:</b> <code>y</code> (p x N output data matrix), <code>u</code> (m x N input data matrix), <code>n</code> (model order), <code>i</code> (block-row factor, typically n &lt;= i &lt;= 2n).</li>
 </ul>
 <p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md104"></a>
+&lt;tt&gt;GainScheduledController&lt;/tt&gt; (&lt;a href="lib/GainScheduledController.h" &gt;GainScheduledController.h&lt;/a&gt;) &lt;em&gt;Part 20+23&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> IController wrapper that interpolates between a sorted list of (p, IController) schedule points.</li>
+<li><b>Modes:</b> <code>NearestNeighbor</code> (hard-switch; calls <code>bumplessInit</code> on the incoming controller when the active index changes — Part 23 fix); <code>LinearBlend</code> (weighted average of adjacent controllers).</li>
+<li><b>Methods:</b> <code>addSchedulePoint(p, ctrl)</code>, <code>setSchedulingParam(p)</code>, <code>compute(error)</code>, <code>lastOutput()</code> (not override).</li>
+<li><b>Note:</b> <code>lastOutput()</code> is NOT a virtual override (no virtual lastOutput() in IController base).</li>
+<li><b>LQR pattern:</b> Use <code>LQRAdapter</code> (which IS an IController) with a state-capturing lambda as the schedule point controller.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md105"></a>
+&lt;tt&gt;GapMetric&lt;/tt&gt; (&lt;a href="lib/GapMetric.h" &gt;GapMetric.h&lt;/a&gt;) &lt;em&gt;Part 20&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Nu-gap upper bound (SISO chordal metric) for measuring plant model distance.</li>
+<li><b>Functions:</b> <code>nuGap(P1, P2, freq_points=200)</code> -&gt; scalar in [0,1]; <code>nuGapMatrix(models)</code> -&gt; N x N symmetric distance matrix; <code>freqResponseGrid(sys, omega)</code>.</li>
+<li><b>Limitation:</b> SISO only; throws <code>invalid_argument</code> for MIMO plants.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md106"></a>
+&lt;tt&gt;LinearModelCluster&lt;/tt&gt; (&lt;a href="lib/LinearModelCluster.h" &gt;LinearModelCluster.h&lt;/a&gt;) &lt;em&gt;Part 20&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Single-linkage agglomerative clustering of plant models by nu-gap distance.</li>
+<li><b>Functions:</b> <code>clusterByGap(gapMatrix, threshold)</code> -&gt; <code>ClusterResult {labels, representatives, maxIntraGap, numClusters, threshold}</code>; <code>suggestGapThreshold(gapMatrix)</code>.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md107"></a>
+&lt;tt&gt;LPVSystemID&lt;/tt&gt; (&lt;a href="lib/LPVSystemID.h" &gt;LPVSystemID.h&lt;/a&gt;) &lt;em&gt;Part 20&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Polynomial LPV system identification via QR regression.</li>
+<li><b>Functions:</b> <code>identifyLPV(X, U, Y, sched, degree, Ts)</code> -&gt; <code>LPVModel</code>; <code>identifyLPVFromIO(U, Y, sched, n_states)</code> (uses n4sid first).</li>
+<li><b>Layout:</b> X is (n x N) column-major (each column = one time step). U is (m x N), Y is (p x N). <b>CRITICAL: NOT (N x n) row-major.</b></li>
+<li><b>LPVModel:</b> <code>frozen(p)</code> -&gt; <code>StateSpace</code>; <code>evalA(p)</code>, <code>evalB(p)</code>.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md108"></a>
+&lt;tt&gt;AutoGainScheduler&lt;/tt&gt; (&lt;a href="lib/AutoGainScheduler.h" &gt;AutoGainScheduler.h&lt;/a&gt;) &lt;em&gt;Part 20&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Pipeline: nonlinear plant -&gt; equilibrium grid -&gt; linearise -&gt; gap cluster -&gt; design controllers -&gt; assemble GainScheduledController.</li>
+<li><b>Functions:</b> <code>findEquilibrium(f, u_eq, x0)</code> (Newton-Raphson); <code>buildAutoGainScheduler(f, p_min, p_max, density, u_eq_fn, x0_fn, design_fn, Ts)</code>.</li>
+<li><b>CRITICAL:</b> <code>design_fn</code> lambda must have trailing return type <code>-&gt; std::shared_ptr&lt;IController&gt;</code> (GCC cannot deduce shared_ptr&lt;Derived&gt; -&gt; shared_ptr&lt;Base&gt;).</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md109"></a>
+&lt;tt&gt;NonlinearMPC&lt;/tt&gt; (&lt;a href="lib/NonlinearMPC.h" &gt;NonlinearMPC.h&lt;/a&gt;) &lt;em&gt;Part 22&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Nonlinear MPC via Real-Time Iteration (RTI, Diehl 2005). Discrete-time dynamics <code>x[k+1] = f(x[k], u[k])</code>.</li>
+<li><b>Params:</b> <code>NMPCParams {Np, Nu, rho_y, rho_u, uMin, uMax, qpMaxIter, qpTol, Ts, n_states, n_inputs, n_outputs}</code>.</li>
+<li><b>Usage:</b> <code>setState(x)</code>, <code>setReference(y_ref)</code>, <code>computeRef(x, y_ref)</code> (MIMO) or <code>compute(error)</code> (SISO).</li>
+<li><b>Algorithm:</b> linearise along warm-started trajectory, build time-varying condensed QP (Theta matrix), solve via FISTA. Theta built with <code>Phi = Phi * A_list[k]</code> (right-multiply, k descending from j to 0).</li>
+<li><b>Note:</b> <code>lastOutput()</code> is NOT a virtual override.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md110"></a>
+&lt;tt&gt;AdaptiveSmithPredictor&lt;/tt&gt; (&lt;a href="lib/AdaptiveSmithPredictor.h" &gt;AdaptiveSmithPredictor.h&lt;/a&gt;) &lt;em&gt;Part 22&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> SmithPredictor with online dead-time estimation via cross-correlation <code>R_uy(tau) = sum u[k-tau]*y[k]</code>. Rebuilds SP when delay estimate changes.</li>
+<li><b>Params:</b> <code>AdaptiveSPParams {maxDelaySteps, estimateInterval, bufferLen}</code>.</li>
+<li><b>Usage:</b> <code>setPlantOutput(y)</code> before <code>compute(r-y)</code> each step (if not called, uses <code>y approx= -error</code> for r=0 regulation).</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md111"></a>
+&lt;tt&gt;AutoTuner&lt;/tt&gt; (&lt;a href="lib/AutoTuner.h" &gt;AutoTuner.h&lt;/a&gt;) &lt;em&gt;Part 22, header-only&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> CMA-ES black-box optimizer for controller parameter tuning (minimises arbitrary cost function).</li>
+<li><b>Params:</b> <code>AutoTunerParams {n, sigma0, maxIter, tol, lower, upper}</code>. <b>Result:</b> <code>TunerResult {params, cost, nEvals, nGens, converged}</code>.</li>
+<li><b>Usage:</b> <code>AutoTuner tuner(atp, seed); auto result = tuner.tune(cost_fn, x0);</code></li>
+<li><b>Box constraints:</b> implemented by clipping samples to [lower, upper].</li>
+</ul>
+<p></b></b></b></b></p>
 <p><b><b><b><b></p><hr  />
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h2><a class="anchor" id="autotoc_md105"></a>
+<h2><a class="anchor" id="autotoc_md113"></a>
 5.4 Tuning Layer</h2>
 <p><b><b><b><b></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md106"></a>
+<h3><a class="anchor" id="autotoc_md114"></a>
 &lt;tt&gt;RelayAutoTuner&lt;/tt&gt; (&lt;a href="lib/ControllerTuner.h" &gt;ControllerTuner.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Astrom-Hagglund relay-feedback test -&gt; extracts ultimate gain <code>Ku</code> and period <code>Tu</code>.</li>
@@ -943,7 +1020,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md107"></a>
+<h3><a class="anchor" id="autotoc_md115"></a>
 &lt;tt&gt;StepResponseTuner&lt;/tt&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Open-loop FOPDT identification (<code>K, tau, theta</code>) from step response data; produces PID gains via IMC.</li>
@@ -951,7 +1028,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md108"></a>
+<h3><a class="anchor" id="autotoc_md116"></a>
 &lt;tt&gt;LQRWeightTuner&lt;/tt&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><code>brysonMethod(xmax, umax)</code> - Bryson's rule: <code>Q = diag(1/xmax^2)</code>, <code>R = diag(1/umax^2)</code>.</li>
@@ -959,7 +1036,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md109"></a>
+<h3><a class="anchor" id="autotoc_md117"></a>
 &lt;tt&gt;MPCHorizonTuner&lt;/tt&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><code>recommend(plant, Ts, rho_y, rho_u)</code> -&gt; <code>Recommendation { Np, Nc, rho_y, rho_u, estimatedSettlingTime }</code>.</li>
@@ -967,11 +1044,11 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md110"></a>
+<h3><a class="anchor" id="autotoc_md118"></a>
 &lt;tt&gt;ZieglerNicholsTuner&lt;/tt&gt;, &lt;tt&gt;CohenCoonTuner&lt;/tt&gt;, &lt;tt&gt;LoopShapingTuner&lt;/tt&gt;, &lt;tt&gt;KalmanWeightTuner&lt;/tt&gt;</h3>
 <p><b><b><b><b> Standalone heuristics; each exposes <code>tuneImpl(...)</code> (unchecked) and <code>tuneFor&lt;C&gt;(...)</code> (template wrapper enforcing compile-time <code>ControllerTraits&lt;C&gt;</code> compatibility - produces actionable error messages for incompatible types).</b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md111"></a>
+<h3><a class="anchor" id="autotoc_md119"></a>
 &lt;tt&gt;TunerSuite&lt;/tt&gt; (&lt;a href="lib/TunerSuite.h" &gt;TunerSuite.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Unified front-end dispatching to the eight tuning families with <b>runtime soft-warnings</b> (IDEAL -&gt; no warning; SOFT -&gt; diagnostic + <code>result.warned == true</code>; FALLBACK -&gt; default params + <code>success == false</code>).</li>
@@ -980,7 +1057,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md112"></a>
+<h3><a class="anchor" id="autotoc_md120"></a>
 &lt;tt&gt;ControllerTraits&lt;C&gt;&lt;/tt&gt; (&lt;a href="lib/ControllerTraits.h" &gt;ControllerTraits.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Compile-time mapping from controller type to supported tuners (booleans <code>supports_heuristic_pid</code>, <code>supports_lqr_tuning</code>, <code>supports_mpc_tuning</code>, <code>supports_freq_tuning</code>, <code>supports_kalman_tuning</code>).</li>
@@ -990,15 +1067,15 @@ Membership function factories</h4>
 <p><b><b><b><b></p><hr  />
 <p></b></b></b></b></p>
 <p><b><b><b><b><a class="anchor" id="55-composition--orchestration"></a> </b></b></b></b></p>
-<h2><a class="anchor" id="autotoc_md114"></a>
+<h2><a class="anchor" id="autotoc_md122"></a>
 5.5 Composition &amp; Orchestration</h2>
 <p><b><b><b><b></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md115"></a>
+<h3><a class="anchor" id="autotoc_md123"></a>
 &lt;tt&gt;ControllerStack&lt;/tt&gt; (&lt;a href="lib/ControllerStack.h" &gt;ControllerStack.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Multi-controller orchestrator with three modes.<ul>
-<li><b>Supervisory</b> - first entry whose <code>activationCondition(error, lastOutput)</code> returns <code>true</code> is used; others idle. Use for gain scheduling, fallbacks.</li>
+<li><b>Supervisory</b> - first entry whose <code>activationCondition(error, lastOutput)</code> returns <code>true</code> is used; others idle. Use for fallbacks and bumpless transfer. For continuous gain scheduling prefer <code>GainScheduledController</code>.</li>
 <li><b>Additive</b> - outputs of all enabled entries are summed. Use for inner/outer cascades.</li>
 <li><b>Weighted</b> - <code>u = Sigma w_i.u_i(e)</code>. Use for fuzzy blending.</li>
 </ul>
@@ -1009,11 +1086,11 @@ Membership function factories</h4>
 <p><b><b><b><b></p><hr  />
 <p></b></b></b></b></p>
 <p><b><b><b><b><a class="anchor" id="56-analysis--metrics"></a> </b></b></b></b></p>
-<h2><a class="anchor" id="autotoc_md117"></a>
+<h2><a class="anchor" id="autotoc_md125"></a>
 5.6 Analysis &amp; Metrics</h2>
 <p><b><b><b><b></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md118"></a>
+<h3><a class="anchor" id="autotoc_md126"></a>
 &lt;tt&gt;MetricsAnalyzer&lt;/tt&gt; (&lt;a href="lib/MetricsAnalyzer.h" &gt;MetricsAnalyzer.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Extract time-domain metrics from step-response data.</li>
@@ -1021,7 +1098,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md119"></a>
+<h3><a class="anchor" id="autotoc_md127"></a>
 &lt;tt&gt;SystemAnalysis&lt;/tt&gt; (&lt;a href="lib/SystemAnalysis.h" &gt;SystemAnalysis.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Frequency-domain and stability analysis utilities (static methods).</li>
@@ -1031,11 +1108,11 @@ Membership function factories</h4>
 <p><b><b><b><b></p><hr  />
 <p></b></b></b></b></p>
 <p><b><b><b><b><a class="anchor" id="57-real-time-utilities--hal"></a> </b></b></b></b></p>
-<h2><a class="anchor" id="autotoc_md121"></a>
+<h2><a class="anchor" id="autotoc_md129"></a>
 5.7 Real-Time Utilities &amp; HAL</h2>
 <p><b><b><b><b></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md122"></a>
+<h3><a class="anchor" id="autotoc_md130"></a>
 &lt;tt&gt;AtomicParamBuffer&lt;Params&gt;&lt;/tt&gt; (&lt;a href="lib/AtomicParamBuffer.h" &gt;AtomicParamBuffer.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Seqlock-based double-buffered parameter handoff between a background tuner and the real-time control thread. Single-writer / single-reader, data-race-free under the C++ memory model.</li>
@@ -1049,7 +1126,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md123"></a>
+<h3><a class="anchor" id="autotoc_md131"></a>
 HAL (&lt;a href="lib/hal/HAL.h" &gt;lib/hal/HAL.h&lt;/a&gt;)</h3>
 <p><b><b><b><b> Bundles <code>ISensor</code>, <code>IActuator</code>, <code>SimPlant</code>, <code>SimSensor</code>, <code>SimActuator</code> for closed-loop simulation against a <code>StateSpace</code> plant. Suitable as a stand-in for real hardware drivers when developing/testing.</b></b></b></b></p>
 <p><b><b><b><b></p><div class="fragment"><div class="line"><a class="code hl_class" href="classctrl_1_1SimPlant.html">ctrl::SimPlant</a>    plant(sys);</div>
@@ -1067,7 +1144,7 @@ HAL (&lt;a href="lib/hal/HAL.h" &gt;lib/hal/HAL.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><hr  />
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h1><a class="anchor" id="autotoc_md125"></a>
+<h1><a class="anchor" id="autotoc_md133"></a>
 6. Deployment Cross-References</h1>
 <p><b><b><b><b></b></b></b></b></p>
 <p><b><b><b><b>For production deployment, parameter-stability constraints, RTOS integration, and troubleshooting recipes, consult <a class="el" href="md_docs_2DEPLOYMENT.html">DEPLOYMENT.md</a>:</b></b></b></b></p>

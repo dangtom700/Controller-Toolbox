@@ -73,12 +73,12 @@ $(function() {
   <div class="headertitle"><div class="title">Controller Toolbox - Deployment Guide</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md127"></a> <em>Version 1.3 - 2026-05-28</em></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md135"></a> <em>Version 1.3 - 2026-05-28</em></p>
 <p>This document covers three areas required before deploying this library to a production control system: (1) per-controller parameter constraints and stability conditions; (2) real-time integration guidelines (zero-allocation checklist, stack-size estimates, RTOS considerations); and (3) a troubleshooting section for the most common runtime failure modes.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md129"></a>
+<h1><a class="anchor" id="autotoc_md137"></a>
 1. Parameter Constraints by Controller</h1>
-<h2><a class="anchor" id="autotoc_md130"></a>
+<h2><a class="anchor" id="autotoc_md138"></a>
 DiscretePID</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -98,7 +98,7 @@ DiscretePID</h2>
 </table>
 <p><b>Bumpless parameter update:</b> <code>setParams()</code> changes gains instantly. To avoid a step in the derivative term, reset after changing <code>Kd</code> or <code>N</code>, or ramp parameter changes over several samples.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md132"></a>
+<h2><a class="anchor" id="autotoc_md140"></a>
 DiscreteLeadLag</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -113,7 +113,7 @@ DiscreteLeadLag</h2>
 <td class="markdownTableBodyNone"><code>Ts</code>   </td><td class="markdownTableBodyNone"><code>Ts &lt; pi / continuousPole</code> (Nyquist on the fastest pole)   </td></tr>
 </table>
 <hr  />
-<h2><a class="anchor" id="autotoc_md134"></a>
+<h2><a class="anchor" id="autotoc_md142"></a>
 DiscreteLQR</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -138,7 +138,7 @@ DiscreteLQR</h2>
 <li><code>All eigenvalues of</code>A<code>on the unit circle must be controllable from</code>B`.</li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md136"></a>
+<h2><a class="anchor" id="autotoc_md144"></a>
 DiscreteMPC</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -159,7 +159,7 @@ DiscreteMPC</h2>
 <p><b>Hessian conditioning:</b> If <code>rho_u</code> is very small (&lt; 1e-6), the Hessian becomes ill-conditioned. <code>computeRef()</code> checks <code>ldlt.info() != Eigen::Success</code> and returns the last safe output on failure. Increase <code>rho_u</code> if this check triggers frequently.</p>
 <p><b>Real-time latency:</b> MPC solve time scales as O(Nc^3.m^3) for the LDLT solve plus O(Np.Nc.n.m) for the matrix products. For <code>n=4, Np=10, Nc=3</code> expect ~5 mus on a 3 GHz core (see benchmark output). Budget at least 3* this for worst-case jitter.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md138"></a>
+<h2><a class="anchor" id="autotoc_md146"></a>
 KalmanFilter</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -174,13 +174,13 @@ KalmanFilter</h2>
 <p><b>Divergence symptoms:</b> residuals grow unboundedly; innovations <code>y - C*x_hat</code> grow larger than expected. Common causes: <code>Q_noise</code> too small (plant model error not covered), <code>R_noise</code> too small (sensor better than modelled), or non-linear plant violating the linear model assumption.</p>
 <p><b>Recovery:</b> call <code>reset()</code> and restart from a plausible <code>P0</code>. In RTOS code, implement a watchdog that resets the filter if max(|residual|) &gt; threshold for more than K consecutive samples.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md140"></a>
+<h2><a class="anchor" id="autotoc_md148"></a>
 MRACController</h2>
 <p>| Parameter | Constraint | Note | |--------&mdash;|--------&mdash;|---&mdash;| | <code>a_m</code> | <code>|a_m| &lt; 1</code> | Reference model stability — constructor throws if violated | | <code>gamma_r</code>, <code>gamma_y</code> | Same sign as plant input gain b_p | Positive for positive-gain plants; negate both for negative-gain | | <code>sigma</code> | <code>&gt;= 0</code>; typical 0.005–0.05 | 0 disables σ-modification (parameter drift risk under constant reference) | | <code>theta_max</code> | <code>&gt; 0</code> | Projection bound — prevents finite-escape under large disturbances | | <code>uMin / uMax</code> | <code>uMin &lt; uMax</code> | Output saturation |</p>
 <p><b>Stability note:</b> σ-modification provides bounded-input-bounded-output (BIIBO) stability for bounded disturbances. Without σ (sigma=0), persistent excitation (PE) of the reference is required to prevent parameter drift.</p>
 <p><b>Real-time:</b> <code>compute()</code> is O(1) — one inner product, one scalar division, and a norm check. No heap allocation.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md142"></a>
+<h2><a class="anchor" id="autotoc_md150"></a>
 FeedbackLinearisationController</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -192,7 +192,7 @@ FeedbackLinearisationController</h2>
 <p><b>Inner controller tuning for relative degree 2:</b> When the output y has relative degree 2 (u appears in ÿ, not ẏ), the inner controller drives a virtual double integrator. Use characteristic polynomial <code>(s+a)(s²+bs+c)</code> for the desired poles. Example: poles {−1, −2±j} → Kp=9, Ki=5, Kd=5.</p>
 <p><b>Real-time:</b> <code>compute()</code> calls the two user functors f_ and g_ plus the inner controller's <code>compute()</code>. No matrix operations for SISO — suitable for embedded targets.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md144"></a>
+<h2><a class="anchor" id="autotoc_md152"></a>
 BalancedTruncation</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -209,7 +209,7 @@ BalancedTruncation</h2>
 <div class="line">Eigen::MatrixXd Pc_reg = Pc + 1e-8 * Eigen::MatrixXd::Identity(n, n);</div>
 </div><!-- fragment --><p> Or pass a regularised system: <code>sys_reg.A = sys.A; sys_reg.B = sys.B * (1 + 1e-8)</code>.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md146"></a>
+<h2><a class="anchor" id="autotoc_md154"></a>
 ExtendedKalmanFilter / UnscentedKalmanFilter</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -225,7 +225,7 @@ ExtendedKalmanFilter / UnscentedKalmanFilter</h2>
 </table>
 <p><b>UKF sigma-point stability check:</b> After construction, verify <code>Wc0 = 1 - alpha^2 + beta &gt; 0</code>. For <code>n=2, kappa=0, alpha=1.0, beta=2.0</code>: <code>Wc0 = 2 &gt; 0</code>. If negative, the covariance update can produce a non-PSD matrix.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md148"></a>
+<h2><a class="anchor" id="autotoc_md156"></a>
 MovingHorizonEstimator</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -246,7 +246,7 @@ MovingHorizonEstimator</h2>
 <p><b>Real-time latency:</b> MHE solve time scales as O(N^2 * n^2) for the condensed QP Hessian build plus O(qpMaxIter * N * n) for the projected gradient iterations. For <code>N=10, n=2</code>, expect ~20 µs per step on a 3 GHz core. Budget at least 3x for jitter.</p>
 <p><b>Zero-allocation note:</b> <code>GradientProjectionQP</code> pre-allocates all work vectors at construction. No heap allocation occurs inside <code>estimate()</code> after <code>initialize()</code> is called.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md150"></a>
+<h2><a class="anchor" id="autotoc_md158"></a>
 DiscreteADRC</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -265,7 +265,7 @@ DiscreteADRC</h2>
 <div class="line">p.omega_c = 10.0;  <span class="comment">// &lt; 50/3 (check)</span></div>
 <div class="line">p.b0      = 1.0;</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md152"></a>
+<h2><a class="anchor" id="autotoc_md160"></a>
 SmithPredictor</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -277,7 +277,7 @@ SmithPredictor</h2>
 </table>
 <p>The internal delay buffer is a fixed-size circular buffer allocated at construction. <b>No dynamic allocation in the control loop.</b></p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md154"></a>
+<h2><a class="anchor" id="autotoc_md162"></a>
 ExtremumSeeker</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -295,9 +295,9 @@ ExtremumSeeker</h2>
 </table>
 <p><b>Convergence check:</b> ESC does not declare convergence autonomously. Implement a stagnation window: </p><div class="fragment"><div class="line"><span class="comment">// If |theta[k] - theta[k-W]| &lt; eps for W samples, optimum is found.</span></div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md156"></a>
+<h1><a class="anchor" id="autotoc_md164"></a>
 2. Real-Time Integration</h1>
-<h2><a class="anchor" id="autotoc_md157"></a>
+<h2><a class="anchor" id="autotoc_md165"></a>
 Zero-Allocation Checklist</h2>
 <p>Before deploying a controller in a real-time control loop, verify each item:</p>
 <ul>
@@ -310,7 +310,7 @@ Zero-Allocation Checklist</h2>
 <li>[ ] <b>No STL streams in the control loop.</b> Use a <code>LockFreeRingBuffer&lt;LogEntry, N&gt;</code> fed by the control loop and drained by a low-priority writer thread (see <code>scripts/</code> for reference implementation).</li>
 <li>[ ] <b>No <code>std::cout</code> / <code>std::cerr</code></b> in the hot path. The warning prints added to ADRC and LQR constructors fire once at construction time - not in <code>compute()</code>.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md158"></a>
+<h2><a class="anchor" id="autotoc_md166"></a>
 Stack-Size Estimates</h2>
 <p>These are approximate peak stack depths for a single <code>compute()</code> call, excluding the Eigen internal stack for small matrices (which is stack-allocated for <code>Matrix&lt;double,N,N&gt;</code> with N&lt;=16).</p>
 <table class="markdownTable">
@@ -348,7 +348,7 @@ Stack-Size Estimates</h2>
 <td class="markdownTableBodyNone">ControllerStack   </td><td class="markdownTableBodyNone">Sum of active controllers   </td></tr>
 </table>
 <p>Add a 2* safety margin for OS/RTOS frame overhead and nested function calls.</p>
-<h2><a class="anchor" id="autotoc_md159"></a>
+<h2><a class="anchor" id="autotoc_md167"></a>
 AtomicParamBuffer - Lock-Free Parameter Updates</h2>
 <p>Controllers whose gains are updated at runtime (gain scheduling, auto-tuning, operator override) face a race between the RT control thread calling <code>compute()</code> and the background thread writing new parameters. A mutex stalls the RT thread. <code>AtomicParamBuffer&lt;Params&gt;</code> solves this with a seqlock: the RT thread never blocks, the writer never corrupts a partially-read struct.</p>
 <p><b>Pattern:</b> </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="AtomicParamBuffer_8h.html">AtomicParamBuffer.h</a>&quot;</span></div>
@@ -424,7 +424,7 @@ AtomicParamBuffer - Lock-Free Parameter Updates</h2>
 <div class="ttc" id="aclassctrl_1_1DiscreteMPC_html_afe19d733608e6aaa4c4d55732b86e630"><div class="ttname"><a href="classctrl_1_1DiscreteMPC.html#afe19d733608e6aaa4c4d55732b86e630">ctrl::DiscreteMPC::setPlant</a></div><div class="ttdeci">void setPlant(const StateSpace &amp;plant)</div><div class="ttdoc">Replace the internal plant model (successive linearisation).</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8cpp_source.html#l00224">DiscreteMPC.cpp:224</a></div></div>
 </div><!-- fragment --><p>Option C - successive linearisation at construction rate: Build a new <code>DiscreteMPC</code> on the background thread (off the hot path), then swap the pointer. Cost is one allocation per linearisation step; acceptable if linearisation rate &lt;&lt; sample rate.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md161"></a>
+<h2><a class="anchor" id="autotoc_md169"></a>
 RTOS Considerations</h2>
 <p><b>Task priority:</b> The control task should run at the highest real-time priority in the RTOS. Non-RT work (logging, tuning, UI updates) belongs in a separate, lower-priority task.</p>
 <p><b>CPU isolation (Linux RT):</b> Pin the control task to a dedicated CPU core: </p><div class="fragment"><div class="line">SCHED_FIFO priority 99, CPU affinity mask = 0x02 (core 1)</div>
@@ -436,9 +436,9 @@ RTOS Considerations</h2>
 <p><b>Compiler flags for RT builds:</b> </p><div class="fragment"><div class="line">-O2 -fno-exceptions -fno-rtti -fstack-usage</div>
 </div><!-- fragment --><p> Review the <code>.su</code> stack-usage report to verify per-function stack consumption. Use <code>-fno-exceptions</code> only if all library code paths have been audited to not rely on RAII for unwinding - the NaN guards use early-return, not exceptions, so this is safe.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md163"></a>
+<h1><a class="anchor" id="autotoc_md171"></a>
 3. Troubleshooting</h1>
-<h2><a class="anchor" id="autotoc_md164"></a>
+<h2><a class="anchor" id="autotoc_md172"></a>
 DARE Non-Convergence (DiscreteLQR)</h2>
 <p><b>Symptom:</b> <code>lqr.dareConverged()</code> returns <code>false</code>; gain matrix <code>K_</code> may be large or irregular.</p>
 <p><b>Cause 1 - Plant not stabilizable:</b> One or more unstable modes of <code>A</code> are not reachable from <code>B</code>. Check: <code>ctrl::SystemAnalysis::getPoles(plant)</code> - any <code>|lambda| &gt;= 1</code> that cannot be shifted by <code>B</code>. Fix: redesign the actuator placement or use output feedback with a full-order observer.</p>
@@ -453,7 +453,7 @@ DARE Non-Convergence (DiscreteLQR)</h2>
 <div class="line">    <span class="comment">// Option C: hold last control output and alarm</span></div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md166"></a>
+<h2><a class="anchor" id="autotoc_md174"></a>
 MPC Infeasibility / LDLT Failure</h2>
 <p><b>Symptom:</b> <code>computeRef()</code> returns last safe output repeatedly; tracking error grows.</p>
 <p><b>Cause 1 - Hessian not positive definite:</b> <code>rho_u</code> too small or zero. Fix: increase <code>rho_u</code>; minimum safe value is approximately <code>1e-6 * rho_y * max(eigenvalue(Phi'Phi))</code>.</p>
@@ -461,7 +461,7 @@ MPC Infeasibility / LDLT Failure</h2>
 <p><b>Cause 3 - Horizons too aggressive for the plant dynamics:</b> Large <code>Np</code> on a fast-unstable plant can cause Phi to have very large entries, making <code>H</code> ill-conditioned. Fix: reduce <code>Np</code> to cover 1-2 settling times, or increase <code>rho_u</code>.</p>
 <p><b>Monitoring:</b> log the LDLT return status count per minute. More than occasional failures indicate a tuning or model problem, not a numerical one.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md168"></a>
+<h2><a class="anchor" id="autotoc_md176"></a>
 Kalman Filter Divergence</h2>
 <p><b>Symptom:</b> State estimate <code>stateEstimate()</code> diverges from true state; covariance <code>P_</code> grows.</p>
 <p><b>Cause 1 - <code>Q_noise</code> underestimated:</b> Filter trusts the model too much; disturbances accumulate. Fix: increase <code>Q_noise</code> diagonal entries. A useful heuristic: <code>Q_ii approx = sigma^2_{disturbance,i}</code>.</p>
@@ -474,14 +474,14 @@ Kalman Filter Divergence</h2>
 <div class="line">    <span class="comment">// Re-inject last known good state estimate or zero</span></div>
 <div class="line">}</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md170"></a>
+<h2><a class="anchor" id="autotoc_md178"></a>
 ADRC ESO Instability (Forward-Euler)</h2>
 <p><b>Symptom:</b> ESO states <code>z1</code>, <code>z2</code>, <code>z3</code> grow without bound; control output saturates.</p>
 <p><b>Cause:</b> <code>omega_o * Ts &gt;= 2</code>. The constructor prints a warning; check stderr at startup.</p>
 <p><b>Fix:</b> Reduce <code>omega_o</code> or decrease <code>Ts</code>. For <code>Ts = 0.01 s</code>, the hard limit is <code>omega_o &lt; 200 rad/s</code>. Practically, keep <code>omega_o &lt;= 100 rad/s</code> for a 2* stability margin.</p>
 <p><b>Rule of thumb:</b> Start with <code>omega_o = 10 / Ts</code> (i.e., 1000 rad/s for <code>Ts=0.001</code>) - this is the upper practical limit before ESO pole locations become sensitive to round-off error.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md172"></a>
+<h2><a class="anchor" id="autotoc_md180"></a>
 SmithPredictor Delay Mismatch</h2>
 <p><b>Symptom:</b> Oscillation or poor transient performance despite stable inner loop.</p>
 <p><b>Cause:</b> <code>delaySteps</code> does not match the true plant delay. A mismatch of even one sample can destabilize the predictor for lightly damped plants.</p>
@@ -492,7 +492,7 @@ SmithPredictor Delay Mismatch</h2>
 <div class="ttc" id="aclassctrl_1_1SmithPredictor_html"><div class="ttname"><a href="classctrl_1_1SmithPredictor.html">ctrl::SmithPredictor</a></div><div class="ttdoc">Smith Predictor wrapper for any IController inner loop.</div><div class="ttdef"><b>Definition</b> <a href="SmithPredictor_8h_source.html#l00045">SmithPredictor.h:46</a></div></div>
 </div><!-- fragment --><p>Or build the fractional filter explicitly via <code>ctrl::padeDelayFilter(theta_frac, Ts)</code> from <code><a class="el" href="FunctionApproximator_8h.html" title="Data-driven Taylor (polynomial) and Pade (rational) function approximation.">FunctionApproximator.h</a></code> and pass it as the fourth constructor argument.</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md174"></a>
+<h2><a class="anchor" id="autotoc_md182"></a>
 NaN / Inf Propagation</h2>
 <p>All scalar-input controllers (<code>DiscretePID</code>, <code>DiscreteLeadLag</code>, <code>DiscreteSMC</code>, <code>DiscreteADRC</code>) now return the last valid output on <code>NaN</code> or <code>Inf</code> input rather than propagating the corruption.</p>
 <p>If you observe the output "freezing" at an unexpected value, check upstream:</p><ol type="1">
@@ -501,9 +501,9 @@ NaN / Inf Propagation</h2>
 <li>Actuator: <code>SimActuator::write()</code> applies NaN hold-last before stepping the plant; log <code>lastOutput()</code> to detect frozen actuator commands.</li>
 </ol>
 <hr  />
-<h1><a class="anchor" id="autotoc_md176"></a>
+<h1><a class="anchor" id="autotoc_md184"></a>
 4. Quick-Start Parameter Tables</h1>
-<h2><a class="anchor" id="autotoc_md177"></a>
+<h2><a class="anchor" id="autotoc_md185"></a>
 Typical starting points for an unknown SISO plant</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
