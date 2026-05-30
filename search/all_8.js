@@ -20,13 +20,14 @@ var searchData=
   ['bryson_17',['bryson',['../classctrl_1_1TunerSuite.html#aecae43608db76d6d46e32562f9d0ff2e',1,'ctrl::TunerSuite']]],
   ['brysonmethod_18',['brysonMethod',['../classctrl_1_1LQRWeightTuner.html#a59deb8f98e587269d8cc14ac2e696f49',1,'ctrl::LQRWeightTuner']]],
   ['brysonmethodfor_19',['brysonMethodFor',['../classctrl_1_1LQRWeightTuner.html#aeecb275e655b6c78a4174ff6e4e27d87',1,'ctrl::LQRWeightTuner']]],
-  ['build_20',['build',['../md_docs_2DOCUMENTATION.html#autotoc_md35',1,'2.1 Standard Configure-Build'],['../classctrl_1_1MixedSensitivity.html#a406b1e5f5063bb0207519a2e6e0d9c19',1,'ctrl::MixedSensitivity::build()'],['../index.html#autotoc_md5',1,'Docker build'],['../index.html#autotoc_md3',1,'Native build']]],
-  ['build_20flags_21',['2.4 Real-Time Build Flags',['../md_docs_2DOCUMENTATION.html#autotoc_md38',1,'']]],
-  ['build_20the_20image_22',['Build the image',['../index.html#autotoc_md16',1,'']]],
-  ['build5termpartition_23',['build5TermPartition',['../namespacectrl.html#af0ae3861533016651748384f0ae65112',1,'ctrl']]],
-  ['buildautogainscheduler_24',['buildAutoGainScheduler',['../namespacectrl.html#ada081701e0eda61aba95a62b1ef46520',1,'ctrl']]],
-  ['builds_25',['Mount your own source for in-container builds',['../index.html#autotoc_md20',1,'']]],
-  ['buildwarnmsg_26',['buildWarnMsg',['../namespacectrl.html#aef6c869b488ae749eed6e486ca0b0bd6',1,'ctrl']]],
-  ['bumplessinit_27',['bumplessinit',['../classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07',1,'ctrl::IController::bumplessInit()'],['../classctrl_1_1FuzzyPID.html#a6159b3bfa98769ce9415ea34da9adeb8',1,'ctrl::FuzzyPID::bumplessInit()'],['../classctrl_1_1DiscretePID.html#affdf4f330e63da4691d4b462b02d197e',1,'ctrl::DiscretePID::bumplessInit()']]],
-  ['by_20controller_28',['1. Parameter Constraints by Controller',['../md_docs_2DEPLOYMENT.html#autotoc_md129',1,'']]]
+  ['bufferlen_20',['bufferLen',['../structctrl_1_1AdaptiveSPParams.html#a0adf65f61c0becc397d781a74474932c',1,'ctrl::AdaptiveSPParams']]],
+  ['build_21',['build',['../md_docs_2DOCUMENTATION.html#autotoc_md35',1,'2.1 Standard Configure-Build'],['../classctrl_1_1MixedSensitivity.html#a406b1e5f5063bb0207519a2e6e0d9c19',1,'ctrl::MixedSensitivity::build()'],['../index.html#autotoc_md5',1,'Docker build'],['../index.html#autotoc_md3',1,'Native build']]],
+  ['build_20flags_22',['2.4 Real-Time Build Flags',['../md_docs_2DOCUMENTATION.html#autotoc_md38',1,'']]],
+  ['build_20the_20image_23',['Build the image',['../index.html#autotoc_md16',1,'']]],
+  ['build5termpartition_24',['build5TermPartition',['../namespacectrl.html#af0ae3861533016651748384f0ae65112',1,'ctrl']]],
+  ['buildautogainscheduler_25',['buildAutoGainScheduler',['../namespacectrl.html#ada081701e0eda61aba95a62b1ef46520',1,'ctrl']]],
+  ['builds_26',['Mount your own source for in-container builds',['../index.html#autotoc_md20',1,'']]],
+  ['buildwarnmsg_27',['buildWarnMsg',['../namespacectrl.html#aef6c869b488ae749eed6e486ca0b0bd6',1,'ctrl']]],
+  ['bumplessinit_28',['bumplessinit',['../classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07',1,'ctrl::IController::bumplessInit()'],['../classctrl_1_1FuzzyPID.html#a6159b3bfa98769ce9415ea34da9adeb8',1,'ctrl::FuzzyPID::bumplessInit()'],['../classctrl_1_1DiscretePID.html#affdf4f330e63da4691d4b462b02d197e',1,'ctrl::DiscretePID::bumplessInit()']]],
+  ['by_20controller_29',['1. Parameter Constraints by Controller',['../md_docs_2DEPLOYMENT.html#autotoc_md129',1,'']]]
 ];

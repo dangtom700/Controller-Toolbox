@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['zerophasetrackingfilter_2ecpp_0',['ZeroPhaseTrackingFilter.cpp',['../ZeroPhaseTrackingFilter_8cpp.html',1,'']]],
-  ['zerophasetrackingfilter_2eh_1',['ZeroPhaseTrackingFilter.h',['../ZeroPhaseTrackingFilter_8h.html',1,'']]]
+  ['unscentedkalmanfilter_2ecpp_0',['UnscentedKalmanFilter.cpp',['../UnscentedKalmanFilter_8cpp.html',1,'']]],
+  ['unscentedkalmanfilter_2eh_1',['UnscentedKalmanFilter.h',['../UnscentedKalmanFilter_8h.html',1,'']]]
 ];

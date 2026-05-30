@@ -129,6 +129,15 @@ Enumerations</h2></td></tr>
 <div class="line"><span class="keywordtype">double</span> u = sched-&gt;compute(error);</div>
 </div><!-- fragment --></dd></dl>
 <dl class="section note"><dt>Note</dt><dd>sign convention: error = reference - measurement (same as DiscretePID).</dd></dl>
+<dl class="section user"><dt>Gain-scheduled LQR via LQRAdapter</dt><dd><div class="fragment"><div class="line"><span class="comment">// Design LQR at each operating point linearisation</span></div>
+<div class="line"><span class="keyword">auto</span> adapt0 = std::make_shared&lt;ctrl::LQRAdapter&gt;(lqr0,</div>
+<div class="line">    [&amp;](){ <span class="keywordflow">return</span> x_current; });   <span class="comment">// stateFn captures current state</span></div>
+<div class="line"><span class="keyword">auto</span> adapt1 = std::make_shared&lt;ctrl::LQRAdapter&gt;(lqr1,</div>
+<div class="line">    [&amp;](){ <span class="keywordflow">return</span> x_current; });</div>
+<div class="line">sched-&gt;addSchedulePoint(0.0, adapt0);</div>
+<div class="line">sched-&gt;addSchedulePoint(1.0, adapt1);</div>
+<div class="line"><span class="comment">// Use NearestNeighbor mode - bumpless transfer fires on switch.</span></div>
+</div><!-- fragment --></dd></dl>
 <dl class="section see"><dt>See also</dt><dd>buildAutoGainScheduler() in <a class="el" href="AutoGainScheduler_8h.html" title="Automated gain-scheduled controller builder via gap-metric clustering.">AutoGainScheduler.h</a> for automated construction from a nonlinear plant model using gap-metric clustering. </dd></dl>
 
 <p class="definition">Definition in file <a class="el" href="GainScheduledController_8h_source.html">GainScheduledController.h</a>.</p>

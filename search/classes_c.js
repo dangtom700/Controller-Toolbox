@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['padeapproximator_0',['PadeApproximator',['../classctrl_1_1PadeApproximator.html',1,'ctrl']]],
-  ['pid_1',['PID',['../structctrl_1_1tag_1_1PID.html',1,'ctrl::tag']]],
-  ['pidparams_2',['PIDParams',['../structctrl_1_1PIDParams.html',1,'ctrl']]],
-  ['pidtuneresult_3',['PIDTuneResult',['../structctrl_1_1PIDTuneResult.html',1,'ctrl']]]
+  ['operatingpoint_0',['OperatingPoint',['../structctrl_1_1OperatingPoint.html',1,'ctrl']]],
+  ['optimtuneresult_1',['OptimTuneResult',['../structctrl_1_1OptimTuneResult.html',1,'ctrl']]],
+  ['outputfeedback_2',['OutputFeedback',['../structctrl_1_1tag_1_1OutputFeedback.html',1,'ctrl::tag']]]
 ];

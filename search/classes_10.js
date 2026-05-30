@@ -1,9 +1,25 @@
 var searchData=
 [
-  ['taylorapproximator_0',['TaylorApproximator',['../classctrl_1_1TaylorApproximator.html',1,'ctrl']]],
-  ['timedomainmetrics_1',['TimeDomainMetrics',['../structctrl_1_1TimeDomainMetrics.html',1,'ctrl']]],
-  ['transferfunction_2',['TransferFunction',['../structctrl_1_1TransferFunction.html',1,'ctrl']]],
-  ['truncationresult_3',['TruncationResult',['../structctrl_1_1TruncationResult.html',1,'ctrl']]],
-  ['tunersuite_4',['TunerSuite',['../classctrl_1_1TunerSuite.html',1,'ctrl']]],
-  ['tuningresultbase_5',['TuningResultBase',['../structctrl_1_1TuningResultBase.html',1,'ctrl']]]
+  ['safesensor_0',['SafeSensor',['../classctrl_1_1SafeSensor.html',1,'ctrl']]],
+  ['simactuator_1',['SimActuator',['../classctrl_1_1SimActuator.html',1,'ctrl']]],
+  ['simplant_2',['SimPlant',['../classctrl_1_1SimPlant.html',1,'ctrl']]],
+  ['simscheduler_3',['SimScheduler',['../classctrl_1_1SimScheduler.html',1,'ctrl']]],
+  ['simsensor_4',['SimSensor',['../classctrl_1_1SimSensor.html',1,'ctrl']]],
+  ['slidingmode_5',['SlidingMode',['../structctrl_1_1tag_1_1SlidingMode.html',1,'ctrl::tag']]],
+  ['smcparams_6',['SMCParams',['../structctrl_1_1SMCParams.html',1,'ctrl']]],
+  ['smithpredictor_7',['SmithPredictor',['../classctrl_1_1SmithPredictor.html',1,'ctrl']]],
+  ['sopdtidentifier_8',['SOPDTIdentifier',['../classctrl_1_1SOPDTIdentifier.html',1,'ctrl']]],
+  ['sopdtmodel_9',['SOPDTModel',['../structctrl_1_1SOPDTModel.html',1,'ctrl']]],
+  ['stabilitymargins_10',['StabilityMargins',['../structctrl_1_1StabilityMargins.html',1,'ctrl']]],
+  ['stackentry_11',['StackEntry',['../structctrl_1_1StackEntry.html',1,'ctrl']]],
+  ['statefeedback_12',['StateFeedback',['../structctrl_1_1tag_1_1StateFeedback.html',1,'ctrl::tag']]],
+  ['statespace_13',['StateSpace',['../structctrl_1_1StateSpace.html',1,'ctrl']]],
+  ['stdtimer_14',['StdTimer',['../classctrl_1_1StdTimer.html',1,'ctrl']]],
+  ['stepresponsetuner_15',['StepResponseTuner',['../classctrl_1_1StepResponseTuner.html',1,'ctrl']]],
+  ['subspaceidresult_16',['SubspaceIDResult',['../structctrl_1_1SubspaceIDResult.html',1,'ctrl']]],
+  ['supertwistingparams_17',['SuperTwistingParams',['../structctrl_1_1SuperTwistingParams.html',1,'ctrl']]],
+  ['supertwistingsmc_18',['SuperTwistingSMC',['../classctrl_1_1SuperTwistingSMC.html',1,'ctrl']]],
+  ['supervisordecision_19',['SupervisorDecision',['../structctrl_1_1SupervisorDecision.html',1,'ctrl']]],
+  ['supervisorparams_20',['SupervisorParams',['../structctrl_1_1SupervisorParams.html',1,'ctrl']]],
+  ['systemanalysis_21',['SystemAnalysis',['../classctrl_1_1SystemAnalysis.html',1,'ctrl']]]
 ];

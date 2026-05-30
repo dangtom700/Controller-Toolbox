@@ -13,7 +13,8 @@ var searchData=
   ['totransferfunction_10',['toTransferFunction',['../classctrl_1_1RecursiveLeastSquares.html#aaa12ce8181db2cf1cf39b757431f535d',1,'ctrl::RecursiveLeastSquares']]],
   ['transferfunction_11',['TransferFunction',['../structctrl_1_1TransferFunction.html#ae16f0d0e9aca025d8f3ed2514fe3a8e6',1,'ctrl::TransferFunction']]],
   ['transmissionzeros_12',['transmissionZeros',['../namespacectrl.html#abaaf02a733918c23d28a20d60759bfbc',1,'ctrl']]],
-  ['tunefor_13',['tunefor',['../classctrl_1_1LoopShapingTuner.html#a4b7c906dada079f112679ea4d3f949b0',1,'ctrl::LoopShapingTuner::tuneFor()'],['../classctrl_1_1CohenCoonTuner.html#a5c146227e48a93d01a6280c2cfdc398a',1,'ctrl::CohenCoonTuner::tuneFor()'],['../classctrl_1_1ZieglerNicholsTuner.html#a231e843bc80159426bc654db2b61acb5',1,'ctrl::ZieglerNicholsTuner::tuneFor(const Input &amp;in)']]],
-  ['tuneimpl_14',['tuneimpl',['../classctrl_1_1ZieglerNicholsTuner.html#adcb1e3a95c75bcd448b75e0862ff5dc9',1,'ctrl::ZieglerNicholsTuner::tuneImpl()'],['../classctrl_1_1CohenCoonTuner.html#a335b1cb5ea52f3a5b02864cd0ec41882',1,'ctrl::CohenCoonTuner::tuneImpl()'],['../classctrl_1_1LoopShapingTuner.html#a84f00307a5826a9024a490d3e4578591',1,'ctrl::LoopShapingTuner::tuneImpl()']]],
-  ['tustinfirstorder_15',['tustinFirstOrder',['../namespacectrl.html#a449f238a5061ab8128fb4a095784a94a',1,'ctrl']]]
+  ['tune_13',['tune',['../classctrl_1_1AutoTuner.html#a8b7a02b72c1354e57321f32b702ccf44',1,'ctrl::AutoTuner']]],
+  ['tunefor_14',['tunefor',['../classctrl_1_1LoopShapingTuner.html#a4b7c906dada079f112679ea4d3f949b0',1,'ctrl::LoopShapingTuner::tuneFor()'],['../classctrl_1_1CohenCoonTuner.html#a5c146227e48a93d01a6280c2cfdc398a',1,'ctrl::CohenCoonTuner::tuneFor()'],['../classctrl_1_1ZieglerNicholsTuner.html#a231e843bc80159426bc654db2b61acb5',1,'ctrl::ZieglerNicholsTuner::tuneFor(const Input &amp;in)']]],
+  ['tuneimpl_15',['tuneimpl',['../classctrl_1_1ZieglerNicholsTuner.html#adcb1e3a95c75bcd448b75e0862ff5dc9',1,'ctrl::ZieglerNicholsTuner::tuneImpl()'],['../classctrl_1_1CohenCoonTuner.html#a335b1cb5ea52f3a5b02864cd0ec41882',1,'ctrl::CohenCoonTuner::tuneImpl()'],['../classctrl_1_1LoopShapingTuner.html#a84f00307a5826a9024a490d3e4578591',1,'ctrl::LoopShapingTuner::tuneImpl()']]],
+  ['tustinfirstorder_16',['tustinFirstOrder',['../namespacectrl.html#a449f238a5061ab8128fb4a095784a94a',1,'ctrl']]]
 ];
