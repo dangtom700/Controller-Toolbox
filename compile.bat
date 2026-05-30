@@ -101,6 +101,9 @@ for %%T in (
     ex60_gap_clustering
     ex61_lpv_identification
     ex62_auto_gain_scheduler
+    ex63_nonlinear_mpc
+    ex64_adaptive_smith_predictor
+    ex65_autotuner_pid
     test_autoscheduling
     example_pid_feedback
     mimo_known

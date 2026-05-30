@@ -92,6 +92,9 @@
 #include "LinearModelCluster.h"         ///< clusterByGap, suggestGapThreshold, ClusterResult - nu-gap agglomerative clustering.
 #include "LPVSystemID.h"                ///< identifyLPV, identifyLPVFromIO, LPVModel - polynomial LPV system identification.
 #include "AutoGainScheduler.h"          ///< buildAutoGainScheduler, findEquilibrium, OperatingPoint - automated gain-scheduling pipeline.
+#include "NonlinearMPC.h"               ///< NonlinearMPC - RTI-based NMPC with time-varying condensed QP (Diehl 2005).
+#include "AdaptiveSmithPredictor.h"     ///< AdaptiveSmithPredictor - SmithPredictor with online cross-correlation delay estimation.
+#include "AutoTuner.h"                  ///< AutoTuner - CMA-ES black-box optimizer for controller parameter tuning.
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,

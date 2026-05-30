@@ -67,6 +67,9 @@ inline std::unordered_map<std::string, bool> features()
         {"gain_scheduled_ctrl",     true},  // always compiled (header-only GainScheduledController.h)
         {"auto_gain_scheduler",     true},  // always compiled (header-only AutoGainScheduler.h)
         {"linear_model_cluster",    true},  // always compiled (header-only LinearModelCluster.h)
+        {"nonlinear_mpc",           true},  // always compiled (NonlinearMPC.cpp in core sources)
+        {"adaptive_smith",          true},  // always compiled (AdaptiveSmithPredictor.cpp in core sources)
+        {"auto_tuner",              true},  // always compiled (header-only AutoTuner.h)
     };
 }
 

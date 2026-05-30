@@ -378,7 +378,7 @@ GPCController::GPCController(const ctrl::StateSpace& ss, const OperatingPoint& o
     : gpcs_([&] {
         ctrl::GPCParams gp;
         // Np=20: covers ~20 steps for a boiler with 100s time constant (need at least tau/Ts=100 steps,
-        // but Np=20 is a practical compromise — more steps improves tracking at increased compute cost).
+        // but Np=20 is a practical compromise - more steps improves tracking at increased compute cost).
         // Nu=3: 3 control moves balances lookahead vs computation.
         // alpha=0.8: reference trajectory filter. alpha=0.1 reaches setpoint in ~1 step (physically
         // impossible for slow boiler -> saturates every step -> diverges). 0.8 gives ~10-step approach.

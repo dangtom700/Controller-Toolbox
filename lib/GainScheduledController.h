@@ -38,6 +38,18 @@
  *
  * @note sign convention: error = reference - measurement (same as DiscretePID).
  *
+ * @par Gain-scheduled LQR via LQRAdapter
+ * @code
+ *   // Design LQR at each operating point linearisation
+ *   auto adapt0 = std::make_shared<ctrl::LQRAdapter>(lqr0,
+ *       [&](){ return x_current; });   // stateFn captures current state
+ *   auto adapt1 = std::make_shared<ctrl::LQRAdapter>(lqr1,
+ *       [&](){ return x_current; });
+ *   sched->addSchedulePoint(0.0, adapt0);
+ *   sched->addSchedulePoint(1.0, adapt1);
+ *   // Use NearestNeighbor mode - bumpless transfer fires on switch.
+ * @endcode
+ *
  * @see buildAutoGainScheduler() in AutoGainScheduler.h for automated construction
  *      from a nonlinear plant model using gap-metric clustering.
  */
@@ -64,7 +76,7 @@ public:
      */
     explicit GainScheduledController(double Ts,
                                      GainScheduleMode mode = GainScheduleMode::LinearBlend)
-        : Ts_(Ts), mode_(mode), current_p_(0.0), last_output_(0.0), active_idx_(0)
+        : Ts_(Ts), mode_(mode), current_p_(0.0), last_output_(0.0), active_idx_(-1)
     {}
 
     /**
@@ -118,9 +130,15 @@ public:
      * @return       Interpolated control output.
      */
     double compute(double error) override {
-        if (schedule_.empty()) { last_output_ = 0.0; return 0.0; }
+        if (schedule_.empty()) {
+            last_output_ = 0.0;
+            notifyObserver(0.0, error);
+            return 0.0;
+        }
         if (schedule_.size() == 1) {
             last_output_ = schedule_[0].ctrl->compute(error);
+            active_idx_ = 0;
+            notifyObserver(last_output_, error);
             return last_output_;
         }
 
@@ -128,17 +146,22 @@ public:
         int hi = std::min(lo + 1, static_cast<int>(schedule_.size()) - 1);
 
         if (mode_ == GainScheduleMode::NearestNeighbor) {
-            // Pick whichever neighbour is closer in p-space
             int idx = (std::abs(current_p_ - schedule_[lo].p) <=
                        std::abs(current_p_ - schedule_[hi].p)) ? lo : hi;
+            // Bumpless transfer: pre-condition the incoming controller so its
+            // first compute() matches the last output of the outgoing controller.
+            if (idx != active_idx_)
+                schedule_[idx].ctrl->bumplessInit(last_output_, error);
             active_idx_ = idx;
             last_output_ = schedule_[idx].ctrl->compute(error);
+            notifyObserver(last_output_, error);
             return last_output_;
         }
 
         // LinearBlend
         if (lo == hi) {
             last_output_ = schedule_[lo].ctrl->compute(error);
+            notifyObserver(last_output_, error);
             return last_output_;
         }
         double p0 = schedule_[lo].p, p1 = schedule_[hi].p;
@@ -147,6 +170,7 @@ public:
         double u0 = schedule_[lo].ctrl->compute(error);
         double u1 = schedule_[hi].ctrl->compute(error);
         last_output_ = (1.0 - alpha) * u0 + alpha * u1;
+        notifyObserver(last_output_, error);
         return last_output_;
     }
 
@@ -154,7 +178,8 @@ public:
     void reset() override {
         for (auto& sp : schedule_) sp.ctrl->reset();
         last_output_ = 0.0;
-        active_idx_ = 0;
+        active_idx_ = -1; // -1 signals "no controller active yet" for bumplessInit
+        notifyObserverReset();
     }
 
     double sampleTime() const override { return Ts_; }

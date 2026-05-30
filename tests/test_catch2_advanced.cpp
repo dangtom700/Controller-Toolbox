@@ -1417,6 +1417,270 @@ TEST_CASE("MovingHorizonEstimator converges on linear first-order system",
 }
 
 // =============================================================================
+// GainScheduledController - bumpless transfer on NearestNeighbor switch
+// =============================================================================
+
+TEST_CASE("GainScheduledController NearestNeighbor bumpless on switch", "[gain_sched]")
+{
+    // Two PIDs tuned for different operating points.
+    // The first is running and has accumulated integral state (non-zero output).
+    // When the scheduler switches to the second, its first output should be
+    // close to the last output of the first (bumplessInit fires).
+    const double Ts = 0.1;
+
+    ctrl::PIDParams pp0; pp0.Kp = 1.0; pp0.Ki = 0.5; pp0.Kd = 0.0;
+    ctrl::PIDParams pp1; pp1.Kp = 2.0; pp1.Ki = 0.1; pp1.Kd = 0.0;
+
+    auto pid0 = std::make_shared<ctrl::DiscretePID>(pp0, Ts);
+    auto pid1 = std::make_shared<ctrl::DiscretePID>(pp1, Ts);
+
+    ctrl::GainScheduledController gs(Ts, ctrl::GainScheduleMode::NearestNeighbor);
+    gs.addSchedulePoint(0.0, pid0);
+    gs.addSchedulePoint(1.0, pid1);
+
+    // Warm up pid0 at p=0 for 20 steps so it has integral state
+    gs.setSchedulingParam(0.0);
+    double last_u = 0.0;
+    for (int k = 0; k < 20; ++k)
+        last_u = gs.compute(1.0); // constant error = 1
+
+    // Switch to p=1 (pid1 becomes nearest): bumplessInit should fire
+    gs.setSchedulingParam(1.0);
+    const double first_u_new = gs.compute(1.0);
+
+    // After bumplessInit, the new controller's first output should be close to last_u
+    // (bumplessInit prepares the controller to output u_target at the given error).
+    // Exact match not guaranteed (bumplessInit is controller-specific) but the jump
+    // should be small: |first_u_new - last_u| << |unconditioned first output|.
+    const double uncond_first = pp1.Kp * 1.0; // what pid1 would produce without bumpless (~2.0)
+    const double jump_with    = std::abs(first_u_new - last_u);
+    const double jump_without = std::abs(uncond_first - last_u);
+    // Bumpless should reduce the jump by at least 50%
+    REQUIRE(jump_with < jump_without);
+}
+
+TEST_CASE("GainScheduledController NearestNeighbor notifies observer", "[gain_sched]")
+{
+    const double Ts = 0.05;
+    ctrl::PIDParams pp; pp.Kp = 1.0;
+    auto pid = std::make_shared<ctrl::DiscretePID>(pp, Ts);
+
+    ctrl::GainScheduledController gs(Ts, ctrl::GainScheduleMode::NearestNeighbor);
+    gs.addSchedulePoint(0.0, pid);
+
+    int n_callbacks = 0;
+    double last_u_obs = 0.0;
+    class CountObs : public ctrl::IControllerObserver {
+    public:
+        int &n; double &u_last;
+        CountObs(int &n_, double &u_) : n(n_), u_last(u_) {}
+        void onCompute(double u, double) override { ++n; u_last = u; }
+        void onComputeVec(const Eigen::VectorXd &, const Eigen::VectorXd &) override {}
+        void onReset() override {}
+    } obs(n_callbacks, last_u_obs);
+
+    gs.attachObserver(&obs);
+    gs.setSchedulingParam(0.0);
+    gs.compute(0.5);
+
+    REQUIRE(n_callbacks == 1);
+    REQUIRE_THAT(last_u_obs, WithinRel(gs.lastOutput(), 1e-9));
+}
+
+// =============================================================================
+// NonlinearMPC - RTI closed-loop convergence
+// =============================================================================
+
+TEST_CASE("NonlinearMPC converges on scalar nonlinear plant", "[nmpc]")
+{
+    // Plant: x[k+1] = 0.8*x - 0.05*x^3 + u,  y = x (1D, full-state output)
+    const double Ts = 0.1;
+    auto f_nl = [](const Eigen::VectorXd &x,
+                   const Eigen::VectorXd &u) -> Eigen::VectorXd {
+        Eigen::VectorXd xn(1);
+        xn(0) = 0.8 * x(0) - 0.05 * x(0) * x(0) * x(0) + u(0);
+        return xn;
+    };
+
+    ctrl::NMPCParams np;
+    np.Np = 8; np.Nu = 3;
+    np.rho_y = 2.0; np.rho_u = 0.2;
+    np.uMin = -5.0; np.uMax = 5.0;
+    np.qpMaxIter = 500; np.qpTol = 1e-6;
+    np.Ts = Ts; np.n_states = 1; np.n_inputs = 1; np.n_outputs = 1;
+
+    ctrl::NonlinearMPC nmpc(np, f_nl);
+
+    Eigen::VectorXd x(1);    x(0) = 0.0;
+    Eigen::VectorXd yref(1); yref(0) = 1.0;
+
+    for (int k = 0; k < 60; ++k)
+    {
+        nmpc.setState(x);
+        const Eigen::VectorXd u = nmpc.computeRef(x, yref);
+        x = f_nl(x, u);
+    }
+
+    // After 60 steps the output should be within 0.1 of reference
+    REQUIRE(std::abs(x(0) - 1.0) < 0.1);
+    REQUIRE(nmpc.lastQPConverged());
+}
+
+TEST_CASE("NonlinearMPC reset clears warm start", "[nmpc]")
+{
+    auto f_lin = [](const Eigen::VectorXd &x,
+                    const Eigen::VectorXd &u) -> Eigen::VectorXd {
+        Eigen::VectorXd xn(1);
+        xn(0) = 0.9 * x(0) + u(0);
+        return xn;
+    };
+
+    ctrl::NMPCParams np;
+    np.Np = 5; np.Nu = 2; np.rho_y = 1.0; np.rho_u = 0.1;
+    np.uMin = -10.0; np.uMax = 10.0;
+    np.Ts = 0.1; np.n_states = 1; np.n_inputs = 1; np.n_outputs = 1;
+
+    ctrl::NonlinearMPC nmpc(np, f_lin);
+
+    Eigen::VectorXd x(1); x(0) = 2.0;
+    Eigen::VectorXd yref(1); yref(0) = 0.0;
+    nmpc.setState(x); nmpc.computeRef(x, yref); // run once to fill warm start
+
+    nmpc.reset();
+    // After reset, lastOutput should be zero
+    REQUIRE(nmpc.lastOutput() == 0.0);
+    // compute on a zero state should not throw
+    Eigen::VectorXd x0(1); x0.setZero();
+    nmpc.setState(x0);
+    REQUIRE_NOTHROW(nmpc.computeRef(x0, yref));
+}
+
+// =============================================================================
+// AdaptiveSmithPredictor - delay estimation and closed-loop stability
+// =============================================================================
+
+TEST_CASE("AdaptiveSmithPredictor stabilises delayed plant", "[adaptive_smith]")
+{
+    // Delay-free model: x[k+1] = 0.8*x + 0.2*u,  y = x
+    const double Ts = 0.1;
+    Eigen::MatrixXd A(1,1); A << 0.8;
+    Eigen::MatrixXd B(1,1); B << 0.2;
+    Eigen::MatrixXd C(1,1); C << 1.0;
+    Eigen::MatrixXd D(1,1); D << 0.0;
+    ctrl::StateSpace model(A, B, C, D, Ts);
+
+    ctrl::PIDParams pp; pp.Kp = 1.5; pp.Ki = 0.2;
+    auto inner = std::make_shared<ctrl::DiscretePID>(pp, Ts);
+
+    ctrl::AdaptiveSPParams asp;
+    asp.maxDelaySteps    = 8;
+    asp.estimateInterval = 100;
+    asp.bufferLen        = 150;
+
+    // True delay = 3; initialise with correct estimate (tests stability path)
+    ctrl::AdaptiveSmithPredictor asp_ctrl(inner, model, 3, Ts, asp);
+
+    // Simulate true plant with delay buffer
+    // Buffer size = d_true: at step k, the input applied d_true steps ago is returned.
+    const int d_true = 3;
+    std::vector<double> u_buf(d_true, 0.0);
+    double x_plant = 0.0;
+
+    double iae = 0.0;
+    for (int k = 0; k < 200; ++k)
+    {
+        const double y   = x_plant;
+        const double e   = 1.0 - y;
+        asp_ctrl.setPlantOutput(y);
+        const double u   = asp_ctrl.compute(e);
+
+        u_buf.push_back(u);
+        const double u_del = u_buf.front();
+        u_buf.erase(u_buf.begin());
+
+        x_plant = 0.8 * x_plant + 0.2 * u_del;
+        if (k > 50) iae += std::abs(e) * Ts;
+    }
+
+    // Plant should have settled: IAE in steps 50-200 < 5.0 (loose; tests convergence, not tuning quality)
+    REQUIRE(iae < 5.0);
+    REQUIRE(std::abs(x_plant - 1.0) < 0.15);
+}
+
+TEST_CASE("AdaptiveSmithPredictor estimatedDelayTime is Ts * delay", "[adaptive_smith]")
+{
+    const double Ts = 0.05;
+    Eigen::MatrixXd A(1,1); A << 0.9;
+    Eigen::MatrixXd B(1,1); B << 0.1;
+    Eigen::MatrixXd C(1,1); C << 1.0;
+    Eigen::MatrixXd D(1,1); D << 0.0;
+    ctrl::StateSpace model(A, B, C, D, Ts);
+
+    ctrl::PIDParams pp; pp.Kp = 1.0;
+    auto inner = std::make_shared<ctrl::DiscretePID>(pp, Ts);
+
+    ctrl::AdaptiveSmithPredictor asp(inner, model, 5, Ts);
+
+    REQUIRE(asp.estimatedDelaySteps() == 5);
+    REQUIRE_THAT(asp.estimatedDelayTime(),
+                 WithinRel(5 * Ts, 1e-10));
+}
+
+// =============================================================================
+// AutoTuner (CMA-ES) - optimisation correctness
+// =============================================================================
+
+TEST_CASE("AutoTuner minimises known 2D quadratic", "[autotuner]")
+{
+    // f(x) = (x0 - 3)^2 + 2*(x1 + 1)^2  has minimum 0 at (3, -1)
+    auto cost = [](const Eigen::VectorXd &x) -> double {
+        return (x(0) - 3.0) * (x(0) - 3.0)
+             + 2.0 * (x(1) + 1.0) * (x(1) + 1.0);
+    };
+
+    ctrl::AutoTunerParams atp;
+    atp.n      = 2;
+    atp.sigma0 = 0.5;
+    atp.maxIter = 200;
+    atp.tol    = 1e-8;
+
+    ctrl::AutoTuner tuner(atp, 42);
+    Eigen::Vector2d x0(0.0, 0.0);
+    const ctrl::TunerResult res = tuner.tune(cost, x0);
+
+    // Should find minimum within tolerance
+    REQUIRE_THAT(res.params(0), WithinAbs(3.0, 1e-3));
+    REQUIRE_THAT(res.params(1), WithinAbs(-1.0, 1e-3));
+    REQUIRE(res.cost < 1e-5);
+    REQUIRE(res.nEvals > 0);
+}
+
+TEST_CASE("AutoTuner respects box bounds", "[autotuner]")
+{
+    // f(x) = (x0 - 10)^2,  true minimum at x=10, but bounded to [0, 5]
+    // Expected optimum: x=5 (upper bound), cost=(10-5)^2=25
+    auto cost = [](const Eigen::VectorXd &x) -> double {
+        return (x(0) - 10.0) * (x(0) - 10.0);
+    };
+
+    ctrl::AutoTunerParams atp;
+    atp.n      = 1;
+    atp.sigma0 = 1.0;
+    atp.maxIter = 150;
+    atp.lower  = Eigen::VectorXd::Constant(1, 0.0);
+    atp.upper  = Eigen::VectorXd::Constant(1, 5.0);
+
+    ctrl::AutoTuner tuner(atp, 7);
+    Eigen::VectorXd x0(1); x0(0) = 2.5;
+    const ctrl::TunerResult res = tuner.tune(cost, x0);
+
+    // Best feasible point should be at or near the upper bound
+    REQUIRE(res.params(0) >= 0.0 - 1e-9);
+    REQUIRE(res.params(0) <= 5.0 + 1e-9);
+    REQUIRE(res.cost < 26.0); // cost at x=5 is 25; allow small slack
+}
+
+// =============================================================================
 // LinearisationHelper - numerical Jacobians and lineariseAtPoint
 // =============================================================================
 

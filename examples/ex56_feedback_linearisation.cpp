@@ -141,8 +141,8 @@ int main()
 
         const double err2 = std::abs(x(0) - ref);
         std::cout << "System 2 (pendulum): theta=" << x(0) * 180.0 / std::numbers::pi
-                  << "^\circ  ref=" << ref * 180.0 / std::numbers::pi
-                  << "^\circ  |err|=" << err2 << " rad  (need < 0.05)\n";
+                  << " deg  ref=" << ref * 180.0 / std::numbers::pi
+                  << " deg  |err|=" << err2 << " rad  (need < 0.05)\n";
 
         if (err2 > 0.05 || !std::isfinite(x(0)))
         {

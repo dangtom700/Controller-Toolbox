@@ -700,6 +700,151 @@ Feasibility conditions
              "Current FLParams.");
 
     // -----------------------------------------------------------------------
+    // NMPCParams + NonlinearMPC
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::NMPCParams>(m, "NMPCParams",
+        "Parameters for NonlinearMPC (RTI-based NMPC).")
+        .def(py::init<>())
+        .def_readwrite("Np",         &ctrl::NMPCParams::Np)
+        .def_readwrite("Nu",         &ctrl::NMPCParams::Nu)
+        .def_readwrite("rho_y",      &ctrl::NMPCParams::rho_y)
+        .def_readwrite("rho_u",      &ctrl::NMPCParams::rho_u)
+        .def_readwrite("uMin",       &ctrl::NMPCParams::uMin)
+        .def_readwrite("uMax",       &ctrl::NMPCParams::uMax)
+        .def_readwrite("qpMaxIter",  &ctrl::NMPCParams::qpMaxIter)
+        .def_readwrite("qpTol",      &ctrl::NMPCParams::qpTol)
+        .def_readwrite("Ts",         &ctrl::NMPCParams::Ts)
+        .def_readwrite("n_states",   &ctrl::NMPCParams::n_states)
+        .def_readwrite("n_inputs",   &ctrl::NMPCParams::n_inputs)
+        .def_readwrite("n_outputs",  &ctrl::NMPCParams::n_outputs);
+
+    py::class_<ctrl::NonlinearMPC, ctrl::IController,
+               std::shared_ptr<ctrl::NonlinearMPC>>(m, "NonlinearMPC", R"doc(
+Nonlinear MPC via Real-Time Iteration (RTI).
+
+Usage
+-----
+>>> nmpc = ctrl.NonlinearMPC(params, f, C)   # C is optional (default: identity)
+>>> nmpc.set_state(x)
+>>> nmpc.set_reference(y_ref)
+>>> u = nmpc.compute(error)                  # SISO
+>>> u_vec = nmpc.compute_ref(x, y_ref)       # MIMO
+)doc")
+        .def(py::init([](const ctrl::NMPCParams &p,
+                         py::object f_py) {
+            auto f = [f_py](const Eigen::VectorXd &x,
+                            const Eigen::VectorXd &u) -> Eigen::VectorXd {
+                return f_py(x, u).cast<Eigen::VectorXd>();
+            };
+            return std::make_shared<ctrl::NonlinearMPC>(p, f);
+        }), py::arg("params"), py::arg("f"),
+            "Construct NMPC with identity output (y = x).")
+        .def(py::init([](const ctrl::NMPCParams &p,
+                         py::object f_py,
+                         const Eigen::MatrixXd &C_out) {
+            auto f = [f_py](const Eigen::VectorXd &x,
+                            const Eigen::VectorXd &u) -> Eigen::VectorXd {
+                return f_py(x, u).cast<Eigen::VectorXd>();
+            };
+            return std::make_shared<ctrl::NonlinearMPC>(p, f, C_out);
+        }), py::arg("params"), py::arg("f"), py::arg("C"),
+            "Construct NMPC with explicit output matrix C (p x n).")
+        .def("compute",          &ctrl::NonlinearMPC::compute, py::arg("error"))
+        .def("compute_ref",      &ctrl::NonlinearMPC::computeRef,
+             py::arg("x"), py::arg("y_ref"), "MIMO interface - return u_0* (m x 1).")
+        .def("set_state",        &ctrl::NonlinearMPC::setState, py::arg("x"))
+        .def("set_reference",    &ctrl::NonlinearMPC::setReference, py::arg("y_ref"))
+        .def("reset",            &ctrl::NonlinearMPC::reset)
+        .def("sample_time",      &ctrl::NonlinearMPC::sampleTime)
+        .def("last_output",      &ctrl::NonlinearMPC::lastOutput)
+        .def("last_qp_converged", &ctrl::NonlinearMPC::lastQPConverged)
+        .def("last_qp_iters",    &ctrl::NonlinearMPC::lastQPIters)
+        .def("last_control_vec", &ctrl::NonlinearMPC::lastControlVec,
+             py::return_value_policy::copy);
+
+    // -----------------------------------------------------------------------
+    // AdaptiveSPParams + AdaptiveSmithPredictor
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::AdaptiveSPParams>(m, "AdaptiveSPParams",
+        "Adaptation parameters for AdaptiveSmithPredictor.")
+        .def(py::init<>())
+        .def_readwrite("max_delay_steps",    &ctrl::AdaptiveSPParams::maxDelaySteps)
+        .def_readwrite("estimate_interval",  &ctrl::AdaptiveSPParams::estimateInterval)
+        .def_readwrite("buffer_len",         &ctrl::AdaptiveSPParams::bufferLen);
+
+    py::class_<ctrl::AdaptiveSmithPredictor, ctrl::IController,
+               std::shared_ptr<ctrl::AdaptiveSmithPredictor>>(
+        m, "AdaptiveSmithPredictor", R"doc(
+Smith Predictor with online dead-time estimation via cross-correlation.
+
+Usage
+-----
+>>> asp = ctrl.AdaptiveSmithPredictor(inner, delay_model, 5, Ts, params)
+>>> asp.set_plant_output(y_meas)
+>>> u = asp.compute(r - y_meas)
+>>> d_est = asp.estimated_delay_steps()
+)doc")
+        .def(py::init<std::shared_ptr<ctrl::IController>,
+                      const ctrl::StateSpace &,
+                      int, double,
+                      const ctrl::AdaptiveSPParams &>(),
+             py::arg("inner"), py::arg("delay_model"),
+             py::arg("initial_delay_steps"), py::arg("Ts"),
+             py::arg("params") = ctrl::AdaptiveSPParams())
+        .def("compute",                  &ctrl::AdaptiveSmithPredictor::compute,
+             py::arg("error"))
+        .def("reset",                    &ctrl::AdaptiveSmithPredictor::reset)
+        .def("sample_time",              &ctrl::AdaptiveSmithPredictor::sampleTime)
+        .def("last_output",              &ctrl::AdaptiveSmithPredictor::lastOutput)
+        .def("set_plant_output",         &ctrl::AdaptiveSmithPredictor::setPlantOutput,
+             py::arg("y"), "Feed actual plant output for accurate cross-correlation.")
+        .def("estimated_delay_steps",    &ctrl::AdaptiveSmithPredictor::estimatedDelaySteps)
+        .def("estimated_delay_time",     &ctrl::AdaptiveSmithPredictor::estimatedDelayTime);
+
+    // -----------------------------------------------------------------------
+    // AutoTunerParams + TunerResult + AutoTuner
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::AutoTunerParams>(m, "AutoTunerParams",
+        "Parameters for AutoTuner (CMA-ES black-box optimizer).")
+        .def(py::init<>())
+        .def_readwrite("n",       &ctrl::AutoTunerParams::n)
+        .def_readwrite("sigma0",  &ctrl::AutoTunerParams::sigma0)
+        .def_readwrite("maxIter", &ctrl::AutoTunerParams::maxIter)
+        .def_readwrite("tol",     &ctrl::AutoTunerParams::tol)
+        .def_readwrite("lower",   &ctrl::AutoTunerParams::lower)
+        .def_readwrite("upper",   &ctrl::AutoTunerParams::upper);
+
+    py::class_<ctrl::TunerResult>(m, "TunerResult", "Result of an AutoTuner::tune() run.")
+        .def_readonly("params",    &ctrl::TunerResult::params)
+        .def_readonly("cost",      &ctrl::TunerResult::cost)
+        .def_readonly("n_evals",   &ctrl::TunerResult::nEvals)
+        .def_readonly("n_gens",    &ctrl::TunerResult::nGens)
+        .def_readonly("converged", &ctrl::TunerResult::converged);
+
+    py::class_<ctrl::AutoTuner>(m, "AutoTuner", R"doc(
+CMA-ES black-box optimizer for controller parameter tuning.
+
+Usage
+-----
+>>> atp = ctrl.AutoTunerParams(); atp.n = 3; atp.sigma0 = 0.5
+>>> atp.lower = np.array([0., 0., 0.]); atp.upper = np.array([5., 2., 1.])
+>>> tuner = ctrl.AutoTuner(atp, seed=42)
+>>> result = tuner.tune(lambda p: iae_simulation(p), x0)
+>>> print(result.params, result.cost, result.converged)
+)doc")
+        .def(py::init<const ctrl::AutoTunerParams &, unsigned>(),
+             py::arg("params"), py::arg("seed") = 42u)
+        .def("tune", [](ctrl::AutoTuner &self,
+                        py::object cost_py,
+                        const Eigen::VectorXd &x0) {
+            auto cost_fn = [cost_py](const Eigen::VectorXd &p) -> double {
+                return cost_py(p).cast<double>();
+            };
+            return self.tune(cost_fn, x0);
+        }, py::arg("cost"), py::arg("x0"),
+           "Run CMA-ES to minimize cost(params) starting from x0.");
+
+    // -----------------------------------------------------------------------
     // Fuzzy module (optional - guarded by CTRL_HAS_FUZZY)
     // -----------------------------------------------------------------------
 #if defined(CTRL_HAS_FUZZY)

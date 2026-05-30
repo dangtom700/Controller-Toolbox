@@ -1,0 +1,50 @@
+name: Latency Benchmark
+
+# Run benchmarks on every push to main and on demand.
+# Results are uploaded as a workflow artifact and optionally
+# written to the repository wiki for trend tracking.
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: windows-2022
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Eigen3 and nlohmann-json via vcpkg
+        run: |
+          vcpkg install "eigen3:x64-windows-static" "nlohmann-json:x64-windows-static"
+
+      - name: Configure (Release + benchmarks enabled)
+        run: |
+          cmake -B build `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCTRL_BUILD_BENCHMARKS=ON `
+            -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+            -DVCPKG_TARGET_TRIPLET="x64-windows-static" `
+            -A x64
+
+      - name: Build controller_toolbox and bench_controllers
+        run: cmake --build build --config Release --target bench_controllers
+
+      - name: Run benchmark
+        run: |
+          $ts = (Get-Date -Format "yyyyMMdd_HHmmss")
+          $out = "benchmark_${ts}.txt"
+          .\build\benchmark\bench_controllers.exe | Tee-Object -FilePath $out
+          echo "BENCH_FILE=$out" >> $env:GITHUB_ENV
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ github.sha }}
+          path: ${{ env.BENCH_FILE }}
+          retention-days: 90

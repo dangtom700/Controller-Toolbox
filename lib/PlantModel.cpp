@@ -175,6 +175,7 @@ namespace ctrl
         const auto eigs = Ad.eigenvalues();
         for (int i = 0; i < eigs.size(); ++i)
         {
+#ifndef NDEBUG
             if (std::abs(eigs[i]) >= 1.0 + 1e-9)
             {
                 std::cerr << "[PlantModel::" << context << "] WARNING: A_d eigenvalue "
@@ -185,6 +186,7 @@ namespace ctrl
                           << "  or a bilinear transform of a marginally stable plant (Tustin).\n"
                           << "  Check that Ts << 1 / |lambda_max(Ac)| for all fast modes.\n";
             }
+#endif
         }
     }
 

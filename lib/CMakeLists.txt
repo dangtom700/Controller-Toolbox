@@ -49,6 +49,8 @@ set(CTRL_CORE_SOURCES
     ZeroPhaseTrackingFilter.cpp
     GapMetric.cpp
     LPVSystemID.cpp
+    NonlinearMPC.cpp
+    AdaptiveSmithPredictor.cpp
 )
 
 # --- Optional sources --------------------------------------------------------

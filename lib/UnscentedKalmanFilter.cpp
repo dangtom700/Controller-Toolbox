@@ -40,10 +40,12 @@ namespace ctrl
         // Warn when Wc(0) < 0: the zeroth covariance weight is negative, which is
         // mathematically valid in the sigma-point formulation but can cause P to lose
         // positive-semidefiniteness numerically. Consider increasing beta or alpha.
+#ifndef NDEBUG
         if (Wc_(0) < 0.0)
             std::cerr << "[UnscentedKalmanFilter] WARNING: Wc(0) = " << Wc_(0)
                       << " < 0. Predicted covariance may lose PSD. "
                       << "Consider increasing beta (default 2) or alpha.\n";
+#endif
 
         const double w_rest = 0.5 / (n + lambda_);
         for (int i = 1; i < L; ++i)

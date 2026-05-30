@@ -422,4 +422,41 @@ assert hasattr(ctrl, 'identify_lpv'),    "identify_lpv not accessible"
 assert hasattr(ctrl, 'identify_lpv_from_io'), "identify_lpv_from_io not accessible"
 print('LPVModel smoke test passed.')
 
+# NonlinearMPC smoke test
+nmpc_p = ctrl.NMPCParams()
+nmpc_p.Np = 5; nmpc_p.Nu = 2; nmpc_p.rho_y = 1.0; nmpc_p.rho_u = 0.1
+nmpc_p.uMin = -5.0; nmpc_p.uMax = 5.0; nmpc_p.Ts = Ts_s
+nmpc_p.n_states = 1; nmpc_p.n_inputs = 1; nmpc_p.n_outputs = 1
+def _f_nl(x, u):
+    return np.array([0.9 * float(x[0]) + float(u[0])])
+nmpc_obj = ctrl.NonlinearMPC(nmpc_p, _f_nl)
+nmpc_obj.set_state(np.array([0.0]))
+u_nmpc = nmpc_obj.compute_ref(np.array([0.0]), np.array([1.0]))
+assert np.isfinite(u_nmpc[0]), "NonlinearMPC output not finite"
+print('NonlinearMPC smoke test passed.')
+
+# AdaptiveSmithPredictor smoke test
+asp_p = ctrl.AdaptiveSPParams()
+asp_p.max_delay_steps = 10; asp_p.estimate_interval = 100; asp_p.buffer_len = 150
+sys_sp = ctrl.StateSpace(np.array([[0.8]]), np.array([[0.2]]),
+                         np.array([[1.0]]), np.array([[0.0]]), Ts_s)
+inner_pid = ctrl.DiscretePID(ctrl.PIDParams(), Ts_s)
+asp_ctrl = ctrl.AdaptiveSmithPredictor(inner_pid, sys_sp, 3, Ts_s, asp_p)
+asp_ctrl.set_plant_output(0.5)
+u_asp = asp_ctrl.compute(0.5)
+assert np.isfinite(u_asp), "AdaptiveSmithPredictor output not finite"
+assert asp_ctrl.estimated_delay_steps() == 3
+print('AdaptiveSmithPredictor smoke test passed.')
+
+# AutoTuner smoke test
+atp = ctrl.AutoTunerParams()
+atp.n = 2; atp.sigma0 = 0.5; atp.maxIter = 20
+tuner = ctrl.AutoTuner(atp, 42)
+def _quad_cost(p):
+    return float(p[0]**2 + p[1]**2)
+res = tuner.tune(_quad_cost, np.array([1.0, 1.0]))
+assert res.n_evals > 0, "AutoTuner produced 0 evaluations"
+assert np.isfinite(res.cost), "AutoTuner cost not finite"
+print('AutoTuner smoke test passed.')
+
 print('\nAll smoke tests passed.')

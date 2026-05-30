@@ -180,7 +180,9 @@ namespace ctrl
     {
         base.warned = true;
         base.warning = msg;
+#ifndef NDEBUG
         std::clog << "[TunerSuite] WARNING: " << msg << "\n";
+#endif
     }
 
     // ============================================================

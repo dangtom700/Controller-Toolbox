@@ -81,8 +81,10 @@ namespace ctrl
                     continue;
                 if (!e.controller->isHealthy())
                 {
+#ifndef NDEBUG
                     std::cerr << "[ControllerStack] WARNING: Supervisory mode - skipping \""
                               << e.name << "\" (isHealthy() == false), trying next entry.\n";
+#endif
                     continue;
                 }
                 if (!prevActiveName_.empty() && e.name != prevActiveName_)
@@ -93,8 +95,12 @@ namespace ctrl
                 break;
             }
             if (!found)
+            {
+#ifndef NDEBUG
                 std::cerr << "[ControllerStack] WARNING: Supervisory mode - no eligible entry "
                              "found. Holding last output " << lastOutput_ << ".\n";
+#endif
+            }
             prevActiveName_ = activeName_;
             break;
         }
@@ -143,8 +149,10 @@ namespace ctrl
             else
             {
                 out = lastOutput_; // hold last output - no active, gate-passing entry
+#ifndef NDEBUG
                 std::cerr << "[ControllerStack] WARNING: Weighted mode - no active, gate-passing "
                              "entry found. Holding last output " << lastOutput_ << ".\n";
+#endif
             }
             break;
         }

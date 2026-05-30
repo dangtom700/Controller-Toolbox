@@ -444,6 +444,59 @@ int main()
     }
 
     // =======================================================================
+    // Section 4 - Part 22 additions: NMPC and AdaptiveSmithPredictor
+    // =======================================================================
+    std::cout << "-- Part 22 additions ---------------------------------------------------"
+                 "----------------\n";
+    printHeader();
+
+    // NonlinearMPC (Np=5, Nu=2, n=2, 1 RTI step per sample)
+    {
+        const int n = 2;
+        ctrl::NMPCParams np;
+        np.Np = 5; np.Nu = 2;
+        np.rho_y = 1.0; np.rho_u = 0.1;
+        np.uMin = -10.0; np.uMax = 10.0;
+        np.qpMaxIter = 200; np.qpTol = 1e-5;
+        np.Ts = Ts; np.n_states = n; np.n_inputs = 1; np.n_outputs = 1;
+
+        auto f_nl = [](const Eigen::VectorXd &x,
+                       const Eigen::VectorXd &u) -> Eigen::VectorXd {
+            Eigen::VectorXd xn(2);
+            xn(0) = 0.9 * x(0) + 0.1 * x(1);
+            xn(1) = 0.8 * x(1) + u(0);
+            return xn;
+        };
+        Eigen::MatrixXd C_out(1, 2); C_out << 1.0, 0.0;
+        ctrl::NonlinearMPC nmpc(np, f_nl, C_out);
+
+        Eigen::VectorXd x_st = Eigen::VectorXd::Constant(n, 0.1);
+        Eigen::VectorXd yref(1); yref << 1.0;
+        record(bench("NonlinearMPC Np=5 (n=2)", STEPS_OPT, WARMUP,
+                     [&](long long) {
+                         nmpc.setState(x_st);
+                         return nmpc.computeRef(x_st, yref)(0);
+                     }));
+    }
+
+    // AdaptiveSmithPredictor (d=5, estimateInterval=1000 so no re-estimate mid-bench)
+    {
+        ctrl::StateSpace sys2 = makePlant(2, Ts);
+        ctrl::PIDParams  pp;
+        pp.Kp = 1.0; pp.Ki = 0.1;
+        auto pid_inner2 = std::make_shared<ctrl::DiscretePID>(pp, Ts);
+        ctrl::AdaptiveSPParams asp;
+        asp.maxDelaySteps    = 10;
+        asp.estimateInterval = 100000; // disable re-estimation during bench
+        asp.bufferLen        = 200;
+        ctrl::AdaptiveSmithPredictor asp_sp(pid_inner2, sys2, 5, Ts, asp);
+        record(bench("AdaptiveSmithPredictor (d=5)", STEPS, WARMUP,
+                     [&](long long) { return asp_sp.compute(1.0); }));
+    }
+
+    std::cout << "\n";
+
+    // =======================================================================
     // Summary - ranked fastest to slowest
     // =======================================================================
     std::sort(all_results.begin(), all_results.end(),
