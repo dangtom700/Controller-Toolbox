@@ -87,6 +87,9 @@ add_example(ex63_nonlinear_mpc)
 add_example(ex64_adaptive_smith_predictor)
 add_example(ex65_autotuner_pid)
 
+# Part 24: AntiWindupWrapper
+add_example(ex66_antwindup_wrapper)
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)

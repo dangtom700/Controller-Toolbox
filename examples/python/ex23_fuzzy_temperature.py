@@ -168,4 +168,6 @@ ax2.legend(); ax2.grid(True, alpha=0.4)
 
 plt.tight_layout()
 fig.savefig(Path(__file__).parent.parent.parent / "data" / "ex23_fuzzy_temperature.png", dpi=150)
-plt.show()
+plt.show(block=False)
+plt.pause(10)
+plt.close('all')

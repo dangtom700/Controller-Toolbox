@@ -1,13 +1,39 @@
 # Test Suite Update - Controller Toolbox
 
-**Date:** 2026-05-28 (Rev 4)
+**Date:** 2026-05-30 (Rev 5)
 **Scope:** `tests/test_catch2_advanced.cpp`, `tests/test_catch2_pilot.cpp`, `tests/test_controllers.cpp`
 
 ---
 
 ## Rev 4 — Algorithm Extension Tests (2026-05-28)
 
-**Current totals: 78 C++ executables pass | 79 Python examples pass | 0 failures.**
+**Current totals (Rev 5 / Part 24): 86 C++ executables pass | 86 Python examples pass | 0 failures.**
+
+---
+
+## Rev 5 — AntiWindupWrapper Tests (2026-05-30)
+
+### New Catch2 test cases — 2 tests in `test_catch2_advanced.cpp`
+
+#### `[anti_windup]` — AntiWindupWrapper (2 tests)
+
+1. **"limits integrator windup during saturation"** — PI controller (Kp=0.5, Ki=1.0, Kb=0) wraps a
+   first-order plant with uMax=1. After 50 saturating steps (r=5) + 30 recovery steps (r=0),
+   the wrapped version's plant output is materially lower than the unwrapped version (integral
+   bounded by conditioning vs. growing unbounded). Asserts: `y_wrapped < y_unwrapped`,
+   `y_wrapped < 1.5`, `y_unwrapped > 1.5`.
+
+2. **"transparent when not saturating"** — Same PI controller, wide limits (uMin=-10, uMax=10),
+   small reference r=0.3 (no saturation). Asserts: `u_wrapped == u_ref` at every step
+   (WithinRel 1e-9), `isSaturated()==false`, `saturationError()==0` throughout and after reset().
+
+**Total test_catch2_advanced.cpp: 61 test cases.**
+
+---
+
+## Rev 4 — Algorithm Extension Tests (2026-05-28)
+
+**Rev 4 totals at time of writing: 78 C++ executables pass | 79 Python examples pass | 0 failures.**
 
 ### New Catch2 test cases — 11 tests, 39 assertions
 

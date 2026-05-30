@@ -845,6 +845,66 @@ Usage
            "Run CMA-ES to minimize cost(params) starting from x0.");
 
     // -----------------------------------------------------------------------
+    // AntiWindupWrapper - generic conditioning-technique decorator (Hanus 1987)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::AntiWindupWrapper, ctrl::IController,
+               std::shared_ptr<ctrl::AntiWindupWrapper>>(
+        m, "AntiWindupWrapper", R"doc(
+Generic anti-windup decorator for any IController (conditioning technique).
+
+Wraps an arbitrary IController with output saturation and the Hanus (1987)
+conditioning technique. The wrapper is transparent when not saturating and
+prevents integrator windup by injecting a correction into the error input:
+
+    e_in[k] = e[k] + Kb * (u_sat[k-1] - u_raw[k-1])
+
+Suitable for DiscreteLQG, DiscreteHinf, GPC, and any controller with hidden
+integrators but no built-in anti-windup.
+
+**Do NOT** wrap DiscretePID with this class - DiscretePID already has built-in
+back-calculation anti-windup via PIDParams::Kb.
+
+Parameters
+----------
+inner : IController
+    The controller to wrap. Co-owned via shared_ptr.
+uMin : float
+    Lower actuator saturation limit.
+uMax : float
+    Upper saturation limit (must be > uMin).
+Kb : float, optional
+    Conditioning gain.  0 = pure clamp; 1.0 = standard (default).
+
+Example
+-------
+>>> pid = ctrl.DiscretePID(pp, Ts)   # Kb=0 in pp to disable built-in AW
+>>> aw  = ctrl.AntiWindupWrapper(pid, uMin=-1.0, uMax=1.0, Kb=1.0)
+>>> u   = aw.compute(r - y)          # saturated + conditioned output
+>>> print(aw.is_saturated(), aw.saturation_error())
+)doc")
+        .def(py::init<std::shared_ptr<ctrl::IController>, double, double, double>(),
+             py::arg("inner"), py::arg("uMin"), py::arg("uMax"), py::arg("Kb") = 1.0,
+             "Construct wrapper around inner controller with saturation limits and conditioning gain.")
+        .def("compute",           &ctrl::AntiWindupWrapper::compute,
+             py::arg("error"),
+             "Advance one step with saturation and conditioning. Returns saturated u.")
+        .def("reset",             &ctrl::AntiWindupWrapper::reset,
+             "Reset the wrapper and the inner controller.")
+        .def("sample_time",       &ctrl::AntiWindupWrapper::sampleTime,
+             "Sample time [s] inherited from the inner controller.")
+        .def("is_healthy",        &ctrl::AntiWindupWrapper::isHealthy,
+             "Delegates health check to the inner controller (e.g. QP convergence).")
+        .def("last_output",       &ctrl::AntiWindupWrapper::lastOutput,
+             "Last saturated output u[k] returned by compute().")
+        .def("is_saturated",      &ctrl::AntiWindupWrapper::isSaturated,
+             "True when the previous compute() hit the saturation limits.")
+        .def("saturation_error",  &ctrl::AntiWindupWrapper::saturationError,
+             "Saturation error from the last step: u_sat - u_raw. Zero when not saturated.")
+        .def("set_actual_output", &ctrl::AntiWindupWrapper::setActualOutput,
+             py::arg("u_applied"),
+             "Feed back the true applied output when external clamping overrides the internal one.");
+
+    // -----------------------------------------------------------------------
     // Fuzzy module (optional - guarded by CTRL_HAS_FUZZY)
     // -----------------------------------------------------------------------
 #if defined(CTRL_HAS_FUZZY)

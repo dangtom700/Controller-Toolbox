@@ -53,3 +53,5 @@
 #include "SimActuator.h"
 #include "SafeSensor.h"
 #include "SimScheduler.h"
+#include "FreeRTOSScheduler.h" // Conditionally compiled (requires FREERTOS_VERSION or INC_FREERTOS_H).
+#include "ZephyrScheduler.h"   // Conditionally compiled (requires CONFIG_ZEPHYR).

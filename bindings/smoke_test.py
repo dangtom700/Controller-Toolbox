@@ -459,4 +459,17 @@ assert res.n_evals > 0, "AutoTuner produced 0 evaluations"
 assert np.isfinite(res.cost), "AutoTuner cost not finite"
 print('AutoTuner smoke test passed.')
 
+# AntiWindupWrapper smoke test
+pp_aw = ctrl.PIDParams()
+pp_aw.Kp = 0.5; pp_aw.Ki = 1.0; pp_aw.Kb = 0.0
+pp_aw.uMin = -1e9; pp_aw.uMax = 1e9
+pid_aw_inner = ctrl.DiscretePID(pp_aw, 0.1)
+aw = ctrl.AntiWindupWrapper(pid_aw_inner, -3.0, 1.0, 1.0)
+u_aw = aw.compute(5.0)   # large error -> saturates
+assert aw.is_saturated(), "AntiWindupWrapper should be saturated on large error"
+assert aw.saturation_error() < 0.0, "saturation_error should be negative when clamped at uMax"
+aw.reset()
+assert not aw.is_saturated(), "AntiWindupWrapper should not be saturated after reset"
+print('AntiWindupWrapper smoke test passed.')
+
 print('\nAll smoke tests passed.')

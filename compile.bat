@@ -104,6 +104,7 @@ for %%T in (
     ex63_nonlinear_mpc
     ex64_adaptive_smith_predictor
     ex65_autotuner_pid
+    ex66_antwindup_wrapper
     test_autoscheduling
     example_pid_feedback
     mimo_known

@@ -70,6 +70,7 @@ inline std::unordered_map<std::string, bool> features()
         {"nonlinear_mpc",           true},  // always compiled (NonlinearMPC.cpp in core sources)
         {"adaptive_smith",          true},  // always compiled (AdaptiveSmithPredictor.cpp in core sources)
         {"auto_tuner",              true},  // always compiled (header-only AutoTuner.h)
+        {"anti_windup_wrapper",     true},  // always compiled (header-only AntiWindupWrapper.h)
     };
 }
 

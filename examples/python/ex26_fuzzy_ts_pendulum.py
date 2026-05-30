@@ -112,4 +112,6 @@ axes[2].legend(); axes[2].grid(True, alpha=0.4)
 
 plt.tight_layout()
 fig.savefig(Path(__file__).parent.parent.parent / "data" / "ex26_fuzzy_ts_pendulum.png", dpi=150)
-plt.show()
+plt.show(block=False)
+plt.pause(10)
+plt.close('all')

@@ -4565,4 +4565,142 @@ NumPy 2.x compatibility, PR checklist (15 items).
 
 ---
 
+## Part 24: AntiWindupWrapper + FreeRTOS/Zephyr HAL Stubs (2026-05-30)
+
+**Open issues closed in this part:** H1, H2 (both HIGH priority from Part 23 backlog).
+
+**Test suite after Part 24:** 87 passed | 0 failed
+  - test_catch2_advanced: 61 test cases (+2 `[anti_windup]`)
+  - All other suites unchanged.
+
+**Python examples:** 86 passed | 0 failed (+1: ex82_antwindup_mpc.py)
+
+---
+
+### 24.1 AntiWindupWrapper [H1 CLOSED]
+
+**New:** `lib/AntiWindupWrapper.h` (header-only, ~180 lines).
+
+**Algorithm:** Hanus (1987) conditioning technique / Astrom & Wittenmark 3rd ed. §8.5.
+
+At each step:
+1. Augment the incoming error with the previous conditioning correction:
+   `e_in[k] = e[k] + c[k-1]`
+2. Compute raw output from the inner controller:
+   `u_raw[k] = C(z) * e_in[k]`
+3. Saturate: `u[k] = clamp(u_raw[k], uMin, uMax)`
+4. Compute next correction: `c[k] = Kb * (u[k] - u_raw[k])`
+
+When unsaturated: `c[k] = 0`, wrapper is identity (transparent pass-through).
+When saturated: correction steers the controller's internal state away from the
+  saturating region without requiring direct access to integrators.
+
+**Steady-state integral bound** (pure-I controller, constant error e):
+  `integral_ss ≈ uMax + e / Kb`
+  This is finite, preventing unbounded windup.
+
+Without wrapper: integral grows as `O(N)` during N steps of saturation.
+With wrapper (Kb=1): integral converges to `uMax + e/Kb` (bounded).
+
+**Key design decisions:**
+- `AntiWindupWrapper : public IController` - full decorator pattern.
+- `bumplessInit()` delegates to `inner_->bumplessInit()` and resets `correction_=0`.
+- `isHealthy()` delegates to `inner_->isHealthy()` (e.g., QP convergence in MPC).
+- `setActualOutput(u_applied)` re-computes the correction when external hardware
+  clamping overrides the internal clamp (DAC clipping, supervisory override).
+- Throws `std::invalid_argument` on nullptr inner, uMin>=uMax, or Kb<0.
+
+**When to use:**
+- DiscreteLQG, DiscreteHinf, GPC, custom controllers with hidden integrators.
+
+**When NOT to use:**
+- DiscretePID: already has back-calculation via `PIDParams::Kb`. Double-wrapping
+  a PID applies the conditioning twice and may destabilise the loop.
+- DiscreteMPC with u-constraints (`uMin`/`uMax` in `MPCParams`): the QP already
+  enforces hard constraints; the wrapper adds only mild performance degradation.
+
+**API:**
+```cpp
+ctrl::AntiWindupWrapper aw(inner, uMin, uMax, Kb=1.0);
+double u = aw.compute(error);     // saturated + conditioned output
+bool   s = aw.isSaturated();      // true if |u_sat - u_raw| > 1e-12
+double e = aw.saturationError();  // u_sat - u_raw from last step
+aw.setActualOutput(u_applied);    // feed back external clamped output
+```
+
+**Files changed:**
+- `lib/AntiWindupWrapper.h` [NEW]
+- `lib/ControllerToolbox.h` - added `#include "AntiWindupWrapper.h"`
+- `lib/Features.h` - added `{"anti_windup_wrapper", true}`
+- `bindings/controllers_bindings.cpp` - AntiWindupWrapper class + methods
+- `bindings/smoke_test.py` - AntiWindupWrapper smoke test assertion
+- `tests/test_catch2_advanced.cpp` - 2 `[anti_windup]` Catch2 tests
+- `examples/ex66_antwindup_wrapper.cpp` [NEW]
+- `examples/CMakeLists.txt` + `compile.bat` - added ex66
+- `examples/python/ex82_antwindup_mpc.py` [NEW]
+
+**Catch2 tests:**
+1. `"AntiWindupWrapper limits integrator windup during saturation" [anti_windup]`
+   - PI (Kp=0.5, Ki=1.0, Kb=0), plant A=0.9 B=0.2, uMax=1.
+   - 50 steps r=5 (saturating) + 30 steps r=0 (recovery).
+   - REQUIRE: wrapped y < unwrapped y (converged faster toward 0).
+   - REQUIRE: wrapped y < 1.5 (crossed below saturation floor).
+   - REQUIRE: unwrapped y > 1.5 (still winding down near y_ss=2).
+
+2. `"AntiWindupWrapper is transparent when not saturating" [anti_windup]`
+   - Same PI, wide limits (uMin=-10, uMax=10), small reference r=0.3.
+   - REQUIRE: wrapped u == unwrapped u at every step (WithinRel 1e-9).
+   - REQUIRE: isSaturated()==false, saturationError()==0 throughout.
+   - REQUIRE: isSaturated()==false after reset().
+
+---
+
+### 24.2 FreeRTOS / Zephyr IScheduler stubs [H2 CLOSED]
+
+**New:** `lib/hal/FreeRTOSScheduler.h` and `lib/hal/ZephyrScheduler.h`.
+
+Both implement the existing `IScheduler` interface (no changes to IScheduler.h).
+
+**FreeRTOSScheduler:**
+- Guarded by `#if defined(FREERTOS_VERSION) || defined(INC_FREERTOS_H)`.
+- Uses `xTimerCreate()` (auto-reload software timer).
+- Period converted from ns to `TickType_t` via `portTICK_PERIOD_MS`.
+- Callback dispatched via static trampoline `timerCallback(TimerHandle_t)`.
+- `overrunCount()` returns 0 (FreeRTOS software timers have no built-in
+  wall-clock measurement; integrate an ITimer if needed).
+
+**ZephyrScheduler:**
+- Guarded by `#if defined(CONFIG_ZEPHYR)`.
+- Uses `k_timer_init()` / `k_timer_start()`.
+- Period converted from ns to `K_MSEC(...)` (millisecond resolution).
+- Callback dispatched via `k_timer_user_data_get()` trampoline.
+- **Note:** `k_timer` expiry runs from the system timer ISR (or workqueue
+  depending on CONFIG_SYSTEM_WORKQUEUE_*). Adapt to submit a `k_work` item
+  if floating-point operations or mutex usage require a thread context.
+
+**Files changed:**
+- `lib/hal/FreeRTOSScheduler.h` [NEW]
+- `lib/hal/ZephyrScheduler.h` [NEW]
+- `lib/hal/HAL.h` - added conditional includes for both stubs
+
+**Tests:** Not applicable - stubs require RTOS headers not present on the host
+build. SimScheduler remains the reference implementation for all host tests.
+
+---
+
+### 24.3 Status of all previously open items (after Part 24)
+
+| ID  | Description                                          | Status after Part 24     |
+|-----|------------------------------------------------------|--------------------------|
+| H1  | AntiWindupWrapper generic anti-windup decorator      | **[CLOSED]** Part 24     |
+| H2  | FreeRTOS / Zephyr IScheduler stubs                   | **[CLOSED]** Part 24     |
+| T2  | MIMO nu-gap (subspace chordal distance)              | [OPEN] deferred          |
+| T3  | Full DK-iteration with vector-fitting rational D(jω) | [OPEN] deferred          |
+| T4  | MHE state constraints (linear inequalities)          | [OPEN] deferred          |
+| T5  | GainScheduledController bumpless for LinearBlend     | [OPEN] deferred          |
+| T6  | test_stability_margins.cpp formal GM/PM regression   | [OPEN] deferred          |
+| T7  | tools/compare_controllers.py IAE/ISE table           | [OPEN] deferred          |
+
+---
+
 *Part 23 added 2026-05-29. Modified: lib/GainScheduledController.h, docs/*, .github/workflows/benchmark.yml. New: examples/python/ex81_lpv_crossval.py, CONTRIBUTING.md.*

@@ -15,7 +15,7 @@ Target audience: control engineers and software developers familiar with discret
    - 5.1 [Core Types](#51-core-types-iplantmodel)
    - 5.2 [Controllers](#52-controllers) (incl. Fuzzy Logic Module)
    - 5.3 [Estimators, Identification & Optimisation](#53-estimators--identification)
-          (incl. GainScheduledController, GapMetric, LPVSystemID, NonlinearMPC, AdaptiveSmithPredictor, AutoTuner)
+          (incl. GainScheduledController, GapMetric, LPVSystemID, NonlinearMPC, AdaptiveSmithPredictor, AutoTuner, AntiWindupWrapper)
    - 5.4 [Tuning Layer](#54-tuning-layer)
    - 5.5 [Composition & Orchestration](#55-composition--orchestration)
    - 5.6 [Analysis & Metrics](#56-analysis--metrics)
@@ -696,6 +696,14 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 - **Params:** `AutoTunerParams {n, sigma0, maxIter, tol, lower, upper}`. **Result:** `TunerResult {params, cost, nEvals, nGens, converged}`.
 - **Usage:** `AutoTuner tuner(atp, seed); auto result = tuner.tune(cost_fn, x0);`
 - **Box constraints:** implemented by clipping samples to [lower, upper].
+
+#### `AntiWindupWrapper` ([AntiWindupWrapper.h](lib/AntiWindupWrapper.h)) *Part 24, header-only*
+- **Purpose:** Generic anti-windup decorator for any IController using the Hanus (1987) conditioning technique. Prevents integrator windup in controllers without built-in saturation handling (DiscreteLQG, DiscreteHinf, GPC, custom).
+- **Algorithm:** At each step: `e_in[k] = e[k] + Kb*(u_sat[k-1]-u_raw[k-1])` is passed to the inner controller; integral is bounded to `≈ uMax + e/Kb` in steady saturation (vs unbounded without wrapper).
+- **Ctor:** `AntiWindupWrapper(shared_ptr<IController> inner, uMin, uMax, Kb=1.0)`.
+- **Key methods:** `compute(error)`, `isSaturated()`, `saturationError()`, `setActualOutput(u_applied)`, `lastOutput()`, `bumplessInit(u_target, error)`.
+- **Do NOT use on DiscretePID** — PID already has back-calculation via `PIDParams::Kb`. Double-wrapping applies conditioning twice.
+- **Python:** `ctrl.AntiWindupWrapper(inner, uMin, uMax, Kb=1.0)`.
 
 ---
 

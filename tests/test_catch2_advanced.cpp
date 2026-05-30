@@ -2005,3 +2005,100 @@ TEST_CASE("designZPETC NMP: detects NMP zeros and unit DC gain", "[zpetc]")
     const double dc_composite = std::abs(resp_plant[0] * resp_filter[0]);
     REQUIRE_THAT(dc_composite, WithinAbs(1.0, 0.05));
 }
+
+// =============================================================================
+// AntiWindupWrapper - conditioning technique (Hanus 1987 / Astrom-Wittenmark 8.5)
+// =============================================================================
+
+TEST_CASE("AntiWindupWrapper limits integrator windup during saturation", "[anti_windup]")
+{
+    // Plant: y[k+1] = 0.9*y[k] + 0.2*u[k],  y_ss = 2.0 at u = 1.
+    // Controller: PI (Kp=0.5, Ki=1.0, Kb=0) - no internal anti-windup.
+    // Actuator: uMin=-3, uMax=1.  Reference r=5 saturates the actuator.
+    //
+    // Without wrapper: integral accumulates freely during saturation (-> ~20).
+    // With wrapper (Kb=1): conditioning bounds the integral to ~ uMax + r/Kb approx = 6.
+    // After switching to r=0, the wrapped plant converges much faster because
+    // its integral is smaller and exits saturation ~40 steps sooner.
+    //
+    // Tolerance: wrapped y[final] < unwrapped y[final].  The gap is ~1.5 at N=80.
+    const double Ts   = 0.1;
+    const double uMax =  1.0;
+    const double uMin = -3.0;
+    const int    Nsat = 50;   // saturation phase (r=5)
+    const int    Nrec = 30;   // recovery phase (r=0)
+
+    auto step_plant = [](double y, double u) { return 0.9 * y + 0.2 * u; };
+
+    auto make_pid = [&]() -> std::shared_ptr<ctrl::DiscretePID> {
+        ctrl::PIDParams pp;
+        pp.Kp = 0.5; pp.Ki = 1.0; pp.Kd = 0.0; pp.N = 10.0;
+        pp.Kb  = 0.0;                // disable built-in anti-windup
+        pp.uMin = -1e9; pp.uMax = 1e9; // wrapper owns clamping
+        return std::make_shared<ctrl::DiscretePID>(pp, Ts);
+    };
+
+    // --- Unwrapped: manual output clamping, integral winds up freely ---
+    auto pid_raw = make_pid();
+    double y_raw = 0.0;
+    for (int k = 0; k < Nsat + Nrec; ++k) {
+        const double ref  = (k < Nsat) ? 5.0 : 0.0;
+        const double u    = std::clamp(pid_raw->compute(ref - y_raw), uMin, uMax);
+        y_raw = step_plant(y_raw, u);
+    }
+
+    // --- Wrapped: conditioning technique prevents windup ---
+    auto pid_aw = make_pid();
+    ctrl::AntiWindupWrapper wrapped(pid_aw, uMin, uMax, /*Kb=*/1.0);
+    double y_aw = 0.0;
+    for (int k = 0; k < Nsat + Nrec; ++k) {
+        const double ref = (k < Nsat) ? 5.0 : 0.0;
+        y_aw = step_plant(y_aw, wrapped.compute(ref - y_aw));
+    }
+
+    // Both applied u=1 during saturation -> identical plant trajectory to step Nsat.
+    // After Nrec recovery steps the wrapped integral is bounded (approx =6) vs unbounded
+    // (approx =20) for the unwrapped case.  The wrapped version converges to r=0 faster.
+    REQUIRE(y_aw < y_raw);          // wrapped converges toward 0; unwrapped stays high
+    REQUIRE(y_aw < 1.5);            // wrapped has crossed below the saturation floor
+    REQUIRE(y_raw > 1.5);           // unwrapped is still winding down near y_ss=2
+    REQUIRE(wrapped.isHealthy());
+}
+
+TEST_CASE("AntiWindupWrapper is transparent when not saturating", "[anti_windup]")
+{
+    // When the output never hits the saturation limits, the wrapper must be
+    // a perfect pass-through: same output as the undecorated inner controller
+    // at every step.  The correction stays zero, isSaturated() stays false.
+    const double Ts = 0.1;
+    ctrl::PIDParams pp;
+    pp.Kp = 1.0; pp.Ki = 0.5; pp.Kd = 0.0; pp.N = 10.0;
+    pp.Kb  = 0.0; pp.uMin = -1e9; pp.uMax = 1e9;
+
+    auto pid_ref     = std::make_shared<ctrl::DiscretePID>(pp, Ts);
+    auto pid_wrapped = std::make_shared<ctrl::DiscretePID>(pp, Ts);
+
+    // Wide limits: max attainable output for r=0.3 is far below +/-10.
+    ctrl::AntiWindupWrapper wrapper(pid_wrapped, -10.0, 10.0, /*Kb=*/1.0);
+
+    double y_ref = 0.0, y_aw = 0.0;
+    const double r = 0.3;
+
+    for (int k = 0; k < 30; ++k) {
+        const double u_ref = pid_ref->compute(r - y_ref);
+        const double u_aw  = wrapper.compute(r - y_aw);
+
+        y_ref = 0.9 * y_ref + 0.2 * u_ref;
+        y_aw  = 0.9 * y_aw  + 0.2 * u_aw;
+
+        // Wrapper must be transparent: same output, no saturation flag
+        REQUIRE_THAT(u_aw, WithinRel(u_ref, 1e-9));
+        REQUIRE_FALSE(wrapper.isSaturated());
+        REQUIRE_THAT(wrapper.saturationError(), WithinAbs(0.0, 1e-12));
+    }
+
+    // reset() clears correction and propagates to inner controller
+    wrapper.reset();
+    REQUIRE_FALSE(wrapper.isSaturated());
+    REQUIRE_THAT(wrapper.saturationError(), WithinAbs(0.0, 1e-12));
+}
