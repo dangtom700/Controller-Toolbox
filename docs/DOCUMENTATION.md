@@ -14,7 +14,8 @@ Target audience: control engineers and software developers familiar with discret
 5. [Class Reference](#5-class-reference)
    - 5.1 [Core Types](#51-core-types-iplantmodel)
    - 5.2 [Controllers](#52-controllers) (incl. Fuzzy Logic Module)
-   - 5.3 [Estimators & Identification](#53-estimators--identification)
+   - 5.3 [Estimators, Identification & Optimisation](#53-estimators--identification)
+          (incl. GainScheduledController, GapMetric, LPVSystemID, NonlinearMPC, AdaptiveSmithPredictor, AutoTuner)
    - 5.4 [Tuning Layer](#54-tuning-layer)
    - 5.5 [Composition & Orchestration](#55-composition--orchestration)
    - 5.6 [Analysis & Metrics](#56-analysis--metrics)
@@ -651,6 +652,51 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 - **Methods:** `n4sid(y, u, n, i)` -> `StateSpace`; `suggestOrder(y, u, maxOrder)` -> recommended model order from singular value elbow detection.
 - **Inputs:** `y` (p x N output data matrix), `u` (m x N input data matrix), `n` (model order), `i` (block-row factor, typically n <= i <= 2n).
 
+#### `GainScheduledController` ([GainScheduledController.h](lib/GainScheduledController.h)) *Part 20+23*
+- **Purpose:** IController wrapper that interpolates between a sorted list of (p, IController) schedule points.
+- **Modes:** `NearestNeighbor` (hard-switch; calls `bumplessInit` on the incoming controller when the active index changes — Part 23 fix); `LinearBlend` (weighted average of adjacent controllers).
+- **Methods:** `addSchedulePoint(p, ctrl)`, `setSchedulingParam(p)`, `compute(error)`, `lastOutput()` (not override).
+- **Note:** `lastOutput()` is NOT a virtual override (no virtual lastOutput() in IController base).
+- **LQR pattern:** Use `LQRAdapter` (which IS an IController) with a state-capturing lambda as the schedule point controller.
+
+#### `GapMetric` ([GapMetric.h](lib/GapMetric.h)) *Part 20*
+- **Purpose:** Nu-gap upper bound (SISO chordal metric) for measuring plant model distance.
+- **Functions:** `nuGap(P1, P2, freq_points=200)` -> scalar in [0,1]; `nuGapMatrix(models)` -> N x N symmetric distance matrix; `freqResponseGrid(sys, omega)`.
+- **Limitation:** SISO only; throws `invalid_argument` for MIMO plants.
+
+#### `LinearModelCluster` ([LinearModelCluster.h](lib/LinearModelCluster.h)) *Part 20*
+- **Purpose:** Single-linkage agglomerative clustering of plant models by nu-gap distance.
+- **Functions:** `clusterByGap(gapMatrix, threshold)` -> `ClusterResult {labels, representatives, maxIntraGap, numClusters, threshold}`; `suggestGapThreshold(gapMatrix)`.
+
+#### `LPVSystemID` ([LPVSystemID.h](lib/LPVSystemID.h)) *Part 20*
+- **Purpose:** Polynomial LPV system identification via QR regression.
+- **Functions:** `identifyLPV(X, U, Y, sched, degree, Ts)` -> `LPVModel`; `identifyLPVFromIO(U, Y, sched, n_states)` (uses n4sid first).
+- **Layout:** X is (n x N) column-major (each column = one time step). U is (m x N), Y is (p x N). **CRITICAL: NOT (N x n) row-major.**
+- **LPVModel:** `frozen(p)` -> `StateSpace`; `evalA(p)`, `evalB(p)`.
+
+#### `AutoGainScheduler` ([AutoGainScheduler.h](lib/AutoGainScheduler.h)) *Part 20*
+- **Purpose:** Pipeline: nonlinear plant -> equilibrium grid -> linearise -> gap cluster -> design controllers -> assemble GainScheduledController.
+- **Functions:** `findEquilibrium(f, u_eq, x0)` (Newton-Raphson); `buildAutoGainScheduler(f, p_min, p_max, density, u_eq_fn, x0_fn, design_fn, Ts)`.
+- **CRITICAL:** `design_fn` lambda must have trailing return type `-> std::shared_ptr<IController>` (GCC cannot deduce shared_ptr<Derived> -> shared_ptr<Base>).
+
+#### `NonlinearMPC` ([NonlinearMPC.h](lib/NonlinearMPC.h)) *Part 22*
+- **Purpose:** Nonlinear MPC via Real-Time Iteration (RTI, Diehl 2005). Discrete-time dynamics `x[k+1] = f(x[k], u[k])`.
+- **Params:** `NMPCParams {Np, Nu, rho_y, rho_u, uMin, uMax, qpMaxIter, qpTol, Ts, n_states, n_inputs, n_outputs}`.
+- **Usage:** `setState(x)`, `setReference(y_ref)`, `computeRef(x, y_ref)` (MIMO) or `compute(error)` (SISO).
+- **Algorithm:** linearise along warm-started trajectory, build time-varying condensed QP (Theta matrix), solve via FISTA. Theta built with `Phi = Phi * A_list[k]` (right-multiply, k descending from j to 0).
+- **Note:** `lastOutput()` is NOT a virtual override.
+
+#### `AdaptiveSmithPredictor` ([AdaptiveSmithPredictor.h](lib/AdaptiveSmithPredictor.h)) *Part 22*
+- **Purpose:** SmithPredictor with online dead-time estimation via cross-correlation `R_uy(tau) = sum u[k-tau]*y[k]`. Rebuilds SP when delay estimate changes.
+- **Params:** `AdaptiveSPParams {maxDelaySteps, estimateInterval, bufferLen}`.
+- **Usage:** `setPlantOutput(y)` before `compute(r-y)` each step (if not called, uses `y approx= -error` for r=0 regulation).
+
+#### `AutoTuner` ([AutoTuner.h](lib/AutoTuner.h)) *Part 22, header-only*
+- **Purpose:** CMA-ES black-box optimizer for controller parameter tuning (minimises arbitrary cost function).
+- **Params:** `AutoTunerParams {n, sigma0, maxIter, tol, lower, upper}`. **Result:** `TunerResult {params, cost, nEvals, nGens, converged}`.
+- **Usage:** `AutoTuner tuner(atp, seed); auto result = tuner.tune(cost_fn, x0);`
+- **Box constraints:** implemented by clipping samples to [lower, upper].
+
 ---
 
 ### 5.4 Tuning Layer
@@ -692,7 +738,7 @@ Standalone heuristics; each exposes `tuneImpl(...)` (unchecked) and `tuneFor<C>(
 
 #### `ControllerStack` ([ControllerStack.h](lib/ControllerStack.h))
 - **Purpose:** Multi-controller orchestrator with three modes.
-  - **Supervisory** - first entry whose `activationCondition(error, lastOutput)` returns `true` is used; others idle. Use for gain scheduling, fallbacks.
+  - **Supervisory** - first entry whose `activationCondition(error, lastOutput)` returns `true` is used; others idle. Use for fallbacks and bumpless transfer. For continuous gain scheduling prefer `GainScheduledController`.
   - **Additive** - outputs of all enabled entries are summed. Use for inner/outer cascades.
   - **Weighted** - `u = Sigma w_i.u_i(e)`. Use for fuzzy blending.
 - **Methods:** `addController(ptr, name, weight, condition)`, `removeController(name)`, `setActive(name, bool)`, `setWeight(name, w)`, `compute(error)`, `activeControllerName()`, `entries()`.

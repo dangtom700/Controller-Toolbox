@@ -1,8 +1,7 @@
 name: Latency Benchmark
 
 # Run benchmarks on every push to main and on demand.
-# Results are uploaded as a workflow artifact and optionally
-# written to the repository wiki for trend tracking.
+# Results are uploaded as a workflow artifact for trend tracking.
 
 on:
   push:
@@ -23,23 +22,32 @@ jobs:
         run: |
           vcpkg install "eigen3:x64-windows-static" "nlohmann-json:x64-windows-static"
 
-      - name: Configure (Release + benchmarks enabled)
+      - name: Configure (MSVC x64 + benchmarks enabled)
         run: |
           cmake -B build `
-            -DCMAKE_BUILD_TYPE=Release `
             -DCTRL_BUILD_BENCHMARKS=ON `
             -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" `
             -DVCPKG_TARGET_TRIPLET="x64-windows-static" `
             -A x64
 
-      - name: Build controller_toolbox and bench_controllers
+      - name: Build bench_controllers (Release config)
         run: cmake --build build --config Release --target bench_controllers
 
-      - name: Run benchmark
+      - name: Locate and run benchmark
         run: |
-          $ts = (Get-Date -Format "yyyyMMdd_HHmmss")
+          # For MSVC multi-config generators, the binary is in build/benchmark/Release/
+          # For single-config (Ninja/MinGW), it would be in build/benchmark/
+          # Use Get-ChildItem to find it robustly.
+          $exe = Get-ChildItem -Path build -Recurse -Filter "bench_controllers.exe" |
+                   Select-Object -First 1 -ExpandProperty FullName
+          if (-not $exe) {
+            Write-Error "bench_controllers.exe not found under build/"
+            exit 1
+          }
+          Write-Host "Found: $exe"
+          $ts  = (Get-Date -Format "yyyyMMdd_HHmmss")
           $out = "benchmark_${ts}.txt"
-          .\build\benchmark\bench_controllers.exe | Tee-Object -FilePath $out
+          & $exe | Tee-Object -FilePath $out
           echo "BENCH_FILE=$out" >> $env:GITHUB_ENV
 
       - name: Upload benchmark results
