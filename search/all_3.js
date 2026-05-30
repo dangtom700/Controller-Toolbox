@@ -7,9 +7,9 @@ var searchData=
   ['4_205_20fuzzy_20pid_20and_20fuzzy_20supervisor_4',['4.5 Fuzzy PID and Fuzzy Supervisor',['../md_docs_2DOCUMENTATION.html#autotoc_md54',1,'']]],
   ['4_206_20composed_20controllers_20tt_20controllerstack_20tt_5',['4.6 Composed Controllers (&lt;tt&gt;ControllerStack&lt;/tt&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md55',1,'']]],
   ['4_207_20background_20tuning_20rt_20reads_6',['4.7 Background Tuning, RT Reads',['../md_docs_2DOCUMENTATION.html#autotoc_md56',1,'']]],
-  ['4_20quick_20start_20parameter_20tables_7',['4. Quick-Start Parameter Tables',['../md_docs_2DEPLOYMENT.html#autotoc_md184',1,'']]],
+  ['4_20quick_20start_20parameter_20tables_7',['4. Quick-Start Parameter Tables',['../md_docs_2DEPLOYMENT.html#autotoc_md185',1,'']]],
   ['4_20real_20time_20build_20flags_8',['2.4 Real-Time Build Flags',['../md_docs_2DOCUMENTATION.html#autotoc_md38',1,'']]],
   ['4_20tests_20tt_20tests_20tt_9',['3.4 Tests (&lt;tt&gt;tests/&lt;/tt&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md45',1,'']]],
-  ['4_20tuning_20layer_10',['5.4 Tuning Layer',['../md_docs_2DOCUMENTATION.html#autotoc_md113',1,'']]],
+  ['4_20tuning_20layer_10',['5.4 Tuning Layer',['../md_docs_2DOCUMENTATION.html#autotoc_md114',1,'']]],
   ['4_20usage_20guide_11',['4. Usage Guide',['../md_docs_2DOCUMENTATION.html#autotoc_md49',1,'']]]
 ];

@@ -9,5 +9,5 @@ var searchData=
   ['build5termpartition_6',['build5TermPartition',['../namespacectrl.html#af0ae3861533016651748384f0ae65112',1,'ctrl']]],
   ['buildautogainscheduler_7',['buildAutoGainScheduler',['../namespacectrl.html#ada081701e0eda61aba95a62b1ef46520',1,'ctrl']]],
   ['buildwarnmsg_8',['buildWarnMsg',['../namespacectrl.html#aef6c869b488ae749eed6e486ca0b0bd6',1,'ctrl']]],
-  ['bumplessinit_9',['bumplessinit',['../classctrl_1_1DiscretePID.html#affdf4f330e63da4691d4b462b02d197e',1,'ctrl::DiscretePID::bumplessInit()'],['../classctrl_1_1FuzzyPID.html#a6159b3bfa98769ce9415ea34da9adeb8',1,'ctrl::FuzzyPID::bumplessInit()'],['../classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07',1,'ctrl::IController::bumplessInit()']]]
+  ['bumplessinit_9',['bumplessinit',['../classctrl_1_1AntiWindupWrapper.html#a60e4dbec760f966b3c255097e9bf44bc',1,'ctrl::AntiWindupWrapper::bumplessInit()'],['../classctrl_1_1DiscretePID.html#affdf4f330e63da4691d4b462b02d197e',1,'ctrl::DiscretePID::bumplessInit()'],['../classctrl_1_1FuzzyPID.html#a6159b3bfa98769ce9415ea34da9adeb8',1,'ctrl::FuzzyPID::bumplessInit()'],['../classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07',1,'ctrl::IController::bumplessInit()']]]
 ];

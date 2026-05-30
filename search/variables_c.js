@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['n_0',['n',['../structctrl_1_1MHEParams.html#a17be4203a89aab8ba18c3d4ccb9eed0b',1,'ctrl::MHEParams::N'],['../structctrl_1_1AutoTunerParams.html#a47499dc657237075947de4f0b95b4812',1,'ctrl::AutoTunerParams::n'],['../structctrl_1_1PIDParams.html#ae47f28adcce19093b8509be3423ce350',1,'ctrl::PIDParams::N']]],
+  ['n_0',['n',['../structctrl_1_1PIDParams.html#ae47f28adcce19093b8509be3423ce350',1,'ctrl::PIDParams::N'],['../structctrl_1_1MHEParams.html#a17be4203a89aab8ba18c3d4ccb9eed0b',1,'ctrl::MHEParams::N'],['../structctrl_1_1AutoTunerParams.html#a47499dc657237075947de4f0b95b4812',1,'ctrl::AutoTunerParams::n']]],
   ['n_5finputs_1',['n_inputs',['../structctrl_1_1LPVModel.html#a1c6c7a4ee932ac4eabd4bd47bf9885db',1,'ctrl::LPVModel::n_inputs'],['../structctrl_1_1NMPCParams.html#a133599061f135044d218e9d3161d1b05',1,'ctrl::NMPCParams::n_inputs']]],
   ['n_5foutputs_2',['n_outputs',['../structctrl_1_1LPVModel.html#acb63faf33f5c443aef0d581c9198c48d',1,'ctrl::LPVModel::n_outputs'],['../structctrl_1_1NMPCParams.html#a3cdd1a4927d08a73235a3eda9106748d',1,'ctrl::NMPCParams::n_outputs']]],
   ['n_5fstates_3',['n_states',['../structctrl_1_1NMPCParams.html#a9f4357c4fddc129af8e2629123302383',1,'ctrl::NMPCParams::n_states'],['../structctrl_1_1LPVModel.html#a053a05785b2850841844da3439dd08f0',1,'ctrl::LPVModel::n_states']]],

@@ -9,8 +9,9 @@ var searchData=
   ['addrule_6',['addRule',['../classctrl_1_1FuzzySystem.html#ad8afab5d63d24f72e386ca5b4d5cc443',1,'ctrl::FuzzySystem']]],
   ['addschedulepoint_7',['addSchedulePoint',['../classctrl_1_1GainScheduledController.html#aceeb51ec4b6ecea890e036a32717c235',1,'ctrl::GainScheduledController']]],
   ['ak_8',['Ak',['../classctrl_1_1DiscreteHinf.html#ad0261e4e1e22da4e35df40eb1bcea8c0',1,'ctrl::DiscreteHinf']]],
-  ['atomicparambuffer_9',['AtomicParamBuffer',['../classctrl_1_1AtomicParamBuffer.html#a04c7b3038e6c9566683176b59782408f',1,'ctrl::AtomicParamBuffer']]],
-  ['attachobserver_10',['attachobserver',['../classctrl_1_1IController.html#abe5b62c21069e869261e870363ee8ab5',1,'ctrl::IController::attachObserver(IControllerObserver *obs)'],['../classctrl_1_1IController.html#aa7968139f4c0d447b54e60ca1dfedd19',1,'ctrl::IController::attachObserver(std::shared_ptr&lt; IControllerObserver &gt; obs)']]],
-  ['augmentedstate_11',['augmentedState',['../classctrl_1_1GeneralizedPredictiveController.html#a9f5a55b9cbccce5786740f80c70505e4',1,'ctrl::GeneralizedPredictiveController']]],
-  ['autotuner_12',['AutoTuner',['../classctrl_1_1AutoTuner.html#ae3a56e0738a05c729ea70e7e8a225fc4',1,'ctrl::AutoTuner']]]
+  ['antiwindupwrapper_9',['AntiWindupWrapper',['../classctrl_1_1AntiWindupWrapper.html#a6d54e75993f3053c0e49de8747519434',1,'ctrl::AntiWindupWrapper']]],
+  ['atomicparambuffer_10',['AtomicParamBuffer',['../classctrl_1_1AtomicParamBuffer.html#a04c7b3038e6c9566683176b59782408f',1,'ctrl::AtomicParamBuffer']]],
+  ['attachobserver_11',['attachobserver',['../classctrl_1_1IController.html#abe5b62c21069e869261e870363ee8ab5',1,'ctrl::IController::attachObserver(IControllerObserver *obs)'],['../classctrl_1_1IController.html#aa7968139f4c0d447b54e60ca1dfedd19',1,'ctrl::IController::attachObserver(std::shared_ptr&lt; IControllerObserver &gt; obs)']]],
+  ['augmentedstate_12',['augmentedState',['../classctrl_1_1GeneralizedPredictiveController.html#a9f5a55b9cbccce5786740f80c70505e4',1,'ctrl::GeneralizedPredictiveController']]],
+  ['autotuner_13',['AutoTuner',['../classctrl_1_1AutoTuner.html#ae3a56e0738a05c729ea70e7e8a225fc4',1,'ctrl::AutoTuner']]]
 ];

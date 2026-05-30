@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Controller Toolbox: Class Members - Functions</title>
+<title>Controller Toolbox: lib/hal/ZephyrScheduler.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -47,7 +47,6 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
-</div><!-- top -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -69,18 +68,34 @@ $(function() {
 </div>
 </div>
 
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="dir_97aefd0d527b934f1d99a682da8fe6a9.html">lib</a></li><li class="navelem"><a class="el" href="dir_e870e4dac26de7990352b1cb7547818f.html">hal</a></li>  </ul>
+</div>
+</div><!-- top -->
+<div class="header">
+  <div class="headertitle"><div class="title">ZephyrScheduler.h File Reference</div></div>
+</div><!--header-->
 <div class="contents">
-<div class="textblock">Here is a list of all functions with links to the classes they belong to:</div>
 
-<h3><a id="index_b" name="index_b"></a>- b -</h3><ul>
-<li>Bk()&#160;:&#160;<a class="el" href="classctrl_1_1DiscreteHinf.html#a8adbfd0a759755ad0d280df2210ac0b7">ctrl::DiscreteHinf</a></li>
-<li>bryson()&#160;:&#160;<a class="el" href="classctrl_1_1TunerSuite.html#aecae43608db76d6d46e32562f9d0ff2e">ctrl::TunerSuite</a></li>
-<li>brysonMethod()&#160;:&#160;<a class="el" href="classctrl_1_1LQRWeightTuner.html#a59deb8f98e587269d8cc14ac2e696f49">ctrl::LQRWeightTuner</a></li>
-<li>brysonMethodFor()&#160;:&#160;<a class="el" href="classctrl_1_1LQRWeightTuner.html#aeecb275e655b6c78a4174ff6e4e27d87">ctrl::LQRWeightTuner</a></li>
-<li>build()&#160;:&#160;<a class="el" href="classctrl_1_1MixedSensitivity.html#a406b1e5f5063bb0207519a2e6e0d9c19">ctrl::MixedSensitivity</a></li>
-<li>bumplessInit()&#160;:&#160;<a class="el" href="classctrl_1_1AntiWindupWrapper.html#a60e4dbec760f966b3c255097e9bf44bc">ctrl::AntiWindupWrapper</a>, <a class="el" href="classctrl_1_1DiscretePID.html#affdf4f330e63da4691d4b462b02d197e">ctrl::DiscretePID</a>, <a class="el" href="classctrl_1_1FuzzyPID.html#a6159b3bfa98769ce9415ea34da9adeb8">ctrl::FuzzyPID</a>, <a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">ctrl::IController</a></li>
-</ul>
-</div><!-- contents -->
+<p>Stub IScheduler implementation for Zephyr RTOS kernel timers.  
+<a href="#details">More...</a></p>
+
+<p><a href="ZephyrScheduler_8h_source.html">Go to the source code of this file.</a></p>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Stub IScheduler implementation for Zephyr RTOS kernel timers. </p>
+<p>This file is a <b>porting stub</b>. It compiles and links only when the Zephyr kernel headers are available (detected via CONFIG_ZEPHYR). On host builds (CI, unit tests) the entire body is excluded so there is no link-time dependency on the RTOS.</p>
+<p><b>Integration steps:</b></p><ol type="1">
+<li>Add <code>lib/hal/</code> to your Zephyr module's include directories.</li>
+<li>Ensure <code>&lt;zephyr/kernel.h&gt;</code> is on the include path (Zephyr build system provides this automatically for in-tree modules).</li>
+<li>Instantiate <code>ctrl::ZephyrScheduler</code> in place of <code><a class="el" href="classctrl_1_1SimScheduler.html" title="Synchronous test scheduler - fires callback immediately on tick().">ctrl::SimScheduler</a></code>.</li>
+<li>Set period, callback, then call start(). The k_timer fires <code>cb_</code> from the timer ISR context (expiry function); see note below on context safety.</li>
+</ol>
+<p><b>Zephyr context note:</b> <code>k_timer</code> expiry functions run from the system timer ISR or a dedicated timer thread depending on CONFIG_SYSTEM_WORKQUEUE_*. To run the control callback from a thread context (safer for floating-point and controller state), submit a k_work item from the expiry function instead of calling <code>cb_()</code> directly. This stub calls <code>cb_()</code> inline; adapt as needed for your CONFIG_FPU and IRQ-safety requirements.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="IScheduler_8h.html" title="Abstract interface for periodic task management.">IScheduler.h</a>, <a class="el" href="SimScheduler_8h.html" title="Synchronous simulation scheduler - concrete IScheduler for testing.">SimScheduler.h</a> (host-simulation reference implementation) </dd></dl>
+
+<p class="definition">Definition in file <a class="el" href="ZephyrScheduler_8h_source.html">ZephyrScheduler.h</a>.</p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8

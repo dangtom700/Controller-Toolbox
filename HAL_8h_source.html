@@ -94,6 +94,9 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#include &quot;<a class="code" href="SimActuator_8h.html">SimActuator.h</a>&quot;</span></div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#include &quot;<a class="code" href="SafeSensor_8h.html">SafeSensor.h</a>&quot;</span></div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#include &quot;<a class="code" href="SimScheduler_8h.html">SimScheduler.h</a>&quot;</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#include &quot;<a class="code" href="FreeRTOSScheduler_8h.html">FreeRTOSScheduler.h</a>&quot;</span> <span class="comment">// Conditionally compiled (requires FREERTOS_VERSION or INC_FREERTOS_H).</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#include &quot;<a class="code" href="ZephyrScheduler_8h.html">ZephyrScheduler.h</a>&quot;</span>   <span class="comment">// Conditionally compiled (requires CONFIG_ZEPHYR).</span></div>
+<div class="ttc" id="aFreeRTOSScheduler_8h_html"><div class="ttname"><a href="FreeRTOSScheduler_8h.html">FreeRTOSScheduler.h</a></div><div class="ttdoc">Stub IScheduler implementation for FreeRTOS software timers.</div></div>
 <div class="ttc" id="aIActuator_8h_html"><div class="ttname"><a href="IActuator_8h.html">IActuator.h</a></div><div class="ttdoc">Abstract interface for any command output.</div></div>
 <div class="ttc" id="aIScheduler_8h_html"><div class="ttname"><a href="IScheduler_8h.html">IScheduler.h</a></div><div class="ttdoc">Abstract interface for periodic task management.</div></div>
 <div class="ttc" id="aISensor_8h_html"><div class="ttname"><a href="ISensor_8h.html">ISensor.h</a></div><div class="ttdoc">Abstract interface for any measurement source.</div></div>
@@ -104,6 +107,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aSimScheduler_8h_html"><div class="ttname"><a href="SimScheduler_8h.html">SimScheduler.h</a></div><div class="ttdoc">Synchronous simulation scheduler - concrete IScheduler for testing.</div></div>
 <div class="ttc" id="aSimSensor_8h_html"><div class="ttname"><a href="SimSensor_8h.html">SimSensor.h</a></div><div class="ttdoc">ISensor adapter backed by a SimPlant.</div></div>
 <div class="ttc" id="aStdTimer_8h_html"><div class="ttname"><a href="StdTimer_8h.html">StdTimer.h</a></div><div class="ttdoc">ITimer implementation using std::chrono::steady_clock.</div></div>
+<div class="ttc" id="aZephyrScheduler_8h_html"><div class="ttname"><a href="ZephyrScheduler_8h.html">ZephyrScheduler.h</a></div><div class="ttdoc">Stub IScheduler implementation for Zephyr RTOS kernel timers.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
