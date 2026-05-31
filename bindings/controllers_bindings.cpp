@@ -845,6 +845,72 @@ Usage
            "Run CMA-ES to minimize cost(params) starting from x0.");
 
     // -----------------------------------------------------------------------
+    // TubeMPC - robust MPC with mRPI tube (Mayne, Seron, Rakovic 2005)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::TubeMPCParams>(m, "TubeMPCParams",
+        "Parameters for TubeMPC: horizon, weights, tube feedback K, and disturbance bound wMax.")
+        .def(py::init<>())
+        .def_readwrite("Np",            &ctrl::TubeMPCParams::Np)
+        .def_readwrite("Nu",            &ctrl::TubeMPCParams::Nu)
+        .def_readwrite("Q",             &ctrl::TubeMPCParams::Q)
+        .def_readwrite("R",             &ctrl::TubeMPCParams::R)
+        .def_readwrite("K",             &ctrl::TubeMPCParams::K)
+        .def_readwrite("wMax",          &ctrl::TubeMPCParams::wMax)
+        .def_readwrite("uMin",          &ctrl::TubeMPCParams::uMin)
+        .def_readwrite("uMax",          &ctrl::TubeMPCParams::uMax)
+        .def_readwrite("Ts",            &ctrl::TubeMPCParams::Ts)
+        .def_readwrite("qp_max_iter",   &ctrl::TubeMPCParams::qpMaxIter)
+        .def_readwrite("qp_tol",        &ctrl::TubeMPCParams::qpTol)
+        .def_readwrite("mRPI_tol",      &ctrl::TubeMPCParams::mRPI_tol)
+        .def_readwrite("mRPI_max_iter", &ctrl::TubeMPCParams::mRPI_maxIter);
+
+    py::class_<ctrl::TubeMPC, ctrl::IController, std::shared_ptr<ctrl::TubeMPC>>(
+        m, "TubeMPC", R"doc(
+Tube MPC: robust MPC for plants with bounded additive disturbances.
+
+Guarantees |x[k] - x_nom[k]|_i <= tube_radius()[i] for all k when w[k] in W.
+Use setState() + setReference() then compute_control(), or the combined compute_ref().
+
+Parameters
+----------
+sys : StateSpace
+    Discrete-time plant model.
+params : TubeMPCParams
+    Tube-MPC configuration including tube feedback gain K and disturbance bound wMax.
+)doc")
+        .def(py::init<const ctrl::StateSpace &, const ctrl::TubeMPCParams &>(),
+             py::arg("sys"), py::arg("params"))
+        .def("set_state",     &ctrl::TubeMPC::setState,      py::arg("x"),
+             "Set measured plant state x (required before compute_control each step).")
+        .def("set_reference", &ctrl::TubeMPC::setReference,  py::arg("y_ref"),
+             "Set output reference y_ref.")
+        .def("compute_ref",   &ctrl::TubeMPC::computeRef,
+             py::arg("x"), py::arg("y_ref"),
+             py::return_value_policy::copy,
+             "Solve tube-MPC QP from x and y_ref; returns composite u = K*(x-x_nom) + v_nom.")
+        .def("compute_control", &ctrl::TubeMPC::computeControl,
+             py::return_value_policy::copy,
+             "Solve tube-MPC QP (requires prior set_state + set_reference).")
+        .def("compute",       &ctrl::TubeMPC::compute,        py::arg("error"),
+             "IController scalar interface (requires prior set_state).")
+        .def("reset",         &ctrl::TubeMPC::reset,
+             "Reset nominal state and warm start.")
+        .def("sample_time",   &ctrl::TubeMPC::sampleTime,    "Sample time Ts [s].")
+        .def("is_healthy",    &ctrl::TubeMPC::isHealthy,     "False if last QP did not converge.")
+        .def("last_qp_converged", &ctrl::TubeMPC::lastQPConverged,
+             "True if the last FISTA solve converged.")
+        .def("tube_radius",   &ctrl::TubeMPC::tubeRadius,
+             py::return_value_policy::copy,
+             "mRPI tube radius z_max (n,): |x-x_nom|_i <= tube_radius[i] guaranteed.")
+        .def("nominal_state", &ctrl::TubeMPC::nominalState,
+             py::return_value_policy::copy,
+             "Current nominal state x_nom (n,) - disturbance-free predicted state.")
+        .def("tightened_umin", &ctrl::TubeMPC::tightenedUMin,
+             py::return_value_policy::copy, "Tightened lower u bound after mRPI constraint tightening.")
+        .def("tightened_umax", &ctrl::TubeMPC::tightenedUMax,
+             py::return_value_policy::copy, "Tightened upper u bound after mRPI constraint tightening.");
+
+    // -----------------------------------------------------------------------
     // AntiWindupWrapper - generic conditioning-technique decorator (Hanus 1987)
     // -----------------------------------------------------------------------
     py::class_<ctrl::AntiWindupWrapper, ctrl::IController,

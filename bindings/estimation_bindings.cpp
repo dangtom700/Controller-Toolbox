@@ -363,4 +363,72 @@ Example
     // TODO: bind SubspaceID::suggestOrder(y_data, u_data, n_block, max_order)
     // Note: data matrices are MatrixXd (rows = channels, cols = time steps)
 #endif
+
+    // -----------------------------------------------------------------------
+    // ParticleFilter - SIR sequential importance resampling
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::ParticleFilterParams>(m, "ParticleFilterParams",
+        "Configuration for the SIR particle filter.")
+        .def(py::init<>())
+        .def_readwrite("n_particles",         &ctrl::ParticleFilterParams::n_particles)
+        .def_readwrite("Q",                   &ctrl::ParticleFilterParams::Q)
+        .def_readwrite("R",                   &ctrl::ParticleFilterParams::R)
+        .def_readwrite("resample_threshold",  &ctrl::ParticleFilterParams::resample_threshold)
+        .def_readwrite("Ts",                  &ctrl::ParticleFilterParams::Ts)
+        .def_readwrite("seed",                &ctrl::ParticleFilterParams::seed);
+
+    py::class_<ctrl::ParticleFilter>(m, "ParticleFilter", R"doc(
+SIR particle filter for nonlinear/non-Gaussian state estimation.
+
+Usage
+-----
+>>> pfp = ctrl.ParticleFilterParams(); pfp.n_particles = 500
+>>> pfp.Q = np.eye(n) * q; pfp.R = np.eye(p) * r
+>>> pf = ctrl.ParticleFilter(pfp, n_states, n_meas, f, h)
+>>> pf.initialise(x0, P0)
+>>> pf.step(y, u_prev)   # predict + update each step
+>>> x_hat = pf.state()
+)doc")
+        .def(py::init([](const ctrl::ParticleFilterParams &p, int n_states, int n_meas,
+                          py::object f_py, py::object h_py) {
+            auto f = [f_py](const Eigen::VectorXd &x,
+                            const Eigen::VectorXd &u) -> Eigen::VectorXd {
+                return f_py(x, u).cast<Eigen::VectorXd>();
+            };
+            auto h = [h_py](const Eigen::VectorXd &x,
+                            const Eigen::VectorXd &u) -> Eigen::VectorXd {
+                return h_py(x, u).cast<Eigen::VectorXd>();
+            };
+            return std::make_unique<ctrl::ParticleFilter>(p, n_states, n_meas,
+                                                          std::move(f), std::move(h));
+        }), py::arg("params"), py::arg("n_states"), py::arg("n_meas"),
+            py::arg("f"), py::arg("h"))
+        .def("initialise", [](ctrl::ParticleFilter &self,
+                               const Eigen::VectorXd &x0,
+                               const Eigen::MatrixXd &P0) {
+            self.initialise(x0, P0);
+        }, py::arg("x0"), py::arg("P0") = Eigen::MatrixXd(),
+           "Initialise particle cloud from N(x0, P0).")
+        .def("predict", &ctrl::ParticleFilter::predict, py::arg("u"),
+             "Propagate all particles through f and add process noise.")
+        .def("update",  &ctrl::ParticleFilter::update,  py::arg("y"), py::arg("u"),
+             "Update weights from measurement likelihood; resample if needed.")
+        .def("step",    &ctrl::ParticleFilter::step,    py::arg("y"), py::arg("u_prev"),
+             "Combined predict(u_prev) + update(y, u_prev).")
+        .def("resample",&ctrl::ParticleFilter::resample,
+             "Trigger systematic resampling immediately.")
+        .def("state",   &ctrl::ParticleFilter::state,
+             py::return_value_policy::copy, "Weighted mean estimate x_hat (n,).")
+        .def("covariance", &ctrl::ParticleFilter::covariance,
+             py::return_value_policy::copy, "Weighted sample covariance P (n x n).")
+        .def("effective_sample_size", &ctrl::ParticleFilter::effectiveSampleSize,
+             "N_eff = 1/sum(w_i^2). High -> good diversity; Low -> degeneracy.")
+        .def_property_readonly("resample_count", &ctrl::ParticleFilter::resampleCount,
+             "Number of times resampling has been triggered since construction.")
+        .def("is_initialised", &ctrl::ParticleFilter::isInitialised,
+             "True if initialise() has been called.")
+        .def("sample_time",    &ctrl::ParticleFilter::sampleTime,
+             "Sample time Ts [s] from parameters.")
+        .def("reset",          &ctrl::ParticleFilter::reset,
+             "Reset particles and weights; requires re-initialisation.");
 }

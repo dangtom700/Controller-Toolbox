@@ -37,6 +37,7 @@ void runSimulation(const ScenarioConfig& sc,
 
         u   = ctrl.compute(ref_Tw1, out.Tw1_C, w.G);
         out = plant.step(w, u);
+        ctrl.setLastEER(out.EER_grid);   // notify ESCSolarCtrl (no-op for others)
 
         TickData td;
         td.t       = t;

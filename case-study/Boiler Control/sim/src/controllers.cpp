@@ -919,4 +919,570 @@ void RepetitiveCtrl::reset()
     for (auto& r : rcs_) r.reset();
 }
 
+// ============================================================================
+// 19. MRACBoilerCtrl
+// Per-channel reference model: y_m[k+1] = 0.80*y_m[k] + 0.20*r[k]  (DC gain=1).
+// Absolute mode: setReference(y_op + ref_dy), compute(y_op + dy), du = u_abs - u_op.
+// gamma_r = gamma_y = 2.0 > 0 (plant input gains are all positive for diagonal channels).
+// ============================================================================
+
+MRACBoilerCtrl::MRACBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op)
+    : mracs_([&] {
+        ctrl::MRACParams mp;
+        mp.a_m       = 0.80;
+        mp.b_m       = 0.20;
+        mp.gamma_r   = 2.0;
+        mp.gamma_y   = 2.0;
+        mp.sigma     = 0.02;
+        mp.theta_max = 50.0;
+        mp.uMin      = 0.0;   // absolute valve position
+        mp.uMax      = 1.0;
+        return std::array<ctrl::MRACController, 3>{
+            ctrl::MRACController(mp, ss.Ts),
+            ctrl::MRACController(mp, ss.Ts),
+            ctrl::MRACController(mp, ss.Ts)
+        };
+    }())
+    , op_(op)
+{}
+
+Vector3d MRACBoilerCtrl::compute(const Vector3d& ref_dy, const Vector3d& dy)
+{
+    const double op_y[] = {op_.y1, op_.y2, op_.y3};
+    const double op_u[] = {op_.u1, op_.u2, op_.u3};
+    Vector3d du;
+    for (int i = 0; i < 3; ++i) {
+        mracs_[i].setReference(op_y[i] + ref_dy(i));
+        double u_abs = mracs_[i].compute(op_y[i] + dy(i));
+        du(i) = u_abs - op_u[i];
+    }
+    return du;
+}
+
+void MRACBoilerCtrl::reset()
+{
+    for (auto& m : mracs_) m.reset();
+}
+
+// ============================================================================
+// 20. HinfBoilerCtrl
+// Per-channel mixed-sensitivity synthesis on diagonal SISO model.
+// W1 tracks low-frequency setpoints; W3 guards against high-frequency noise.
+// std::optional avoids storing DiscreteHinf objects without a valid synthesis.
+// ============================================================================
+
+HinfBoilerCtrl::HinfBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op)
+    : fallback_pids_{ ctrl::DiscretePID(pidParamsFor(0), ss.Ts),
+                      ctrl::DiscretePID(pidParamsFor(1), ss.Ts),
+                      ctrl::DiscretePID(pidParamsFor(2), ss.Ts) }
+{
+    (void)op;
+
+    ctrl::HinfParams hp;
+    hp.gammaInit = 2.0;
+
+    for (int i = 0; i < 3; ++i) {
+        try {
+            auto G = diagonalChannel(ss, i);
+            G.D.setZero();   // DGKF requires D22=0; small feedthrough from ZOH discretisation
+            auto W1 = ctrl::MixedSensitivity::makeW1(0.05, 1.5, 0.001, ss.Ts);
+            auto W2 = ctrl::MixedSensitivity::makeW2constant(2.0, ss.Ts);
+            auto W3 = ctrl::MixedSensitivity::makeW3(0.5, 1.5, 0.001, ss.Ts);
+            auto P  = ctrl::MixedSensitivity::build(G, W1, W2, W3);
+            auto result = ctrl::DiscreteHinf::solve(P, hp);
+            if (result.feasible)
+                hinfs_[i].emplace(result);
+        } catch (const std::exception&) {
+            // synthesis failed; fallback_pids_[i] used
+        }
+    }
+}
+
+Vector3d HinfBoilerCtrl::compute(const Vector3d& ref_dy, const Vector3d& dy)
+{
+    Vector3d e = ref_dy - dy;
+    Vector3d du;
+    for (int i = 0; i < 3; ++i) {
+        du(i) = hinfs_[i] ? hinfs_[i]->compute(e(i))
+                           : fallback_pids_[i].compute(e(i));
+    }
+    return du;
+}
+
+void HinfBoilerCtrl::reset()
+{
+    for (int i = 0; i < 3; ++i) {
+        if (hinfs_[i]) hinfs_[i]->reset();
+        fallback_pids_[i].reset();
+    }
+}
+
+// ============================================================================
+// 21. AdaptiveSPBoilerCtrl
+// Online cross-correlation re-estimates dead-time (search range 0..8 steps).
+// setPlantOutput(y_abs) must be called before compute() each step.
+// initialDelay=2 steps (2 s) matching SmithPredictorController.
+// ============================================================================
+
+AdaptiveSPBoilerCtrl::AdaptiveSPBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op)
+    : sps_([&] {
+        ctrl::AdaptiveSPParams asp;
+        asp.maxDelaySteps    = 8;
+        asp.estimateInterval = 100;
+        asp.bufferLen        = 200;
+
+        auto make_asp = [&](int axis) {
+            auto inner = std::make_shared<ctrl::DiscretePID>(pidParamsFor(axis), ss.Ts);
+            return ctrl::AdaptiveSmithPredictor(
+                inner, buildSmithDelayModel(ss, axis), 2, ss.Ts, asp);
+        };
+        return std::array<ctrl::AdaptiveSmithPredictor, 3>{
+            make_asp(0), make_asp(1), make_asp(2)
+        };
+    }())
+    , op_(op)
+{}
+
+Vector3d AdaptiveSPBoilerCtrl::compute(const Vector3d& ref_dy, const Vector3d& dy)
+{
+    const double op_y[] = {op_.y1, op_.y2, op_.y3};
+    Vector3d du;
+    for (int i = 0; i < 3; ++i) {
+        sps_[i].setPlantOutput(op_y[i] + dy(i));
+        du(i) = sps_[i].compute(ref_dy(i) - dy(i));
+    }
+    return du;
+}
+
+void AdaptiveSPBoilerCtrl::reset()
+{
+    for (auto& sp : sps_) sp.reset();
+}
+
+// ============================================================================
+// 22. NMPCBoilerCtrl
+// ============================================================================
+
+NMPCBoilerCtrl::NMPCBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op)
+    : nmpc_([&]() {
+        ctrl::NMPCParams np;
+        np.n_states  = 3;
+        np.n_inputs  = 3;
+        np.n_outputs = 3;
+        np.Np        = 10;
+        np.Nu        = 3;
+        np.rho_y     = 1.0;
+        np.rho_u     = 0.1;
+        np.uMin      = -0.5;    // max du per step [valve fraction]
+        np.uMax      =  0.5;
+        np.Ts        = ss.Ts;
+
+        // Capture operating point for the closure
+        const double x1_op = op.x1, x2_op = op.x2, x3_op = op.x3;
+        const double u1_op = op.u1, u2_op = op.u2, u3_op = op.u3;
+        const double Ts    = ss.Ts;
+
+        // Nonlinear discrete dynamics in deviation space (Euler integration, Ts=1s)
+        auto f_dev = [x1_op, x2_op, x3_op, u1_op, u2_op, u3_op, Ts]
+                     (const Eigen::VectorXd& x_dev, const Eigen::VectorXd& u_dev)
+                     -> Eigen::VectorXd {
+            double x1 = x1_op + x_dev(0);
+            double x2 = x2_op + x_dev(1);
+            double x3 = x3_op + x_dev(2);
+            double u1 = std::clamp(u1_op + u_dev(0), 0.0, 1.0);
+            double u2 = std::clamp(u2_op + u_dev(1), 0.0, 1.0);
+            double u3 = std::clamp(u3_op + u_dev(2), 0.0, 1.0);
+
+            double x1_98 = std::pow(std::max(x1, 1.0), 9.0 / 8.0);
+            double dx1 = -0.0018 * u2 * x1_98 + 0.9 * u1 - 0.15 * u3;
+            double dx2 = (0.073 * u2 - 0.016) * x1_98 - 0.1 * x2;
+            double dx3 = (141.0 * u3 - (1.1 * u2 - 0.19) * x1) / 85.0;
+
+            Eigen::VectorXd x_next(3);
+            x_next(0) = x_dev(0) + Ts * dx1;
+            x_next(1) = x_dev(1) + Ts * dx2;
+            x_next(2) = x_dev(2) + Ts * dx3;
+            return x_next;
+        };
+
+        // Use ss.C as output matrix (maps [dx1,dx2,dx3] to [dy1,dy2,dy3])
+        return ctrl::NonlinearMPC(np, f_dev, ss.C);
+    }())
+    , op_(op)
+{}
+
+Vector3d NMPCBoilerCtrl::compute(const Vector3d& ref_dy, const Vector3d& dy)
+{
+    // Use dy as state proxy (Cd approx = I near operating point)
+    Eigen::VectorXd x_dev(3); x_dev = dy;
+    Eigen::VectorXd y_ref(3); y_ref = ref_dy;
+
+    Eigen::VectorXd du = nmpc_.computeRef(x_dev, y_ref);
+    return du.head<3>();
+}
+
+void NMPCBoilerCtrl::reset()
+{
+    nmpc_.reset();
+}
+
+// ============================================================================
+// 23. FLBoilerCtrl
+// ============================================================================
+
+// Build one FeedbackLinearisationController for a diagonal boiler channel.
+// Channel 0: u1->y1=x1  (g=0.9, nonlinear f)
+// Channel 1: u2->y2=x2  (g=0.073*x1^(9/8), nonlinear f)
+// Channel 2: u3->x3      (g=141/85, linear f for water level)
+static ctrl::FeedbackLinearisationController makeFLForChannel(
+    int ch, const OperatingPoint& op, double Ts)
+{
+    const double x1_op = op.x1, x2_op = op.x2, x3_op = op.x3;
+    const double u1_op = op.u1, u2_op = op.u2, u3_op = op.u3;
+
+    ctrl::FeedbackLinearisationController::DriftFn f_fn;
+    ctrl::FeedbackLinearisationController::GainFn  g_fn;
+
+    if (ch == 0) {
+        // y1 = x1;  dy1/dt = -0.0018*u2*x1^(9/8) + 0.9*u1 - 0.15*u3
+        // In deviation: f0(x_dev) = drift at u1=u1_op
+        f_fn = [x1_op, u1_op, u2_op, u3_op](const Eigen::VectorXd& x_dev, double) {
+            double x1 = x1_op + x_dev(0);
+            double x1_98 = std::pow(std::max(x1, 1.0), 9.0 / 8.0);
+            return -0.0018 * u2_op * x1_98 + 0.9 * u1_op - 0.15 * u3_op;
+        };
+        g_fn = [](const Eigen::VectorXd&, double) { return 0.9; };
+
+    } else if (ch == 1) {
+        // y2 = x2;  dy2/dt = (0.073*u2 - 0.016)*x1^(9/8) - 0.1*x2
+        f_fn = [x1_op, x2_op, u2_op](const Eigen::VectorXd& x_dev, double) {
+            double x1 = x1_op + x_dev(0);
+            double x2 = x2_op + x_dev(1);
+            double x1_98 = std::pow(std::max(x1, 1.0), 9.0 / 8.0);
+            return (0.073 * u2_op - 0.016) * x1_98 - 0.1 * x2;
+        };
+        g_fn = [x1_op](const Eigen::VectorXd& x_dev, double) {
+            double x1 = x1_op + x_dev(0);
+            return 0.073 * std::pow(std::max(x1, 1.0), 9.0 / 8.0);
+        };
+
+    } else {
+        // x3 water level proxy for y3 (channel 2)
+        // dx3/dt = (141*u3 - (1.1*u2_op - 0.19)*x1) / 85
+        f_fn = [x1_op, u3_op, u2_op](const Eigen::VectorXd& x_dev, double) {
+            double x1 = x1_op + x_dev(0);
+            return (141.0 * u3_op - (1.1 * u2_op - 0.19) * x1) / 85.0;
+        };
+        g_fn = [](const Eigen::VectorXd&, double) { return 141.0 / 85.0; };
+    }
+
+    // Inner PID: proportional control on the linearized virtual plant
+    ctrl::PIDParams pp;
+    pp.Kp   = 0.5;
+    pp.Ki   = 0.005;
+    pp.Kd   = 0.0;
+    pp.N    = 5.0;
+    pp.Kb   = 1.0;
+    pp.uMin = -2.0;
+    pp.uMax =  2.0;
+    auto inner = std::make_shared<ctrl::DiscretePID>(pp, Ts);
+
+    ctrl::FLParams flp;
+    flp.uMin              = -0.5;
+    flp.uMax              =  0.5;
+    flp.regularisationEps = 1e-6;
+
+    return ctrl::FeedbackLinearisationController(f_fn, g_fn, inner, flp, Ts);
+}
+
+FLBoilerCtrl::FLBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op)
+    : fls_{ makeFLForChannel(0, op, ss.Ts),
+            makeFLForChannel(1, op, ss.Ts),
+            makeFLForChannel(2, op, ss.Ts) }
+    , op_(op)
+{}
+
+Vector3d FLBoilerCtrl::compute(const Vector3d& ref_dy, const Vector3d& dy)
+{
+    Eigen::VectorXd x_dev(3); x_dev = dy;
+    for (auto& fl : fls_) fl.setState(x_dev);
+
+    Vector3d du;
+    for (int i = 0; i < 3; ++i)
+        du(i) = fls_[i].compute(ref_dy(i) - dy(i));
+    return du;
+}
+
+void FLBoilerCtrl::reset()
+{
+    for (auto& fl : fls_) fl.reset();
+}
+
+// ============================================================================
+// 24. MHELQRBoilerCtrl
+// ============================================================================
+
+MHELQRBoilerCtrl::MHELQRBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op)
+    : mhe_([&]() {
+        ctrl::MHEParams mp;
+        mp.N        = 10;
+        mp.wMin     = -0.5;
+        mp.wMax     =  0.5;
+        mp.qpMaxIter = 300;
+        return ctrl::MovingHorizonEstimator(
+            ss,
+            1e-3 * Eigen::Matrix3d::Identity(),
+            (Eigen::Matrix3d() << 0.25, 0, 0, 0, 1.0, 0, 0, 0, 25.0).finished(),
+            mp);
+    }())
+    , lqr_(ss, brysonLQRParams())
+    , du_prev_(Vector3d::Zero())
+{
+    (void)op;
+}
+
+Vector3d MHELQRBoilerCtrl::compute(const Vector3d& ref_dy, const Vector3d& dy)
+{
+    if (!initialised_) {
+        mhe_.initialize(dy.cast<double>(),
+                        1e-3 * Eigen::Matrix3d::Identity());
+        initialised_ = true;
+    }
+
+    Eigen::VectorXd x_est = mhe_.estimate(dy.cast<double>(),
+                                           du_prev_.cast<double>());
+    Eigen::VectorXd du = lqr_.compute(x_est, ref_dy.cast<double>());
+    du_prev_ = du.head<3>();
+    return du.head<3>();
+}
+
+void MHELQRBoilerCtrl::reset()
+{
+    mhe_.reset();
+    du_prev_.setZero();
+    initialised_ = false;
+}
+
+// ============================================================================
+// 25. LPVGSBoilerCtrl
+// ============================================================================
+
+LPVGSBoilerCtrl::LPVGSBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op)
+    : op_(op)
+{
+    // Sweep pressure x1 \in [60, 150] bar; linearise at each point.
+    // Design DiscreteLQR per linearisation; assemble GainScheduledController.
+    const double p_min = 60.0, p_max = 150.0;
+    const int    n_pts = 6;
+
+    sched_ = std::make_shared<ctrl::GainScheduledController>(
+        ss.Ts, ctrl::GainScheduleMode::NearestNeighbor);
+
+    for (int k = 0; k < n_pts; ++k) {
+        double x1_k = p_min + k * (p_max - p_min) / (n_pts - 1);
+
+        // Build operating point at this pressure
+        OperatingPoint op_k = op;
+        op_k.x1 = x1_k;
+
+        try {
+            ctrl::StateSpace ss_k = linearize(op_k, ss.Ts);
+            ctrl::DiscreteLQR lqr_k(ss_k, brysonLQRParams());
+            // Wrap LQR gain in PID (DiscreteLQR doesn't implement IController)
+            ctrl::PIDParams pp;
+            pp.Kp   = lqr_k.gainMatrix()(0, 0);  // channel-0 gain as proxy
+            pp.Ki   = pp.Kp * 0.05;
+            pp.Kd   = 0.0;
+            pp.N    = 5.0;
+            pp.Kb   = 1.0;
+            pp.uMin = -0.5;
+            pp.uMax =  0.5;
+            sched_->addSchedulePoint(x1_k,
+                std::make_shared<ctrl::DiscretePID>(pp, ss.Ts));
+        } catch (const std::exception&) {
+            // If linearization fails at this point, skip it
+        }
+    }
+
+    // Ensure at least one point exists (fallback PID)
+    if (sched_->numPoints() == 0) {
+        sched_->addSchedulePoint((p_min + p_max) / 2.0,
+            std::make_shared<ctrl::DiscretePID>(pidParamsFor(0), ss.Ts));
+    }
+}
+
+Vector3d LPVGSBoilerCtrl::compute(const Vector3d& ref_dy, const Vector3d& dy)
+{
+    // Schedule on current pressure deviation from op + op.x1
+    double x1_current = op_.x1 + dy(0);
+    sched_->setSchedulingParam(x1_current);
+
+    // The DiscreteLQR inside the scheduler uses IController::compute(error).
+    // For MIMO: it returns u[0] only. We call per-channel as proxy.
+    Vector3d e = ref_dy - dy;
+    Vector3d du;
+    for (int i = 0; i < 3; ++i)
+        du(i) = sched_->compute(e(i));
+    return du;
+}
+
+void LPVGSBoilerCtrl::reset()
+{
+    if (sched_) sched_->reset();
+}
+
+// ============================================================================
+// 26. SubspaceIDLQGBoilerCtrl
+// ============================================================================
+
+SubspaceIDLQGBoilerCtrl::SubspaceIDLQGBoilerCtrl(const ctrl::StateSpace& ss,
+                                                   const OperatingPoint& op)
+    : lqg_([&]() {
+        // Generate simulated PRBS I/O data for SubspaceID identification.
+        const int N_id = 300;
+        Eigen::MatrixXd U(3, N_id), Y(3, N_id);
+
+        Eigen::VectorXd x_sim = Eigen::VectorXd::Zero(3);
+        for (int k = 0; k < N_id; ++k) {
+            double t = k * ss.Ts;
+            Eigen::VectorXd u_id(3);
+            u_id << 0.05 * std::sin(0.10 * t),
+                    0.05 * std::sin(0.13 * t + 0.5),
+                    0.02 * std::sin(0.07 * t + 1.0);
+            U.col(k) = u_id;
+            Y.col(k) = ss.C * x_sim + ss.D * u_id;
+            x_sim    = ss.A * x_sim + ss.B * u_id;
+        }
+
+        // n4sid: identify 3rd-order model, horizon i=15
+        ctrl::SubspaceIDResult res = ctrl::n4sid(Y, U, 3, 15, ss.Ts);
+
+        // Use identified model if successful, fall back to linearised ss
+        ctrl::StateSpace ss_id = (res.success && res.model.has_value())
+                                     ? res.model.value()
+                                     : ss;
+
+        ctrl::LQRParams lp = brysonLQRParams();
+        Eigen::MatrixXd Q_n = 1e-3 * Eigen::MatrixXd::Identity(ss_id.A.rows(), ss_id.A.rows());
+        Eigen::MatrixXd R_n = (Eigen::Matrix3d() << 0.25, 0, 0,
+                                                      0,  1.0, 0,
+                                                      0,  0, 25.0).finished();
+        return ctrl::DiscreteLQG(ss_id, lp, Q_n, R_n);
+    }())
+    , du_prev_(Vector3d::Zero())
+{
+    (void)op;
+}
+
+Vector3d SubspaceIDLQGBoilerCtrl::compute(const Vector3d& ref_dy, const Vector3d& dy)
+{
+    Eigen::VectorXd x_ref(3); x_ref = ref_dy.cast<double>();
+    Eigen::VectorXd y(3);     y     = dy.cast<double>();
+
+    Eigen::VectorXd u = lqg_.step(y, du_prev_.cast<double>(), x_ref);
+    du_prev_ = u.head<3>();
+    return u.head<3>();
+}
+
+void SubspaceIDLQGBoilerCtrl::reset()
+{
+    lqg_.reset();
+    du_prev_.setZero();
+}
+
+// ============================================================================
+// 27. AutoGSBoilerCtrl
+// ============================================================================
+
+AutoGSBoilerCtrl::AutoGSBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op)
+    : op_(op)
+{
+    // Boiler channel 0 (pressure x1) nonlinear dynamics for AutoGS.
+    // State: 1D [dx1], input: 1D [du1], scheduling: x1 = x1_op + p_sched.
+    // Continuous: dx1/dt = -0.0018*u2_op*(x1_op+p)^(9/8) + 0.9*(u1_op+du1) - 0.15*u3_op
+    //           = f_drift(p) + 0.9*du1
+    // This is a 1D SISO affine system. Schedule on x1 = x1_op + p, p \in [-30, 40] bar.
+
+    const double x1_op = op.x1, u1_op = op.u1, u2_op = op.u2, u3_op = op.u3;
+
+    auto f_cont = [x1_op, u1_op, u2_op, u3_op](const Eigen::VectorXd& xs,
+                                                  const Eigen::VectorXd& u_in)
+                  -> Eigen::VectorXd {
+        double x1 = x1_op + xs(0);
+        double x1_98 = std::pow(std::max(x1, 1.0), 9.0 / 8.0);
+        Eigen::VectorXd xdot(1);
+        xdot(0) = -0.0018 * u2_op * x1_98 + 0.9 * (u1_op + u_in(0)) - 0.15 * u3_op;
+        return xdot;
+    };
+
+    auto u_eq_fn = [x1_op, u1_op, u2_op, u3_op](double p_sched)
+                   -> Eigen::VectorXd {
+        // At equilibrium: f_cont([p_sched], [0]) = 0 -> solve for du1
+        double x1_98 = std::pow(std::max(x1_op + p_sched, 1.0), 9.0 / 8.0);
+        double du1_eq = (0.0018 * u2_op * x1_98 + 0.15 * u3_op - 0.9 * u1_op) / 0.9;
+        Eigen::VectorXd u(1);
+        u(0) = std::clamp(du1_eq, -0.5, 0.5);
+        return u;
+    };
+
+    auto x0_fn = [](double p_sched) -> Eigen::VectorXd {
+        Eigen::VectorXd x(1);
+        x(0) = p_sched;   // pressure deviation = scheduling param
+        return x;
+    };
+
+    auto design_fn = [](const ctrl::StateSpace& sys_k, double /*p*/)
+                     -> std::shared_ptr<ctrl::IController> {
+        ctrl::LQRParams lp;
+        Eigen::VectorXd xm(1), um(1);
+        xm << 5.0;    // max pressure deviation 5 bar
+        um << 0.3;    // max valve increment 0.3
+        lp = ctrl::LQRWeightTuner::brysonMethod(xm, um);
+        ctrl::DiscreteLQR lqr(sys_k, lp);
+
+        // DiscreteLQR doesn't implement IController; extract gain into PID
+        ctrl::PIDParams pp;
+        pp.Kp   = lqr.gainMatrix()(0, 0);
+        pp.Ki   = pp.Kp * 0.01;
+        pp.Kd   = 0.0;
+        pp.N    = 5.0;
+        pp.Kb   = 1.0;
+        pp.uMin = -0.5;
+        pp.uMax =  0.5;
+        return std::make_shared<ctrl::DiscretePID>(pp, sys_k.Ts);
+    };
+
+    try {
+        sched_ = ctrl::buildAutoGainScheduler(
+            f_cont, -30.0, 40.0, 6, u_eq_fn, x0_fn, design_fn, ss.Ts,
+            /*gap_threshold=*/0.4, /*freq_points=*/80);
+    } catch (const std::exception&) {
+        // Fallback to single-point PID-like controller
+        sched_ = std::make_shared<ctrl::GainScheduledController>(
+            ss.Ts, ctrl::GainScheduleMode::NearestNeighbor);
+        sched_->addSchedulePoint(0.0,
+            std::make_shared<ctrl::DiscretePID>(pidParamsFor(0), ss.Ts));
+    }
+}
+
+Vector3d AutoGSBoilerCtrl::compute(const Vector3d& ref_dy, const Vector3d& dy)
+{
+    // Schedule on current pressure deviation (channel 0)
+    sched_->setSchedulingParam(dy(0));
+
+    Vector3d e = ref_dy - dy;
+    Vector3d du;
+    // AutoGS only controls channel 0 (pressure); channels 1,2 use PID gains
+    du(0) = sched_->compute(e(0));
+    // Channels 1,2: simple proportional fallback
+    du(1) = 0.05 * e(1);
+    du(2) = 0.05 * e(2);
+    return du;
+}
+
+void AutoGSBoilerCtrl::reset()
+{
+    if (sched_) sched_->reset();
+}
+
 } // namespace boiler

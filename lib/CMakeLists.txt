@@ -51,6 +51,8 @@ set(CTRL_CORE_SOURCES
     LPVSystemID.cpp
     NonlinearMPC.cpp
     AdaptiveSmithPredictor.cpp
+    TubeMPC.cpp
+    ParticleFilter.cpp
 )
 
 # --- Optional sources --------------------------------------------------------

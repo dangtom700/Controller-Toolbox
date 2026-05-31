@@ -96,6 +96,8 @@
 #include "AdaptiveSmithPredictor.h"     ///< AdaptiveSmithPredictor - SmithPredictor with online cross-correlation delay estimation.
 #include "AutoTuner.h"                  ///< AutoTuner - CMA-ES black-box optimizer for controller parameter tuning.
 #include "AntiWindupWrapper.h"          ///< AntiWindupWrapper - generic anti-windup decorator (conditioning technique, Hanus 1987).
+#include "TubeMPC.h"                    ///< TubeMPC - robust MPC with mRPI tube for bounded additive disturbances (Mayne 2005).
+#include "ParticleFilter.h"             ///< ParticleFilter - SIR particle filter for nonlinear/non-Gaussian state estimation.
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,

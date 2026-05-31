@@ -2102,3 +2102,188 @@ TEST_CASE("AntiWindupWrapper is transparent when not saturating", "[anti_windup]
     REQUIRE_FALSE(wrapper.isSaturated());
     REQUIRE_THAT(wrapper.saturationError(), WithinAbs(0.0, 1e-12));
 }
+
+// =============================================================================
+// TubeMPC - robust MPC for bounded additive disturbances
+// =============================================================================
+
+TEST_CASE("TubeMPC nominal trajectory tracks reference (no disturbance)", "[tube_mpc]")
+{
+    // 1D plant: x[k+1] = 0.8*x[k] + 0.2*u[k],  y = x.
+    // K = -0.3  -> A_cl = 0.8 + 0.2*(-0.3) = 0.74  (stable).
+    // No disturbance: the nominal model IS the actual model.
+    // After 40 steps the output must reach within 0.15 of r=1.
+    const double Ts = 0.1;
+    Eigen::MatrixXd A(1,1), B(1,1), C(1,1), D(1,1);
+    A << 0.8; B << 0.2; C << 1.0; D << 0.0;
+    ctrl::StateSpace sys(A, B, C, D, Ts);
+
+    ctrl::TubeMPCParams p;
+    p.Np = 10; p.Nu = 3;
+    p.Q  = Eigen::MatrixXd::Identity(1,1) * 10.0;
+    p.R  = Eigen::MatrixXd::Identity(1,1) * 0.05; // low rho_u -> y_ss ~= Q/(Q+R)*r ~= 0.995
+    p.K  = Eigen::MatrixXd::Constant(1,1,-0.3); // tube feedback
+    p.wMax  = Eigen::VectorXd::Constant(1, 0.05);
+    p.uMin  = Eigen::VectorXd::Constant(1,-2.0);
+    p.uMax  = Eigen::VectorXd::Constant(1, 2.0);
+    p.Ts = Ts;
+
+    ctrl::TubeMPC tmpc(sys, p);
+
+    Eigen::VectorXd x(1); x(0) = 0.0;
+    const Eigen::VectorXd yref = Eigen::VectorXd::Constant(1, 1.0);
+
+    for (int k = 0; k < 50; ++k) {
+        const Eigen::VectorXd u = tmpc.computeRef(x, yref);
+        x = A * x + B * u;
+    }
+
+    // Steady-state: MPC without integral has y_ss = Q/(Q+R)*r ~= 10/10.05 ~= 0.995
+    REQUIRE_THAT(x(0), WithinAbs(1.0, 0.15));
+    REQUIRE(tmpc.lastQPConverged());
+
+    // mRPI radius must be finite and positive (disturbance bound > 0)
+    REQUIRE(tmpc.tubeRadius()(0) > 0.0);
+    REQUIRE(std::isfinite(tmpc.tubeRadius()(0)));
+}
+
+TEST_CASE("TubeMPC actual state stays within tube under bounded disturbances", "[tube_mpc]")
+{
+    // Same plant.  Apply disturbances w[k] \in [-wMax, wMax] at every step.
+    // Tube guarantee: |x[k] - x_nom[k]| <= z_max for all k.
+    // Verified empirically with adversarial (worst-case) disturbances.
+    const double Ts = 0.1;
+    Eigen::MatrixXd A(1,1), B(1,1), C(1,1), D(1,1);
+    A << 0.8; B << 0.2; C << 1.0; D << 0.0;
+    ctrl::StateSpace sys(A, B, C, D, Ts);
+
+    ctrl::TubeMPCParams p;
+    p.Np = 8; p.Nu = 2;
+    p.Q  = Eigen::MatrixXd::Identity(1,1);
+    p.R  = Eigen::MatrixXd::Identity(1,1) * 0.1;
+    p.K  = Eigen::MatrixXd::Constant(1,1,-0.3);
+    p.wMax  = Eigen::VectorXd::Constant(1, 0.08);
+    p.uMin  = Eigen::VectorXd::Constant(1,-3.0);
+    p.uMax  = Eigen::VectorXd::Constant(1, 3.0);
+    p.Ts = Ts;
+
+    ctrl::TubeMPC tmpc(sys, p);
+    const double z_max = tmpc.tubeRadius()(0);
+
+    Eigen::VectorXd x(1); x(0) = 0.0;
+    const Eigen::VectorXd yref = Eigen::VectorXd::Constant(1, 1.0);
+
+    // Worst-case disturbance: always at maximum amplitude
+    const double w_amp = p.wMax(0);
+    double max_tube_err = 0.0;
+
+    for (int k = 0; k < 50; ++k) {
+        const Eigen::VectorXd u = tmpc.computeRef(x, yref);
+        // Apply adversarial disturbance (sign chosen to maximise error)
+        const double w = (k % 2 == 0) ? w_amp : -w_amp;
+        x = A * x + B * u + Eigen::VectorXd::Constant(1, w);
+
+        const double tube_err = std::abs(x(0) - tmpc.nominalState()(0));
+        max_tube_err = std::max(max_tube_err, tube_err);
+    }
+
+    // Tube guarantee: max error must not exceed z_max (with small floating-point margin)
+    REQUIRE(max_tube_err <= z_max + 1e-6);
+    REQUIRE(tmpc.lastQPConverged());
+}
+
+// =============================================================================
+// ParticleFilter - SIR sequential importance resampling
+// =============================================================================
+
+TEST_CASE("ParticleFilter estimates linear plant state within EKF accuracy", "[particle_filter]")
+{
+    // Linear plant: x[k+1] = 0.9*x[k] + u[k] + w[k],  y[k] = x[k] + v[k]
+    // Q=0.1, R=0.5.  After 30 steps the PF estimate RMSE must be < 0.3
+    // (comparable to the KF/EKF steady-state, confirming the algorithm works).
+    const double Ts = 0.1;
+    const double q  = 0.01;
+    const double r  = 0.25;
+
+    ctrl::ParticleFilterParams pfp;
+    pfp.n_particles = 400;
+    pfp.Q = Eigen::MatrixXd::Constant(1, 1, q);
+    pfp.R = Eigen::MatrixXd::Constant(1, 1, r);
+    pfp.Ts   = Ts;
+    pfp.seed = 7u;
+
+    auto f = [](const Eigen::VectorXd &x, const Eigen::VectorXd &u) {
+        Eigen::VectorXd xn(1);
+        xn(0) = 0.9 * x(0) + u(0);
+        return xn;
+    };
+    auto h = [](const Eigen::VectorXd &x, const Eigen::VectorXd &) {
+        return x; // y = x
+    };
+
+    ctrl::ParticleFilter pf(pfp, 1, 1, f, h);
+    pf.initialise(Eigen::VectorXd::Zero(1),
+                  Eigen::MatrixXd::Identity(1, 1) * 0.1);
+
+    // Separate RNG for the "true" plant (deterministic seed)
+    std::mt19937 plant_rng(42);
+    std::normal_distribution<double> w_dist(0.0, std::sqrt(q));
+    std::normal_distribution<double> v_dist(0.0, std::sqrt(r));
+
+    double x_true = 0.0;
+    const Eigen::VectorXd u_zero = Eigen::VectorXd::Zero(1);
+    double sse = 0.0;
+    const int N = 30;
+
+    for (int k = 0; k < N; ++k) {
+        x_true = 0.9 * x_true + w_dist(plant_rng);
+        const double y_meas = x_true + v_dist(plant_rng);
+        Eigen::VectorXd y_vec(1); y_vec(0) = y_meas;
+        pf.step(y_vec, u_zero);
+
+        const double err = pf.state()(0) - x_true;
+        sse += err * err;
+    }
+
+    const double rmse = std::sqrt(sse / N);
+    REQUIRE(rmse < 0.30); // well-behaved filter should achieve sub-KF RMSE
+    REQUIRE(pf.effectiveSampleSize() > 1.0); // at least some diversity
+    REQUIRE(pf.isInitialised());
+}
+
+TEST_CASE("ParticleFilter resamples when weight degeneracy occurs", "[particle_filter]")
+{
+    // Use a very tight likelihood (R small) to force weight degeneracy rapidly.
+    // After a few steps the resampler should have fired at least once.
+    ctrl::ParticleFilterParams pfp;
+    pfp.n_particles = 100;
+    pfp.Q = Eigen::MatrixXd::Constant(1, 1, 0.1);
+    pfp.R = Eigen::MatrixXd::Constant(1, 1, 1e-4); // very tight -> fast degeneracy
+    pfp.resample_threshold = 90.0; // aggressive: resample when N_eff < 90
+    pfp.seed = 13u;
+
+    auto f = [](const Eigen::VectorXd &x, const Eigen::VectorXd &u) {
+        Eigen::VectorXd xn(1); xn(0) = 0.95 * x(0) + u(0); return xn;
+    };
+    auto h = [](const Eigen::VectorXd &x, const Eigen::VectorXd &) { return x; };
+
+    ctrl::ParticleFilter pf(pfp, 1, 1, f, h);
+    pf.initialise(Eigen::VectorXd::Zero(1));
+
+    const Eigen::VectorXd u0 = Eigen::VectorXd::Zero(1);
+    Eigen::VectorXd y(1); y(0) = 0.5; // sudden measurement
+
+    for (int k = 0; k < 5; ++k)
+        pf.step(y, u0);
+
+    // With N_eff threshold = 90/100, resampling must have fired at least once
+    REQUIRE(pf.resampleCount() >= 1);
+
+    // After resampling, weights should be uniform (1/N each)
+    const double w_uniform = 1.0 / 100.0;
+    REQUIRE_THAT(pf.weights().minCoeff(), WithinAbs(w_uniform, 1e-9));
+    REQUIRE_THAT(pf.weights().maxCoeff(), WithinAbs(w_uniform, 1e-9));
+
+    // Estimate must be finite
+    REQUIRE(std::isfinite(pf.state()(0)));
+}

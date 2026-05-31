@@ -71,6 +71,8 @@ inline std::unordered_map<std::string, bool> features()
         {"adaptive_smith",          true},  // always compiled (AdaptiveSmithPredictor.cpp in core sources)
         {"auto_tuner",              true},  // always compiled (header-only AutoTuner.h)
         {"anti_windup_wrapper",     true},  // always compiled (header-only AntiWindupWrapper.h)
+        {"tube_mpc",                true},  // always compiled (TubeMPC.cpp in core sources)
+        {"particle_filter",         true},  // always compiled (ParticleFilter.cpp in core sources)
     };
 }
 

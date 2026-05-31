@@ -472,4 +472,31 @@ aw.reset()
 assert not aw.is_saturated(), "AntiWindupWrapper should not be saturated after reset"
 print('AntiWindupWrapper smoke test passed.')
 
+# TubeMPC smoke test
+tp_s = ctrl.TubeMPCParams()
+tp_s.Np = 5; tp_s.Nu = 2
+tp_s.Q = np.eye(1) * 2.0; tp_s.R = np.eye(1) * 0.3
+tp_s.K = np.array([[-0.3]]); tp_s.wMax = np.array([0.05])
+tp_s.uMin = np.array([-2.0]); tp_s.uMax = np.array([2.0]); tp_s.Ts = 0.1
+sys_tube = ctrl.StateSpace(np.array([[0.8]]), np.array([[0.2]]),
+                           np.eye(1), np.zeros((1,1)), 0.1)
+tmpc_s = ctrl.TubeMPC(sys_tube, tp_s)
+z = tmpc_s.tube_radius()
+assert np.all(z > 0), "TubeMPC tube radius must be positive"
+u_tube = tmpc_s.compute_ref(np.zeros(1), np.ones(1))
+assert np.isfinite(u_tube[0]), "TubeMPC output not finite"
+print('TubeMPC smoke test passed.')
+
+# ParticleFilter smoke test
+pfp_s = ctrl.ParticleFilterParams()
+pfp_s.n_particles = 50; pfp_s.Q = np.eye(1)*0.1; pfp_s.R = np.eye(1)*0.5; pfp_s.seed = 1
+pf_s = ctrl.ParticleFilter(pfp_s, 1, 1,
+                            lambda x, u: np.array([0.9*x[0]+u[0]]),
+                            lambda x, u: x.copy())
+pf_s.initialise(np.zeros(1))
+pf_s.step(np.array([0.3]), np.zeros(1))
+assert np.isfinite(pf_s.state()[0]), "ParticleFilter state not finite"
+assert pf_s.effective_sample_size() > 1.0, "ParticleFilter N_eff <= 1"
+print('ParticleFilter smoke test passed.')
+
 print('\nAll smoke tests passed.')

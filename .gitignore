@@ -9,3 +9,5 @@
 *.log
 reference/
 run_corrector_check.txt
+CLAUDE.md
+memory/

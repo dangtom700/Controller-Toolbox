@@ -9,9 +9,20 @@
 #include "PlantModel.h"
 #include "RecursiveLeastSquares.h"
 #include "SystemAnalysis.h"
+#include "DiscreteADRC.h"
+#include "RepetitiveController.h"
+#include "DiscreteLQR.h"
+#include "DiscreteLQG.h"
+#include "ControllerTuner.h"
+#include "TubeMPC.h"
+#include "ExtendedKalmanFilter.h"
+#include "MRACController.h"
+#include "NonlinearMPC.h"
+#include "AutoGainScheduler.h"
 #include <Eigen/Dense>
 #include <array>
 #include <memory>
+#include <optional>
 #include <string>
 
 // Controller wrappers for the tug-barge simulation.
@@ -207,6 +218,155 @@ private:
 
     ctrl::StateSpace buildAxisSS(int axis, const Eigen::Vector3d& nu) const;
     void relinearize(int axis, const Eigen::Vector3d& nu);
+};
+
+// -- Mode 8: ADRC (3-axis) ----------------------------------------------------
+// 2nd-order ADRC per axis. ESO estimates coupling + drag as total disturbance.
+// b0_xy = 1/M_re(i,i); b0_psi = 1/M_re(2,2).
+// omega_o=0.5 rad/s satisfies omega_o*Ts = 0.25 < 0.5 (backward Euler stable).
+class ADRCTugCtrl : public ControllerBase {
+public:
+    explicit ADRCTugCtrl(const PlantParameters& p);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref,
+                            const Eigen::Matrix<double,6,1>& state) override;
+    void reset() override;
+    std::string name() const override { return "ADRC"; }
+private:
+    const PlantParameters& pp_;
+    std::array<ctrl::DiscreteADRC, 3> adrcs_;
+};
+
+// -- Mode 9: RepetitiveController (3-axis) ------------------------------------
+// Plug-in repetitive controller on top of PID baseline.
+// Period estimated from JONSWAP peak period Tp (from plant_params.json).
+// Cancels periodic wave drift in S3/S4 scenarios.
+class RepetitiveTugCtrl : public ControllerBase {
+public:
+    explicit RepetitiveTugCtrl(const PlantParameters& p);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref,
+                            const Eigen::Matrix<double,6,1>& state) override;
+    void reset() override;
+    std::string name() const override { return "RepetitiveCtrl"; }
+private:
+    const PlantParameters& pp_;
+    std::array<ctrl::RepetitiveController, 3> rcs_;
+};
+
+// -- Mode 10: LQR (6-state MIMO) -----------------------------------------------
+// Bryson-tuned full-state LQR on the linearised 6-state model.
+// xmax=[10,10,0.1,1,1,0.05]; umax=[TAU_XY_MAX,TAU_XY_MAX,TAU_PSI_MAX].
+// x_ref = [ref(0), ref(1), ref(2), 0, 0, 0] (position track, zero velocity).
+class LQRTugCtrl : public ControllerBase {
+public:
+    explicit LQRTugCtrl(const PlantParameters& p);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref,
+                            const Eigen::Matrix<double,6,1>& state) override;
+    void reset() override {}   // LQR is stateless at runtime
+    std::string name() const override { return "LQR"; }
+private:
+    const PlantParameters& pp_;
+    ctrl::DiscreteLQR lqr_;
+};
+
+// -- Mode 11: LQG (6-state KF + LQR) ------------------------------------------
+// DiscreteLQG: Kalman filter estimates 6-state, LQR provides optimal feedback.
+// Same Bryson weights as LQRTugCtrl; KF noise tuned to GPS/IMU spec.
+class LQGTugCtrl : public ControllerBase {
+public:
+    explicit LQGTugCtrl(const PlantParameters& p);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref,
+                            const Eigen::Matrix<double,6,1>& state) override;
+    void reset() override;
+    std::string name() const override { return "LQG"; }
+private:
+    const PlantParameters& pp_;
+    ctrl::DiscreteLQG lqg_;
+    Eigen::VectorXd u_prev_;
+};
+
+// -- Mode 12: TubeMPC (3x per-axis robust MPC) ---------------------------------
+// Tube-MPC on the same decoupled 2-state per-axis model as MPCController.
+// K = -K_lqr (LQR stabilising feedback); wMax sized to JONSWAP wave disturbance.
+// Guarantees state stays within computed tube under bounded wave forcing.
+class TubeMPCTugCtrl : public ControllerBase {
+public:
+    explicit TubeMPCTugCtrl(const PlantParameters& p);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref,
+                            const Eigen::Matrix<double,6,1>& state) override;
+    void reset() override;
+    std::string name() const override { return "TubeMPC"; }
+private:
+    const PlantParameters& pp_;
+    std::array<ctrl::TubeMPC, 3> tmpcs_;
+};
+
+// -- Mode 13: EKF-LQR ----------------------------------------------------------
+// EKF propagates nonlinear J(psi)*nu kinematics and body-frame dynamics.
+// LQR uses the linearised 6-state model from KFPIDController.buildPlantSS().
+// Provides better state estimates when heading angle is significant.
+class EKFLQRTugCtrl : public ControllerBase {
+public:
+    explicit EKFLQRTugCtrl(const PlantParameters& p);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref,
+                            const Eigen::Matrix<double,6,1>& state) override;
+    void reset() override;
+    std::string name() const override { return "EKF-LQR"; }
+private:
+    const PlantParameters& pp_;
+    ctrl::ExtendedKalmanFilter ekf_;
+    ctrl::DiscreteLQR lqr_;
+    Eigen::VectorXd u_prev_;
+};
+
+// -- Mode 14: MRAC (3-axis adaptive) ------------------------------------------
+// 3x MRACController, one per axis. Very conservative adaptation (gamma=1e-8)
+// and large theta_max to prevent instability on the slow double-integrator-like
+// ship dynamics (relative degree 2 from force to position).
+class MRACTugCtrl : public ControllerBase {
+public:
+    explicit MRACTugCtrl(const PlantParameters& p);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref,
+                            const Eigen::Matrix<double,6,1>& state) override;
+    void reset() override;
+    std::string name() const override { return "MRAC"; }
+private:
+    const PlantParameters& pp_;
+    std::array<ctrl::MRACController, 3> mracs_;
+};
+
+// -- Mode 15: AutoGS (automated gain-scheduled LQR on surge axis) -------------
+// buildAutoGainScheduler sweeps surge speed [0,1.5] m/s, clusters by nu-gap,
+// and designs DiscreteLQR at each representative.  Scheduling variable = |u_v|.
+// The other axes remain as PID loops.
+class AutoGSTugCtrl : public ControllerBase {
+public:
+    explicit AutoGSTugCtrl(const PlantParameters& p);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref,
+                            const Eigen::Matrix<double,6,1>& state) override;
+    void reset() override;
+    std::string name() const override { return "AutoGS-LQR"; }
+private:
+    const PlantParameters& pp_;
+    std::shared_ptr<ctrl::GainScheduledController> sched_surge_;
+    std::array<ctrl::DiscretePID, 2> pids_yw_;  // y and psi remain PID
+    // Capture current surge-axis state for LQRAdapter callbacks
+    mutable Eigen::VectorXd x_surge_;  // [e_surge, u_vel]
+};
+
+// -- Mode 16: NonlinearMPC (6-state ship dynamics) ----------------------------
+// RTI-NMPC on the discrete-time nonlinear tug model (Euler-integrated J(psi)*nu
+// kinematics + linear body-force dynamics). Np=20, Nu=5.
+// C = [I_3, 0_{3x3}] tracks position only; input in kN for numerical stability.
+class NMPCTugCtrl : public ControllerBase {
+public:
+    explicit NMPCTugCtrl(const PlantParameters& p);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref,
+                            const Eigen::Matrix<double,6,1>& state) override;
+    void reset() override;
+    std::string name() const override { return "NMPC"; }
+private:
+    const PlantParameters& pp_;
+    ctrl::NonlinearMPC nmpc_;
 };
 
 } // namespace tug

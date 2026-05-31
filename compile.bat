@@ -105,7 +105,10 @@ for %%T in (
     ex64_adaptive_smith_predictor
     ex65_autotuner_pid
     ex66_antwindup_wrapper
+    ex67_tube_mpc
+    ex68_particle_filter
     test_autoscheduling
+    test_stability_margins
     example_pid_feedback
     mimo_known
     mimo_unknown
@@ -116,6 +119,8 @@ for %%T in (
     realtime_all
     boiler_sim
     tug_sim
+    smismo_sim
+    solar_cooling_sim
     toolbox_examples
     test_catch2_pilot
     test_catch2_advanced

@@ -47,10 +47,10 @@ int main(int argc, char* argv[])
     std::cout << "Boiler Control Full Numerical Simulation\n";
     std::cout << "=========================================\n";
     std::cout << "Scenarios: " << scenario_files.size() << "\n";
-    std::cout << "Controllers per scenario: 18\n";
-    std::cout << "Total runs: " << scenario_files.size() * 18 << "\n\n";
+    std::cout << "Controllers per scenario: 27\n";
+    std::cout << "Total runs: " << scenario_files.size() * 27 << "\n\n";
 
-    int total = static_cast<int>(scenario_files.size()) * 18;
+    int total = static_cast<int>(scenario_files.size()) * 27;
     int done  = 0;
 
     for (auto& sf : scenario_files) {
@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
             boiler::getOperatingPoint(scenario.operating_point);
         ctrl::StateSpace ss = boiler::linearize(op, scenario.Ts);
 
-        // Build all 18 controllers for this operating point
+        // Build all 21 controllers for this operating point (18 original + 3 Wave 1)
         std::vector<std::unique_ptr<boiler::ControllerBase>> controllers;
         controllers.push_back(std::make_unique<boiler::PIDController>(ss, op));
         controllers.push_back(std::make_unique<boiler::LQRController>(ss, op));
@@ -90,6 +90,18 @@ int main(int argc, char* argv[])
         controllers.push_back(std::make_unique<boiler::AdditiveStackController>(ss, op));
         controllers.push_back(std::make_unique<boiler::WeightedStackController>(ss, op));
         controllers.push_back(std::make_unique<boiler::RepetitiveCtrl>(ss, op));
+        // Wave 1 additions
+        controllers.push_back(std::make_unique<boiler::MRACBoilerCtrl>(ss, op));
+        controllers.push_back(std::make_unique<boiler::HinfBoilerCtrl>(ss, op));
+        controllers.push_back(std::make_unique<boiler::AdaptiveSPBoilerCtrl>(ss, op));
+        // Wave 2 additions
+        controllers.push_back(std::make_unique<boiler::NMPCBoilerCtrl>(ss, op));
+        controllers.push_back(std::make_unique<boiler::FLBoilerCtrl>(ss, op));
+        // Wave 3 additions
+        controllers.push_back(std::make_unique<boiler::MHELQRBoilerCtrl>(ss, op));
+        controllers.push_back(std::make_unique<boiler::LPVGSBoilerCtrl>(ss, op));
+        controllers.push_back(std::make_unique<boiler::SubspaceIDLQGBoilerCtrl>(ss, op));
+        controllers.push_back(std::make_unique<boiler::AutoGSBoilerCtrl>(ss, op));
 
         for (auto& ctrl : controllers) {
             try {

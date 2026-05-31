@@ -48,6 +48,7 @@ int main(int argc, char* argv[])
     // -- Controllers -----------------------------------------------------------
     // Build them once; runner calls reset() before each run.
     std::vector<std::unique_ptr<tug::ControllerBase>> controllers;
+    // Original 7
     controllers.push_back(std::make_unique<tug::PIDController>(plant));
     controllers.push_back(std::make_unique<tug::KFPIDController>(plant));
     controllers.push_back(std::make_unique<tug::SMCController>(plant));
@@ -55,6 +56,18 @@ int main(int argc, char* argv[])
     controllers.push_back(std::make_unique<tug::ESCController>(plant));
     controllers.push_back(std::make_unique<tug::FuzzyPIDController>(plant));
     controllers.push_back(std::make_unique<tug::FuzzySupervised_MPC>(plant));
+    // Wave 1 additions
+    controllers.push_back(std::make_unique<tug::ADRCTugCtrl>(plant));
+    controllers.push_back(std::make_unique<tug::RepetitiveTugCtrl>(plant));
+    // Wave 2 additions
+    controllers.push_back(std::make_unique<tug::LQRTugCtrl>(plant));
+    controllers.push_back(std::make_unique<tug::LQGTugCtrl>(plant));
+    controllers.push_back(std::make_unique<tug::TubeMPCTugCtrl>(plant));
+    controllers.push_back(std::make_unique<tug::EKFLQRTugCtrl>(plant));
+    controllers.push_back(std::make_unique<tug::MRACTugCtrl>(plant));
+    // Wave 3 additions
+    controllers.push_back(std::make_unique<tug::AutoGSTugCtrl>(plant));
+    controllers.push_back(std::make_unique<tug::NMPCTugCtrl>(plant));
 
     // -- Run all (scenario x controller) pairs ---------------------------------
     int total = static_cast<int>(scenario_files.size() * controllers.size());

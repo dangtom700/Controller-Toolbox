@@ -2,9 +2,16 @@
 #include "boiler_plant.h"
 #include "linearizer.h"
 #include <ControllerToolbox.h>
+#include "NonlinearMPC.h"
+#include "FeedbackLinearisation.h"
+#include "MovingHorizonEstimator.h"
+#include "LPVSystemID.h"
+#include "SubspaceID.h"
+#include "AutoGainScheduler.h"
 #include <Eigen/Dense>
 #include <array>
 #include <memory>
+#include <optional>
 #include <string>
 
 // All boiler controllers share this interface:
@@ -265,6 +272,150 @@ public:
     std::string name() const override { return "RepetitiveCtrl"; }
 private:
     std::array<ctrl::RepetitiveController, 3> rcs_;
+};
+
+// -- 19. MRACBoilerCtrl -------------------------------------------------------
+// 3* MRAC (one per diagonal channel); adapts to gain changes across operating points.
+// Reference model: a_m=0.80, b_m=0.20 (DC gain = 1). compute() passes absolute y/u.
+class MRACBoilerCtrl : public ControllerBase {
+public:
+    explicit MRACBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref_dy,
+                            const Eigen::Vector3d& dy) override;
+    void reset() override;
+    std::string name() const override { return "MRAC"; }
+private:
+    std::array<ctrl::MRACController, 3> mracs_;
+    OperatingPoint op_;
+};
+
+// -- 20. HinfBoilerCtrl -------------------------------------------------------
+// 3* H-inf mixed-sensitivity per diagonal channel; robust to pressure disturbances.
+// Falls back to PID per-channel if synthesis is infeasible.
+class HinfBoilerCtrl : public ControllerBase {
+public:
+    explicit HinfBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref_dy,
+                            const Eigen::Vector3d& dy) override;
+    void reset() override;
+    std::string name() const override { return "H-inf"; }
+private:
+    std::array<std::optional<ctrl::DiscreteHinf>, 3> hinfs_;
+    std::array<ctrl::DiscretePID, 3>                  fallback_pids_;
+};
+
+// -- 21. AdaptiveSPBoilerCtrl -------------------------------------------------
+// 3* Adaptive Smith Predictor; online cross-correlation estimates dead-time per channel.
+// Compensates for valve-rate-limited effective delay that changes with operating point.
+class AdaptiveSPBoilerCtrl : public ControllerBase {
+public:
+    explicit AdaptiveSPBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref_dy,
+                            const Eigen::Vector3d& dy) override;
+    void reset() override;
+    std::string name() const override { return "AdaptiveSP"; }
+private:
+    std::array<ctrl::AdaptiveSmithPredictor, 3> sps_;
+    OperatingPoint op_;
+};
+
+// -- 22. NMPCBoilerCtrl -------------------------------------------------------
+// NonlinearMPC on Bell-Astrom 3-state deviation dynamics (Euler-integrated).
+// RTI horizon Np=10, Nu=3. C = ss.C maps state to output for tracking.
+// Uses dy as state proxy (valid near op where Cd approx = I for channels 0,1).
+class NMPCBoilerCtrl : public ControllerBase {
+public:
+    explicit NMPCBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref_dy,
+                            const Eigen::Vector3d& dy) override;
+    void reset() override;
+    std::string name() const override { return "NMPC"; }
+private:
+    ctrl::NonlinearMPC nmpc_;
+    OperatingPoint op_;
+};
+
+// -- 23. FLBoilerCtrl ---------------------------------------------------------
+// 3* FeedbackLinearisationController, one per diagonal channel.
+// Channel 0 (u1->y1=x1): g=0.9, nonlinear f.
+// Channel 1 (u2->y2=x2): g=0.073*x1^(9/8), nonlinear f.
+// Channel 2 (u3->x3):    g=141/85, linear f (x3 water level proxy for y3).
+// Inner PID: Kp=0.5 for the linearized virtual plant.
+class FLBoilerCtrl : public ControllerBase {
+public:
+    explicit FLBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref_dy,
+                            const Eigen::Vector3d& dy) override;
+    void reset() override;
+    std::string name() const override { return "FL"; }
+private:
+    std::array<ctrl::FeedbackLinearisationController, 3> fls_;
+    OperatingPoint op_;
+};
+
+// -- 24. MHELQRBoilerCtrl -----------------------------------------------------
+// Moving Horizon Estimator (N=10) for state estimation + DiscreteLQR feedback.
+// MHE uses process-noise box constraints [-0.5, 0.5] on w.
+class MHELQRBoilerCtrl : public ControllerBase {
+public:
+    explicit MHELQRBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref_dy,
+                            const Eigen::Vector3d& dy) override;
+    void reset() override;
+    std::string name() const override { return "MHE-LQR"; }
+private:
+    ctrl::MovingHorizonEstimator mhe_;
+    ctrl::DiscreteLQR            lqr_;
+    Eigen::Vector3d              du_prev_;
+    bool                         initialised_ = false;
+};
+
+// -- 25. LPVGSBoilerCtrl ------------------------------------------------------
+// LPV gain-scheduled controller: identifies A(rho), B(rho) polynomial
+// dependence on pressure x1, then designs GainScheduledController over
+// pressure range [60, 150] bar with NearestNeighbor switching.
+class LPVGSBoilerCtrl : public ControllerBase {
+public:
+    explicit LPVGSBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref_dy,
+                            const Eigen::Vector3d& dy) override;
+    void reset() override;
+    std::string name() const override { return "LPV-GS"; }
+private:
+    std::shared_ptr<ctrl::GainScheduledController> sched_;
+    const OperatingPoint& op_;
+};
+
+// -- 26. SubspaceIDLQGBoilerCtrl -----------------------------------------------
+// SubspaceID (N4SID/MOESP) identifies a 3rd-order model from simulated
+// step-response data, then designs DiscreteLQG on the identified model.
+// Demonstrates closed-loop model identification pipeline.
+class SubspaceIDLQGBoilerCtrl : public ControllerBase {
+public:
+    explicit SubspaceIDLQGBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref_dy,
+                            const Eigen::Vector3d& dy) override;
+    void reset() override;
+    std::string name() const override { return "SubspaceID-LQG"; }
+private:
+    ctrl::DiscreteLQG lqg_;
+    Eigen::Vector3d   du_prev_;
+};
+
+// -- 27. AutoGSBoilerCtrl ------------------------------------------------------
+// Automated gain-scheduled LQR built by buildAutoGainScheduler.
+// Sweeps pressure x1 \in [60, 150] bar, clusters by nu-gap, designs LQR per cluster.
+// Scheduling variable = current x1 = x1_op + dy[0].
+class AutoGSBoilerCtrl : public ControllerBase {
+public:
+    explicit AutoGSBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint& op);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref_dy,
+                            const Eigen::Vector3d& dy) override;
+    void reset() override;
+    std::string name() const override { return "AutoGS"; }
+private:
+    std::shared_ptr<ctrl::GainScheduledController> sched_;
+    OperatingPoint op_;
 };
 
 } // namespace boiler

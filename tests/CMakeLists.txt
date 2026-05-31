@@ -27,6 +27,12 @@ add_executable(test_autoscheduling test_autoscheduling.cpp)
 target_link_libraries(test_autoscheduling PRIVATE controller_toolbox Catch2::Catch2WithMain)
 target_include_directories(test_autoscheduling PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
+# -- Catch2 stability margins regression suite (Part 25 / T6) ---------------
+add_executable(test_stability_margins test_stability_margins.cpp)
+target_link_libraries(test_stability_margins PRIVATE controller_toolbox Catch2::Catch2WithMain)
+target_include_directories(test_stability_margins PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_features(test_stability_margins PRIVATE cxx_std_20)
+
 # -- Legacy hand-rolled test executables (kept unchanged) -------------------
 add_executable(test_controllers test_controllers.cpp)
 target_link_libraries(test_controllers PRIVATE controller_toolbox)

@@ -90,6 +90,10 @@ add_example(ex65_autotuner_pid)
 # Part 24: AntiWindupWrapper
 add_example(ex66_antwindup_wrapper)
 
+# Part 25: TubeMPC, ParticleFilter
+add_example(ex67_tube_mpc)
+add_example(ex68_particle_filter)
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)
