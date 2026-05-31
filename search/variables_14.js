@@ -5,6 +5,6 @@ var searchData=
   ['wcrossovergain_2',['wCrossoverGain',['../structctrl_1_1StabilityMargins.html#ad3881a81fafb13778a075225a406a6a6',1,'ctrl::StabilityMargins']]],
   ['wcrossoverphase_3',['wCrossoverPhase',['../structctrl_1_1StabilityMargins.html#a3e1fcf9625811ebe2c2b31ace3caf21e',1,'ctrl::StabilityMargins']]],
   ['weight_4',['weight',['../structctrl_1_1StackEntry.html#a0a4f3bfacc0249d7d3099be1f34d2f40',1,'ctrl::StackEntry::weight'],['../structctrl_1_1Rule.html#a7af26a558ec583f686650a0fae5af059',1,'ctrl::Rule::weight']]],
-  ['wmax_5',['wMax',['../structctrl_1_1MHEParams.html#a5ad914176dbe63158092528ceb58d5de',1,'ctrl::MHEParams']]],
+  ['wmax_5',['wmax',['../structctrl_1_1MHEParams.html#a5ad914176dbe63158092528ceb58d5de',1,'ctrl::MHEParams::wMax'],['../structctrl_1_1TubeMPCParams.html#a51158a827a282ed4142e8a58f5fd815c',1,'ctrl::TubeMPCParams::wMax']]],
   ['wmin_6',['wMin',['../structctrl_1_1MHEParams.html#a9666c1322f7c337dddc6ebb6077c5329',1,'ctrl::MHEParams']]]
 ];

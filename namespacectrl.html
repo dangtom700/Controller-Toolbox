@@ -368,6 +368,12 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1PadeApproximator.html">PadeApproximator</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rational function approximator (Pade / Sanathanan-Koerner least squares).  <a href="classctrl_1_1PadeApproximator.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ParticleFilter.html">ParticleFilter</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">SIR particle filter for nonlinear/non-Gaussian state estimation.  <a href="classctrl_1_1ParticleFilter.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ParticleFilterParams.html">ParticleFilterParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration parameters for the SIR particle filter.  <a href="structctrl_1_1ParticleFilterParams.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1PIDParams.html">PIDParams</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for <a class="el" href="classctrl_1_1DiscretePID.html" title="Discrete-time PID controller.">DiscretePID</a>.  <a href="structctrl_1_1PIDParams.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -467,6 +473,12 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TruncationResult.html">TruncationResult</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of a balanced truncation operation.  <a href="structctrl_1_1TruncationResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1TubeMPC.html">TubeMPC</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tube MPC - robust <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> for plants with bounded additive disturbances.  <a href="classctrl_1_1TubeMPC.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TubeMPCParams.html">TubeMPCParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parameters for the Tube MPC controller.  <a href="structctrl_1_1TubeMPCParams.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1TunerResult.html">TunerResult</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of an <a class="el" href="classctrl_1_1AutoTuner.html#a8b7a02b72c1354e57321f32b702ccf44" title="Run CMA-ES to minimize cost starting from x0.">AutoTuner::tune()</a> run.  <a href="structctrl_1_1TunerResult.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -497,6 +509,11 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a2b4f19ebb433c185c5b7a561cec22f20" id="r_a2b4f19ebb433c185c5b7a561cec22f20"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a2b4f19ebb433c185c5b7a561cec22f20">JacobianFn</a> = std::function&lt; Eigen::MatrixXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td></tr>
 <tr class="memdesc:a2b4f19ebb433c185c5b7a561cec22f20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for a Jacobian: returns an (n*n) or (p*n) matrix given (x, u).  <br /></td></tr>
 <tr class="separator:a2b4f19ebb433c185c5b7a561cec22f20"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3032ac8419f78cb550ee786567b2d353" id="r_a3032ac8419f78cb550ee786567b2d353"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a3032ac8419f78cb550ee786567b2d353">ParticleFn</a> = std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td></tr>
+<tr class="memdesc:a3032ac8419f78cb550ee786567b2d353"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process and measurement model functions for the particle filter.  <br /></td></tr>
+<tr class="separator:a3032ac8419f78cb550ee786567b2d353"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7786f7620b405436dbc64206aca63a2a" id="r_a7786f7620b405436dbc64206aca63a2a"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a7786f7620b405436dbc64206aca63a2a">ParticleMeasFn</a> = std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td></tr>
+<tr class="separator:a7786f7620b405436dbc64206aca63a2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -764,6 +781,40 @@ Variables</h2></td></tr>
 <p>Measurement function: y = h(x, u). </p>
 
 <p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00055">55</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+
+</div>
+</div>
+<a id="a3032ac8419f78cb550ee786567b2d353" name="a3032ac8419f78cb550ee786567b2d353"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3032ac8419f78cb550ee786567b2d353">&#9670;&#160;</a></span>ParticleFn</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="namespacectrl.html#a3032ac8419f78cb550ee786567b2d353">ctrl::ParticleFn</a> = typedef std::function&lt;Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Process and measurement model functions for the particle filter. </p>
+
+<p class="definition">Definition at line <a class="el" href="ParticleFilter_8h_source.html#l00052">52</a> of file <a class="el" href="ParticleFilter_8h_source.html">ParticleFilter.h</a>.</p>
+
+</div>
+</div>
+<a id="a7786f7620b405436dbc64206aca63a2a" name="a7786f7620b405436dbc64206aca63a2a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7786f7620b405436dbc64206aca63a2a">&#9670;&#160;</a></span>ParticleMeasFn</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="namespacectrl.html#a7786f7620b405436dbc64206aca63a2a">ctrl::ParticleMeasFn</a> = typedef std::function&lt;Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="ParticleFilter_8h_source.html#l00054">54</a> of file <a class="el" href="ParticleFilter_8h_source.html">ParticleFilter.h</a>.</p>
 
 </div>
 </div>
@@ -3411,7 +3462,7 @@ Variables</h2></td></tr>
 
 <p class="reference">References <a class="el" href="GradientProjectionQP_8h_source.html#l00053">ctrl::QPSolveResult::converged</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteMPC_8cpp_source.html#l00137">ctrl::DiscreteMPC::computeRef()</a>, <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>, and <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00077">ctrl::MovingHorizonEstimator::estimate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="TubeMPC_8cpp_source.html#l00233">ctrl::TubeMPC::computeControl()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00137">ctrl::DiscreteMPC::computeRef()</a>, <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>, and <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00077">ctrl::MovingHorizonEstimator::estimate()</a>.</p>
 
 </div>
 </div>
