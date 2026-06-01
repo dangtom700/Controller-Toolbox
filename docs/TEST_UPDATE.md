@@ -1,29 +1,51 @@
 # Test Suite Update - Controller Toolbox
 
-**Date:** 2026-05-30 (Rev 5)
-**Scope:** `tests/test_catch2_advanced.cpp`, `tests/test_catch2_pilot.cpp`, `tests/test_controllers.cpp`
+**Date:** 2026-05-31 (Rev 6)
+**Scope:** `tests/test_catch2_advanced.cpp`, `tests/test_catch2_pilot.cpp`, `tests/test_controllers.cpp`, case-study sims
 
 ---
 
-## Rev 4 — Algorithm Extension Tests (2026-05-28)
+## Rev 6 -- Case-Study Expansion (Part 26, 2026-05-31)
 
-**Current totals (Rev 5 / Part 24): 86 C++ executables pass | 86 Python examples pass | 0 failures.**
+**Current totals (Rev 6 / Part 26): 90 C++ executables pass | 88 Python examples pass | 0 failures.**
+
+Part 26 added **no new `lib/` Catch2 tests** -- all work was in `case-study/`. The case
+studies are exercised end-to-end via `run.py` Phase 3 (each sim binary must exit 0):
+
+| Case study | Controllers | Scenarios | Runs |
+|---|---|---|---|
+| Boiler Control (`boiler_sim`) | 27 | 8 | 216 |
+| Meter In Meter Out / SMISMO (`smismo_sim`) | 14 | 3 | 42 |
+| Tug Boat (`tug_sim`) | 16 | 4 | 64 |
+| Solar Cooling (`solar_cooling_sim`) | 9 | 5 | 45 |
+
+**KNOWN COVERAGE GAP (Part 26 review, finding T1):** only the Tug study has a Catch2
+regression test (`test_tugsim_regression.cpp`). Boiler/SMISMO/Solar are validated only
+by "the binary exited 0" -- a controller that drives the plant to a wall also exits 0.
+Adding `test_boiler_regression.cpp` / `test_smismo_regression.cpp` /
+`test_solar_regression.cpp` (per-controller IAE/settling thresholds) is the top open task.
 
 ---
 
-## Rev 5 — AntiWindupWrapper Tests (2026-05-30)
+## Rev 4 -- Algorithm Extension Tests (2026-05-28)
 
-### New Catch2 test cases — 2 tests in `test_catch2_advanced.cpp`
+**Historical (Rev 5 / Part 24): 86 C++ executables pass | 86 Python examples pass | 0 failures.**
 
-#### `[anti_windup]` — AntiWindupWrapper (2 tests)
+---
 
-1. **"limits integrator windup during saturation"** — PI controller (Kp=0.5, Ki=1.0, Kb=0) wraps a
+## Rev 5 -- AntiWindupWrapper Tests (2026-05-30)
+
+### New Catch2 test cases -- 2 tests in `test_catch2_advanced.cpp`
+
+#### `[anti_windup]` -- AntiWindupWrapper (2 tests)
+
+1. **"limits integrator windup during saturation"** -- PI controller (Kp=0.5, Ki=1.0, Kb=0) wraps a
    first-order plant with uMax=1. After 50 saturating steps (r=5) + 30 recovery steps (r=0),
    the wrapped version's plant output is materially lower than the unwrapped version (integral
    bounded by conditioning vs. growing unbounded). Asserts: `y_wrapped < y_unwrapped`,
    `y_wrapped < 1.5`, `y_unwrapped > 1.5`.
 
-2. **"transparent when not saturating"** — Same PI controller, wide limits (uMin=-10, uMax=10),
+2. **"transparent when not saturating"** -- Same PI controller, wide limits (uMin=-10, uMax=10),
    small reference r=0.3 (no saturation). Asserts: `u_wrapped == u_ref` at every step
    (WithinRel 1e-9), `isSaturated()==false`, `saturationError()==0` throughout and after reset().
 
@@ -31,41 +53,41 @@
 
 ---
 
-## Rev 4 — Algorithm Extension Tests (2026-05-28)
+## Rev 4 -- Algorithm Extension Tests (2026-05-28)
 
 **Rev 4 totals at time of writing: 78 C++ executables pass | 79 Python examples pass | 0 failures.**
 
-### New Catch2 test cases — 11 tests, 39 assertions
+### New Catch2 test cases -- 11 tests, 39 assertions
 
-#### `[linearisation]` — LinearisationHelper (2 tests, 9 assertions)
+#### `[linearisation]` -- LinearisationHelper (2 tests, 9 assertions)
 
 | Test | Key assertions |
 |------|---------------|
 | `jacobianX/U match analytical for Van der Pol at origin` | A_err < 1e-4, B_err < 1e-4 vs analytical A=[[0,1],[-1,μ]], B=[[0],[1]] |
 | `lineariseAtPoint produces stable LQR gain for Van der Pol` | DARE converges; all CL poles inside unit circle; ‖x(500)‖ < 0.05 |
 
-#### `[fl]` — FeedbackLinearisationController (2 tests, 7 assertions)
+#### `[fl]` -- FeedbackLinearisationController (2 tests, 7 assertions)
 
 | Test | Key assertions |
 |------|---------------|
 | `FL drives cubic drift ẋ=-x³+u to 1.0` | `isfinite(x)`, `|y-1.0| < 0.05` after 500 steps |
-| `FL lastOutput and sampleTime API` | sampleTime==Ts, lastOutput==0 before compute, u≈Kp·e for f=0/g=1, reset clears |
+| `FL lastOutput and sampleTime API` | sampleTime==Ts, lastOutput==0 before compute, u~Kp*e for f=0/g=1, reset clears |
 
-#### `[mrac]` — MRACController (2 tests, 7 assertions)
+#### `[mrac]` -- MRACController (2 tests, 7 assertions)
 
 | Test | Key assertions |
 |------|---------------|
 | `MRAC tracks reference model within 500 steps` | `|e_m| < 0.05`, θ within theta_max |
-| `reset restores initial theta and clears model state` | θ_r→b_m, θ_y→0, y_m→0 after reset |
+| `reset restores initial theta and clears model state` | θ_r->b_m, θ_y->0, y_m->0 after reset |
 
-#### `[btm]` — BalancedTruncation (2 tests, 8 assertions)
+#### `[btm]` -- BalancedTruncation (2 tests, 8 assertions)
 
 | Test | Key assertions |
 |------|---------------|
-| `HSVs are descending and non-negative` | σ₁ ≥ σ₂ ≥ 0; errorBound = 2·σ₂; reduced model stable; r=1 |
+| `HSVs are descending and non-negative` | σ₁ ≥ σ₂ ≥ 0; errorBound = 2*σ₂; reduced model stable; r=1 |
 | `DC gain deviation within H∞ error bound` | `|dc_full - dc_red| ≤ errorBound + 1e-8` |
 
-#### `[zpetc]` — ZeroPhaseTrackingFilter (3 tests, 8 assertions)
+#### `[zpetc]` -- ZeroPhaseTrackingFilter (3 tests, 8 assertions)
 
 | Test | Key assertions |
 |------|---------------|
@@ -75,7 +97,7 @@
 
 ---
 
-## Rev 3 — Part 18 Test Additions (2026-05-28)
+## Rev 3 -- Part 18 Test Additions (2026-05-28)
 
 **Current totals: 73 C++ executables pass | 74 Python examples pass | 0 failures.**
 
@@ -83,7 +105,7 @@
 
 Two new Catch2 test cases were added for the Part 18 algorithms, bringing the total to **40 test cases, 150 assertions**.
 
-#### `[sopdt]` — SOPDTIdentifier regression (new)
+#### `[sopdt]` -- SOPDTIdentifier regression (new)
 
 Tests `SOPDTIdentifier` on synthetic SOPDT data generated from known parameters (K=2, tau1=5, tau2=2, theta=1.5).
 
@@ -96,7 +118,7 @@ Tests `SOPDTIdentifier` on synthetic SOPDT data generated from known parameters 
 | IMC-PID positive | `Kp > 0`, `Ti > 0`, `Td > 0` |
 | Closed-loop PI convergence | Tracking within 10% after 500 steps |
 
-#### `[mhe]` — MovingHorizonEstimator regression (new)
+#### `[mhe]` -- MovingHorizonEstimator regression (new)
 
 Tests `MovingHorizonEstimator` on a scalar first-order plant (a=0.8) with noise-free measurements over 60 steps.
 
@@ -108,15 +130,15 @@ Tests `MovingHorizonEstimator` on a scalar first-order plant (a=0.8) with noise-
 
 ---
 
-## Rev 2 — Catch2 Test Suite (2026-05-27)
+## Rev 2 -- Catch2 Test Suite (2026-05-27)
 
 ### New Catch2 test files
 
 Two Catch2 v3 test files were added alongside the existing custom-framework tests.
 
-#### `test_catch2_pilot.cpp` — 5 test cases, 21 assertions
+#### `test_catch2_pilot.cpp` -- 5 test cases, 21 assertions
 
-Regression tests for bugs confirmed fixed in Parts 10–12 of the cumulative bug report.
+Regression tests for bugs confirmed fixed in Parts 10-12 of the cumulative bug report.
 
 | Test case | Bug | Key assertion |
 |-----------|-----|---------------|
@@ -126,7 +148,7 @@ Regression tests for bugs confirmed fixed in Parts 10–12 of the cumulative bug
 | `PIDParams::b_weight reduces proportional setpoint kick` | P11-8 2DOF weight | `peak(b=0.0) <= peak(b=1.0)` on 1st-order plant; both reach steady-state within 0.01 |
 | `IControllerObserver receives callbacks from DiscretePID` | Observer wiring | `onCompute` fires after `compute()`; `onReset` fires after `reset()`; no callbacks after `detachObserver()` |
 
-#### `test_catch2_advanced.cpp` — 40 test cases, 150 assertions (Rev 3 total)
+#### `test_catch2_advanced.cpp` -- 40 test cases, 150 assertions (Rev 3 total)
 
 Broader regression coverage. Includes GPC tracking, LQR convergence, SMC sign convention, ADRC double-integrator, n4sid DC gain tolerance, EKF/UKF, repetitive control, H-infinity, SOPDTIdentifier [sopdt], and MovingHorizonEstimator [mhe] (see Rev 3 section above).
 

@@ -35,7 +35,9 @@ conda run -n soft_robotics -- python run.py
 
 **Never use** `cmake --build build --parallel` - sequential compilation per `compile.bat` is required.
 
-**Expected baseline (Part 22):** `C++ 85/85 passed | Python 84/84 passed`.
+**Expected baseline (as of Part 26, 2026-05-31):** `C++ 90/90 passed | Python 88/88 passed`,
+plus the four case studies reporting full run counts (Boiler 216, SMISMO 42, Solar 45, Tug 64).
+This number drifts every part - treat the latest `run_*.log` as the source of truth, not this line.
 
 A log file `run_YYYYMMDD_HHMMSS.log` is written to the project root after every run.
 

@@ -55,7 +55,7 @@ controller/
 |-- CMakeLists.txt          # Root build, subdir aggregator
 |-- lib/                    # Library sources (build target: controller_toolbox)
 |-- examples/               # Single-file demos (ex01..ex22) + advanced cpp/ folder
-|-- case-study/             # Boiler-turbine multivariable case study
+|-- case-study/             # 4 physics studies: boiler-turbine, SMISMO hydraulic, tug boat, solar cooling
 |-- tests/                  # CTest-driven unit + integration tests
 |-- scripts/                # tune_all / simulate_all / realtime_all batch tools
 |-- cheatsheet/             # Markdown reference notes (tuning, identification)
@@ -177,11 +177,24 @@ cmake --build build --target docs
 
 **Python examples** (`examples/python/`, `ex01_*` through `ex75_*`): NumPy/python-control cross-validation and pybind11 binding demonstrations for every C++ class. Python examples 61-70 mirror corrector patterns; 71-75 mirror the new algorithm extensions.
 
-### 3.3 Case Study (`case-study/`)
+### 3.3 Case Studies (`case-study/`)
 
-**Boiler-Turbine:** [boiler_turbine_case_study.cpp](case-study/boiler_turbine_case_study.cpp) - a 3*3 nonlinear Bell-Astrom boiler-turbine model with linearisation, then LQR / MPC / LQG / PID / SMC / Extremum-Seeker comparison across three operating points (Low / Medium / High Load). See [case-study/verdict_boiler_turbine.md](case-study/verdict_boiler_turbine.md) for the analysis verdict.
+Four self-contained physics studies exercise the library end-to-end. Each pairs a nonlinear plant simulator with a roster of controllers that **wrap** the `lib/` algorithms behind a study-specific `ControllerBase` (not `ctrl::IController` directly, because each plant has a different I/O signature), then sweeps every controller across several scenarios and writes CSV telemetry for post-processing. Counts below are the Part 26 state.
 
-**Tug Boat Numerical Simulation:** [`case-study/Tug Boat Numerical Simulation/`](case-study/Tug%20Boat%20Numerical%20Simulation/) - a 3-DOF marine vessel simulation (Li et al. 2026, Ocean Engineering 357) running 7 controllers across 4 environmental scenarios (28 runs total). Controllers: PID, KF-PID, SMC, MPC, ESC, FuzzyPID, FuzzySup-MPC. Uses the full Toolbox including `FuzzyLogic`, `KalmanFilter`, `DiscreteMPC`, `DiscreteSMC`, `ExtremumSeeker`, and `PlantModel`. Outputs CSV telemetry for Python post-processing. See the planning documents in that folder for mathematical model detail.
+| Study | Plant | Controllers | Scenarios | Runs | Build target |
+|---|---|---|---|---|---|
+| [`Boiler Control/`](case-study/Boiler%20Control/) | Bell-Astrom 3x3 MIMO boiler-turbine, 3 operating points | 27 | 8 | 216 | `boiler_sim` |
+| [`Meter In Meter Out Control/`](case-study/Meter%20In%20Meter%20Out%20Control/) | SMISMO 9-state hydraulic actuator (separate meter-in/meter-out spools) | 14 | 3 | 42 | `smismo_sim` |
+| [`Tug Boat Numerical Simulation/`](case-study/Tug%20Boat%20Numerical%20Simulation/) | 3-DOF marine vessel (Li et al. 2026, Ocean Engineering 357), 6-state MIMO + thrust allocation | 16 | 4 | 64 | `tug_sim` |
+| [`Solar-Driven Cooling .../`](case-study/Solar-Driven%20Cooling%20System%20with%20Photovoltaic%20Evaporative%20Chimney/) | Algebraic SISO solar cooling + PV evaporative chimney (Ruiz et al. 2024) | 9 | 5 | 45 | `solar_cooling_sim` |
+
+**Boiler-Turbine** controllers span PID, LQR, LQG, MPC, SMC, ESC, ADRC, Lead-Lag+PID, Smith Predictor, GPC-RLS, EKF-LQR, UKF-LQR, FuzzyPID, FuzzySup-MPC, three `ControllerStack` compositions, Repetitive, MRAC, H-infinity, Adaptive Smith Predictor, plus Part 26 additions: NonlinearMPC, Feedback Linearisation, MHE-LQR, LPV gain-scheduled, SubspaceID-LQG, and automated (gap-metric) gain-scheduled LQR.
+
+**Tug Boat** controllers: PID, KF-PID, SMC, MPC, ESC, FuzzyPID, FuzzySup-MPC, ADRC, Repetitive, plus Part 26 additions: 6-state MIMO LQR, LQG, per-axis TubeMPC, EKF-LQR, MRAC, automated gain-scheduled LQR, and NonlinearMPC. Uses `FuzzyLogic`, `KalmanFilter`, `DiscreteMPC`, `DiscreteSMC`, `ExtremumSeeker`, `DiscreteLQR/LQG`, `TubeMPC`, `ExtendedKalmanFilter`, `NonlinearMPC`, and `PlantModel`.
+
+**SMISMO** and **Solar** rosters are documented in their respective `sim/include/*controllers.h` headers. The example wrapper [ex21_boiler_turbine_case_study.cpp](examples/ex21_boiler_turbine_case_study.cpp) is the standalone boiler demo; the full multi-controller sweeps live under the `case-study/` subdirectories and build as the targets in the table above (all listed in `compile.bat`).
+
+> **Note:** only the Tug study currently has a Catch2 regression test (`tests/test_tugsim_regression.cpp`). Adding equivalent IAE/settling-threshold tests for Boiler, SMISMO, and Solar is the top open task (see the Part 26 review in `docs/cumulative_bug_report.md`, finding T1).
 
 ### 3.4 Tests (`tests/`)
 
@@ -328,13 +341,13 @@ stack->addController(std::make_shared<ctrl::DiscreteSMC>(sp, Ts), "SMC",
 double u = stack->compute(error);
 ```
 
-**Condition callback signature:** `std::function<bool(double error, double last_output)>` — both arguments are always passed; use `(double e, double)` to ignore `last_output`.
+**Condition callback signature:** `std::function<bool(double error, double last_output)>` -- both arguments are always passed; use `(double e, double)` to ignore `last_output`.
 
 **Corrector patterns supported:**
-- **Cascade** (`Additive` mode): inner loop runs at fast rate, outer provides setpoint — see `ex42_pid_inner_mpc_outer.cpp`.
-- **Additive** (`Additive` mode): `u_total = u_primary + u_corrector` — see `ex47_esc_additive_pid.cpp`.
-- **Observer+SF** (manual, not via stack): estimator provides `setState()` to feedback law — see `ex50_ekf_mpc.cpp`.
-- **Supervisory / Bumpless** (`Supervisory` mode): condition switches between controllers — see `ex54_bumpless_transfer.cpp`.
+- **Cascade** (`Additive` mode): inner loop runs at fast rate, outer provides setpoint -- see `ex42_pid_inner_mpc_outer.cpp`.
+- **Additive** (`Additive` mode): `u_total = u_primary + u_corrector` -- see `ex47_esc_additive_pid.cpp`.
+- **Observer+SF** (manual, not via stack): estimator provides `setState()` to feedback law -- see `ex50_ekf_mpc.cpp`.
+- **Supervisory / Bumpless** (`Supervisory` mode): condition switches between controllers -- see `ex54_bumpless_transfer.cpp`.
 
 ### 4.7 Background Tuning, RT Reads
 
@@ -389,7 +402,7 @@ SISO TF -> controllable canonical SS conversion.
 - **Purpose:** Abstract base for all SISO controllers; uniform interface for stacking and tuning.
 - **Pure-virtual:** `compute(double signal) -> double`, `reset()`, `sampleTime() const -> double`.
 - **Convention:** `signal` is the **error** `e = r - y` for tracking controllers, the **plant output** for optimisation controllers (ESC) and observer-based controllers (ADRC, LQG).
-- **Observer (telemetry):** `attachObserver(IControllerObserver*)` stores a non-owning raw pointer — caller must ensure the observer outlives the controller. `attachObserver(std::shared_ptr<IControllerObserver>)` co-owns the observer, safe for Python bindings and dynamically-allocated observers. `detachObserver()` releases both.
+- **Observer (telemetry):** `attachObserver(IControllerObserver*)` stores a non-owning raw pointer -- caller must ensure the observer outlives the controller. `attachObserver(std::shared_ptr<IControllerObserver>)` co-owns the observer, safe for Python bindings and dynamically-allocated observers. `detachObserver()` releases both.
 
 ---
 
@@ -482,7 +495,7 @@ SISO TF -> controllable canonical SS conversion.
 #### `GeneralizedPredictiveController` ([GeneralizedPredictiveControl.h](lib/GeneralizedPredictiveControl.h))
 - **Purpose:** GPC based on the CARIMA (Controlled AutoRegressive Integrated Moving Average) process model. Supports online model adaptation via RLS using `setPlant()`.
 - **Parameters (`GPCParams`):** `Np` (prediction horizon), `Nu` (control horizon), `rho_y` (output weight), `rho_u` (move-suppression weight), `uMin/uMax`.
-- **Inputs:** `computeRef(y_current, r_ref)` — current plant output and reference.
+- **Inputs:** `computeRef(y_current, r_ref)` -- current plant output and reference.
 - **Returns:** Optimal delta-u (first move of the receding horizon).
 - **Methods:** `computeRef(y, r)`, `setPlant(plant)` (hot-swap for adaptive MPC), `augmentedState()`, `reset()`.
 - **Prediction model:** CARIMA `A(q^-1) * Delta * y = B(q^-1) * u + e`; augmented state includes integrator state; Ga (CARIMA step-response matrix) differs from standard MPC Phi by a `C*B` correction term.
@@ -554,13 +567,13 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 - **Constructor:** `(plant, Q_noise, R_noise, P0 = I)`.
 - **Methods:** `predict(u)`, `update(y, u_current)`, `state()`, `covariance()`, `reset()`.
 - **`step()` overloads:**
-  - `step(y, u_prev)` — combined predict+update; `u_current` defaults to `u_prev` (correct for `D = 0` plants).
-  - `step(y, u_prev, u_current)` — plain-reference overload; explicit current input for `D != 0` plants. Preferred from Python bindings (the default overload uses `std::optional<std::reference_wrapper<...>>` which pybind11 cannot auto-convert).
+  - `step(y, u_prev)` -- combined predict+update; `u_current` defaults to `u_prev` (correct for `D = 0` plants).
+  - `step(y, u_prev, u_current)` -- plain-reference overload; explicit current input for `D != 0` plants. Preferred from Python bindings (the default overload uses `std::optional<std::reference_wrapper<...>>` which pybind11 cannot auto-convert).
 - **Floor:** `R_noise` has an automatic floor of `1e-12` per diagonal element to avoid division by zero.
 
 #### `ExtendedKalmanFilter` ([ExtendedKalmanFilter.h](lib/ExtendedKalmanFilter.h))
 - **Purpose:** EKF for nonlinear state estimation. Linearises the dynamics and measurement functions around the current estimate at each step.
-- **Constructor:** `(n, p, f, h, Fjac, Hjac, Q, R, Ts)` — `n` states, `p` outputs, nonlinear functions `f(x,u)` and `h(x,u)`, Jacobian functions `Fjac(x,u)` and `Hjac(x,u)` (or pass `nullptr` for numerical differentiation with scaled epsilon).
+- **Constructor:** `(n, p, f, h, Fjac, Hjac, Q, R, Ts)` -- `n` states, `p` outputs, nonlinear functions `f(x,u)` and `h(x,u)`, Jacobian functions `Fjac(x,u)` and `Hjac(x,u)` (or pass `nullptr` for numerical differentiation with scaled epsilon).
 - **Methods:** `predict(u)`, `update(y, u)`, `step(y, u_prev)`, `state()`, `covariance()`, `setState(x)`, `reset()`.
 - **Numerical Jacobian:** When `Fjac = nullptr`, finite differences use `eps = max(1e-5 * |x_i|, 1e-8)` per element to handle heterogeneous state magnitudes (see [test_catch2_pilot.cpp] P12-17 fix).
 
@@ -571,7 +584,7 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 - **Alpha/kappa guidance:** For n=2, kappa=0: use `alpha >= 1/sqrt(n) = 0.707` to avoid negative `Wc0 = 1 - alpha^2 + beta`. With `alpha=1.0, beta=2.0, kappa=0`: `lambda=0`, `Wm0=0`, `Wc0=2 > 0`. This is the recommended configuration for 2-state systems.
 
 #### `MovingHorizonEstimator` ([MovingHorizonEstimator.h](lib/MovingHorizonEstimator.h))
-- **Purpose:** MHE via condensed QP — the dual of MPC for state estimation. Optimises the state trajectory over a moving window of N measurements with box constraints on process noise.
+- **Purpose:** MHE via condensed QP -- the dual of MPC for state estimation. Optimises the state trajectory over a moving window of N measurements with box constraints on process noise.
 - **Constructor:** `(plant, Q_noise, R_noise, params)`.
 - **Parameters (`MHEParams`):** `N` (horizon length), `wMin/wMax` (process noise bounds), `qpMaxIter`, `qpTol`.
 - **Methods:** `initialize(x0, P0)`, `estimate(y, u)` -> `VectorXd x_hat`, `setHorizon(N)`, `setWeightMatrices(Q, R)`, `reset()`, `state()`, `lastConverged()`, `lastQpIters()`, `sampleTime()`.
@@ -590,62 +603,62 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 - **Constructor:** `(t_data, y_data, stepMag)`.
 - **Methods:** `identify(method)` -> `SOPDTModel {K, tau1, tau2, theta, fitRMSE}`; `evaluate(model, t, stepMag)` -> simulated response; `static imcTuning(model, lambdaC)` -> `PIDParams`.
 - **`SOPDTMethod`:** `Graphical` or `Optimization`.
-- **Graphical algorithm:** ZN tangent -> `theta`; 63.2% crossing -> `tau_sum = tau1+tau2`; 28.3% crossing ratio `r` interpolated between FOPDT limit (r≈0.332) and critically-damped SOPDT limit (r≈0.530) to split into `tau1` and `tau2`.
+- **Graphical algorithm:** ZN tangent -> `theta`; 63.2% crossing -> `tau_sum = tau1+tau2`; 28.3% crossing ratio `r` interpolated between FOPDT limit (r~0.332) and critically-damped SOPDT limit (r~0.530) to split into `tau1` and `tau2`.
 - **Optimization:** Nested golden-section search on `(theta, tau1, tau2)` minimising RMSE.
 - **IMC-PID (Rivera 1986):** `tau_eq = tau1+tau2`, `Kp = tau_eq / (K*(lambdaC + theta/2))`, `Ti = tau_eq`, `Td = tau1*tau2/tau_eq`.
 
 #### `MRACController` ([MRACController.h](lib/MRACController.h))
-- **Purpose:** Discrete-time Model Reference Adaptive Control — SISO, first-order reference model. Forces plant output to track y_m[k+1] = a_m·y_m + b_m·r via two-parameter Lyapunov adaptation with σ-modification and Euclidean projection.
+- **Purpose:** Discrete-time Model Reference Adaptive Control -- SISO, first-order reference model. Forces plant output to track y_m[k+1] = a_m*y_m + b_m*r via two-parameter Lyapunov adaptation with σ-modification and Euclidean projection.
 - **Constructor:** `(MRACParams, Ts)`.
 - **Convention:** `compute(y_plant)` takes plant output (ADRC convention, not error). Call `setReference(r)` before each `compute()`.
-- **Adaptation law:** `θ[k+1] = θ[k] − Ts·(γ·e_m·φ + σ·θ[k])` with projection: if ‖θ‖ > theta_max → θ ← θ·theta_max/‖θ‖.
+- **Adaptation law:** `θ[k+1] = θ[k] - Ts*(γ*e_m*φ + σ*θ[k])` with projection: if ‖θ‖ > theta_max -> θ <- θ*theta_max/‖θ‖.
 - **Parameters (`MRACParams`):** `a_m`, `b_m` (reference model), `gamma_r`, `gamma_y` (rates), `sigma` (σ-modification, 0=off), `theta_max` (projection bound), `uMin/uMax`.
 - **Methods:** `compute(y)`, `setReference(r)`, `reset()`, `theta_r()`, `theta_y()`, `modelOutput()`, `modelError()`.
 - **Feasibility:** Minimum-phase plant required; gain sign must match γ_r, γ_y sign; persistent excitation needed for θ convergence.
 
 #### `FeedbackLinearisationController` ([FeedbackLinearisation.h](lib/FeedbackLinearisation.h))
-- **Purpose:** Exact feedback linearisation for SISO affine-in-control systems ẋ = f(x) + g(x)·u, relative degree 1. Cancels nonlinear terms algebraically; inner IController drives the resulting virtual integrator.
+- **Purpose:** Exact feedback linearisation for SISO affine-in-control systems ẋ = f(x) + g(x)*u, relative degree 1. Cancels nonlinear terms algebraically; inner IController drives the resulting virtual integrator.
 - **Constructor:** `(DriftFn f, GainFn g, shared_ptr<IController> inner, FLParams, Ts)`.
-- **Control law:** `u[k] = clamp((v − f(x[k], u[k-1])) / g_eff(x[k], u[k-1]), uMin, uMax)` where v = inner→compute(error).
+- **Control law:** `u[k] = clamp((v - f(x[k], u[k-1])) / g_eff(x[k], u[k-1]), uMin, uMax)` where v = inner->compute(error).
 - **Critical requirement:** `setState(x)` must be called before each `compute()` with the current measured or estimated plant state.
 - **Parameters (`FLParams`):** `uMin`, `uMax`, `regularisationEps` (minimum |g| before clamping; preserves sign).
 - **Feasibility:** Relative degree 1, minimum-phase zeros, g(x) ≠ 0 across operating region.
-- **Relative degree 2 note:** For angle-output systems (pendulum), the inner PID must be tuned for a virtual double integrator; example gains: Kp=9, Ki=5, Kd=5 for poles {−1, −2±j}. See `ex56_feedback_linearisation.cpp`.
+- **Relative degree 2 note:** For angle-output systems (pendulum), the inner PID must be tuned for a virtual double integrator; example gains: Kp=9, Ki=5, Kd=5 for poles {-1, -2±j}. See `ex56_feedback_linearisation.cpp`.
 
 #### `RecursiveLeastSquares` ([RecursiveLeastSquares.h](lib/RecursiveLeastSquares.h))
 - **Purpose:** Online ARX parameter estimation using exponential forgetting (`lambda` factor).
-- **Constructor:** `(na, nb, nk, lambda, P0_scale)` — output order, input order, delay, forgetting factor, initial covariance scale.
+- **Constructor:** `(na, nb, nk, lambda, P0_scale)` -- output order, input order, delay, forgetting factor, initial covariance scale.
 - **Methods:** `update(y, u)` -> current ARX coefficients; `reset()`, `toTransferFunction()`, `toStateSpace()`.
 - **Typical use:** Feed identified `StateSpace` into `GPC::setPlant()` for adaptive GPC (see `ex28_gpc_adaptive.cpp`).
 
 #### `LinearisationHelper` ([LinearisationHelper.h](lib/LinearisationHelper.h))
-- **Purpose:** Numerical Jacobians and ZOH linearisation of continuous-time nonlinear models at a given operating point. Central-difference with step `h_i = ε·max(|x_i|, 1)` for heterogeneous state magnitudes.
+- **Purpose:** Numerical Jacobians and ZOH linearisation of continuous-time nonlinear models at a given operating point. Central-difference with step `h_i = ε*max(|x_i|, 1)` for heterogeneous state magnitudes.
 - **Key functions:**
-  - `jacobianX(f, x0, u0, eps=1e-4)` → MatrixXd ∂f/∂x (n evaluations of f).
-  - `jacobianU(f, x0, u0, eps=1e-4)` → MatrixXd ∂f/∂u (m evaluations).
-  - `lineariseAtPoint(f, x0, u0, Ts)` → discrete StateSpace (ZOH, C=I, D=0).
-  - `lineariseAtPoint(f, h, x0, u0, Ts)` → discrete StateSpace with custom output h(x,u).
-- **Note:** The `StateFunc`/`MeasFunc` type aliases are identical to those in `ExtendedKalmanFilter.h` — safe to include both (C++ redeclaration of identical alias is valid).
-- **Typical use:** Compute A, B at operating point → `c2d(ZOH)` → `DiscreteLQR` design → apply gain to nonlinear plant.
+  - `jacobianX(f, x0, u0, eps=1e-4)` -> MatrixXd ∂f/∂x (n evaluations of f).
+  - `jacobianU(f, x0, u0, eps=1e-4)` -> MatrixXd ∂f/∂u (m evaluations).
+  - `lineariseAtPoint(f, x0, u0, Ts)` -> discrete StateSpace (ZOH, C=I, D=0).
+  - `lineariseAtPoint(f, h, x0, u0, Ts)` -> discrete StateSpace with custom output h(x,u).
+- **Note:** The `StateFunc`/`MeasFunc` type aliases are identical to those in `ExtendedKalmanFilter.h` -- safe to include both (C++ redeclaration of identical alias is valid).
+- **Typical use:** Compute A, B at operating point -> `c2d(ZOH)` -> `DiscreteLQR` design -> apply gain to nonlinear plant.
 
 #### `BalancedTruncation` ([BalancedTruncation.h](lib/BalancedTruncation.h))
 - **Purpose:** Moore (1981) model order reduction via balanced realisation. Replaces an n-state stable system with an r-state approximation preserving the most energetically significant modes. Provides a-priori H∞ error bound.
 - **Functions:**
-  - `balancedTruncate(sys, r)` → `TruncationResult {reduced, hankelSingularValues, errorBound, isStable}`.
-  - `suggestOrder(result, tol=0.01)` → int — smallest r such that error bound < tol × total_norm.
-- **Algorithm:** Solve gramians via `SystemAnalysis::solveDiscreteLyapunov` → Cholesky of P_c → `SelfAdjointEigenSolver` of M = L_c'·P_o·L_c → sort HSVs descending → balanced transformation T_r = L_c·U·Σ^{-½} → truncate.
-- **Error bound:** ‖G − G_r‖∞ ≤ 2·Σᵢ₌ᵣ₊₁ⁿ σᵢ. Verified: actual DC gain deviation is always within this bound.
-- **Constraint:** O(n⁶) Lyapunov solver — use for n ≤ 10. Larger systems require Bartels-Stewart (not yet implemented).
+  - `balancedTruncate(sys, r)` -> `TruncationResult {reduced, hankelSingularValues, errorBound, isStable}`.
+  - `suggestOrder(result, tol=0.01)` -> int -- smallest r such that error bound < tol x total_norm.
+- **Algorithm:** Solve gramians via `SystemAnalysis::solveDiscreteLyapunov` -> Cholesky of P_c -> `SelfAdjointEigenSolver` of M = L_c'*P_o*L_c -> sort HSVs descending -> balanced transformation T_r = L_c*U*Σ^{-½} -> truncate.
+- **Error bound:** ‖G - G_r‖∞ ≤ 2*Σᵢ₌ᵣ₊₁ⁿ σᵢ. Verified: actual DC gain deviation is always within this bound.
+- **Constraint:** O(n⁶) Lyapunov solver -- use for n ≤ 10. Larger systems require Bartels-Stewart (not yet implemented).
 - **Correct usage:** Design controller on `result.reduced`, then apply to the full-order plant. The error bound quantifies the performance degradation. See `ex58_balanced_truncation.cpp`.
 
 #### `ZeroPhaseTrackingFilter` ([ZeroPhaseTrackingFilter.h](lib/ZeroPhaseTrackingFilter.h))
 - **Purpose:** ZPETC (Tomizuka 1987) feedforward prefilter. Inverts the minimum-phase part of a plant's numerator causally, normalises DC gain to 1, and produces zero phase error for min-phase zeros.
 - **Functions:**
-  - `transmissionZeros(sys)` → `vector<complex<double>>` — finite eigenvalues of the system matrix pencil `[[A−λI, B],[C, D]]` via `GeneralizedEigenSolver`.
-  - `designZPETC(plant)` → `ZPETCResult {filter, dcAmplitudeError, hasNMPZeros, zeros, nmpZeros}`.
-- **Composite response:** G(z)·G_ff(z) = B⁻(z)/B⁻(1). For min-phase plants: G·G_ff = z^{-d} (unit magnitude, pure delay). For NMP: unit DC gain, amplitude error away from DC.
-- **Key implementation detail:** The evaluation function `evalTF` must store C as `MatrixXcd` not `VectorXcd` — Eigen's implicit reshape transposed a (1×n) row into an (n×1) column, producing a ×50 error. Fixed: use matrix products `C_c * zIA.solve(B_c) + D_c`.
-- **Python binding disambiguation:** `suggest_order` is overloaded — VectorXd (SubspaceID) dispatches from `advanced_bindings.cpp`; TruncationResult (BalancedTruncation) from `analysis_bindings.cpp`. Wrapped in lambdas to resolve the C++ overload ambiguity.
+  - `transmissionZeros(sys)` -> `vector<complex<double>>` -- finite eigenvalues of the system matrix pencil `[[A-λI, B],[C, D]]` via `GeneralizedEigenSolver`.
+  - `designZPETC(plant)` -> `ZPETCResult {filter, dcAmplitudeError, hasNMPZeros, zeros, nmpZeros}`.
+- **Composite response:** G(z)*G_ff(z) = B⁻(z)/B⁻(1). For min-phase plants: G*G_ff = z^{-d} (unit magnitude, pure delay). For NMP: unit DC gain, amplitude error away from DC.
+- **Key implementation detail:** The evaluation function `evalTF` must store C as `MatrixXcd` not `VectorXcd` -- Eigen's implicit reshape transposed a (1xn) row into an (nx1) column, producing a x50 error. Fixed: use matrix products `C_c * zIA.solve(B_c) + D_c`.
+- **Python binding disambiguation:** `suggest_order` is overloaded -- VectorXd (SubspaceID) dispatches from `advanced_bindings.cpp`; TruncationResult (BalancedTruncation) from `analysis_bindings.cpp`. Wrapped in lambdas to resolve the C++ overload ambiguity.
 
 #### `SubspaceID` ([SubspaceID.h](lib/SubspaceID.h))
 - **Purpose:** N4SID subspace identification of MIMO state-space models from PRBS or arbitrary excitation data.
@@ -654,7 +667,7 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 
 #### `GainScheduledController` ([GainScheduledController.h](lib/GainScheduledController.h)) *Part 20+23*
 - **Purpose:** IController wrapper that interpolates between a sorted list of (p, IController) schedule points.
-- **Modes:** `NearestNeighbor` (hard-switch; calls `bumplessInit` on the incoming controller when the active index changes — Part 23 fix); `LinearBlend` (weighted average of adjacent controllers).
+- **Modes:** `NearestNeighbor` (hard-switch; calls `bumplessInit` on the incoming controller when the active index changes -- Part 23 fix); `LinearBlend` (weighted average of adjacent controllers).
 - **Methods:** `addSchedulePoint(p, ctrl)`, `setSchedulingParam(p)`, `compute(error)`, `lastOutput()` (not override).
 - **Note:** `lastOutput()` is NOT a virtual override (no virtual lastOutput() in IController base).
 - **LQR pattern:** Use `LQRAdapter` (which IS an IController) with a state-capturing lambda as the schedule point controller.
@@ -699,10 +712,10 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 
 #### `AntiWindupWrapper` ([AntiWindupWrapper.h](lib/AntiWindupWrapper.h)) *Part 24, header-only*
 - **Purpose:** Generic anti-windup decorator for any IController using the Hanus (1987) conditioning technique. Prevents integrator windup in controllers without built-in saturation handling (DiscreteLQG, DiscreteHinf, GPC, custom).
-- **Algorithm:** At each step: `e_in[k] = e[k] + Kb*(u_sat[k-1]-u_raw[k-1])` is passed to the inner controller; integral is bounded to `≈ uMax + e/Kb` in steady saturation (vs unbounded without wrapper).
+- **Algorithm:** At each step: `e_in[k] = e[k] + Kb*(u_sat[k-1]-u_raw[k-1])` is passed to the inner controller; integral is bounded to `~ uMax + e/Kb` in steady saturation (vs unbounded without wrapper).
 - **Ctor:** `AntiWindupWrapper(shared_ptr<IController> inner, uMin, uMax, Kb=1.0)`.
 - **Key methods:** `compute(error)`, `isSaturated()`, `saturationError()`, `setActualOutput(u_applied)`, `lastOutput()`, `bumplessInit(u_target, error)`.
-- **Do NOT use on DiscretePID** — PID already has back-calculation via `PIDParams::Kb`. Double-wrapping applies conditioning twice.
+- **Do NOT use on DiscretePID** -- PID already has back-calculation via `PIDParams::Kb`. Double-wrapping applies conditioning twice.
 - **Python:** `ctrl.AntiWindupWrapper(inner, uMin, uMax, Kb=1.0)`.
 
 ---

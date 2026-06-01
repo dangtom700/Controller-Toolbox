@@ -4,7 +4,7 @@ A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H
 
 Thirty-plus controller implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.
 
-Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. 59 C++ example programs and 75 Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and new algorithm extension.
+Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. 69 C++ example programs and 88 Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and new algorithm extension. Four end-to-end physics case studies (boiler-turbine, hydraulic SMISMO, tug boat, solar cooling) exercise the full controller stack on nonlinear plants.
 
 ---
 
@@ -74,7 +74,7 @@ for (int k = 0; k < 500; ++k) {
 | [docs/TEST_UPDATE.md](docs/TEST_UPDATE.md) | Test suite history, regression coverage, sign-convention notes |
 | [docs/CONTROL_STRATEGIES_DEEP_DIVE.md](docs/CONTROL_STRATEGIES_DEEP_DIVE.md) | Taxonomy of strategy families, plant model interference, decision framework, proposed extensions |
 | [cheatsheet/](cheatsheet/) | Tuning methods, controller categories, system identification notes |
-| [case-study/](case-study/) | Nonlinear 3x3 boiler-turbine and Tug Boat multivariable studies |
+| [case-study/](case-study/) | Four full physics studies (boiler-turbine, hydraulic SMISMO, tug boat, solar cooling) -- see "Case Studies" below |
 
 ---
 
@@ -84,13 +84,34 @@ for (int k = 0; k < 500; ++k) {
 |-- lib/             # Library sources -> target: controller_toolbox
 |-- examples/        # ex01..ex54 single-file C++ demos (corrector patterns, new algorithms)
 |-- examples/python/ # ex01..ex70 Python companion scripts and binding demos
-|-- case-study/      # Boiler-turbine MIMO benchmark + Tug Boat numerical simulation
+|-- case-study/      # 4 physics studies: boiler-turbine, SMISMO hydraulic, tug boat, solar cooling
 |-- tests/           # CTest-driven unit + integration tests (Catch2 v3)
 |-- bindings/        # pybind11 binding source files
 |-- scripts/         # tune_all / simulate_all / realtime_all
 |-- cheatsheet/      # Reference notes
 |-- docs/            # Documentation & deployment guides
 ```
+
+---
+
+## Case Studies
+
+Four self-contained physics studies under [case-study/](case-study/) exercise the
+library end-to-end. Each pairs a nonlinear plant simulator with a roster of
+controllers that wrap the `lib/` algorithms, then sweeps every controller across
+several scenarios and writes CSV telemetry for post-processing.
+
+| Study | Plant | Controllers | Scenarios x Runs |
+|---|---|---|---|
+| [Boiler Control](case-study/Boiler%20Control/) | Bell-Astrom 3x3 MIMO boiler-turbine | 27 | 8 -> 216 |
+| [Meter In Meter Out Control](case-study/Meter%20In%20Meter%20Out%20Control/) | SMISMO 9-state hydraulic actuator | 14 | 3 -> 42 |
+| [Tug Boat Numerical Simulation](case-study/Tug%20Boat%20Numerical%20Simulation/) | 3-DOF tug, 6-state MIMO + thrust allocation | 16 | 4 -> 64 |
+| [Solar-Driven Cooling System](case-study/Solar-Driven%20Cooling%20System%20with%20Photovoltaic%20Evaporative%20Chimney/) | Algebraic SISO solar cooling + PV evaporative chimney | 9 | 5 -> 45 |
+
+Controllers span the full stack: PID, LQR, LQG, MPC, GPC-RLS, SMC, ADRC, Fuzzy-PID,
+Smith Predictor, MRAC, H-infinity, TubeMPC, NonlinearMPC, Feedback Linearisation,
+EKF-LQR, MHE-LQR, SubspaceID-LQG, and gain-scheduled (manual, LPV, and automated
+gap-metric) variants, depending on the plant.
 
 ---
 
