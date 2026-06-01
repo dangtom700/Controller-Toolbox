@@ -1,1049 +1,442 @@
-Bug Report - generated from run_20260601_112812.log on 2026-06-01 11:54:44.015341
-Total failure indicators found: 74
-Merged into 32 block(s)
+Bug Report - generated from run_20260601_153615.log on 2026-06-01 16:04:12.633065
+Total failure indicators found: 37
+Merged into 11 block(s)
 ========================================================================
 
---- FAILURE BLOCK #1 (keywords: error) ---
-Lines 3 - 25
+--- FAILURE BLOCK #1 (keywords: fail) ---
+Lines 1457 - 1477
 
-       3: ========================================================================
-       4:   Phase 1 — Non-ASCII scan
-       5:   Directory: C:\Users\dangs\OneDrive\Desktop\Controller Toolbox
-       6: ========================================================================
-       7: 
-       8:   lib\BalancedTruncation.cpp:90  [U+208A '\u208a']
-       9:         // ||G - G\u1d63||inf <= 2 . Sigma_i=\u1d63\u208a1^n sigma_i
-      10:   lib\BalancedTruncation.cpp:105  [U+208A '\u208a']
-      11:         // Return smallest r such that 2.Sigma_i=\u1d63\u208a1^n sigma_i < threshold
-      12:   lib\BalancedTruncation.h:20  [U+208A '\u208a']
->>>   13:      * **Hinf error bound:** ||G - G\u1d63||inf <= 2 . Sigma_i=\u1d63\u208a1^n sigma_i
-      14:   lib\BalancedTruncation.h:55  [U+208A '\u208a']
-      15:         double          errorBound;            ///< Hinf error bound = 2.Sigma_i=\u1d63\u208a1^n sigma_i.
-      16:   lib\TubeMPC.cpp:58  [U+2295 '\u2295']
-      17:     //   Z_inf = \u2295_{k=0}^{inf} A_cl^k * W
-      18:   reference\pdc-master\app_cstr_pid.py:294  [U+3010 '\u3010', U+3011 '\u3011']
-      19:         recommended for Type-B PID control\u3010450933523291993^TL149-L172\u3011.  The setpoint
-      20: 
-      21: --- Scan summary ---
-      22: Files with hits : 4
-      23: Total characters: 7
-      24: All offenders:
-      25:   U+208A '\u208a'     x4 (no auto-replacement)
+    1457: 
+    1458: [CONFIG] Configuring CMake...
+    1459: -- Building for: Ninja
+    1460: -- The CXX compiler identification is GNU 14.2.0
+    1461: -- Detecting CXX compiler ABI info
+    1462: -- Detecting CXX compiler ABI info - done
+    1463: -- Check for working CXX compiler: C:/msys64/mingw64/bin/c++.exe - skipped
+    1464: -- Detecting CXX compile features
+    1465: -- Detecting CXX compile features - done
+    1466: -- Performing Test HAVE_FLAG__ffile_prefix_map_C__Users_dangs_OneDrive_Desktop_Controller_Toolbox_build__deps_catch2_src__
+>>> 1467: -- Performing Test HAVE_FLAG__ffile_prefix_map_C__Users_dangs_OneDrive_Desktop_Controller_Toolbox_build__deps_catch2_src__ - Failed
+    1468: -- Configuring done (15.7s)
+    1469: -- Generating done (1.0s)
+    1470: -- Build files have been written to: build
+    1471: 
+    1472: 
+    1473: ----------------------------------------------------------
+    1474: [BUILD] controller_toolbox
+    1475: ----------------------------------------------------------
+    1476: [1/41] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DiscretePID.cpp.obj
+    1477: [2/41] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ExtremumSeeker.cpp.obj
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #2 (keywords: warn) ---
-Lines 392 - 412
+--- FAILURE BLOCK #2 (keywords: fail, assert, fatal, exception) ---
+Lines 2009 - 2126
 
-     392: examples\python\ex24_disturbance_rejection.py: 22 replacement(s)
-     393:     U+002D '-' -> '-' (x22)
-     394: examples\python\ex24_fuzzy_dc_motor.py: 203 replacement(s)
-     395:     U+002D '-' -> '-' (x203)
-     396: examples\python\ex25_fuzzy_supervisor_mpc.py: 303 replacement(s)
-     397:     U+002D '-' -> '-' (x303)
-     398: examples\python\ex25_rls_online_identification.py: 22 replacement(s)
-     399:     U+002D '-' -> '-' (x22)
-     400: examples\python\ex26_fuzzy_ts_pendulum.py: 343 replacement(s)
-     401:     U+002D '-' -> '-' (x343)
->>>  402: examples\python\ex26_tuner_suite_soft_warnings.py: 55 replacement(s)
-     403:     U+002D '-' -> '-' (x55)
-     404: examples\python\ex27_nelder_mead_ise.py: 38 replacement(s)
-     405:     U+002D '-' -> '-' (x38)
-     406: examples\python\ex28_itae_vs_ise_optimisation.py: 51 replacement(s)
-     407:     U+002D '-' -> '-' (x51)
-     408: examples\python\ex29_csv_alignment_verification.py: 24 replacement(s)
-     409:     U+002D '-' -> '-' (x24)
-     410: examples\python\ex30_monte_carlo_robustness.py: 19 replacement(s)
-     411:     U+002D '-' -> '-' (x19)
-     412: examples\python\ex31_frequency_analysis.py: 24 replacement(s)
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #3 (keywords: nan) ---
-Lines 2289 - 2309
-
-    2289: === Scenario: s02_medload_regulation (Perturbation rejection at Medium Load (op B)) ===
-    2290:   [s02_medload_regulation         | PID                     ]   IAE=[514.7850, 41.9979, 78.1034]  ISE=[1603.8644, 30.4546, 2.5203]  E_valve=0.0108
-    2291:   [s02_medload_regulation         | LQR                     ]   IAE=[169.3241, 376.1559, 43.9420]  ISE=[547.3087, 115.4137, 1.2659]  E_valve=0.0027
-    2292:   [s02_medload_regulation         | LQG                     ]   IAE=[188.6453, 66.8726, 187.6624]  ISE=[578.9805, 75.6347, 9.7949]  E_valve=0.0019
-    2293:   [s02_medload_regulation         | MPC                     ]   IAE=[120.6688, 18.2999, 16.2818]  ISE=[448.7650, 27.6815, 0.1598]  E_valve=0.0444
-    2294:   [s02_medload_regulation         | SMC                     ]   IAE=[192.1688, 491.7823, 22.8399]  ISE=[559.6849, 102.1991, 0.3056]  E_valve=3.4831
-    2295:   [s02_medload_regulation         | ESC                     ]   IAE=[112188.7861, 63610.3049, 36230.3093]  ISE=[4274373.9247, 1367221.7003, 10690219.3762]  E_valve=0.3013
-    2296:   [s02_medload_regulation         | ADRC                    ]   IAE=[4905.6241, 2711.9727, 85.2700]  ISE=[10525.3864, 3975.1355, 2.8544]  E_valve=0.1582
-    2297:   [s02_medload_regulation         | LeadLag-PID             ]   IAE=[310.8123, 41.0305, 87.5749]  ISE=[649.1649, 28.9243, 2.7576]  E_valve=0.0037
-    2298:   [s02_medload_regulation         | SmithPredictor          ]   IAE=[325.5709, 908.6985, 77.3917]  ISE=[858.2098, 334.0378, 2.4558]  E_valve=1.0588
->>> 2299:   [s02_medload_regulation         | GPC-RLS                 ]   IAE=[nan, nan, nan]  ISE=[nan, nan, nan]  E_valve=nan
-    2300:   [s02_medload_regulation         | EKF-LQR                 ]   IAE=[187.8077, 66.6894, 187.8446]  ISE=[578.3988, 77.5677, 9.8139]  E_valve=0.0019
-    2301:   [s02_medload_regulation         | UKF-LQR                 ]   IAE=[187.8415, 66.6660, 187.8427]  ISE=[578.4294, 77.5437, 9.8137]  E_valve=0.0019
-    2302:   [s02_medload_regulation         | FuzzyPID                ]   IAE=[337.9245, 282.9929, 47.3295]  ISE=[786.1801, 65.8653, 0.9890]  E_valve=9.8524
-    2303:   [s02_medload_regulation         | FuzzySup-MPC            ]   IAE=[382.6509, 27.9708, 173.0152]  ISE=[467.3810, 28.7663, 11.5275]  E_valve=1.6279
-    2304:   [s02_medload_regulation         | SupervisoryStack        ]   IAE=[514.7850, 41.9979, 78.1034]  ISE=[1603.8644, 30.4546, 2.5203]  E_valve=0.0108
-    2305:   [s02_medload_regulation         | AdditiveStack           ]   IAE=[299.3444, 866.3013, 44.7394]  ISE=[571.5684, 270.4420, 0.9812]  E_valve=2.0075
-    2306:   [s02_medload_regulation         | WeightedStack           ]   IAE=[514.7850, 41.9979, 78.1034]  ISE=[1603.8644, 30.4546, 2.5203]  E_valve=0.0108
-    2307:   [s02_medload_regulation         | RepetitiveCtrl          ]   IAE=[28998.5013, 3196.8458, 222.1589]  ISE=[449130.3527, 7258.7554, 20.5647]  E_valve=2.1419
-    2308:   [s02_medload_regulation         | MRAC                    ]   IAE=[15786.5481, 10664.5383, 260.3000]  ISE=[83592.0817, 39394.1822, 29.2862]  E_valve=2.8467
-    2309:   [s02_medload_regulation         | H-inf                   ]   IAE=[514.7850, 41.9979, 78.1034]  ISE=[1603.8644, 30.4546, 2.5203]  E_valve=0.0108
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #4 (keywords: nan, error) ---
-Lines 2453 - 2483
-
-    2453:   [s07_multiop_transition         | MRAC                    ]   IAE=[17792.7199, 14806.6025, 235.7818]  ISE=[317624.3829, 139978.5274, 25.9750]  E_valve=2.2688
-    2454:   [s07_multiop_transition         | H-inf                   ]   IAE=[79892.1447, 149976.5635, 15281.5649]  ISE=[3808279.8814, 13680206.7705, 4578493.7766]  E_valve=0.4113
-    2455:   [s07_multiop_transition         | AdaptiveSP              ]   IAE=[80877.7982, 151182.7238, 55126.7824]  ISE=[3914770.6059, 13925952.8098, 1760924659.4626]  E_valve=0.4256
-    2456:   [s07_multiop_transition         | NMPC                    ]   IAE=[96659.8329, 51092.1405, 13215.7792]  ISE=[6315119.0027, 2101543.8100, 14265810.5570]  E_valve=0.0292
-    2457:   [s07_multiop_transition         | FL                      ]   IAE=[9792.4755, 6709.1307, 262.5535]  ISE=[174852.6213, 237285.6312, 54.8647]  E_valve=0.1010
-    2458:   [s07_multiop_transition         | MHE-LQR                 ]   IAE=[8514.7917, 16872.6838, 397.9111]  ISE=[172139.2648, 275945.9243, 117.8738]  E_valve=0.0332
-    2459:   [s07_multiop_transition         | LPV-GS                  ]   IAE=[4398.3642, 4057.0985, 433.6925]  ISE=[143010.7666, 146351.5429, 129.5519]  E_valve=0.0702
-    2460:   [s07_multiop_transition         | SubspaceID-LQG          ]   IAE=[29462.5824, 60963.2601, 2454.6307]  ISE=[529315.5000, 2137443.4420, 27221.1302]  E_valve=0.0080
-    2461:   [s07_multiop_transition         | AutoGS                  ]   IAE=[6362.1083, 6969.5167, 98631.4068]  ISE=[190444.8272, 118126.3309, 292311385.5791]  E_valve=0.6515
-    2462: 
->>> 2463: === Scenario: s08_periodic_load (Sinusoidal load disturbance at 0.05 Hz to demonstrate RepetitiveController advantage over PID/MPC. Plant starts at Medium Load (op B). A sinusoidal perturbation on y1 setpoint simulates periodic grid load oscillations at 0.05 Hz (period = 200 s). After one learning period, RepetitiveController should achieve near-zero periodic IAE; PID and MPC retain residual periodic error proportional to their disturbance-rejection bandwidth.) ===
-    2464:   [s08_periodic_load              | PID                     ]   IAE=[14593.9305, 1274.5637, 357.6679]  ISE=[37067.5430, 273.7826, 22.2450]  E_valve=0.2373
-    2465:   [s08_periodic_load              | LQR                     ]   IAE=[11806.4819, 2923.3584, 226.6468]  ISE=[23903.8683, 1467.5692, 8.8173]  E_valve=0.0790
-    2466:   [s08_periodic_load              | LQG                     ]   IAE=[11745.6635, 5377.4687, 193.4005]  ISE=[23657.9281, 4956.9944, 6.5317]  E_valve=0.0785
-    2467:   [s08_periodic_load              | MPC                     ]   IAE=[7713.5867, 865.7212, 3188.2475]  ISE=[10364.8655, 180.3957, 1943.7483]  E_valve=4.5885
-    2468:   [s08_periodic_load              | SMC                     ]   IAE=[22714.4805, 805.4823, 177.3504]  ISE=[85169.1601, 139.7474, 5.2260]  E_valve=6.3742
-    2469:   [s08_periodic_load              | ESC                     ]   IAE=[274929.3501, 155275.6160, 154543.9668]  ISE=[11855104.4138, 3765315.6829, 5333702.8443]  E_valve=0.3319
-    2470:   [s08_periodic_load              | ADRC                    ]   IAE=[57461.9517, 26279.9952, 411.2771]  ISE=[568645.2472, 118641.6001, 33.1189]  E_valve=0.3117
-    2471:   [s08_periodic_load              | LeadLag-PID             ]   IAE=[15382.0506, 1576.3232, 227.3322]  ISE=[40608.1817, 426.7978, 8.8754]  E_valve=0.0840
-    2472:   [s08_periodic_load              | SmithPredictor          ]   IAE=[14902.1959, 2442.5026, 346.7524]  ISE=[38349.8164, 1237.9780, 20.8153]  E_valve=2.2569
-    2473:   [s08_periodic_load              | GPC-RLS                 ]   IAE=[nan, nan, nan]  ISE=[nan, nan, nan]  E_valve=nan
-    2474:   [s08_periodic_load              | EKF-LQR                 ]   IAE=[11748.4389, 5274.6141, 192.1933]  ISE=[23668.2950, 4771.4280, 6.3361]  E_valve=0.0784
-    2475:   [s08_periodic_load              | UKF-LQR                 ]   IAE=[11748.4389, 5274.6132, 192.1933]  ISE=[23668.2949, 4771.4264, 6.3361]  E_valve=0.0784
-    2476:   [s08_periodic_load              | FuzzyPID                ]   IAE=[53228.7202, 5883.4264, 325.7835]  ISE=[524996.0595, 6121.4907, 19.5081]  E_valve=4.3081
-    2477:   [s08_periodic_load              | FuzzySup-MPC            ]   IAE=[7623.8562, 854.0219, 3602.8529]  ISE=[10098.9598, 172.5106, 2215.7301]  E_valve=4.5779
-    2478:   [s08_periodic_load              | SupervisoryStack        ]   IAE=[14593.9305, 1274.5637, 357.6679]  ISE=[37067.5430, 273.7826, 22.2450]  E_valve=0.2373
-    2479:   [s08_periodic_load              | AdditiveStack           ]   IAE=[1650.8427, 1235.8178, 226.4284]  ISE=[859.1745, 346.6332, 9.0066]  E_valve=3.6451
-    2480:   [s08_periodic_load              | WeightedStack           ]   IAE=[14593.9305, 1274.5637, 357.6679]  ISE=[37067.5430, 273.7826, 22.2450]  E_valve=0.2373
-    2481:   [s08_periodic_load              | RepetitiveCtrl          ]   IAE=[65524.9373, 17782.4846, 381.0665]  ISE=[897557.1772, 115652.5518, 29.3627]  E_valve=6.3075
-    2482:   [s08_periodic_load              | MRAC                    ]   IAE=[65779.5201, 22208.5226, 511.1324]  ISE=[771807.5891, 86852.9412, 57.9081]  E_valve=5.8083
-    2483:   [s08_periodic_load              | H-inf                   ]   IAE=[14593.9305, 1274.5637, 357.6679]  ISE=[37067.5430, 273.7826, 22.2450]  E_valve=0.2373
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #5 (keywords: fail) ---
-Lines 2631 - 2654
-
-    2631: 
-    2632:   EXIT 0 — PASSED
-    2633: 
-    2634: ------------------------------------------------------------------------
-    2635:   [4/90]  build\case-study\Tug Boat Numerical Simulation\tug_sim.exe
-    2636: ------------------------------------------------------------------------
-    2637: 
-    2638: Loading plant parameters from: case-study/Tug Boat Numerical Simulation/config/plant_params.json
-    2639: M_re diagonal: 1.34912e+08   8.718e+07 4.66898e+13
-    2640: D_re diagonal:      600000    1.34e+06 3.11942e+12
->>> 2641: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
-    2642: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
-    2643: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
-    2644: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
-    2645: 
-    2646: Running 64 simulations (4 scenarios x 16 controllers)...
-    2647: 
-    2648: [S1 | PID]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=11.3 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_PID.csv
-    2649: [S1 | KF-PID]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=17.5 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_KF-PID.csv
-    2650: [S1 | SMC]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=11.1 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_SMC.csv
-    2651: [S1 | MPC]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=16.1 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_MPC.csv
-    2652: [S1 | ESC]  IAE_x=4.3  IAE_y=4.2  IAE_psi=0.0  IAE_total=0.1  E_fuel=2612734287.3  sat=1207  wall=19.9 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_ESC.csv
-    2653: [S1 | FuzzyPID]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=1067  wall=17.8 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_FuzzyPID.csv
-    2654: [S1 | FuzzySup-MPC]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=13.9 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_FuzzySup-MPC.csv
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #6 (keywords: error) ---
-Lines 2811 - 2831
-
-    2811:     40    97.802    97.679     0.123
-    2812:     80    97.250    97.179     0.071
-    2813:    120    97.249    97.158     0.091
-    2814:    160    97.247    97.188     0.059
-    2815:    200    97.238    97.239    -0.001
-    2816:    240    97.184    97.213    -0.030
-    2817:    280    97.188    97.228    -0.040
-    2818:    320    97.159    97.235    -0.076
-    2819:    360    97.213    97.178     0.035
-    2820:    400    97.194    97.197    -0.003
->>> 2821: RMS errors: x1=0.119 x2=0.672 x3=10.159
-    2822: -> ex07_ekf.csv
-    2823: 
-    2824: === Ex08: UKF vs EKF Comparison ===
-    2825:      k  err_ekf_x1 err_ukf_x1
-    2826: ------------------------------
-    2827:      0       0.836       0.836
-    2828:     50       0.071       0.071
-    2829:    100       0.000       0.000
-    2830:    150       0.010       0.010
-    2831:    200       0.014       0.014
+    2009: ----------------------------------------------------------
+    2010: [BUILD] ex68_particle_filter
+    2011: ----------------------------------------------------------
+    2012: [1/2] Building CXX object examples/CMakeFiles/ex68_particle_filter.dir/ex68_particle_filter.cpp.obj
+    2013: [2/2] Linking CXX executable examples\ex68_particle_filter.exe
+    2014: [OK] ex68_particle_filter
+    2015: 
+    2016: ----------------------------------------------------------
+    2017: [BUILD] test_autoscheduling
+    2018: ----------------------------------------------------------
+>>> 2019: [1/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generator_exception.cpp.obj
+    2020: [2/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_run_for_at_least.cpp.obj
+    2021: [3/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/catch_chronometer.cpp.obj
+    2022: [4/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_analyse.cpp.obj
+    2023: [5/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_benchmark_function.cpp.obj
+    2024: [6/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generators_random.cpp.obj
+    2025: [7/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_automake.cpp.obj
+    2026: [8/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_event_listener.cpp.obj
+    2027: [9/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generators.cpp.obj
+    2028: [10/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_registrars.cpp.obj
+    2029: [11/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_common_base.cpp.obj
+    2030: [12/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_compact.cpp.obj
+    2031: [13/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_helpers.cpp.obj
+    2032: [14/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_stats.cpp.obj
+    2033: [15/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_exception.cpp.obj
+    2034: [16/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_console.cpp.obj
+    2035: [17/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_streaming_base.cpp.obj
+    2036: [18/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_generatortracker.cpp.obj
+    2037: [19/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_cumulative_base.cpp.obj
+    2038: [20/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_testcase.cpp.obj
+    2039: [21/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_registry_hub.cpp.obj
+    2040: [22/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_reporter_factory.cpp.obj
+    2041: [23/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_capture.cpp.obj
+    2042: [24/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_sonarqube.cpp.obj
+    2043: [25/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_config.cpp.obj
+    2044: [26/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_tap.cpp.obj
+    2045: [27/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_junit.cpp.obj
+    2046: [28/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_multi.cpp.obj
+    2047: [29/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_teamcity.cpp.obj
+    2048: [30/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_tag_alias_autoregistrar.cpp.obj
+    2049: [31/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_assertion_result.cpp.obj
+    2050: [32/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_totals.cpp.obj
+    2051: [33/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_json.cpp.obj
+    2052: [34/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_xml.cpp.obj
+    2053: [35/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_translate_exception.cpp.obj
+    2054: [36/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_approx.cpp.obj
+    2055: [37/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_version.cpp.obj
+    2056: [38/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_test_case_info.cpp.obj
+    2057: [39/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_get_random_seed.cpp.obj
+    2058: [40/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_reporter.cpp.obj
+    2059: [41/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_context.cpp.obj
+    2060: [42/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_timer.cpp.obj
+    2061: [43/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_case_insensitive_comparisons.cpp.obj
+    2062: [44/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_debugger.cpp.obj
+    2063: [45/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_message.cpp.obj
+    2064: [46/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_registry_hub.cpp.obj
+    2065: [47/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_errno_guard.cpp.obj
+    2066: [48/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_enforce.cpp.obj
+    2067: [49/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_floating_point_helpers.cpp.obj
+    2068: [50/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_test_spec.cpp.obj
+    2069: [51/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_enum_values_registry.cpp.obj
+    2070: [52/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_assertion_handler.cpp.obj
+    2071: [53/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_tostring.cpp.obj
+    2072: [54/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_getenv.cpp.obj
+    2073: [55/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_exception_translator_registry.cpp.obj
+    2074: [56/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_config.cpp.obj
+    2075: [57/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_leak_detector.cpp.obj
+    2076: [58/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_message_info.cpp.obj
+    2077: [59/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_decomposer.cpp.obj
+    2078: [60/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_jsonwriter.cpp.obj
+    2079: [61/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_istream.cpp.obj
+    2080: [62/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_debug_console.cpp.obj
+    2081: [63/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_random_number_generator.cpp.obj
+    2082: [64/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_polyfills.cpp.obj
+    2083: [65/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_result_type.cpp.obj
+    2084: [66/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_output_redirect.cpp.obj
+    2085: [67/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_parse_numbers.cpp.obj
+    2086: [68/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_clara.cpp.obj
+    2087: [69/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_random_seed_generation.cpp.obj
+    2088: [70/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_singletons.cpp.obj
+    2089: [71/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_lazy_expr.cpp.obj
+    2090: [72/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reusable_string_stream.cpp.obj
+    2091: [73/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_startup_exception_registry.cpp.obj
+    2092: [74/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_source_line_info.cpp.obj
+    2093: [75/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_console_colour.cpp.obj
+    2094: [76/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_stdstreams.cpp.obj
+    2095: [77/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_fatal_condition_handler.cpp.obj
+    2096: [78/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_list.cpp.obj
+    2097: [79/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_stringref.cpp.obj
+    2098: [80/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_info_hasher.cpp.obj
+    2099: [81/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_string_manip.cpp.obj
+    2100: [82/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_uncaught_exceptions.cpp.obj
+    2101: [83/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_section.cpp.obj
+    2102: [84/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_tag_alias_registry.cpp.obj
+    2103: [85/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_failure_exception.cpp.obj
+    2104: [86/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_registry.cpp.obj
+    2105: [87/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reporter_spec_parser.cpp.obj
+    2106: [88/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_wildcard_pattern.cpp.obj
+    2107: [89/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_tracker.cpp.obj
+    2108: [90/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_spec_parser.cpp.obj
+    2109: [91/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reporter_registry.cpp.obj
+    2110: [92/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_xmlwriter.cpp.obj
+    2111: [93/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_textflow.cpp.obj
+    2112: [94/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_commandline.cpp.obj
+    2113: [95/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers.cpp.obj
+    2114: [96/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_run_context.cpp.obj
+    2115: [97/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_container_properties.cpp.obj
+    2116: [98/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_exception.cpp.obj
+    2117: [99/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_session.cpp.obj
+    2118: [100/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_predicate.cpp.obj
+    2119: [101/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_quantifiers.cpp.obj
+    2120: [102/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_registry_impl.cpp.obj
+    2121: [103/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_floating_point.cpp.obj
+    2122: [104/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/internal/catch_matchers_impl.cpp.obj
+    2123: [105/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_templated.cpp.obj
+    2124: [106/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2WithMain.dir/catch2/internal/catch_main.cpp.obj
+    2125: [107/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_string.cpp.obj
+    2126: [108/111] Linking CXX static library _deps\catch2-build\src\libCatch2.a
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #7 (keywords: error) ---
-Lines 2896 - 2916
+--- FAILURE BLOCK #3 (keywords: warn) ---
+Lines 2278 - 2298
 
-    2896: B =
-    2897: 1
-    2898: 0
-    2899: C =
-    2900: 4.9625e-05 4.9125e-05
-    2901: DC gain approx = 0.897727
-    2902: 
-    2903: FOPDT fit:  K=0.897445  tau=1.14s  theta=0.53s
-    2904: IMC-PID:  Kp=1.423  Ki=1.013  Kd=0.306
-    2905: 
->>> 2906:      k    t[s]         y     error         u
-    2907: --------------------------------------------
-    2908:      0   0.000     0.000     1.000     5.000
-    2909:    150   1.500     0.500     0.503     0.926
-    2910:    300   3.000     0.828     0.173     0.991
-    2911:    450   4.500     0.923     0.077     1.056
-    2912:    600   6.000     0.959     0.041     1.095
-    2913:    750   7.500     0.984     0.016     1.105
-    2914:    900   9.000     0.994     0.006     1.109
-    2915:   1050  10.500     0.997     0.003     1.112
-    2916:   1200  12.000     0.999     0.001     1.113
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #8 (keywords: error) ---
-Lines 2968 - 2988
-
-    2968:     0     1     0
-    2969: B =
-    2970: 1
-    2971: 0
-    2972: 0
-    2973: C =
-    2974:     0     0 0.006
-    2975: 
-    2976: MPC recommendation:  Np=55  Nc=18  t_settle approx =2.75s
-    2977: 
->>> 2978:      k    t[s]         y     error         u
-    2979: --------------------------------------------
-    2980:      0   0.000     0.000     1.000     3.935
-    2981:     20   1.000     1.107    -0.123     0.906
-    2982:     40   2.000     0.998     0.004     0.994
-    2983:     60   3.000     1.000     0.000     1.001
-    2984:     80   4.000     1.000    -0.000     1.000
-    2985:    100   5.000     1.000     0.000     1.000
-    2986:    120   6.000     1.000     0.000     1.000
-    2987:    140   7.000     1.000    -0.000     1.000
-    2988:    160   8.000     1.000    -0.000     1.000
+    2278: Compile succeeded.
+    2279: 
+    2280: ========================================================================
+    2281:   Phase 3 - Python bindings build + smoke test
+    2282: ========================================================================
+    2283: 
+    2284:   [cmake configure (bindings)]
+    2285: 
+    2286: -- Found Python3: C:/Users/dangs/miniconda3/envs/soft_robotics/python.exe (found version "3.14.4") found components: Interpreter Development Development.Module Development.Embed
+    2287: -- pybind11 not found via find_package - fetching via FetchContent
+>>> 2288: CMake Deprecation Warning at build/_deps/pybind11-src/CMakeLists.txt:13 (cmake_minimum_required):
+    2289:   Compatibility with CMake < 3.10 will be removed from a future version of
+    2290:   CMake.
+    2291: 
+    2292:   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+    2293:   to tell CMake that the project requires at least <min> but has been updated
+    2294:   to work with policies introduced by <max> or earlier.
+    2295: 
+    2296: 
+    2297: -- pybind11 v2.13.6 
+    2298: -- Found PythonInterp: C:/Users/dangs/miniconda3/envs/soft_robotics/python.exe (found suitable version "3.14.4", minimum required is "3.7")
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #9 (keywords: error) ---
-Lines 3160 - 3180
+--- FAILURE BLOCK #4 (keywords: nan) ---
+Lines 2514 - 2534
 
-    3160:  800  8.000-18.019   19.019    20.006-20.000        2.000
-    3161: 
-    3162: Note: z3 (ESO state 3) tracks the disturbance estimate.
-    3163: 
-    3164:   EXIT 0 — PASSED
-    3165: 
-    3166: ------------------------------------------------------------------------
-    3167:   [15/90]  build\examples\ex10_supervisory_stack.exe
-    3168: ------------------------------------------------------------------------
-    3169: 
->>> 3170:   k    t[s]    y      error    u     active
-    3171: --------------------------------------------------
-    3172:    0  0.000   0.000    1.000 -8.000  SMC
-    3173:   60  0.600  -0.948    1.923 -8.000  SMC
-    3174:  120  1.200  -2.436    3.413 -8.000  SMC
-    3175:  180  1.800  -3.492    4.479 -8.000  SMC
-    3176:  240  2.400  -3.997    4.992 -8.000  SMC
-    3177:  300  3.000  -4.134    5.134 -8.000  SMC
-    3178:  360  3.600  -4.106    5.107 -8.000  SMC
-    3179:  420  4.200  -4.039    5.040 -8.000  SMC
-    3180:  480  4.800  -3.988    4.988 -8.000  SMC
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #10 (keywords: fail) ---
-Lines 3789 - 3809
-
-    3789: 
-    3790: === Rational D-scaling (first-order per channel) ===
-    3791:   Iterations:   0
-    3792:   mu_upper:     inf
-    3793:   Converged:    no
-    3794:   K feasible:   no
-    3795:   D filters L:  0 channels
-    3796:   D filters R:  0 channels
-    3797:   mu history:  
-    3798: 
->>> 3799: FAIL
-    3800: 
-    3801:   EXIT 0 — PASSED
-    3802: 
-    3803: ------------------------------------------------------------------------
-    3804:   [40/90]  build\examples\ex35_cascade_pid.exe
-    3805: ------------------------------------------------------------------------
-    3806: 
-    3807: Cascade control final y_outer = 0.999396  (ref = 1)
-    3808: PASS
-    3809: 
+    2514: === Scenario: s02_medload_regulation (Perturbation rejection at Medium Load (op B)) ===
+    2515:   [s02_medload_regulation         | PID                     ]   IAE=[514.7850, 41.9979, 78.1034]  ISE=[1603.8644, 30.4546, 2.5203]  E_valve=0.0108
+    2516:   [s02_medload_regulation         | LQR                     ]   IAE=[169.3241, 376.1559, 43.9420]  ISE=[547.3087, 115.4137, 1.2659]  E_valve=0.0027
+    2517:   [s02_medload_regulation         | LQG                     ]   IAE=[188.6453, 66.8726, 187.6624]  ISE=[578.9805, 75.6347, 9.7949]  E_valve=0.0019
+    2518:   [s02_medload_regulation         | MPC                     ]   IAE=[120.6688, 18.2999, 16.2818]  ISE=[448.7650, 27.6815, 0.1598]  E_valve=0.0444
+    2519:   [s02_medload_regulation         | SMC                     ]   IAE=[192.1688, 491.7823, 22.8399]  ISE=[559.6849, 102.1991, 0.3056]  E_valve=3.4831
+    2520:   [s02_medload_regulation         | ESC                     ]   IAE=[112188.7861, 63610.3049, 36230.3093]  ISE=[4274373.9247, 1367221.7003, 10690219.3762]  E_valve=0.3013
+    2521:   [s02_medload_regulation         | ADRC                    ]   IAE=[4905.6241, 2711.9727, 85.2700]  ISE=[10525.3864, 3975.1355, 2.8544]  E_valve=0.1582
+    2522:   [s02_medload_regulation         | LeadLag-PID             ]   IAE=[310.8123, 41.0305, 87.5749]  ISE=[649.1649, 28.9243, 2.7576]  E_valve=0.0037
+    2523:   [s02_medload_regulation         | SmithPredictor          ]   IAE=[325.5709, 908.6985, 77.3917]  ISE=[858.2098, 334.0378, 2.4558]  E_valve=1.0588
+>>> 2524:   [s02_medload_regulation         | GPC-RLS                 ]   IAE=[nan, nan, nan]  ISE=[nan, nan, nan]  E_valve=nan
+    2525:   [s02_medload_regulation         | EKF-LQR                 ]   IAE=[187.8077, 66.6894, 187.8446]  ISE=[578.3988, 77.5677, 9.8139]  E_valve=0.0019
+    2526:   [s02_medload_regulation         | UKF-LQR                 ]   IAE=[187.8415, 66.6660, 187.8427]  ISE=[578.4294, 77.5437, 9.8137]  E_valve=0.0019
+    2527:   [s02_medload_regulation         | FuzzyPID                ]   IAE=[337.9245, 282.9929, 47.3295]  ISE=[786.1801, 65.8653, 0.9890]  E_valve=9.8524
+    2528:   [s02_medload_regulation         | FuzzySup-MPC            ]   IAE=[382.6509, 27.9708, 173.0152]  ISE=[467.3810, 28.7663, 11.5275]  E_valve=1.6279
+    2529:   [s02_medload_regulation         | SupervisoryStack        ]   IAE=[514.7850, 41.9979, 78.1034]  ISE=[1603.8644, 30.4546, 2.5203]  E_valve=0.0108
+    2530:   [s02_medload_regulation         | AdditiveStack           ]   IAE=[299.3444, 866.3013, 44.7394]  ISE=[571.5684, 270.4420, 0.9812]  E_valve=2.0075
+    2531:   [s02_medload_regulation         | WeightedStack           ]   IAE=[514.7850, 41.9979, 78.1034]  ISE=[1603.8644, 30.4546, 2.5203]  E_valve=0.0108
+    2532:   [s02_medload_regulation         | RepetitiveCtrl          ]   IAE=[28998.5013, 3196.8458, 222.1589]  ISE=[449130.3527, 7258.7554, 20.5647]  E_valve=2.1419
+    2533:   [s02_medload_regulation         | MRAC                    ]   IAE=[15786.5481, 10664.5383, 260.3000]  ISE=[83592.0817, 39394.1822, 29.2862]  E_valve=2.8467
+    2534:   [s02_medload_regulation         | H-inf                   ]   IAE=[514.7850, 41.9979, 78.1034]  ISE=[1603.8644, 30.4546, 2.5203]  E_valve=0.0108
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #11 (keywords: fail) ---
-Lines 3879 - 3899
+--- FAILURE BLOCK #5 (keywords: error, nan) ---
+Lines 2678 - 2708
 
-    3879: CASCADE PID(inner)+MPC(outer): final y_outer = 1  (ref = 1)
-    3880: PASS
-    3881: 
-    3882:   EXIT 0 — PASSED
-    3883: 
-    3884: ------------------------------------------------------------------------
-    3885:   [48/90]  build\examples\ex43_smc_inner_lqr_outer.exe
-    3886: ------------------------------------------------------------------------
-    3887: 
-    3888: CASCADE SMC(inner)+LQR(outer): final pos = 0.910648  (ref = 1)
->>> 3889: FAIL
-    3890: 
-    3891:   EXIT 0 — PASSED
-    3892: 
-    3893: ------------------------------------------------------------------------
-    3894:   [49/90]  build\examples\ex44_fuzzy_pd_inner_pid_outer.exe
-    3895: ------------------------------------------------------------------------
-    3896: 
-    3897: CASCADE FuzzyPD(inner)+PID(outer): final y = 0.961072  (ref = 1)
-    3898: PASS
-    3899: 
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #12 (keywords: error) ---
-Lines 3994 - 4014
-
-    3994: Bumpless supervisory: final y = 0.99996  (ref = 1)
-    3995: Max |u| jump on switch = 0.00363788
-    3996: PASS
-    3997: 
-    3998:   EXIT 0 — PASSED
-    3999: 
-    4000: ------------------------------------------------------------------------
-    4001:   [60/90]  build\examples\ex55_linearisation_helper.exe
-    4002: ------------------------------------------------------------------------
-    4003: 
->>> 4004: Van der Pol Jacobian relative errors:
-    4005:   A: 0  B: 0
-    4006: Linearised Van der Pol (discrete, Ts=0.05):
-    4007:   A =
-    4008:    0.99874  0.0506091
-    4009: -0.0506091    1.02404
-    4010:   B = 0.00126022  0.0506091
-    4011: LQR gain K = 1.97457 4.01298
-    4012: Van der Pol LQR: ||x(T)|| = 2.6613e-16  (need < 0.05)
-    4013: 
-    4014: CSTR linearised (Ts=1 s):  A=0.606535  B=0.786941
+    2678:   [s07_multiop_transition         | MRAC                    ]   IAE=[17792.7199, 14806.6025, 235.7818]  ISE=[317624.3829, 139978.5274, 25.9750]  E_valve=2.2688
+    2679:   [s07_multiop_transition         | H-inf                   ]   IAE=[79892.1447, 149976.5635, 15281.5649]  ISE=[3808279.8814, 13680206.7705, 4578493.7766]  E_valve=0.4113
+    2680:   [s07_multiop_transition         | AdaptiveSP              ]   IAE=[79934.1959, 150022.8800, 14426.0883]  ISE=[3813633.0390, 13691444.0982, 1796725.6089]  E_valve=0.4113
+    2681:   [s07_multiop_transition         | NMPC                    ]   IAE=[96659.8329, 51092.1405, 13215.7792]  ISE=[6315119.0027, 2101543.8100, 14265810.5570]  E_valve=0.0292
+    2682:   [s07_multiop_transition         | FL                      ]   IAE=[9792.4755, 6709.1307, 262.5535]  ISE=[174852.6213, 237285.6312, 54.8647]  E_valve=0.1010
+    2683:   [s07_multiop_transition         | MHE-LQR                 ]   IAE=[8514.7917, 16872.6838, 397.9111]  ISE=[172139.2648, 275945.9243, 117.8738]  E_valve=0.0332
+    2684:   [s07_multiop_transition         | LPV-GS                  ]   IAE=[4398.3642, 4057.0985, 433.6925]  ISE=[143010.7666, 146351.5429, 129.5519]  E_valve=0.0702
+    2685:   [s07_multiop_transition         | SubspaceID-LQG          ]   IAE=[29462.5824, 60963.2601, 2454.6307]  ISE=[529315.5000, 2137443.4420, 27221.1302]  E_valve=0.0080
+    2686:   [s07_multiop_transition         | AutoGS                  ]   IAE=[6362.1083, 6969.5167, 98631.4068]  ISE=[190444.8272, 118126.3309, 292311385.5791]  E_valve=0.6515
+    2687: 
+>>> 2688: === Scenario: s08_periodic_load (Sinusoidal load disturbance at 0.05 Hz to demonstrate RepetitiveController advantage over PID/MPC. Plant starts at Medium Load (op B). A sinusoidal perturbation on y1 setpoint simulates periodic grid load oscillations at 0.05 Hz (period = 200 s). After one learning period, RepetitiveController should achieve near-zero periodic IAE; PID and MPC retain residual periodic error proportional to their disturbance-rejection bandwidth.) ===
+    2689:   [s08_periodic_load              | PID                     ]   IAE=[14593.9305, 1274.5637, 357.6679]  ISE=[37067.5430, 273.7826, 22.2450]  E_valve=0.2373
+    2690:   [s08_periodic_load              | LQR                     ]   IAE=[11806.4819, 2923.3584, 226.6468]  ISE=[23903.8683, 1467.5692, 8.8173]  E_valve=0.0790
+    2691:   [s08_periodic_load              | LQG                     ]   IAE=[11745.6635, 5377.4687, 193.4005]  ISE=[23657.9281, 4956.9944, 6.5317]  E_valve=0.0785
+    2692:   [s08_periodic_load              | MPC                     ]   IAE=[7713.5867, 865.7212, 3188.2475]  ISE=[10364.8655, 180.3957, 1943.7483]  E_valve=4.5885
+    2693:   [s08_periodic_load              | SMC                     ]   IAE=[22714.4805, 805.4823, 177.3504]  ISE=[85169.1601, 139.7474, 5.2260]  E_valve=6.3742
+    2694:   [s08_periodic_load              | ESC                     ]   IAE=[274929.3501, 155275.6160, 154543.9668]  ISE=[11855104.4138, 3765315.6829, 5333702.8443]  E_valve=0.3319
+    2695:   [s08_periodic_load              | ADRC                    ]   IAE=[57461.9517, 26279.9952, 411.2771]  ISE=[568645.2472, 118641.6001, 33.1189]  E_valve=0.3117
+    2696:   [s08_periodic_load              | LeadLag-PID             ]   IAE=[15382.0506, 1576.3232, 227.3322]  ISE=[40608.1817, 426.7978, 8.8754]  E_valve=0.0840
+    2697:   [s08_periodic_load              | SmithPredictor          ]   IAE=[14902.1959, 2442.5026, 346.7524]  ISE=[38349.8164, 1237.9780, 20.8153]  E_valve=2.2569
+    2698:   [s08_periodic_load              | GPC-RLS                 ]   IAE=[nan, nan, nan]  ISE=[nan, nan, nan]  E_valve=nan
+    2699:   [s08_periodic_load              | EKF-LQR                 ]   IAE=[11748.4389, 5274.6141, 192.1933]  ISE=[23668.2950, 4771.4280, 6.3361]  E_valve=0.0784
+    2700:   [s08_periodic_load              | UKF-LQR                 ]   IAE=[11748.4389, 5274.6132, 192.1933]  ISE=[23668.2949, 4771.4264, 6.3361]  E_valve=0.0784
+    2701:   [s08_periodic_load              | FuzzyPID                ]   IAE=[53228.7202, 5883.4264, 325.7835]  ISE=[524996.0595, 6121.4907, 19.5081]  E_valve=4.3081
+    2702:   [s08_periodic_load              | FuzzySup-MPC            ]   IAE=[7623.8562, 854.0219, 3602.8529]  ISE=[10098.9598, 172.5106, 2215.7301]  E_valve=4.5779
+    2703:   [s08_periodic_load              | SupervisoryStack        ]   IAE=[14593.9305, 1274.5637, 357.6679]  ISE=[37067.5430, 273.7826, 22.2450]  E_valve=0.2373
+    2704:   [s08_periodic_load              | AdditiveStack           ]   IAE=[1650.8427, 1235.8178, 226.4284]  ISE=[859.1745, 346.6332, 9.0066]  E_valve=3.6451
+    2705:   [s08_periodic_load              | WeightedStack           ]   IAE=[14593.9305, 1274.5637, 357.6679]  ISE=[37067.5430, 273.7826, 22.2450]  E_valve=0.2373
+    2706:   [s08_periodic_load              | RepetitiveCtrl          ]   IAE=[65524.9373, 17782.4846, 381.0665]  ISE=[897557.1772, 115652.5518, 29.3627]  E_valve=6.3075
+    2707:   [s08_periodic_load              | MRAC                    ]   IAE=[65779.5201, 22208.5226, 511.1324]  ISE=[771807.5891, 86852.9412, 57.9081]  E_valve=5.8083
+    2708:   [s08_periodic_load              | H-inf                   ]   IAE=[14593.9305, 1274.5637, 357.6679]  ISE=[37067.5430, 273.7826, 22.2450]  E_valve=0.2373
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #13 (keywords: error) ---
-Lines 4036 - 4075
+--- FAILURE BLOCK #6 (keywords: fail) ---
+Lines 2856 - 2879
 
-    4036: PASS
-    4037: 
-    4038:   EXIT 0 — PASSED
-    4039: 
-    4040: ------------------------------------------------------------------------
-    4041:   [63/90]  build\examples\ex58_balanced_truncation.exe
-    4042: ------------------------------------------------------------------------
-    4043: 
-    4044: Full 4th-order system: DC gain approx = 1
-    4045: Hankel singular values: 0.578974 0.083152 0.00420916 3.15516e-05 
->>> 4046: Error bound for r=2: 0.00848141
-    4047: Reduced model stable: yes
-    4048: Suggested order for tol=1%: 2
-    4049: DC gain - full: 1  reduced: 0.992481  |diff| = 0.00751873  (error bound = 0.00848141)
-    4050: LQR closed loop on reduced model: y(inf) = 1  |err| = 1.33227e-15  (need < 0.15)
-    4051: PASS
-    4052: 
-    4053:   EXIT 0 — PASSED
-    4054: 
-    4055: ------------------------------------------------------------------------
-    4056:   [64/90]  build\examples\ex59_zpetc.exe
-    4057: ------------------------------------------------------------------------
-    4058: 
-    4059: System 1 (min-phase):
-    4060:   hasNMPZeros = false
-    4061:   dcAmplitudeError = 6.88338e-15
-    4062:   zeros: (-0.5+0j) 
-    4063: System 2 (NMP, zero at z=1.5):
-    4064:   hasNMPZeros = true
-    4065:   dcAmplitudeError = 3.99772
-    4066:   NMP zeros: 1.5 
-    4067:   DC gain of G2.G_ff = 1  (need approx = 1.0)
-    4068: PASS
-    4069: 
-    4070:   EXIT 0 — PASSED
-    4071: 
-    4072: ------------------------------------------------------------------------
-    4073:   [65/90]  build\examples\ex60_gap_clustering.exe
-    4074: ------------------------------------------------------------------------
-    4075: 
+    2856: 
+    2857:   EXIT 0 - PASSED
+    2858: 
+    2859: ------------------------------------------------------------------------
+    2860:   [4/89]  build\case-study\Tug Boat Numerical Simulation\tug_sim.exe
+    2861: ------------------------------------------------------------------------
+    2862: 
+    2863: Loading plant parameters from: case-study/Tug Boat Numerical Simulation/config/plant_params.json
+    2864: M_re diagonal: 1.34912e+08   8.718e+07 4.66898e+13
+    2865: D_re diagonal:      600000    1.34e+06 3.11942e+12
+>>> 2866: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
+    2867: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
+    2868: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
+    2869: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
+    2870: 
+    2871: Running 64 simulations (4 scenarios x 16 controllers)...
+    2872: 
+    2873: [S1 | PID]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=9.9 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_PID.csv
+    2874: [S1 | KF-PID]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=12.2 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_KF-PID.csv
+    2875: [S1 | SMC]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=10.0 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_SMC.csv
+    2876: [S1 | MPC]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=14.1 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_MPC.csv
+    2877: [S1 | ESC]  IAE_x=4.3  IAE_y=4.2  IAE_psi=0.0  IAE_total=0.1  E_fuel=2612734287.3  sat=1207  wall=14.5 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_ESC.csv
+    2878: [S1 | FuzzyPID]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=1067  wall=18.6 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_FuzzyPID.csv
+    2879: [S1 | FuzzySup-MPC]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=15.3 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_FuzzySup-MPC.csv
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #14 (keywords: error) ---
-Lines 4125 - 4145
+--- FAILURE BLOCK #7 (keywords: fail) ---
+Lines 4014 - 4034
 
-    4125:     [ 8.869e-16         0.3]
-    4126:     [-1.863e-17         0.2]
-    4127:   true A1:
-    4128:       0 0.3
-    4129:   0 0.2
-    4130: 
-    4131: B_coeffs[0] (true: B0) =
-    4132:     [         1]
-    4133:     [-9.029e-18]
-    4134: 
->>> 4135: Coefficient errors (Frobenius norm):
-    4136:   ||A_hat0 - A0|| = 4.549e-15
-    4137:   ||A_hat1 - A1|| = 3.545e-13
-    4138:   ||B_hat0 - B0|| = 4.442e-16
-    4139: 
-    4140: Closed-loop state-norm IAE (200 steps, p=0): 1.034
-    4141: PASS
-    4142: 
-    4143:   EXIT 0 — PASSED
-    4144: 
-    4145: ------------------------------------------------------------------------
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #15 (keywords: warn) ---
-Lines 4187 - 4207
-
-    4187:    0   0.000   0.81      2  1.000
-    4188:  100   0.682   0.70      0  0.318
-    4189:  200   0.821   0.83      0  0.179
-    4190:  300   0.899   0.90      0  0.101
-    4191:  400   0.943   0.95      0  0.057
-    4192:  500   0.968   0.97      0  0.032
-    4193: 
-    4194: Final estimated delay: 0  (true: 5)
-    4195: IAE first half : 83.69
-    4196: IAE second half: 14.51
->>> 4197: WARN: delay estimate 0 != true 5
-    4198: PASS
-    4199: 
-    4200:   EXIT 0 — PASSED
-    4201: 
-    4202: ------------------------------------------------------------------------
-    4203:   [70/90]  build\examples\ex65_autotuner_pid.exe
-    4204: ------------------------------------------------------------------------
-    4205: 
-    4206: Default gains  Kp=1.00 Ki=0.10 Kd=0.00  IAE=2.7252
-    4207: Tuned  gains   Kp=3.485 Ki=1.780 Kd=0.964  IAE=0.6150
+    4014: 
+    4015: === Rational D-scaling (first-order per channel) ===
+    4016:   Iterations:   0
+    4017:   mu_upper:     inf
+    4018:   Converged:    no
+    4019:   K feasible:   no
+    4020:   D filters L:  0 channels
+    4021:   D filters R:  0 channels
+    4022:   mu history:  
+    4023: 
+>>> 4024: FAIL (constant D-scaling did not converge)
+    4025: 
+    4026:   EXIT 0 - PASSED
+    4027: 
+    4028: ------------------------------------------------------------------------
+    4029:   [40/89]  build\examples\ex35_cascade_pid.exe
+    4030: ------------------------------------------------------------------------
+    4031: 
+    4032: Cascade control final y_outer = 0.999396  (ref = 1)
+    4033: PASS
+    4034: 
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #16 (keywords: fail) ---
-Lines 4594 - 4614
+--- FAILURE BLOCK #8 (keywords: fail) ---
+Lines 4104 - 4124
 
-    4594: 
-    4595: =================================================================
-    4596:  SISO Unknown Case - System ID + Fuzzy Performance
-    4597:  Plant treated as a black box (G(s)=1/(s^2+1.5s+1) internally)
-    4598: =================================================================
-    4599: 
-    4600: [1] Excitation signal setup
-    4601:   Loaded PRBS from examples/data/siso_prbs.csv (3000 samples)
-    4602: [2] Relay feedback test (d=0.5, up to 6000 steps)
-    4603:   Ku=133.5  Tu=0.515 s
->>> 4604:   Relay fidelity: |Ku_relay - Ku_bode|/Ku_bode = 9e+03%  [FAIL >15%]
-    4605: [3] Step response identification -> FOPDT
-    4606:   K=0.89743  tau=1.14 s  theta=0.53 s
-    4607: [4] ARX(2,2) batch LS identification
-    4608:   ARX: a1=-1.98511  a2=0.98522  b1=4.9625e-05  b2=4.9125e-05
-    4609:   NRMSE (in-sample) = 2.9e-12%  [PASS <=5%]
-    4610:   NRMSE (validation) = 2.6e-12%  [PASS <=5%]
-    4611: 
-    4612: [5] All PID tuning rules on identified FOPDT
-    4613: --------------------------------------------------------------------------------------------------------------
-    4614:            PID-ZN(relay) ISE=  0.37174 ITAE= 11.88324 OS=  9.1% Ts=20.000s J= 11.34147  (Fair 65)
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #17 (keywords: error) ---
-Lines 4668 - 4729
-
-    4668: ------------------------------------------------------------------------
-    4669: 
-    4670: ============================================================
-    4671:   Real-Time Controller Runner  -  All lib/ controllers
-    4672:   Ts=0.01 s  N=500 steps  ref=1
-    4673: ============================================================
-    4674: 
-    4675: [1] DiscretePID (IMC)  - real-time
-    4676: 
-    4677:   --------------------------------------------------------
->>> 4678:       k    t(s)         y     error         ujitter(micro-s)
-    4679:   --------------------------------------------------------
-    4680:       0   0.000     0.000     1.000     6.534         0.2
-    4681:      50   0.500     0.233     0.773     1.388      4321.2
-    4682:     100   1.000     0.543     0.463     1.252      3173.7
-    4683:     150   1.500     0.800     0.204     1.098      3248.3
-    4684:     200   2.000     0.957     0.045     0.993      3570.4
-    4685:     250   2.500     1.019    -0.019     0.957      1601.5
-    4686:     300   3.000     1.019    -0.019     0.974      2829.6
-    4687:     350   3.500     0.992     0.007     1.018     10403.6
-    4688:     400   4.000     0.965     0.035     1.064      1099.0
-    4689:     450   4.500     0.950     0.050     1.099      1357.9
-    4690:     499   4.990     0.950     0.050     1.116     11430.4
-    4691:   y_final       = 0.950
-    4692:   avg_compute   = 0.412 micro-s
-    4693:   max_jitter    = 23389.100 micro-s
-    4694:   missed steps  = 27 / 500
-    4695: 
-    4696: [2] DiscreteLQR (Bryson)  - real-time
-    4697:   --------------------------------------------------------
-    4698:       k    t(s)         y     error         ujitter(micro-s)
-    4699:   --------------------------------------------------------
-    4700:       0   0.000     0.000     1.000     1.915         3.2
-    4701:      50   0.500     0.000     1.000     0.000     12563.0
-    4702:     100   1.000     0.000     1.000     0.000      7966.0
-    4703:     150   1.500     0.000     1.000     0.000      6369.5
-    4704:     200   2.000     0.000     1.000     0.000      2775.5
-    4705:     250   2.500     0.000     1.000     0.000      9088.1
-    4706:     300   3.000     0.000     1.000     0.000      9122.8
-    4707:     350   3.500     0.000     1.000     0.000      8676.8
-    4708:     400   4.000     0.000     1.000     0.000      7122.1
-    4709:     450   4.500     0.000     1.000     0.000     12810.4
-    4710:     499   4.990     0.000     1.000     0.000      -188.0
-    4711:   y_final       = 0.000
-    4712:   avg_compute   = 2.841 micro-s
-    4713:   max_jitter    = 26237.100 micro-s
-    4714:   missed steps  = 31 / 500
-    4715: 
-    4716: [3] DiscreteMPC  - real-time
-    4717: 
-    4718:   --------------------------------------------------------
-    4719:       k    t(s)         y     error         ujitter(micro-s)
-    4720:   --------------------------------------------------------
-    4721:       0   0.000     0.000     1.000     3.085         0.2
-    4722:      50   0.500     0.297     0.712     1.878       715.8
-    4723:     100   1.000     0.708     0.299     1.013      6244.8
-    4724:     150   1.500     0.948     0.055     0.854      6765.8
-    4725:     200   2.000     1.031    -0.030     0.942      -576.2
-    4726:     250   2.500     1.036    -0.036     1.046      5178.2
-    4727:     300   3.000     1.020    -0.020     1.104      2720.3
-    4728:     350   3.500     1.006    -0.006     1.123     13172.4
-    4729:     400   4.000     1.000    -0.000     1.123      7156.0
+    4104: CASCADE PID(inner)+MPC(outer): final y_outer = 1  (ref = 1)
+    4105: PASS
+    4106: 
+    4107:   EXIT 0 - PASSED
+    4108: 
+    4109: ------------------------------------------------------------------------
+    4110:   [48/89]  build\examples\ex43_smc_inner_lqr_outer.exe
+    4111: ------------------------------------------------------------------------
+    4112: 
+    4113: CASCADE SMC(inner)+LQR(outer): final pos = 0.910648  (ref = 1)
+>>> 4114: FAIL
+    4115: 
+    4116:   EXIT 0 - PASSED
+    4117: 
+    4118: ------------------------------------------------------------------------
+    4119:   [49/89]  build\examples\ex44_fuzzy_pd_inner_pid_outer.exe
+    4120: ------------------------------------------------------------------------
+    4121: 
+    4122: CASCADE FuzzyPD(inner)+PID(outer): final y = 0.961072  (ref = 1)
+    4123: PASS
+    4124: 
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #18 (keywords: error) ---
-Lines 4915 - 4935
+--- FAILURE BLOCK #9 (keywords: fail, warn) ---
+Lines 5250 - 5271
 
-    4915:   omega_c    = 3.000000 rad/s
-    4916:   |G(jw_c)|  = 0.108947
-    4917:   zero  z_c  = 1.398923 rad/s
-    4918:   pole  p_c  = 6.433521 rad/s
-    4919:   gain  K    = 19.683957
-    4920:   Phase at omega_c: 40.000000 deg
-    4921: 
-    4922: ============================================================
-    4923:   6. DiscreteSMC  (bandwidth-parameterised)
-    4924: ============================================================
->>> 4925:   c_e  = 1.000000  (surface error weight)
-    4926:   c_de = 0.100000  (surface rate weight)
-    4927:   K    = 5.000000  (switching gain)
-    4928:   phi  = 0.500000  (boundary layer thickness)
-    4929:   uMin = -10.000000  uMax = 10.000000
-    4930: 
-    4931: ============================================================
-    4932:   7. DiscreteADRC  (bandwidth parameterisation, Gao 2003)
-    4933: ============================================================
-    4934:   b0      = 0.787232  (approx input gain K/tau)
-    4935:   omega_c = 3.000000 rad/s
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #19 (keywords: fail, warn) ---
-Lines 5024 - 5045
-
-    5024:   [PASS] uMin == uMax: output is clamped constant
-    5025:   [PASS] Pure P: compute(1.0) == Kp
-    5026:   [PASS] setParams hot-update (no exception)
-    5027: 
-    5028: === DiscreteLQR ===
-    5029:   [PASS] Gain matrix is 1 x n
-    5030:   [PASS] LQR: zero state -> zero control
-    5031:   [PASS] LQR: nonzero state -> nonzero control
-    5032:   [PASS] LQR: x == x_ref -> zero control
-    5033:   [PASS] LQR: feedforward offset applied
->>> 5034: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
-    5035: [DiscreteLQR] WARNING: DARE did not converge in 100 iterations. Using last iterate - verify (A,B) is stabilisable and (A,sqrt(Q)) is detectable.
-    5036:   [PASS] LQR: unstabilizable plant - dareConverged() is false
-    5037:   [PASS] LQR: unstabilizable - gain matrix still finite
-    5038:   [PASS] LQR: wrong-sized x_ref throws invalid_argument (expected exception)
-    5039:   [PASS] LQR: wrong-sized u_ff throws invalid_argument (expected exception)
-    5040:   [PASS] LQRAdapter::compute returns finite value
-    5041: 
-    5042: === DiscreteMPC ===
-    5043:   [PASS] MPC: zero error -> ~zero output
-    5044:   [PASS] MPC: positive error -> positive control
-    5045:   [PASS] MPC: large error clamped to uMax
+    5250:   [PASS] uMin == uMax: output is clamped constant
+    5251:   [PASS] Pure P: compute(1.0) == Kp
+    5252:   [PASS] setParams hot-update (no exception)
+    5253: 
+    5254: === DiscreteLQR ===
+    5255:   [PASS] Gain matrix is 1 x n
+    5256:   [PASS] LQR: zero state -> zero control
+    5257:   [PASS] LQR: nonzero state -> nonzero control
+    5258:   [PASS] LQR: x == x_ref -> zero control
+    5259:   [PASS] LQR: feedforward offset applied
+>>> 5260: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
+    5261: [DiscreteLQR] WARNING: DARE did not converge in 100 iterations. Using last iterate - verify (A,B) is stabilisable and (A,sqrt(Q)) is detectable.
+    5262:   [PASS] LQR: unstabilizable plant - dareConverged() is false
+    5263:   [PASS] LQR: unstabilizable - gain matrix still finite
+    5264:   [PASS] LQR: wrong-sized x_ref throws invalid_argument (expected exception)
+    5265:   [PASS] LQR: wrong-sized u_ff throws invalid_argument (expected exception)
+    5266:   [PASS] LQRAdapter::compute returns finite value
+    5267: 
+    5268: === DiscreteMPC ===
+    5269:   [PASS] MPC: zero error -> ~zero output
+    5270:   [PASS] MPC: positive error -> positive control
+    5271:   [PASS] MPC: large error clamped to uMax
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #20 (keywords: fail, warn) ---
-Lines 5423 - 5462
+--- FAILURE BLOCK #10 (keywords: fail, warn) ---
+Lines 5649 - 5688
 
-    5423:   [PASS] n4sid: identified pole magnitude within 3% of true value
-    5424:   [PASS] n4sid: DC gain within 50% for fast 1st-order plant
-    5425:   [PASS] suggestOrder: returns 1..4 for PRBS-identified spectrum
-    5426:   [PASS] n4sid: identification succeeds for D!=0 plant
-    5427:   [PASS] n4sid: identified model has correct order (n=2) for D!=0 plant
-    5428:   [PASS] n4sid: identified model is stable for D!=0 plant
-    5429: 
-    5430: --------------------------------------------
-    5431:   Results: 382 passed, 0 failed
-    5432: --------------------------------------------
->>> 5433: [LoopShapingTuner] Warning: phase_add_deg must be in (0, 90). Returning a unity-gain compensator at the requested crossover.
-    5434: 
-    5435:   EXIT 0 — PASSED
-    5436: 
-    5437: ------------------------------------------------------------------------
-    5438:   [86/90]  build\tests\test_integration.exe
-    5439: ------------------------------------------------------------------------
-    5440: 
-    5441: ============================================================
-    5442:   Controller Toolbox - Integration & Regression Tests
-    5443: ============================================================
-    5444: 
-    5445: === ControllerStack Extended ===
-    5446:   [PASS] TC-STACK-01: All weights zero gives zero output
-    5447:   [PASS] TC-STACK-06: Activation condition receives lastOutput_ correctly
-    5448: 
-    5449: === Regression Tests ===
-    5450:   [PASS] TC-REG-03 (Issue I-3): ADRC reset clears reference to 0
-    5451: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
-    5452: [DiscreteLQR] WARNING: DARE did not converge in 100 iterations. Using last iterate - verify (A,B) is stabilisable and (A,sqrt(Q)) is detectable.
-    5453:   [PASS] TC-REG-05 (Issue I-5): unstabilisable plant - dareConverged() is false
-    5454: 
-    5455: === c2d + MPC Integration ===
-    5456:   [PASS] c2d+MPC: first move respects duMax=0.2
-    5457:   [PASS] c2d+MPC: closed-loop tracks unit step
-    5458: 
-    5459: === N4SID + GPC Adaptive Integration ===
-    5460:   [PASS] N4SID+GPC: identification succeeds
-    5461:   [PASS] N4SID+GPC: GPC on identified model computes without throw (no exception)
-    5462:   [PASS] N4SID+GPC: suggestOrder returns sensible order (1..4)
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #21 (keywords: warn) ---
-Lines 5739 - 5759
-
-    5739:   [20] examples\python\ex20_adrc_eso_estimation.py
-    5740:   [21] examples\python\ex21_extremum_seeking.py
-    5741:   [22] examples\python\ex22_smith_predictor.py
-    5742:   [23] examples\python\ex23_controller_stack.py
-    5743:   [24] examples\python\ex23_fuzzy_temperature.py
-    5744:   [25] examples\python\ex24_disturbance_rejection.py
-    5745:   [26] examples\python\ex24_fuzzy_dc_motor.py
-    5746:   [27] examples\python\ex25_fuzzy_supervisor_mpc.py
-    5747:   [28] examples\python\ex25_rls_online_identification.py
-    5748:   [29] examples\python\ex26_fuzzy_ts_pendulum.py
->>> 5749:   [30] examples\python\ex26_tuner_suite_soft_warnings.py
-    5750:   [31] examples\python\ex27_nelder_mead_ise.py
-    5751:   [32] examples\python\ex28_itae_vs_ise_optimisation.py
-    5752:   [33] examples\python\ex29_csv_alignment_verification.py
-    5753:   [34] examples\python\ex30_monte_carlo_robustness.py
-    5754:   [35] examples\python\ex31_frequency_analysis.py
-    5755:   [36] examples\python\ex32_phase_portrait.py
-    5756:   [37] examples\python\ex33_performance_dashboard.py
-    5757:   [38] examples\python\ex34_arx_to_ss_pipeline.py
-    5758:   [39] examples\python\ex35_full_pipeline.py
-    5759:   [40] examples\python\ex36_pid_temperature_control.py
+    5649:   [PASS] n4sid: identified pole magnitude within 3% of true value
+    5650:   [PASS] n4sid: DC gain within 50% for fast 1st-order plant
+    5651:   [PASS] suggestOrder: returns 1..4 for PRBS-identified spectrum
+    5652:   [PASS] n4sid: identification succeeds for D!=0 plant
+    5653:   [PASS] n4sid: identified model has correct order (n=2) for D!=0 plant
+    5654:   [PASS] n4sid: identified model is stable for D!=0 plant
+    5655: 
+    5656: --------------------------------------------
+    5657:   Results: 382 passed, 0 failed
+    5658: --------------------------------------------
+>>> 5659: [LoopShapingTuner] Warning: phase_add_deg must be in (0, 90). Returning a unity-gain compensator at the requested crossover.
+    5660: 
+    5661:   EXIT 0 - PASSED
+    5662: 
+    5663: ------------------------------------------------------------------------
+    5664:   [86/89]  build\tests\test_integration.exe
+    5665: ------------------------------------------------------------------------
+    5666: 
+    5667: ============================================================
+    5668:   Controller Toolbox - Integration & Regression Tests
+    5669: ============================================================
+    5670: 
+    5671: === ControllerStack Extended ===
+    5672:   [PASS] TC-STACK-01: All weights zero gives zero output
+    5673:   [PASS] TC-STACK-06: Activation condition receives lastOutput_ correctly
+    5674: 
+    5675: === Regression Tests ===
+    5676:   [PASS] TC-REG-03 (Issue I-3): ADRC reset clears reference to 0
+    5677: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
+    5678: [DiscreteLQR] WARNING: DARE did not converge in 100 iterations. Using last iterate - verify (A,B) is stabilisable and (A,sqrt(Q)) is detectable.
+    5679:   [PASS] TC-REG-05 (Issue I-5): unstabilisable plant - dareConverged() is false
+    5680: 
+    5681: === c2d + MPC Integration ===
+    5682:   [PASS] c2d+MPC: first move respects duMax=0.2
+    5683:   [PASS] c2d+MPC: closed-loop tracks unit step
+    5684: 
+    5685: === N4SID + GPC Adaptive Integration ===
+    5686:   [PASS] N4SID+GPC: identification succeeds
+    5687:   [PASS] N4SID+GPC: GPC on identified model computes without throw (no exception)
+    5688:   [PASS] N4SID+GPC: suggestOrder returns sensible order (1..4)
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #22 (keywords: error) ---
-Lines 5976 - 6004
+--- FAILURE BLOCK #11 (keywords: warn) ---
+Lines 6802 - 6832
 
-    5976: ------------------------------------------------------------------------
-    5977:   [5/88]  examples\python\ex05_noisy_data_and_snr.py
-    5978: ------------------------------------------------------------------------
-    5979: 
-    5980: ============================================================
-    5981: ex05 - Noisy Data and SNR Verification
-    5982: ============================================================
-    5983: 
-    5984: Clean I/O: 1500 PRBS samples
-    5985: 
->>> 5986:   SNR (dB) | achieved SNR | a1 error (%) | b1 error (%)
-    5987:   --------------------------------------------------------------
-    5988:          40 |        39.72 |      44.8869 |     123.7960  [PASS]
-    5989:          30 |        29.97 |      71.1431 |     124.2697  [PASS]
-    5990:          20 |        19.80 |      74.3675 |      44.7342  [PASS]
-    5991:   [PASS] assert_close (a1 clean (1%)): |-1.98511 - -1.98511| = 1.077e-13  (tol=1.985e-02)
-    5992:   [PASS] assert_close (b1 clean (1%)): |4.9625e-05 - 4.9625e-05| = 9.996e-17  (tol=4.963e-07)
-    5993: 
-    5994:   a1 errors by SNR (40->30->20 dB): ['44.8869%', '71.1431%', '74.3675%']
-    5995:   [PASS] error monotonically increases as SNR decreases
-    5996: 
-    5997: ================================================
-    5998:   Verification: 6/6 checks passed
-    5999: ================================================
-    6000:   [PASS]  SNR 40dB achieved
-    6001:   [PASS]  SNR 30dB achieved
-    6002:   [PASS]  SNR 20dB achieved
-    6003:   [PASS]  a1_clean_1pct
-    6004:   [PASS]  b1_clean_1pct
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #23 (keywords: error) ---
-Lines 6182 - 6202
-
-    6182: 
-    6183: ============================================================
-    6184: ex11 - Relay Auto-Tuner -> Ziegler-Nichols PID
-    6185: ============================================================
-    6186: 
-    6187:   Relay measured: Ku=99.7485, Pu=1.2800 s
-    6188:   [PASS] Pu in plausible range (0.5 s < 1.2800 s < 5.0 s)
-    6189: 
-    6190:   ZN gains: Kp=59.8491, Ki=93.5142, Kd=9.5759
-    6191:   [PASS] ZN closed loop is stable
->>> 6192:   Steady-state error: 0.0000
-    6193: 
-    6194: ================================================
-    6195:   Verification: 3/3 checks passed
-    6196: ================================================
-    6197:   [PASS]  Pu_within_5pct
-    6198:   [PASS]  zn_stable
-    6199:   [PASS]  zn_tracks
-    6200: ================================================
-    6201: 
-    6202: 
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #24 (keywords: warn) ---
-Lines 6652 - 6689
-
-    6652: 
-    6653: ------------------------------------------------------------------------
-    6654:   [29/88]  examples\python\ex26_fuzzy_ts_pendulum.py
-    6655: ------------------------------------------------------------------------
-    6656: 
-    6657: Saved: data\ex26_fuzzy_ts_pendulum.csv
-    6658: 
-    6659:   EXIT 0 - PASSED
-    6660: 
-    6661: ------------------------------------------------------------------------
->>> 6662:   [30/88]  examples\python\ex26_tuner_suite_soft_warnings.py
-    6663: ------------------------------------------------------------------------
-    6664: 
-    6665: ============================================================
-    6666: ex26 - TunerSuite Soft-Warning Dispatch
-    6667: ============================================================
-    6668: 
-    6669:   Tuner     | CtrlKind | Expected          | warned | success
-    6670:   ------------------------------------------------------------------
-    6671:   RelayZN   | PID      | IDEAL - no warning |     No | PASS
-    6672:   RelayZN   | Smith    | SOFT  - 1 warning  |    Yes | PASS
-    6673:   RelayZN   | LeadLag  | SOFT  - 1 warning  |    Yes | PASS
-    6674:   RelayZN   | SMC      | FALLBACK - 1 warning|    Yes | PASS
-    6675:   IMC       | PID      | IDEAL - no warning |     No | PASS
-    6676:   IMC       | LQR      | FALLBACK - 1 warning|    Yes | PASS
-    6677:   Bryson    | LQR      | IDEAL - no warning |     No | PASS
-    6678:   Bryson    | MPC      | SOFT  - 1 warning  |    Yes | PASS
-    6679:   Bryson    | PID      | FALLBACK - 1 warning|    Yes | PASS
-    6680: 
-    6681: ================================================
-    6682:   Verification: 9/9 checks passed
-    6683: ================================================
-    6684:   [PASS]  RelayZN+PID
-    6685:   [PASS]  RelayZN+Smith
-    6686:   [PASS]  RelayZN+LeadLag
-    6687:   [PASS]  RelayZN+SMC
-    6688:   [PASS]  IMC+PID
-    6689:   [PASS]  IMC+LQR
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #25 (keywords: error) ---
-Lines 6737 - 6757
-
-    6737:   Optimising for ITAE ...
-    6738: 
-    6739:   ISE-opt:  Kp=5.0144,  Ki=1.7763,  Kd=0.5484
-    6740:   ITAE-opt: Kp=1.9888, Ki=1.7923, Kd=0.9100
-    6741: 
-    6742:   Validation metrics (ISE-opt vs ITAE-opt):
-    6743:   Metric     |      ISE-opt |     ITAE-opt
-    6744:   ISE        |      0.37645 |      0.46685
-    6745:   ITAE       |      1.63340 |      0.52113
-    6746: 
->>> 6747:   ISE-opt SS error: 0.0003, ITAE-opt SS error: 0.0000
-    6748: 
-    6749: ================================================
-    6750:   Verification: 6/6 checks passed
-    6751: ================================================
-    6752:   [PASS]  ise_opt_better_ise
-    6753:   [PASS]  itae_opt_better_itae
-    6754:   [PASS]  ise_stable
-    6755:   [PASS]  itae_stable
-    6756:   [PASS]  ise_ss
-    6757:   [PASS]  itae_ss
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #26 (keywords: nan, error) ---
-Lines 6896 - 6922
-
-    6896: ============================================================
-    6897: ex33 - Performance Dashboard
-    6898: ============================================================
-    6899:   Simulating PID... ISE=0.4059, SS_err=0.0000, stable=True
-    6900:   Simulating LQR... ISE=0.3105, SS_err=0.0000, stable=True
-    6901:   Simulating LQG... ISE=0.3105, SS_err=0.0000, stable=True
-    6902:   Simulating SMC... ISE=0.3958, SS_err=0.0218, stable=True
-    6903:   Simulating ADRC... ISE=0.3643, SS_err=0.0000, stable=True
-    6904:   Simulating LeadLag... ISE=3.7122, SS_err=0.4191, stable=True
-    6905: 
->>> 6906: controller      ISE      ITAE  overshoot  rise_time     ss_error  stable
-    6907:        PID 0.405906  1.118465   5.092258       0.85 4.034353e-05    True
-    6908:        LQR 0.310547  0.282498  35.112138       0.34 1.110223e-16    True
-    6909:        LQG 0.310547  0.282498  35.112138       0.34 1.110223e-16    True
-    6910:        SMC 0.395772  4.508520   9.069949       0.52 2.179297e-02    True
-    6911:       ADRC 0.364253  0.228651   0.507423       0.93 5.551115e-16    True
-    6912:    LeadLag 3.712169 83.683653   0.000000        NaN 4.190648e-01    True
-    6913: 
-    6914:   [PASS] all controllers stable
-    6915:   [PASS] 4/6 controllers have SS error < 2%
-    6916: 
-    6917: ================================================
-    6918:   Verification: 2/2 checks passed
-    6919: ================================================
-    6920:   [PASS]  all_stable
-    6921:   [PASS]  6_of_6_ss_ok
-    6922: ================================================
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #27 (keywords: warn, fail, error) ---
-Lines 7002 - 7051
-
-    7002:   EXIT 0 - PASSED
-    7003: 
-    7004: ------------------------------------------------------------------------
-    7005:   [41/88]  examples\python\ex37_mpc_lqr_dc_motor.py
-    7006: ------------------------------------------------------------------------
-    7007: 
-    7008: Traceback (most recent call last):
-    7009:   File "examples\python\ex37_mpc_lqr_dc_motor.py", line 31, in <module>
-    7010:     mp.qpMaxIter = 1000  # default 200 too low for Np=30 with tight rho_u=0.01
-    7011:     ^^^^^^^^^^^^
->>> 7012: AttributeError: 'ctrl_toolbox.MPCParams' object has no attribute 'qpMaxIter' and no __dict__ for setting new attributes. Did you mean: 'qp_max_iter'?
-    7013: ERROR conda.cli.main_run:execute(148): `conda run python examples\python\ex37_mpc_lqr_dc_motor.py` failed. (See above for error)
-    7014: 
-    7015:   EXIT 1 - FAILED
-    7016: 
-    7017: ------------------------------------------------------------------------
-    7018:   [42/88]  examples\python\ex38_lqg_noisy_measurements.py
-    7019: ------------------------------------------------------------------------
-    7020: 
-    7021: === LQG with Noisy Measurements ===
-    7022: Measurement noise sigma: 0.0050 rad
-    7023: KF RMSE vs true state:  0.00121 rad  (24.3% of noise)
-    7024: Final position:         0.9996 rad  (target 1.0)
-    7025: KF noise reduction:     12.3 dB
-    7026: PASS
-    7027: 
-    7028:   EXIT 0 - PASSED
-    7029: 
-    7030: ------------------------------------------------------------------------
-    7031:   [43/88]  examples\python\ex39_gpc_adaptive_rls.py
-    7032: ------------------------------------------------------------------------
-    7033: 
-    7034: Traceback (most recent call last):
-    7035:   File "examples\python\ex39_gpc_adaptive_rls.py", line 31, in <module>
-    7036:     gp.qpMaxIter = 1000  # default 200 too low for Np=20; eliminates QP convergence warnings
-    7037:     ^^^^^^^^^^^^
-    7038: AttributeError: 'ctrl_toolbox.GPCParams' object has no attribute 'qpMaxIter' and no __dict__ for setting new attributes. Did you mean: 'qp_max_iter'?
-    7039: ERROR conda.cli.main_run:execute(148): `conda run python examples\python\ex39_gpc_adaptive_rls.py` failed. (See above for error)
-    7040: 
-    7041:   EXIT 1 - FAILED
-    7042: 
-    7043: ------------------------------------------------------------------------
-    7044:   [44/88]  examples\python\ex40_controller_stack_switching.py
-    7045: ------------------------------------------------------------------------
-    7046: 
-    7047: === ControllerStack Supervisory Switching ===
-    7048: t<50  (normal): {'MPC'}
-    7049: t=50..100 (MPC disabled): {'GPC'}
-    7050: t=100..150 (MPC+GPC disabled): {'PID'}
-    7051: t>150 (restored): {'MPC'}
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #28 (keywords: warn) ---
-Lines 7152 - 7177
-
-    7152: ============================================================
-    7153: Step response cross-validation: 6/6 checks passed
-    7154: PASS
-    7155: 
-    7156:   EXIT 0 - PASSED
-    7157: 
-    7158: ------------------------------------------------------------------------
-    7159:   [50/88]  examples\python\ex46_crossval_stability_margins.py
-    7160: ------------------------------------------------------------------------
-    7161: 
->>> 7162: C:\Users\dangs\miniconda3\envs\soft_robotics\Lib\site-packages\control\xferfcn.py:391: RuntimeWarning: divide by zero encountered in divide
-    7163:   out[i][j] = (polyval(self.num_array[i, j], x_arr) /
-    7164: C:\Users\dangs\miniconda3\envs\soft_robotics\Lib\site-packages\control\xferfcn.py:391: RuntimeWarning: invalid value encountered in divide
-    7165:   out[i][j] = (polyval(self.num_array[i, j], x_arr) /
-    7166: C:\Users\dangs\miniconda3\envs\soft_robotics\Lib\site-packages\control\frdata.py:422: FutureWarning: response property is deprecated; use complex
-    7167:   warn("response property is deprecated; use complex", FutureWarning)
-    7168: === Stability margins: L(z) = c2d(5/(s*(s+1))), Ts=0.1 ===
-    7169:   Reference: Gm=12.1872 dB, Pm=19.1140 deg  (Wcg=4.4357, Wcp=2.1250)
-    7170:   Gain margin [dB]                                  : ctrl=12.1872  ref=12.1872  err=0.0000  PASS
-    7171:   Phase margin [deg]                                : ctrl=19.1140  ref=19.1140  err=0.0000  PASS
-    7172: 
-    7173: === Stability check: get_poles() and is_discrete_stable() ===
-    7174:   Stable plant poles: ['0.9000', '0.5000']  is_stable=True
-    7175:   Unstable plant: is_discrete_stable=False (expected False)
-    7176: 
-    7177: === Frequency response: magnitude at DC and Nyquist ===
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #29 (keywords: error, warn) ---
-Lines 7483 - 7511
-
-    7483: 
-    7484: ADDITIVE LeadLag+Integrator: final y=0.8399  (ref=1.0)
-    7485: PASS
-    7486: 
-    7487:   EXIT 0 - PASSED
-    7488: 
-    7489: ------------------------------------------------------------------------
-    7490:   [75/88]  examples\python\ex71_linearisation_helper.py
-    7491: ------------------------------------------------------------------------
-    7492: 
->>> 7493: [PlantModel::c2d (ZOH)] WARNING: A_d eigenvalue (1.01139,0.0490021) (|lambda| = 1.01258) lies outside the unit disk.
-    7494:   This may indicate numerical loss of precision in the matrix exponential (ZOH)
-    7495:   or a bilinear transform of a marginally stable plant (Tustin).
-    7496:   Check that Ts << 1 / |lambda_max(Ac)| for all fast modes.
-    7497: [PlantModel::c2d (ZOH)] WARNING: A_d eigenvalue (1.01139,-0.0490021) (|lambda| = 1.01258) lies outside the unit disk.
-    7498:   This may indicate numerical loss of precision in the matrix exponential (ZOH)
-    7499:   or a bilinear transform of a marginally stable plant (Tustin).
-    7500:   Check that Ts << 1 / |lambda_max(Ac)| for all fast modes.
-    7501: Jacobian relative errors:  A=0.00e+00  B=0.00e+00
-    7502: Discrete A:
-    7503: [[ 0.99873978  0.05060915]
-    7504:  [-0.05060915  1.02404435]]
-    7505: Discrete B:
-    7506: [[0.00126022]
-    7507:  [0.05060915]]
-    7508: LQR on linearised Van der Pol: ||x(T)|| = 0.0000  (need < 0.05)
-    7509: PASS
-    7510: 
-    7511:   EXIT 0 - PASSED
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #30 (keywords: error) ---
-Lines 7529 - 7562
-
-    7529: Final: theta_r=0.3792  theta_y=-0.0465
-    7530: PASS
-    7531: 
-    7532:   EXIT 0 - PASSED
-    7533: 
-    7534: ------------------------------------------------------------------------
-    7535:   [78/88]  examples\python\ex74_balanced_truncation.py
-    7536: ------------------------------------------------------------------------
-    7537: 
-    7538: Hankel singular values: [5.78974197e-01 8.31520357e-02 4.20915539e-03 3.15515573e-05]
->>> 7539: Error bound (r=2): 8.481414e-03
-    7540: Reduced model stable: True
-    7541: Suggested order for 1% tol: 2
-    7542: DC gain - full: 1.0000  reduced: 0.9925
-    7543: PASS
-    7544: 
-    7545:   EXIT 0 - PASSED
-    7546: 
-    7547: ------------------------------------------------------------------------
-    7548:   [79/88]  examples\python\ex75_zpetc.py
-    7549: ------------------------------------------------------------------------
-    7550: 
-    7551: System 1 - hasNMPZeros: False,  dcAmplitudeError: 6.88e-15
-    7552: System 2 - hasNMPZeros: True,  dcAmplitudeError: 3.9977
-    7553:   NMP zeros: ['1.500+0.000j']
-    7554:   Composite DC gain: 1.0000  (need approx = 1.0)
-    7555:   Transmission zeros magnitudes: ['1.500']
-    7556: PASS
-    7557: 
-    7558:   EXIT 0 - PASSED
-    7559: 
-    7560: ------------------------------------------------------------------------
-    7561:   [80/88]  examples\python\ex76_auto_gain_scheduling_demo.py
-    7562: ------------------------------------------------------------------------
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #31 (keywords: error) ---
-Lines 7606 - 7627
-
-    7606: ------------------------------------------------------------------------
-    7607: 
-    7608: SKIP: AutoTuner not found - rebuild ctrl_toolbox binding
-    7609: 
-    7610:   EXIT 0 - PASSED
-    7611: 
-    7612: ------------------------------------------------------------------------
-    7613:   [85/88]  examples\python\ex81_lpv_crossval.py
-    7614: ------------------------------------------------------------------------
-    7615: 
->>> 7616: Coefficient errors: A0=4.44e-16  A1=8.88e-16  B0=1.11e-16  B1=1.39e-17
-    7617: Cross-validation state RMS error: 1.47e-16
-    7618: PASS
-    7619: 
-    7620:   EXIT 0 - PASSED
-    7621: 
-    7622: ------------------------------------------------------------------------
-    7623:   [86/88]  examples\python\ex82_antwindup_mpc.py
-    7624: ------------------------------------------------------------------------
-    7625: 
-    7626: SKIP: AntiWindupWrapper not found - rebuild ctrl_toolbox binding
-    7627: 
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #32 (keywords: fail) ---
-Lines 7637 - 7655
-
-    7637: 
-    7638: ------------------------------------------------------------------------
-    7639:   [88/88]  examples\python\ex84_particle_filter.py
-    7640: ------------------------------------------------------------------------
-    7641: 
-    7642: SKIP: ParticleFilter not found - rebuild ctrl_toolbox binding
-    7643: 
-    7644:   EXIT 0 - PASSED
-    7645: 
-    7646: ========================================================================
->>> 7647:   Python summary: 86 passed  |  2 failed
-    7648: ========================================================================
-    7649: 
-    7650:   Failed Python scripts:
-    7651:     examples\python\ex37_mpc_lqr_dc_motor.py
-    7652:     examples\python\ex39_gpc_adaptive_rls.py
-    7653: 
-    7654:   WARNING: some Python examples failed. Re-build with -DCTRL_BUILD_PYTHON_BINDINGS=ON and retry.
-    7655: 
+    6802:   EXIT 0 - PASSED
+    6803: 
+    6804: ------------------------------------------------------------------------
+    6805:   [30/88]  examples\python\ex26_tuner_suite_soft_warnings.py
+    6806: ------------------------------------------------------------------------
+    6807: 
+    6808: ============================================================
+    6809: ex26 - TunerSuite Soft-Warning Dispatch
+    6810: ============================================================
+    6811: 
+>>> 6812:   Tuner     | CtrlKind | Expected          | warned | success
+    6813:   ------------------------------------------------------------------
+    6814:   RelayZN   | PID      | IDEAL - no warning |     No | PASS
+    6815:   RelayZN   | Smith    | SOFT  - 1 warning  |    Yes | PASS
+    6816:   RelayZN   | LeadLag  | SOFT  - 1 warning  |    Yes | PASS
+    6817:   RelayZN   | SMC      | FALLBACK - 1 warning|    Yes | PASS
+    6818:   IMC       | PID      | IDEAL - no warning |     No | PASS
+    6819:   IMC       | LQR      | FALLBACK - 1 warning|    Yes | PASS
+    6820:   Bryson    | LQR      | IDEAL - no warning |     No | PASS
+    6821:   Bryson    | MPC      | SOFT  - 1 warning  |    Yes | PASS
+    6822:   Bryson    | PID      | FALLBACK - 1 warning|    Yes | PASS
+    6823: 
+    6824: ================================================
+    6825:   Verification: 9/9 checks passed
+    6826: ================================================
+    6827:   [PASS]  RelayZN+PID
+    6828:   [PASS]  RelayZN+Smith
+    6829:   [PASS]  RelayZN+LeadLag
+    6830:   [PASS]  RelayZN+SMC
+    6831:   [PASS]  IMC+PID
+    6832:   [PASS]  IMC+LQR
 
 ------------------------------------------------------------------------
 

@@ -31,7 +31,8 @@ int main()
     ctrl::SMCParams smc_p;
     smc_p.c_e  = 1.0;    // error weight in sliding surface
     smc_p.c_de = 10.0 * Ts;  // c_de = lambda * Ts (lambda=10 [1/s])
-    smc_p.phi  = 0.05;   // boundary layer thickness
+    smc_p.phi  = 0.5;    // boundary layer; 0.05 caused rapid chattering that prevented
+                         // the inner loop tracking vel_ref cleanly - net position drift approx = 0
     smc_p.uMin = -20.0;
     smc_p.uMax =  20.0;
     ctrl::DiscreteSMC smc_inner(smc_p, Ts);
@@ -47,7 +48,7 @@ int main()
 
     double pos = 0.0, vel = 0.0;
     const double ref_pos = 1.0;
-    const int N = 1000;
+    const int N = 1000;  // 10 s at Ts=0.01; phi=0.5 gives tau_outer ~ 0.76 s -> 13 tau
     double final_pos = 0.0;
 
     for (int k = 0; k < N; ++k) {

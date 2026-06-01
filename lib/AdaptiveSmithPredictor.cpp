@@ -37,15 +37,28 @@ void AdaptiveSmithPredictor::estimateDelay()
     const int tau_max = std::min(params_.maxDelaySteps, N - 1);
     if (tau_max < 1) return; // not enough data
 
-    // R_uy(tau) = sum_{k=tau}^{N-1} u_hist[k-tau] * y_hist[k]
+    // Demean both buffers before cross-correlation.
+    // Without demeaning, R_uy(tau) is dominated by u_mean*y_mean*(N-tau),
+    // which always peaks at tau=0 regardless of the true delay.
+    double u_mean = 0.0, y_mean = 0.0;
+    for (int i = 0; i < N; ++i) { u_mean += u_hist_[i]; y_mean += y_hist_[i]; }
+    u_mean /= N;
+    y_mean /= N;
+
+    // Normalized cross-covariance: divide by (N-tau) so longer windows at small tau
+    // do not artificially inflate R at tau=0.
+    // rho(tau) = [1/(N-tau)] * sum_{k=tau}^{N-1} (u[k-tau]-u_mean) * (y[k]-y_mean)
     double best_R   = -1e300;
     int    best_tau = current_delay_;
 
     for (int tau = 0; tau <= tau_max; ++tau)
     {
+        const int n_terms = N - tau;
+        if (n_terms < 1) continue;
         double R = 0.0;
         for (int k = tau; k < N; ++k)
-            R += u_hist_[k - tau] * y_hist_[k];
+            R += (u_hist_[k - tau] - u_mean) * (y_hist_[k] - y_mean);
+        R /= static_cast<double>(n_terms);
 
         if (R > best_R)
         {
