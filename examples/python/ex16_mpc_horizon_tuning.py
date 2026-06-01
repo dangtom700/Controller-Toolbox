@@ -5,7 +5,7 @@ Goal     : Show how changing the prediction horizon Np (with Nc=Np/2) affects
            MPC closed-loop performance; verify that ISE improves up to an
            asymptote as Np grows, and that the precomputed Hessian is PSD.
 
-Data generation : 1 500-sample closed-loop for Np \in {5, 10, 20, 40}.
+Data generation : 1 500-sample closed-loop for Np \\in {5, 10, 20, 40}.
 Verification    :
   - Hessian is symmetric PSD for each horizon.
   - ISE is non-increasing as Np grows (diminishing returns).

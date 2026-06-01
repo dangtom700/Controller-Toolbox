@@ -23,7 +23,7 @@ from utils.controllers import ExtremumSeeker
 from utils.verify import print_summary, assert_close
 
 Ts     = 0.01
-STEPS  = 5000
+STEPS  = 10000   # 100 s: ESC convergence is slow (LPF time constant ~5 s)
 THETA_OPT = 1.5
 
 def cost(theta):
@@ -35,11 +35,11 @@ print("=" * 60)
 print(f"\n  Cost: J(theta) = -(theta-{THETA_OPT})^2 + 4,  theta* = {THETA_OPT}")
 
 esc = ExtremumSeeker(
-    dither_amp=0.05,
+    dither_amp=0.10,   # larger dither for stronger gradient signal
     dither_freq=5.0,
-    omega_h=0.5,
-    omega_l=0.2,
-    k_esc=2.0,
+    omega_h=1.0,       # HPF cutoff above dither freq to pass the AC component
+    omega_l=0.5,       # LPF cutoff: time constant ~2 s
+    k_esc=5.0,         # faster integration
     Ts=Ts,
     u_min=-5.0, u_max=5.0,
 )

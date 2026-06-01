@@ -156,7 +156,7 @@ ax1.plot(ts, refs, 'k--', lw=1.2, label='Reference')
 ax1.plot(ts, yfs,  'b',   lw=1.5, label='FuzzyPD')
 ax1.plot(ts, yps,  'r--', lw=1.5, label='PID')
 ax1.axvspan(300, ts[-1], alpha=0.08, color='orange', label='Disturbance')
-ax1.set_ylabel('Temperature [^\circC]')
+ax1.set_ylabel('Temperature [^\\circC]')
 ax1.legend(); ax1.grid(True, alpha=0.4)
 ax1.set_title('HVAC Temperature Control - FuzzyPD vs PID')
 

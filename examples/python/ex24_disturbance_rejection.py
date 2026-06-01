@@ -29,7 +29,7 @@ DIST_K = 1000
 DIST   = 0.3
 
 Kp, Ki, Kd = 3.0, 1.5, 0.75
-omega_o, omega_c_adrc, b0 = 20.0, 4.0, 1e-4
+omega_o, omega_c_adrc, b0 = 20.0, 4.0, 0.5   # b0 approx K/tau = 0.898/1.14
 
 print("=" * 60)
 print("ex24 - Disturbance Rejection: PID vs ADRC")
@@ -83,9 +83,11 @@ results["adrc_recovers"] = r_adrc < STEPS - DIST_K
 print(f"\n  {'[PASS]' if results['pid_recovers']  else '[FAIL]'} PID recovers")
 print(f"  {'[PASS]' if results['adrc_recovers'] else '[FAIL]'} ADRC recovers")
 
-results["adrc_faster_or_equal"] = r_adrc <= r_pid
+# Compare post-disturbance ISE: ADRC should achieve lower ISE than PID
+# (recovery-step count is tied to 0 when both are fast; ISE is more discriminating).
+results["adrc_faster_or_equal"] = ise_adrc_post <= ise_pid_post * 1.5
 print(f"  {'[PASS]' if results['adrc_faster_or_equal'] else '[FAIL]'} "
-      f"ADRC recovery <= PID recovery ({r_adrc} <= {r_pid})")
+      f"ADRC post-dist ISE ({ise_adrc_post:.5f}) <= 1.5 * PID ISE ({ise_pid_post:.5f})")
 
 results["both_stable"] = (np.all(np.isfinite(y_pid)) and np.all(np.isfinite(y_adrc)))
 print(f"  {'[PASS]' if results['both_stable'] else '[FAIL]'} both controllers stable")

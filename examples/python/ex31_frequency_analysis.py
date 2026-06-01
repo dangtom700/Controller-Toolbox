@@ -75,8 +75,8 @@ L_mag   = np.abs(L_arr)
 L_phase = np.degrees(np.angle(L_arr))
 cross_idx = np.argmin(np.abs(L_mag - 1.0))
 pm = float(L_phase[cross_idx]) + 180.0
-print(f"  Phase margin at |L|=1: {pm:.1f}^\circ")
+print(f"  Phase margin at |L|=1: {pm:.1f}^\\circ")
 results["pm_positive"] = pm > 0.0
-print(f"  {'[PASS]' if results['pm_positive'] else '[FAIL]'} phase margin > 0^\circ")
+print(f"  {'[PASS]' if results['pm_positive'] else '[FAIL]'} phase margin > 0^\\circ")
 
 print_summary(results)

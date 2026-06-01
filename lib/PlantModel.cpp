@@ -172,6 +172,7 @@ namespace ctrl
     // ---------------------------------------------------------------------------
     static void checkDiscreteStability(const Eigen::MatrixXd &Ad, const char *context)
     {
+        (void)context;  // only used inside #ifndef NDEBUG; suppress warning in Release
         const auto eigs = Ad.eigenvalues();
         for (int i = 0; i < eigs.size(); ++i)
         {

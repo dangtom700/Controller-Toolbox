@@ -50,10 +50,11 @@ int main()
     for (int k = 0; k < N; ++k) {
         const double u_sp = sp.compute(ref - y);
 
-        // Apply delayed input to plant
-        const double u_delayed = u_buf[d_int];
+        // Shift delay buffer first so that u_buf[d_int] is the true d_int-step
+        // delayed value (read-before-shift gives a (d_int+1)-step delay instead).
         for (int i = d_int; i > 0; --i) u_buf[i] = u_buf[i-1];
         u_buf[0] = u_sp;
+        const double u_delayed = u_buf[d_int];
 
         Eigen::VectorXd uv(1); uv(0) = u_delayed;
         y = ctrl::ssStep(G0, x_plant, uv)(0);

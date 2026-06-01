@@ -62,7 +62,6 @@ void MovingHorizonEstimator::initialize(const Eigen::VectorXd &x0,
     x_est_  = x0;
     step_count_ = 0;
 
-    const int Np1 = params_.N + 1;
     for (auto &v : y_hist_) v.setZero();
     for (auto &v : u_hist_) v.setZero();
 
@@ -83,10 +82,9 @@ Eigen::VectorXd MovingHorizonEstimator::estimate(const Eigen::VectorXd &y,
         throw std::invalid_argument("MHE::estimate: u must have size m.");
 
     const int N   = params_.N;
-    const int Np1 = N + 1;
 
     // Shift history: oldest entry falls off, new y and u go at the back.
-    // y_hist_ has Np1 slots: indices [0..N], where 0 is the oldest.
+    // y_hist_ has N+1 slots: indices [0..N], where 0 is the oldest.
     // u_hist_ has N slots: u_hist_[i] drives the transition x[i] -> x[i+1].
     for (int i = 0; i < N; ++i) y_hist_[i] = y_hist_[i + 1];
     y_hist_[N] = y;

@@ -58,11 +58,15 @@ int main()
 
     const int N = 400;
     double sse_theta = 0.0;
+    double u_applied = 0.0;  // tracks the control applied in the previous step
 
     for (int k = 0; k < N; ++k) {
         // Noisy measurement
         Eigen::VectorXd ym(1); ym(0) = x_true(0) + 0.1 * randn();
-        Eigen::VectorXd u_prev(1); u_prev(0) = 0.0;
+        // Pass the previously applied control so the UKF predicts the state
+        // evolution correctly; using zero here ignores the torque and causes
+        // the estimator to drift away from the true state.
+        Eigen::VectorXd u_prev(1); u_prev(0) = u_applied;
 
         ukf.predict(u_prev);
         ukf.update(ym, u_prev);
@@ -75,7 +79,7 @@ int main()
         const double phi = phi_smc;
         const double u_smc = -(eta_smc + std::abs(g/L * std::sin(x_est(0)))) * (std::abs(s) < phi ? s/phi : (s > 0 ? 1.0 : -1.0));
 
-        Eigen::VectorXd uv(1); uv(0) = u_smc;
+        u_applied = u_smc;  // remember for next step's UKF predict
 
         // True plant step (Euler) with noise
         const double ddth = -g/L * std::sin(x_true(0)) - b * x_true(1) + u_smc + 0.1 * randn();

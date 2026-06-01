@@ -43,7 +43,9 @@ int main()
     Eigen::VectorXd x = Eigen::VectorXd::Zero(1);
     double y = 0.0;
     const double ref = 1.0;
-    const int N = 800;
+    // G(s)=1/(s+0.2) has tau=5s; underdamped closed-loop has settling ~50s.
+    // 800 steps = 16s is only 3 time constants, insufficient. 3000 steps = 60s settles to <2%.
+    const int N = 3000;
 
     for (int k = 0; k < N; ++k) {
         const double e = ref - y;

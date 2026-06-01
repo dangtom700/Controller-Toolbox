@@ -11,7 +11,7 @@ Goal     : Replicate the ControllerStack composition concept in Python.
 Data generation : 2 000-sample step; stack of DiscretePID + DiscreteSMC.
 Verification    :
   - Supervisory output equals u_pid when |u_pid| > |u_smc|, else u_smc.
-  - Additive output \in [u_min, u_max] at all times.
+  - Additive output \\in [u_min, u_max] at all times.
   - Weighted output is convex: min(u_pid,u_smc) <= u_w <= max(u_pid,u_smc).
 
 Run:

@@ -28,6 +28,7 @@ lqr = ctrl.DiscreteLQR(plant, lqr_p)
 mp = ctrl.MPCParams()
 mp.Np=30; mp.Nc=8; mp.rho_y=100.0; mp.rho_u=0.01
 mp.uMin=-12.0; mp.uMax=12.0; mp.duMin=-5.0; mp.duMax=5.0
+mp.qpMaxIter = 1000  # default 200 too low for Np=30 with tight rho_u=0.01
 mpc = ctrl.DiscreteMPC(plant, mp)
 
 N = int(3.0/Ts); r_pos = 1.0

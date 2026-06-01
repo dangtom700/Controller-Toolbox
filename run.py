@@ -47,7 +47,7 @@ PATTERN = re.compile(r'[^\w\s\(\)\{\}\[\]:;.,\'\"\-=<>\/\\|`~?!@#$%^&*+]')
 REPLACEMENTS = {
     # Dashes / arrows
     '—': '-',       # em dash —
-    '–': '-',       # en dash –
+    '-': '-',       # en dash -
     '→': '->',      # →
     '←': '<-',      # ←
     '⇒': '=>',      # ⇒
@@ -565,6 +565,117 @@ def phase_python():
 
 
 # ---------------------------------------------------------------------------
+# Phase 5 — Bug report (scan completed log for [FAIL] entries)
+# ---------------------------------------------------------------------------
+
+def phase_bug_report(log_path):
+    """Scan the run log for failure indicators and write a concise bug report.
+
+    The report includes context lines around each failure (or cluster of failures)
+    and a summary.  The log file is read with error resilience.
+    """
+    keywords = ['fail', 'error', 'exception', 'fatal', 'abort', 'assert', 'nan', 'warn']
+    context_lines = 10          # lines before and after each failure marker
+
+    # Phrases that mark a line as "passed / no bug" even if a keyword appears in it.
+    # Checked case-insensitively before the keyword scan; any match skips the line.
+    safe_phrases = [
+        'no exception',          # "(no exception)" = expected no exception and got none
+        '0 failed',              # "90 passed | 0 failed" summary line
+        '0 fail',                # catches both "0 failed" and "0 failures"
+        'exit 0',                # "EXIT 0 — PASSED" line per executable
+        '[pass]',                # "[PASS] assert_close ..." test output
+        'all tests passed',      # Catch2 final banner
+        'passed | 0',            # "N passed | 0 failed" summary variant
+    ]
+
+    # Try to read the log - fall back to latin‑1 if UTF‑8 fails
+    try:
+        with open(log_path, 'r', encoding='utf-8', errors='replace') as f:
+            lines = f.readlines()
+    except UnicodeDecodeError:
+        with open(log_path, 'r', encoding='latin-1', errors='replace') as f:
+            lines = f.readlines()
+    except OSError as e:
+        print(f'[bug_report] Cannot read {log_path}: {e}')
+        return
+
+    # Collect line indices that match any keyword (case-insensitive).
+    # Lines whose lowercase content contains any safe_phrase are skipped first
+    # to avoid false positives from passing-test output.
+    matches = []
+    for i, line in enumerate(lines):
+        line_lower = line.lower()
+        if any(phrase in line_lower for phrase in safe_phrases):
+            continue                          # passing context — not a real indicator
+        for kw in keywords:
+            if kw in line_lower:
+                matches.append((i, kw))      # store line number and matched keyword
+                break                         # avoid duplicate entries for same line
+
+    if not matches:
+        print('  No failure indicators found - no bug report written.\n')
+        return
+
+    # Merge failure contexts where their windows overlap or touch
+    merged_blocks = []
+    i = 0
+    total_failures = len(matches)
+
+    while i < total_failures:
+        start_idx = matches[i][0]
+        block_start = max(0, start_idx - context_lines)
+        block_end = min(len(lines), start_idx + context_lines + 1)
+        keywords_in_block = [matches[i][1]]
+
+        # Expand block to include any subsequent matches that fall inside it
+        j = i + 1
+        while j < total_failures:
+            next_idx = matches[j][0]
+            # If next failure line is within current block or just adjacent,
+            # we extend the block to cover it as well.
+            if next_idx <= block_end + context_lines:   # +context_lines to glue close blocks
+                block_end = min(len(lines), next_idx + context_lines + 1)
+                keywords_in_block.append(matches[j][1])
+                j += 1
+            else:
+                break
+        merged_blocks.append((block_start, block_end, keywords_in_block, start_idx))
+        i = j
+
+    # Build root-path prefixes to strip so the report shows paths relative to
+    # the project root ("Controller Toolbox/") instead of the full user directory.
+    # The log contains both forward-slash (compiler) and backslash (shell) forms.
+    _root = os.path.abspath('.')
+    _root_fwd = _root.replace('\\', '/') + '/'   # e.g. "C:/Users/.../Controller Toolbox/"
+    _root_bwd = _root.replace('/', '\\') + '\\'  # e.g. "C:\Users\...\Controller Toolbox\"
+
+    def _strip_root(text):
+        text = text.replace(_root_bwd, '')
+        text = text.replace(_root_fwd, '')
+        return text
+
+    # Write the report
+    report_name = "bug_report.txt"
+    with open(report_name, 'w', encoding='utf-8') as report:
+        from datetime import datetime
+        report.write(f"Bug Report - generated from {_strip_root(log_path)} on {datetime.now()}\n")
+        report.write(f"Total failure indicators found: {total_failures}\n")
+        report.write(f"Merged into {len(merged_blocks)} block(s)\n")
+        report.write("=" * 72 + "\n\n")
+
+        for block_id, (block_start, block_end, kw_list, first_match_line) in enumerate(merged_blocks, 1):
+            report.write(f"--- FAILURE BLOCK #{block_id} (keywords: {', '.join(set(kw_list))}) ---\n")
+            report.write(f"Lines {block_start+1} - {block_end}\n\n")
+            for line_no in range(block_start, block_end):
+                prefix = ">>> " if line_no == first_match_line else "    "
+                report.write(f"{prefix}{line_no+1:4d}: {_strip_root(lines[line_no])}")
+            report.write("\n" + "-" * 72 + "\n\n")
+
+    print(f'  Bug report written: {report_name}  ({total_failures} indicator(s) in {len(merged_blocks)} block(s))\n')
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
@@ -583,3 +694,5 @@ if __name__ == '__main__':
     finally:
         sys.stdout = sys.__stdout__
         _log_file.close()
+
+    phase_bug_report(log_path)

@@ -28,6 +28,7 @@ plant_a = make_plant(1.0); plant_b = make_plant(1.6)
 gp = ctrl.GPCParams()
 gp.Np=20; gp.Nu=6; gp.rho_y=5.0; gp.rho_u=0.5; gp.alpha=0.1
 gp.uMin=0.0; gp.uMax=25.0
+gp.qpMaxIter = 1000  # default 200 too low for Np=20; eliminates QP convergence warnings
 gpc = ctrl.GeneralizedPredictiveController(plant_a, gp)
 rls = ctrl.RecursiveLeastSquares(na=1, nb=1, lambda_forgetting=0.98, Ts=Ts)
 

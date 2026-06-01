@@ -417,10 +417,19 @@ Vector3d GPCController::compute(const Vector3d& ref_dy, const Vector3d& dy)
         // Update RLS with latest I/O
         rls_[i].update(dy(i), u_prev_(i));
 
-        // Hot-swap GPC plant every kRLSUpdateInterval steps after warmup
+        // Hot-swap GPC plant every kRLSUpdateInterval steps after warmup.
+        // Guard: only swap if the identified model is stable (all poles inside
+        // the unit disk). Closed-loop RLS can identify unstable models during
+        // large setpoint transitions, which causes NaN in the GPC Hessian.
         if (step_count_ >= kRLSWarmup &&
             step_count_ % kRLSUpdateInterval == 0) {
-            gpcs_[i].setPlant(rls_[i].toStateSpace());
+            auto plant = rls_[i].toStateSpace();
+            const Eigen::VectorXcd eigs = plant.A.eigenvalues();
+            bool stable = true;
+            for (int k = 0; k < eigs.size(); ++k)
+                if (std::abs(eigs(k)) >= 1.0) { stable = false; break; }
+            if (stable)
+                gpcs_[i].setPlant(plant);
         }
 
         du(i) = gpcs_[i].computeRef(dy(i), ref_dy(i));

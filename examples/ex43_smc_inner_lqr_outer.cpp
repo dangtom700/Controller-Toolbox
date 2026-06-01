@@ -59,11 +59,14 @@ int main()
         const double e_smc = vel - vel_ref;  // SMC uses compute(y - ref)
         const double u_smc = smc_inner.compute(e_smc);
 
-        // Inner velocity plant step
+        // Inner velocity plant step.
+        // ssStep returns y[k]=C*x[k]+D*u (pre-update output) and updates x in place.
+        // For this plant C=1, D=0 so y[k]=x[k]=old vel; use x_vel(0) after the call
+        // to get the updated state x[k+1] = A*x[k] + B*u_smc.
         Eigen::VectorXd x_vel(1); x_vel(0) = vel;
         Eigen::VectorXd uv(1); uv(0) = u_smc;
-        const Eigen::VectorXd y_vel = ctrl::ssStep(sys_vel, x_vel, uv);
-        vel = y_vel(0);
+        ctrl::ssStep(sys_vel, x_vel, uv);  // x_vel updated to x[k+1] in place
+        vel = x_vel(0);
 
         // Outer position integration (Euler)
         pos += Ts * vel;

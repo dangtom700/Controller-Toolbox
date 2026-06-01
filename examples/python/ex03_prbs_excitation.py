@@ -17,6 +17,7 @@ Run:
 """
 
 import numpy as np
+from scipy import signal as sig
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -40,14 +41,17 @@ for k in range(STEPS):
 
 print(f"\nGenerated {STEPS} PRBS samples, amplitude=+/-0.5")
 
-# --- Verify PRBS spectral flatness ---
-Y = np.abs(np.fft.rfft(u))**2
-Y_db = 10.0 * np.log10(Y[1:] + 1e-30)   # skip DC
-spread_db = float(np.max(Y_db) - np.min(Y_db))
-print(f"\n  PRBS spectral spread (max-min): {spread_db:.1f} dB")
+# --- Verify PRBS spectral flatness via Welch PSD (smoothed estimate) ---
+# Raw FFT of a binary PRBS has large bin-to-bin variation; Welch averaging reveals
+# the underlying near-flat spectrum characteristic of a PRBS signal.
+fs = 1.0 / Ts
+f_welch, psd = sig.welch(u, fs=fs, nperseg=256)
+psd_db = 10.0 * np.log10(psd[1:] + 1e-30)   # skip DC bin
+spread_db = float(np.max(psd_db) - np.min(psd_db))
+print(f"\n  PRBS Welch PSD spread (max-min): {spread_db:.1f} dB")
 results = {}
-results["prbs_flat"] = (spread_db < 40.0)
-print(f"  {'[PASS]' if results['prbs_flat'] else '[FAIL]'} spectral spread < 40 dB")
+results["prbs_flat"] = (spread_db < 15.0)   # Welch-smoothed PRBS spectrum is flat within ~15 dB
+print(f"  {'[PASS]' if results['prbs_flat'] else '[FAIL]'} smoothed spectral spread < 15 dB")
 
 # --- ARX identification: 2nd order, na=2, nb=2 ---
 # y[k] = -a1 y[k-1] - a2 y[k-2] + b1 u[k-1] + b2 u[k-2]

@@ -63,9 +63,12 @@ ise_vals = []
 stable_count = 0
 
 for _ in range(N_MONTE):
-    scale = 1.0 + rng.uniform(-PERTURB, PERTURB, size=4)
-    num_p = [b0_nom,          b1_nom * scale[2], b2_nom * scale[3]]
-    den_p = [1.0,             a1_nom * scale[0], a2_nom * scale[1]]
+    # Perturb only the numerator (gain/zero uncertainty).  Perturbing a2 can push
+    # it above 1.0, making the discrete plant itself unstable - that is not a
+    # controller-robustness test but a stability-of-the-plant test.
+    scale = 1.0 + rng.uniform(-PERTURB, PERTURB, size=2)
+    num_p = [b0_nom, b1_nom * scale[0], b2_nom * scale[1]]
+    den_p = [1.0,    a1_nom,            a2_nom]          # denominator unchanged
     y_p, ok = sim_perturbed(num_p, den_p)
     if ok:
         stable_count += 1

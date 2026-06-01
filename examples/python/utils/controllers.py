@@ -273,22 +273,25 @@ class ExtremumSeeker:
         self._theta = 0.0      # integrated gradient estimate
         self._hpf_state = 0.0
         self._lpf_state = 0.0
+        self._perf_prev = 0.0  # previous performance sample for HPF
         self._k = 0            # sample counter
 
     def reset(self):
         self._theta = 0.0
         self._hpf_state = 0.0
         self._lpf_state = 0.0
+        self._perf_prev = 0.0
         self._k = 0
 
     def compute(self, performance: float) -> float:
         t = self._k * self.Ts
         dither = self.amp * np.sin(self.omega_d * t)
-        # HPF (first-order IIR)
+        # HPF: backward-Euler discretisation of H(s)=s/(s+omega_h)
+        # y[k] = (1-alpha) * (y[k-1] + x[k] - x[k-1])
         alpha_h = self.omega_h * self.Ts / (1.0 + self.omega_h * self.Ts)
-        hpf_out = (1.0 - alpha_h) * (self._hpf_state + performance - self._hpf_state)
-        hpf_out = performance - (1.0 - alpha_h) * self._hpf_state
+        hpf_out = (1.0 - alpha_h) * (self._hpf_state + performance - self._perf_prev)
         self._hpf_state = hpf_out
+        self._perf_prev = performance
         # Demodulate
         demod = hpf_out * dither
         # LPF

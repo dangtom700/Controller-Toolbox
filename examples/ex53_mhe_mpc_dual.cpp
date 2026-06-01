@@ -57,19 +57,23 @@ int main()
     const double ref = 1.0;
     const int N = 150;
     double final_y = 0.0;
+    double u_applied = 0.0;  // tracks the control applied in the previous step
 
     for (int k = 0; k < N; ++k) {
         // Noisy position measurement
         Eigen::VectorXd ym(1);
         ym(0) = x_true(0) + noisy(0.2);
 
-        // MHE: estimate state from noisy measurement
-        Eigen::VectorXd u_prev(1); u_prev(0) = (k > 0) ? mpc.lastQPIters() * 0.0 : 0.0;
+        // MHE: estimate state from noisy measurement.
+        // Pass the previously applied control so MHE's internal model evolves
+        // correctly; lastQPIters()*0.0 was always zero and caused divergence.
+        Eigen::VectorXd u_prev(1); u_prev(0) = u_applied;
         const Eigen::VectorXd x_est = mhe.estimate(ym, u_prev);
 
         // MPC: compute optimal input using MHE state estimate
         mpc.setState(x_est);
         const double u_mpc = mpc.compute(ref - ym(0));
+        u_applied = u_mpc;  // remember for next step's MHE estimate
 
         // True plant step with process noise
         Eigen::Vector2d w; w << noisy(0.1), noisy(0.1);

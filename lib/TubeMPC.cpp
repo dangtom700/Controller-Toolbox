@@ -142,17 +142,9 @@ void TubeMPC::buildCondensedMatrices()
         for (int i = j; i < Np; ++i) {
             // At step i, input at step j contributes C*A^(i-j-1)*B
             // For hold-last at j=Nu-1, accumulate from j onward
-            const Eigen::MatrixXd &blk = CB_list[i - j]; // C * A^(i-j-1) * B... wait
-
-            // CB_list[k] = C * A^k * B, so C * A^(i-j-1) * B = CB_list[i-j-1]
-            // But that's only valid for i > j.  At i==j: C*A^(-1)*B -- not valid.
-            // Correct: Phi[i,j] = C * A^(i-1-j) * B  only for i-1-j >= 0, i.e., i > j.
-            // For i == j: the input at step j affects x[j+1], which contributes to y[j+1]
-            // (i.e., i starts at j for y[j+1] = prediction step j+1 from initial state).
-            // Actually: y_nom[i+1] = C * (A^(i+1) * x0 + sum_{t=0}^{i} A^(i-t)*B*v[t])
-            // So Phi[row i, col j] = C * A^(i-j) * B  for j <= i  (i, j are 0-based block indices)
-            Phi_.block(i * pp_, j * m_, pp_, m_) +=
-                CB_list[i - j];  // C * A^(i-j) * B
+            // CB_list[k] = C * A^k * B
+            // Phi[row i, col j] = C * A^(i-j) * B  for j <= i  (0-based block indices)
+            Phi_.block(i * pp_, j * m_, pp_, m_) += CB_list[i - j];
 
             if (is_last && i < Np - 1) {
                 // For hold-last: input v[Nu-1] is repeated at steps Nu, Nu+1, ..., Np-1.

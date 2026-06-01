@@ -77,6 +77,7 @@ double FOPDTIdentifier::evaluate(const FOPDTModel &m, double t) const
 PIDParams FOPDTIdentifier::imcTuning(const FOPDTModel &m, double lambdaC,
                                      double Ts, bool piOnly)
 {
+    (void)Ts;  // reserved for future discrete IMC; continuous formula used here
     if (lambdaC <= 0.0)
         throw std::invalid_argument("FOPDTIdentifier::imcTuning: lambdaC must be > 0.");
 

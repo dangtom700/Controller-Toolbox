@@ -48,13 +48,21 @@ def sim_pid():
     return y
 
 # --- LQR ---
+def _nbar(A_, B_, C_, K_):
+    """Reference pre-scaling: Nbar = 1 / (C (I-A+BK)^{-1} B)."""
+    Acl = A_ - B_ @ K_
+    val = float(np.squeeze(C_ @ np.linalg.solve(np.eye(A_.shape[0]) - Acl, B_)))
+    return 1.0 / val if abs(val) > 1e-12 else 1.0
+
 def sim_lqr():
     Q = np.diag([1.0, 1.0]); R = np.array([[0.04]])
     lqr = DiscreteLQR(A, B, Q, R)
+    nb  = _nbar(A, B, C, lqr.K)
     plant = tf2ss(EXAMPLE_NUM, EXAMPLE_DEN)
     y = np.zeros(STEPS)
     for k in range(STEPS):
-        u = lqr.compute(plant.x, np.array([0.0, 0.0]))
+        u = float(np.squeeze(-lqr.K @ plant.x)) + nb * 1.0   # Nbar feedforward
+        u = float(np.clip(u, -10.0, 10.0))
         y[k] = ss_step(plant, u)
     return y
 
@@ -63,11 +71,15 @@ def sim_lqg():
     Q_lqr = np.diag([1.0, 1.0]); R_lqr = np.array([[0.04]])
     Q_kf  = 1e-4 * np.eye(2);    R_kf  = 1e-3 * np.eye(1)
     lqg   = DiscreteLQG(A, B, C, Q_lqr, R_lqr, Q_kf, R_kf, u_min=-10.0, u_max=10.0)
+    nb    = _nbar(A, B, C, lqg.lqr.K)
     plant = tf2ss(EXAMPLE_NUM, EXAMPLE_DEN)
     y = np.zeros(STEPS)
     for k in range(STEPS):
         y_meas = float(np.squeeze(C @ plant.x))
-        u = lqg.compute(y_meas)
+        x_hat  = lqg.kf.step(lqg.u_prev, y_meas)
+        u = float(np.squeeze(-lqg.lqr.K @ x_hat)) + nb * 1.0
+        u = float(np.clip(u, -10.0, 10.0))
+        lqg.u_prev = u
         plant.x = A @ plant.x + B.ravel() * u
         y[k] = y_meas
     return y
@@ -84,7 +96,7 @@ def sim_smc():
 
 # --- ADRC ---
 def sim_adrc():
-    adrc = DiscreteADRC(omega_o=20.0, omega_c=4.0, b0=1e-4,
+    adrc = DiscreteADRC(omega_o=20.0, omega_c=4.0, b0=0.5,
                         Ts=Ts, u_min=-10.0, u_max=10.0)
     plant = tf2ss(EXAMPLE_NUM, EXAMPLE_DEN)
     y = np.zeros(STEPS)
