@@ -6,5 +6,5 @@ var searchData=
   ['qpsolveresult_3',['QPSolveResult',['../structctrl_1_1QPSolveResult.html',1,'ctrl']]],
   ['qptol_4',['qptol',['../structctrl_1_1MPCParams.html#a69b1dd9c27d3b993002628dde3cfebad',1,'ctrl::MPCParams::qpTol'],['../structctrl_1_1GPCParams.html#a2b94cd8e07a684a3034391cbf91e6e9b',1,'ctrl::GPCParams::qpTol'],['../structctrl_1_1MHEParams.html#a7347c942bf0bf1304310488090221af1',1,'ctrl::MHEParams::qpTol'],['../structctrl_1_1NMPCParams.html#a1aceba18e0715abb4b70a5bc877154ae',1,'ctrl::NMPCParams::qpTol'],['../structctrl_1_1TubeMPCParams.html#adf5dd131464ac867e780ffe85778b48a',1,'ctrl::TubeMPCParams::qpTol']]],
   ['quick_20start_5',['Quick Start',['../index.html#autotoc_md2',1,'']]],
-  ['quick_20start_20parameter_20tables_6',['4. Quick-Start Parameter Tables',['../md_docs_2DEPLOYMENT.html#autotoc_md185',1,'']]]
+  ['quick_20start_20parameter_20tables_6',['4. Quick-Start Parameter Tables',['../md_docs_2DEPLOYMENT.html#autotoc_md187',1,'']]]
 ];

@@ -75,7 +75,7 @@ $(function() {
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="md_README"></a> A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H-infinity, Lead-Lag, Smith Predictor, Repetitive Control, Feedforward, Extremum Seeking, Kalman/EKF/UKF/MHE filtering, Fuzzy Logic inference, SOPDT/FOPDT identification, RLS and N4SID system identification, plus an integrated tuner suite and analysis layer.</p>
 <p>Thirty-plus controller implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.</p>
-<p>Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. 59 C++ example programs and 75 Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and new algorithm extension.</p>
+<p>Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. 69 C++ example programs and 88 Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and new algorithm extension. Four end-to-end physics case studies (boiler-turbine, hydraulic SMISMO, tug boat, solar cooling) exercise the full controller stack on nonlinear plants.</p>
 <hr  />
 <h1><a class="anchor" id="autotoc_md2"></a>
 Quick Start</h1>
@@ -144,7 +144,7 @@ Documentation</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><a href="cheatsheet/">cheatsheet/</a>   </td><td class="markdownTableBodyNone">Tuning methods, controller categories, system identification notes    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><a href="case-study/">case-study/</a>   </td><td class="markdownTableBodyNone">Nonlinear 3x3 boiler-turbine and Tug Boat multivariable studies   </td></tr>
+<td class="markdownTableBodyNone"><a href="case-study/">case-study/</a>   </td><td class="markdownTableBodyNone">Four full physics studies (boiler-turbine, hydraulic SMISMO, tug boat, solar cooling) &ndash; see "Case Studies" below   </td></tr>
 </table>
 <hr  />
 <h1><a class="anchor" id="autotoc_md11"></a>
@@ -152,7 +152,7 @@ Repository Layout</h1>
 <div class="fragment"><div class="line">|-- lib/             # Library sources -&gt; target: controller_toolbox</div>
 <div class="line">|-- examples/        # ex01..ex54 single-file C++ demos (corrector patterns, new algorithms)</div>
 <div class="line">|-- examples/python/ # ex01..ex70 Python companion scripts and binding demos</div>
-<div class="line">|-- case-study/      # Boiler-turbine MIMO benchmark + Tug Boat numerical simulation</div>
+<div class="line">|-- case-study/      # 4 physics studies: boiler-turbine, SMISMO hydraulic, tug boat, solar cooling</div>
 <div class="line">|-- tests/           # CTest-driven unit + integration tests (Catch2 v3)</div>
 <div class="line">|-- bindings/        # pybind11 binding source files</div>
 <div class="line">|-- scripts/         # tune_all / simulate_all / realtime_all</div>
@@ -160,6 +160,23 @@ Repository Layout</h1>
 <div class="line">|-- docs/            # Documentation &amp; deployment guides</div>
 </div><!-- fragment --><hr  />
 <h1><a class="anchor" id="autotoc_md13"></a>
+Case Studies</h1>
+<p>Four self-contained physics studies under <a href="case-study/">case-study/</a> exercise the library end-to-end. Each pairs a nonlinear plant simulator with a roster of controllers that wrap the <code>lib/</code> algorithms, then sweeps every controller across several scenarios and writes CSV telemetry for post-processing.</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Study   </th><th class="markdownTableHeadNone">Plant   </th><th class="markdownTableHeadNone">Controllers   </th><th class="markdownTableHeadNone">Scenarios x Runs    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><a href="case-study/Boiler%20Control/">Boiler Control</a>   </td><td class="markdownTableBodyNone">Bell-Astrom 3x3 MIMO boiler-turbine   </td><td class="markdownTableBodyNone">27   </td><td class="markdownTableBodyNone">8 -&gt; 216    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><a href="case-study/Meter%20In%20Meter%20Out%20Control/">Meter In Meter Out Control</a>   </td><td class="markdownTableBodyNone">SMISMO 9-state hydraulic actuator   </td><td class="markdownTableBodyNone">14   </td><td class="markdownTableBodyNone">3 -&gt; 42    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><a href="case-study/Tug%20Boat%20Numerical%20Simulation/">Tug Boat Numerical Simulation</a>   </td><td class="markdownTableBodyNone">3-DOF tug, 6-state MIMO + thrust allocation   </td><td class="markdownTableBodyNone">16   </td><td class="markdownTableBodyNone">4 -&gt; 64    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><a href="case-study/Solar-Driven%20Cooling%20System%20with%20Photovoltaic%20Evaporative%20Chimney/">Solar-Driven Cooling System</a>   </td><td class="markdownTableBodyNone">Algebraic SISO solar cooling + PV evaporative chimney   </td><td class="markdownTableBodyNone">9   </td><td class="markdownTableBodyNone">5 -&gt; 45   </td></tr>
+</table>
+<p>Controllers span the full stack: PID, LQR, LQG, MPC, GPC-RLS, SMC, ADRC, Fuzzy-PID, Smith Predictor, MRAC, H-infinity, TubeMPC, NonlinearMPC, Feedback Linearisation, EKF-LQR, MHE-LQR, SubspaceID-LQG, and gain-scheduled (manual, LPV, and automated gap-metric) variants, depending on the plant.</p>
+<hr  />
+<h1><a class="anchor" id="autotoc_md15"></a>
 Controller Inventory</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -186,35 +203,35 @@ Controller Inventory</h1>
 <td class="markdownTableBodyNone"><b>Model utilities</b>   </td><td class="markdownTableBodyNone">LinearisationHelper (jacobianX/U, lineariseAtPoint ZOH), BalancedTruncation (Hinf bound), ZeroPhaseTrackingFilter (ZPETC + transmissionZeros)   </td></tr>
 </table>
 <hr  />
-<h1><a class="anchor" id="autotoc_md15"></a>
+<h1><a class="anchor" id="autotoc_md17"></a>
 Docker Usage</h1>
 <p>The included [<code>Dockerfile</code>](Dockerfile) uses a two-stage build:</p>
 <ul>
 <li><b>Stage 1 (builder)</b> - Debian Bookworm slim + CMake + g++ + libeigen3-dev, compiles every target with the root <a href="CMakeLists.txt"><code>CMakeLists.txt</code></a>.</li>
 <li><b>Stage 2 (runtime)</b> - Slim image containing only the compiled binaries, ready to run examples, tests, or your own application.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md16"></a>
+<h2><a class="anchor" id="autotoc_md18"></a>
 Build the image</h2>
 <div class="fragment"><div class="line">docker build -t controller-toolbox .</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md17"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md19"></a>
 Run the test suite (default &lt;tt&gt;CMD&lt;/tt&gt;)</h2>
 <div class="fragment"><div class="line">docker run --rm controller-toolbox</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md18"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md20"></a>
 Run any example or script</h2>
 <div class="fragment"><div class="line">docker run --rm controller-toolbox ex07_lqg_kalman</div>
 <div class="line">docker run --rm controller-toolbox boiler_turbine_case_study</div>
 <div class="line">docker run --rm controller-toolbox simulate_all</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md19"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md21"></a>
 Interactive shell for development</h2>
 <div class="fragment"><div class="line">docker run --rm -it --entrypoint /bin/bash controller-toolbox</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md20"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md22"></a>
 Mount your own source for in-container builds</h2>
 <div class="fragment"><div class="line">docker run --rm -it -v &quot;$(pwd):/work&quot; -w /work \</div>
 <div class="line">    --entrypoint /bin/bash controller-toolbox:builder \</div>
 <div class="line">    -c &quot;cmake -S . -B build &amp;&amp; cmake --build build&quot;</div>
 </div><!-- fragment --><p>(Use the <code>builder</code> stage tag - see the Dockerfile for details.)</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md22"></a>
+<h1><a class="anchor" id="autotoc_md24"></a>
 Tested Compilers</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -227,7 +244,7 @@ Tested Compilers</h1>
 <td class="markdownTableBodyNone">MSVC   </td><td class="markdownTableBodyNone">19.20+ (VS 2019/2022)   </td><td class="markdownTableBodyNone">OK   </td></tr>
 </table>
 <hr  />
-<h1><a class="anchor" id="autotoc_md24"></a>
+<h1><a class="anchor" id="autotoc_md26"></a>
 Project Status</h1>
 <p><b>Current test counts (2026-05-28):</b> 78 C++ executables pass | 79 Python examples pass | 0 failures. test_catch2_advanced: 51 test cases, 189 assertions. All Catch2 tags: [qp][mpc][gpc][kalman][lqr][smc][adrc][leadlag][hinf][ekf][ukf][rc][rls][n4sid][c2d][stack][observer][sopdt][mhe][linearisation][fl][mrac][btm][zpetc].</p>
 <p><b>Part 18 additions (2026-05-28):</b></p><ul>
