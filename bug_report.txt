@@ -1,442 +1,67 @@
-Bug Report - generated from run_20260601_153615.log on 2026-06-01 16:04:12.633065
-Total failure indicators found: 37
-Merged into 11 block(s)
+Bug Report - generated from run_20260601_164308.log on 2026-06-01 17:11:54.723362
+Total failure indicators found: 10
+Merged into 2 block(s)
 ========================================================================
 
---- FAILURE BLOCK #1 (keywords: fail) ---
-Lines 1457 - 1477
+--- FAILURE BLOCK #1 (keywords: error) ---
+Lines 2684 - 2704
 
-    1457: 
-    1458: [CONFIG] Configuring CMake...
-    1459: -- Building for: Ninja
-    1460: -- The CXX compiler identification is GNU 14.2.0
-    1461: -- Detecting CXX compiler ABI info
-    1462: -- Detecting CXX compiler ABI info - done
-    1463: -- Check for working CXX compiler: C:/msys64/mingw64/bin/c++.exe - skipped
-    1464: -- Detecting CXX compile features
-    1465: -- Detecting CXX compile features - done
-    1466: -- Performing Test HAVE_FLAG__ffile_prefix_map_C__Users_dangs_OneDrive_Desktop_Controller_Toolbox_build__deps_catch2_src__
->>> 1467: -- Performing Test HAVE_FLAG__ffile_prefix_map_C__Users_dangs_OneDrive_Desktop_Controller_Toolbox_build__deps_catch2_src__ - Failed
-    1468: -- Configuring done (15.7s)
-    1469: -- Generating done (1.0s)
-    1470: -- Build files have been written to: build
-    1471: 
-    1472: 
-    1473: ----------------------------------------------------------
-    1474: [BUILD] controller_toolbox
-    1475: ----------------------------------------------------------
-    1476: [1/41] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DiscretePID.cpp.obj
-    1477: [2/41] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ExtremumSeeker.cpp.obj
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #2 (keywords: fail, assert, fatal, exception) ---
-Lines 2009 - 2126
-
-    2009: ----------------------------------------------------------
-    2010: [BUILD] ex68_particle_filter
-    2011: ----------------------------------------------------------
-    2012: [1/2] Building CXX object examples/CMakeFiles/ex68_particle_filter.dir/ex68_particle_filter.cpp.obj
-    2013: [2/2] Linking CXX executable examples\ex68_particle_filter.exe
-    2014: [OK] ex68_particle_filter
-    2015: 
-    2016: ----------------------------------------------------------
-    2017: [BUILD] test_autoscheduling
-    2018: ----------------------------------------------------------
->>> 2019: [1/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generator_exception.cpp.obj
-    2020: [2/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_run_for_at_least.cpp.obj
-    2021: [3/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/catch_chronometer.cpp.obj
-    2022: [4/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_analyse.cpp.obj
-    2023: [5/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_benchmark_function.cpp.obj
-    2024: [6/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generators_random.cpp.obj
-    2025: [7/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_automake.cpp.obj
-    2026: [8/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_event_listener.cpp.obj
-    2027: [9/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generators.cpp.obj
-    2028: [10/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_registrars.cpp.obj
-    2029: [11/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_common_base.cpp.obj
-    2030: [12/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_compact.cpp.obj
-    2031: [13/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_helpers.cpp.obj
-    2032: [14/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_stats.cpp.obj
-    2033: [15/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_exception.cpp.obj
-    2034: [16/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_console.cpp.obj
-    2035: [17/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_streaming_base.cpp.obj
-    2036: [18/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_generatortracker.cpp.obj
-    2037: [19/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_cumulative_base.cpp.obj
-    2038: [20/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_testcase.cpp.obj
-    2039: [21/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_registry_hub.cpp.obj
-    2040: [22/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_reporter_factory.cpp.obj
-    2041: [23/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_capture.cpp.obj
-    2042: [24/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_sonarqube.cpp.obj
-    2043: [25/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_config.cpp.obj
-    2044: [26/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_tap.cpp.obj
-    2045: [27/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_junit.cpp.obj
-    2046: [28/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_multi.cpp.obj
-    2047: [29/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_teamcity.cpp.obj
-    2048: [30/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_tag_alias_autoregistrar.cpp.obj
-    2049: [31/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_assertion_result.cpp.obj
-    2050: [32/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_totals.cpp.obj
-    2051: [33/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_json.cpp.obj
-    2052: [34/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_xml.cpp.obj
-    2053: [35/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_translate_exception.cpp.obj
-    2054: [36/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_approx.cpp.obj
-    2055: [37/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_version.cpp.obj
-    2056: [38/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_test_case_info.cpp.obj
-    2057: [39/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_get_random_seed.cpp.obj
-    2058: [40/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_reporter.cpp.obj
-    2059: [41/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_context.cpp.obj
-    2060: [42/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_timer.cpp.obj
-    2061: [43/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_case_insensitive_comparisons.cpp.obj
-    2062: [44/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_debugger.cpp.obj
-    2063: [45/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_message.cpp.obj
-    2064: [46/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_registry_hub.cpp.obj
-    2065: [47/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_errno_guard.cpp.obj
-    2066: [48/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_enforce.cpp.obj
-    2067: [49/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_floating_point_helpers.cpp.obj
-    2068: [50/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_test_spec.cpp.obj
-    2069: [51/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_enum_values_registry.cpp.obj
-    2070: [52/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_assertion_handler.cpp.obj
-    2071: [53/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_tostring.cpp.obj
-    2072: [54/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_getenv.cpp.obj
-    2073: [55/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_exception_translator_registry.cpp.obj
-    2074: [56/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_config.cpp.obj
-    2075: [57/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_leak_detector.cpp.obj
-    2076: [58/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_message_info.cpp.obj
-    2077: [59/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_decomposer.cpp.obj
-    2078: [60/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_jsonwriter.cpp.obj
-    2079: [61/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_istream.cpp.obj
-    2080: [62/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_debug_console.cpp.obj
-    2081: [63/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_random_number_generator.cpp.obj
-    2082: [64/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_polyfills.cpp.obj
-    2083: [65/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_result_type.cpp.obj
-    2084: [66/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_output_redirect.cpp.obj
-    2085: [67/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_parse_numbers.cpp.obj
-    2086: [68/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_clara.cpp.obj
-    2087: [69/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_random_seed_generation.cpp.obj
-    2088: [70/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_singletons.cpp.obj
-    2089: [71/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_lazy_expr.cpp.obj
-    2090: [72/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reusable_string_stream.cpp.obj
-    2091: [73/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_startup_exception_registry.cpp.obj
-    2092: [74/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_source_line_info.cpp.obj
-    2093: [75/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_console_colour.cpp.obj
-    2094: [76/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_stdstreams.cpp.obj
-    2095: [77/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_fatal_condition_handler.cpp.obj
-    2096: [78/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_list.cpp.obj
-    2097: [79/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_stringref.cpp.obj
-    2098: [80/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_info_hasher.cpp.obj
-    2099: [81/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_string_manip.cpp.obj
-    2100: [82/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_uncaught_exceptions.cpp.obj
-    2101: [83/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_section.cpp.obj
-    2102: [84/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_tag_alias_registry.cpp.obj
-    2103: [85/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_failure_exception.cpp.obj
-    2104: [86/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_registry.cpp.obj
-    2105: [87/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reporter_spec_parser.cpp.obj
-    2106: [88/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_wildcard_pattern.cpp.obj
-    2107: [89/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_tracker.cpp.obj
-    2108: [90/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_spec_parser.cpp.obj
-    2109: [91/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reporter_registry.cpp.obj
-    2110: [92/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_xmlwriter.cpp.obj
-    2111: [93/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_textflow.cpp.obj
-    2112: [94/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_commandline.cpp.obj
-    2113: [95/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers.cpp.obj
-    2114: [96/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_run_context.cpp.obj
-    2115: [97/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_container_properties.cpp.obj
-    2116: [98/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_exception.cpp.obj
-    2117: [99/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_session.cpp.obj
-    2118: [100/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_predicate.cpp.obj
-    2119: [101/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_quantifiers.cpp.obj
-    2120: [102/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_registry_impl.cpp.obj
-    2121: [103/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_floating_point.cpp.obj
-    2122: [104/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/internal/catch_matchers_impl.cpp.obj
-    2123: [105/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_templated.cpp.obj
-    2124: [106/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2WithMain.dir/catch2/internal/catch_main.cpp.obj
-    2125: [107/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_string.cpp.obj
-    2126: [108/111] Linking CXX static library _deps\catch2-build\src\libCatch2.a
+    2684:   [s07_multiop_transition         | MRAC                    ]   IAE=[17792.7199, 14806.6025, 235.7818]  ISE=[317624.3829, 139978.5274, 25.9750]  E_valve=2.2688
+    2685:   [s07_multiop_transition         | H-inf                   ]   IAE=[79892.1447, 149976.5635, 15281.5649]  ISE=[3808279.8814, 13680206.7705, 4578493.7766]  E_valve=0.4113
+    2686:   [s07_multiop_transition         | AdaptiveSP              ]   IAE=[79934.1959, 150022.8800, 14426.0883]  ISE=[3813633.0390, 13691444.0982, 1796725.6089]  E_valve=0.4113
+    2687:   [s07_multiop_transition         | NMPC                    ]   IAE=[96659.8329, 51092.1405, 13215.7792]  ISE=[6315119.0027, 2101543.8100, 14265810.5570]  E_valve=0.0292
+    2688:   [s07_multiop_transition         | FL                      ]   IAE=[9792.4755, 6709.1307, 262.5535]  ISE=[174852.6213, 237285.6312, 54.8647]  E_valve=0.1010
+    2689:   [s07_multiop_transition         | MHE-LQR                 ]   IAE=[8514.7917, 16872.6838, 397.9111]  ISE=[172139.2648, 275945.9243, 117.8738]  E_valve=0.0332
+    2690:   [s07_multiop_transition         | LPV-GS                  ]   IAE=[4398.3642, 4057.0985, 433.6925]  ISE=[143010.7666, 146351.5429, 129.5519]  E_valve=0.0702
+    2691:   [s07_multiop_transition         | SubspaceID-LQG          ]   IAE=[29462.5824, 60963.2601, 2454.6307]  ISE=[529315.5000, 2137443.4420, 27221.1302]  E_valve=0.0080
+    2692:   [s07_multiop_transition         | AutoGS                  ]   IAE=[6362.1083, 6969.5167, 98631.4068]  ISE=[190444.8272, 118126.3309, 292311385.5791]  E_valve=0.6515
+    2693: 
+>>> 2694: === Scenario: s08_periodic_load (Sinusoidal load disturbance at 0.05 Hz to demonstrate RepetitiveController advantage over PID/MPC. Plant starts at Medium Load (op B). A sinusoidal perturbation on y1 setpoint simulates periodic grid load oscillations at 0.05 Hz (period = 200 s). After one learning period, RepetitiveController should achieve near-zero periodic IAE; PID and MPC retain residual periodic error proportional to their disturbance-rejection bandwidth.) ===
+    2695:   [s08_periodic_load              | PID                     ]   IAE=[14593.9305, 1274.5637, 357.6679]  ISE=[37067.5430, 273.7826, 22.2450]  E_valve=0.2373
+    2696:   [s08_periodic_load              | LQR                     ]   IAE=[11806.4819, 2923.3584, 226.6468]  ISE=[23903.8683, 1467.5692, 8.8173]  E_valve=0.0790
+    2697:   [s08_periodic_load              | LQG                     ]   IAE=[11745.6635, 5377.4687, 193.4005]  ISE=[23657.9281, 4956.9944, 6.5317]  E_valve=0.0785
+    2698:   [s08_periodic_load              | MPC                     ]   IAE=[7713.5867, 865.7212, 3188.2475]  ISE=[10364.8655, 180.3957, 1943.7483]  E_valve=4.5885
+    2699:   [s08_periodic_load              | SMC                     ]   IAE=[22714.4805, 805.4823, 177.3504]  ISE=[85169.1601, 139.7474, 5.2260]  E_valve=6.3742
+    2700:   [s08_periodic_load              | ESC                     ]   IAE=[274929.3501, 155275.6160, 154543.9668]  ISE=[11855104.4138, 3765315.6829, 5333702.8443]  E_valve=0.3319
+    2701:   [s08_periodic_load              | ADRC                    ]   IAE=[57461.9517, 26279.9952, 411.2771]  ISE=[568645.2472, 118641.6001, 33.1189]  E_valve=0.3117
+    2702:   [s08_periodic_load              | LeadLag-PID             ]   IAE=[15382.0506, 1576.3232, 227.3322]  ISE=[40608.1817, 426.7978, 8.8754]  E_valve=0.0840
+    2703:   [s08_periodic_load              | SmithPredictor          ]   IAE=[14902.1959, 2442.5026, 346.7524]  ISE=[38349.8164, 1237.9780, 20.8153]  E_valve=2.2569
+    2704:   [s08_periodic_load              | GPC-RLS                 ]   IAE=[nan, nan, nan]  ISE=[nan, nan, nan]  E_valve=nan
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #3 (keywords: warn) ---
-Lines 2278 - 2298
+--- FAILURE BLOCK #2 (keywords: warn) ---
+Lines 6812 - 6840
 
-    2278: Compile succeeded.
-    2279: 
-    2280: ========================================================================
-    2281:   Phase 3 - Python bindings build + smoke test
-    2282: ========================================================================
-    2283: 
-    2284:   [cmake configure (bindings)]
-    2285: 
-    2286: -- Found Python3: C:/Users/dangs/miniconda3/envs/soft_robotics/python.exe (found version "3.14.4") found components: Interpreter Development Development.Module Development.Embed
-    2287: -- pybind11 not found via find_package - fetching via FetchContent
->>> 2288: CMake Deprecation Warning at build/_deps/pybind11-src/CMakeLists.txt:13 (cmake_minimum_required):
-    2289:   Compatibility with CMake < 3.10 will be removed from a future version of
-    2290:   CMake.
-    2291: 
-    2292:   Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
-    2293:   to tell CMake that the project requires at least <min> but has been updated
-    2294:   to work with policies introduced by <max> or earlier.
-    2295: 
-    2296: 
-    2297: -- pybind11 v2.13.6 
-    2298: -- Found PythonInterp: C:/Users/dangs/miniconda3/envs/soft_robotics/python.exe (found suitable version "3.14.4", minimum required is "3.7")
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #4 (keywords: nan) ---
-Lines 2514 - 2534
-
-    2514: === Scenario: s02_medload_regulation (Perturbation rejection at Medium Load (op B)) ===
-    2515:   [s02_medload_regulation         | PID                     ]   IAE=[514.7850, 41.9979, 78.1034]  ISE=[1603.8644, 30.4546, 2.5203]  E_valve=0.0108
-    2516:   [s02_medload_regulation         | LQR                     ]   IAE=[169.3241, 376.1559, 43.9420]  ISE=[547.3087, 115.4137, 1.2659]  E_valve=0.0027
-    2517:   [s02_medload_regulation         | LQG                     ]   IAE=[188.6453, 66.8726, 187.6624]  ISE=[578.9805, 75.6347, 9.7949]  E_valve=0.0019
-    2518:   [s02_medload_regulation         | MPC                     ]   IAE=[120.6688, 18.2999, 16.2818]  ISE=[448.7650, 27.6815, 0.1598]  E_valve=0.0444
-    2519:   [s02_medload_regulation         | SMC                     ]   IAE=[192.1688, 491.7823, 22.8399]  ISE=[559.6849, 102.1991, 0.3056]  E_valve=3.4831
-    2520:   [s02_medload_regulation         | ESC                     ]   IAE=[112188.7861, 63610.3049, 36230.3093]  ISE=[4274373.9247, 1367221.7003, 10690219.3762]  E_valve=0.3013
-    2521:   [s02_medload_regulation         | ADRC                    ]   IAE=[4905.6241, 2711.9727, 85.2700]  ISE=[10525.3864, 3975.1355, 2.8544]  E_valve=0.1582
-    2522:   [s02_medload_regulation         | LeadLag-PID             ]   IAE=[310.8123, 41.0305, 87.5749]  ISE=[649.1649, 28.9243, 2.7576]  E_valve=0.0037
-    2523:   [s02_medload_regulation         | SmithPredictor          ]   IAE=[325.5709, 908.6985, 77.3917]  ISE=[858.2098, 334.0378, 2.4558]  E_valve=1.0588
->>> 2524:   [s02_medload_regulation         | GPC-RLS                 ]   IAE=[nan, nan, nan]  ISE=[nan, nan, nan]  E_valve=nan
-    2525:   [s02_medload_regulation         | EKF-LQR                 ]   IAE=[187.8077, 66.6894, 187.8446]  ISE=[578.3988, 77.5677, 9.8139]  E_valve=0.0019
-    2526:   [s02_medload_regulation         | UKF-LQR                 ]   IAE=[187.8415, 66.6660, 187.8427]  ISE=[578.4294, 77.5437, 9.8137]  E_valve=0.0019
-    2527:   [s02_medload_regulation         | FuzzyPID                ]   IAE=[337.9245, 282.9929, 47.3295]  ISE=[786.1801, 65.8653, 0.9890]  E_valve=9.8524
-    2528:   [s02_medload_regulation         | FuzzySup-MPC            ]   IAE=[382.6509, 27.9708, 173.0152]  ISE=[467.3810, 28.7663, 11.5275]  E_valve=1.6279
-    2529:   [s02_medload_regulation         | SupervisoryStack        ]   IAE=[514.7850, 41.9979, 78.1034]  ISE=[1603.8644, 30.4546, 2.5203]  E_valve=0.0108
-    2530:   [s02_medload_regulation         | AdditiveStack           ]   IAE=[299.3444, 866.3013, 44.7394]  ISE=[571.5684, 270.4420, 0.9812]  E_valve=2.0075
-    2531:   [s02_medload_regulation         | WeightedStack           ]   IAE=[514.7850, 41.9979, 78.1034]  ISE=[1603.8644, 30.4546, 2.5203]  E_valve=0.0108
-    2532:   [s02_medload_regulation         | RepetitiveCtrl          ]   IAE=[28998.5013, 3196.8458, 222.1589]  ISE=[449130.3527, 7258.7554, 20.5647]  E_valve=2.1419
-    2533:   [s02_medload_regulation         | MRAC                    ]   IAE=[15786.5481, 10664.5383, 260.3000]  ISE=[83592.0817, 39394.1822, 29.2862]  E_valve=2.8467
-    2534:   [s02_medload_regulation         | H-inf                   ]   IAE=[514.7850, 41.9979, 78.1034]  ISE=[1603.8644, 30.4546, 2.5203]  E_valve=0.0108
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #5 (keywords: error, nan) ---
-Lines 2678 - 2708
-
-    2678:   [s07_multiop_transition         | MRAC                    ]   IAE=[17792.7199, 14806.6025, 235.7818]  ISE=[317624.3829, 139978.5274, 25.9750]  E_valve=2.2688
-    2679:   [s07_multiop_transition         | H-inf                   ]   IAE=[79892.1447, 149976.5635, 15281.5649]  ISE=[3808279.8814, 13680206.7705, 4578493.7766]  E_valve=0.4113
-    2680:   [s07_multiop_transition         | AdaptiveSP              ]   IAE=[79934.1959, 150022.8800, 14426.0883]  ISE=[3813633.0390, 13691444.0982, 1796725.6089]  E_valve=0.4113
-    2681:   [s07_multiop_transition         | NMPC                    ]   IAE=[96659.8329, 51092.1405, 13215.7792]  ISE=[6315119.0027, 2101543.8100, 14265810.5570]  E_valve=0.0292
-    2682:   [s07_multiop_transition         | FL                      ]   IAE=[9792.4755, 6709.1307, 262.5535]  ISE=[174852.6213, 237285.6312, 54.8647]  E_valve=0.1010
-    2683:   [s07_multiop_transition         | MHE-LQR                 ]   IAE=[8514.7917, 16872.6838, 397.9111]  ISE=[172139.2648, 275945.9243, 117.8738]  E_valve=0.0332
-    2684:   [s07_multiop_transition         | LPV-GS                  ]   IAE=[4398.3642, 4057.0985, 433.6925]  ISE=[143010.7666, 146351.5429, 129.5519]  E_valve=0.0702
-    2685:   [s07_multiop_transition         | SubspaceID-LQG          ]   IAE=[29462.5824, 60963.2601, 2454.6307]  ISE=[529315.5000, 2137443.4420, 27221.1302]  E_valve=0.0080
-    2686:   [s07_multiop_transition         | AutoGS                  ]   IAE=[6362.1083, 6969.5167, 98631.4068]  ISE=[190444.8272, 118126.3309, 292311385.5791]  E_valve=0.6515
-    2687: 
->>> 2688: === Scenario: s08_periodic_load (Sinusoidal load disturbance at 0.05 Hz to demonstrate RepetitiveController advantage over PID/MPC. Plant starts at Medium Load (op B). A sinusoidal perturbation on y1 setpoint simulates periodic grid load oscillations at 0.05 Hz (period = 200 s). After one learning period, RepetitiveController should achieve near-zero periodic IAE; PID and MPC retain residual periodic error proportional to their disturbance-rejection bandwidth.) ===
-    2689:   [s08_periodic_load              | PID                     ]   IAE=[14593.9305, 1274.5637, 357.6679]  ISE=[37067.5430, 273.7826, 22.2450]  E_valve=0.2373
-    2690:   [s08_periodic_load              | LQR                     ]   IAE=[11806.4819, 2923.3584, 226.6468]  ISE=[23903.8683, 1467.5692, 8.8173]  E_valve=0.0790
-    2691:   [s08_periodic_load              | LQG                     ]   IAE=[11745.6635, 5377.4687, 193.4005]  ISE=[23657.9281, 4956.9944, 6.5317]  E_valve=0.0785
-    2692:   [s08_periodic_load              | MPC                     ]   IAE=[7713.5867, 865.7212, 3188.2475]  ISE=[10364.8655, 180.3957, 1943.7483]  E_valve=4.5885
-    2693:   [s08_periodic_load              | SMC                     ]   IAE=[22714.4805, 805.4823, 177.3504]  ISE=[85169.1601, 139.7474, 5.2260]  E_valve=6.3742
-    2694:   [s08_periodic_load              | ESC                     ]   IAE=[274929.3501, 155275.6160, 154543.9668]  ISE=[11855104.4138, 3765315.6829, 5333702.8443]  E_valve=0.3319
-    2695:   [s08_periodic_load              | ADRC                    ]   IAE=[57461.9517, 26279.9952, 411.2771]  ISE=[568645.2472, 118641.6001, 33.1189]  E_valve=0.3117
-    2696:   [s08_periodic_load              | LeadLag-PID             ]   IAE=[15382.0506, 1576.3232, 227.3322]  ISE=[40608.1817, 426.7978, 8.8754]  E_valve=0.0840
-    2697:   [s08_periodic_load              | SmithPredictor          ]   IAE=[14902.1959, 2442.5026, 346.7524]  ISE=[38349.8164, 1237.9780, 20.8153]  E_valve=2.2569
-    2698:   [s08_periodic_load              | GPC-RLS                 ]   IAE=[nan, nan, nan]  ISE=[nan, nan, nan]  E_valve=nan
-    2699:   [s08_periodic_load              | EKF-LQR                 ]   IAE=[11748.4389, 5274.6141, 192.1933]  ISE=[23668.2950, 4771.4280, 6.3361]  E_valve=0.0784
-    2700:   [s08_periodic_load              | UKF-LQR                 ]   IAE=[11748.4389, 5274.6132, 192.1933]  ISE=[23668.2949, 4771.4264, 6.3361]  E_valve=0.0784
-    2701:   [s08_periodic_load              | FuzzyPID                ]   IAE=[53228.7202, 5883.4264, 325.7835]  ISE=[524996.0595, 6121.4907, 19.5081]  E_valve=4.3081
-    2702:   [s08_periodic_load              | FuzzySup-MPC            ]   IAE=[7623.8562, 854.0219, 3602.8529]  ISE=[10098.9598, 172.5106, 2215.7301]  E_valve=4.5779
-    2703:   [s08_periodic_load              | SupervisoryStack        ]   IAE=[14593.9305, 1274.5637, 357.6679]  ISE=[37067.5430, 273.7826, 22.2450]  E_valve=0.2373
-    2704:   [s08_periodic_load              | AdditiveStack           ]   IAE=[1650.8427, 1235.8178, 226.4284]  ISE=[859.1745, 346.6332, 9.0066]  E_valve=3.6451
-    2705:   [s08_periodic_load              | WeightedStack           ]   IAE=[14593.9305, 1274.5637, 357.6679]  ISE=[37067.5430, 273.7826, 22.2450]  E_valve=0.2373
-    2706:   [s08_periodic_load              | RepetitiveCtrl          ]   IAE=[65524.9373, 17782.4846, 381.0665]  ISE=[897557.1772, 115652.5518, 29.3627]  E_valve=6.3075
-    2707:   [s08_periodic_load              | MRAC                    ]   IAE=[65779.5201, 22208.5226, 511.1324]  ISE=[771807.5891, 86852.9412, 57.9081]  E_valve=5.8083
-    2708:   [s08_periodic_load              | H-inf                   ]   IAE=[14593.9305, 1274.5637, 357.6679]  ISE=[37067.5430, 273.7826, 22.2450]  E_valve=0.2373
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #6 (keywords: fail) ---
-Lines 2856 - 2879
-
-    2856: 
-    2857:   EXIT 0 - PASSED
-    2858: 
-    2859: ------------------------------------------------------------------------
-    2860:   [4/89]  build\case-study\Tug Boat Numerical Simulation\tug_sim.exe
-    2861: ------------------------------------------------------------------------
-    2862: 
-    2863: Loading plant parameters from: case-study/Tug Boat Numerical Simulation/config/plant_params.json
-    2864: M_re diagonal: 1.34912e+08   8.718e+07 4.66898e+13
-    2865: D_re diagonal:      600000    1.34e+06 3.11942e+12
->>> 2866: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
-    2867: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
-    2868: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
-    2869: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
-    2870: 
-    2871: Running 64 simulations (4 scenarios x 16 controllers)...
-    2872: 
-    2873: [S1 | PID]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=9.9 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_PID.csv
-    2874: [S1 | KF-PID]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=12.2 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_KF-PID.csv
-    2875: [S1 | SMC]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=10.0 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_SMC.csv
-    2876: [S1 | MPC]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=14.1 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_MPC.csv
-    2877: [S1 | ESC]  IAE_x=4.3  IAE_y=4.2  IAE_psi=0.0  IAE_total=0.1  E_fuel=2612734287.3  sat=1207  wall=14.5 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_ESC.csv
-    2878: [S1 | FuzzyPID]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=1067  wall=18.6 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_FuzzyPID.csv
-    2879: [S1 | FuzzySup-MPC]  IAE_x=0.0  IAE_y=0.0  IAE_psi=0.0  IAE_total=0.0  E_fuel=0.0  sat=0  wall=15.3 ms  -> case-study/Tug Boat Numerical Simulation/logs/run_S1_FuzzySup-MPC.csv
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #7 (keywords: fail) ---
-Lines 4014 - 4034
-
-    4014: 
-    4015: === Rational D-scaling (first-order per channel) ===
-    4016:   Iterations:   0
-    4017:   mu_upper:     inf
-    4018:   Converged:    no
-    4019:   K feasible:   no
-    4020:   D filters L:  0 channels
-    4021:   D filters R:  0 channels
-    4022:   mu history:  
-    4023: 
->>> 4024: FAIL (constant D-scaling did not converge)
-    4025: 
-    4026:   EXIT 0 - PASSED
-    4027: 
-    4028: ------------------------------------------------------------------------
-    4029:   [40/89]  build\examples\ex35_cascade_pid.exe
-    4030: ------------------------------------------------------------------------
-    4031: 
-    4032: Cascade control final y_outer = 0.999396  (ref = 1)
-    4033: PASS
-    4034: 
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #8 (keywords: fail) ---
-Lines 4104 - 4124
-
-    4104: CASCADE PID(inner)+MPC(outer): final y_outer = 1  (ref = 1)
-    4105: PASS
-    4106: 
-    4107:   EXIT 0 - PASSED
-    4108: 
-    4109: ------------------------------------------------------------------------
-    4110:   [48/89]  build\examples\ex43_smc_inner_lqr_outer.exe
-    4111: ------------------------------------------------------------------------
-    4112: 
-    4113: CASCADE SMC(inner)+LQR(outer): final pos = 0.910648  (ref = 1)
->>> 4114: FAIL
-    4115: 
-    4116:   EXIT 0 - PASSED
-    4117: 
-    4118: ------------------------------------------------------------------------
-    4119:   [49/89]  build\examples\ex44_fuzzy_pd_inner_pid_outer.exe
-    4120: ------------------------------------------------------------------------
-    4121: 
-    4122: CASCADE FuzzyPD(inner)+PID(outer): final y = 0.961072  (ref = 1)
-    4123: PASS
-    4124: 
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #9 (keywords: fail, warn) ---
-Lines 5250 - 5271
-
-    5250:   [PASS] uMin == uMax: output is clamped constant
-    5251:   [PASS] Pure P: compute(1.0) == Kp
-    5252:   [PASS] setParams hot-update (no exception)
-    5253: 
-    5254: === DiscreteLQR ===
-    5255:   [PASS] Gain matrix is 1 x n
-    5256:   [PASS] LQR: zero state -> zero control
-    5257:   [PASS] LQR: nonzero state -> nonzero control
-    5258:   [PASS] LQR: x == x_ref -> zero control
-    5259:   [PASS] LQR: feedforward offset applied
->>> 5260: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
-    5261: [DiscreteLQR] WARNING: DARE did not converge in 100 iterations. Using last iterate - verify (A,B) is stabilisable and (A,sqrt(Q)) is detectable.
-    5262:   [PASS] LQR: unstabilizable plant - dareConverged() is false
-    5263:   [PASS] LQR: unstabilizable - gain matrix still finite
-    5264:   [PASS] LQR: wrong-sized x_ref throws invalid_argument (expected exception)
-    5265:   [PASS] LQR: wrong-sized u_ff throws invalid_argument (expected exception)
-    5266:   [PASS] LQRAdapter::compute returns finite value
-    5267: 
-    5268: === DiscreteMPC ===
-    5269:   [PASS] MPC: zero error -> ~zero output
-    5270:   [PASS] MPC: positive error -> positive control
-    5271:   [PASS] MPC: large error clamped to uMax
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #10 (keywords: fail, warn) ---
-Lines 5649 - 5688
-
-    5649:   [PASS] n4sid: identified pole magnitude within 3% of true value
-    5650:   [PASS] n4sid: DC gain within 50% for fast 1st-order plant
-    5651:   [PASS] suggestOrder: returns 1..4 for PRBS-identified spectrum
-    5652:   [PASS] n4sid: identification succeeds for D!=0 plant
-    5653:   [PASS] n4sid: identified model has correct order (n=2) for D!=0 plant
-    5654:   [PASS] n4sid: identified model is stable for D!=0 plant
-    5655: 
-    5656: --------------------------------------------
-    5657:   Results: 382 passed, 0 failed
-    5658: --------------------------------------------
->>> 5659: [LoopShapingTuner] Warning: phase_add_deg must be in (0, 90). Returning a unity-gain compensator at the requested crossover.
-    5660: 
-    5661:   EXIT 0 - PASSED
-    5662: 
-    5663: ------------------------------------------------------------------------
-    5664:   [86/89]  build\tests\test_integration.exe
-    5665: ------------------------------------------------------------------------
-    5666: 
-    5667: ============================================================
-    5668:   Controller Toolbox - Integration & Regression Tests
-    5669: ============================================================
-    5670: 
-    5671: === ControllerStack Extended ===
-    5672:   [PASS] TC-STACK-01: All weights zero gives zero output
-    5673:   [PASS] TC-STACK-06: Activation condition receives lastOutput_ correctly
-    5674: 
-    5675: === Regression Tests ===
-    5676:   [PASS] TC-REG-03 (Issue I-3): ADRC reset clears reference to 0
-    5677: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
-    5678: [DiscreteLQR] WARNING: DARE did not converge in 100 iterations. Using last iterate - verify (A,B) is stabilisable and (A,sqrt(Q)) is detectable.
-    5679:   [PASS] TC-REG-05 (Issue I-5): unstabilisable plant - dareConverged() is false
-    5680: 
-    5681: === c2d + MPC Integration ===
-    5682:   [PASS] c2d+MPC: first move respects duMax=0.2
-    5683:   [PASS] c2d+MPC: closed-loop tracks unit step
-    5684: 
-    5685: === N4SID + GPC Adaptive Integration ===
-    5686:   [PASS] N4SID+GPC: identification succeeds
-    5687:   [PASS] N4SID+GPC: GPC on identified model computes without throw (no exception)
-    5688:   [PASS] N4SID+GPC: suggestOrder returns sensible order (1..4)
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #11 (keywords: warn) ---
-Lines 6802 - 6832
-
-    6802:   EXIT 0 - PASSED
-    6803: 
-    6804: ------------------------------------------------------------------------
-    6805:   [30/88]  examples\python\ex26_tuner_suite_soft_warnings.py
-    6806: ------------------------------------------------------------------------
-    6807: 
-    6808: ============================================================
-    6809: ex26 - TunerSuite Soft-Warning Dispatch
-    6810: ============================================================
-    6811: 
->>> 6812:   Tuner     | CtrlKind | Expected          | warned | success
-    6813:   ------------------------------------------------------------------
-    6814:   RelayZN   | PID      | IDEAL - no warning |     No | PASS
-    6815:   RelayZN   | Smith    | SOFT  - 1 warning  |    Yes | PASS
-    6816:   RelayZN   | LeadLag  | SOFT  - 1 warning  |    Yes | PASS
-    6817:   RelayZN   | SMC      | FALLBACK - 1 warning|    Yes | PASS
-    6818:   IMC       | PID      | IDEAL - no warning |     No | PASS
-    6819:   IMC       | LQR      | FALLBACK - 1 warning|    Yes | PASS
-    6820:   Bryson    | LQR      | IDEAL - no warning |     No | PASS
-    6821:   Bryson    | MPC      | SOFT  - 1 warning  |    Yes | PASS
-    6822:   Bryson    | PID      | FALLBACK - 1 warning|    Yes | PASS
-    6823: 
-    6824: ================================================
-    6825:   Verification: 9/9 checks passed
-    6826: ================================================
-    6827:   [PASS]  RelayZN+PID
-    6828:   [PASS]  RelayZN+Smith
-    6829:   [PASS]  RelayZN+LeadLag
-    6830:   [PASS]  RelayZN+SMC
-    6831:   [PASS]  IMC+PID
-    6832:   [PASS]  IMC+LQR
+    6812: ------------------------------------------------------------------------
+    6813:   [30/88]  examples\python\ex26_tuner_suite_soft_warnings.py
+    6814: ------------------------------------------------------------------------
+    6815: 
+    6816: ============================================================
+    6817: ex26 - TunerSuite Soft-Warning Dispatch
+    6818: ============================================================
+    6819: 
+    6820:   Tuner     | CtrlKind | Expected          | warned | success
+    6821:   ------------------------------------------------------------------
+>>> 6822:   RelayZN   | PID      | IDEAL - no warning |     No | PASS
+    6823:   RelayZN   | Smith    | SOFT  - 1 warning  |    Yes | PASS
+    6824:   RelayZN   | LeadLag  | SOFT  - 1 warning  |    Yes | PASS
+    6825:   RelayZN   | SMC      | FALLBACK - 1 warning|    Yes | PASS
+    6826:   IMC       | PID      | IDEAL - no warning |     No | PASS
+    6827:   IMC       | LQR      | FALLBACK - 1 warning|    Yes | PASS
+    6828:   Bryson    | LQR      | IDEAL - no warning |     No | PASS
+    6829:   Bryson    | MPC      | SOFT  - 1 warning  |    Yes | PASS
+    6830:   Bryson    | PID      | FALLBACK - 1 warning|    Yes | PASS
+    6831: 
+    6832: ================================================
+    6833:   Verification: 9/9 checks passed
+    6834: ================================================
+    6835:   [PASS]  RelayZN+PID
+    6836:   [PASS]  RelayZN+Smith
+    6837:   [PASS]  RelayZN+LeadLag
+    6838:   [PASS]  RelayZN+SMC
+    6839:   [PASS]  IMC+PID
+    6840:   [PASS]  IMC+LQR
 
 ------------------------------------------------------------------------
 
