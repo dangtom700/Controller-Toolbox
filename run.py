@@ -151,6 +151,7 @@ REPLACEMENTS = {
     'ŷ': 'yhat',    # ŷ y with circumflex
     'ĝ': 'ghat',    # ĝ g with circumflex
     # Additional math
+    '∝': '~',       # ∝ proportional to
     '∂': 'd',       # ∂ partial derivative
     '†': '^T',      # † dagger (transpose / pseudo-inverse)
     '⊥': '\\perp',  # ⊥ perpendicular
@@ -347,7 +348,7 @@ def phase_clean():
     _divider()
     print()
 
-    total_hits = scan_files(cwd, show_context=True)
+    total_hits = scan_files(cwd, show_context=False)
 
     if total_hits == 0:
         print('\nAll clean — no non-ASCII characters found.\n')
@@ -724,6 +725,19 @@ def phase_bug_report(log_path):
         '| gpc-rls',             # Boiler case-study: GPC-RLS IAE=[nan,nan,nan] for the first
                                  # ~10-20 steps while RLS builds its covariance matrix;
                                  # s02/s08 show NaN because these scenarios start fresh — expected
+        # ── Case-study scenario headers (descriptions contain "error" as a word) ──
+        '=== scenario:',         # Boiler/SMISMO/Tug/Solar/Humid scenario header lines contain
+                                 # "error" in prose descriptions (e.g. "periodic error"); these
+                                 # are run labels, not failure indicators
+        # ── Ninja incremental build warnings (benign) ────────────────────────────
+        'premature end of file', # "ninja: warning: premature end of file; recovering" is a
+                                 # benign ninja warning when reading stale .d dependency files;
+                                 # build still succeeds (the [OK] line follows immediately)
+        # ── ex26 TunerSuite table rows: all rows end with | PASS (passing test results) ──
+        'no warning',            # "IDEAL - no warning | No | PASS" rows (warned=No)
+        '1 warning',             # "SOFT - 1 warning | Yes | PASS" and
+                                 # "FALLBACK - 1 warning | Yes | PASS" rows (warned=Yes);
+                                 # "warn" keyword fires on "warning" but result is PASS
     ]
 
     # Try to read the log - fall back to latin‑1 if UTF‑8 fails

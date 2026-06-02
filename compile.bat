@@ -121,10 +121,12 @@ for %%T in (
     tug_sim
     smismo_sim
     solar_cooling_sim
+    humidification_sim
     toolbox_examples
     test_catch2_pilot
     test_catch2_advanced
     test_tugsim_regression
+    test_humidification
 ) do (
     echo.
     echo ----------------------------------------------------------

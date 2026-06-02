@@ -1,0 +1,25 @@
+{
+  "_ref": "Ye, Yan, Ni — Applied Thermal Engineering 245 (2024) 122877",
+
+  "plates": {
+    "_comment": "Porous fiber plate geometry. 20 plates × 2 sides × 0.1 m × 0.1 m = 0.4 m².",
+    "l_plate_m":   0.100,
+    "A_plates_m2": 0.400,
+    "C_gap":       1.25
+  },
+
+  "room": {
+    "_comment": "Small office / bedroom: 4 × 4 × 3 m ≈ 50 m³. T_room fixed (isothermal assumption).",
+    "V_room_m3":             50.0,
+    "rho_air_kgm3":           1.2,
+    "T_room_C":              22.0,
+    "ACH":                    0.5,
+    "G_occ_per_person_gh":   50.0
+  },
+
+  "simulation": {
+    "_comment": "Ts=30 s is typical HVAC rate. 3 h ≈ 1.5 room time constants (τ≈7200 s).",
+    "dt_s":       30.0,
+    "duration_s": 10800.0
+  }
+}

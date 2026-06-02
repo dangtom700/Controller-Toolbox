@@ -71,10 +71,26 @@ target_compile_definitions(test_tugsim_regression PRIVATE
     TUG_SIM_SOURCE_DIR="${TUG_SIM_ROOT}"
 )
 
+# -- Porous Fiber Plate Humidification regression tests (Part 29) -----------
+set(HUMID_SIM_ROOT "${CMAKE_SOURCE_DIR}/case-study/Porous Fiber Plate Humidification System")
+add_executable(test_humidification
+    test_humidification.cpp
+    ${HUMID_SIM_ROOT}/sim/src/humid_plant.cpp
+    ${HUMID_SIM_ROOT}/sim/src/controllers.cpp
+)
+target_include_directories(test_humidification PRIVATE
+    ${HUMID_SIM_ROOT}/sim/include
+)
+target_link_libraries(test_humidification PRIVATE
+    controller_toolbox Catch2::Catch2WithMain nlohmann_json::nlohmann_json
+)
+target_compile_features(test_humidification PRIVATE cxx_std_20)
+
 enable_testing()
 catch_discover_tests(test_catch2_pilot)
 catch_discover_tests(test_catch2_advanced)
 catch_discover_tests(test_tugsim_regression)
+catch_discover_tests(test_humidification)
 add_test(NAME controller_tests  COMMAND test_controllers)
 add_test(NAME tuner_tests       COMMAND test_tuners_extended)
 add_test(NAME integration_tests COMMAND test_integration)
