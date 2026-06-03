@@ -104,7 +104,7 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a7e1419d92b5a96b0597ab7310d006eab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tikhonov regularisation on g (prevents over-fitting to noisy data).  <br /></td></tr>
 <tr class="separator:a7e1419d92b5a96b0597ab7310d006eab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac76eec892dd1df56cbd4c794ae7ed595" id="r_ac76eec892dd1df56cbd4c794ae7ed595"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1DeePC_1_1Params.html#ac76eec892dd1df56cbd4c794ae7ed595">lambda_eq</a> = 1e5</td></tr>
-<tr class="memdesc:ac76eec892dd1df56cbd4c794ae7ed595"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalty for violating the past-input consistency H_up.g = u_ini.  <br /></td></tr>
+<tr class="memdesc:ac76eec892dd1df56cbd4c794ae7ed595"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalty for violating the past-input consistency H_up.g = u_ini. WARNING: if lambda_eq &gt;&gt; rho_y and the I/O buffers are all-zero (cold start), the tracking objective is numerically negligible and <a class="el" href="classctrl_1_1DeePC.html" title="Data-Enabled Predictive Controller (DeePC).">DeePC</a> outputs u≈0. Use lambda_eq ≤ 10×rho_y for cold-start scenarios.  <br /></td></tr>
 <tr class="separator:ac76eec892dd1df56cbd4c794ae7ed595"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af831ca705b383b31977ec0daebb1b62f" id="r_af831ca705b383b31977ec0daebb1b62f"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1DeePC_1_1Params.html#af831ca705b383b31977ec0daebb1b62f">uMin</a> = -1e9</td></tr>
 <tr class="memdesc:af831ca705b383b31977ec0daebb1b62f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Input lower bound.  <br /></td></tr>
@@ -138,9 +138,9 @@ Public Attributes</h2></td></tr>
 
 <p>ADMM iterations per control step. </p>
 
-<p class="definition">Definition at line <a class="el" href="DeePC_8h_source.html#l00073">73</a> of file <a class="el" href="DeePC_8h_source.html">DeePC.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DeePC_8h_source.html#l00076">76</a> of file <a class="el" href="DeePC_8h_source.html">DeePC.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00103">ctrl::DeePC::computeIO()</a>, <a class="el" href="DeePC_8cpp_source.html#l00026">ctrl::DeePC::DeePC()</a>, and <a class="el" href="DeePC_8h_source.html#l00123">ctrl::DeePC::lastADMMIter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00102">ctrl::DeePC::computeIO()</a>, <a class="el" href="DeePC_8cpp_source.html#l00026">ctrl::DeePC::DeePC()</a>, and <a class="el" href="DeePC_8h_source.html#l00126">ctrl::DeePC::lastADMMIter()</a>.</p>
 
 </div>
 </div>
@@ -156,11 +156,11 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Penalty for violating the past-input consistency H_up.g = u_ini. </p>
+<p>Penalty for violating the past-input consistency H_up.g = u_ini. WARNING: if lambda_eq &gt;&gt; rho_y and the I/O buffers are all-zero (cold start), the tracking objective is numerically negligible and <a class="el" href="classctrl_1_1DeePC.html" title="Data-Enabled Predictive Controller (DeePC).">DeePC</a> outputs u≈0. Use lambda_eq ≤ 10×rho_y for cold-start scenarios. </p>
 
 <p class="definition">Definition at line <a class="el" href="DeePC_8h_source.html#l00069">69</a> of file <a class="el" href="DeePC_8h_source.html">DeePC.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00103">ctrl::DeePC::computeIO()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00102">ctrl::DeePC::computeIO()</a>.</p>
 
 </div>
 </div>
@@ -198,7 +198,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="DeePC_8h_source.html#l00065">65</a> of file <a class="el" href="DeePC_8h_source.html">DeePC.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00103">ctrl::DeePC::computeIO()</a>, and <a class="el" href="DeePC_8cpp_source.html#l00026">ctrl::DeePC::DeePC()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00102">ctrl::DeePC::computeIO()</a>, and <a class="el" href="DeePC_8cpp_source.html#l00026">ctrl::DeePC::DeePC()</a>.</p>
 
 </div>
 </div>
@@ -216,9 +216,9 @@ Public Attributes</h2></td></tr>
 
 <p>ADMM coupling penalty rho. Larger -&gt; faster consensus, more oscillation. </p>
 
-<p class="definition">Definition at line <a class="el" href="DeePC_8h_source.html#l00072">72</a> of file <a class="el" href="DeePC_8h_source.html">DeePC.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DeePC_8h_source.html#l00075">75</a> of file <a class="el" href="DeePC_8h_source.html">DeePC.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00103">ctrl::DeePC::computeIO()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00102">ctrl::DeePC::computeIO()</a>.</p>
 
 </div>
 </div>
@@ -238,7 +238,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="DeePC_8h_source.html#l00067">67</a> of file <a class="el" href="DeePC_8h_source.html">DeePC.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00103">ctrl::DeePC::computeIO()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00102">ctrl::DeePC::computeIO()</a>.</p>
 
 </div>
 </div>
@@ -258,7 +258,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="DeePC_8h_source.html#l00066">66</a> of file <a class="el" href="DeePC_8h_source.html">DeePC.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00103">ctrl::DeePC::computeIO()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00102">ctrl::DeePC::computeIO()</a>.</p>
 
 </div>
 </div>
@@ -278,7 +278,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="DeePC_8h_source.html#l00064">64</a> of file <a class="el" href="DeePC_8h_source.html">DeePC.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00103">ctrl::DeePC::computeIO()</a>, <a class="el" href="DeePC_8cpp_source.html#l00026">ctrl::DeePC::DeePC()</a>, and <a class="el" href="DeePC_8h_source.html#l00127">ctrl::DeePC::isWarmedUp()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00102">ctrl::DeePC::computeIO()</a>, <a class="el" href="DeePC_8cpp_source.html#l00026">ctrl::DeePC::DeePC()</a>, and <a class="el" href="DeePC_8h_source.html#l00130">ctrl::DeePC::isWarmedUp()</a>.</p>
 
 </div>
 </div>
@@ -296,9 +296,9 @@ Public Attributes</h2></td></tr>
 
 <p>Input upper bound. </p>
 
-<p class="definition">Definition at line <a class="el" href="DeePC_8h_source.html#l00071">71</a> of file <a class="el" href="DeePC_8h_source.html">DeePC.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DeePC_8h_source.html#l00074">74</a> of file <a class="el" href="DeePC_8h_source.html">DeePC.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00103">ctrl::DeePC::computeIO()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00102">ctrl::DeePC::computeIO()</a>.</p>
 
 </div>
 </div>
@@ -316,9 +316,9 @@ Public Attributes</h2></td></tr>
 
 <p>Input lower bound. </p>
 
-<p class="definition">Definition at line <a class="el" href="DeePC_8h_source.html#l00070">70</a> of file <a class="el" href="DeePC_8h_source.html">DeePC.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DeePC_8h_source.html#l00073">73</a> of file <a class="el" href="DeePC_8h_source.html">DeePC.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00103">ctrl::DeePC::computeIO()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DeePC_8cpp_source.html#l00102">ctrl::DeePC::computeIO()</a>.</p>
 
 </div>
 </div>
