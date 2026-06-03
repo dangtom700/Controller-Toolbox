@@ -172,109 +172,111 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>          p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a3762144eaaff8e3160b89992e8227730">rho_y</a>    * (H_yf_.transpose() * H_yf_)</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        + p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a7e1419d92b5a96b0597ab7310d006eab">lambda_g</a> * Eigen::MatrixXd::Identity(n_col_, n_col_)</div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        + p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#ac76eec892dd1df56cbd4c794ae7ed595">lambda_eq</a> * (H_up_.transpose() * H_up_)</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        + p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a0270c503609652c373ca708a5ac6c2be">rho_admm</a> * (H_uf_.transpose() * H_uf_);</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    M_ldlt_.compute(M);</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keywordflow">if</span> (M_ldlt_.info() != Eigen::Success)</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        <span class="keywordflow">throw</span> std::runtime_error(</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>            <span class="stringliteral">&quot;DeePC: Hessian factorisation failed - matrix is not positive-definite. &quot;</span></div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>            <span class="stringliteral">&quot;Check that the offline data is persistently exciting (increase lambda_g if needed).&quot;</span>);</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>}</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="comment">// Core control computation</span></div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
-<div class="foldopen" id="foldopen00102" data-start="{" data-end="}">
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="classctrl_1_1DeePC.html#a88364528802561cae3d3ae2779164e85">  102</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1DeePC.html#a88364528802561cae3d3ae2779164e85">DeePC::computeIO</a>(<span class="keywordtype">double</span> y_meas, <span class="keywordtype">double</span> r)</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>{</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="comment">// Shift I/O buffer left (drop oldest) and push (u_prev_, y_meas) at the end</span></div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    u_buf_.head(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a90672ff72c12c005a0da14fdeef5d258">T_ini</a> - 1) = u_buf_.tail(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a90672ff72c12c005a0da14fdeef5d258">T_ini</a> - 1).eval();</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    y_buf_.head(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a90672ff72c12c005a0da14fdeef5d258">T_ini</a> - 1) = y_buf_.tail(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a90672ff72c12c005a0da14fdeef5d258">T_ini</a> - 1).eval();</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    u_buf_(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a90672ff72c12c005a0da14fdeef5d258">T_ini</a> - 1) = u_prev_;</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    y_buf_(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a90672ff72c12c005a0da14fdeef5d258">T_ini</a> - 1) = y_meas;</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    ++step_cnt_;</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <span class="comment">// Return zero during warm-up (buffer not yet representative)</span></div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <span class="keywordflow">if</span> (step_cnt_ &lt;= p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a90672ff72c12c005a0da14fdeef5d258">T_ini</a>) {</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>        <a class="code hl_function" href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">notifyObserver</a>(0.0, y_meas);</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        <span class="keywordflow">return</span> 0.0;</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    }</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="comment">// Constant reference trajectory over the horizon</span></div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <span class="keyword">const</span> Eigen::VectorXd y_ref = Eigen::VectorXd::Constant(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a6112ba7c5481d42e220d78e3cb02d8ca">Np</a>, r);</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="comment">// Pre-compute constant parts of the g-update RHS that don&#39;t change within the loop</span></div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    <span class="keyword">const</span> Eigen::VectorXd rhs_fixed =</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>          p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a3762144eaaff8e3160b89992e8227730">rho_y</a>    * (H_yf_.transpose() * y_ref)</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        + p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#ac76eec892dd1df56cbd4c794ae7ed595">lambda_eq</a> * (H_up_.transpose() * u_buf_);</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="comment">// Scalar used in u-update (element-wise for diagonal R = rho_u.I)</span></div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> inv_Ru_rho = 1.0 / (p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#ad2fcdba7768a97f6ef64d3df21118e94">rho_u</a> + p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a0270c503609652c373ca708a5ac6c2be">rho_admm</a>);</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="comment">// ADMM iterations</span></div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="comment">// -----------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="comment">// g-update:  M . g = rhs_fixed + H_uf&#39; . (rho.u - lambda)</span></div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="comment">// u-update:  u_free = (rho.H_uf.g + lambda) / (rho_u + rho);  u = clip(u_free, uMin, uMax)</span></div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="comment">// lambda-update:  lambda += rho . (H_uf.g - u)</span></div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="comment">// -----------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a6c6512688e7adddb4d23b1d0045d50ff">admm_iter</a>; ++k) {</div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>        <span class="comment">// g-update</span></div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        <span class="keyword">const</span> Eigen::VectorXd rhs =</div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>            rhs_fixed + H_uf_.transpose() * (p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a0270c503609652c373ca708a5ac6c2be">rho_admm</a> * u_opt_ - lam_);</div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>        g_ = M_ldlt_.solve(rhs);</div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>        <span class="comment">// u-update: unconstrained optimum then project</span></div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        <span class="keyword">const</span> Eigen::VectorXd huf_g = H_uf_ * g_;</div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        <span class="keyword">const</span> Eigen::VectorXd u_free = inv_Ru_rho * (p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a0270c503609652c373ca708a5ac6c2be">rho_admm</a> * huf_g + lam_);</div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>        u_opt_ = u_free.cwiseMin(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a14bfa948b123d6d4a645dc110186e947">uMax</a>).cwiseMax(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#af831ca705b383b31977ec0daebb1b62f">uMin</a>);</div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span> </div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>        <span class="comment">// dual update</span></div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>        lam_ += p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a0270c503609652c373ca708a5ac6c2be">rho_admm</a> * (huf_g - u_opt_);</div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    }</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    primal_res_ = (H_uf_ * g_ - u_opt_).norm();</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        + p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#ac76eec892dd1df56cbd4c794ae7ed595">lambda_eq</a> * (H_yp_.transpose() * H_yp_)   <span class="comment">// past-output equality</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        + p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a0270c503609652c373ca708a5ac6c2be">rho_admm</a> * (H_uf_.transpose() * H_uf_);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    M_ldlt_.compute(M);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keywordflow">if</span> (M_ldlt_.info() != Eigen::Success)</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="keywordflow">throw</span> std::runtime_error(</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>            <span class="stringliteral">&quot;DeePC: Hessian factorisation failed - matrix is not positive-definite. &quot;</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>            <span class="stringliteral">&quot;Check that the offline data is persistently exciting (increase lambda_g if needed).&quot;</span>);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>}</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="comment">// Core control computation</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="foldopen" id="foldopen00103" data-start="{" data-end="}">
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="classctrl_1_1DeePC.html#a88364528802561cae3d3ae2779164e85">  103</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1DeePC.html#a88364528802561cae3d3ae2779164e85">DeePC::computeIO</a>(<span class="keywordtype">double</span> y_meas, <span class="keywordtype">double</span> r)</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>{</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="comment">// Shift I/O buffer left (drop oldest) and push (u_prev_, y_meas) at the end</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    u_buf_.head(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a90672ff72c12c005a0da14fdeef5d258">T_ini</a> - 1) = u_buf_.tail(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a90672ff72c12c005a0da14fdeef5d258">T_ini</a> - 1).eval();</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    y_buf_.head(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a90672ff72c12c005a0da14fdeef5d258">T_ini</a> - 1) = y_buf_.tail(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a90672ff72c12c005a0da14fdeef5d258">T_ini</a> - 1).eval();</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    u_buf_(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a90672ff72c12c005a0da14fdeef5d258">T_ini</a> - 1) = u_prev_;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    y_buf_(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a90672ff72c12c005a0da14fdeef5d258">T_ini</a> - 1) = y_meas;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    ++step_cnt_;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <span class="comment">// Return zero during warm-up (buffer not yet representative)</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="keywordflow">if</span> (step_cnt_ &lt;= p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a90672ff72c12c005a0da14fdeef5d258">T_ini</a>) {</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        <a class="code hl_function" href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">notifyObserver</a>(0.0, y_meas);</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        <span class="keywordflow">return</span> 0.0;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    }</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <span class="comment">// Constant reference trajectory over the horizon</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="keyword">const</span> Eigen::VectorXd y_ref = Eigen::VectorXd::Constant(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a6112ba7c5481d42e220d78e3cb02d8ca">Np</a>, r);</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    <span class="comment">// Pre-compute constant parts of the g-update RHS that don&#39;t change within the loop</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="keyword">const</span> Eigen::VectorXd rhs_fixed =</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>          p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a3762144eaaff8e3160b89992e8227730">rho_y</a>    * (H_yf_.transpose() * y_ref)</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>        + p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#ac76eec892dd1df56cbd4c794ae7ed595">lambda_eq</a> * (H_up_.transpose() * u_buf_)</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        + p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#ac76eec892dd1df56cbd4c794ae7ed595">lambda_eq</a> * (H_yp_.transpose() * y_buf_); <span class="comment">// past-output equality</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="comment">// Scalar used in u-update (element-wise for diagonal R = rho_u.I)</span></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> inv_Ru_rho = 1.0 / (p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#ad2fcdba7768a97f6ef64d3df21118e94">rho_u</a> + p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a0270c503609652c373ca708a5ac6c2be">rho_admm</a>);</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="comment">// ADMM iterations</span></div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="comment">// -----------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="comment">// g-update:  M . g = rhs_fixed + H_uf&#39; . (rho.u - lambda)</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="comment">// u-update:  u_free = (rho.H_uf.g + lambda) / (rho_u + rho);  u = clip(u_free, uMin, uMax)</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <span class="comment">// lambda-update:  lambda += rho . (H_uf.g - u)</span></div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="comment">// -----------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a6c6512688e7adddb4d23b1d0045d50ff">admm_iter</a>; ++k) {</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>        <span class="comment">// g-update</span></div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>        <span class="keyword">const</span> Eigen::VectorXd rhs =</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>            rhs_fixed + H_uf_.transpose() * (p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a0270c503609652c373ca708a5ac6c2be">rho_admm</a> * u_opt_ - lam_);</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>        g_ = M_ldlt_.solve(rhs);</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        <span class="comment">// u-update: unconstrained optimum then project</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>        <span class="keyword">const</span> Eigen::VectorXd huf_g = H_uf_ * g_;</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>        <span class="keyword">const</span> Eigen::VectorXd u_free = inv_Ru_rho * (p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a0270c503609652c373ca708a5ac6c2be">rho_admm</a> * huf_g + lam_);</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>        u_opt_ = u_free.cwiseMin(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a14bfa948b123d6d4a645dc110186e947">uMax</a>).cwiseMax(p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#af831ca705b383b31977ec0daebb1b62f">uMin</a>);</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        <span class="comment">// dual update</span></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        lam_ += p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a0270c503609652c373ca708a5ac6c2be">rho_admm</a> * (huf_g - u_opt_);</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    }</div>
 <div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> u_apply = std::clamp(u_opt_(0), p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#af831ca705b383b31977ec0daebb1b62f">uMin</a>, p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a14bfa948b123d6d4a645dc110186e947">uMax</a>);</div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    u_prev_ = u_apply;</div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <a class="code hl_function" href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">notifyObserver</a>(u_apply, y_meas);</div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    <span class="keywordflow">return</span> u_apply;</div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>}</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    primal_res_ = (H_uf_ * g_ - u_opt_).norm();</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> u_apply = std::clamp(u_opt_(0), p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#af831ca705b383b31977ec0daebb1b62f">uMin</a>, p_.<a class="code hl_variable" href="structctrl_1_1DeePC_1_1Params.html#a14bfa948b123d6d4a645dc110186e947">uMax</a>);</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    u_prev_ = u_apply;</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    <a class="code hl_function" href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">notifyObserver</a>(u_apply, y_meas);</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    <span class="keywordflow">return</span> u_apply;</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>}</div>
 </div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span><span class="comment">// IController interface</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span> </div>
 <div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span> </div>
-<div class="foldopen" id="foldopen00162" data-start="{" data-end="}">
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno"><a class="line" href="classctrl_1_1DeePC.html#a1a158449f7be20151fd653c415295daa">  162</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1DeePC.html#a1a158449f7be20151fd653c415295daa">DeePC::compute</a>(<span class="keywordtype">double</span> error)</div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>{</div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <span class="comment">// error = r - y  =&gt;  y = r - error</span></div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classctrl_1_1DeePC.html#a88364528802561cae3d3ae2779164e85">computeIO</a>(r_ - error, r_);</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>}</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span><span class="comment">// IController interface</span></div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
+<div class="foldopen" id="foldopen00164" data-start="{" data-end="}">
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno"><a class="line" href="classctrl_1_1DeePC.html#a1a158449f7be20151fd653c415295daa">  164</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1DeePC.html#a1a158449f7be20151fd653c415295daa">DeePC::compute</a>(<span class="keywordtype">double</span> error)</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>{</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    <span class="comment">// error = r - y  =&gt;  y = r - error</span></div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classctrl_1_1DeePC.html#a88364528802561cae3d3ae2779164e85">computeIO</a>(r_ - error, r_);</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>}</div>
 </div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
-<div class="foldopen" id="foldopen00168" data-start="{" data-end="}">
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno"><a class="line" href="classctrl_1_1DeePC.html#a70ec76e08143456b7d3fe54e0fc683d1">  168</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1DeePC.html#a70ec76e08143456b7d3fe54e0fc683d1">DeePC::reset</a>()</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>{</div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    g_.setZero();</div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    u_opt_.setZero();</div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    lam_.setZero();</div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    u_buf_.setZero();</div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    y_buf_.setZero();</div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    u_prev_     = 0.0;</div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    step_cnt_   = 0;</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    primal_res_ = 0.0;</div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>}</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="foldopen" id="foldopen00170" data-start="{" data-end="}">
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno"><a class="line" href="classctrl_1_1DeePC.html#a70ec76e08143456b7d3fe54e0fc683d1">  170</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1DeePC.html#a70ec76e08143456b7d3fe54e0fc683d1">DeePC::reset</a>()</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>{</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    g_.setZero();</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    u_opt_.setZero();</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    lam_.setZero();</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    u_buf_.setZero();</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    y_buf_.setZero();</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    u_prev_     = 0.0;</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    step_cnt_   = 0;</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    primal_res_ = 0.0;</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>}</div>
 </div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span> </div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aDeePC_8h_html"><div class="ttname"><a href="DeePC_8h.html">DeePC.h</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DeePC_html_a1a158449f7be20151fd653c415295daa"><div class="ttname"><a href="classctrl_1_1DeePC.html#a1a158449f7be20151fd653c415295daa">ctrl::DeePC::compute</a></div><div class="ttdeci">double compute(double error) override</div><div class="ttdoc">IController::compute compatibility.</div><div class="ttdef"><b>Definition</b> <a href="DeePC_8cpp_source.html#l00162">DeePC.cpp:162</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DeePC_html_a1a158449f7be20151fd653c415295daa"><div class="ttname"><a href="classctrl_1_1DeePC.html#a1a158449f7be20151fd653c415295daa">ctrl::DeePC::compute</a></div><div class="ttdeci">double compute(double error) override</div><div class="ttdoc">IController::compute compatibility.</div><div class="ttdef"><b>Definition</b> <a href="DeePC_8cpp_source.html#l00164">DeePC.cpp:164</a></div></div>
 <div class="ttc" id="aclassctrl_1_1DeePC_html_a6a298672f877b088648fa323b9485bd7"><div class="ttname"><a href="classctrl_1_1DeePC.html#a6a298672f877b088648fa323b9485bd7">ctrl::DeePC::DeePC</a></div><div class="ttdeci">DeePC(const Eigen::VectorXd &amp;u_data, const Eigen::VectorXd &amp;y_data, const Params &amp;params, double Ts)</div><div class="ttdoc">Construct DeePC and pre-factor the ADMM Hessian.</div><div class="ttdef"><b>Definition</b> <a href="DeePC_8cpp_source.html#l00026">DeePC.cpp:26</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DeePC_html_a70ec76e08143456b7d3fe54e0fc683d1"><div class="ttname"><a href="classctrl_1_1DeePC.html#a70ec76e08143456b7d3fe54e0fc683d1">ctrl::DeePC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset all internal states (integrators, delay buffers, estimators).</div><div class="ttdef"><b>Definition</b> <a href="DeePC_8cpp_source.html#l00168">DeePC.cpp:168</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DeePC_html_a88364528802561cae3d3ae2779164e85"><div class="ttname"><a href="classctrl_1_1DeePC.html#a88364528802561cae3d3ae2779164e85">ctrl::DeePC::computeIO</a></div><div class="ttdeci">double computeIO(double y_meas, double r)</div><div class="ttdoc">Compute control action from absolute plant output and setpoint.</div><div class="ttdef"><b>Definition</b> <a href="DeePC_8cpp_source.html#l00102">DeePC.cpp:102</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DeePC_html_a70ec76e08143456b7d3fe54e0fc683d1"><div class="ttname"><a href="classctrl_1_1DeePC.html#a70ec76e08143456b7d3fe54e0fc683d1">ctrl::DeePC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset all internal states (integrators, delay buffers, estimators).</div><div class="ttdef"><b>Definition</b> <a href="DeePC_8cpp_source.html#l00170">DeePC.cpp:170</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DeePC_html_a88364528802561cae3d3ae2779164e85"><div class="ttname"><a href="classctrl_1_1DeePC.html#a88364528802561cae3d3ae2779164e85">ctrl::DeePC::computeIO</a></div><div class="ttdeci">double computeIO(double y_meas, double r)</div><div class="ttdoc">Compute control action from absolute plant output and setpoint.</div><div class="ttdef"><b>Definition</b> <a href="DeePC_8cpp_source.html#l00103">DeePC.cpp:103</a></div></div>
 <div class="ttc" id="aclassctrl_1_1IController_html_aff795d6bd36f8a8d20796d0670fef301"><div class="ttname"><a href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">ctrl::IController::notifyObserver</a></div><div class="ttdeci">void notifyObserver(double u, double signal) const</div><div class="ttdoc">Fire the observer's onCompute() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00154">IController.h:154</a></div></div>
 <div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AdaptiveSmithPredictor_8cpp_source.html#l00005">AdaptiveSmithPredictor.cpp:6</a></div></div>
 <div class="ttc" id="astructctrl_1_1DeePC_1_1Params_html"><div class="ttname"><a href="structctrl_1_1DeePC_1_1Params.html">ctrl::DeePC::Params</a></div><div class="ttdoc">DeePC design parameters.</div><div class="ttdef"><b>Definition</b> <a href="DeePC_8h_source.html#l00063">DeePC.h:63</a></div></div>
