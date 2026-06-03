@@ -55,12 +55,11 @@ var searchData=
   ['isrunning_52',['isrunning',['../classctrl_1_1IScheduler.html#ab1fd616c4008ee63a7d519c2998814e1',1,'ctrl::IScheduler::isRunning()'],['../classctrl_1_1SimScheduler.html#a1a7495ef8ace37059de896a4ba03eb76',1,'ctrl::SimScheduler::isRunning()']]],
   ['issaturated_53',['isSaturated',['../classctrl_1_1AntiWindupWrapper.html#a413e63a3a427ab7a9c09d16153e0e0d9',1,'ctrl::AntiWindupWrapper']]],
   ['isstable_54',['isStable',['../structctrl_1_1TruncationResult.html#a53d6275a9b900108cdb16e870fb82918',1,'ctrl::TruncationResult']]],
-  ['isvalid_55',['isvalid',['../classctrl_1_1SafeSensor.html#a2588ae59386c9d31ab7c7c21309cff78',1,'ctrl::SafeSensor::isValid()'],['../classctrl_1_1ISensor.html#a366745c03cda60b3c91f2e5425e818d7',1,'ctrl::ISensor::isValid()'],['../classctrl_1_1SimSensor.html#aab8b15621d8bf66b61b7d237a5396046',1,'ctrl::SimSensor::isValid()']]],
-  ['iswarmedup_56',['isWarmedUp',['../classctrl_1_1DeePC.html#aab27a129bb2c6b47bcf69f847cb47a68',1,'ctrl::DeePC']]],
-  ['iterations_57',['iterations',['../structctrl_1_1DareResult.html#a15fc6f428bc21ddc1b65e189bad58175',1,'ctrl::DareResult::iterations'],['../structctrl_1_1MuSynResult.html#ad7266fb4157db98091a204e0751b7133',1,'ctrl::MuSynResult::iterations']]],
-  ['iterativelearningcontrol_2ecpp_58',['IterativeLearningControl.cpp',['../IterativeLearningControl_8cpp.html',1,'']]],
-  ['iterativelearningcontrol_2eh_59',['IterativeLearningControl.h',['../IterativeLearningControl_8h.html',1,'']]],
-  ['iters_60',['iters',['../structctrl_1_1QPSolveResult.html#a33d7f202f9ce9340d33f79214fa301c0',1,'ctrl::QPSolveResult']]],
-  ['itimer_61',['ITimer',['../classctrl_1_1ITimer.html',1,'ctrl']]],
-  ['itimer_2eh_62',['ITimer.h',['../ITimer_8h.html',1,'']]]
+  ['isvalid_55',['isvalid',['../classctrl_1_1SimSensor.html#aab8b15621d8bf66b61b7d237a5396046',1,'ctrl::SimSensor::isValid()'],['../classctrl_1_1SafeSensor.html#a2588ae59386c9d31ab7c7c21309cff78',1,'ctrl::SafeSensor::isValid()'],['../classctrl_1_1ISensor.html#a366745c03cda60b3c91f2e5425e818d7',1,'ctrl::ISensor::isValid()']]],
+  ['iterations_56',['iterations',['../structctrl_1_1DareResult.html#a15fc6f428bc21ddc1b65e189bad58175',1,'ctrl::DareResult::iterations'],['../structctrl_1_1MuSynResult.html#ad7266fb4157db98091a204e0751b7133',1,'ctrl::MuSynResult::iterations']]],
+  ['iterativelearningcontrol_2ecpp_57',['IterativeLearningControl.cpp',['../IterativeLearningControl_8cpp.html',1,'']]],
+  ['iterativelearningcontrol_2eh_58',['IterativeLearningControl.h',['../IterativeLearningControl_8h.html',1,'']]],
+  ['iters_59',['iters',['../structctrl_1_1QPSolveResult.html#a33d7f202f9ce9340d33f79214fa301c0',1,'ctrl::QPSolveResult']]],
+  ['itimer_60',['ITimer',['../classctrl_1_1ITimer.html',1,'ctrl']]],
+  ['itimer_2eh_61',['ITimer.h',['../ITimer_8h.html',1,'']]]
 ];
