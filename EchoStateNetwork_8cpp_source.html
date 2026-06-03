@@ -247,11 +247,12 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    states_.clear();</div>
 <div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>    targets_.clear();</div>
 <div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    washout_cnt_ = 0;</div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    fitted_      = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>}</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    <span class="comment">// NOTE: W_out_ and fitted_ are intentionally NOT cleared - reset() only</span></div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    <span class="comment">// resets the reservoir state for inference; readout weights persist.</span></div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>}</div>
 </div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aEchoStateNetwork_8h_html"><div class="ttname"><a href="EchoStateNetwork_8h.html">EchoStateNetwork.h</a></div></div>
 <div class="ttc" id="aclassctrl_1_1EchoStateNetwork_html"><div class="ttname"><a href="classctrl_1_1EchoStateNetwork.html">ctrl::EchoStateNetwork</a></div><div class="ttdoc">Echo State Network (ESN) / Reservoir Computing.</div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00050">EchoStateNetwork.h:50</a></div></div>
 <div class="ttc" id="aclassctrl_1_1EchoStateNetwork_html_a0f0d3eade87edf7b9b6f93928627fb6a"><div class="ttname"><a href="classctrl_1_1EchoStateNetwork.html#a0f0d3eade87edf7b9b6f93928627fb6a">ctrl::EchoStateNetwork::fitReadout</a></div><div class="ttdeci">void fitReadout()</div><div class="ttdoc">Compute W_out via ridge regression on all accumulated data.</div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8cpp_source.html#l00088">EchoStateNetwork.cpp:88</a></div></div>
