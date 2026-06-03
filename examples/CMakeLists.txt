@@ -95,7 +95,6 @@ add_example(ex67_tube_mpc)
 add_example(ex68_particle_filter)
 
 # Part 30: Data-driven and ML algorithms
-add_example(ex69_deepc)
 add_example(ex70_ilc)
 add_example(ex71_sindy)
 add_example(ex72_koopman_edmd)

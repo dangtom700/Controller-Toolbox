@@ -572,33 +572,10 @@ int main()
     // =======================================================================
     // Section 6 - Part 30-31 ML / Data-Driven controllers
     // =======================================================================
-    std::cout << "-- Part 30-31 (ML / Data-Driven: DeePC/ILC/L1/CBF/GP/ESN/NeuralPID/CEM/SINDy/Koopman) \n";
+    std::cout << "-- Part 31 (ML / Data-Driven: ILC/L1/CBF/GP/ESN/NeuralPID/CEM) --------"
+                 "----------------\n";
     printHeader();
 
-    // DeePC (ADMM per-step, T_ini=5, Np=10, 300-sample offline data)
-    {
-        const int N_data = 300;
-        Eigen::VectorXd u_d(N_data), y_d(N_data);
-        {
-            double x_gen = 0.0;
-            for (int k = 0; k < N_data; ++k) {
-                double u_k = 0.8 * std::sin(0.3 * k) + 0.4 * std::sin(1.1 * k);
-                x_gen  = 0.8 * x_gen + 0.2 * u_k;
-                u_d(k) = u_k;
-                y_d(k) = x_gen;
-            }
-        }
-        ctrl::DeePC::Params dp;
-        dp.T_ini     = 5;
-        dp.Np        = 10;
-        dp.rho_y     = 1.0;
-        dp.rho_u     = 0.1;
-        dp.admm_iter = 50;
-        ctrl::DeePC deepc(u_d, y_d, dp, Ts);
-        deepc.setReference(1.0);
-        record(bench("DeePC (Np=10, admm=50)", STEPS_OPT, WARMUP,
-                     [&](long long) { return deepc.compute(0.2); }));
-    }
 
     // ILC - per-step cost: feedforward lookup + recordError (P-type, N=100)
     {

@@ -98,7 +98,6 @@
 #include "AntiWindupWrapper.h"          ///< AntiWindupWrapper - generic anti-windup decorator (conditioning technique, Hanus 1987).
 #include "TubeMPC.h"                    ///< TubeMPC - robust MPC with mRPI tube for bounded additive disturbances (Mayne 2005).
 #include "ParticleFilter.h"             ///< ParticleFilter - SIR particle filter for nonlinear/non-Gaussian state estimation.
-#include "DeePC.h"                      ///< DeePC - Data-Enabled Predictive Control (Coulson 2019); Hankel-based QP, ADMM solver.
 #include "IterativeLearningControl.h"   ///< ILC  - P-type, D-type and norm-optimal iterative learning control (Bristow 2006).
 #include "SINDy.h"                      ///< SINDy - sparse identification of nonlinear dynamics (Brunton 2016); STLS regression.
 #include "KoopmanEDMD.h"                ///< Koopman/EDMD - Extended Dynamic Mode Decomposition; linear lifting for nonlinear MPC/LQR.

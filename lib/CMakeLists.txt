@@ -53,7 +53,6 @@ set(CTRL_CORE_SOURCES
     AdaptiveSmithPredictor.cpp
     TubeMPC.cpp
     ParticleFilter.cpp
-    DeePC.cpp
     IterativeLearningControl.cpp
     SINDy.cpp
     KoopmanEDMD.cpp

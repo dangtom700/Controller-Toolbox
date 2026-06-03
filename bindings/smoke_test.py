@@ -499,27 +499,6 @@ assert np.isfinite(pf_s.state()[0]), "ParticleFilter state not finite"
 assert pf_s.effective_sample_size() > 1.0, "ParticleFilter N_eff <= 1"
 print('ParticleFilter smoke test passed.')
 
-# DeePC
-_N_dc  = 200; _Ts_dc = 0.1
-_u_off = np.array([float(1 - 2*(i % 2)) for i in range(_N_dc)])  # PRBS +-1
-_y_off = np.zeros(_N_dc)
-_x_dc  = 0.0
-for _k in range(_N_dc):            # first-order plant  y[k+1] = 0.8*y[k] + 0.2*u[k]
-    _y_off[_k] = _x_dc
-    _x_dc = 0.8 * _x_dc + 0.2 * _u_off[_k]
-_dp = ctrl.DeePCParams()
-_dp.T_ini = 4; _dp.Np = 10; _dp.lambda_g = 1.0; _dp.lambda_eq = 1e4
-_dp.rho_y = 1.0; _dp.rho_u = 0.1; _dp.uMin = -2.0; _dp.uMax = 2.0
-_dc = ctrl.DeePC(_u_off, _y_off, _dp, _Ts_dc)
-assert not _dc.is_warmed_up(), "DeePC should not be warmed up yet"
-for _i in range(6):                # warm-up (T_ini=4 steps needed)
-    _dc.compute_io(0.0, 1.0)
-assert _dc.is_warmed_up(), "DeePC should be warmed up after T_ini+1 steps"
-_u_dc = _dc.compute_io(0.5, 1.0)
-assert np.isfinite(_u_dc), "DeePC output not finite"
-assert _dp.uMin <= _u_dc <= _dp.uMax, "DeePC output violates bounds"
-assert 'deepc' in ctrl.features(), "features() missing 'deepc'"
-print('DeePC smoke test passed.')
 
 # ILC P-type
 _ip = ctrl.ILCParams()

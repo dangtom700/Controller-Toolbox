@@ -980,68 +980,6 @@ Example
              "Feed back the true applied output when external clamping overrides the internal one.");
 
     // -----------------------------------------------------------------------
-    // DeePC
-    // -----------------------------------------------------------------------
-    py::class_<ctrl::DeePC::Params>(m, "DeePCParams",
-        "Design parameters for the Data-Enabled Predictive Controller.")
-        .def(py::init<>())
-        .def_readwrite("T_ini",      &ctrl::DeePC::Params::T_ini,
-                       "Past window length (>= plant order).")
-        .def_readwrite("Np",         &ctrl::DeePC::Params::Np,
-                       "Prediction horizon.")
-        .def_readwrite("rho_y",      &ctrl::DeePC::Params::rho_y,
-                       "Output tracking weight (Q = rho_y * I).")
-        .def_readwrite("rho_u",      &ctrl::DeePC::Params::rho_u,
-                       "Input effort weight (R = rho_u * I).")
-        .def_readwrite("lambda_g",   &ctrl::DeePC::Params::lambda_g,
-                       "Tikhonov regularisation on the Hankel coefficient vector g.")
-        .def_readwrite("lambda_eq",  &ctrl::DeePC::Params::lambda_eq,
-                       "Penalty weight for past-input consistency H_up*g = u_ini.")
-        .def_readwrite("uMin",       &ctrl::DeePC::Params::uMin,   "Input lower bound.")
-        .def_readwrite("uMax",       &ctrl::DeePC::Params::uMax,   "Input upper bound.")
-        .def_readwrite("rho_admm",   &ctrl::DeePC::Params::rho_admm,
-                       "ADMM coupling penalty rho.")
-        .def_readwrite("admm_iter",  &ctrl::DeePC::Params::admm_iter,
-                       "ADMM iterations per control step.");
-
-    py::class_<ctrl::DeePC, ctrl::IController,
-               std::shared_ptr<ctrl::DeePC>>(m, "DeePC", R"doc(
-Data-Enabled Predictive Controller (DeePC).
-
-Uses the Willems fundamental lemma: a pair of block-Hankel matrices built from
-persistently-exciting offline I/O data implicitly represents the system's reachable
-trajectories.  No explicit model identification step is required.
-
-Example
--------
->>> import numpy as np
->>> N = 300; Ts = 0.1
->>> u_off = np.random.choice([-1.0, 1.0], size=N)   # PRBS offline input
->>> y_off = np.zeros(N)
->>> # ... simulate plant to get y_off ...
->>> p = ctrl.DeePCParams()
->>> p.T_ini = 5; p.Np = 20; p.lambda_g = 1.0; p.rho_y = 1.0; p.rho_u = 0.1
->>> deepc = ctrl.DeePC(u_off, y_off, p, Ts)
->>> u = deepc.compute_io(y_measured, r_setpoint)
-)doc")
-        .def(py::init<const Eigen::VectorXd&, const Eigen::VectorXd&,
-                      const ctrl::DeePC::Params&, double>(),
-             py::arg("u_data"), py::arg("y_data"), py::arg("params"), py::arg("Ts"),
-             "Construct and pre-factor the ADMM Hessian from offline I/O data.")
-        .def("compute_io",        &ctrl::DeePC::computeIO,
-             py::arg("y_meas"), py::arg("r"),
-             "Compute u from absolute plant output y_meas and setpoint r.")
-        .def("compute",           &ctrl::DeePC::compute,       py::arg("error"),
-             "IController::compute(error=r-y).  Call set_reference(r) first.")
-        .def("set_reference",     &ctrl::DeePC::setReference,  py::arg("r"))
-        .def("reset",             &ctrl::DeePC::reset)
-        .def("sample_time",       &ctrl::DeePC::sampleTime)
-        .def("is_warmed_up",      &ctrl::DeePC::isWarmedUp,
-             "True once the T_ini-step warm-up buffer is full.")
-        .def("last_primal_res",   &ctrl::DeePC::lastPrimalResidual,
-             "||H_uf*g - u|| after the last ADMM solve (convergence diagnostic).");
-
-    // -----------------------------------------------------------------------
     // ILC
     // -----------------------------------------------------------------------
     py::enum_<ctrl::ILC::Mode>(m, "ILCMode")
