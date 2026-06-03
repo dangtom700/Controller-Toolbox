@@ -2384,7 +2384,12 @@ TEST_CASE("DeePC tracks step reference on first-order plant (IAE check)", "[deep
     p.rho_y    = 1.0;
     p.rho_u    = 0.05;
     p.lambda_g = 0.5;
-    p.lambda_eq= 1e5;
+    // lambda_eq must be comparable to rho_y on a cold start (all-zero buffers).
+    // lambda_eq=1e5 >> rho_y=1 drowns the tracking term: M dominated by
+    // lambda_eq*(H_up'H_up) while RHS ≈ rho_y*(H_yf'*y_ref) ≈ 0 relative to M,
+    // producing g≈0 → u≈0 regardless of horizon.  10× is sufficient to enforce
+    // past-input consistency while keeping tracking meaningful.
+    p.lambda_eq= 10.0;
     p.uMin     = -3.0;
     p.uMax     =  3.0;
     p.rho_admm = 1.0;

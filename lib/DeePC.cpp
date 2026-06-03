@@ -86,7 +86,6 @@ void DeePC::factoriseHessian()
           p_.rho_y    * (H_yf_.transpose() * H_yf_)
         + p_.lambda_g * Eigen::MatrixXd::Identity(n_col_, n_col_)
         + p_.lambda_eq * (H_up_.transpose() * H_up_)
-        + p_.lambda_eq * (H_yp_.transpose() * H_yp_)   // past-output equality
         + p_.rho_admm * (H_uf_.transpose() * H_uf_);
 
     M_ldlt_.compute(M);
@@ -122,8 +121,7 @@ double DeePC::computeIO(double y_meas, double r)
     // Pre-compute constant parts of the g-update RHS that don't change within the loop
     const Eigen::VectorXd rhs_fixed =
           p_.rho_y    * (H_yf_.transpose() * y_ref)
-        + p_.lambda_eq * (H_up_.transpose() * u_buf_)
-        + p_.lambda_eq * (H_yp_.transpose() * y_buf_); // past-output equality
+        + p_.lambda_eq * (H_up_.transpose() * u_buf_);
 
     // Scalar used in u-update (element-wise for diagonal R = rho_u.I)
     const double inv_Ru_rho = 1.0 / (p_.rho_u + p_.rho_admm);

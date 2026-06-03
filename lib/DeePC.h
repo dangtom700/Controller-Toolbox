@@ -67,6 +67,9 @@ public:
         double rho_u     = 0.1;   ///< Input effort weight   (R = rho_u . I_{Np}).
         double lambda_g  = 1.0;   ///< Tikhonov regularisation on g (prevents over-fitting to noisy data).
         double lambda_eq = 1e5;   ///< Penalty for violating the past-input consistency H_up.g = u_ini.
+                                  ///<  WARNING: if lambda_eq >> rho_y and the I/O buffers are all-zero
+                                  ///<  (cold start), the tracking objective is numerically negligible and
+                                  ///<  DeePC outputs u≈0.  Use lambda_eq ≤ 10×rho_y for cold-start scenarios.
         double uMin      = -1e9;  ///< Input lower bound.
         double uMax      =  1e9;  ///< Input upper bound.
         double rho_admm  = 1.0;   ///< ADMM coupling penalty rho.  Larger -> faster consensus, more oscillation.
