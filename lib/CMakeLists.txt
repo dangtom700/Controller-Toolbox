@@ -53,6 +53,16 @@ set(CTRL_CORE_SOURCES
     AdaptiveSmithPredictor.cpp
     TubeMPC.cpp
     ParticleFilter.cpp
+    DeePC.cpp
+    IterativeLearningControl.cpp
+    SINDy.cpp
+    KoopmanEDMD.cpp
+    L1AdaptiveController.cpp
+    CBFSafetyFilter.cpp
+    GaussianProcess.cpp
+    EchoStateNetwork.cpp
+    NeuralPID.cpp
+    CEMController.cpp
 )
 
 # --- Optional sources --------------------------------------------------------

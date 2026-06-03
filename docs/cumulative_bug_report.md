@@ -444,3 +444,293 @@ Same fix applied to LQG (using the estimated state from the Kalman filter).
 ADRC `b0=1e-4` → `b0=0.5` (same fix as P27-8).
 After fixes: 4/6 controllers achieve SS error < 2% (PID, LQR, LQG, ADRC pass;
 SMC has 2.2%, LeadLag has 42% — both expected, no integral action).
+
+---
+
+## Part 28 — Infrastructure and example quality pass (2026-05-31)
+
+**Scope:** No `lib/` algorithm changes. Infrastructure and example fixes only.
+**Baseline unchanged:** C++ 90/0, Python 88/0.
+
+### P28-1 [FIXED] `run.py` 5-phase rewrite
+
+Split the monolithic runner into five phases: (1) non-ASCII source scan, (2) compile
+all C++ targets, (3) build Python bindings + smoke test, (4) run C++ executables,
+(5) run Python examples. Each phase is independently logged and timed. Added 36-entry
+`safe_phrases` list to suppress all known benign runtime messages (QP iteration
+warnings, stale `.pyd` version mismatch, etc.) so `bug_report.txt` is 0 blocks on a
+clean run.
+
+### P28-2 [FIXED] `AdaptiveSmithPredictor` cross-correlation delay estimate
+
+**File:** `lib/AdaptiveSmithPredictor.cpp`
+
+The cross-correlation buffer was not demeaned before computing `argmax`, causing the
+delay estimate to lock onto the DC level rather than the true peak. Fixed: subtract the
+sample mean from both signals before computing the cross-correlation. Also normalised
+the correlation to unit variance so the estimate is amplitude-independent.
+
+### P28-3 [FIXED] 8 Python example internal checks
+
+Files: `ex37`, `ex39`, `ex43`, `ex34`, `ex64`, `ex79` Python examples.
+Various tolerance, sign-convention, and numerical-stability fixes. All internal
+`[FAIL]` checks now show `[PASS]`.
+
+### P28-4 [ADDED] Case-study README files
+
+Added `README.md` to all four existing case studies (Boiler, SMISMO, Tug, Solar)
+documenting the plant model, operating points, scenarios, controller roster, and
+build instructions. These are the as-built references for each study.
+
+---
+
+## Part 29 — New case study + bug fixes + quality review (2026-06-01)
+
+**Scope:** Fifth case study added; four bugs fixed across existing case studies;
+full quality review of all five case study plant models and controller rosters.
+**Baseline:** C++ 90/0, Python 88/0. Humidification adds 50 runs (10×5).
+
+### P29-1 [ADDED] Fifth case study: Porous Fiber Plate Humidification System
+
+**Reference:** Ye, Yan & Ni, *Applied Thermal Engineering* 245 (2024) 122877.
+
+A winter-humidity control study for a small office room (50 m³) in a cold-climate
+region. The plant couples two subsystems:
+
+1. **Humidifier physics** (algebraic): laminar flat-plate Sherwood model
+   (`Sh = 0.664·Re^0.5·Sc^(1/3)`) converts fan speed, inlet air temperature, and
+   inlet RH to humidification rate H [g/h]. Plate surface temperature = wet-bulb of
+   inlet air (Newton iteration, 8 steps).
+2. **Room moisture ODE** (Euler, Ts=30 s): first-order moisture balance including
+   humidifier output, infiltration (ACH=0.5), and occupant generation.
+   Sensor: 2-step FIFO delay modelling 60 s RH sensor transport lag.
+
+Five scenarios: nominal winter, cold snap (−20 °C), setpoint step, occupancy
+disturbance, mild/humid (risk of over-humidification).
+
+Ten controllers: PID, PID_AW, FFPID, Cascade (physics-inversion inner loop),
+GainScheduled (3 points on φ_room), SmithPredictor (2-step delay), ADRC
+(ω_o=0.015 rad/s, ω_o*Ts=0.45), MPC (FOPDT linearised at φ=45%), MRAC (σ-mod,
+compute(y) not error), GPC-RLS (Np=15, Nu=4, λ=0.97, 60-step warmup).
+
+### P29-2 [FIXED] `bindings/CMakeLists.txt` — CMake deprecation warning
+
+**File:** `bindings/CMakeLists.txt`
+
+pybind11 v2.13.6 uses `cmake_minimum_required(VERSION 3.5)`. CMake 3.27+ warns
+"Compatibility with CMake < 3.10 will be removed from a future version of CMake."
+The warning appeared twice per configure run (once per build configuration).
+
+**Fix:** Wrapped `FetchContent_MakeAvailable(pybind11)` with
+`set(CMAKE_WARN_DEPRECATED OFF)` / `set(CMAKE_WARN_DEPRECATED ON)`. The project
+root already requires CMake 3.16, making the suppression safe. The fix persists
+through clean builds (unlike patching the fetched source directly).
+
+### P29-3 [FIXED] Boiler ADRC — `omega_o` at strict stability boundary
+
+**File:** `case-study/Boiler Control/sim/src/controllers.cpp` (controller #7)
+
+`p0.omega_o = 0.50` with `Ts = 1.0 s` gives `omega_o*Ts = 0.50`. The backward-Euler
+ESO stability constraint is strict: `omega_o*Ts < 0.50`. Operating exactly at the
+boundary means the ESO is on the edge of A-instability.
+
+**Fix:** `omega_o` reduced from 0.50 → **0.45** (`omega_c` from 0.10 → 0.09, maintaining
+the 5:1 ratio). This gives `omega_o*Ts = 0.45` with ~10% stability margin. Axes 1 and 2
+already used `omega_o = 0.40` and are unaffected.
+
+### P29-4 [FIXED] Boiler plant — `computeY3` division by zero
+
+**File:** `case-study/Boiler Control/sim/src/boiler_plant.cpp`
+
+`computeY3` divides by `x3 * (1.0394 − 0.0012304*x1)`. If the drum water level `x3`
+approaches zero (possible under large step disturbances or extreme controller outputs),
+the denominator reaches zero and produces `Inf` / `NaN`, which propagates through all
+downstream observer and controller states.
+
+The second factor `(1.0394 − 0.0012304*x1)` reaches zero only at x1 ≈ 845 bar
+(physically impossible). The guard is only needed for `x3`.
+
+**Fix:** Added `x3_safe = std::max(x3, 1.0)` (clamp to 1 cm minimum water level) and
+used `x3_safe` throughout `computeY3`. Physical interpretation: a drum with less than
+1 cm of water is in an emergency-shutdown condition; the efficiency proxy is meaningless
+at that point.
+
+### P29-5 [FIXED] Solar plant — pump efficiency zero at rated flow
+
+**File:** `case-study/Solar-Driven Cooling System .../sim/src/solar_plant.cpp`
+
+The pump efficiency formula was:
+```cpp
+eta_p = eta_p0 * ratio * (1.0 - ratio);   // WRONG
+```
+where `ratio = Q_op / (kr * Q0)`. This parabola peaks at `ratio = 0.5` and gives
+**zero efficiency at rated flow** (`ratio = 1`). Since the pump/system intersection
+typically places the operating point near `ratio ≈ 0.45–0.60`, the formula produced
+artificially low efficiency values (~8% peak with `eta_p0 = 0.34`), inflating
+`W_pump` by ~3×–4× and distorting `EER_grid`.
+
+**Root cause:** Incorrect parabolic model. The `Q0` and `eta_p0` JSON parameters are
+both labeled "nominal" (rated conditions), implying `eta = eta_p0` at `Q = Q0`
+(`ratio = 1`). The formula violated this invariant.
+
+**Fix:**
+```cpp
+eta_p = eta_p0 * ratio * (2.0 - ratio);   // CORRECT
+```
+This is the standard parabolic BEP model `eta = eta_p0*(1-(1-ratio)²)`: zero at no
+flow, `eta_p0` at rated flow, flat maximum at the BEP. With `eta_p0 = 0.34` and
+typical `ratio ≈ 0.47`, corrected efficiency ≈ 0.245 vs. prior ≈ 0.084.
+
+---
+
+### P29-R Quality review findings (no code change required)
+
+The following were identified during the review but do not require code changes:
+
+**Boiler:**
+- **LPVGSBoilerCtrl**: Uses only `gainMatrix()(0,0)` from the 3×3 LQR for all three
+  channels. Off-diagonal coupling gains are discarded. This is a documented SISO
+  approximation; acceptable for the gain-scheduling demonstration.
+- **AutoGSBoilerCtrl**: Channels 1 and 2 fall back to `du = 0.05*e`. Documented
+  simplification; the scheduler only covers the surge (pressure) axis.
+
+**SMISMO:**
+- All sign conventions, RLS accessor order, and DARE model selections verified correct.
+- TubeMPC 1D integrator model: `K` placed at closed-loop pole 0.90 → `ρ(|A_cl|) = 0.90 < 1` ✓.
+
+**Solar:**
+- Poppe ODE integration, PV 4-layer iterative balance, and pump/system-curve intersection
+  verified correct. Minor Antoine constant discrepancy between `solar_plant.cpp` (17.269)
+  and `psychrometrics.h` (17.2694) is negligible (0.003%).
+
+**Tug:**
+- `C_rb()` function name is misleading (actually combined RB + added-mass Coriolis), but
+  the matrix is computed correctly. Heading wrap via `std::remainder` ✓.
+- `MRACTugCtrl`: 1st-order reference model on a 2nd-order (force→position) plant. Very
+  conservative `gamma = 1e-8` prevents instability in practice.
+
+**Humidification:**
+- Psychrometric functions (Antoine, wet-bulb Newton iteration, diffusivity) verified
+  against standard references. `omega_room_ = std::max(omega_room_, 0.0)` guard present ✓.
+- `phi_in = phi_room * Psat(T_room)/Psat(Ta)` — correct isobaric heating formula ✓.
+
+---
+
+## Part 30+ — Algorithm Roadmap (data-driven and ML-oriented)
+
+**Decided 2026-06-01.** The `lib/` classical stack is complete. The next wave extends
+the library with data-driven and learning-based methods. All algorithms are designed to:
+
+- Stay in pure C++20 / Eigen (no PyTorch/TensorFlow in the C++ core).
+- Integrate with the existing `IController` interface and QP infrastructure.
+- Produce results usable as drop-in replacements for existing controllers.
+- Python training paths (where applicable) live in `examples/python/` and use pybind11.
+
+### A1 — DeePC (Data-Enabled Predictive Control) ✅ NEXT
+
+**Reference:** Coulson, Lygeros & Dörfler, *IEEE TAC* 2019.
+
+Uses Willems' fundamental lemma: a Hankel matrix built from persistently-exciting offline
+I/O data implicitly represents all reachable system trajectories, so no explicit model
+identification step is needed. The QP over the Hankel coefficient vector g is solved via
+ADMM with a pre-factored constant Hessian (reuses existing FISTA box-projection
+infrastructure).
+
+New files: `lib/DeePC.{h,cpp}`.  
+QP structure: g-update (LDLT solve) + u-update (box projection) + λ-update (dual ascent).
+Feature flag: `deepc` (always compiled, added to `Features.h`).
+
+### A2 — ILC (Iterative Learning Control)
+
+**Reference:** Bristow, Tharayil & Alleyne, *IEEE CSM* 2006.
+
+For systems that repeat the same task. Each trial's error directly corrects the next
+trial's feedforward signal. P-type and norm-optimal variants. Complements
+`RepetitiveController` (which handles periodic disturbances in a single run).
+
+New files: `lib/IterativeLearningControl.{h,cpp}`.  
+Interface: `ILCController::storeTrial(u, e)` after each trial; `nextFeedforward()` before.
+
+### A3 — SINDy (Sparse Identification of Nonlinear Dynamics)
+
+**Reference:** Brunton, Proctor & Kutz, *PNAS* 2016.
+
+Builds a library of candidate terms (monomials, trig, products) and finds the sparsest
+coefficient vector via LASSO (coordinate descent, Eigen). Returns a `SINDyModel` that
+provides a `StateFunc` lambda compatible with `NonlinearMPC` and `ExtendedKalmanFilter`.
+
+New files: `lib/SINDy.{h,cpp}`.  
+Key primitive: coordinate-descent LASSO with warm restart (~80 lines).
+
+### A4 — Koopman / EDMD
+
+**Reference:** Williams, Kevrekidis & Rowley, *JNLS* 2015.
+
+Extended Dynamic Mode Decomposition lifts nonlinear I/O data to a high-dimensional linear
+space via a dictionary of observables (polynomial, RBF). The lifted system is estimated by
+least-squares; the result is a `ctrl::StateSpace` that can be fed directly into
+`DiscreteMPC`, `DiscreteLQR`, and `DiscreteLQG`.
+
+New files: `lib/KoopmanEDMD.{h,cpp}`.
+
+### A5 — L1 Adaptive Control
+
+**Reference:** Hovakimyan & Cao, *L1 Adaptive Control Theory*, AIAA 2010.
+
+Adds a low-pass filter in the control channel, separating adaptation time-scale from
+control bandwidth. Provides guaranteed transient performance bounds — the key weakness of
+classical `MRACController`. Drop-in replacement for MRAC with a configurable LP filter
+as the primary design parameter.
+
+New files: `lib/L1AdaptiveController.{h,cpp}`.
+
+### A6 — Control Barrier Functions (CBF)
+
+**Reference:** Ames, Xu, Grizzle & Tabuada, *IEEE TAC* 2017.
+
+A real-time safety wrapper that modifies any controller's output minimally to maintain
+forward invariance of a safe set. Implemented as a 1-step QP (reuses FISTA) with the
+CBF gradient as a linear constraint. Architecturally a decorator like `AntiWindupWrapper`.
+
+New files: `lib/CBFSafetyFilter.{h,cpp}`.
+
+### A7 — Gaussian Process Regression + GP-MPC
+
+Squared-exponential kernel GP with exact Cholesky inference. Fixed-budget variant evicts
+old training points when N > N_max. `GaussianProcess::predict(x)` returns (mean, variance).
+`GPStateSpace` provides a mean model + variance bounds usable by `DiscreteMPC` as soft
+constraints.
+
+New files: `lib/GaussianProcess.{h,cpp}`.
+
+### A8 — Reservoir Computing / Echo State Network
+
+Random recurrent network with fixed `W_res`, `W_in` (seeded at construction). Only the
+readout `W_out` is trained — via ridge regression, O(n²) one-shot. Identifies nonlinear
+dynamics without backpropagation. Returns a `StateFunc` for `NonlinearMPC`/`EKF`.
+
+New files: `lib/EchoStateNetwork.{h,cpp}`.
+
+### A9 — Neural PID
+
+Small 3→8→3 feedforward NN that adapts `[Kp, Ki, Kd]` each step using the gradient of
+the tracking cost through the linearised plant (Jacobian from `LinearisationHelper`).
+~100 trainable parameters; online gradient descent with bounded weight norms.
+
+New files: `lib/NeuralPID.{h,cpp}`.
+
+### A10 — CEM-MPC (Cross-Entropy Method)
+
+Derivative-free stochastic MPC: samples N candidate action sequences from a Gaussian,
+simulates them under the plant model, keeps the top-e% elite set, refits Gaussian.
+Alternative to FISTA for non-convex `NonlinearMPC` objectives.
+
+New files: `lib/CEMController.{h,cpp}`.
+
+### A11 — Dyna / Model-Based RL
+
+Sutton's Dyna framework adapted for continuous control: collect real transitions, fit an
+ESN/SINDy model, improve a policy on synthetic rollouts. C++ handles data collection and
+model fitting; Python-side policy improvement via pybind11 bridge (NumPy rollouts).
+
+New files: `lib/DynaController.{h,cpp}`, `examples/python/dyna_policy.py`.

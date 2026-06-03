@@ -9,10 +9,13 @@ namespace boiler {
 double computeY3(double x1, double x2, double x3, double u1, double u2, double u3)
 {
     (void)x2;
-    double acs = ((1.0 - 0.001538 * x3) * 0.8 * x1 - 25.6) /
-                 (x3 * (1.0394 - 0.0012304 * x1));
+    // Guard against near-zero water level (denominator x3*(1.0394-0.0012304*x1)).
+    // x3 < 1 cm means the drum is essentially dry; clamp to prevent division by zero.
+    double x3_safe = std::max(x3, 1.0);
+    double acs = ((1.0 - 0.001538 * x3_safe) * 0.8 * x1 - 25.6) /
+                 (x3_safe * (1.0394 - 0.0012304 * x1));
     double qe  = (0.854 * u2 - 0.147) * x1 + 45.59 * u1 - 2.514 * u3 - 2.096;
-    return 0.05 * (0.13073 * x3 + 100.0 * acs + qe / 9.0 - 67.975);
+    return 0.05 * (0.13073 * x3_safe + 100.0 * acs + qe / 9.0 - 67.975);
 }
 
 const OperatingPoint op_A = {

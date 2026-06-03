@@ -21,6 +21,15 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include "ControllerToolbox.h"
+#include "IterativeLearningControl.h"
+#include "SINDy.h"
+#include "KoopmanEDMD.h"
+#include "L1AdaptiveController.h"
+#include "CBFSafetyFilter.h"
+#include "GaussianProcess.h"
+#include "EchoStateNetwork.h"
+#include "NeuralPID.h"
+#include "CEMController.h"
 #include "hal/HAL.h"   // SimScheduler, StdTimer (HAL not in umbrella by default)
 #include <cmath>
 #include <cstdlib>
@@ -2286,4 +2295,790 @@ TEST_CASE("ParticleFilter resamples when weight degeneracy occurs", "[particle_f
 
     // Estimate must be finite
     REQUIRE(std::isfinite(pf.state()(0)));
+}
+
+// =============================================================================
+// DeePC
+// =============================================================================
+
+// Generate offline PRBS I/O data on a first-order plant  y[k+1] = a*y[k] + b*u[k].
+static std::pair<Eigen::VectorXd, Eigen::VectorXd>
+generateOfflineData(int N, double a, double b)
+{
+    Eigen::VectorXd u(N), y(N);
+    double x = 0.0;
+    for (int k = 0; k < N; ++k) {
+        u(k) = (k % 2 == 0) ? 1.0 : -1.0;   // square-wave PRBS
+        y(k) = x;
+        x    = a * x + b * u(k);
+    }
+    return {u, y};
+}
+
+TEST_CASE("DeePC constructs without error from PRBS data", "[deepc]")
+{
+    auto [u, y] = generateOfflineData(250, 0.8, 0.2);
+    ctrl::DeePC::Params p;
+    p.T_ini = 5; p.Np = 15; p.lambda_g = 1.0; p.lambda_eq = 1e5;
+    p.rho_y = 1.0; p.rho_u = 0.1;
+    REQUIRE_NOTHROW(ctrl::DeePC(u, y, p, 0.1));
+}
+
+TEST_CASE("DeePC throws when data is too short", "[deepc]")
+{
+    auto [u, y] = generateOfflineData(10, 0.8, 0.2);  // N=10 < T_ini+Np+1=21
+    ctrl::DeePC::Params p;
+    p.T_ini = 5; p.Np = 15;
+    REQUIRE_THROWS_AS(ctrl::DeePC(u, y, p, 0.1), std::invalid_argument);
+}
+
+TEST_CASE("DeePC warm-up returns zero for first T_ini steps", "[deepc]")
+{
+    auto [u, y] = generateOfflineData(250, 0.8, 0.2);
+    ctrl::DeePC::Params p;
+    p.T_ini = 5; p.Np = 15; p.lambda_g = 1.0; p.lambda_eq = 1e5;
+    p.rho_y = 1.0; p.rho_u = 0.1;
+    ctrl::DeePC deepc(u, y, p, 0.1);
+
+    REQUIRE_FALSE(deepc.isWarmedUp());
+    for (int k = 0; k < p.T_ini; ++k)
+        REQUIRE_THAT(deepc.computeIO(0.0, 1.0), WithinAbs(0.0, 1e-12));
+    // One more step triggers the first real solve
+    (void)deepc.computeIO(0.0, 1.0);
+    REQUIRE(deepc.isWarmedUp());
+}
+
+TEST_CASE("DeePC respects input box constraints", "[deepc]")
+{
+    auto [u_off, y_off] = generateOfflineData(300, 0.8, 0.2);
+    ctrl::DeePC::Params p;
+    p.T_ini = 5; p.Np = 15; p.lambda_g = 1.0; p.lambda_eq = 1e5;
+    p.rho_y = 1.0; p.rho_u = 0.1;
+    p.uMin  = -0.5;
+    p.uMax  =  0.5;
+    ctrl::DeePC deepc(u_off, y_off, p, 0.1);
+
+    for (int k = 0; k <= p.T_ini + 1; ++k)
+        (void)deepc.computeIO(0.0, 1.0);   // warm-up + first real step
+
+    // After warm-up, every output must respect uMin/uMax
+    for (int k = 0; k < 20; ++k) {
+        double u_cmd = deepc.computeIO(static_cast<double>(k) * 0.02, 1.0);
+        REQUIRE(u_cmd >= p.uMin - 1e-10);
+        REQUIRE(u_cmd <= p.uMax + 1e-10);
+    }
+}
+
+TEST_CASE("DeePC tracks step reference on first-order plant (IAE check)", "[deepc]")
+{
+    // Plant: y[k+1] = 0.8*y[k] + 0.2*u[k],  DC gain = 0.2/(1-0.8) = 1.0
+    constexpr double a = 0.8, b = 0.2, r = 1.0;
+    constexpr int    N_off = 400, N_sim = 200;
+    constexpr double Ts = 0.1;
+
+    auto [u_off, y_off] = generateOfflineData(N_off, a, b);
+
+    ctrl::DeePC::Params p;
+    p.T_ini    = 5;
+    p.Np       = 20;
+    p.rho_y    = 1.0;
+    p.rho_u    = 0.05;
+    p.lambda_g = 0.5;
+    p.lambda_eq= 1e5;
+    p.uMin     = -3.0;
+    p.uMax     =  3.0;
+    p.rho_admm = 1.0;
+    p.admm_iter= 150;
+    ctrl::DeePC deepc(u_off, y_off, p, Ts);
+
+    double x = 0.0, iae = 0.0;
+    for (int k = 0; k < N_sim; ++k) {
+        double y_k  = x;
+        double u_k  = deepc.computeIO(y_k, r);
+        x = a * x + b * u_k;
+        if (k > p.T_ini)          // exclude warm-up from IAE
+            iae += std::abs(r - y_k) * Ts;
+    }
+
+    // DC gain = 1.0, so the plant WILL reach r=1 under integral action (DeePC)
+    // IAE over 200 steps: a good controller should be well below 5.0
+    REQUIRE(iae < 8.0);
+    // Final value should be close to 1
+    REQUIRE_THAT(x, WithinAbs(r, 0.10));
+}
+
+// =============================================================================
+// ILC
+// =============================================================================
+
+// Single trial on a first-order plant with P-type ILC.
+static double runILCTrial(ctrl::ILC& ilc, double a, double b, double r_val)
+{
+    double x = 0.0, sse = 0.0;
+    for (int k = 0; k < ilc.trialLength(); ++k) {
+        double y = x;
+        double e = r_val - y;
+        double u = ilc.feedforward(k) + 3.0 * e;   // simple proportional feedback
+        x = a * x + b * u;
+        ilc.recordError(k, e);
+        sse += e * e;
+    }
+    ilc.updateFeedforward();
+    return std::sqrt(sse / ilc.trialLength());
+}
+
+TEST_CASE("ILC P-type constructs without error", "[ilc]")
+{
+    ctrl::ILC::Params p;
+    p.N = 50; p.Ts = 0.01; p.mode = ctrl::ILC::Mode::PType; p.Lp = 0.5;
+    REQUIRE_NOTHROW(ctrl::ILC(p));
+}
+
+TEST_CASE("ILC P-type error decreases over trials", "[ilc]")
+{
+    ctrl::ILC::Params p;
+    p.N = 100; p.Ts = 0.01;
+    p.mode = ctrl::ILC::Mode::PType;
+    p.Lp   = 0.5;
+    p.Q_filter = 0.95;
+    ctrl::ILC ilc(p);
+
+    double rms_first = 0.0, rms_last = 0.0;
+    for (int t = 0; t < 20; ++t) {
+        double rms = runILCTrial(ilc, 0.8, 0.2, 1.0);
+        if (t == 0)  rms_first = rms;
+        if (t == 19) rms_last  = rms;
+    }
+    // After 20 trials, error should have decreased significantly
+    REQUIRE(rms_last < rms_first * 0.3);
+}
+
+TEST_CASE("ILC feedforward bound respected", "[ilc]")
+{
+    ctrl::ILC::Params p;
+    p.N = 50; p.Ts = 0.01; p.Lp = 0.8;
+    p.uMin = -0.5; p.uMax = 0.5;
+    ctrl::ILC ilc(p);
+
+    // Run one trial with large errors to force saturation
+    for (int k = 0; k < p.N; ++k)
+        ilc.recordError(k, 10.0);   // very large error -> would saturate
+    ilc.updateFeedforward();
+
+    for (int k = 0; k < p.N; ++k) {
+        REQUIRE(ilc.feedforward(k) >= p.uMin - 1e-10);
+        REQUIRE(ilc.feedforward(k) <= p.uMax + 1e-10);
+    }
+}
+
+TEST_CASE("ILC norm-optimal constructs from Markov matrix", "[ilc]")
+{
+    constexpr int N = 20;
+    // First-order system Markov matrix G[i,j] = b * a^(i-j)  for i>=j
+    Eigen::MatrixXd G = Eigen::MatrixXd::Zero(N, N);
+    const double a = 0.8, b = 0.2;
+    for (int i = 0; i < N; ++i)
+        for (int j = 0; j <= i; ++j)
+            G(i, j) = b * std::pow(a, static_cast<double>(i - j));
+
+    ctrl::ILC::Params p;
+    p.N = N; p.Ts = 0.01;
+    p.mode = ctrl::ILC::Mode::NormOptimal;
+    p.rho_u = 0.5; p.rho_e = 1.0;
+    REQUIRE_NOTHROW(ctrl::ILC(p, G));
+}
+
+TEST_CASE("ILC reset restores initial state", "[ilc]")
+{
+    ctrl::ILC::Params p;
+    p.N = 30; p.Ts = 0.01; p.Lp = 0.5;
+    ctrl::ILC ilc(p);
+
+    for (int k = 0; k < p.N; ++k) ilc.recordError(k, 1.0);
+    ilc.updateFeedforward();
+    REQUIRE(ilc.trialIndex() == 1);
+    REQUIRE(ilc.feedforward(0) > 0.0);  // should have learnt something
+
+    ilc.reset();
+    REQUIRE(ilc.trialIndex() == 0);
+    for (int k = 0; k < p.N; ++k)
+        REQUIRE_THAT(ilc.feedforward(k), WithinAbs(0.0, 1e-12));
+}
+
+// =============================================================================
+// SINDy
+// =============================================================================
+
+TEST_CASE("SINDy identifies linear system exactly (OLS)", "[sindy]")
+{
+    // True dynamics: dx = -0.5*x + 2.0*u
+    ctrl::SINDy::Params p;
+    p.n_state  = 1;
+    p.n_input  = 1;
+    p.library  = ctrl::SINDyLibrary::PolyDeg2;
+    p.use_ols  = true;   // plain OLS, no sparsification
+    ctrl::SINDy sindy(p);
+
+    for (int k = 0; k < 100; ++k) {
+        Eigen::VectorXd x(1), u(1), xdot(1);
+        x(0)    = static_cast<double>(k % 10) * 0.2 - 1.0;
+        u(0)    = static_cast<double>(k % 7)  * 0.3 - 1.0;
+        xdot(0) = -0.5 * x(0) + 2.0 * u(0);
+        sindy.addSnapshot(x, u, xdot);
+    }
+
+    ctrl::SINDyModel model = sindy.fit();
+
+    // Verify prediction on test point
+    Eigen::VectorXd x_t(1), u_t(1);
+    x_t(0) = 0.7;  u_t(0) = 0.3;
+    Eigen::VectorXd pred = model.predict(x_t, u_t);
+    const double true_val = -0.5 * 0.7 + 2.0 * 0.3;
+    REQUIRE_THAT(pred(0), WithinAbs(true_val, 1e-6));
+}
+
+TEST_CASE("SINDy STLS produces sparser solution than OLS on linear system", "[sindy]")
+{
+    ctrl::SINDy::Params p_ols, p_stls;
+    p_ols.n_state  = p_stls.n_state  = 1;
+    p_ols.n_input  = p_stls.n_input  = 1;
+    p_ols.library  = p_stls.library  = ctrl::SINDyLibrary::PolyDeg2;
+    p_ols.use_ols  = true;
+    p_stls.threshold = 0.05;  p_stls.stls_iter = 15;
+
+    ctrl::SINDy sindy_ols(p_ols), sindy_stls(p_stls);
+
+    for (int k = 0; k < 200; ++k) {
+        Eigen::VectorXd x(1), u(1), xdot(1);
+        x(0)    = (k % 11) * 0.2 - 1.0;
+        u(0)    = (k % 7)  * 0.3 - 1.0;
+        xdot(0) = -0.5 * x(0) + 1.0 * u(0);  // linear system
+        sindy_ols .addSnapshot(x, u, xdot);
+        sindy_stls.addSnapshot(x, u, xdot);
+    }
+
+    auto m_ols  = sindy_ols .fit();
+    auto m_stls = sindy_stls.fit();
+
+    // STLS must be at least as sparse as OLS
+    REQUIRE(m_stls.sparsity() >= m_ols.sparsity());
+}
+
+TEST_CASE("SINDy libraryRow length matches n_terms", "[sindy]")
+{
+    ctrl::SINDy::Params p;
+    p.n_state = 2;  p.n_input = 1;
+    p.library = ctrl::SINDyLibrary::PolyDeg2;
+    ctrl::SINDy sindy(p);
+
+    Eigen::VectorXd x(2), u(1);
+    x << 0.5, -0.3;
+    u << 0.2;
+    auto row = sindy.libraryRow(x, u);
+    REQUIRE(row.size() == sindy.nTerms());
+}
+
+TEST_CASE("SINDy finite-difference snapshot matches analytic", "[sindy]")
+{
+    ctrl::SINDy::Params p;
+    p.n_state = 1; p.n_input = 1;
+    p.library = ctrl::SINDyLibrary::PolyDeg1;
+    p.use_ols = true;
+    ctrl::SINDy sindy(p);
+
+    constexpr double Ts = 0.01;
+    for (int k = 0; k < 50; ++k) {
+        Eigen::VectorXd x0(1), x1(1), u(1);
+        x0(0) = static_cast<double>(k) * 0.05;
+        u(0)  = 0.3;
+        x1(0) = 0.9 * x0(0) + 0.1 * u(0);  // Euler step of first-order system
+        sindy.addSnapshotFD(x0, x1, u, Ts);
+    }
+    auto model = sindy.fit();
+
+    // Should reconstruct dx/dt = -10*x + 10*u (from Euler: x1 = (1-a*Ts)*x0 + b*Ts*u)
+    Eigen::VectorXd xt(1), ut(1);
+    xt(0) = 1.0; ut(0) = 0.5;
+    auto pred = model.predict(xt, ut);
+    // True: dx = (0.9-1)/0.01 * x + 0.1/0.01 * u = -10*x + 10*u = -10 + 5 = -5
+    REQUIRE_THAT(pred(0), WithinAbs(-5.0, 0.1));
+}
+
+// =============================================================================
+// KoopmanEDMD
+// =============================================================================
+
+TEST_CASE("KoopmanEDMD constructs and reports correct lifted dimension", "[koopman]")
+{
+    ctrl::KoopmanEDMD::Params p;
+    p.n_state = 2; p.n_input = 1;
+    p.dict = ctrl::KoopmanDict::PolyDeg2;
+    ctrl::KoopmanEDMD edmd(p);
+    // PolyDeg2 for n=2, m=1: [1; x(2); u(1); x^2(3); xu(2); u^2(1)] = 10
+    REQUIRE(edmd.nLifted() == 10);
+    REQUIRE(edmd.snapshotCount() == 0);
+}
+
+TEST_CASE("KoopmanEDMD PolyDeg1 recovers linear dynamics exactly", "[koopman]")
+{
+    // True dynamics: x[k+1] = 0.9*x[k] + 0.1*u[k]
+    ctrl::KoopmanEDMD::Params p;
+    p.n_state = 1; p.n_input = 1;
+    p.dict = ctrl::KoopmanDict::PolyDeg1;
+    p.tikhonov = 1e-10;
+    ctrl::KoopmanEDMD edmd(p);
+
+    for (int k = 0; k < 60; ++k) {
+        Eigen::VectorXd x(1), u(1), x1(1);
+        x(0) = (k % 10) * 0.2 - 1.0;
+        u(0) = (k % 7)  * 0.3 - 1.0;
+        x1(0) = 0.9 * x(0) + 0.1 * u(0);
+        edmd.addSnapshot(x, u, x1);
+    }
+
+    ctrl::StateSpace ss = edmd.fitProjected();
+    // Projected A should be ~0.9, B ~0.1
+    REQUIRE_THAT(ss.A(0, 0), WithinAbs(0.9, 0.02));
+    REQUIRE_THAT(ss.B(0, 0), WithinAbs(0.1, 0.02));
+}
+
+TEST_CASE("KoopmanEDMD fit() returns correct output dimensions", "[koopman]")
+{
+    ctrl::KoopmanEDMD::Params p;
+    p.n_state = 1; p.n_input = 1;
+    p.dict = ctrl::KoopmanDict::PolyDeg2;
+    ctrl::KoopmanEDMD edmd(p);
+
+    for (int k = 0; k < 40; ++k) {
+        Eigen::VectorXd x(1), u(1), x1(1);
+        x(0) = k * 0.1 - 2.0; u(0) = 0.5; x1(0) = 0.8*x(0) + 0.2*u(0);
+        edmd.addSnapshot(x, u, x1);
+    }
+
+    ctrl::StateSpace ss = edmd.fit();
+    // Lifted StateSpace: rows of A = nLifted x nLifted
+    REQUIRE(ss.A.rows() == edmd.nLifted());
+    REQUIRE(ss.A.cols() == edmd.nLifted());
+    // C maps lifted -> original n_state
+    REQUIRE(ss.C.rows() == 1);
+    REQUIRE(ss.C.cols() == edmd.nLifted());
+}
+
+TEST_CASE("KoopmanEDMD lift() returns correct dimension", "[koopman]")
+{
+    ctrl::KoopmanEDMD::Params p;
+    p.n_state = 2; p.n_input = 2;
+    p.dict = ctrl::KoopmanDict::PolyDeg1;
+    ctrl::KoopmanEDMD edmd(p);
+    Eigen::VectorXd x(2), u(2);
+    x << 1.0, 2.0; u << 0.5, -0.5;
+    Eigen::VectorXd psi = edmd.lift(x, u);
+    REQUIRE(psi.size() == edmd.nLifted());
+}
+
+// =============================================================================
+// L1 Adaptive Controller
+// =============================================================================
+
+TEST_CASE("L1AdaptiveController constructs without throw", "[l1adaptive]")
+{
+    ctrl::L1AdaptiveController::Params p;
+    p.a_m = 0.9; p.b_m = 0.1; p.Gamma = 100.0; p.omega_c = 5.0;
+    REQUIRE_NOTHROW(ctrl::L1AdaptiveController(p, 0.01));
+}
+
+TEST_CASE("L1AdaptiveController output is finite and bounded", "[l1adaptive]")
+{
+    ctrl::L1AdaptiveController::Params p;
+    p.a_m = 0.85; p.b_m = 0.15; p.Gamma = 50.0; p.omega_c = 3.0;
+    p.uMin = -5.0; p.uMax = 5.0;
+    ctrl::L1AdaptiveController l1(p, 0.01);
+
+    for (int k = 0; k < 200; ++k) {
+        l1.setReference(1.0);
+        double u = l1.compute(0.5 + 0.3 * std::sin(k * 0.1));
+        REQUIRE(std::isfinite(u));
+        REQUIRE(u >= p.uMin - 1e-9);
+        REQUIRE(u <= p.uMax + 1e-9);
+    }
+}
+
+TEST_CASE("L1AdaptiveController tracks step reference (steady-state error < 15%)", "[l1adaptive]")
+{
+    ctrl::L1AdaptiveController::Params p;
+    p.a_m = 0.9; p.b_m = 0.1; p.k_g = 1.0;
+    p.Gamma = 200.0; p.omega_c = 10.0;
+    p.uMin = -5.0; p.uMax = 5.0;
+    ctrl::L1AdaptiveController l1(p, 0.01);
+
+    // First-order plant: y[k+1] = 0.85*y[k] + 0.15*u[k]
+    double y = 0.0, r = 1.0;
+    for (int k = 0; k < 500; ++k) {
+        l1.setReference(r);
+        double u = l1.compute(y);
+        y = 0.85 * y + 0.15 * u;
+    }
+    REQUIRE_THAT(y, WithinAbs(r, 0.15));
+}
+
+TEST_CASE("L1AdaptiveController reset clears adaptation state", "[l1adaptive]")
+{
+    ctrl::L1AdaptiveController::Params p;
+    p.a_m = 0.8; p.b_m = 0.2;
+    ctrl::L1AdaptiveController l1(p, 0.01);
+
+    l1.setReference(2.0);
+    for (int k = 0; k < 50; ++k) l1.compute(static_cast<double>(k) * 0.05);
+
+    l1.reset();
+    REQUIRE_THAT(l1.estimatedDisturbance(), WithinAbs(0.0, 1e-12));
+}
+
+// =============================================================================
+// CBF Safety Filter
+// =============================================================================
+
+TEST_CASE("CBFSafetyFilter constructs with shared_ptr nominal", "[cbf]")
+{
+    ctrl::PIDParams cbf_p1; cbf_p1.Kp = 2.0; cbf_p1.Ki = 0.1; cbf_p1.N = 1.0;
+    auto pid = std::make_shared<ctrl::DiscretePID>(cbf_p1, 0.01);
+    auto h_fn   = [](double x) { return 1.5 - x; };
+    auto dh_fn  = [](double)   { return -1.0; };
+    auto f0_fn  = [](double x) { return -0.1 * x; };
+    auto g_fn   = [](double)   { return 1.0; };
+    ctrl::CBFSafetyFilter::Params cp; cp.alpha = 1.0; cp.uMin = -3.0; cp.uMax = 3.0;
+    REQUIRE_NOTHROW(ctrl::CBFSafetyFilter(pid, h_fn, dh_fn, f0_fn, g_fn, cp, 0.01));
+}
+
+TEST_CASE("CBFSafetyFilter prevents state from exceeding x_max", "[cbf]")
+{
+    const double x_max = 1.5;
+    ctrl::PIDParams cbf_p2; cbf_p2.Kp = 5.0; cbf_p2.Ki = 0.5; cbf_p2.N = 1.0;
+    auto pid = std::make_shared<ctrl::DiscretePID>(cbf_p2, 0.01);
+    auto h_fn  = [x_max](double x) { return x_max - x; };
+    auto dh_fn = [](double)        { return -1.0; };
+    auto f0_fn = [](double)        { return 0.0; };
+    auto g_fn  = [](double)        { return 1.0; };
+    ctrl::CBFSafetyFilter::Params cp;
+    cp.alpha = 2.0; cp.uMin = -3.0; cp.uMax = 3.0;
+    ctrl::CBFSafetyFilter cbf(pid, h_fn, dh_fn, f0_fn, g_fn, cp, 0.01);
+
+    // Integrator: x[k+1] = x[k] + 0.01*u[k], reference=2.0 (above safe set)
+    double x = 0.0;
+    for (int k = 0; k < 300; ++k) {
+        cbf.setState(x);
+        double u = cbf.compute(2.0 - x);
+        x += 0.01 * u;
+        REQUIRE(x <= x_max + 0.05);
+    }
+}
+
+TEST_CASE("CBFSafetyFilter is inactive when state is far from boundary", "[cbf]")
+{
+    ctrl::PIDParams cbf_p3; cbf_p3.Kp = 1.0; cbf_p3.N = 1.0;
+    auto pid = std::make_shared<ctrl::DiscretePID>(cbf_p3, 0.01);
+    auto h_fn  = [](double x) { return 10.0 - x; };
+    auto dh_fn = [](double)   { return -1.0; };
+    auto f0_fn = [](double)   { return 0.0; };
+    auto g_fn  = [](double)   { return 1.0; };
+    ctrl::CBFSafetyFilter::Params cp; cp.alpha = 1.0;
+    ctrl::CBFSafetyFilter cbf(pid, h_fn, dh_fn, f0_fn, g_fn, cp, 0.01);
+
+    cbf.setState(0.0);
+    cbf.compute(1.0);
+    REQUIRE_FALSE(cbf.cbfActive());
+}
+
+// =============================================================================
+// Gaussian Process
+// =============================================================================
+
+TEST_CASE("GaussianProcess constructs and reports zero size", "[gp]")
+{
+    ctrl::GaussianProcess::Params p;
+    p.length_scale = 1.0; p.signal_var = 1.0; p.noise_var = 0.01; p.n_max = 50;
+    ctrl::GaussianProcess gp(1, p);
+    REQUIRE(gp.size() == 0);
+    REQUIRE_FALSE(gp.isFitted());
+}
+
+TEST_CASE("GaussianProcess fit and predict on near-linear data", "[gp]")
+{
+    ctrl::GaussianProcess::Params p;
+    p.length_scale = 2.0; p.signal_var = 1.0; p.noise_var = 1e-4; p.n_max = 50;
+    ctrl::GaussianProcess gp(1, p);
+
+    for (int k = 0; k < 20; ++k) {
+        Eigen::VectorXd xv(1); xv(0) = k * 0.5 - 5.0;
+        gp.addPoint(xv, 2.0 * xv(0) + 1.0);
+    }
+    gp.fit();
+    REQUIRE(gp.isFitted());
+
+    Eigen::VectorXd xt(1); xt(0) = 0.0;
+    auto pred = gp.predict(xt);
+    REQUIRE(std::isfinite(pred.mean));
+    REQUIRE(pred.variance >= 0.0);
+    REQUIRE_THAT(pred.mean, WithinAbs(1.0, 0.5));
+}
+
+TEST_CASE("GaussianProcess variance is higher away from training data", "[gp]")
+{
+    ctrl::GaussianProcess::Params p;
+    p.length_scale = 0.5; p.signal_var = 1.0; p.noise_var = 0.01; p.n_max = 30;
+    ctrl::GaussianProcess gp(1, p);
+
+    for (int k = 0; k < 10; ++k) {
+        Eigen::VectorXd xv(1); xv(0) = static_cast<double>(k);
+        gp.addPoint(xv, std::sin(xv(0)));
+    }
+    gp.fit();
+
+    Eigen::VectorXd x_near(1), x_far(1);
+    x_near(0) = 4.5;
+    x_far(0)  = 50.0;
+    auto pred_near = gp.predict(x_near);
+    auto pred_far  = gp.predict(x_far);
+    REQUIRE(pred_far.variance > pred_near.variance);
+}
+
+TEST_CASE("GaussianProcess fixed budget evicts oldest points", "[gp]")
+{
+    ctrl::GaussianProcess::Params p;
+    p.length_scale = 1.0; p.signal_var = 1.0; p.noise_var = 0.01; p.n_max = 10;
+    ctrl::GaussianProcess gp(1, p);
+
+    for (int k = 0; k < 25; ++k) {
+        Eigen::VectorXd xv(1); xv(0) = k * 0.1;
+        gp.addPoint(xv, static_cast<double>(k));
+    }
+    REQUIRE(gp.size() == 10);
+}
+
+// =============================================================================
+// Echo State Network
+// =============================================================================
+
+TEST_CASE("EchoStateNetwork constructs with correct reservoir size", "[esn]")
+{
+    ctrl::EchoStateNetwork::Params p;
+    p.n_res = 30; p.n_in = 1; p.n_out = 1;
+    p.spectral_radius = 0.85; p.sparsity = 0.8; p.washout = 10;
+    ctrl::EchoStateNetwork esn(p);
+    REQUIRE(esn.reservoirSize() == 30);
+    REQUIRE_FALSE(esn.isFitted());
+}
+
+TEST_CASE("EchoStateNetwork fit and predict returns finite values", "[esn]")
+{
+    ctrl::EchoStateNetwork::Params p;
+    p.n_res = 20; p.n_in = 1; p.n_out = 1;
+    p.spectral_radius = 0.8; p.sparsity = 0.7;
+    p.washout = 5; p.ridge = 1e-3; p.seed = 7;
+    ctrl::EchoStateNetwork esn(p);
+
+    double y = 0.0;
+    for (int k = 0; k < 100; ++k) {
+        double u = (k % 5 < 3) ? 1.0 : -1.0;
+        double y_next = std::tanh(0.7 * y + 0.4 * u);
+        Eigen::VectorXd uv(1), yv(1); uv << u; yv << y_next;
+        esn.stepReservoir(uv);
+        esn.addTrainingTarget(yv);
+        y = y_next;
+    }
+    esn.fitReadout();
+    REQUIRE(esn.isFitted());
+
+    esn.reset();
+    Eigen::VectorXd uv(1); uv << 0.5;
+    Eigen::VectorXd pred = esn.predict(uv);
+    REQUIRE(pred.size() == 1);
+    REQUIRE(std::isfinite(pred(0)));
+}
+
+TEST_CASE("EchoStateNetwork MSE on held-out sequence is reasonable", "[esn]")
+{
+    ctrl::EchoStateNetwork::Params p;
+    p.n_res = 40; p.n_in = 1; p.n_out = 1;
+    p.spectral_radius = 0.9; p.sparsity = 0.8;
+    p.washout = 20; p.ridge = 1e-4; p.seed = 42;
+    ctrl::EchoStateNetwork esn(p);
+
+    double y = 0.0;
+    for (int k = 0; k < 300; ++k) {
+        double u = (k % 3 == 0) ? 1.0 : -0.5;
+        double y_next = std::tanh(0.8 * y + 0.5 * u);
+        Eigen::VectorXd uv(1), yv(1); uv << u; yv << y_next;
+        esn.stepReservoir(uv);
+        esn.addTrainingTarget(yv);
+        y = y_next;
+    }
+    esn.fitReadout();
+
+    y = 0.0; esn.reset();
+    double mse = 0.0;
+    for (int k = 0; k < 50; ++k) {
+        double u = (k % 4 == 0) ? 0.8 : -0.3;
+        double y_true = std::tanh(0.8 * y + 0.5 * u);
+        Eigen::VectorXd uv(1); uv << u;
+        double y_hat = esn.predict(uv)(0);
+        mse += (y_true - y_hat) * (y_true - y_hat);
+        y = y_true;
+    }
+    REQUIRE(mse / 50 < 0.1);
+}
+
+// =============================================================================
+// NeuralPID
+// =============================================================================
+
+TEST_CASE("NeuralPID constructs and returns finite bounded output", "[neuralpid]")
+{
+    ctrl::NeuralPID::Params p;
+    p.n_hidden = 8; p.lr = 1e-3; p.Ts = 0.01;
+    p.plant_gain = 1.0; p.uMin = -5.0; p.uMax = 5.0;
+    ctrl::NeuralPID npid(p);
+    double u = npid.compute(0.5);
+    REQUIRE(std::isfinite(u));
+    REQUIRE(u >= p.uMin - 1e-9);
+    REQUIRE(u <= p.uMax + 1e-9);
+}
+
+TEST_CASE("NeuralPID initial gains are positive (softplus output)", "[neuralpid]")
+{
+    ctrl::NeuralPID::Params p;
+    p.Kp0 = 2.0; p.Ki0 = 0.3; p.Kd0 = 0.0;
+    p.n_hidden = 6; p.lr = 0.0;
+    p.Ts = 0.01; p.plant_gain = 1.0;
+    ctrl::NeuralPID npid(p);
+    npid.compute(0.0);
+    REQUIRE(npid.currentKp() > 0.0);
+    REQUIRE(npid.currentKi() > 0.0);
+}
+
+TEST_CASE("NeuralPID reduces tracking error over 400 adaptation steps", "[neuralpid]")
+{
+    ctrl::NeuralPID::Params p;
+    p.n_hidden = 8; p.lr = 5e-4; p.Ts = 0.01;
+    p.plant_gain = 0.2; p.Kp0 = 1.0; p.Ki0 = 0.1;
+    p.uMin = -3.0; p.uMax = 3.0;
+    ctrl::NeuralPID npid(p);
+
+    double x = 0.0;
+    double iae_first = 0.0, iae_last = 0.0;
+    for (int k = 0; k < 400; ++k) {
+        double u = npid.compute(1.0 - x);
+        x = 0.8 * x + 0.2 * u;
+        double e = std::abs(1.0 - x);
+        if (k < 100) iae_first += e;
+        if (k >= 300) iae_last  += e;
+    }
+    REQUIRE(iae_last <= iae_first + 1.0);
+}
+
+TEST_CASE("NeuralPID reset clears integrator and error state", "[neuralpid]")
+{
+    ctrl::NeuralPID::Params p;
+    p.n_hidden = 4; p.lr = 0.0; p.Ts = 0.01; p.plant_gain = 1.0;
+    ctrl::NeuralPID npid(p);
+    for (int k = 0; k < 20; ++k) npid.compute(1.0);
+    npid.reset();
+    double u = npid.compute(0.0);
+    REQUIRE_THAT(u, WithinAbs(0.0, 0.5));
+}
+
+// =============================================================================
+// CEM-MPC
+// =============================================================================
+
+TEST_CASE("CEMController constructs on double integrator", "[cem]")
+{
+    constexpr double kTs = 0.05;
+    Eigen::Matrix2d A; A << 1, kTs, 0, 1;
+    Eigen::Vector2d B; B << 0.5*kTs*kTs, kTs;
+    Eigen::MatrixXd C(1, 2); C << 1.0, 0.0;
+
+    auto f = [A, B](const Eigen::VectorXd& x, const Eigen::VectorXd& u) -> Eigen::VectorXd {
+        return A * x + B * u;
+    };
+
+    ctrl::CEMController::Params p;
+    p.Np = 10; p.N_samples = 50; p.n_iter = 3;
+    p.Q = 10.0; p.R = 0.1; p.uMin = -2.0; p.uMax = 2.0; p.seed = 1;
+    REQUIRE_NOTHROW(ctrl::CEMController(p, f, C, kTs));
+}
+
+TEST_CASE("CEMController output is within bounds", "[cem]")
+{
+    constexpr double kTs = 0.05;
+    Eigen::Matrix2d A; A << 1, kTs, 0, 1;
+    Eigen::Vector2d B; B << 0.5*kTs*kTs, kTs;
+    Eigen::MatrixXd C(1, 2); C << 1.0, 0.0;
+
+    auto f = [A, B](const Eigen::VectorXd& x, const Eigen::VectorXd& u) -> Eigen::VectorXd {
+        return A * x + B * u;
+    };
+
+    ctrl::CEMController::Params p;
+    p.Np = 8; p.N_samples = 40; p.n_iter = 2;
+    p.Q = 1.0; p.R = 0.1; p.uMin = -1.5; p.uMax = 1.5; p.seed = 2;
+    ctrl::CEMController cem(p, f, C, kTs);
+
+    Eigen::Vector2d x0; x0.setZero();
+    Eigen::VectorXd r(1); r << 1.0;
+    cem.setState(x0); cem.setReference(r);
+    auto u_vec = cem.computeRef(x0, r);
+
+    REQUIRE(u_vec.size() == 1);
+    REQUIRE(u_vec(0) >= p.uMin - 1e-9);
+    REQUIRE(u_vec(0) <= p.uMax + 1e-9);
+}
+
+TEST_CASE("CEMController drives double integrator toward reference", "[cem]")
+{
+    constexpr double kTs = 0.05;
+    Eigen::Matrix2d A; A << 1, kTs, 0, 1;
+    Eigen::Vector2d B; B << 0.5*kTs*kTs, kTs;
+    Eigen::MatrixXd C(1, 2); C << 1.0, 0.0;
+
+    auto f = [A, B](const Eigen::VectorXd& x, const Eigen::VectorXd& u) -> Eigen::VectorXd {
+        return A * x + B * u;
+    };
+
+    ctrl::CEMController::Params p;
+    p.Np = 20; p.N_samples = 80; p.n_iter = 4;
+    p.Q = 100.0; p.R = 0.1; p.uMin = -3.0; p.uMax = 3.0; p.seed = 42;
+    ctrl::CEMController cem(p, f, C, kTs);
+
+    Eigen::Vector2d x; x.setZero();
+    Eigen::VectorXd r(1); r << 1.0;
+
+    for (int k = 0; k < 60; ++k) {
+        cem.setState(x); cem.setReference(r);
+        auto u_vec = cem.computeRef(x, r);
+        x = A * x + B * u_vec(0);
+    }
+    REQUIRE_THAT(x(0), WithinAbs(1.0, 0.3));
+}
+
+TEST_CASE("CEMController IController compute() returns finite value", "[cem]")
+{
+    constexpr double kTs = 0.05;
+    Eigen::Matrix2d A; A << 1, kTs, 0, 1;
+    Eigen::Vector2d B; B << 0.5*kTs*kTs, kTs;
+    Eigen::MatrixXd C(1, 2); C << 1.0, 0.0;
+
+    auto f = [A, B](const Eigen::VectorXd& x, const Eigen::VectorXd& u) -> Eigen::VectorXd {
+        return A * x + B * u;
+    };
+
+    ctrl::CEMController::Params p;
+    p.Np = 5; p.N_samples = 20; p.n_iter = 2;
+    p.Q = 1.0; p.R = 0.1; p.uMin = -2.0; p.uMax = 2.0; p.seed = 3;
+    ctrl::CEMController cem(p, f, C, kTs);
+
+    Eigen::Vector2d x0; x0.setZero();
+    cem.setState(x0);
+    double u = cem.compute(0.5);
+    REQUIRE(std::isfinite(u));
 }

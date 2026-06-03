@@ -4,6 +4,15 @@
 #include <pybind11/functional.h>
 
 #include "ControllerToolbox.h"
+#include "IterativeLearningControl.h"
+#include "SINDy.h"
+#include "KoopmanEDMD.h"
+#include "L1AdaptiveController.h"
+#include "CBFSafetyFilter.h"
+#include "GaussianProcess.h"
+#include "EchoStateNetwork.h"
+#include "NeuralPID.h"
+#include "CEMController.h"
 
 namespace py = pybind11;
 
@@ -969,6 +978,396 @@ Example
         .def("set_actual_output", &ctrl::AntiWindupWrapper::setActualOutput,
              py::arg("u_applied"),
              "Feed back the true applied output when external clamping overrides the internal one.");
+
+    // -----------------------------------------------------------------------
+    // DeePC
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::DeePC::Params>(m, "DeePCParams",
+        "Design parameters for the Data-Enabled Predictive Controller.")
+        .def(py::init<>())
+        .def_readwrite("T_ini",      &ctrl::DeePC::Params::T_ini,
+                       "Past window length (>= plant order).")
+        .def_readwrite("Np",         &ctrl::DeePC::Params::Np,
+                       "Prediction horizon.")
+        .def_readwrite("rho_y",      &ctrl::DeePC::Params::rho_y,
+                       "Output tracking weight (Q = rho_y * I).")
+        .def_readwrite("rho_u",      &ctrl::DeePC::Params::rho_u,
+                       "Input effort weight (R = rho_u * I).")
+        .def_readwrite("lambda_g",   &ctrl::DeePC::Params::lambda_g,
+                       "Tikhonov regularisation on the Hankel coefficient vector g.")
+        .def_readwrite("lambda_eq",  &ctrl::DeePC::Params::lambda_eq,
+                       "Penalty weight for past-input consistency H_up*g = u_ini.")
+        .def_readwrite("uMin",       &ctrl::DeePC::Params::uMin,   "Input lower bound.")
+        .def_readwrite("uMax",       &ctrl::DeePC::Params::uMax,   "Input upper bound.")
+        .def_readwrite("rho_admm",   &ctrl::DeePC::Params::rho_admm,
+                       "ADMM coupling penalty rho.")
+        .def_readwrite("admm_iter",  &ctrl::DeePC::Params::admm_iter,
+                       "ADMM iterations per control step.");
+
+    py::class_<ctrl::DeePC, ctrl::IController,
+               std::shared_ptr<ctrl::DeePC>>(m, "DeePC", R"doc(
+Data-Enabled Predictive Controller (DeePC).
+
+Uses the Willems fundamental lemma: a pair of block-Hankel matrices built from
+persistently-exciting offline I/O data implicitly represents the system's reachable
+trajectories.  No explicit model identification step is required.
+
+Example
+-------
+>>> import numpy as np
+>>> N = 300; Ts = 0.1
+>>> u_off = np.random.choice([-1.0, 1.0], size=N)   # PRBS offline input
+>>> y_off = np.zeros(N)
+>>> # ... simulate plant to get y_off ...
+>>> p = ctrl.DeePCParams()
+>>> p.T_ini = 5; p.Np = 20; p.lambda_g = 1.0; p.rho_y = 1.0; p.rho_u = 0.1
+>>> deepc = ctrl.DeePC(u_off, y_off, p, Ts)
+>>> u = deepc.compute_io(y_measured, r_setpoint)
+)doc")
+        .def(py::init<const Eigen::VectorXd&, const Eigen::VectorXd&,
+                      const ctrl::DeePC::Params&, double>(),
+             py::arg("u_data"), py::arg("y_data"), py::arg("params"), py::arg("Ts"),
+             "Construct and pre-factor the ADMM Hessian from offline I/O data.")
+        .def("compute_io",        &ctrl::DeePC::computeIO,
+             py::arg("y_meas"), py::arg("r"),
+             "Compute u from absolute plant output y_meas and setpoint r.")
+        .def("compute",           &ctrl::DeePC::compute,       py::arg("error"),
+             "IController::compute(error=r-y).  Call set_reference(r) first.")
+        .def("set_reference",     &ctrl::DeePC::setReference,  py::arg("r"))
+        .def("reset",             &ctrl::DeePC::reset)
+        .def("sample_time",       &ctrl::DeePC::sampleTime)
+        .def("is_warmed_up",      &ctrl::DeePC::isWarmedUp,
+             "True once the T_ini-step warm-up buffer is full.")
+        .def("last_primal_res",   &ctrl::DeePC::lastPrimalResidual,
+             "||H_uf*g - u|| after the last ADMM solve (convergence diagnostic).");
+
+    // -----------------------------------------------------------------------
+    // ILC
+    // -----------------------------------------------------------------------
+    py::enum_<ctrl::ILC::Mode>(m, "ILCMode")
+        .value("PType",       ctrl::ILC::Mode::PType,       "u_{j+1}[k] = Q*u_j[k] + Lp*e_j[k]")
+        .value("DType",       ctrl::ILC::Mode::DType,       "PType + derivative term Ld*(de/dt)")
+        .value("NormOptimal", ctrl::ILC::Mode::NormOptimal, "Minimum-norm update using Markov matrix G")
+        .export_values();
+
+    py::class_<ctrl::ILC::Params>(m, "ILCParams",
+        "Parameters for the Iterative Learning Controller.")
+        .def(py::init<>())
+        .def_readwrite("N",        &ctrl::ILC::Params::N,        "Trial length (steps per trial).")
+        .def_readwrite("Ts",       &ctrl::ILC::Params::Ts,       "Sample time [s].")
+        .def_readwrite("mode",     &ctrl::ILC::Params::mode,     "ILC update law (PType/DType/NormOptimal).")
+        .def_readwrite("Lp",       &ctrl::ILC::Params::Lp,       "Proportional ILC gain in (0,1).")
+        .def_readwrite("Ld",       &ctrl::ILC::Params::Ld,       "Derivative ILC gain.")
+        .def_readwrite("Q_filter", &ctrl::ILC::Params::Q_filter, "Forgetting factor for old feedforward [0,1].")
+        .def_readwrite("rho_u",    &ctrl::ILC::Params::rho_u,    "Input effort weight (norm-optimal only).")
+        .def_readwrite("rho_e",    &ctrl::ILC::Params::rho_e,    "Tracking error weight (norm-optimal only).")
+        .def_readwrite("uMin",     &ctrl::ILC::Params::uMin,     "Feedforward lower bound.")
+        .def_readwrite("uMax",     &ctrl::ILC::Params::uMax,     "Feedforward upper bound.");
+
+    py::class_<ctrl::ILC>(m, "ILC", R"doc(
+Iterative Learning Controller (ILC).
+
+Learns a feedforward correction that eliminates repeating tracking errors across
+trials of a fixed-duration task.  Supports P-type, D-type, and norm-optimal
+update laws.
+
+Example
+-------
+>>> p = ctrl.ILCParams(); p.N = 100; p.Ts = 0.01; p.Lp = 0.5
+>>> ilc = ctrl.ILC(p)
+>>> for k in range(p.N):
+...     u = ilc.feedforward(k) + pid.compute(r[k] - y[k])
+...     ilc.record_error(k, r[k] - y[k])
+>>> ilc.update_feedforward()    # compute next-trial feedforward
+)doc")
+        .def(py::init<const ctrl::ILC::Params&>(),
+             py::arg("params"),
+             "Construct P-type or D-type ILC.")
+        .def(py::init<const ctrl::ILC::Params&, const Eigen::MatrixXd&>(),
+             py::arg("params"), py::arg("G"),
+             "Construct norm-optimal ILC from N*N Markov matrix G.")
+        .def("feedforward",        &ctrl::ILC::feedforward,        py::arg("k"),
+             "Return the stored feedforward input for step k of the current trial.")
+        .def("record_error",       &ctrl::ILC::recordError,        py::arg("k"), py::arg("error"),
+             "Record tracking error at step k.")
+        .def("update_feedforward", &ctrl::ILC::updateFeedforward,
+             "Compute and store the updated feedforward for the next trial.")
+        .def("reset",              &ctrl::ILC::reset,
+             "Reset feedforward to zero and restart from trial 0.")
+        .def("trial_index",        &ctrl::ILC::trialIndex,   "Current trial index.")
+        .def("trial_length",       &ctrl::ILC::trialLength,  "Trial length N.")
+        .def("last_rms_error",     &ctrl::ILC::lastRMSError, "RMS error of the last completed trial.");
+
+    // -----------------------------------------------------------------------
+    // SINDy
+    // -----------------------------------------------------------------------
+    py::enum_<ctrl::SINDyLibrary>(m, "SINDyLibrary",
+        "Basis function set for the SINDy library Theta(x,u).")
+        .value("PolyDeg1", ctrl::SINDyLibrary::PolyDeg1, "1 + x + u")
+        .value("PolyDeg2", ctrl::SINDyLibrary::PolyDeg2, "PolyDeg1 + all degree-2 monomials")
+        .value("PolyDeg3", ctrl::SINDyLibrary::PolyDeg3, "PolyDeg2 + all degree-3 monomials")
+        .value("PolyTrig", ctrl::SINDyLibrary::PolyTrig, "PolyDeg2 + sin/cos of each state")
+        .export_values();
+
+    py::class_<ctrl::SINDy::Params>(m, "SINDyParams",
+        "Parameters for the SINDy sparse identification algorithm.")
+        .def(py::init<>())
+        .def_readwrite("n_state",   &ctrl::SINDy::Params::n_state,   "State dimension.")
+        .def_readwrite("n_input",   &ctrl::SINDy::Params::n_input,   "Input dimension.")
+        .def_readwrite("library",   &ctrl::SINDy::Params::library,   "Basis function set.")
+        .def_readwrite("threshold", &ctrl::SINDy::Params::threshold, "STLS sparsity threshold.")
+        .def_readwrite("stls_iter", &ctrl::SINDy::Params::stls_iter, "STLS iterations.")
+        .def_readwrite("use_ols",   &ctrl::SINDy::Params::use_ols,   "If True, use plain OLS (no sparsification).");
+
+    py::class_<ctrl::SINDyModel>(m, "SINDyModel", R"doc(
+Fitted SINDy sparse model: xdot = Theta(x,u) * Xi.
+
+Returned by SINDy.fit().  Use predict(x, u) to evaluate the identified dynamics.
+)doc")
+        .def("predict",      &ctrl::SINDyModel::predict,
+             py::arg("x_dev"), py::arg("u_dev"),
+             "Evaluate identified dynamics at (x_dev, u_dev).  Returns xdot.")
+        .def("n_state",      &ctrl::SINDyModel::nState)
+        .def("n_input",      &ctrl::SINDyModel::nInput)
+        .def("n_terms",      &ctrl::SINDyModel::nTerms)
+        .def("sparsity",     &ctrl::SINDyModel::sparsity,
+             "Non-zero fraction of Xi (1.0 = fully sparse, 0.0 = dense).")
+        .def("coefficients", &ctrl::SINDyModel::coefficients,
+             py::return_value_policy::copy,
+             "Coefficient matrix Xi (n_terms x n_state).");
+
+    py::class_<ctrl::SINDy>(m, "SINDy", R"doc(
+Sparse Identification of Nonlinear Dynamics (SINDy).
+
+Collects I/O snapshots, builds a polynomial (or trig) library Theta(x,u),
+and solves for the sparsest coefficient matrix Xi via STLS.
+
+Example
+-------
+>>> p = ctrl.SINDyParams(); p.n_state=2; p.n_input=1; p.threshold=0.05
+>>> s = ctrl.SINDy(p)
+>>> s.add_snapshot(x_dev, u_dev, xdot_measured)   # or add_snapshot_fd
+>>> model = s.fit()                                 # SINDyModel
+>>> xdot_hat = model.predict(x_test, u_test)
+)doc")
+        .def(py::init<const ctrl::SINDy::Params&>(), py::arg("params"))
+        .def("add_snapshot",    &ctrl::SINDy::addSnapshot,
+             py::arg("x_dev"), py::arg("u_dev"), py::arg("xdot_dev"),
+             "Add a snapshot: (state_dev, input_dev) -> derivative.")
+        .def("add_snapshot_fd", &ctrl::SINDy::addSnapshotFD,
+             py::arg("x_k"), py::arg("x_k1"), py::arg("u_k"), py::arg("Ts"),
+             "Add a snapshot using forward finite-difference: xdot approx = (x_{k+1} - x_k) / Ts.")
+        .def("fit",             &ctrl::SINDy::fit,
+             "Fit the sparse model.  Returns a SINDyModel.")
+        .def("snapshot_count",  &ctrl::SINDy::snapshotCount)
+        .def("n_terms",         &ctrl::SINDy::nTerms,
+             "Number of library terms for the chosen basis.")
+        .def("library_row",     &ctrl::SINDy::libraryRow,
+             py::arg("x"), py::arg("u"),
+             "Return the library row Theta(x, u) as a numpy array.");
+
+    // -----------------------------------------------------------------------
+    // KoopmanEDMD
+    // -----------------------------------------------------------------------
+    py::enum_<ctrl::KoopmanDict>(m, "KoopmanDict",
+        "Dictionary type for Koopman/EDMD lifting map.")
+        .value("PolyDeg1", ctrl::KoopmanDict::PolyDeg1, "Linear DMDc ([1;x;u])")
+        .value("PolyDeg2", ctrl::KoopmanDict::PolyDeg2, "Quadratic lifting")
+        .value("RBF",      ctrl::KoopmanDict::RBF,      "Gaussian RBF centres")
+        .export_values();
+
+    py::class_<ctrl::KoopmanEDMD::Params>(m, "KoopmanEDMDParams")
+        .def(py::init<>())
+        .def_readwrite("n_state",    &ctrl::KoopmanEDMD::Params::n_state)
+        .def_readwrite("n_input",    &ctrl::KoopmanEDMD::Params::n_input)
+        .def_readwrite("dict",       &ctrl::KoopmanEDMD::Params::dict)
+        .def_readwrite("rbf_n_cent", &ctrl::KoopmanEDMD::Params::rbf_n_cent)
+        .def_readwrite("rbf_width",  &ctrl::KoopmanEDMD::Params::rbf_width)
+        .def_readwrite("tikhonov",   &ctrl::KoopmanEDMD::Params::tikhonov);
+
+    py::class_<ctrl::KoopmanEDMD>(m, "KoopmanEDMD",
+        "Extended Dynamic Mode Decomposition (Koopman operator approximation).")
+        .def(py::init<const ctrl::KoopmanEDMD::Params&>(), py::arg("params"))
+        .def("add_snapshot",    &ctrl::KoopmanEDMD::addSnapshot,
+             py::arg("x_k"), py::arg("u_k"), py::arg("x_k1"))
+        .def("fit",             &ctrl::KoopmanEDMD::fit,
+             "Fit full lifted StateSpace.")
+        .def("fit_projected",   &ctrl::KoopmanEDMD::fitProjected,
+             "Fit and project back to original n_state dimensions.")
+        .def("n_lifted",        &ctrl::KoopmanEDMD::nLifted)
+        .def("snapshot_count",  &ctrl::KoopmanEDMD::snapshotCount)
+        .def("lift",            &ctrl::KoopmanEDMD::lift,
+             py::arg("x"), py::arg("u"),
+             "Return the lifted observable vector psi(x, u).");
+
+    // -----------------------------------------------------------------------
+    // L1 Adaptive Controller
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::L1AdaptiveController::Params>(m, "L1AdaptiveParams")
+        .def(py::init<>())
+        .def_readwrite("a_m",       &ctrl::L1AdaptiveController::Params::a_m)
+        .def_readwrite("b_m",       &ctrl::L1AdaptiveController::Params::b_m)
+        .def_readwrite("k_g",       &ctrl::L1AdaptiveController::Params::k_g)
+        .def_readwrite("Gamma",     &ctrl::L1AdaptiveController::Params::Gamma)
+        .def_readwrite("omega_c",   &ctrl::L1AdaptiveController::Params::omega_c)
+        .def_readwrite("sigma_max", &ctrl::L1AdaptiveController::Params::sigma_max)
+        .def_readwrite("uMin",      &ctrl::L1AdaptiveController::Params::uMin)
+        .def_readwrite("uMax",      &ctrl::L1AdaptiveController::Params::uMax);
+
+    py::class_<ctrl::L1AdaptiveController, ctrl::IController,
+               std::shared_ptr<ctrl::L1AdaptiveController>>(m, "L1AdaptiveController",
+        "L1 Adaptive Controller (Hovakimyan 2010). Bounded-transient adaptive control.")
+        .def(py::init<const ctrl::L1AdaptiveController::Params&, double>(),
+             py::arg("params"), py::arg("Ts"))
+        .def("compute",                 &ctrl::L1AdaptiveController::compute, py::arg("error"))
+        .def("set_reference",           &ctrl::L1AdaptiveController::setReference, py::arg("r"))
+        .def("reset",                   &ctrl::L1AdaptiveController::reset)
+        .def("sample_time",             &ctrl::L1AdaptiveController::sampleTime)
+        .def("estimated_disturbance",   &ctrl::L1AdaptiveController::estimatedDisturbance)
+        .def("prediction_error",        &ctrl::L1AdaptiveController::predictionError);
+
+    // -----------------------------------------------------------------------
+    // CBF Safety Filter
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::CBFSafetyFilter::Params>(m, "CBFParams")
+        .def(py::init<>())
+        .def_readwrite("alpha", &ctrl::CBFSafetyFilter::Params::alpha)
+        .def_readwrite("uMin",  &ctrl::CBFSafetyFilter::Params::uMin)
+        .def_readwrite("uMax",  &ctrl::CBFSafetyFilter::Params::uMax)
+        .def_readwrite("slack", &ctrl::CBFSafetyFilter::Params::slack);
+
+    py::class_<ctrl::CBFSafetyFilter, ctrl::IController,
+               std::shared_ptr<ctrl::CBFSafetyFilter>>(m, "CBFSafetyFilter",
+        "Control Barrier Function safety filter (Ames 2017). 1-QP safety wrapper.")
+        .def(py::init<std::shared_ptr<ctrl::IController>,
+                      std::function<double(double)>,
+                      std::function<double(double)>,
+                      std::function<double(double)>,
+                      std::function<double(double)>,
+                      const ctrl::CBFSafetyFilter::Params&, double>(),
+             py::arg("nominal"), py::arg("h"), py::arg("dh_dx"),
+             py::arg("f0"), py::arg("g"), py::arg("params"), py::arg("Ts"))
+        .def("compute",       &ctrl::CBFSafetyFilter::compute,     py::arg("error"))
+        .def("set_state",     &ctrl::CBFSafetyFilter::setState,    py::arg("x"))
+        .def("reset",         &ctrl::CBFSafetyFilter::reset)
+        .def("cbf_active",    &ctrl::CBFSafetyFilter::cbfActive)
+        .def("barrier_value", &ctrl::CBFSafetyFilter::barrierValue)
+        .def("nominal_output",&ctrl::CBFSafetyFilter::nominalOutput);
+
+    // -----------------------------------------------------------------------
+    // GaussianProcess
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::GaussianProcess::Params>(m, "GPParams")
+        .def(py::init<>())
+        .def_readwrite("length_scale", &ctrl::GaussianProcess::Params::length_scale)
+        .def_readwrite("signal_var",   &ctrl::GaussianProcess::Params::signal_var)
+        .def_readwrite("noise_var",    &ctrl::GaussianProcess::Params::noise_var)
+        .def_readwrite("n_max",        &ctrl::GaussianProcess::Params::n_max);
+
+    py::class_<ctrl::GaussianProcess::Prediction>(m, "GPPrediction")
+        .def_readonly("mean",     &ctrl::GaussianProcess::Prediction::mean)
+        .def_readonly("variance", &ctrl::GaussianProcess::Prediction::variance);
+
+    py::class_<ctrl::GaussianProcess>(m, "GaussianProcess",
+        "Gaussian Process Regression (SE kernel, Cholesky inference, fixed-budget).")
+        .def(py::init<int, const ctrl::GaussianProcess::Params&>(),
+             py::arg("x_dim"), py::arg("params"))
+        .def("add_point", &ctrl::GaussianProcess::addPoint,
+             py::arg("x"), py::arg("y"))
+        .def("fit",       &ctrl::GaussianProcess::fit)
+        .def("predict",   &ctrl::GaussianProcess::predict,   py::arg("x_test"))
+        .def("size",      &ctrl::GaussianProcess::size)
+        .def("is_fitted", &ctrl::GaussianProcess::isFitted)
+        .def("reset",     &ctrl::GaussianProcess::reset);
+
+    // -----------------------------------------------------------------------
+    // EchoStateNetwork
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::EchoStateNetwork::Params>(m, "ESNParams")
+        .def(py::init<>())
+        .def_readwrite("n_res",           &ctrl::EchoStateNetwork::Params::n_res)
+        .def_readwrite("n_in",            &ctrl::EchoStateNetwork::Params::n_in)
+        .def_readwrite("n_out",           &ctrl::EchoStateNetwork::Params::n_out)
+        .def_readwrite("spectral_radius", &ctrl::EchoStateNetwork::Params::spectral_radius)
+        .def_readwrite("sparsity",        &ctrl::EchoStateNetwork::Params::sparsity)
+        .def_readwrite("alpha",           &ctrl::EchoStateNetwork::Params::alpha)
+        .def_readwrite("ridge",           &ctrl::EchoStateNetwork::Params::ridge)
+        .def_readwrite("washout",         &ctrl::EchoStateNetwork::Params::washout)
+        .def_readwrite("seed",            &ctrl::EchoStateNetwork::Params::seed);
+
+    py::class_<ctrl::EchoStateNetwork>(m, "EchoStateNetwork",
+        "Echo State Network / Reservoir Computing (Jaeger 2001). Random reservoir, trained readout.")
+        .def(py::init<const ctrl::EchoStateNetwork::Params&>(), py::arg("params"))
+        .def("step_reservoir",      &ctrl::EchoStateNetwork::stepReservoir, py::arg("u"))
+        .def("add_training_target", &ctrl::EchoStateNetwork::addTrainingTarget, py::arg("y_target"))
+        .def("fit_readout",         &ctrl::EchoStateNetwork::fitReadout)
+        .def("predict",
+             py::overload_cast<const Eigen::VectorXd&>(&ctrl::EchoStateNetwork::predict),
+             py::arg("u"))
+        .def("reset",            &ctrl::EchoStateNetwork::reset)
+        .def("is_fitted",        &ctrl::EchoStateNetwork::isFitted)
+        .def("reservoir_size",   &ctrl::EchoStateNetwork::reservoirSize)
+        .def("reservoir_state",  &ctrl::EchoStateNetwork::reservoirState,
+             py::return_value_policy::copy);
+
+    // -----------------------------------------------------------------------
+    // NeuralPID
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::NeuralPID::Params>(m, "NeuralPIDParams")
+        .def(py::init<>())
+        .def_readwrite("n_hidden",       &ctrl::NeuralPID::Params::n_hidden)
+        .def_readwrite("lr",             &ctrl::NeuralPID::Params::lr)
+        .def_readwrite("Ts",             &ctrl::NeuralPID::Params::Ts)
+        .def_readwrite("plant_gain",     &ctrl::NeuralPID::Params::plant_gain)
+        .def_readwrite("max_weight_norm",&ctrl::NeuralPID::Params::max_weight_norm)
+        .def_readwrite("uMin",           &ctrl::NeuralPID::Params::uMin)
+        .def_readwrite("uMax",           &ctrl::NeuralPID::Params::uMax)
+        .def_readwrite("Kp0",            &ctrl::NeuralPID::Params::Kp0)
+        .def_readwrite("Ki0",            &ctrl::NeuralPID::Params::Ki0)
+        .def_readwrite("Kd0",            &ctrl::NeuralPID::Params::Kd0);
+
+    py::class_<ctrl::NeuralPID, ctrl::IController,
+               std::shared_ptr<ctrl::NeuralPID>>(m, "NeuralPID",
+        "Online Neural PID - small NN adapts Kp/Ki/Kd via online backpropagation.")
+        .def(py::init<const ctrl::NeuralPID::Params&>(), py::arg("params"))
+        .def("compute",     &ctrl::NeuralPID::compute, py::arg("error"))
+        .def("reset",       &ctrl::NeuralPID::reset)
+        .def("sample_time", &ctrl::NeuralPID::sampleTime)
+        .def("current_kp",  &ctrl::NeuralPID::currentKp)
+        .def("current_ki",  &ctrl::NeuralPID::currentKi)
+        .def("current_kd",  &ctrl::NeuralPID::currentKd);
+
+    // -----------------------------------------------------------------------
+    // CEM-MPC
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::CEMController::Params>(m, "CEMParams")
+        .def(py::init<>())
+        .def_readwrite("Np",         &ctrl::CEMController::Params::Np)
+        .def_readwrite("N_samples",  &ctrl::CEMController::Params::N_samples)
+        .def_readwrite("n_iter",     &ctrl::CEMController::Params::n_iter)
+        .def_readwrite("elite_frac", &ctrl::CEMController::Params::elite_frac)
+        .def_readwrite("sigma_init", &ctrl::CEMController::Params::sigma_init)
+        .def_readwrite("sigma_min",  &ctrl::CEMController::Params::sigma_min)
+        .def_readwrite("Q",          &ctrl::CEMController::Params::Q)
+        .def_readwrite("R",          &ctrl::CEMController::Params::R)
+        .def_readwrite("uMin",       &ctrl::CEMController::Params::uMin)
+        .def_readwrite("uMax",       &ctrl::CEMController::Params::uMax)
+        .def_readwrite("seed",       &ctrl::CEMController::Params::seed);
+
+    py::class_<ctrl::CEMController, ctrl::IController,
+               std::shared_ptr<ctrl::CEMController>>(m, "CEMController",
+        "Cross-Entropy Method MPC (derivative-free stochastic rollout optimisation).")
+        .def(py::init<const ctrl::CEMController::Params&,
+                      ctrl::StateFunc,
+                      Eigen::MatrixXd, double>(),
+             py::arg("params"), py::arg("f"), py::arg("C"), py::arg("Ts"))
+        .def("compute_ref",   &ctrl::CEMController::computeRef,
+             py::arg("x_cur"), py::arg("y_ref"))
+        .def("compute",       &ctrl::CEMController::compute,      py::arg("error"))
+        .def("set_state",     &ctrl::CEMController::setState,     py::arg("x"))
+        .def("set_reference", &ctrl::CEMController::setReference, py::arg("r_ref"))
+        .def("reset",         &ctrl::CEMController::reset)
+        .def("last_cost",     &ctrl::CEMController::lastCost);
 
     // -----------------------------------------------------------------------
     // Fuzzy module (optional - guarded by CTRL_HAS_FUZZY)

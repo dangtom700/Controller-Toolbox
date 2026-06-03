@@ -249,10 +249,10 @@ ADRCController::ADRCController(const ctrl::StateSpace& ss, const OperatingPoint&
         const double Ts    = ss.Ts;
 
         // Bandwidth tuning (Ts=1s). Stability constraint for backward-Euler ADRC:
-        // omega_o*Ts < ~0.5 and omega_c*Ts < ~0.2 to avoid closed-loop instability from
-        // discretisation error in the ESO (verified empirically: omega_o=0.75 diverges).
-        // Safe choice: omega_o=0.5/Ts=0.5, omega_c=omega_o/5=0.10.
-        ctrl::ADRCParams p0; p0.omega_o=0.50; p0.omega_c=0.10; p0.b0=0.9*Ts;         p0.uMin=-0.5; p0.uMax=0.5;
+        // omega_o*Ts < 0.5 (strict) and omega_c*Ts < 0.2 to avoid closed-loop instability
+        // from discretisation error in the ESO (verified empirically: omega_o=0.75 diverges).
+        // omega_o=0.45 gives omega_o*Ts=0.45 < 0.5 with 10% margin; omega_c=omega_o/5=0.09.
+        ctrl::ADRCParams p0; p0.omega_o=0.45; p0.omega_c=0.09; p0.b0=0.9*Ts;         p0.uMin=-0.5; p0.uMax=0.5;
         ctrl::ADRCParams p1; p1.omega_o=0.40; p1.omega_c=0.08; p1.b0=0.073*x1_98*Ts; p1.uMin=-0.5; p1.uMax=0.5;
         ctrl::ADRCParams p2; p2.omega_o=0.40; p2.omega_c=0.08; p2.b0=(141.0/85.0)*Ts; p2.uMin=-0.5; p2.uMax=0.5;
 

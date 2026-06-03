@@ -499,4 +499,157 @@ assert np.isfinite(pf_s.state()[0]), "ParticleFilter state not finite"
 assert pf_s.effective_sample_size() > 1.0, "ParticleFilter N_eff <= 1"
 print('ParticleFilter smoke test passed.')
 
+# DeePC
+_N_dc  = 200; _Ts_dc = 0.1
+_u_off = np.array([float(1 - 2*(i % 2)) for i in range(_N_dc)])  # PRBS +-1
+_y_off = np.zeros(_N_dc)
+_x_dc  = 0.0
+for _k in range(_N_dc):            # first-order plant  y[k+1] = 0.8*y[k] + 0.2*u[k]
+    _y_off[_k] = _x_dc
+    _x_dc = 0.8 * _x_dc + 0.2 * _u_off[_k]
+_dp = ctrl.DeePCParams()
+_dp.T_ini = 4; _dp.Np = 10; _dp.lambda_g = 1.0; _dp.lambda_eq = 1e4
+_dp.rho_y = 1.0; _dp.rho_u = 0.1; _dp.uMin = -2.0; _dp.uMax = 2.0
+_dc = ctrl.DeePC(_u_off, _y_off, _dp, _Ts_dc)
+assert not _dc.is_warmed_up(), "DeePC should not be warmed up yet"
+for _i in range(6):                # warm-up (T_ini=4 steps needed)
+    _dc.compute_io(0.0, 1.0)
+assert _dc.is_warmed_up(), "DeePC should be warmed up after T_ini+1 steps"
+_u_dc = _dc.compute_io(0.5, 1.0)
+assert np.isfinite(_u_dc), "DeePC output not finite"
+assert _dp.uMin <= _u_dc <= _dp.uMax, "DeePC output violates bounds"
+assert 'deepc' in ctrl.features(), "features() missing 'deepc'"
+print('DeePC smoke test passed.')
+
+# ILC P-type
+_ip = ctrl.ILCParams()
+_ip.N = 20; _ip.Ts = 0.01; _ip.mode = ctrl.ILCMode.PType; _ip.Lp = 0.5
+_ip.uMin = -2.0; _ip.uMax = 2.0
+_ilc = ctrl.ILC(_ip)
+assert _ilc.trial_index() == 0
+for _k in range(20):
+    _ilc.record_error(_k, 1.0 - float(_k) / 20.0)
+_ilc.update_feedforward()
+assert _ilc.trial_index() == 1
+assert _ilc.last_rms_error() > 0.0
+_ff0 = _ilc.feedforward(0)
+assert _ip.uMin <= _ff0 <= _ip.uMax, "ILC feedforward out of bounds"
+assert 'ilc' in ctrl.features(), "features() missing 'ilc'"
+print('ILC smoke test passed.')
+
+# SINDy: identify simple 1-state linear system  dx = -0.5*x + u
+_sp = ctrl.SINDyParams()
+_sp.n_state = 1; _sp.n_input = 1
+_sp.library = ctrl.SINDyLibrary.PolyDeg2
+_sp.threshold = 0.01; _sp.stls_iter = 10
+_sindy = ctrl.SINDy(_sp)
+for _k in range(200):
+    _x = np.array([float(_k % 10) * 0.1 - 0.5])
+    _u = np.array([float(_k % 5) * 0.2 - 0.4])
+    _xdot = np.array([-0.5 * _x[0] + _u[0]])
+    _sindy.add_snapshot(_x, _u, _xdot)
+_sm = _sindy.fit()
+assert _sm.n_state() == 1, "SINDy n_state mismatch"
+_test_x = np.array([1.0]); _test_u = np.array([0.5])
+_pred = _sm.predict(_test_x, _test_u)
+assert np.isfinite(_pred[0]), "SINDy predict not finite"
+assert abs(_pred[0] - (-0.5*1.0 + 0.5)) < 0.2, f"SINDy prediction far off: {_pred[0]:.3f}"
+assert 'sindy' in ctrl.features(), "features() missing 'sindy'"
+print('SINDy smoke test passed.')
+
+# KoopmanEDMD
+_kp = ctrl.KoopmanEDMDParams()
+_kp.n_state = 1; _kp.n_input = 1; _kp.dict = ctrl.KoopmanDict.PolyDeg2
+_edmd = ctrl.KoopmanEDMD(_kp)
+for _k in range(30):
+    _xk = np.array([float(_k) * 0.1 - 1.5])
+    _uk = np.array([0.3])
+    _xk1 = np.array([0.8 * _xk[0] + 0.2 * _uk[0]])
+    _edmd.add_snapshot(_xk, _uk, _xk1)
+_ss_proj = _edmd.fit_projected()
+assert _ss_proj.state_size() >= 1, "KoopmanEDMD fit_projected state size mismatch"
+assert 'koopman_edmd' in ctrl.features(), "features() missing 'koopman_edmd'"
+print('KoopmanEDMD smoke test passed.')
+
+# L1 Adaptive
+_l1p = ctrl.L1AdaptiveParams()
+_l1p.a_m = 0.8; _l1p.b_m = 0.2; _l1p.Gamma = 50.0; _l1p.omega_c = 2.0
+_l1p.uMin = -2.0; _l1p.uMax = 2.0
+_l1 = ctrl.L1AdaptiveController(_l1p, 0.01)
+_l1.set_reference(1.0)
+_u_l1 = _l1.compute(0.5)
+assert np.isfinite(_u_l1), "L1Adaptive output not finite"
+assert 'l1_adaptive' in ctrl.features()
+print('L1AdaptiveController smoke test passed.')
+
+# CBF Safety Filter
+_pid_cbf = ctrl.DiscretePID(ctrl.PIDParams(), 0.01)
+_h_fn  = lambda x: 1.5 - x
+_dh_fn = lambda x: -1.0
+_f0_fn = lambda x: 0.0
+_g_fn  = lambda x: 0.01
+_cbfp  = ctrl.CBFParams(); _cbfp.alpha = 1.0; _cbfp.uMin = -5.0; _cbfp.uMax = 5.0
+_cbf   = ctrl.CBFSafetyFilter(_pid_cbf, _h_fn, _dh_fn, _f0_fn, _g_fn, _cbfp, 0.01)
+_cbf.set_state(1.0)
+_u_cbf = _cbf.compute(0.5)
+assert np.isfinite(_u_cbf), "CBF output not finite"
+assert 'cbf_safety_filter' in ctrl.features()
+print('CBFSafetyFilter smoke test passed.')
+
+# GaussianProcess
+_gpp = ctrl.GPParams(); _gpp.length_scale = 1.0; _gpp.signal_var = 1.0; _gpp.noise_var = 0.01
+_gpr = ctrl.GaussianProcess(1, _gpp)
+for _k in range(10):
+    _gpr.add_point(np.array([float(_k) * 0.5]), float(np.sin(_k * 0.5)))
+_gpr.fit()
+_pred = _gpr.predict(np.array([1.0]))
+assert np.isfinite(_pred.mean), "GP mean not finite"
+assert _pred.variance >= 0.0, "GP variance negative"
+assert 'gaussian_process' in ctrl.features()
+print('GaussianProcess smoke test passed.')
+
+# EchoStateNetwork
+_ep = ctrl.ESNParams(); _ep.n_res = 20; _ep.n_in = 1; _ep.n_out = 1
+_ep.spectral_radius = 0.8; _ep.washout = 5
+_esn = ctrl.EchoStateNetwork(_ep)
+for _k in range(30):
+    _u_esn = np.array([float(_k % 3) * 0.5 - 0.5])
+    _esn.step_reservoir(_u_esn)
+    _esn.add_training_target(np.array([np.tanh(0.5 * float(_k % 5))]))
+_esn.fit_readout()
+assert _esn.is_fitted(), "ESN not fitted"
+_y_esn = _esn.predict(np.array([0.5]))
+assert np.isfinite(_y_esn[0]), "ESN predict not finite"
+assert 'echo_state_network' in ctrl.features()
+print('EchoStateNetwork smoke test passed.')
+
+# NeuralPID
+_np_p = ctrl.NeuralPIDParams()
+_np_p.n_hidden = 4; _np_p.lr = 1e-3; _np_p.Ts = 0.01; _np_p.plant_gain = 0.2
+_np_p.uMin = -2.0; _np_p.uMax = 2.0
+_npid = ctrl.NeuralPID(_np_p)
+_u_npid = _npid.compute(0.5)
+assert np.isfinite(_u_npid), "NeuralPID not finite"
+assert np.isfinite(_npid.current_kp()), "NeuralPID Kp not finite"
+assert 'neural_pid' in ctrl.features()
+print('NeuralPID smoke test passed.')
+
+# CEM-MPC
+_cp = ctrl.CEMParams(); _cp.Np = 5; _cp.N_samples = 20; _cp.n_iter = 2
+_cp.Q = 1.0; _cp.R = 0.1; _cp.uMin = -1.0; _cp.uMax = 1.0
+import numpy as _npcem
+_A_cem = _npcem.array([[0.9]])
+_B_cem = _npcem.array([[0.2]])
+_C_cem = _npcem.array([[1.0]])
+_D_cem = _npcem.array([[0.0]])
+_ss_cem = ctrl.StateSpace(_A_cem, _B_cem, _C_cem, _D_cem, 0.01)
+def _f_cem(x, u): return _ss_cem.A @ x + _ss_cem.B @ u
+_cem = ctrl.CEMController(_cp, _f_cem, _C_cem, 0.01)
+_cem.set_state(_npcem.array([0.0]))
+_cem.set_reference(_npcem.array([1.0]))
+_u_cem = _cem.compute_ref(_npcem.array([0.0]), _npcem.array([1.0]))
+assert _npcem.isfinite(_u_cem[0]), "CEM output not finite"
+assert 'cem_mpc' in ctrl.features()
+print('CEMController smoke test passed.')
+
 print('\nAll smoke tests passed.')

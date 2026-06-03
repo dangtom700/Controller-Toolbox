@@ -98,6 +98,16 @@
 #include "AntiWindupWrapper.h"          ///< AntiWindupWrapper - generic anti-windup decorator (conditioning technique, Hanus 1987).
 #include "TubeMPC.h"                    ///< TubeMPC - robust MPC with mRPI tube for bounded additive disturbances (Mayne 2005).
 #include "ParticleFilter.h"             ///< ParticleFilter - SIR particle filter for nonlinear/non-Gaussian state estimation.
+#include "DeePC.h"                      ///< DeePC - Data-Enabled Predictive Control (Coulson 2019); Hankel-based QP, ADMM solver.
+#include "IterativeLearningControl.h"   ///< ILC  - P-type, D-type and norm-optimal iterative learning control (Bristow 2006).
+#include "SINDy.h"                      ///< SINDy - sparse identification of nonlinear dynamics (Brunton 2016); STLS regression.
+#include "KoopmanEDMD.h"                ///< Koopman/EDMD - Extended Dynamic Mode Decomposition; linear lifting for nonlinear MPC/LQR.
+#include "L1AdaptiveController.h"       ///< L1 Adaptive - bounded-transient adaptive control with LP filter (Hovakimyan 2010).
+#include "CBFSafetyFilter.h"            ///< CBF - Control Barrier Function safety filter; 1-QP wrapper for any IController (Ames 2017).
+#include "GaussianProcess.h"            ///< GP - Gaussian Process Regression; SE kernel, Cholesky inference, fixed-budget online.
+#include "EchoStateNetwork.h"           ///< ESN - Echo State Network; random reservoir, ridge-regression readout (Jaeger 2001).
+#include "NeuralPID.h"                  ///< NeuralPID - online neural network adapts Kp/Ki/Kd via backprop through linearised plant.
+#include "CEMController.h"              ///< CEM-MPC - Cross-Entropy Method MPC; derivative-free stochastic rollout optimisation.
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,

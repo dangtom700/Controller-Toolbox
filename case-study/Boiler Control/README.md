@@ -99,7 +99,7 @@ returns a 3-element valve-delta command.
 | 4 | MPC | `DiscreteMPC` x3 | Per-axis FOPDT condensed QP; Np=30, Nc=8, qp_max_iter=1000 |
 | 5 | SMC | `DiscreteSMC` x3 | compute(y - ref) sign convention; per-axis phi=[0.10,0.20,0.05], K=0.10 |
 | 6 | ESC | `ExtremumSeeker` | Model-free gradient descent maximizing negative IAE sum |
-| 7 | ADRC | `DiscreteADRC` x3 | omega_o=0.50 rad/s; omega_o*Ts=0.50 (stable backward-Euler limit) |
+| 7 | ADRC | `DiscreteADRC` x3 | omega_o=0.45 rad/s; omega_o*Ts=0.45 < 0.50 (backward-Euler stable with 10% margin); omega_c=0.09 |
 | 8 | LeadLag-PID | `DiscreteLeadLag` + `DiscretePID` x3 | Lead compensator cascaded with PI |
 | 9 | SmithPredictor | `SmithPredictor` x3 | Per-axis 1-step transport delay model |
 | 10 | GPC-RLS | `GeneralizedPredictiveController` + `RecursiveLeastSquares` x3 | Adaptive self-tuning GPC; NaN if RLS not yet converged |
@@ -130,8 +130,9 @@ returns a 3-element valve-delta command.
   controller silently falls back to the OP-B PID gains. This is visible as identical IAE to PID.
 - **AutoGS / LPV-GS:** `DiscreteLQR` is not an `IController`; LQR gains are wrapped in a `DiscretePID`
   proxy (Kp = K(0,0)) for the `design_fn` interface (TK26-1).
-- **ADRC stability:** omega_o * Ts must be < 0.5 for the backward-Euler ESO. At Ts=1 s,
-  omega_o is capped at 0.50 rad/s.
+- **ADRC stability:** `omega_o * Ts` must be strictly < 0.5 for the backward-Euler ESO.
+  At Ts=1 s, `omega_o = 0.45` rad/s gives `omega_o*Ts = 0.45` with ~10% margin. Do not
+  increase `omega_o` above 0.49 without reducing `Ts`.
 
 ---
 

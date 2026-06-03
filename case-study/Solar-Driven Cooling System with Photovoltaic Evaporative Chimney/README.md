@@ -90,6 +90,10 @@ PV power:       W_PV = G * A_PV * eta_PV
 System curve: Hm_sys = sys_a + sys_b * Q^2
 Pump curve:   Hm_pump = kr^2 * H0 * (1 - (Q / (kr*Q0))^2)   [Eqs. 22-27]
 Intersection gives actual flow Q; pump power W_pump = rho*g*Q*Hm / eta_p
+
+Pump efficiency (parabolic BEP model):
+  ratio = Q / (kr * Q0)
+  eta_p = eta_p0 * ratio * (2 - ratio)      [= eta_p0 at rated flow, 0 at no flow]
 ```
 
 ### Key Plant Parameters

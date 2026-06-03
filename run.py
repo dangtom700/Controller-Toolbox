@@ -376,7 +376,7 @@ def phase_compile():
 
     script_abs = os.path.abspath(script)
     cwd = os.getcwd()
-    with subprocess.Popen(script_abs, shell=True, stdout=subprocess.PIPE,
+    with subprocess.Popen(['cmd', '/c', script_abs], stdout=subprocess.PIPE,
                           stderr=subprocess.STDOUT, text=True,
                           encoding='utf-8', errors='backslashreplace',
                           cwd=cwd) as proc:
@@ -413,11 +413,11 @@ def phase_bindings():
 
     cwd = os.getcwd()
 
-    def _run_cmd(cmd_str, label):
-        """Stream a shell command to stdout; return its exit code."""
+    def _run_cmd(cmd_list, label):
+        """Stream a command (list form) to stdout; return its exit code."""
         print(f'  [{label}]\n')
         with subprocess.Popen(
-            cmd_str, shell=True, stdout=subprocess.PIPE,
+            cmd_list, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, text=True,
             encoding='utf-8', errors='backslashreplace', cwd=cwd
         ) as proc:
@@ -430,7 +430,7 @@ def phase_bindings():
     # Step 1: cmake configure — adds CTRL_BUILD_PYTHON_BINDINGS=ON to the
     # existing build directory without reconfiguring everything else.
     rc = _run_cmd(
-        'cmake -S . -B build -DCTRL_BUILD_PYTHON_BINDINGS=ON -G Ninja',
+        ['cmake', '-S', '.', '-B', 'build', '-DCTRL_BUILD_PYTHON_BINDINGS=ON', '-G', 'Ninja'],
         'cmake configure (bindings)'
     )
     if rc != 0:
@@ -439,7 +439,7 @@ def phase_bindings():
 
     # Step 2: build only the ctrl_toolbox binding target (sequential, no --parallel).
     rc = _run_cmd(
-        'cmake --build build --target ctrl_toolbox',
+        ['cmake', '--build', 'build', '--target', 'ctrl_toolbox'],
         'cmake build ctrl_toolbox'
     )
     if rc != 0:
@@ -766,6 +766,7 @@ def phase_bug_report(log_path):
 
     if not matches:
         print('  No failure indicators found - no bug report written.\n')
+        os.remove(log_path)   # clean up log if no failures found
         return
 
     # Merge failure contexts where their windows overlap or touch
@@ -839,10 +840,10 @@ if __name__ == '__main__':
 
     try:
         phase_clean()
-        phase_compile()
-        phase_bindings()   # build ctrl_toolbox .pyd + smoke test
-        phase_run()
-        phase_python()
+        # phase_compile()
+        # phase_bindings()   # build ctrl_toolbox .pyd + smoke test
+        # phase_run()
+        # phase_python()
     finally:
         sys.stdout = sys.__stdout__
         _log_file.close()

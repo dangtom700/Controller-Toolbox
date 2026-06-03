@@ -320,7 +320,10 @@ static HydResult solveHydraulics(double kr, const HydraulicsParams& hy)
 
     double ratio   = Q_op / (kr * hy.Q0);
     ratio          = std::min(ratio, 1.0);
-    double eta_p   = std::max(hy.eta_p0 * ratio * (1.0 - ratio), 1e-6);
+    // Parabolic pump efficiency curve: eta = eta_p0 * (2*q - q^2) = eta_p0*(1-(1-q)^2).
+    // Peaks at ratio=1 (rated/BEP flow) giving eta=eta_p0, zero at ratio=0 (no flow).
+    // Previous formula ratio*(1-ratio) was wrong - gave zero efficiency at rated conditions.
+    double eta_p   = std::max(hy.eta_p0 * ratio * (2.0 - ratio), 1e-6);
     double W_pump  = hy.rho * hy.g * Q_op_m3 * Hm / eta_p;
 
     return {Q_op, Hm, W_pump, eta_p};

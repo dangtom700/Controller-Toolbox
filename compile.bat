@@ -107,6 +107,13 @@ for %%T in (
     ex66_antwindup_wrapper
     ex67_tube_mpc
     ex68_particle_filter
+    ex69_deepc
+    ex70_ilc
+    ex71_sindy
+    ex72_koopman_edmd
+    ex73_l1_adaptive
+    ex74_cbf_safety
+    ex75_gp_esn_neural
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

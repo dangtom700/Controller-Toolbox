@@ -25,7 +25,13 @@ if(NOT pybind11_FOUND)
         GIT_TAG        v2.13.6
         GIT_SHALLOW    TRUE
     )
+    # pybind11 v2.13 uses cmake_minimum_required(VERSION 3.5). CMake 3.27+ warns
+    # "Compatibility with CMake < 3.10 will be removed" for any sub-project that
+    # declares a minimum below 3.10. Our root already requires 3.16, so the
+    # warning is a false alarm - suppress it for the duration of this fetch.
+    set(CMAKE_WARN_DEPRECATED OFF)
     FetchContent_MakeAvailable(pybind11)
+    set(CMAKE_WARN_DEPRECATED ON)
 endif()
 
 pybind11_add_module(ctrl_toolbox

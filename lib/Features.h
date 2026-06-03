@@ -73,6 +73,16 @@ inline std::unordered_map<std::string, bool> features()
         {"anti_windup_wrapper",     true},  // always compiled (header-only AntiWindupWrapper.h)
         {"tube_mpc",                true},  // always compiled (TubeMPC.cpp in core sources)
         {"particle_filter",         true},  // always compiled (ParticleFilter.cpp in core sources)
+        {"deepc",                   true},  // always compiled (DeePC.cpp in core sources)
+        {"ilc",                     true},  // always compiled (IterativeLearningControl.cpp)
+        {"sindy",                   true},  // always compiled (SINDy.cpp)
+        {"koopman_edmd",            true},  // always compiled (KoopmanEDMD.cpp)
+        {"l1_adaptive",             true},  // always compiled (L1AdaptiveController.cpp)
+        {"cbf_safety_filter",       true},  // always compiled (CBFSafetyFilter.cpp)
+        {"gaussian_process",        true},  // always compiled (GaussianProcess.cpp)
+        {"echo_state_network",      true},  // always compiled (EchoStateNetwork.cpp)
+        {"neural_pid",              true},  // always compiled (NeuralPID.cpp)
+        {"cem_mpc",                 true},  // always compiled (CEMController.cpp)
     };
 }
 

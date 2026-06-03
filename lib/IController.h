@@ -102,6 +102,9 @@ public:
      */
     virtual bool isHealthy() const { return true; }
 
+    /** @brief Human-readable controller identifier. Override in each subclass. */
+    virtual std::string name() const { return ""; }
+
     // -- Observer (telemetry) ------------------------------------------------
 
     /**

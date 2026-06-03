@@ -70,6 +70,15 @@ def create_controller(evaluated_model_path, output_cpp_path):
             model_params = json.load(f)
             
         logging.info("Validating model structure...")
+        for _key in ('A', 'B', 'C', 'D'):
+            if _key not in model_params:
+                continue
+            for _row in model_params[_key]:
+                for _v in _row:
+                    if not isinstance(_v, (int, float)):
+                        raise ValueError(
+                            f"Matrix {_key} contains non-numeric value: {_v!r}"
+                        )
         if 'fit_percentage' in model_params and model_params['fit_percentage'] < 60.0:
             logging.warning(f"Model fit is poor ({model_params['fit_percentage']}%). Controller performance may degrade.")
 

@@ -94,6 +94,15 @@ add_example(ex66_antwindup_wrapper)
 add_example(ex67_tube_mpc)
 add_example(ex68_particle_filter)
 
+# Part 30: Data-driven and ML algorithms
+add_example(ex69_deepc)
+add_example(ex70_ilc)
+add_example(ex71_sindy)
+add_example(ex72_koopman_edmd)
+add_example(ex73_l1_adaptive)
+add_example(ex74_cbf_safety)
+add_example(ex75_gp_esn_neural)
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)

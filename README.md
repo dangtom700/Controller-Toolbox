@@ -2,9 +2,9 @@
 
 A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H-infinity, Lead-Lag, Smith Predictor, Repetitive Control, Feedforward, Extremum Seeking, Kalman/EKF/UKF/MHE filtering, Fuzzy Logic inference, SOPDT/FOPDT identification, RLS and N4SID system identification, plus an integrated tuner suite and analysis layer.
 
-Thirty-plus controller implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.
+Sixty-plus controller implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.
 
-Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. 69 C++ example programs and 88 Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and new algorithm extension. Four end-to-end physics case studies (boiler-turbine, hydraulic SMISMO, tug boat, solar cooling) exercise the full controller stack on nonlinear plants.
+Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. C++ example programs and 88 Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and new algorithm extension. Five end-to-end physics case studies (boiler-turbine, hydraulic SMISMO, tug boat, solar cooling, porous-plate humidification) exercise the full controller stack on nonlinear plants.
 
 ---
 
@@ -107,6 +107,7 @@ several scenarios and writes CSV telemetry for post-processing.
 | [Meter In Meter Out Control](case-study/Meter%20In%20Meter%20Out%20Control/) | SMISMO 9-state hydraulic actuator | 14 | 3 -> 42 |
 | [Tug Boat Numerical Simulation](case-study/Tug%20Boat%20Numerical%20Simulation/) | 3-DOF tug, 6-state MIMO + thrust allocation | 16 | 4 -> 64 |
 | [Solar-Driven Cooling System](case-study/Solar-Driven%20Cooling%20System%20with%20Photovoltaic%20Evaporative%20Chimney/) | Algebraic SISO solar cooling + PV evaporative chimney | 9 | 5 -> 45 |
+| [Porous Fiber Plate Humidification System](case-study/Porous%20Fiber%20Plate%20Humidification%20System/) | Laminar flat-plate evaporative humidifier + room ODE | 10 | 5 -> 50 |
 
 Controllers span the full stack: PID, LQR, LQG, MPC, GPC-RLS, SMC, ADRC, Fuzzy-PID,
 Smith Predictor, MRAC, H-infinity, TubeMPC, NonlinearMPC, Feedback Linearisation,
@@ -189,25 +190,19 @@ docker run --rm -it -v "$(pwd):/work" -w /work \
 
 ## Project Status
 
-**Current test counts (2026-05-28):** 78 C++ executables pass | 79 Python examples pass | 0 failures.
-test_catch2_advanced: 51 test cases, 189 assertions. All Catch2 tags: [qp][mpc][gpc][kalman][lqr][smc][adrc][leadlag][hinf][ekf][ukf][rc][rls][n4sid][c2d][stack][observer][sopdt][mhe][linearisation][fl][mrac][btm][zpetc].
+**Baseline (Part 29 - 2026-06-01):** C++ 90 passed | 0 failed . Python 88 passed | 0 failed.  
+Case studies: Boiler 216/216 . SMISMO 42/42 . Solar 45/45 . Tug 64/64 . Humidification 50/50.  
+`bug_report.txt`: 0 blocks after a clean run (36-entry `safe_phrases` list in `run.py` suppresses all known benign messages).
 
-**Part 18 additions (2026-05-28):**
-- `SOPDTIdentifier` - graphical (ZN tangent + 28.3%/63.2% crossings) and optimization (nested golden-section) SOPDT step-response identification; Rivera 1986 IMC-PID tuning for SOPDT models.
-- `MovingHorizonEstimator` - condensed QP dual of MPC; reuses `GradientProjectionQP`; box constraints on process noise; horizon ramp-up from 1 to N.
-- `DiscreteHinf::solveMuSyn` extended with full rational D-scaling (first-order D_j(z) fit per channel, plant state augmentation).
-- 23 new C++ examples (ex32-ex54) and 21 new Python examples (ex50-ex70) covering corrector patterns: Cascade, Additive, Observer+SF, Supervisory.
+**Part 29 additions and fixes (2026-06-01):**
+- Added fifth case study: **Porous Fiber Plate Humidification System** (Ye et al. 2024) - laminar flat-plate evaporative humidifier + first-order room moisture ODE; 10 controllers * 5 scenarios = 50 runs.
+- Fixed `pybind11` v2.13 CMake 3.27+ deprecation warning (`cmake_minimum_required VERSION 3.5`) by wrapping `FetchContent_MakeAvailable` with `CMAKE_WARN_DEPRECATED OFF` in `bindings/CMakeLists.txt`.
+- Fixed boiler ADRC `omega_o=0.50` at exact boundary (`omega_o*Ts=0.50` - strict `< 0.5` required); reduced to `omega_o=0.45`, `omega_c=0.09`.
+- Fixed `computeY3` in boiler plant: guard against division by zero when drum water level `x3 -> 0`.
+- Fixed solar pump efficiency formula: `ratio*(1-ratio)` gave zero efficiency at rated flow; corrected to `ratio*(2-ratio)` (parabola centred at BEP).
 
-**Extension session (2026-05-28, E1-E5 all implemented):**
-- `MRACController` - Lyapunov MRAC with sigma-modification and parameter projection; ADRC-convention `compute(y_plant)`. Examples: ex57/ex73.
-- `FeedbackLinearisationController` - exact FL for SISO affine-in-control; DriftFn+GainFn; `setState(x)` required each step. Examples: ex56/ex72.
-- `LinearisationHelper` - `jacobianX/U` (central-diff, scaled epsilon); `lineariseAtPoint` ZOH. Examples: ex55/ex71.
-- `BalancedTruncation` - `balancedTruncate(sys, r)` with Hinf error bound 2.Sigmasigma_i; `suggestOrder`. Examples: ex58/ex74.
-- `ZeroPhaseTrackingFilter` - ZPETC (Tomizuka 1987); `transmissionZeros` via `GeneralizedEigenSolver`. Examples: ex59/ex75.
+**Part 28 (2026-05-31):** 5-phase `run.py`; `AdaptiveSmithPredictor` cross-correlation fix; 8 Python example bugs fixed; 36-entry `safe_phrases` for clean `bug_report.txt`; 4 case-study READMEs added.
 
-**Earlier additions:**
-- `FuzzyLogic` module (2026-05-23): Mamdani and Takagi-Sugeno inference engines, `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor` - see [docs/DOCUMENTATION.md Section 5.2](docs/DOCUMENTATION.md).
-- `ExtendedKalmanFilter`, `UnscentedKalmanFilter`, `RepetitiveController`, `GeneralizedPredictiveController`, `SubspaceID`, `DiscreteHinf`, `FOPDTIdentifier`, `SOPDTIdentifier`, `MovingHorizonEstimator`, `FeedforwardController`, `GradientProjectionQP`.
-- Five math corrections (2026-05-22): MPC condensed prediction formula, PID backward-Euler integral law, LQG D!=0 staleness warning, Smith Predictor feedthrough, SMC `c_de` Ts-absorption.
+**Part 27 (2026-05-31):** Python example quality pass - 11 internal `[FAIL]` checks fixed in 10 example files.
 
 Details in [docs/cumulative_bug_report.md](docs/cumulative_bug_report.md). Real-time deployment guidance in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
