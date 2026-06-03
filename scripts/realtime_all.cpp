@@ -195,7 +195,7 @@ static void print_rt_stats(const RTResult &r)
 int main()
 {
     std::cout << "============================================================\n";
-    std::cout << "  Real-Time Controller Runner  -  All lib/ controllers\n";
+    std::cout << "  Real-Time Controller Runner  -  All lib/ controllers (13 total)\n";
     std::cout << "  Ts=" << Ts << " s  N=" << N_STEP << " steps  ref=" << REF << "\n";
     std::cout << "============================================================\n";
 
@@ -477,6 +477,249 @@ int main()
         auto r = run_realtime_error("stack", stack, plant, false);
         print_rt_stats(r);
         all_results.push_back(r);
+    }
+
+    // =========================================================
+    //  9. MRACController  (absolute-y interface)
+    // =========================================================
+    {
+        std::cout << "\n[9] MRACController  - real-time\n";
+        ctrl::MRACParams mp;
+        mp.a_m = 0.85; mp.b_m = 0.15; mp.gamma_r = 5.0; mp.gamma_y = 5.0;
+        ctrl::MRACController mrac(mp, Ts);
+
+        RTResult res;
+        res.name = "mrac";
+        res.t.reserve(N_STEP); res.y.reserve(N_STEP);
+        res.e.reserve(N_STEP); res.u.reserve(N_STEP);
+
+        auto plant_m = make_plant();
+        Eigen::VectorXd x = Eigen::VectorXd::Zero(n);
+        double y = 0.0;
+
+        const auto Ts_ns = std::chrono::nanoseconds(static_cast<long long>(Ts * 1e9));
+        RTStats stats; double total_compute = 0.0;
+        TimePoint loop_start = Clock::now();
+
+        for (int k = 0; k < N_STEP; ++k) {
+            TimePoint deadline = loop_start + k * Ts_ns;
+            auto now2 = Clock::now();
+            if (now2 < deadline) std::this_thread::sleep_until(deadline);
+            double jitter_us = Duration(Clock::now() - deadline).count() * 1e6;
+            stats.max_jitter_us = std::max(stats.max_jitter_us, jitter_us);
+            if (jitter_us > 1.5 * Ts * 1e6) ++stats.missed;
+
+            auto cs = Clock::now();
+            mrac.setReference(REF);
+            double u = mrac.compute(y);
+            total_compute += Duration(Clock::now() - cs).count() * 1e6;
+
+            Eigen::VectorXd uv(1); uv << u;
+            y = ctrl::ssStep(plant_m, x, uv)(0);
+            res.t.push_back(k * Ts); res.y.push_back(y);
+            res.e.push_back(REF - y); res.u.push_back(u);
+        }
+        stats.avg_compute_us = total_compute / N_STEP;
+        res.stats = stats; res.y_final = y;
+
+        std::ofstream f(std::string(PROJECT_DATA_DIR) + "/rt_mrac.csv");
+        f << "t,y,error,u\n";
+        for (int k = 0; k < N_STEP; ++k)
+            f << std::fixed << std::setprecision(6)
+              << res.t[k] << "," << res.y[k] << "," << res.e[k] << "," << res.u[k] << "\n";
+        print_rt_stats(res);
+        all_results.push_back(res);
+    }
+
+    // =========================================================
+    //  10. L1AdaptiveController  (absolute-y interface)
+    // =========================================================
+    {
+        std::cout << "\n[10] L1AdaptiveController  - real-time\n";
+        ctrl::L1AdaptiveController::Params lp;
+        lp.a_m = 0.85; lp.b_m = 0.15; lp.Gamma = 50.0; lp.omega_c = 2.0;
+        ctrl::L1AdaptiveController l1(lp, Ts);
+
+        RTResult res;
+        res.name = "l1adapt";
+        res.t.reserve(N_STEP); res.y.reserve(N_STEP);
+        res.e.reserve(N_STEP); res.u.reserve(N_STEP);
+
+        auto plant_l1 = make_plant();
+        Eigen::VectorXd x = Eigen::VectorXd::Zero(n);
+        double y = 0.0;
+
+        const auto Ts_ns = std::chrono::nanoseconds(static_cast<long long>(Ts * 1e9));
+        RTStats stats; double total_compute = 0.0;
+        TimePoint loop_start = Clock::now();
+
+        for (int k = 0; k < N_STEP; ++k) {
+            TimePoint deadline = loop_start + k * Ts_ns;
+            auto now2 = Clock::now();
+            if (now2 < deadline) std::this_thread::sleep_until(deadline);
+            double jitter_us = Duration(Clock::now() - deadline).count() * 1e6;
+            stats.max_jitter_us = std::max(stats.max_jitter_us, jitter_us);
+            if (jitter_us > 1.5 * Ts * 1e6) ++stats.missed;
+
+            auto cs = Clock::now();
+            l1.setReference(REF);
+            double u = l1.compute(y);
+            total_compute += Duration(Clock::now() - cs).count() * 1e6;
+
+            Eigen::VectorXd uv(1); uv << u;
+            y = ctrl::ssStep(plant_l1, x, uv)(0);
+            res.t.push_back(k * Ts); res.y.push_back(y);
+            res.e.push_back(REF - y); res.u.push_back(u);
+        }
+        stats.avg_compute_us = total_compute / N_STEP;
+        res.stats = stats; res.y_final = y;
+
+        std::ofstream f(std::string(PROJECT_DATA_DIR) + "/rt_l1adapt.csv");
+        f << "t,y,error,u\n";
+        for (int k = 0; k < N_STEP; ++k)
+            f << std::fixed << std::setprecision(6)
+              << res.t[k] << "," << res.y[k] << "," << res.e[k] << "," << res.u[k] << "\n";
+        print_rt_stats(res);
+        all_results.push_back(res);
+    }
+
+    // =========================================================
+    //  11. NeuralPID  (error-based, standard compute() interface)
+    // =========================================================
+    {
+        std::cout << "\n[11] NeuralPID  - real-time\n";
+        ctrl::NeuralPID::Params np;
+        np.n_hidden = 8; np.lr = 1e-3; np.Ts = Ts;
+        ctrl::NeuralPID npid(np);
+        auto r = run_realtime_error("neuralpid", npid, plant, false);
+        print_rt_stats(r);
+        all_results.push_back(r);
+    }
+
+    // =========================================================
+    //  12. CBFSafetyFilter (wrapping DiscretePID)
+    // =========================================================
+    {
+        std::cout << "\n[12] CBFSafetyFilter  - real-time\n";
+        ctrl::PIDParams cbf_pp; cbf_pp.Kp = 2.0; cbf_pp.Ki = 0.1;
+        auto pid_cbf = std::make_shared<ctrl::DiscretePID>(cbf_pp, Ts);
+        const double x_max = 1.5;
+        ctrl::CBFSafetyFilter::Params cbfp;
+        cbfp.alpha = 1.0; cbfp.uMin = -5.0; cbfp.uMax = 5.0;
+        ctrl::CBFSafetyFilter cbf(
+            pid_cbf,
+            [x_max](double x) { return x_max - x; },
+            [](double)        { return -1.0; },
+            [](double x)      { return 0.8 * x; },
+            [](double)        { return 0.2; },
+            cbfp, Ts);
+
+        RTResult res;
+        res.name = "cbf";
+        res.t.reserve(N_STEP); res.y.reserve(N_STEP);
+        res.e.reserve(N_STEP); res.u.reserve(N_STEP);
+
+        auto plant_cbf = make_plant();
+        Eigen::VectorXd x = Eigen::VectorXd::Zero(n);
+        double y = 0.0;
+
+        const auto Ts_ns = std::chrono::nanoseconds(static_cast<long long>(Ts * 1e9));
+        RTStats stats; double total_compute = 0.0;
+        TimePoint loop_start = Clock::now();
+
+        for (int k = 0; k < N_STEP; ++k) {
+            TimePoint deadline = loop_start + k * Ts_ns;
+            auto now2 = Clock::now();
+            if (now2 < deadline) std::this_thread::sleep_until(deadline);
+            double jitter_us = Duration(Clock::now() - deadline).count() * 1e6;
+            stats.max_jitter_us = std::max(stats.max_jitter_us, jitter_us);
+            if (jitter_us > 1.5 * Ts * 1e6) ++stats.missed;
+
+            auto cs = Clock::now();
+            cbf.setState(y);
+            double u = cbf.compute(REF - y);
+            total_compute += Duration(Clock::now() - cs).count() * 1e6;
+
+            Eigen::VectorXd uv(1); uv << u;
+            y = ctrl::ssStep(plant_cbf, x, uv)(0);
+            res.t.push_back(k * Ts); res.y.push_back(y);
+            res.e.push_back(REF - y); res.u.push_back(u);
+        }
+        stats.avg_compute_us = total_compute / N_STEP;
+        res.stats = stats; res.y_final = y;
+
+        std::ofstream f(std::string(PROJECT_DATA_DIR) + "/rt_cbf.csv");
+        f << "t,y,error,u\n";
+        for (int k = 0; k < N_STEP; ++k)
+            f << std::fixed << std::setprecision(6)
+              << res.t[k] << "," << res.y[k] << "," << res.e[k] << "," << res.u[k] << "\n";
+        print_rt_stats(res);
+        all_results.push_back(res);
+    }
+
+    // =========================================================
+    //  13. DeePC (absolute-y interface, pre-collected offline data)
+    // =========================================================
+    {
+        std::cout << "\n[13] DeePC  - real-time\n";
+        const int N_data = 300;
+        Eigen::VectorXd u_d(N_data), y_d(N_data);
+        {
+            double x_gen = 0.0;
+            for (int k = 0; k < N_data; ++k) {
+                double u_k = 0.8 * std::sin(0.3 * k) + 0.4 * std::sin(1.1 * k);
+                x_gen  = 0.8 * x_gen + 0.2 * u_k;
+                u_d(k) = u_k;
+                y_d(k) = x_gen;
+            }
+        }
+        ctrl::DeePC::Params dp;
+        dp.T_ini = 5; dp.Np = 10;
+        dp.rho_y = 1.0; dp.rho_u = 0.1;
+        dp.admm_iter = 50;
+        ctrl::DeePC deepc(u_d, y_d, dp, Ts);
+
+        RTResult res;
+        res.name = "deepc";
+        res.t.reserve(N_STEP); res.y.reserve(N_STEP);
+        res.e.reserve(N_STEP); res.u.reserve(N_STEP);
+
+        auto plant_dc = make_plant();
+        Eigen::VectorXd x = Eigen::VectorXd::Zero(n);
+        double y = 0.0;
+
+        const auto Ts_ns = std::chrono::nanoseconds(static_cast<long long>(Ts * 1e9));
+        RTStats stats; double total_compute = 0.0;
+        TimePoint loop_start = Clock::now();
+
+        for (int k = 0; k < N_STEP; ++k) {
+            TimePoint deadline = loop_start + k * Ts_ns;
+            auto now2 = Clock::now();
+            if (now2 < deadline) std::this_thread::sleep_until(deadline);
+            double jitter_us = Duration(Clock::now() - deadline).count() * 1e6;
+            stats.max_jitter_us = std::max(stats.max_jitter_us, jitter_us);
+            if (jitter_us > 1.5 * Ts * 1e6) ++stats.missed;
+
+            auto cs = Clock::now();
+            deepc.setReference(REF);
+            double u = deepc.compute(y);
+            total_compute += Duration(Clock::now() - cs).count() * 1e6;
+
+            Eigen::VectorXd uv(1); uv << u;
+            y = ctrl::ssStep(plant_dc, x, uv)(0);
+            res.t.push_back(k * Ts); res.y.push_back(y);
+            res.e.push_back(REF - y); res.u.push_back(u);
+        }
+        stats.avg_compute_us = total_compute / N_STEP;
+        res.stats = stats; res.y_final = y;
+
+        std::ofstream f(std::string(PROJECT_DATA_DIR) + "/rt_deepc.csv");
+        f << "t,y,error,u\n";
+        for (int k = 0; k < N_STEP; ++k)
+            f << std::fixed << std::setprecision(6)
+              << res.t[k] << "," << res.y[k] << "," << res.e[k] << "," << res.u[k] << "\n";
+        print_rt_stats(res);
+        all_results.push_back(res);
     }
 
     // =========================================================

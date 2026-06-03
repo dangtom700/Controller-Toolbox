@@ -497,6 +497,283 @@ int main()
     std::cout << "\n";
 
     // =======================================================================
+    // Section 5 - Part 23-28 additions: MRAC / TubeMPC / ParticleFilter
+    // =======================================================================
+    std::cout << "-- Part 23-28 (MRAC / TubeMPC / ParticleFilter) ---------------------"
+                 "----------------\n";
+    printHeader();
+
+    // MRACController (SISO, 1st-order reference model)
+    {
+        ctrl::MRACParams mp;
+        mp.a_m = 0.85; mp.b_m = 0.15; mp.gamma_r = 5.0; mp.gamma_y = 5.0;
+        ctrl::MRACController mrac(mp, Ts);
+        mrac.setReference(1.0);
+        record(bench("MRACController", STEPS, WARMUP,
+                     [&](long long) { return mrac.compute(0.9); }));
+    }
+
+    // TubeMPC SISO (1-state plant, Np=10, same setup as ex67)
+    {
+        Eigen::MatrixXd At(1,1), Bt(1,1), Ct(1,1), Dt(1,1);
+        At << 0.8; Bt << 0.2; Ct << 1.0; Dt << 0.0;
+        ctrl::StateSpace sys_t(At, Bt, Ct, Dt, Ts);
+
+        ctrl::TubeMPCParams tp;
+        tp.Np   = 10; tp.Nu = 3;
+        tp.Q    = Eigen::MatrixXd::Identity(1,1) * 2.0;
+        tp.R    = Eigen::MatrixXd::Identity(1,1) * 0.3;
+        tp.K    = Eigen::MatrixXd::Constant(1,1,-0.3);   // A+BK = 0.74 (stable)
+        tp.wMax = Eigen::VectorXd::Constant(1, 0.1);
+        tp.uMin = Eigen::VectorXd::Constant(1,-2.0);
+        tp.uMax = Eigen::VectorXd::Constant(1, 2.0);
+        tp.Ts   = Ts;
+
+        ctrl::TubeMPC tmpc(sys_t, tp);
+        Eigen::VectorXd x_t(1); x_t(0) = 0.1;
+        const Eigen::VectorXd yref_t = Eigen::VectorXd::Constant(1, 1.0);
+        record(bench("TubeMPC Np=10 (n=1)", STEPS_OPT, WARMUP,
+                     [&](long long) {
+                         return tmpc.computeRef(x_t, yref_t)(0);
+                     }));
+    }
+
+    // ParticleFilter (n=1, N=200)
+    {
+        const int n_pf = 1, m_pf = 1;
+        ctrl::ParticleFilterParams pfp;
+        pfp.Q = Eigen::MatrixXd::Identity(n_pf, n_pf) * 0.01;
+        pfp.R = Eigen::MatrixXd::Identity(m_pf, m_pf) * 0.1;
+        pfp.n_particles = 200;
+
+        ctrl::ParticleFilter pf(
+            pfp, n_pf, m_pf,
+            [](const Eigen::VectorXd& x, const Eigen::VectorXd&) {
+                return Eigen::VectorXd(x * 0.8);
+            },
+            [](const Eigen::VectorXd& x, const Eigen::VectorXd&) {
+                return x;
+            }
+        );
+        Eigen::VectorXd x0_pf = Eigen::VectorXd::Zero(n_pf);
+        pf.initialise(x0_pf, Eigen::MatrixXd::Identity(n_pf, n_pf) * 0.1);
+
+        Eigen::VectorXd y_pf(m_pf); y_pf(0) = 0.5;
+        Eigen::VectorXd u_pf(1);    u_pf(0) = 0.1;
+        record(bench("ParticleFilter (N=200, n=1)", STEPS, WARMUP,
+                     [&](long long) {
+                         pf.step(y_pf, u_pf);
+                         return pf.state()(0);
+                     }));
+    }
+
+    std::cout << "\n";
+
+    // =======================================================================
+    // Section 6 - Part 30-31 ML / Data-Driven controllers
+    // =======================================================================
+    std::cout << "-- Part 30-31 (ML / Data-Driven: DeePC/ILC/L1/CBF/GP/ESN/NeuralPID/CEM/SINDy/Koopman) \n";
+    printHeader();
+
+    // DeePC (ADMM per-step, T_ini=5, Np=10, 300-sample offline data)
+    {
+        const int N_data = 300;
+        Eigen::VectorXd u_d(N_data), y_d(N_data);
+        {
+            double x_gen = 0.0;
+            for (int k = 0; k < N_data; ++k) {
+                double u_k = 0.8 * std::sin(0.3 * k) + 0.4 * std::sin(1.1 * k);
+                x_gen  = 0.8 * x_gen + 0.2 * u_k;
+                u_d(k) = u_k;
+                y_d(k) = x_gen;
+            }
+        }
+        ctrl::DeePC::Params dp;
+        dp.T_ini     = 5;
+        dp.Np        = 10;
+        dp.rho_y     = 1.0;
+        dp.rho_u     = 0.1;
+        dp.admm_iter = 50;
+        ctrl::DeePC deepc(u_d, y_d, dp, Ts);
+        deepc.setReference(1.0);
+        record(bench("DeePC (Np=10, admm=50)", STEPS_OPT, WARMUP,
+                     [&](long long) { return deepc.compute(0.2); }));
+    }
+
+    // ILC - per-step cost: feedforward lookup + recordError (P-type, N=100)
+    {
+        ctrl::ILC::Params ip;
+        ip.N        = 100;
+        ip.Ts       = Ts;
+        ip.Lp       = 0.5;
+        ip.Q_filter = 0.95;
+        ctrl::ILC ilc(ip);
+        record(bench("ILC step (N=100)", STEPS, WARMUP,
+                     [&](long long k) {
+                         const int kk = static_cast<int>(k % ip.N);
+                         ilc.recordError(kk, 0.01 * std::sin(0.1 * static_cast<double>(k)));
+                         if (kk == ip.N - 1)
+                             ilc.updateFeedforward();
+                         return ilc.feedforward(kk);
+                     }));
+    }
+
+    // L1AdaptiveController
+    {
+        ctrl::L1AdaptiveController::Params lp;
+        lp.a_m = 0.85; lp.b_m = 0.15; lp.Gamma = 50.0; lp.omega_c = 2.0;
+        ctrl::L1AdaptiveController l1(lp, Ts);
+        l1.setReference(1.0);
+        record(bench("L1AdaptiveController", STEPS, WARMUP,
+                     [&](long long) { return l1.compute(0.9); }));
+    }
+
+    // CBFSafetyFilter (wrapping DiscretePID, SISO 1-state)
+    {
+        ctrl::PIDParams cbf_pp; cbf_pp.Kp = 2.0; cbf_pp.Ki = 0.1;
+        auto pid_cbf = std::make_shared<ctrl::DiscretePID>(cbf_pp, Ts);
+
+        const double x_max = 1.5;
+        ctrl::CBFSafetyFilter::Params cbfp;
+        cbfp.alpha = 1.0; cbfp.uMin = -2.0; cbfp.uMax = 2.0;
+        ctrl::CBFSafetyFilter cbf(
+            pid_cbf,
+            [x_max](double x) { return x_max - x; },      // h(x)
+            [](double)        { return -1.0; },             // dh/dx
+            [](double x)      { return 0.8 * x; },         // f0(x)
+            [](double)        { return 0.2; },              // g(x)
+            cbfp, Ts);
+        cbf.setState(0.5);
+        record(bench("CBFSafetyFilter", STEPS, WARMUP,
+                     [&](long long) { return cbf.compute(0.5); }));
+    }
+
+    // GaussianProcess predict (50 training points, 1-D input)
+    {
+        ctrl::GaussianProcess::Params gpp;
+        gpp.length_scale = 1.0; gpp.signal_var = 1.0; gpp.noise_var = 0.01;
+        gpp.n_max = 200;
+        ctrl::GaussianProcess gp(1, gpp);
+        for (int i = 0; i < 50; ++i) {
+            Eigen::VectorXd xi(1); xi(0) = -2.5 + 0.1 * i;
+            gp.addPoint(xi, std::sin(xi(0)));
+        }
+        gp.fit();
+        Eigen::VectorXd x_gp(1); x_gp(0) = 0.5;
+        record(bench("GaussianProcess predict (n=50)", STEPS_OPT, WARMUP,
+                     [&](long long) {
+                         auto pred = gp.predict(x_gp);
+                         return pred.mean;
+                     }));
+    }
+
+    // EchoStateNetwork predict (n_res=50, trained readout)
+    {
+        ctrl::EchoStateNetwork::Params ep;
+        ep.n_res = 50; ep.n_in = 1; ep.n_out = 1; ep.washout = 10;
+        ctrl::EchoStateNetwork esn(ep);
+        for (int i = 0; i < 300; ++i) {
+            Eigen::VectorXd u_tr(1); u_tr(0) = std::sin(0.1 * i);
+            esn.stepReservoir(u_tr);
+            Eigen::VectorXd y_tr(1); y_tr(0) = std::sin(0.1 * (i + 1));
+            esn.addTrainingTarget(y_tr);
+        }
+        esn.fitReadout();
+        Eigen::VectorXd u_esn(1); u_esn(0) = 0.5;
+        record(bench("EchoStateNetwork (n_res=50)", STEPS, WARMUP,
+                     [&](long long) { return esn.predict(u_esn)(0); }));
+    }
+
+    // NeuralPID (3->8->3, online backprop)
+    {
+        ctrl::NeuralPID::Params np;
+        np.n_hidden = 8; np.lr = 1e-3; np.Ts = Ts;
+        ctrl::NeuralPID npid(np);
+        record(bench("NeuralPID (h=8)", STEPS, WARMUP,
+                     [&](long long) { return npid.compute(0.5); }));
+    }
+
+    // CEMController (n=2, Np=10, N_samples=50, 3 CEM iters)
+    {
+        ctrl::CEMController::Params cp;
+        cp.Np        = 10;
+        cp.N_samples = 50;
+        cp.n_iter    = 3;
+        cp.Q = 1.0; cp.R = 0.1;
+        cp.uMin = -5.0; cp.uMax = 5.0;
+        auto f_cem = [](const Eigen::VectorXd& x,
+                        const Eigen::VectorXd& u) -> Eigen::VectorXd {
+            Eigen::VectorXd xn(2);
+            xn(0) = 0.9 * x(0) + 0.1 * x(1);
+            xn(1) = 0.8 * x(1) + u(0);
+            return xn;
+        };
+        Eigen::MatrixXd C_cem(1, 2); C_cem << 1.0, 0.0;
+        ctrl::CEMController cem(cp, f_cem, C_cem, Ts);
+        Eigen::VectorXd x_cem = Eigen::VectorXd::Constant(2, 0.1);
+        Eigen::VectorXd yref_cem(1); yref_cem(0) = 1.0;
+        record(bench("CEMController Np=10 (n=2)", STEPS_OPT, WARMUP,
+                     [&](long long) {
+                         cem.setState(x_cem);
+                         return cem.computeRef(x_cem, yref_cem)(0);
+                     }));
+    }
+
+    // SINDy inference (PolyDeg2, n=2, m=1 – per-step predict() cost after offline fit)
+    {
+        ctrl::SINDy::Params sp;
+        sp.n_state = 2; sp.n_input = 1;
+        sp.library = ctrl::SINDyLibrary::PolyDeg2;
+        sp.use_ols = true;
+        ctrl::SINDy sindy(sp);
+
+        Eigen::VectorXd x_tr(2), xn_tr(2), u_tr(1);
+        x_tr << 0.5, 0.1;
+        for (int k = 0; k < 300; ++k) {
+            u_tr(0) = (k % 2 == 0) ? 0.3 : -0.3;
+            xn_tr(0) = 0.9 * x_tr(0) + 0.1 * x_tr(1) + 0.01 * u_tr(0);
+            xn_tr(1) = -0.05 * x_tr(0) + 0.8 * x_tr(1) + 0.1 * u_tr(0);
+            sindy.addSnapshot(x_tr, u_tr, (xn_tr - x_tr) / Ts);
+            x_tr = xn_tr;
+        }
+        ctrl::SINDyModel sindy_model = sindy.fit();
+
+        Eigen::VectorXd x_b(2), u_b(1);
+        x_b << 0.1, 0.05;  u_b << 0.5;
+        record(bench("SINDy predict (n=2, PolyDeg2)", STEPS, WARMUP,
+                     [&](long long) {
+                         return sindy_model.predict(x_b, u_b)(0);
+                     }));
+    }
+
+    // KoopmanEDMD lift (PolyDeg2, n=2, m=1 – per-step lift() cost; fit is offline)
+    {
+        ctrl::KoopmanEDMD::Params kp;
+        kp.n_state = 2; kp.n_input = 1;
+        kp.dict = ctrl::KoopmanEDMD::Dict::PolyDeg2;
+        ctrl::KoopmanEDMD edmd(kp);
+
+        Eigen::VectorXd x_tr(2), xn_tr(2), u_tr(1);
+        x_tr << 0.5, 0.1;
+        for (int k = 0; k < 300; ++k) {
+            u_tr(0) = 0.5 * std::sin(0.2 * static_cast<double>(k));
+            xn_tr(0) = 0.9 * x_tr(0) + 0.1 * x_tr(1) + 0.01 * u_tr(0);
+            xn_tr(1) = -0.05 * x_tr(0) + 0.8 * x_tr(1) + 0.1 * u_tr(0);
+            edmd.addSnapshot(x_tr, u_tr, xn_tr);
+            x_tr = xn_tr;
+        }
+
+        Eigen::VectorXd x_b(2), u_b(1);
+        x_b << 0.1, 0.05;  u_b << 0.5;
+        record(bench("KoopmanEDMD lift (n=2, PolyDeg2)", STEPS, WARMUP,
+                     [&](long long) {
+                         return edmd.lift(x_b, u_b)(0);
+                     }));
+    }
+
+    std::cout << "\n";
+
+    // =======================================================================
     // Summary - ranked fastest to slowest
     // =======================================================================
     std::sort(all_results.begin(), all_results.end(),

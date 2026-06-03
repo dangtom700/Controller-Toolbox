@@ -2657,11 +2657,12 @@ TEST_CASE("KoopmanEDMD fit() returns correct output dimensions", "[koopman]")
     ctrl::StateSpace ss = edmd.fit();
     // fit() strips the n_input input columns from the lifted state, so
     // A is (nLifted - n_input) x (nLifted - n_input).
+    // C is Identity(n_state_lift, n_state_lift) -- full lifted output.
+    // Use fitProjected() if you need n_state x n_state_lift projection.
     const int n_state_lift = edmd.nLifted() - p.n_input;
     REQUIRE(ss.A.rows() == n_state_lift);
     REQUIRE(ss.A.cols() == n_state_lift);
-    // C maps lifted state -> original n_state
-    REQUIRE(ss.C.rows() == 1);
+    REQUIRE(ss.C.rows() == n_state_lift);
     REQUIRE(ss.C.cols() == n_state_lift);
 }
 
