@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <cmath>
 
 // Psychrometric helpers for the porous-plate humidification case study.

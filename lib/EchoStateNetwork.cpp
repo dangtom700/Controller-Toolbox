@@ -148,7 +148,8 @@ void EchoStateNetwork::reset()
     states_.clear();
     targets_.clear();
     washout_cnt_ = 0;
-    fitted_      = false;
+    // NOTE: W_out_ and fitted_ are intentionally NOT cleared - reset() only
+    // resets the reservoir state for inference; readout weights persist.
 }
 
 } // namespace ctrl

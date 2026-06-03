@@ -840,10 +840,10 @@ if __name__ == '__main__':
 
     try:
         phase_clean()
-        # phase_compile()
-        # phase_bindings()   # build ctrl_toolbox .pyd + smoke test
-        # phase_run()
-        # phase_python()
+        phase_compile()
+        phase_bindings()   # build ctrl_toolbox .pyd + smoke test
+        phase_run()
+        phase_python()
     finally:
         sys.stdout = sys.__stdout__
         _log_file.close()
