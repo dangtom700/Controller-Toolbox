@@ -1,5 +1,11 @@
 var searchData=
 [
-  ['x_5feq_0',['x_eq',['../structctrl_1_1OperatingPoint.html#a1d63c5b25b6ae9bad57f7742c68de4ac',1,'ctrl::OperatingPoint']]],
-  ['x_5finf_1',['X_inf',['../structctrl_1_1HinfResult.html#a1f5829d4c831486d1672430264c15078',1,'ctrl::HinfResult']]]
+  ['warned_0',['warned',['../structctrl_1_1TuningResultBase.html#a46a48ca5d07af7f910c53e321cbd225c',1,'ctrl::TuningResultBase']]],
+  ['warning_1',['warning',['../structctrl_1_1TuningResultBase.html#a7ae8d074fd1836f905c9829d6302ddb1',1,'ctrl::TuningResultBase']]],
+  ['washout_2',['washout',['../structctrl_1_1EchoStateNetwork_1_1Params.html#a413db2505590ce2a39933dee45543ad0',1,'ctrl::EchoStateNetwork::Params']]],
+  ['wcrossovergain_3',['wCrossoverGain',['../structctrl_1_1StabilityMargins.html#ad3881a81fafb13778a075225a406a6a6',1,'ctrl::StabilityMargins']]],
+  ['wcrossoverphase_4',['wCrossoverPhase',['../structctrl_1_1StabilityMargins.html#a3e1fcf9625811ebe2c2b31ace3caf21e',1,'ctrl::StabilityMargins']]],
+  ['weight_5',['weight',['../structctrl_1_1StackEntry.html#a0a4f3bfacc0249d7d3099be1f34d2f40',1,'ctrl::StackEntry::weight'],['../structctrl_1_1Rule.html#a7af26a558ec583f686650a0fae5af059',1,'ctrl::Rule::weight']]],
+  ['wmax_6',['wmax',['../structctrl_1_1MHEParams.html#a5ad914176dbe63158092528ceb58d5de',1,'ctrl::MHEParams::wMax'],['../structctrl_1_1TubeMPCParams.html#a51158a827a282ed4142e8a58f5fd815c',1,'ctrl::TubeMPCParams::wMax']]],
+  ['wmin_7',['wMin',['../structctrl_1_1MHEParams.html#a9666c1322f7c337dddc6ebb6077c5329',1,'ctrl::MHEParams']]]
 ];

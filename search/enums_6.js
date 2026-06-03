@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['sopdtmethod_0',['SOPDTMethod',['../namespacectrl.html#ab1f13895423e788521b5365061b1b850',1,'ctrl']]],
-  ['stackmode_1',['StackMode',['../namespacectrl.html#a4312ec6fe1026061128af26aaf161458',1,'ctrl']]]
+  ['mode_0',['Mode',['../classctrl_1_1ILC.html#a101cee11d88c37eaee047dc4dde5d934',1,'ctrl::ILC']]]
 ];

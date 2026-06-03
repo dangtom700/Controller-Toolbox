@@ -12,6 +12,7 @@ var searchData=
   ['phase_5fadd_5fdeg_9',['phase_add_deg',['../structctrl_1_1LoopShapingTuner_1_1Input.html#a408104a20cf8a67a18e1260cd957442e',1,'ctrl::LoopShapingTuner::Input']]],
   ['phasemargindeg_10',['phaseMarginDeg',['../structctrl_1_1StabilityMargins.html#a545c8a69805fa7a09aa44f7a7e64824a',1,'ctrl::StabilityMargins']]],
   ['phi_11',['phi',['../structctrl_1_1SMCParams.html#abdc54f1d0798b7b555d042eb9d095cd8',1,'ctrl::SMCParams']]],
-  ['predictedcrossoverfreq_12',['predictedCrossoverFreq',['../structctrl_1_1TuningResultBase.html#a40e273dd00b5617da70596b2ec5be355',1,'ctrl::TuningResultBase']]],
-  ['predicteddampingratio_13',['predictedDampingRatio',['../structctrl_1_1TuningResultBase.html#a8845ae86ce6d01d58399a10dd5d52f48',1,'ctrl::TuningResultBase']]]
+  ['plant_5fgain_12',['plant_gain',['../structctrl_1_1NeuralPID_1_1Params.html#a693ee443f83fccd864c74063dcb71a58',1,'ctrl::NeuralPID::Params']]],
+  ['predictedcrossoverfreq_13',['predictedCrossoverFreq',['../structctrl_1_1TuningResultBase.html#a40e273dd00b5617da70596b2ec5be355',1,'ctrl::TuningResultBase']]],
+  ['predicteddampingratio_14',['predictedDampingRatio',['../structctrl_1_1TuningResultBase.html#a8845ae86ce6d01d58399a10dd5d52f48',1,'ctrl::TuningResultBase']]]
 ];

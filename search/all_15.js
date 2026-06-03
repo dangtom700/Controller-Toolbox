@@ -1,7 +1,7 @@
 var searchData=
 [
   ['of_20contents_0',['Table of Contents',['../md_docs_2DOCUMENTATION.html#autotoc_md29',1,'']]],
-  ['omega_5fc_1',['omega_c',['../structctrl_1_1LoopShapingTuner_1_1Input.html#a03beaf6ce98819e1a5f591eb0b007cb9',1,'ctrl::LoopShapingTuner::Input::omega_c'],['../structctrl_1_1ADRCParams.html#a236c298d82fe43914d7455bb5dbda0c3',1,'ctrl::ADRCParams::omega_c']]],
+  ['omega_5fc_1',['omega_c',['../structctrl_1_1LoopShapingTuner_1_1Input.html#a03beaf6ce98819e1a5f591eb0b007cb9',1,'ctrl::LoopShapingTuner::Input::omega_c'],['../structctrl_1_1ADRCParams.html#a236c298d82fe43914d7455bb5dbda0c3',1,'ctrl::ADRCParams::omega_c'],['../structctrl_1_1L1AdaptiveController_1_1Params.html#ac41c6d9c9b67567322f11e7670b0b241',1,'ctrl::L1AdaptiveController::Params::omega_c']]],
   ['omega_5fo_2',['omega_o',['../structctrl_1_1ADRCParams.html#a0b906b144bbe2c2ab2f11082a8660344',1,'ctrl::ADRCParams']]],
   ['oncompute_3',['onCompute',['../classctrl_1_1IControllerObserver.html#a8fdee178803e03dfb2ba1af3044558d6',1,'ctrl::IControllerObserver']]],
   ['oncomputevec_4',['onComputeVec',['../classctrl_1_1IControllerObserver.html#af1d51da10240290fa672f0f7e945f6ff',1,'ctrl::IControllerObserver']]],
@@ -11,7 +11,7 @@ var searchData=
   ['operatingpoint_8',['OperatingPoint',['../structctrl_1_1OperatingPoint.html',1,'ctrl']]],
   ['operator_28_29_9',['operator()',['../structctrl_1_1MF.html#aea9e4bb7700c6ba5d5ba05004ac68edd',1,'ctrl::MF']]],
   ['optimise_10',['optimise',['../classctrl_1_1TunerSuite.html#a9c32b9bf224d2b1fe4ff2c40e334b41e',1,'ctrl::TunerSuite']]],
-  ['optimization_11',['optimization',['../namespacectrl.html#ab1f13895423e788521b5365061b1b850a15970c4fdbca1fc48c5b412d94e798c0',1,'ctrl::Optimization'],['../namespacectrl.html#afe5d6d219bd6cb8e4f6b4d0d3b9225b8a15970c4fdbca1fc48c5b412d94e798c0',1,'ctrl::Optimization']]],
+  ['optimization_11',['optimization',['../namespacectrl.html#afe5d6d219bd6cb8e4f6b4d0d3b9225b8a15970c4fdbca1fc48c5b412d94e798c0',1,'ctrl::Optimization'],['../namespacectrl.html#ab1f13895423e788521b5365061b1b850a15970c4fdbca1fc48c5b412d94e798c0',1,'ctrl::Optimization']]],
   ['optimtuneresult_12',['OptimTuneResult',['../structctrl_1_1OptimTuneResult.html',1,'ctrl']]],
   ['optional_13',['2.5 Doxygen API Output (Optional)',['../md_docs_2DOCUMENTATION.html#autotoc_md41',1,'']]],
   ['optional_20python_20tooling_14',['1.2 Optional Python Tooling',['../md_docs_2DOCUMENTATION.html#autotoc_md33',1,'']]],

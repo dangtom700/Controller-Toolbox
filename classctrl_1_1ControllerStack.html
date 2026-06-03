@@ -100,16 +100,16 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab132e40a4ee1d6054313e1c778ae9712" id="r_ab132e40a4ee1d6054313e1c778ae9712"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#ab132e40a4ee1d6054313e1c778ae9712">ControllerStack</a> (<a class="el" href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458">StackMode</a> <a class="el" href="classctrl_1_1ControllerStack.html#a7699dc65172c47b782b42d668a718cde">mode</a>, double <a class="el" href="classctrl_1_1ControllerStack.html#a406041e44af7c8cd2df0d17de8a6b858">sampleTime</a>)</td></tr>
 <tr class="memdesc:ab132e40a4ee1d6054313e1c778ae9712"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct an empty stack.  <br /></td></tr>
 <tr class="separator:ab132e40a4ee1d6054313e1c778ae9712"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afbbd26638b331147b1548baeba205c22" id="r_afbbd26638b331147b1548baeba205c22"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#afbbd26638b331147b1548baeba205c22">addController</a> (std::shared_ptr&lt; <a class="el" href="classctrl_1_1IController.html">IController</a> &gt; controller, const std::string &amp;name, double weight=1.0, std::function&lt; bool(double, double)&gt; condition=nullptr)</td></tr>
+<tr class="memitem:afbbd26638b331147b1548baeba205c22" id="r_afbbd26638b331147b1548baeba205c22"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#afbbd26638b331147b1548baeba205c22">addController</a> (std::shared_ptr&lt; <a class="el" href="classctrl_1_1IController.html">IController</a> &gt; controller, const std::string &amp;<a class="el" href="classctrl_1_1IController.html#a55604bce75cc319383cbf86f7048612c">name</a>, double weight=1.0, std::function&lt; bool(double, double)&gt; condition=nullptr)</td></tr>
 <tr class="memdesc:afbbd26638b331147b1548baeba205c22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Append a controller to the priority queue.  <br /></td></tr>
 <tr class="separator:afbbd26638b331147b1548baeba205c22"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a51e3842848a0f6ea804f11105f43c01f" id="r_a51e3842848a0f6ea804f11105f43c01f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#a51e3842848a0f6ea804f11105f43c01f">removeController</a> (const std::string &amp;name)</td></tr>
+<tr class="memitem:a51e3842848a0f6ea804f11105f43c01f" id="r_a51e3842848a0f6ea804f11105f43c01f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#a51e3842848a0f6ea804f11105f43c01f">removeController</a> (const std::string &amp;<a class="el" href="classctrl_1_1IController.html#a55604bce75cc319383cbf86f7048612c">name</a>)</td></tr>
 <tr class="memdesc:a51e3842848a0f6ea804f11105f43c01f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove the entry with the given name.  <br /></td></tr>
 <tr class="separator:a51e3842848a0f6ea804f11105f43c01f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9999b764bca2817d5a4ed977f4ee7098" id="r_a9999b764bca2817d5a4ed977f4ee7098"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#a9999b764bca2817d5a4ed977f4ee7098">setActive</a> (const std::string &amp;name, bool active)</td></tr>
+<tr class="memitem:a9999b764bca2817d5a4ed977f4ee7098" id="r_a9999b764bca2817d5a4ed977f4ee7098"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#a9999b764bca2817d5a4ed977f4ee7098">setActive</a> (const std::string &amp;<a class="el" href="classctrl_1_1IController.html#a55604bce75cc319383cbf86f7048612c">name</a>, bool active)</td></tr>
 <tr class="memdesc:a9999b764bca2817d5a4ed977f4ee7098"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable or disable an entry without removing it.  <br /></td></tr>
 <tr class="separator:a9999b764bca2817d5a4ed977f4ee7098"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a89e87343e0f7a06f37a184a17a78bffb" id="r_a89e87343e0f7a06f37a184a17a78bffb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#a89e87343e0f7a06f37a184a17a78bffb">setWeight</a> (const std::string &amp;name, double weight)</td></tr>
+<tr class="memitem:a89e87343e0f7a06f37a184a17a78bffb" id="r_a89e87343e0f7a06f37a184a17a78bffb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#a89e87343e0f7a06f37a184a17a78bffb">setWeight</a> (const std::string &amp;<a class="el" href="classctrl_1_1IController.html#a55604bce75cc319383cbf86f7048612c">name</a>, double weight)</td></tr>
 <tr class="memdesc:a89e87343e0f7a06f37a184a17a78bffb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the weight of an entry (Weighted mode only).  <br /></td></tr>
 <tr class="separator:a89e87343e0f7a06f37a184a17a78bffb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa00ac88e91ad03fd85c302f9a8171048" id="r_aa00ac88e91ad03fd85c302f9a8171048"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerStack.html#aa00ac88e91ad03fd85c302f9a8171048">compute</a> (double error) override</td></tr>
@@ -142,6 +142,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController" id="r_a2dc30a3b9bfb8b9649cef7218ad9e68b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b">isHealthy</a> () const</td></tr>
 <tr class="memdesc:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Health query for supervisory fault-tolerant control.  <br /></td></tr>
 <tr class="separator:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55604bce75cc319383cbf86f7048612c inherit pub_methods_classctrl_1_1IController" id="r_a55604bce75cc319383cbf86f7048612c"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a55604bce75cc319383cbf86f7048612c">name</a> () const</td></tr>
+<tr class="memdesc:a55604bce75cc319383cbf86f7048612c inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Human-readable controller identifier.  <br /></td></tr>
+<tr class="separator:a55604bce75cc319383cbf86f7048612c inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController" id="r_abe5b62c21069e869261e870363ee8ab5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#abe5b62c21069e869261e870363ee8ab5">attachObserver</a> (<a class="el" href="classctrl_1_1IControllerObserver.html">IControllerObserver</a> *obs)</td></tr>
 <tr class="memdesc:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attach a telemetry observer.  <br /></td></tr>
 <tr class="separator:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -311,6 +314,8 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="ControllerStack_8cpp_source.html#l00015">15</a> of file <a class="el" href="ControllerStack_8cpp_source.html">ControllerStack.cpp</a>.</p>
 
+<p class="reference">References <a class="el" href="IController_8h_source.html#l00106">ctrl::IController::name()</a>.</p>
+
 </div>
 </div>
 <a id="aa00ac88e91ad03fd85c302f9a8171048" name="aa00ac88e91ad03fd85c302f9a8171048"></a>
@@ -350,7 +355,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="ControllerStack_8cpp_source.html#l00052">52</a> of file <a class="el" href="ControllerStack_8cpp_source.html">ControllerStack.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458a3f7b3d8ee7bf0d542bd50821c083888f">ctrl::Additive</a>, <a class="el" href="IController_8h_source.html#l00151">ctrl::IController::notifyObserver()</a>, <a class="el" href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458a45ed3b27103b66790c200c1af5f94c33">ctrl::Supervisory</a>, and <a class="el" href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458a582368ac8232617ead14ac74ccc40ea9">ctrl::Weighted</a>.</p>
+<p class="reference">References <a class="el" href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458a3f7b3d8ee7bf0d542bd50821c083888f">ctrl::Additive</a>, <a class="el" href="IController_8h_source.html#l00154">ctrl::IController::notifyObserver()</a>, <a class="el" href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458a45ed3b27103b66790c200c1af5f94c33">ctrl::Supervisory</a>, and <a class="el" href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458a582368ac8232617ead14ac74ccc40ea9">ctrl::Weighted</a>.</p>
 
 </div>
 </div>
@@ -475,7 +480,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="ControllerStack_8cpp_source.html#l00166">166</a> of file <a class="el" href="ControllerStack_8cpp_source.html">ControllerStack.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="IController_8h_source.html#l00171">ctrl::IController::notifyObserverReset()</a>.</p>
+<p class="reference">References <a class="el" href="IController_8h_source.html#l00174">ctrl::IController::notifyObserverReset()</a>.</p>
 
 </div>
 </div>
@@ -547,7 +552,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="ControllerStack_8cpp_source.html#l00040">40</a> of file <a class="el" href="ControllerStack_8cpp_source.html">ControllerStack.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="ControllerStack_8h_source.html#l00085">ctrl::StackEntry::active</a>.</p>
+<p class="reference">References <a class="el" href="ControllerStack_8h_source.html#l00085">ctrl::StackEntry::active</a>, and <a class="el" href="IController_8h_source.html#l00106">ctrl::IController::name()</a>.</p>
 
 </div>
 </div>
@@ -587,6 +592,8 @@ Additional Inherited Members</h2></td></tr>
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="ControllerStack_8cpp_source.html#l00046">46</a> of file <a class="el" href="ControllerStack_8cpp_source.html">ControllerStack.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="IController_8h_source.html#l00106">ctrl::IController::name()</a>.</p>
 
 </div>
 </div>

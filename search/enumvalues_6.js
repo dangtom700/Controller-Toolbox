@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['leadlag_0',['LeadLag',['../namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa7cacc882b6fbe96bad6aa3c3a0ea6677',1,'ctrl']]],
-  ['linearblend_1',['LinearBlend',['../namespacectrl.html#ac4b116227149e74ff44404995b9b5f9fa6e14db3e35ac130427b397988bfd00df',1,'ctrl']]],
-  ['lqg_2',['LQG',['../namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa21d16cd097fc5e73bbaf35a33f632f74',1,'ctrl']]],
-  ['lqr_3',['LQR',['../namespacectrl.html#ae9f75df6083768f99f318568d9b9038aaa6e6a19e8d19a6641a626a0bf2a39919',1,'ctrl']]]
+  ['ideal_0',['IDEAL',['../namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0a07df98da6e2b219bc61e36237a2bf2ff',1,'ctrl']]],
+  ['imc_1',['IMC',['../namespacectrl.html#ac903a5a20ba43db1acb05d549374197fad7a1003002f545d6e966d9cdd7a63f71',1,'ctrl']]]
 ];

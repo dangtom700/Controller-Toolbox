@@ -19,8 +19,9 @@ var searchData=
   ['den_16',['den',['../structctrl_1_1TransferFunction.html#a137ed1576cb50e7ee0ed6e5fe1491436',1,'ctrl::TransferFunction']]],
   ['dfilters_5fl_17',['dFilters_L',['../structctrl_1_1MuSynResult.html#a2501fc98030c17401d30e05f4e494434',1,'ctrl::MuSynResult']]],
   ['dfilters_5fr_18',['dFilters_R',['../structctrl_1_1MuSynResult.html#a786846d49b7272251c2d1f969756823a',1,'ctrl::MuSynResult']]],
-  ['dk_19',['Dk',['../structctrl_1_1HinfResult.html#a15e297860c8ceea12c34e052d0024d35',1,'ctrl::HinfResult']]],
-  ['dscalemaxiter_20',['dScaleMaxIter',['../structctrl_1_1MuSynParams.html#aa97638ab1a133ed16ec61e61d723245e',1,'ctrl::MuSynParams']]],
-  ['dumax_21',['dumax',['../structctrl_1_1MPCParams.html#a0ac4045664a9990c14bb4488563d5891',1,'ctrl::MPCParams::duMax'],['../structctrl_1_1GPCParams.html#a1e2582585b776464456fdcd9f4831f27',1,'ctrl::GPCParams::duMax']]],
-  ['dumin_22',['dumin',['../structctrl_1_1MPCParams.html#abd6b7302a4bd41fd59268c4c73a079d6',1,'ctrl::MPCParams::duMin'],['../structctrl_1_1GPCParams.html#a34f1dae381d27a812cf721fd99975c7d',1,'ctrl::GPCParams::duMin']]]
+  ['dict_19',['dict',['../structctrl_1_1KoopmanEDMD_1_1Params.html#afbecdacdd22542f56f8e0b40d51bfa51',1,'ctrl::KoopmanEDMD::Params']]],
+  ['dk_20',['Dk',['../structctrl_1_1HinfResult.html#a15e297860c8ceea12c34e052d0024d35',1,'ctrl::HinfResult']]],
+  ['dscalemaxiter_21',['dScaleMaxIter',['../structctrl_1_1MuSynParams.html#aa97638ab1a133ed16ec61e61d723245e',1,'ctrl::MuSynParams']]],
+  ['dumax_22',['dumax',['../structctrl_1_1MPCParams.html#a0ac4045664a9990c14bb4488563d5891',1,'ctrl::MPCParams::duMax'],['../structctrl_1_1GPCParams.html#a1e2582585b776464456fdcd9f4831f27',1,'ctrl::GPCParams::duMax']]],
+  ['dumin_23',['dumin',['../structctrl_1_1MPCParams.html#abd6b7302a4bd41fd59268c4c73a079d6',1,'ctrl::MPCParams::duMin'],['../structctrl_1_1GPCParams.html#a34f1dae381d27a812cf721fd99975c7d',1,'ctrl::GPCParams::duMin']]]
 ];

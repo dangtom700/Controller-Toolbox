@@ -5,7 +5,7 @@ var searchData=
   ['b1_2',['B1',['../structctrl_1_1GeneralisedPlant.html#aff78ded1a50781afd341dd44b4028a2f',1,'ctrl::GeneralisedPlant']]],
   ['b2_3',['B2',['../structctrl_1_1GeneralisedPlant.html#ad898a83f9974d018d600eed531bf4f3f',1,'ctrl::GeneralisedPlant']]],
   ['b_5fcoeffs_4',['B_coeffs',['../structctrl_1_1LPVModel.html#aae2c6031b33fffc8ea0407a142069d65',1,'ctrl::LPVModel']]],
-  ['b_5fm_5',['b_m',['../structctrl_1_1MRACParams.html#a9f933d97587863d3c8bcf83f0497fc21',1,'ctrl::MRACParams']]],
+  ['b_5fm_5',['b_m',['../structctrl_1_1L1AdaptiveController_1_1Params.html#a56cb8ec121ae05dfff751ab47c99ec1e',1,'ctrl::L1AdaptiveController::Params::b_m'],['../structctrl_1_1MRACParams.html#a9f933d97587863d3c8bcf83f0497fc21',1,'ctrl::MRACParams::b_m']]],
   ['b_5fweight_6',['b_weight',['../structctrl_1_1PIDParams.html#aa0cffc00a3934a9687f65bee5c56e97e',1,'ctrl::PIDParams']]],
   ['bestcost_7',['bestCost',['../structctrl_1_1OptimTuneResult.html#ab1a576498055639839b0056dfc7bdd58',1,'ctrl::OptimTuneResult']]],
   ['bestparams_8',['bestParams',['../structctrl_1_1OptimTuneResult.html#a40cce9397c06a210f8ded80bb22e13eb',1,'ctrl::OptimTuneResult']]],

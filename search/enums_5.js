@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['pidtuningrule_0',['PIDTuningRule',['../namespacectrl.html#ac903a5a20ba43db1acb05d549374197f',1,'ctrl']]]
+  ['koopmandict_0',['KoopmanDict',['../namespacectrl.html#a17d0171c81d155d52400be8aff2ddcc3',1,'ctrl']]]
 ];
