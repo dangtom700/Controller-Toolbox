@@ -25,7 +25,7 @@ int main()
     constexpr double Ts    = 0.05;
     constexpr double K_dc  = 1.2;
     constexpr double tau   = 2.0;
-    constexpr double alpha = std::exp(-Ts / tau);      // ~ 0.975
+    const     double alpha = std::exp(-Ts / tau);      // ~ 0.975
     const     double beta  = K_dc * (1.0 - alpha);    // ZOH
 
     // --- Cost function: IAE over 80 steps for unit step, from y=0 ----------
