@@ -47,7 +47,6 @@ PATTERN = re.compile(r'[^\w\s\(\)\{\}\[\]:;.,\'\"\-=<>\/\\|`~?!@#$%^&*+]')
 REPLACEMENTS = {
     # Dashes / arrows
     '—': '-',       # em dash —
-    '-': '-',       # en dash -
     '→': '->',      # →
     '←': '<-',      # ←
     '⇒': '=>',      # ⇒
@@ -189,6 +188,7 @@ REPLACEMENTS = {
     '\U0001f7e2': '',    # 🟢 green circle
     '✅': '',        # ✅ white heavy check mark
     '❌': '',        # ❌ cross mark
+    '–': '-',       # – en dash (common in copy-pasted text)
 }
 
 _self_basename = os.path.basename(__file__)
@@ -303,6 +303,8 @@ def apply_replacements(directory, dry_run=False):
             applied = []
 
             for char, replacement in REPLACEMENTS.items():
+                if char == replacement:    # skip self-mappings (no-op / stale entries)
+                    continue
                 occurrences = modified.count(char)
                 if occurrences:
                     modified = modified.replace(char, replacement)

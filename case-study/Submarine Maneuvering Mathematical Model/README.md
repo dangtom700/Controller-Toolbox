@@ -122,7 +122,7 @@ M_stern  = ½ rho V^2 A_s Cz_s(deltas, beta_s)
 
 | Method | Notes |
 |--------|-------|
-| **PID (classical)** | Depth–pitch cascade; industry standard |
+| **PID (classical)** | Depth-pitch cascade; industry standard |
 | **LQR** | Linear state-feedback at trim condition |
 | **MPC** | Handles plane saturation constraints; enables coupled depth + heading |
 | **Sliding Mode Control (SMC)** | Robust to large-angle model uncertainty |

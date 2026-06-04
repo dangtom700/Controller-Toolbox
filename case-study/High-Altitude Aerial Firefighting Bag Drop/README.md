@@ -11,9 +11,9 @@
 
 ## System Description
 
-Forest firefighting using fixed-wing aircraft typically requires low-altitude drops (approx =30 m) to avoid atomisation of liquid retardants, which reduces ground coverage thickness and effectiveness. Low-altitude operations are hazardous – 47 aircraft accidents (39 fatalities) in the US from 2000-2023.  
+Forest firefighting using fixed-wing aircraft typically requires low-altitude drops (approx =30 m) to avoid atomisation of liquid retardants, which reduces ground coverage thickness and effectiveness. Low-altitude operations are hazardous - 47 aircraft accidents (39 fatalities) in the US from 2000-2023.  
 
-A novel solution uses **water-absorbing bags** – large encapsulated "droplets" that resist aerodynamic breakup. Bags can be dropped from higher altitudes (>=90 m) without significant atomisation, improving flight safety while maintaining ground coverage.  
+A novel solution uses **water-absorbing bags** - large encapsulated "droplets" that resist aerodynamic breakup. Bags can be dropped from higher altitudes (>=90 m) without significant atomisation, improving flight safety while maintaining ground coverage.  
 
 The paper develops a **mathematical model** to predict bag trajectory, rotational attitude, and the resulting ground drop pattern (coverage length, width, and uniformity). The model is validated with full-scale drop tests.
 
@@ -30,14 +30,14 @@ d/dt [x, v, theta, omega] = f(m, I, F_{aero}, F_{gravity}, M_{aero})
 $$
 
 where:
-- `x \in ℝ^3` – position vector  
-- `v \in ℝ^3` – linear velocity  
-- `theta \in ℝ^3` – Euler angles (attitude)  
-- `omega \in ℝ^3` – angular velocity  
-- `m` – bag mass (water + bag material)  
-- `I` – inertia tensor  
-- `F_aero` – aerodynamic force (dependent on orientation, wind)  
-- `M_aero` – aerodynamic moment  
+- `x \in ℝ^3` - position vector  
+- `v \in ℝ^3` - linear velocity  
+- `theta \in ℝ^3` - Euler angles (attitude)  
+- `omega \in ℝ^3` - angular velocity  
+- `m` - bag mass (water + bag material)  
+- `I` - inertia tensor  
+- `F_aero` - aerodynamic force (dependent on orientation, wind)  
+- `M_aero` - aerodynamic moment  
 
 The aerodynamic forces are computed from the relative wind velocity and bag shape.
 
@@ -78,7 +78,7 @@ The model outputs a 2D coverage map `C(x,y)`.
 
 | Signal | Description |
 |--------|-------------|
-| `h_drop` | Release altitude above ground (e.g., 30–120 m) |
+| `h_drop` | Release altitude above ground (e.g., 30-120 m) |
 | `V_aircraft` | Aircraft speed and heading at release |
 | `wind` | Wind velocity profile (speed, direction, turbulence) |
 | Bag properties | Mass, dimensions, inertia, aerodynamic coefficients |
@@ -98,9 +98,9 @@ The model outputs a 2D coverage map `C(x,y)`.
 
 This is a **mission planning and design optimisation** problem, not real-time control. The model supports:
 
-1. **Airdrop mission planning** – choose drop height and release parameters to achieve required coverage while maximising flight safety.
-2. **Bag design optimisation** – adjust bag shape, mass, and water absorption to minimise pattern dispersion.
-3. **Real-time trajectory estimation** (optional) – if bags carry sensors, estimate impact point from initial release conditions.
+1. **Airdrop mission planning** - choose drop height and release parameters to achieve required coverage while maximising flight safety.
+2. **Bag design optimisation** - adjust bag shape, mass, and water absorption to minimise pattern dispersion.
+3. **Real-time trajectory estimation** (optional) - if bags carry sensors, estimate impact point from initial release conditions.
 
 ---
 
@@ -120,10 +120,10 @@ This is a **mission planning and design optimisation** problem, not real-time co
 
 | Parameter | Typical Range / Value |
 |-----------|------------------------|
-| Drop altitude | 30–120 m (conventional low: 30 m; bag high: 90–120 m) |
-| Aircraft speed | 60–120 m/s (typical for airtankers) |
-| Bag mass (wet) | 10–50 kg (depending on water absorption) |
-| Wind speed | 0–15 m/s (critical for lateral drift) |
+| Drop altitude | 30-120 m (conventional low: 30 m; bag high: 90-120 m) |
+| Aircraft speed | 60-120 m/s (typical for airtankers) |
+| Bag mass (wet) | 10-50 kg (depending on water absorption) |
+| Wind speed | 0-15 m/s (critical for lateral drift) |
 | Prediction error (length) | approx =20% (validated) |
 | Prediction error (width) | <1 m (validated) |
 
@@ -131,10 +131,10 @@ This is a **mission planning and design optimisation** problem, not real-time co
 
 ## Scenarios
 
-- **High-altitude drop** (90 m) vs. conventional liquid retardant (30 m) – comparison of ground coverage and safety.
-- **Crosswind sensitivity** – pattern elongation and lateral shift.
-- **Bag design optimisation** – minimise pattern width for a given drop height.
-- **Monte Carlo uncertainty quantification** – wind gusts, release timing errors.
+- **High-altitude drop** (90 m) vs. conventional liquid retardant (30 m) - comparison of ground coverage and safety.
+- **Crosswind sensitivity** - pattern elongation and lateral shift.
+- **Bag design optimisation** - minimise pattern width for a given drop height.
+- **Monte Carlo uncertainty quantification** - wind gusts, release timing errors.
 
 ---
 

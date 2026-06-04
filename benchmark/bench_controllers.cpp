@@ -696,7 +696,7 @@ int main()
                      }));
     }
 
-    // SINDy inference (PolyDeg2, n=2, m=1 – per-step predict() cost after offline fit)
+    // SINDy inference (PolyDeg2, n=2, m=1 - per-step predict() cost after offline fit)
     {
         ctrl::SINDy::Params sp;
         sp.n_state = 2; sp.n_input = 1;
@@ -723,7 +723,7 @@ int main()
                      }));
     }
 
-    // KoopmanEDMD lift (PolyDeg2, n=2, m=1 – per-step lift() cost; fit is offline)
+    // KoopmanEDMD lift (PolyDeg2, n=2, m=1 - per-step lift() cost; fit is offline)
     {
         ctrl::KoopmanEDMD::Params kp;
         kp.n_state = 2; kp.n_input = 1;

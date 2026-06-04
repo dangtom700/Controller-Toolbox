@@ -8,7 +8,7 @@ performance of high-performance water-absorbing porous fiber plates," *Applied T
 
 ## Context and Motivation
 
-Indoor air in severe cold regions (e.g., Harbin, China) drops to 10–25 % RH in winter as dry
+Indoor air in severe cold regions (e.g., Harbin, China) drops to 10-25 % RH in winter as dry
 outdoor air infiltrates heated buildings. Low humidity impairs occupant health, enables virus
 transmission, and degrades work performance. The paper introduces a **porous polyester-fiber
 plate** (UNITIKA) that wicks water from a pan below via capillary action and evaporates it into
@@ -52,7 +52,7 @@ Mass flux:                  mw = hm * A_plates * delta_rho          [kg/s]
 Humidification capacity:    H  = max(0, mw * 3.6e6)                [g/h]
 ```
 
-**Validated range:** Ta = 35–45 ^\circC, phi_in = 0.15–0.30, u_fan = 1.0–3.5 m/s.
+**Validated range:** Ta = 35-45 ^\circC, phi_in = 0.15-0.30, u_fan = 1.0-3.5 m/s.
 Peak H approx = 266 g/h at (Ta = 45 ^\circC, phi = 15 %, u = 3.5 m/s). Theoretical errors < 10 %
 after CFD gap-velocity correction (C_gap = 1.25).
 
@@ -111,8 +111,8 @@ All parameters loaded from `config/plant_params.json`.
 | Symbol | Description | Winter typical |
 |--------|-------------|----------------|
 | T_out | Outdoor dry-bulb temperature | -20 to -3 ^\circC |
-| phi_out | Outdoor relative humidity | 0.20 – 0.55 |
-| n_occ | Occupant count | 0 – 4 persons |
+| phi_out | Outdoor relative humidity | 0.20 - 0.55 |
+| n_occ | Occupant count | 0 - 4 persons |
 
 ---
 

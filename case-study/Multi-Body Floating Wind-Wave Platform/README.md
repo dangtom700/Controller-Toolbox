@@ -111,7 +111,7 @@ For the simplified two-body case an analytical expression for the natural freque
 | **Complex-conjugate control** | Optimal passive PTO for regular waves |
 | **Model Predictive Control (MPC)** | Handles stroke/force constraints with wave preview |
 | **LQR / LQG** | Linear state-feedback using linearised model around operating point |
-| **Reactive control** | Spring–damper parameter scheduling |
+| **Reactive control** | Spring-damper parameter scheduling |
 | **Reinforcement Learning** | Handles irregular seas without exact wave model |
 
 ---
@@ -123,7 +123,7 @@ For the simplified two-body case an analytical expression for the natural freque
 | Water depth | >= 50 m | Offshore deepwater site |
 | FOWT displacement | O(10^3) t | Typical semi-sub FOWT |
 | WEC arm length | O(10) m | Articulated arm geometry |
-| Wave period | 6–20 s | Typical North Sea spectrum |
+| Wave period | 6-20 s | Typical North Sea spectrum |
 | PTO damping `Cpto` | Optimised per sea state | Passive case |
 
 ---

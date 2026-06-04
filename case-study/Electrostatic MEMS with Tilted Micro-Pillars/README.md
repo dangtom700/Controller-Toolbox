@@ -2,7 +2,7 @@
 
 **Reference:** Kareem, A.H., Fathalilou, M. & Rezazadeh, G., "Mathematical modeling of an
 electrostatic MEMS with tilted elastomeric micro-pillars," *Applied Mathematical Modelling*
-131 (2024) 306–322. Urmia University / Skolkovo Institute of Science and Technology.
+131 (2024) 306-322. Urmia University / Skolkovo Institute of Science and Technology.
 
 ---
 
@@ -35,7 +35,7 @@ reject AC disturbance forces, and adapt to viscoelastic drift in the pillar stif
 
 The plant is discretized at Ts = 0.5 mus and simulated as a **lumped single-degree-of-freedom
 (SDOF) model** of the microbeam mid-point displacement w [m], derived from the paper's first
-Galerkin mode expansion. This gives an ODE that captures the essential electrostatic–mechanical
+Galerkin mode expansion. This gives an ODE that captures the essential electrostatic-mechanical
 nonlinearity and viscoelastic pillar coupling.
 
 ### Equation of Motion

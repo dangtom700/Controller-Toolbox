@@ -128,7 +128,7 @@ All scenarios target the origin `[x=0, y=0, psi=0]` (station-keeping).
 **Total runs: 16 controllers x 4 scenarios = 64**
 
 S1 is a numerical stability check - all controllers should produce IAE = 0 with no
-environmental forcing. S2–S4 replicate Table 5 conditions from Li et al. (2026).
+environmental forcing. S2-S4 replicate Table 5 conditions from Li et al. (2026).
 
 ---
 

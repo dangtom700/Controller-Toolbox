@@ -114,8 +114,8 @@ This is primarily a **structural health monitoring / load estimation** problem, 
 
 | Parameter | Description |
 |-----------|-------------|
-| Reactor compartment length | ~30–50 m (typical FNPP section) |
-| Ice pressure range | 0.1–2.0 MPa (Bohai Sea, mild ice conditions) |
+| Reactor compartment length | ~30-50 m (typical FNPP section) |
+| Ice pressure range | 0.1-2.0 MPa (Bohai Sea, mild ice conditions) |
 | Number of load points `n` | Hundreds (FEM resolution) |
 | Number of sensors `m` | Tens (practical installation limit) |
 | Condition number threshold | Minimised by ISAA sensor placement |

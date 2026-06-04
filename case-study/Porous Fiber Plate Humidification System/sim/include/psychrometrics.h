@@ -80,7 +80,7 @@ inline double wetBulb(double Ta_K, double phi_a)
     return Twb;
 }
 
-// Air kinematic viscosity [m^2/s] (linear fit, valid 250–340 K).
+// Air kinematic viscosity [m^2/s] (linear fit, valid 250-340 K).
 inline double nu_air(double T_K)
 {
     return 1.328e-5 + 9.6e-8 * (T_K - 293.15);
@@ -92,7 +92,7 @@ inline double lambda_air(double T_K)
     return 0.02442 + 7.2e-5 * (T_K - 293.15);
 }
 
-// Air Prandtl number (nearly constant for dry air 20–60^\circC).
+// Air Prandtl number (nearly constant for dry air 20-60^\circC).
 inline double Pr_air(double /*T_K*/) { return 0.707; }
 
 // Water-vapour diffusivity in air [m^2/s] at mean temperature Tm_K.
