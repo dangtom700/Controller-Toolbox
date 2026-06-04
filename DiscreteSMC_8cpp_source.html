@@ -122,78 +122,83 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        e_prev_ = error;</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        s_prev_ = s;</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        u_prev_ = u;</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        <span class="keywordflow">return</span> u;</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    }</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        <span class="comment">// M3 telemetry: sliding surface value</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <a class="code hl_function" href="classctrl_1_1IController.html#a8209b0a7f469ab75271a71ef25617a1e">notifyObserverState</a>(<span class="stringliteral">&quot;surface&quot;</span>, Eigen::VectorXd::Constant(1, s));</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        <a class="code hl_function" href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">notifyObserver</a>(u, error);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <span class="keywordflow">return</span> u;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    }</div>
 </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="foldopen" id="foldopen00041" data-start="{" data-end="}">
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="classctrl_1_1DiscreteSMC.html#a065d02a961f7abaa74fed3af119521b9">   41</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1DiscreteSMC.html#a065d02a961f7abaa74fed3af119521b9">DiscreteSMC::reset</a>()</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    {</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        e_prev_ = 0.0;</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        s_prev_ = 0.0;</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        u_prev_ = 0.0;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    }</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="foldopen" id="foldopen00044" data-start="{" data-end="}">
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="classctrl_1_1DiscreteSMC.html#a065d02a961f7abaa74fed3af119521b9">   44</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1DiscreteSMC.html#a065d02a961f7abaa74fed3af119521b9">DiscreteSMC::reset</a>()</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    {</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        e_prev_ = 0.0;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        s_prev_ = 0.0;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        u_prev_ = 0.0;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    }</div>
 </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="comment">// ---------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="comment">// SuperTwistingSMC</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="comment">// ---------------------------------------------------------------------------</span></div>
-<div class="foldopen" id="foldopen00051" data-start="{" data-end="}">
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="classctrl_1_1SuperTwistingSMC.html#a0017d1769280062a47caf49fecf153d1">   51</a></span>    <a class="code hl_function" href="classctrl_1_1SuperTwistingSMC.html#a0017d1769280062a47caf49fecf153d1">SuperTwistingSMC::SuperTwistingSMC</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1SuperTwistingParams.html">SuperTwistingParams</a> &amp;params, <span class="keywordtype">double</span> sampleTime)</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        : p_(params), Ts_(sampleTime)</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    {</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <a class="code hl_function" href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">reset</a>();</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    }</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="comment">// ---------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="comment">// SuperTwistingSMC</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="comment">// ---------------------------------------------------------------------------</span></div>
+<div class="foldopen" id="foldopen00054" data-start="{" data-end="}">
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="classctrl_1_1SuperTwistingSMC.html#a0017d1769280062a47caf49fecf153d1">   54</a></span>    <a class="code hl_function" href="classctrl_1_1SuperTwistingSMC.html#a0017d1769280062a47caf49fecf153d1">SuperTwistingSMC::SuperTwistingSMC</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1SuperTwistingParams.html">SuperTwistingParams</a> &amp;params, <span class="keywordtype">double</span> sampleTime)</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        : p_(params), Ts_(sampleTime)</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    {</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        <a class="code hl_function" href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">reset</a>();</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    }</div>
 </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="comment">// Discrete super-twisting update:</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="comment">//   s[k]   = c_e.e[k] + c_de.(e[k] - e[k-1])</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="comment">//   u[k]   = v_ - K1.|s|^{1/2}.sign(s)          (power term - chattering-free)</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="comment">//   v_new  = v_ - K2.Ts.sign(s)                  (integral term - Euler)</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="comment">// The integrator v_ provides the equivalent of a sliding-mode integral that</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="comment">// removes steady-state error without a boundary layer.</span></div>
-<div class="foldopen" id="foldopen00064" data-start="{" data-end="}">
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classctrl_1_1SuperTwistingSMC.html#a8d37fd835fc00be3b448042372a5c90c">   64</a></span>    <span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1SuperTwistingSMC.html#a8d37fd835fc00be3b448042372a5c90c">SuperTwistingSMC::compute</a>(<span class="keywordtype">double</span> error)</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    {</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keywordflow">if</span> (!std::isfinite(error))</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>            <span class="keywordflow">return</span> std::max(p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#a866e524ef0399cad048fbf69e88e342f">uMin</a>, std::min(p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#a7a709463b29a152f33f6fcc1d33d6887">uMax</a>, v_));</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keyword">const</span> <span class="keywordtype">double</span> s = p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#afd3504ce1d4ae3532f0e2bb032894b66">c_e</a> * error + p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#a62ce8285bffab84b6a9761bb17e4dc57">c_de</a> * (error - e_prev_);</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        <span class="keyword">const</span> <span class="keywordtype">double</span> sign_s = (s &gt; 0.0) ? 1.0 : (s &lt; 0.0 ? -1.0 : 0.0);</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="keyword">const</span> <span class="keywordtype">double</span> sqrt_s = std::sqrt(std::abs(s));</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="comment">// Discrete super-twisting update:</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="comment">//   s[k]   = c_e.e[k] + c_de.(e[k] - e[k-1])</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="comment">//   u[k]   = v_ - K1.|s|^{1/2}.sign(s)          (power term - chattering-free)</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="comment">//   v_new  = v_ - K2.Ts.sign(s)                  (integral term - Euler)</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="comment">//</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="comment">// The integrator v_ provides the equivalent of a sliding-mode integral that</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="comment">// removes steady-state error without a boundary layer.</span></div>
+<div class="foldopen" id="foldopen00067" data-start="{" data-end="}">
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="classctrl_1_1SuperTwistingSMC.html#a8d37fd835fc00be3b448042372a5c90c">   67</a></span>    <span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1SuperTwistingSMC.html#a8d37fd835fc00be3b448042372a5c90c">SuperTwistingSMC::compute</a>(<span class="keywordtype">double</span> error)</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    {</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keywordflow">if</span> (!std::isfinite(error))</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>            <span class="keywordflow">return</span> std::max(p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#a866e524ef0399cad048fbf69e88e342f">uMin</a>, std::min(p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#a7a709463b29a152f33f6fcc1d33d6887">uMax</a>, v_));</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="keyword">const</span> <span class="keywordtype">double</span> s = p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#afd3504ce1d4ae3532f0e2bb032894b66">c_e</a> * error + p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#a62ce8285bffab84b6a9761bb17e4dc57">c_de</a> * (error - e_prev_);</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="comment">// Control output</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        <span class="keywordtype">double</span> u = v_ - p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#a72c3177b49aaecceeeffa5a45d692538">K1</a> * sqrt_s * sign_s;</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        u = std::max(p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#a866e524ef0399cad048fbf69e88e342f">uMin</a>, std::min(p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#a7a709463b29a152f33f6fcc1d33d6887">uMax</a>, u));</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <span class="comment">// Integrator update (Euler - keep K2*Ts small for accuracy)</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        v_ -= p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#ad6c93df7b0bc89c26e0b296d9f5f6a1c">K2</a> * Ts_ * sign_s;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keyword">const</span> <span class="keywordtype">double</span> sign_s = (s &gt; 0.0) ? 1.0 : (s &lt; 0.0 ? -1.0 : 0.0);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        <span class="keyword">const</span> <span class="keywordtype">double</span> sqrt_s = std::sqrt(std::abs(s));</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="comment">// Control output</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <span class="keywordtype">double</span> u = v_ - p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#a72c3177b49aaecceeeffa5a45d692538">K1</a> * sqrt_s * sign_s;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        u = std::max(p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#a866e524ef0399cad048fbf69e88e342f">uMin</a>, std::min(p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#a7a709463b29a152f33f6fcc1d33d6887">uMax</a>, u));</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        e_prev_ = error;</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        s_prev_ = s;</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        <span class="keywordflow">return</span> u;</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    }</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        <span class="comment">// Integrator update (Euler - keep K2*Ts small for accuracy)</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        v_ -= p_.<a class="code hl_variable" href="structctrl_1_1SuperTwistingParams.html#ad6c93df7b0bc89c26e0b296d9f5f6a1c">K2</a> * Ts_ * sign_s;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        e_prev_ = error;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        s_prev_ = s;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <span class="keywordflow">return</span> u;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    }</div>
 </div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
-<div class="foldopen" id="foldopen00086" data-start="{" data-end="}">
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">   86</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">SuperTwistingSMC::reset</a>()</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    {</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        e_prev_ = 0.0;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        s_prev_ = 0.0;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        v_      = 0.0;</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    }</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="foldopen" id="foldopen00089" data-start="{" data-end="}">
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">   89</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">SuperTwistingSMC::reset</a>()</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    {</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        e_prev_ = 0.0;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        s_prev_ = 0.0;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        v_      = 0.0;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    }</div>
 </div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aDiscreteSMC_8h_html"><div class="ttname"><a href="DiscreteSMC_8h.html">DiscreteSMC.h</a></div><div class="ttdoc">Discrete-time Sliding Mode Controllers - first-order SMC and super-twisting SMC.</div></div>
-<div class="ttc" id="aclassctrl_1_1DiscreteSMC_html_a065d02a961f7abaa74fed3af119521b9"><div class="ttname"><a href="classctrl_1_1DiscreteSMC.html#a065d02a961f7abaa74fed3af119521b9">ctrl::DiscreteSMC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset previous error, sliding surface, and output.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00041">DiscreteSMC.cpp:41</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DiscreteSMC_html_a065d02a961f7abaa74fed3af119521b9"><div class="ttname"><a href="classctrl_1_1DiscreteSMC.html#a065d02a961f7abaa74fed3af119521b9">ctrl::DiscreteSMC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset previous error, sliding surface, and output.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00044">DiscreteSMC.cpp:44</a></div></div>
 <div class="ttc" id="aclassctrl_1_1DiscreteSMC_html_a6c50a3767e0c08a76090581e6bbca4d0"><div class="ttname"><a href="classctrl_1_1DiscreteSMC.html#a6c50a3767e0c08a76090581e6bbca4d0">ctrl::DiscreteSMC::DiscreteSMC</a></div><div class="ttdeci">DiscreteSMC(const SMCParams &amp;params, double sampleTime)</div><div class="ttdoc">Construct with tuning parameters and fixed sample time.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00008">DiscreteSMC.cpp:8</a></div></div>
 <div class="ttc" id="aclassctrl_1_1DiscreteSMC_html_a7a2d1fb5f0d6a93ac17a4374c2a442e0"><div class="ttname"><a href="classctrl_1_1DiscreteSMC.html#a7a2d1fb5f0d6a93ac17a4374c2a442e0">ctrl::DiscreteSMC::compute</a></div><div class="ttdeci">double compute(double error) override</div><div class="ttdoc">Compute u[k] from tracking error e[k] = r[k] - y[k].</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00019">DiscreteSMC.cpp:19</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SuperTwistingSMC_html_a0017d1769280062a47caf49fecf153d1"><div class="ttname"><a href="classctrl_1_1SuperTwistingSMC.html#a0017d1769280062a47caf49fecf153d1">ctrl::SuperTwistingSMC::SuperTwistingSMC</a></div><div class="ttdeci">SuperTwistingSMC(const SuperTwistingParams &amp;params, double sampleTime)</div><div class="ttdoc">Construct with tuning parameters and fixed sample time.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00051">DiscreteSMC.cpp:51</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SuperTwistingSMC_html_a8d37fd835fc00be3b448042372a5c90c"><div class="ttname"><a href="classctrl_1_1SuperTwistingSMC.html#a8d37fd835fc00be3b448042372a5c90c">ctrl::SuperTwistingSMC::compute</a></div><div class="ttdeci">double compute(double error) override</div><div class="ttdoc">Compute u[k] from tracking error e[k] = r[k] - y[k].</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00064">DiscreteSMC.cpp:64</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SuperTwistingSMC_html_ad6ace024e00ad947ca294f939b4db1cc"><div class="ttname"><a href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">ctrl::SuperTwistingSMC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset previous error, sliding surface, and integrator state v.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00086">DiscreteSMC.cpp:86</a></div></div>
+<div class="ttc" id="aclassctrl_1_1IController_html_a8209b0a7f469ab75271a71ef25617a1e"><div class="ttname"><a href="classctrl_1_1IController.html#a8209b0a7f469ab75271a71ef25617a1e">ctrl::IController::notifyObserverState</a></div><div class="ttdeci">void notifyObserverState(std::string_view key, const Eigen::VectorXd &amp;value) const</div><div class="ttdoc">Fire the observer's onState() callback (M3 internal-state telemetry).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00189">IController.h:189</a></div></div>
+<div class="ttc" id="aclassctrl_1_1IController_html_aff795d6bd36f8a8d20796d0670fef301"><div class="ttname"><a href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">ctrl::IController::notifyObserver</a></div><div class="ttdeci">void notifyObserver(double u, double signal) const</div><div class="ttdoc">Fire the observer's onCompute() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00155">IController.h:155</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SuperTwistingSMC_html_a0017d1769280062a47caf49fecf153d1"><div class="ttname"><a href="classctrl_1_1SuperTwistingSMC.html#a0017d1769280062a47caf49fecf153d1">ctrl::SuperTwistingSMC::SuperTwistingSMC</a></div><div class="ttdeci">SuperTwistingSMC(const SuperTwistingParams &amp;params, double sampleTime)</div><div class="ttdoc">Construct with tuning parameters and fixed sample time.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00054">DiscreteSMC.cpp:54</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SuperTwistingSMC_html_a8d37fd835fc00be3b448042372a5c90c"><div class="ttname"><a href="classctrl_1_1SuperTwistingSMC.html#a8d37fd835fc00be3b448042372a5c90c">ctrl::SuperTwistingSMC::compute</a></div><div class="ttdeci">double compute(double error) override</div><div class="ttdoc">Compute u[k] from tracking error e[k] = r[k] - y[k].</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00067">DiscreteSMC.cpp:67</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SuperTwistingSMC_html_ad6ace024e00ad947ca294f939b4db1cc"><div class="ttname"><a href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">ctrl::SuperTwistingSMC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset previous error, sliding surface, and integrator state v.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00089">DiscreteSMC.cpp:89</a></div></div>
 <div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AdaptiveSmithPredictor_8cpp_source.html#l00005">AdaptiveSmithPredictor.cpp:6</a></div></div>
 <div class="ttc" id="astructctrl_1_1SMCParams_html"><div class="ttname"><a href="structctrl_1_1SMCParams.html">ctrl::SMCParams</a></div><div class="ttdoc">Tuning parameters for DiscreteSMC.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8h_source.html#l00020">DiscreteSMC.h:21</a></div></div>
 <div class="ttc" id="astructctrl_1_1SMCParams_html_a098f2ef5891177964432117e86cce7c3"><div class="ttname"><a href="structctrl_1_1SMCParams.html#a098f2ef5891177964432117e86cce7c3">ctrl::SMCParams::uMax</a></div><div class="ttdeci">double uMax</div><div class="ttdoc">Output saturation upper limit.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8h_source.html#l00057">DiscreteSMC.h:57</a></div></div>

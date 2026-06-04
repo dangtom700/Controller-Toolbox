@@ -1,8 +1,11 @@
 var searchData=
 [
-  ['kalmanfilter_0',['KalmanFilter',['../classctrl_1_1KalmanFilter.html',1,'ctrl']]],
-  ['kalmannoiseparams_1',['KalmanNoiseParams',['../structctrl_1_1KalmanNoiseParams.html',1,'ctrl']]],
-  ['kalmantuneresult_2',['KalmanTuneResult',['../structctrl_1_1KalmanTuneResult.html',1,'ctrl']]],
-  ['kalmanweighttuner_3',['KalmanWeightTuner',['../classctrl_1_1KalmanWeightTuner.html',1,'ctrl']]],
-  ['koopmanedmd_4',['KoopmanEDMD',['../classctrl_1_1KoopmanEDMD.html',1,'ctrl']]]
+  ['iactuator_0',['IActuator',['../classctrl_1_1IActuator.html',1,'ctrl']]],
+  ['icontroller_1',['IController',['../classctrl_1_1IController.html',1,'ctrl']]],
+  ['icontrollerobserver_2',['IControllerObserver',['../classctrl_1_1IControllerObserver.html',1,'ctrl']]],
+  ['ilc_3',['ILC',['../classctrl_1_1ILC.html',1,'ctrl']]],
+  ['input_4',['input',['../structctrl_1_1LoopShapingTuner_1_1Input.html',1,'ctrl::LoopShapingTuner::Input'],['../structctrl_1_1ZieglerNicholsTuner_1_1Input.html',1,'ctrl::ZieglerNicholsTuner::Input']]],
+  ['ischeduler_5',['IScheduler',['../classctrl_1_1IScheduler.html',1,'ctrl']]],
+  ['isensor_6',['ISensor',['../classctrl_1_1ISensor.html',1,'ctrl']]],
+  ['itimer_7',['ITimer',['../classctrl_1_1ITimer.html',1,'ctrl']]]
 ];

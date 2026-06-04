@@ -15,10 +15,12 @@ var searchData=
   ['mftriangular_12',['mfTriangular',['../namespacectrl.html#a210a1ff6e7c04e4d043ed83f0ad3a129',1,'ctrl']]],
   ['minreal_13',['minreal',['../namespacectrl.html#a336b6d277ba94f21f11fcb2e5283952d',1,'ctrl']]],
   ['mode_14',['mode',['../classctrl_1_1ControllerStack.html#a7699dc65172c47b782b42d668a718cde',1,'ctrl::ControllerStack']]],
-  ['model_15',['model',['../classctrl_1_1SimPlant.html#ad71a6b423717b13f00d648b5aca5d941',1,'ctrl::SimPlant::model()'],['../classctrl_1_1FeedforwardController.html#a4daefd82286a5f235ce6dcdb396a95d8',1,'ctrl::FeedforwardController::model()']]],
+  ['model_15',['model',['../classctrl_1_1SimPlant.html#ad71a6b423717b13f00d648b5aca5d941',1,'ctrl::SimPlant::model()'],['../classctrl_1_1FeedforwardController.html#a4daefd82286a5f235ce6dcdb396a95d8',1,'ctrl::FeedforwardController::model()'],['../classctrl_1_1DynaController.html#a8934902408f0db93e7a8ac1bc12d1d2a',1,'ctrl::DynaController::model()']]],
   ['modelerror_16',['modelError',['../classctrl_1_1MRACController.html#a63f00834d097c1d13cda8b316d4787b3',1,'ctrl::MRACController']]],
-  ['modeloutput_17',['modelOutput',['../classctrl_1_1MRACController.html#aaa37aa3220bf4194f0c184c655fe256b',1,'ctrl::MRACController']]],
-  ['movinghorizonestimator_18',['MovingHorizonEstimator',['../classctrl_1_1MovingHorizonEstimator.html#a513ae3f01545e2e4148774117b066142',1,'ctrl::MovingHorizonEstimator']]],
-  ['mpchorizon_19',['mpcHorizon',['../classctrl_1_1TunerSuite.html#a73582e0e3f826ebcfbdb9b64644e9a87',1,'ctrl::TunerSuite']]],
-  ['mraccontroller_20',['MRACController',['../classctrl_1_1MRACController.html#a087fe1589c530373343aff0312396236',1,'ctrl::MRACController']]]
+  ['modelfitted_17',['modelFitted',['../classctrl_1_1DynaController.html#a26770ea1167d1462cdc960c7fc13a7c6',1,'ctrl::DynaController']]],
+  ['modeloutput_18',['modelOutput',['../classctrl_1_1MRACController.html#aaa37aa3220bf4194f0c184c655fe256b',1,'ctrl::MRACController']]],
+  ['modelrollout_19',['modelRollout',['../classctrl_1_1DynaController.html#a743dd95ce4641d1738b70bf2e49f7404',1,'ctrl::DynaController']]],
+  ['movinghorizonestimator_20',['MovingHorizonEstimator',['../classctrl_1_1MovingHorizonEstimator.html#a513ae3f01545e2e4148774117b066142',1,'ctrl::MovingHorizonEstimator']]],
+  ['mpchorizon_21',['mpcHorizon',['../classctrl_1_1TunerSuite.html#a73582e0e3f826ebcfbdb9b64644e9a87',1,'ctrl::TunerSuite']]],
+  ['mraccontroller_22',['MRACController',['../classctrl_1_1MRACController.html#a087fe1589c530373343aff0312396236',1,'ctrl::MRACController']]]
 ];

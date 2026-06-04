@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['pidtuningrule_0',['PIDTuningRule',['../namespacectrl.html#ac903a5a20ba43db1acb05d549374197f',1,'ctrl']]]
+  ['mode_0',['Mode',['../classctrl_1_1ILC.html#a101cee11d88c37eaee047dc4dde5d934',1,'ctrl::ILC']]]
 ];

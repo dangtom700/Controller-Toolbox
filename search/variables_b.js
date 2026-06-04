@@ -4,7 +4,7 @@ var searchData=
   ['maxdelaysteps_1',['maxDelaySteps',['../structctrl_1_1AdaptiveSPParams.html#a335ceafa419252b6f0e5cf5ac7a5ba03',1,'ctrl::AdaptiveSPParams']]],
   ['maxdkiter_2',['maxDKIter',['../structctrl_1_1MuSynParams.html#a719ce3510c8bffcab81b8bd8c34eaa23',1,'ctrl::MuSynParams']]],
   ['maxintragap_3',['maxIntraGap',['../structctrl_1_1ClusterResult.html#ab23ce22563b8b1791649793c7ec511ca',1,'ctrl::ClusterResult']]],
-  ['maxiter_4',['maxiter',['../structctrl_1_1AutoTunerParams.html#ab11947a149a3b18bd3cf84c8def37c6a',1,'ctrl::AutoTunerParams::maxIter'],['../structctrl_1_1HinfParams.html#a10e224f1e822233258ffbc2240707326',1,'ctrl::HinfParams::maxIter']]],
+  ['maxiter_4',['maxiter',['../structctrl_1_1AutoTunerParams.html#ab11947a149a3b18bd3cf84c8def37c6a',1,'ctrl::AutoTunerParams::maxIter'],['../structctrl_1_1BayesOptParams.html#a99febe5a2ee74b999454b28c39393e3f',1,'ctrl::BayesOptParams::maxIter'],['../structctrl_1_1HinfParams.html#a10e224f1e822233258ffbc2240707326',1,'ctrl::HinfParams::maxIter']]],
   ['mean_5',['mean',['../structctrl_1_1GaussianProcess_1_1Prediction.html#abaee8751b7a6dc446d17dfd4b4e7d029',1,'ctrl::GaussianProcess::Prediction']]],
   ['message_6',['message',['../structctrl_1_1SubspaceIDResult.html#ab11bfc9d8aa33ea86ee77445613957d8',1,'ctrl::SubspaceIDResult']]],
   ['mf_7',['mf',['../structctrl_1_1LinguisticTerm.html#aa40d3fdcf5c92b42b8e0a7fa288f2f4e',1,'ctrl::LinguisticTerm']]],

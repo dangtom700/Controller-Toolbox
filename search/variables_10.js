@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['r_0',['r',['../structctrl_1_1LQRParams.html#ab2e060a8d2cb1b80bbaf93d9e7f22fc3',1,'ctrl::LQRParams::R'],['../structctrl_1_1ParticleFilterParams.html#aa6990f764d44beda9a6f65cd3008894d',1,'ctrl::ParticleFilterParams::R'],['../structctrl_1_1TubeMPCParams.html#ad9c2b59fe559bacfc2457ba95e9456f9',1,'ctrl::TubeMPCParams::R'],['../structctrl_1_1CEMController_1_1Params.html#ae00bf59d6cc609f6d8bf26876e736a0a',1,'ctrl::CEMController::Params::R']]],
+  ['r_0',['r',['../structctrl_1_1LQRParams.html#ab2e060a8d2cb1b80bbaf93d9e7f22fc3',1,'ctrl::LQRParams::R'],['../structctrl_1_1ParticleFilterParams.html#aa6990f764d44beda9a6f65cd3008894d',1,'ctrl::ParticleFilterParams::R'],['../structctrl_1_1ScenarioMPCParams.html#a7f04818b2282e81b7e6f95c261a2f1c8',1,'ctrl::ScenarioMPCParams::R'],['../structctrl_1_1TubeMPCParams.html#ad9c2b59fe559bacfc2457ba95e9456f9',1,'ctrl::TubeMPCParams::R'],['../structctrl_1_1CEMController_1_1Params.html#ae00bf59d6cc609f6d8bf26876e736a0a',1,'ctrl::CEMController::Params::R']]],
   ['rbf_5fn_5fcent_1',['rbf_n_cent',['../structctrl_1_1KoopmanEDMD_1_1Params.html#a62efaebf3714cbc55d386eb55bd6ff36',1,'ctrl::KoopmanEDMD::Params']]],
   ['rbf_5fwidth_2',['rbf_width',['../structctrl_1_1KoopmanEDMD_1_1Params.html#a9ec29ca2e2a0bd0bedd92054a09b2170',1,'ctrl::KoopmanEDMD::Params']]],
   ['reduced_3',['reduced',['../structctrl_1_1TruncationResult.html#ad36c6a0636ff52860020a90d431f2d92',1,'ctrl::TruncationResult']]],

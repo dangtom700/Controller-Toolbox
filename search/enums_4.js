@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['inferencemethod_0',['InferenceMethod',['../namespacectrl.html#a73e0367e44b7fe77d1b4948481380c22',1,'ctrl']]]
+  ['gainschedulemode_0',['GainScheduleMode',['../namespacectrl.html#ac4b116227149e74ff44404995b9b5f9f',1,'ctrl']]]
 ];

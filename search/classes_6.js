@@ -1,5 +1,9 @@
 var searchData=
 [
-  ['hinfparams_0',['HinfParams',['../structctrl_1_1HinfParams.html',1,'ctrl']]],
-  ['hinfresult_1',['HinfResult',['../structctrl_1_1HinfResult.html',1,'ctrl']]]
+  ['gainscheduledcontroller_0',['GainScheduledController',['../classctrl_1_1GainScheduledController.html',1,'ctrl']]],
+  ['gaussianprocess_1',['GaussianProcess',['../classctrl_1_1GaussianProcess.html',1,'ctrl']]],
+  ['generalisedplant_2',['GeneralisedPlant',['../structctrl_1_1GeneralisedPlant.html',1,'ctrl']]],
+  ['generalizedpredictive_3',['GeneralizedPredictive',['../structctrl_1_1tag_1_1GeneralizedPredictive.html',1,'ctrl::tag']]],
+  ['generalizedpredictivecontroller_4',['GeneralizedPredictiveController',['../classctrl_1_1GeneralizedPredictiveController.html',1,'ctrl']]],
+  ['gpcparams_5',['GPCParams',['../structctrl_1_1GPCParams.html',1,'ctrl']]]
 ];

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['operatingpoint_0',['OperatingPoint',['../structctrl_1_1OperatingPoint.html',1,'ctrl']]],
-  ['optimtuneresult_1',['OptimTuneResult',['../structctrl_1_1OptimTuneResult.html',1,'ctrl']]],
-  ['outputfeedback_2',['OutputFeedback',['../structctrl_1_1tag_1_1OutputFeedback.html',1,'ctrl::tag']]]
+  ['neuralpid_0',['NeuralPID',['../classctrl_1_1NeuralPID.html',1,'ctrl']]],
+  ['nmpcparams_1',['NMPCParams',['../structctrl_1_1NMPCParams.html',1,'ctrl']]],
+  ['nonlinearmpc_2',['NonlinearMPC',['../classctrl_1_1NonlinearMPC.html',1,'ctrl']]]
 ];

@@ -84,6 +84,7 @@ $(function() {
 <p>Observer hook for non-intrusive controller telemetry (Observer pattern).  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;Eigen/Dense&gt;</code><br />
+<code>#include &lt;string_view&gt;</code><br />
 </div>
 <p><a href="IControllerObserver_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -112,8 +113,8 @@ Namespaces</h2></td></tr>
 <div class="line">pid.attachObserver(&amp;logger);</div>
 <div class="line"><span class="comment">// Every pid.compute(e) call now also fires logger.onCompute(u, e).</span></div>
 <div class="ttc" id="aclassctrl_1_1DiscretePID_html"><div class="ttname"><a href="classctrl_1_1DiscretePID.html">ctrl::DiscretePID</a></div><div class="ttdoc">Discrete-time PID controller.</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00099">DiscretePID.h:100</a></div></div>
-<div class="ttc" id="aclassctrl_1_1IControllerObserver_html"><div class="ttname"><a href="classctrl_1_1IControllerObserver.html">ctrl::IControllerObserver</a></div><div class="ttdoc">Interface for controller telemetry observers.</div><div class="ttdef"><b>Definition</b> <a href="IControllerObserver_8h_source.html#l00042">IControllerObserver.h:43</a></div></div>
-<div class="ttc" id="aclassctrl_1_1IControllerObserver_html_a8fdee178803e03dfb2ba1af3044558d6"><div class="ttname"><a href="classctrl_1_1IControllerObserver.html#a8fdee178803e03dfb2ba1af3044558d6">ctrl::IControllerObserver::onCompute</a></div><div class="ttdeci">virtual void onCompute(double, double)</div><div class="ttdoc">Called after every SISO compute() invocation.</div><div class="ttdef"><b>Definition</b> <a href="IControllerObserver_8h_source.html#l00053">IControllerObserver.h:53</a></div></div>
+<div class="ttc" id="aclassctrl_1_1IControllerObserver_html"><div class="ttname"><a href="classctrl_1_1IControllerObserver.html">ctrl::IControllerObserver</a></div><div class="ttdoc">Interface for controller telemetry observers.</div><div class="ttdef"><b>Definition</b> <a href="IControllerObserver_8h_source.html#l00043">IControllerObserver.h:44</a></div></div>
+<div class="ttc" id="aclassctrl_1_1IControllerObserver_html_a8fdee178803e03dfb2ba1af3044558d6"><div class="ttname"><a href="classctrl_1_1IControllerObserver.html#a8fdee178803e03dfb2ba1af3044558d6">ctrl::IControllerObserver::onCompute</a></div><div class="ttdeci">virtual void onCompute(double, double)</div><div class="ttdoc">Called after every SISO compute() invocation.</div><div class="ttdef"><b>Definition</b> <a href="IControllerObserver_8h_source.html#l00054">IControllerObserver.h:54</a></div></div>
 </div><!-- fragment --><p><b>ControllerStack integration:</b> ControllerStack calls notifyObserver() after every dispatched compute() so observers registered on the stack itself receive the composite output automatically.</p>
 <dl class="section note"><dt>Note</dt><dd>Observers are non-owning raw pointers. The observer must outlive the controller. Use detachObserver() before the observer is destroyed to prevent dangling calls.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd>Gang of Four, "Design Patterns", Observer (1994). </dd></dl>

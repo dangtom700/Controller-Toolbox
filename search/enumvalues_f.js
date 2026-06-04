@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['weighted_0',['Weighted',['../namespacectrl.html#a4312ec6fe1026061128af26aaf161458a582368ac8232617ead14ac74ccc40ea9',1,'ctrl']]],
-  ['weightedaverage_1',['WeightedAverage',['../namespacectrl.html#a6dfa916cba4d5f5b44a2bf5317cd196eaf818fb451ad05227ddf60d3380f8dd99',1,'ctrl']]]
+  ['ucb_0',['UCB',['../structctrl_1_1BayesOptParams.html#ab25a02a64b1bd8ae2a8c4de0348b3ecca2d09b5708e07ea3054c8fd57499fd599',1,'ctrl::BayesOptParams']]]
 ];

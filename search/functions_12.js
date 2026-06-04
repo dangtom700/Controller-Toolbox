@@ -19,7 +19,7 @@ var searchData=
   ['triallength_16',['trialLength',['../classctrl_1_1ILC.html#a55380a04e3716af983efdbbf4cf51684',1,'ctrl::ILC']]],
   ['tubempc_17',['TubeMPC',['../classctrl_1_1TubeMPC.html#a0df6a572acd0608ca908dfe6b204aec5',1,'ctrl::TubeMPC']]],
   ['tuberadius_18',['tubeRadius',['../classctrl_1_1TubeMPC.html#ab31cf0d860e37d85326045b62b0a06d5',1,'ctrl::TubeMPC']]],
-  ['tune_19',['tune',['../classctrl_1_1AutoTuner.html#a8b7a02b72c1354e57321f32b702ccf44',1,'ctrl::AutoTuner']]],
+  ['tune_19',['tune',['../classctrl_1_1BayesianOptimizer.html#abc0ccd9d9f659b7b670872cfc68ac5cf',1,'ctrl::BayesianOptimizer::tune()'],['../classctrl_1_1AutoTuner.html#a8b7a02b72c1354e57321f32b702ccf44',1,'ctrl::AutoTuner::tune()']]],
   ['tunefor_20',['tunefor',['../classctrl_1_1ZieglerNicholsTuner.html#a231e843bc80159426bc654db2b61acb5',1,'ctrl::ZieglerNicholsTuner::tuneFor()'],['../classctrl_1_1CohenCoonTuner.html#a5c146227e48a93d01a6280c2cfdc398a',1,'ctrl::CohenCoonTuner::tuneFor()'],['../classctrl_1_1LoopShapingTuner.html#a4b7c906dada079f112679ea4d3f949b0',1,'ctrl::LoopShapingTuner::tuneFor()']]],
   ['tuneimpl_21',['tuneimpl',['../classctrl_1_1ZieglerNicholsTuner.html#adcb1e3a95c75bcd448b75e0862ff5dc9',1,'ctrl::ZieglerNicholsTuner::tuneImpl()'],['../classctrl_1_1CohenCoonTuner.html#a335b1cb5ea52f3a5b02864cd0ec41882',1,'ctrl::CohenCoonTuner::tuneImpl()'],['../classctrl_1_1LoopShapingTuner.html#a84f00307a5826a9024a490d3e4578591',1,'ctrl::LoopShapingTuner::tuneImpl()']]],
   ['tustinfirstorder_22',['tustinFirstOrder',['../namespacectrl.html#a449f238a5061ab8128fb4a095784a94a',1,'ctrl']]]

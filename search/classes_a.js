@@ -1,16 +1,14 @@
 var searchData=
 [
-  ['metricsanalyzer_0',['MetricsAnalyzer',['../classctrl_1_1MetricsAnalyzer.html',1,'ctrl']]],
-  ['mf_1',['MF',['../structctrl_1_1MF.html',1,'ctrl']]],
-  ['mheparams_2',['MHEParams',['../structctrl_1_1MHEParams.html',1,'ctrl']]],
-  ['mixedsensitivity_3',['MixedSensitivity',['../classctrl_1_1MixedSensitivity.html',1,'ctrl']]],
-  ['modelpredictive_4',['ModelPredictive',['../structctrl_1_1tag_1_1ModelPredictive.html',1,'ctrl::tag']]],
-  ['movinghorizonestimator_5',['MovingHorizonEstimator',['../classctrl_1_1MovingHorizonEstimator.html',1,'ctrl']]],
-  ['mpchorizontuner_6',['MPCHorizonTuner',['../classctrl_1_1MPCHorizonTuner.html',1,'ctrl']]],
-  ['mpcparams_7',['MPCParams',['../structctrl_1_1MPCParams.html',1,'ctrl']]],
-  ['mpctuneresult_8',['MPCTuneResult',['../structctrl_1_1MPCTuneResult.html',1,'ctrl']]],
-  ['mraccontroller_9',['MRACController',['../classctrl_1_1MRACController.html',1,'ctrl']]],
-  ['mracparams_10',['MRACParams',['../structctrl_1_1MRACParams.html',1,'ctrl']]],
-  ['musynparams_11',['MuSynParams',['../structctrl_1_1MuSynParams.html',1,'ctrl']]],
-  ['musynresult_12',['MuSynResult',['../structctrl_1_1MuSynResult.html',1,'ctrl']]]
+  ['l1adaptivecontroller_0',['L1AdaptiveController',['../classctrl_1_1L1AdaptiveController.html',1,'ctrl']]],
+  ['leadlagparams_1',['LeadLagParams',['../structctrl_1_1LeadLagParams.html',1,'ctrl']]],
+  ['leadlagtuneresult_2',['LeadLagTuneResult',['../structctrl_1_1LeadLagTuneResult.html',1,'ctrl']]],
+  ['linguisticterm_3',['LinguisticTerm',['../structctrl_1_1LinguisticTerm.html',1,'ctrl']]],
+  ['linguisticvariable_4',['LinguisticVariable',['../structctrl_1_1LinguisticVariable.html',1,'ctrl']]],
+  ['loopshapingtuner_5',['LoopShapingTuner',['../classctrl_1_1LoopShapingTuner.html',1,'ctrl']]],
+  ['lpvmodel_6',['LPVModel',['../structctrl_1_1LPVModel.html',1,'ctrl']]],
+  ['lqradapter_7',['LQRAdapter',['../classctrl_1_1LQRAdapter.html',1,'ctrl']]],
+  ['lqrparams_8',['LQRParams',['../structctrl_1_1LQRParams.html',1,'ctrl']]],
+  ['lqrtuneresult_9',['LQRTuneResult',['../structctrl_1_1LQRTuneResult.html',1,'ctrl']]],
+  ['lqrweighttuner_10',['LQRWeightTuner',['../classctrl_1_1LQRWeightTuner.html',1,'ctrl']]]
 ];

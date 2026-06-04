@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['tier_0',['Tier',['../namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0',1,'ctrl']]],
-  ['type_1',['Type',['../structctrl_1_1MF.html#a45111b9be760c87a34728c543aca96c3',1,'ctrl::MF']]]
+  ['sindylibrary_0',['SINDyLibrary',['../namespacectrl.html#ac4198df21ad11e3f0ce32a11120311af',1,'ctrl']]],
+  ['sopdtmethod_1',['SOPDTMethod',['../namespacectrl.html#ab1f13895423e788521b5365061b1b850',1,'ctrl']]],
+  ['stackmode_2',['StackMode',['../namespacectrl.html#a4312ec6fe1026061128af26aaf161458',1,'ctrl']]]
 ];

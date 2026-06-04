@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['fopdtmethod_0',['FOPDTMethod',['../namespacectrl.html#afe5d6d219bd6cb8e4f6b4d0d3b9225b8',1,'ctrl']]]
+  ['defuzzmethod_0',['DefuzzMethod',['../namespacectrl.html#a6dfa916cba4d5f5b44a2bf5317cd196e',1,'ctrl']]]
 ];

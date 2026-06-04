@@ -160,6 +160,9 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:add3b2b28b1048f8cd5c1130b80676138 inherit pro_methods_classctrl_1_1IController" id="r_add3b2b28b1048f8cd5c1130b80676138"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#add3b2b28b1048f8cd5c1130b80676138">notifyObserverReset</a> () const</td></tr>
 <tr class="memdesc:add3b2b28b1048f8cd5c1130b80676138 inherit pro_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fire the observer's onReset() callback (if attached).  <br /></td></tr>
 <tr class="separator:add3b2b28b1048f8cd5c1130b80676138 inherit pro_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8209b0a7f469ab75271a71ef25617a1e inherit pro_methods_classctrl_1_1IController" id="r_a8209b0a7f469ab75271a71ef25617a1e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a8209b0a7f469ab75271a71ef25617a1e">notifyObserverState</a> (std::string_view key, const Eigen::VectorXd &amp;value) const</td></tr>
+<tr class="memdesc:a8209b0a7f469ab75271a71ef25617a1e inherit pro_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fire the observer's onState() callback (M3 internal-state telemetry).  <br /></td></tr>
+<tr class="separator:a8209b0a7f469ab75271a71ef25617a1e inherit pro_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Online Neural PID - small network that adapts [Kp, Ki, Kd] each step. </p>
@@ -172,7 +175,7 @@ Additional Inherited Members</h2></td></tr>
 <div class="line"> </div>
 <div class="line">Loss:  J = e[k]^2</div>
 <div class="line">Gradient:  dJ/dtheta via backprop through [u-&gt;y] Jacobian + chain rule</div>
-<div class="ttc" id="anamespacectrl_html_a2c5350675a644a3ab773529c5aea79ca"><div class="ttname"><a href="namespacectrl.html#a2c5350675a644a3ab773529c5aea79ca">ctrl::features</a></div><div class="ttdeci">std::unordered_map&lt; std::string, bool &gt; features()</div><div class="ttdoc">Runtime query of optional modules compiled into the library.</div><div class="ttdef"><b>Definition</b> <a href="Features_8h_source.html#l00020">Features.h:20</a></div></div>
+<div class="ttc" id="anamespacectrl_html_a2c5350675a644a3ab773529c5aea79ca"><div class="ttname"><a href="namespacectrl.html#a2c5350675a644a3ab773529c5aea79ca">ctrl::features</a></div><div class="ttdeci">std::unordered_map&lt; std::string, bool &gt; features()</div><div class="ttdoc">Return a snapshot of all registered features.</div><div class="ttdef"><b>Definition</b> <a href="Features_8h_source.html#l00040">Features.h:40</a></div></div>
 </div><!-- fragment --><p>Weight norms are bounded at each step (<code>max_weight_norm</code>) to prevent divergence.</p>
 <p><b>Usage:</b> </p><div class="fragment"><div class="line"><a class="code hl_struct" href="structctrl_1_1NeuralPID_1_1Params.html">ctrl::NeuralPID::Params</a> p;</div>
 <div class="line">p.<a class="code hl_variable" href="structctrl_1_1NeuralPID_1_1Params.html#a8f261c801deeaf9b6ee8e26e5b9c6592">n_hidden</a> = 8; p.<a class="code hl_variable" href="structctrl_1_1NeuralPID_1_1Params.html#a7a0e49c24fe9592e24e2b19432cf7b4d">lr</a> = 1e-3; p.<a class="code hl_variable" href="structctrl_1_1NeuralPID_1_1Params.html#af3e8c833edfaf03ec51e802262950fe6">Ts</a> = 0.01;</div>
@@ -266,7 +269,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="NeuralPID_8cpp_source.html#l00063">63</a> of file <a class="el" href="NeuralPID_8cpp_source.html">NeuralPID.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="NeuralPID_8h_source.html#l00051">ctrl::NeuralPID::Params::lr</a>, <a class="el" href="IController_8h_source.html#l00154">ctrl::IController::notifyObserver()</a>, <a class="el" href="NeuralPID_8h_source.html#l00053">ctrl::NeuralPID::Params::plant_gain</a>, <a class="el" href="NeuralPID_8h_source.html#l00052">ctrl::NeuralPID::Params::Ts</a>, <a class="el" href="NeuralPID_8h_source.html#l00056">ctrl::NeuralPID::Params::uMax</a>, and <a class="el" href="NeuralPID_8h_source.html#l00055">ctrl::NeuralPID::Params::uMin</a>.</p>
+<p class="reference">References <a class="el" href="NeuralPID_8h_source.html#l00051">ctrl::NeuralPID::Params::lr</a>, <a class="el" href="IController_8h_source.html#l00155">ctrl::IController::notifyObserver()</a>, <a class="el" href="NeuralPID_8h_source.html#l00053">ctrl::NeuralPID::Params::plant_gain</a>, <a class="el" href="NeuralPID_8h_source.html#l00052">ctrl::NeuralPID::Params::Ts</a>, <a class="el" href="NeuralPID_8h_source.html#l00056">ctrl::NeuralPID::Params::uMax</a>, and <a class="el" href="NeuralPID_8h_source.html#l00055">ctrl::NeuralPID::Params::uMin</a>.</p>
 
 </div>
 </div>

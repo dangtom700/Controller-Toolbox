@@ -7,5 +7,6 @@ var searchData=
   ['gamma_5fr_4',['gamma_r',['../structctrl_1_1MRACParams.html#acb6da2fe291dcb17ffbf4d096209bfcd',1,'ctrl::MRACParams']]],
   ['gamma_5fy_5',['gamma_y',['../structctrl_1_1MRACParams.html#a7a9b1586a85969cc3d0bcb9a470037b9',1,'ctrl::MRACParams']]],
   ['gammainit_6',['gammaInit',['../structctrl_1_1HinfParams.html#aee414c159172c24578519d41446add33',1,'ctrl::HinfParams']]],
-  ['gammatol_7',['gammaTol',['../structctrl_1_1HinfParams.html#a9f5007efff143b693325cc647e3eb976',1,'ctrl::HinfParams']]]
+  ['gammatol_7',['gammaTol',['../structctrl_1_1HinfParams.html#a9f5007efff143b693325cc647e3eb976',1,'ctrl::HinfParams']]],
+  ['gp_8',['gp',['../structctrl_1_1BayesOptParams.html#aaf769937a54ce6796880822ab65890c7',1,'ctrl::BayesOptParams']]]
 ];

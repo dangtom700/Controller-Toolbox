@@ -17,5 +17,7 @@ var searchData=
   ['discretepid_2eh_14',['DiscretePID.h',['../DiscretePID_8h.html',1,'']]],
   ['discretesmc_2ecpp_15',['DiscreteSMC.cpp',['../DiscreteSMC_8cpp.html',1,'']]],
   ['discretesmc_2eh_16',['DiscreteSMC.h',['../DiscreteSMC_8h.html',1,'']]],
-  ['documentation_2emd_17',['DOCUMENTATION.md',['../DOCUMENTATION_8md.html',1,'']]]
+  ['documentation_2emd_17',['DOCUMENTATION.md',['../DOCUMENTATION_8md.html',1,'']]],
+  ['dynacontroller_2ecpp_18',['DynaController.cpp',['../DynaController_8cpp.html',1,'']]],
+  ['dynacontroller_2eh_19',['DynaController.h',['../DynaController_8h.html',1,'']]]
 ];

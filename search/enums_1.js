@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['defuzzmethod_0',['DefuzzMethod',['../namespacectrl.html#a6dfa916cba4d5f5b44a2bf5317cd196e',1,'ctrl']]]
+  ['c2dmethod_0',['C2dMethod',['../namespacectrl.html#adca30ca249ad63cca5be491ba5520156',1,'ctrl']]],
+  ['ctrlkind_1',['CtrlKind',['../namespacectrl.html#ae9f75df6083768f99f318568d9b9038a',1,'ctrl']]]
 ];

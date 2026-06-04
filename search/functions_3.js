@@ -15,5 +15,6 @@ var searchData=
   ['discretempc_12',['DiscreteMPC',['../classctrl_1_1DiscreteMPC.html#a88ffdafcdd2e4e4ac9c2b9fe5dc18597',1,'ctrl::DiscreteMPC']]],
   ['discretepid_13',['DiscretePID',['../classctrl_1_1DiscretePID.html#a735631c0cad0a4fe8a0b9348767b3b8d',1,'ctrl::DiscretePID']]],
   ['discretesmc_14',['DiscreteSMC',['../classctrl_1_1DiscreteSMC.html#a6c50a3767e0c08a76090581e6bbca4d0',1,'ctrl::DiscreteSMC']]],
-  ['dk_15',['Dk',['../classctrl_1_1DiscreteHinf.html#aedfaa56f189618aae1ba741ef0ae7b43',1,'ctrl::DiscreteHinf']]]
+  ['dk_15',['Dk',['../classctrl_1_1DiscreteHinf.html#aedfaa56f189618aae1ba741ef0ae7b43',1,'ctrl::DiscreteHinf']]],
+  ['dynacontroller_16',['DynaController',['../classctrl_1_1DynaController.html#a8fd8dd975b9182e4c456c906285864d8',1,'ctrl::DynaController']]]
 ];

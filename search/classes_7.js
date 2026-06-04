@@ -1,11 +1,5 @@
 var searchData=
 [
-  ['iactuator_0',['IActuator',['../classctrl_1_1IActuator.html',1,'ctrl']]],
-  ['icontroller_1',['IController',['../classctrl_1_1IController.html',1,'ctrl']]],
-  ['icontrollerobserver_2',['IControllerObserver',['../classctrl_1_1IControllerObserver.html',1,'ctrl']]],
-  ['ilc_3',['ILC',['../classctrl_1_1ILC.html',1,'ctrl']]],
-  ['input_4',['input',['../structctrl_1_1LoopShapingTuner_1_1Input.html',1,'ctrl::LoopShapingTuner::Input'],['../structctrl_1_1ZieglerNicholsTuner_1_1Input.html',1,'ctrl::ZieglerNicholsTuner::Input']]],
-  ['ischeduler_5',['IScheduler',['../classctrl_1_1IScheduler.html',1,'ctrl']]],
-  ['isensor_6',['ISensor',['../classctrl_1_1ISensor.html',1,'ctrl']]],
-  ['itimer_7',['ITimer',['../classctrl_1_1ITimer.html',1,'ctrl']]]
+  ['hinfparams_0',['HinfParams',['../structctrl_1_1HinfParams.html',1,'ctrl']]],
+  ['hinfresult_1',['HinfResult',['../structctrl_1_1HinfResult.html',1,'ctrl']]]
 ];

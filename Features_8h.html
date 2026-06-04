@@ -80,8 +80,10 @@ $(function() {
   <div class="headertitle"><div class="title">Features.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;string&gt;</code><br />
-<code>#include &lt;unordered_map&gt;</code><br />
+
+<p>Backward-compatible <code><a class="el" href="namespacectrl.html#a2c5350675a644a3ab773529c5aea79ca" title="Return a snapshot of all registered features.">ctrl::features()</a></code> wrapper over ControllerRegistry.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="ControllerRegistry_8h_source.html">ControllerRegistry.h</a>&quot;</code><br />
 </div>
 <p><a href="Features_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -93,10 +95,28 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a2c5350675a644a3ab773529c5aea79ca" id="r_a2c5350675a644a3ab773529c5aea79ca"><td class="memItemLeft" align="right" valign="top">std::unordered_map&lt; std::string, bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a2c5350675a644a3ab773529c5aea79ca">ctrl::features</a> ()</td></tr>
-<tr class="memdesc:a2c5350675a644a3ab773529c5aea79ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runtime query of optional modules compiled into the library.  <br /></td></tr>
+<tr class="memdesc:a2c5350675a644a3ab773529c5aea79ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a snapshot of all registered features.  <br /></td></tr>
 <tr class="separator:a2c5350675a644a3ab773529c5aea79ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Backward-compatible <code><a class="el" href="namespacectrl.html#a2c5350675a644a3ab773529c5aea79ca" title="Return a snapshot of all registered features.">ctrl::features()</a></code> wrapper over ControllerRegistry. </p>
+<p>Part 33 (M2): the hand-maintained literal map has been replaced by the self-registration system in <code><a class="el" href="ControllerRegistry_8h.html" title="Self-registration registry for controller feature flags.">ControllerRegistry.h</a></code>. Controllers register themselves via <code><a class="el" href="ControllerRegistry_8h.html#ae8187c4a512daf1ad11234f8e9c413b9">CTRL_REGISTER_FEATURE(name)</a></code> at the bottom of their own header. Pre-M2 controllers are registered centrally in <code><a class="el" href="ControllerRegistrations_8h.html" title="Centralized feature registrations for controllers added before M2.">ControllerRegistrations.h</a></code> (included by the <code><a class="el" href="ControllerToolbox_8h.html" title="Discrete-Time Controller Toolbox - umbrella include.">ControllerToolbox.h</a></code> umbrella).</p>
+<p>The <code>features()</code> function below is kept for backward compatibility: any code that called <code><a class="el" href="namespacectrl.html#a2c5350675a644a3ab773529c5aea79ca" title="Return a snapshot of all registered features.">ctrl::features()</a></code> continues to work unchanged.</p>
+<div class="fragment"><div class="line"><span class="comment">// Check whether a feature is available at runtime</span></div>
+<div class="line"><span class="keywordflow">if</span> (<a class="code hl_function" href="classctrl_1_1ControllerRegistry.html#a991c170b13d7a0c9b3a93bc72c09adaf">ctrl::ControllerRegistry::has</a>(<span class="stringliteral">&quot;dyna&quot;</span>))</div>
+<div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;DynaController available\n&quot;</span>;</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Enumerate all registered features (same as before)</span></div>
+<div class="line"><span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; [name, on] : <a class="code hl_namespace" href="namespacectrl.html">ctrl</a>::features())</div>
+<div class="line">    std::printf(<span class="stringliteral">&quot;  %-24s %s\n&quot;</span>, name.c_str(), on ? <span class="stringliteral">&quot;yes&quot;</span> : <span class="stringliteral">&quot;no&quot;</span>);</div>
+<div class="ttc" id="aclassctrl_1_1ControllerRegistry_html_a991c170b13d7a0c9b3a93bc72c09adaf"><div class="ttname"><a href="classctrl_1_1ControllerRegistry.html#a991c170b13d7a0c9b3a93bc72c09adaf">ctrl::ControllerRegistry::has</a></div><div class="ttdeci">static bool has(std::string_view name)</div><div class="ttdoc">Return true if name is registered and marked available.</div><div class="ttdef"><b>Definition</b> <a href="ControllerRegistry_8h_source.html#l00067">ControllerRegistry.h:67</a></div></div>
+<div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AdaptiveSmithPredictor_8cpp_source.html#l00005">AdaptiveSmithPredictor.cpp:6</a></div></div>
+</div><!-- fragment --><dl class="section see"><dt>See also</dt><dd><a class="el" href="ControllerRegistry_8h.html" title="Self-registration registry for controller feature flags.">ControllerRegistry.h</a> &ndash; singleton + <a class="el" href="ControllerRegistry_8h.html#ae8187c4a512daf1ad11234f8e9c413b9">CTRL_REGISTER_FEATURE</a> macro. </dd>
+<dd>
+<a class="el" href="ControllerRegistrations_8h.html" title="Centralized feature registrations for controllers added before M2.">ControllerRegistrations.h</a> &ndash; centralized registrations for pre-M2 controllers. </dd></dl>
+
+<p class="definition">Definition in file <a class="el" href="Features_8h_source.html">Features.h</a>.</p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8

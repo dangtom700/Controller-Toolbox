@@ -31,8 +31,9 @@ var searchData=
   ['generic_28',['Generic',['../namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa8045a0a6c688b0635e3caccc408a1446',1,'ctrl']]],
   ['getfrequencyresponse_29',['getFrequencyResponse',['../classctrl_1_1SystemAnalysis.html#a9302c9ab17ea2f1a9bbecbb9c98a9acf',1,'ctrl::SystemAnalysis']]],
   ['getpoles_30',['getPoles',['../classctrl_1_1SystemAnalysis.html#ae9fd5f69fc3911297a2c09a3832dac2b',1,'ctrl::SystemAnalysis']]],
-  ['gpcparams_31',['GPCParams',['../structctrl_1_1GPCParams.html',1,'ctrl']]],
-  ['gradientprojectionqp_2eh_32',['GradientProjectionQP.h',['../GradientProjectionQP_8h.html',1,'']]],
-  ['graphical_33',['graphical',['../namespacectrl.html#afe5d6d219bd6cb8e4f6b4d0d3b9225b8a5772f5928c9d3f31259d15041bfe260f',1,'ctrl::Graphical'],['../namespacectrl.html#ab1f13895423e788521b5365061b1b850a5772f5928c9d3f31259d15041bfe260f',1,'ctrl::Graphical']]],
-  ['guide_34',['guide',['../md_docs_2DOCUMENTATION.html#autotoc_md36',1,'2. Compilation Guide'],['../md_docs_2DOCUMENTATION.html#autotoc_md51',1,'4. Usage Guide'],['../md_docs_2DEPLOYMENT.html',1,'Controller Toolbox - Deployment Guide']]]
+  ['gp_31',['gp',['../structctrl_1_1BayesOptParams.html#aaf769937a54ce6796880822ab65890c7',1,'ctrl::BayesOptParams']]],
+  ['gpcparams_32',['GPCParams',['../structctrl_1_1GPCParams.html',1,'ctrl']]],
+  ['gradientprojectionqp_2eh_33',['GradientProjectionQP.h',['../GradientProjectionQP_8h.html',1,'']]],
+  ['graphical_34',['graphical',['../namespacectrl.html#afe5d6d219bd6cb8e4f6b4d0d3b9225b8a5772f5928c9d3f31259d15041bfe260f',1,'ctrl::Graphical'],['../namespacectrl.html#ab1f13895423e788521b5365061b1b850a5772f5928c9d3f31259d15041bfe260f',1,'ctrl::Graphical']]],
+  ['guide_35',['guide',['../md_docs_2DOCUMENTATION.html#autotoc_md36',1,'2. Compilation Guide'],['../md_docs_2DOCUMENTATION.html#autotoc_md51',1,'4. Usage Guide'],['../md_docs_2DEPLOYMENT.html',1,'Controller Toolbox - Deployment Guide']]]
 ];

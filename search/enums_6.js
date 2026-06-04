@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['mode_0',['Mode',['../classctrl_1_1ILC.html#a101cee11d88c37eaee047dc4dde5d934',1,'ctrl::ILC']]]
+  ['koopmandict_0',['KoopmanDict',['../namespacectrl.html#a17d0171c81d155d52400be8aff2ddcc3',1,'ctrl']]]
 ];

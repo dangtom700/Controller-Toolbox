@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['koopmandict_0',['KoopmanDict',['../namespacectrl.html#a17d0171c81d155d52400be8aff2ddcc3',1,'ctrl']]]
+  ['inferencemethod_0',['InferenceMethod',['../namespacectrl.html#a73e0367e44b7fe77d1b4948481380c22',1,'ctrl']]]
 ];
