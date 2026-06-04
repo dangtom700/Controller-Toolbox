@@ -69,7 +69,7 @@ private:
 class MPCController : public ControllerBase {
 public:
     explicit MPCController(double Ts, double Tw1_nom = 40.0,
-                           double a = 0.018, double b = 4.5);
+                           double a = 0.018, double b = 100.0);
     ControlInput compute(double ref_Tw1, double measured_Tw1, double G) override;
     void reset() override;
     std::string name() const override { return "MPC"; }

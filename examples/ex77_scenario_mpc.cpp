@@ -39,7 +39,7 @@ int main()
         ctrl::ScenarioMPCParams p;
         p.Np = 10; p.Nu = 4; p.Ts = Ts;
         p.Q  = Eigen::MatrixXd::Identity(1, 1);
-        p.R  = Eigen::MatrixXd::Identity(1, 1) * 0.1;
+        p.R  = Eigen::MatrixXd::Identity(1, 1) * 0.01;  // low effort penalty for tight tracking
         p.Sigma_w  = Eigen::MatrixXd::Identity(1, 1) * (sw * sw);
         p.N_samples = n_samples; p.seed = 42;
         p.uMin = Eigen::VectorXd::Constant(1, -2.0);

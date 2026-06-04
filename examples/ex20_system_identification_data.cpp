@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <fstream>
 #include <random>
+#include <filesystem>
 
 int main()
 {
@@ -22,6 +23,7 @@ int main()
     std::normal_distribution<double> input_noise(0.0, 0.2); // process noise on u
     std::normal_distribution<double> meas_noise(0.0, 0.05); // measurement noise on y
 
+    std::filesystem::create_directories(PROJECT_DATA_DIR);
     std::ofstream out(std::string(PROJECT_DATA_DIR) + "/sysid_data.csv");
     if (!out) {
         std::cerr << "Failed to open " << PROJECT_DATA_DIR << "/sysid_data.csv\n";

@@ -738,6 +738,11 @@ def phase_bug_report(log_path):
         '1 warning',             # "SOFT - 1 warning | Yes | PASS" and
                                  # "FALLBACK - 1 warning | Yes | PASS" rows (warned=Yes);
                                  # "warn" keyword fires on "warning" but result is PASS
+        # ── ML/data-driven example diagnostic metrics (EXIT 0, word "error" in label) ──
+        'mean position error',   # ex71_sindy: "EKF with SINDy model - mean position error: 0.6629"
+        '|   u     | fitted |',  # ex76_dyna_mbrl table header "Step | error | u | fitted | buffer"
+        'mean abs error',        # ex89_gp_regression: "Mean abs error: 0.0995  (< 0.30 expected)"
+        'zero error after reset',# ex91_neural_pid: "Reset test: zero error after reset"
     ]
 
     # Try to read the log - fall back to latin‑1 if UTF‑8 fails

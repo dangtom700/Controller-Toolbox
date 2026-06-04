@@ -7,6 +7,8 @@ namespace solar {
 // Clamp helpers
 static constexpr double kMwMin = 0.02;
 static constexpr double kMwMax = 0.22;
+// Operating-point spray flow for Tw1 approx = 40 ^\circC (Tw1 = T_w2 + Q_cond/(m_dot_w*cp_w))
+static constexpr double kMwNom = 0.033;
 static constexpr double kKrMin = 0.30;
 static constexpr double kKrMax = 1.00;
 
@@ -15,18 +17,19 @@ static double clampKr(double v) { return std::clamp(v, kKrMin, kKrMax); }
 
 // ---------------------------------------------------------------------------
 // 1. PIDController
-// Gains tuned for a nominal Tw1 range of ~15-45 ^\circC with Ts = 10 s.
-// Tracking error e = ref_Tw1 - measured_Tw1.
-// Positive e (too cold) -> reduce m_dot_w; negative e (too warm) -> increase.
+// Plant has NEGATIVE gain: higher m_dot_w -> lower Tw1 (Tw1 = T_w2 + Q/(m*cp)).
+// Formula: m_dot_w = kMwNom - pid.compute(e),  e = ref - measured.
+// Positive e (too cold) -> positive u -> m_dot_w < kMwNom -> less flow -> Tw1 rises (check)
+// Kp < 1/|K_plant| approx = 1/1000 for linearised stability at the operating point.
 // ---------------------------------------------------------------------------
 PIDController::PIDController(double Ts)
     : pid_(ctrl::PIDParams{
-        .Kp   =  0.002,
-        .Ki   =  0.0003,
-        .Kd   =  0.005,
+        .Kp   =  0.0005,
+        .Ki   =  0.00005,
+        .Kd   =  0.0,
         .N    =  5.0,
-        .uMin = kMwMin,
-        .uMax = kMwMax,
+        .uMin = -(kMwMax - kMwNom),   // -0.187: maps to m_dot_w = kMwMax
+        .uMax =   kMwNom - kMwMin,    // +0.013: maps to m_dot_w = kMwMin
         .Kb   =  0.5
       }, Ts)
 {}
@@ -38,8 +41,8 @@ void PIDController::reset()
 
 ControlInput PIDController::compute(double ref_Tw1, double measured_Tw1, double /*G*/)
 {
-    double e        = ref_Tw1 - measured_Tw1;
-    double m_dot_w  = clampMw(pid_.compute(e));
+    double e       = ref_Tw1 - measured_Tw1;
+    double m_dot_w = clampMw(kMwNom - pid_.compute(e));
     return {m_dot_w, kr_nom_};
 }
 
@@ -51,12 +54,12 @@ ControlInput PIDController::compute(double ref_Tw1, double measured_Tw1, double 
 // ---------------------------------------------------------------------------
 FFPIDController::FFPIDController(double Ts)
     : pid_(ctrl::PIDParams{
-        .Kp   =  0.002,
-        .Ki   =  0.0003,
-        .Kd   =  0.005,
+        .Kp   =  0.0005,
+        .Ki   =  0.00005,
+        .Kd   =  0.0,
         .N    =  5.0,
-        .uMin = -0.10,
-        .uMax =  0.10,
+        .uMin = -0.25,   // wide inner range; outer clampMw provides hard bound
+        .uMax =  0.25,
         .Kb   =  0.5
       }, Ts)
 {}
@@ -69,9 +72,10 @@ void FFPIDController::reset()
 ControlInput FFPIDController::compute(double ref_Tw1, double measured_Tw1, double G)
 {
     double e       = ref_Tw1 - measured_Tw1;
-    double u_ff    = G_to_mw_ * std::max(G, 0.0);
+    double u_ff    = G_to_mw_ * std::max(G, 0.0);  // bias (integral cancels at steady-state)
     double u_fb    = pid_.compute(e);
-    double m_dot_w = clampMw(mw_nom_ + u_ff + u_fb);
+    // Subtract feedback (positive e -> reduce flow -> raise Tw1); add feedforward bias.
+    double m_dot_w = clampMw(kMwNom + u_ff - u_fb);
     double kr      = clampKr(kr_base_ + kr_e_slope_ * (e / 10.0));
     return {m_dot_w, kr};
 }
@@ -85,10 +89,11 @@ ControlInput FFPIDController::compute(double ref_Tw1, double measured_Tw1, doubl
 // ---------------------------------------------------------------------------
 MPCController::MPCController(double Ts, double Tw1_nom, double a, double b)
     : mpc_(
-        // Build a SISO discrete-time state-space from the FOPDT model
+        // FOPDT in deviation form around (Tw1_nom, kMwNom).
+        // B is NEGATIVE because higher m_dot_w -> lower Tw1 (negative plant gain).
         ctrl::StateSpace(
             (Eigen::Matrix<double,1,1>() << 1.0 - a*Ts).finished(),  // A (1x1)
-            (Eigen::Matrix<double,1,1>() << b*Ts).finished(),         // B (1x1)
+            (Eigen::Matrix<double,1,1>() << -b*Ts).finished(),        // B negative (check)
             (Eigen::Matrix<double,1,1>() << 1.0).finished(),          // C (1x1)
             (Eigen::Matrix<double,1,1>() << 0.0).finished(),          // D (1x1)
             Ts
@@ -97,11 +102,11 @@ MPCController::MPCController(double Ts, double Tw1_nom, double a, double b)
             .Np    = 8,
             .Nc    = 3,
             .rho_y = 10.0,
-            .rho_u = 50.0,
-            .uMin  = kMwMid - kMwHalf,
-            .uMax  = kMwMid + kMwHalf,
-            .duMin = -0.02,
-            .duMax =  0.02,
+            .rho_u = 0.5,             // reduced so tracking dominates effort penalty
+            .uMin  = kMwMin - kMwNom, // deviation lower bound = -0.013
+            .uMax  = kMwMax - kMwNom, // deviation upper bound = +0.187
+            .duMin = -0.05,
+            .duMax =  0.05,
         }
       ),
       Tw1_nom_(Tw1_nom)
@@ -118,7 +123,7 @@ void MPCController::reset()
 
 ControlInput MPCController::compute(double ref_Tw1, double measured_Tw1, double /*G*/)
 {
-    // Work in deviation variables so that u = 0 maps to m_dot_w = kMwMid
+    // Deviation variables: x=DeltaTw1, u=Deltam_dot_w (around kMwNom).
     double x_dev = measured_Tw1 - Tw1_nom_;
     double r_dev = ref_Tw1      - Tw1_nom_;
 
@@ -128,7 +133,8 @@ ControlInput MPCController::compute(double ref_Tw1, double measured_Tw1, double 
     mpc_.setState(x);
     Eigen::VectorXd u = mpc_.computeRef(x, r);
 
-    double m_dot_w = clampMw(u(0));
+    // u(0) is Deltam_dot_w; add operating-point to get absolute flow
+    double m_dot_w = clampMw(kMwNom + u(0));
     return {m_dot_w, kr_nom_};
 }
 
@@ -144,8 +150,10 @@ ADRCSolarCtrl::ADRCSolarCtrl(double Ts)
         .omega_o = 0.04,
         .omega_c = 0.008,
         .b0      = 4.5,
-        .uMin    = kMwMin,
-        .uMax    = kMwMax
+        // Output u is subtracted from kMwNom: m_dot_w = kMwNom - u.
+        // Bounds ensure m_dot_w stays in [kMwMin, kMwMax].
+        .uMin    = -(kMwMax - kMwNom),  // -0.187
+        .uMax    =   kMwNom - kMwMin,   // +0.013
       }, Ts)
 {}
 
@@ -153,7 +161,10 @@ void ADRCSolarCtrl::reset() { adrc_.reset(); }
 
 ControlInput ADRCSolarCtrl::compute(double ref_Tw1, double measured_Tw1, double /*G*/)
 {
-    double m_dot_w = clampMw(adrc_.compute(ref_Tw1 - measured_Tw1));
+    // Subtract ADRC output from nominal: positive e (too cold) -> positive u
+    // -> m_dot_w = kMwNom - u < kMwNom -> less flow -> Tw1 rises (check)
+    double e       = ref_Tw1 - measured_Tw1;
+    double m_dot_w = clampMw(kMwNom - adrc_.compute(e));
     return {m_dot_w, kr_nom_};
 }
 
