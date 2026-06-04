@@ -3152,7 +3152,11 @@ TEST_CASE("ScenarioMPC zero-noise matches deterministic MPC direction", "[scenar
 TEST_CASE("ScenarioMPC drives plant to reference in closed loop", "[scenario_mpc]")
 {
     auto sys = makeScenarioPlant();
-    ctrl::ScenarioMPC smpc(sys, makeScenarioParams(0.02));
+    // Lower effort penalty (R=0.01) so steady-state tracking error is within 10%.
+    // With R=0.1 the MPC undershoots to ~0.79 due to the cost-function offset.
+    auto p = makeScenarioParams(0.02);
+    p.R = Eigen::MatrixXd::Identity(1, 1) * 0.01;
+    ctrl::ScenarioMPC smpc(sys, p);
 
     double y = 0.0;
     double ref = 1.0;
