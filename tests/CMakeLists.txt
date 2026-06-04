@@ -102,21 +102,6 @@ target_link_libraries(test_boiler_regression PRIVATE
 )
 target_compile_features(test_boiler_regression PRIVATE cxx_std_20)
 
-# -- SMISMO case-study controller regression tests (T1b) ---------------------
-set(SMISMO_SIM_ROOT "${CMAKE_SOURCE_DIR}/case-study/Meter In Meter Out Control")
-add_executable(test_smismo_regression
-    test_smismo_regression.cpp
-    ${SMISMO_SIM_ROOT}/sim/src/smismo_plant.cpp
-    ${SMISMO_SIM_ROOT}/sim/src/smismo_controllers.cpp
-)
-target_include_directories(test_smismo_regression PRIVATE
-    ${SMISMO_SIM_ROOT}/sim/include
-)
-target_link_libraries(test_smismo_regression PRIVATE
-    controller_toolbox Catch2::Catch2WithMain nlohmann_json::nlohmann_json
-)
-target_compile_features(test_smismo_regression PRIVATE cxx_std_20)
-
 # -- Solar case-study controller regression tests (T1c) ----------------------
 set(SOLAR_SIM_ROOT "${CMAKE_SOURCE_DIR}/case-study/Solar-Driven Cooling System with Photovoltaic Evaporative Chimney")
 add_executable(test_solar_regression
@@ -155,7 +140,6 @@ catch_discover_tests(test_catch2_advanced)
 catch_discover_tests(test_tugsim_regression)
 catch_discover_tests(test_humidification)
 catch_discover_tests(test_boiler_regression)
-catch_discover_tests(test_smismo_regression)
 catch_discover_tests(test_solar_regression)
 catch_discover_tests(test_humid_regression)
 add_test(NAME controller_tests  COMMAND test_controllers)

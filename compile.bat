@@ -129,7 +129,6 @@ for %%T in (
     realtime_all
     boiler_sim
     tug_sim
-    smismo_sim
     solar_cooling_sim
     humidification_sim
     toolbox_examples
@@ -138,7 +137,6 @@ for %%T in (
     test_tugsim_regression
     test_humidification
     test_boiler_regression
-    test_smismo_regression
     test_solar_regression
     test_humid_regression
 ) do (
