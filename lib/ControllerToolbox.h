@@ -52,6 +52,7 @@
 
 #include "IController.h"         ///< Abstract controller interface.
 #include "IControllerObserver.h" ///< Observer hook for non-intrusive controller telemetry.
+#include "ControllerRegistry.h"  ///< Self-registration registry + CTRL_REGISTER_FEATURE macro (M2).
 #include "Features.h"            ///< ctrl::features() - runtime optional-module discovery.
 #include "PlantModel.h"       ///< TransferFunction, StateSpace, tf2ss, ssStep, c2d.
 #include "DiscretePID.h"      ///< PID - backward-Euler, derivative filter, anti-windup.
@@ -107,6 +108,10 @@
 #include "EchoStateNetwork.h"           ///< ESN - Echo State Network; random reservoir, ridge-regression readout (Jaeger 2001).
 #include "NeuralPID.h"                  ///< NeuralPID - online neural network adapts Kp/Ki/Kd via backprop through linearised plant.
 #include "CEMController.h"              ///< CEM-MPC - Cross-Entropy Method MPC; derivative-free stochastic rollout optimisation.
+#include "DynaController.h"             ///< Dyna - model-based RL; SINDy error-dynamics fit + synthetic rollout planning (Sutton 1991).
+#include "ScenarioMPC.h"                ///< ScenarioMPC - stochastic MPC; N_s noise-trajectory average cost QP (Calafiore & Campi 2006).
+#include "BayesianOptimizer.h"          ///< BayesianOptimizer - GP surrogate + UCB/EI acquisition for expensive controller tuning (Srinivas 2010).
+#include "ControllerMonitor.h"          ///< ControllerMonitor - CUSUM + EWMA SPC charts on live controller output or onState channels (M3/SPC).
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,
@@ -134,3 +139,7 @@
 #include "FunctionApproximator.h" ///< Taylor (polynomial) + Pade (rational) data-driven approximation.
                                   ///< Includes padeDelayFilter() for fractional dead-time SmithPredictor.
 #endif
+
+// M2: Centralized registrations for all pre-M2 controllers.
+// Must come AFTER all algorithm includes so the conditional CTRL_HAS_* flags are set.
+#include "ControllerRegistrations.h"

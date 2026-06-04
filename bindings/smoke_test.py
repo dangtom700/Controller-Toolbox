@@ -631,4 +631,83 @@ assert _npcem.isfinite(_u_cem[0]), "CEM output not finite"
 assert 'cem_mpc' in ctrl.features()
 print('CEMController smoke test passed.')
 
+# ---- DynaController --------------------------------------------------------
+import numpy as _npdyna
+_pid_for_dyna_p = ctrl.PIDParams()
+_pid_for_dyna_p.Kp = 0.8; _pid_for_dyna_p.Ki = 0.2; _pid_for_dyna_p.Kd = 0.0
+_pid_for_dyna = ctrl.DiscretePID(_pid_for_dyna_p, 0.01)
+_dp = ctrl.DynaParams()
+_dp.Ts = 0.01; _dp.n_collect = 5; _dp.n_refit_every = 50
+_dyna = ctrl.DynaController(_dp, _pid_for_dyna)
+for _k in range(10):
+    _u_dyna = _dyna.compute(1.0 - 0.1 * _k)
+assert _npdyna.isfinite(_u_dyna), "DynaController output not finite"
+assert _dyna.buffer_size() == 9, f"Expected 9 transitions, got {_dyna.buffer_size()}"
+assert _dyna.model_fitted(), "Model should be fitted after 9 >= n_collect=5 transitions"
+_e_pred = _dyna.model_rollout(0.5, _npdyna.ones(5) * 0.1)
+assert len(_e_pred) == 5, "Rollout should return 5-element vector"
+assert 'dyna' in ctrl.features()
+print('DynaController smoke test passed.')
+
+# ---- ScenarioMPC -----------------------------------------------------------
+import numpy as _npsmpc
+_A_sm = _npsmpc.array([[0.9]])
+_B_sm = _npsmpc.array([[0.1]])
+_C_sm = _npsmpc.array([[1.0]])
+_D_sm = _npsmpc.array([[0.0]])
+_ss_sm = ctrl.StateSpace(_A_sm, _B_sm, _C_sm, _D_sm, 0.1)
+_smp = ctrl.ScenarioMPCParams()
+_smp.Np = 5; _smp.Nu = 2; _smp.Ts = 0.1; _smp.N_samples = 10; _smp.seed = 7
+_smp.Q = _npsmpc.eye(1); _smp.R = _npsmpc.eye(1) * 0.1
+_smp.Sigma_w = _npsmpc.eye(1) * 0.01
+_smp.uMin = _npsmpc.array([-2.0]); _smp.uMax = _npsmpc.array([2.0])
+_smpc = ctrl.ScenarioMPC(_ss_sm, _smp)
+_smpc.set_state(_npsmpc.array([0.5]))
+_smpc.set_reference(_npsmpc.array([1.0]))
+_u_sm = _smpc.compute_control()
+assert _npsmpc.isfinite(_u_sm[0]), "ScenarioMPC output not finite"
+_u_siso = _smpc.compute(0.3)
+assert _npsmpc.isfinite(_u_siso), "ScenarioMPC SISO output not finite"
+assert 'scenario_mpc' in ctrl.features()
+print('ScenarioMPC smoke test passed.')
+
+# ---- BayesianOptimizer -----------------------------------------------------
+import numpy as _npbo
+_bp = ctrl.BayesOptParams()
+_bp.n = 2; _bp.n_init = 4; _bp.maxIter = 6; _bp.seed = 7
+_bp.lower = _npbo.array([0.0, 0.0]); _bp.upper = _npbo.array([5.0, 5.0])
+_bo = ctrl.BayesianOptimizer(_bp)
+_bo_x0 = _npbo.array([1.0, 1.0])
+# Sphere: min at (2,2) -> should return cost near 0
+_bo_result = _bo.tune(lambda p: float((p[0]-2.0)**2 + (p[1]-2.0)**2), _bo_x0)
+assert _npbo.isfinite(_bo_result.cost), "BO result cost not finite"
+assert _bo_result.n_evals == 10, f"Expected 10 evals, got {_bo_result.n_evals}"
+assert _bo_result.cost < 8.0, f"BO should improve: cost={_bo_result.cost}"
+assert 'bayesian_optimizer' in ctrl.features()
+print('BayesianOptimizer smoke test passed.')
+
+# ---- ControllerRegistry (M2) -----------------------------------------------
+assert ctrl.registry_count() > 0, "Registry should have entries after umbrella include"
+assert ctrl.registry_has('pid'),  "pid should be registered"
+assert ctrl.registry_has('dyna'), "dyna should be self-registered"
+assert ctrl.registry_has('scenario_mpc'), "scenario_mpc should be self-registered"
+assert ctrl.registry_has('bayesian_optimizer'), "bayesian_optimizer should be self-registered"
+assert ctrl.registry_has('controller_monitor'), "controller_monitor should be self-registered"
+assert 'pid' in ctrl.features(), "features() should include pid"
+print('ControllerRegistry smoke test passed.')
+
+# ---- ControllerMonitor (M3/SPC) --------------------------------------------
+import numpy as _npmon
+_mon = ctrl.ControllerMonitor()
+_mon.set_target(0.0); _mon.set_sigma(0.1)
+_alarms = []
+_mon.set_alarm_callback(lambda chart, stat: _alarms.append((chart, stat)))
+# Feed 10 normal samples then a large shift
+for _v in [0.0]*10:
+    _mon.on_compute(_v, 0.0)
+_mon.on_compute(5.0, 0.0)  # large excursion should trigger alarm
+assert _mon.n_samples() == 11
+assert _mon.n_alarms() > 0, "Large shift should trigger at least one alarm"
+print('ControllerMonitor smoke test passed.')
+
 print('\nAll smoke tests passed.')

@@ -74,6 +74,9 @@ namespace ctrl
         u = std::max(p_.uMin, std::min(p_.uMax, u));
 
         u_prev_ = u;
+        // M3 telemetry: emit ESO state [z1, z2, z3] for observers that need it
+        notifyObserverState("eso", z_);
+        notifyObserver(u, y);
         return u;
     }
 

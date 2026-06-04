@@ -1,29 +1,29 @@
 # Controller Toolbox -- Project Master State Document
 
 **Project:** Discrete-Time Controller Toolbox (C++20 / pybind11 / Catch2)
-**Current Part:** 26 (case-study expansion + senior review -- complete 2026-05-31)
+**Current Part:** 33 (T1a–T1d + A11 + SMPC + BO + M2 + M3 -- complete 2026-06-03)
 **Maintained by:** Claude Code (Senior Principal Engineer role)
 **Update cadence:** End of every major iteration (new algorithm, case study, or binding pass)
 
 ---
 
-## 1. Baseline Health (Part 26 Exit State)
+## 1. Baseline Health (Part 33 Exit State)
 
 | Suite | Passing | Failing | Notes |
 |-------|---------|---------|-------|
-| C++ (Catch2 + binaries) | 90 | 0 | test_catch2_advanced (65) + pilot (5) + autoscheduling (9) + stability_margins (3) + tugsim_regression (1) + integration (6) + case-study/example binaries |
-| Python examples | 88 | 0 | 16 SKIPped (Release rebuild needed for QP warn suppression) |
-| Case studies | 367 runs | 0 | Boiler 216 (27x8), SMISMO 42 (14x3), Solar 45 (9x5), Tug 64 (16x4) |
-| Runtime warnings | ~25 | -- | 15 old .pyd, 4 TC-REG-05, 2 c2d, 4 benign Tug PBH; all expected |
+| C++ (Catch2 + binaries) | ~163 | 0 | test_catch2_advanced (~95) + pilot (5) + autoscheduling (9) + stability_margins (3) + tugsim_regression (1) + integration (6) + boiler/smismo/solar/humid regression (4×6=24) + test_humidification (1) + example binaries |
+| Python examples | ~103 | 0 | ex99–ex102 added (Dyna/MBRL, ScenarioMPC, BayesBO, Registry+Monitor) |
+| Case studies | 417 runs | 0 | Boiler 216 (27×8), SMISMO 42 (14×3), Solar 45 (9×5), Tug 64 (16×4), Humid 50 (10×5) |
+| Runtime warnings | ~0 in bug_report.txt | -- | 36-entry safe_phrases list suppresses all known benign messages |
 
 **Verify with:** `conda run -n soft_robotics -- python run.py`
 
 ---
 
-## 2. Algorithm Inventory (~55 `lib/` modules -- unchanged in Part 26)
+## 2. Algorithm Inventory (~75 `lib/` modules -- updated through Part 33)
 
-> Part 26 added **24 case-study controller wrappers**, not new `lib/` algorithms.
-> Every case-study controller composes one or more of the modules below behind a
+> Part 26 added 24 case-study controller wrappers. Parts 30–33 added 13 new `lib/` algorithms (DeePC, ILC, SINDy, KoopmanEDMD, L1Adaptive, CBFSafetyFilter, GaussianProcess, EchoStateNetwork, NeuralPID, CEMController, DynaController, ScenarioMPC, BayesianOptimizer) plus 3 infrastructure modules (ControllerRegistry, ControllerRegistrations, ControllerMonitor).
+> Every case-study controller composes one or more modules below behind a
 > plant-specific `ControllerBase` (see section 3 and CLAUDE.md "Case Studies").
 
 ### Core Controllers
@@ -78,7 +78,30 @@
 `FuzzyLogic` (Mamdani/TS), `DiscreteHinf` (DGKF 2-Riccati), `EKF`, `UKF`,
 `SubspaceID`, `FunctionApproximator` (Taylor + Pade)
 
-### Infrastructure
+### Data-driven and ML algorithms (Parts 30–33)
+| Class | Header | Notes |
+|-------|--------|-------|
+| `DeePC` | DeePC.h | ADMM Hankel-QP (Coulson 2019) |
+| `ILCController` | IterativeLearningControl.h | P-type + norm-optimal |
+| `SINDy` / `SINDyModel` | SINDy.h | STLS sparse ID; training must have varied `u` |
+| `KoopmanEDMD` | KoopmanEDMD.h | EDMD lift -> `StateSpace`; `A.rows() == nLifted - n_input` |
+| `L1AdaptiveController` | L1AdaptiveController.h | LP-filtered MRAC; `compute(y_plant)` not error |
+| `CBFSafetyFilter` | CBFSafetyFilter.h | 1D analytical QP safety wrapper |
+| `GaussianProcess` | GaussianProcess.h | SE kernel + Cholesky; fixed-budget FIFO eviction |
+| `EchoStateNetwork` | EchoStateNetwork.h | `reset()` preserves `W_out_` / `fitted_` |
+| `NeuralPID` | NeuralPID.h | 3→n_h→3 online backprop; softplus gains |
+| `CEMController` | CEMController.h | Elite-sample stochastic MPC; `computeRef(x, y_ref)` |
+| `DynaController` | DynaController.h | Sutton Dyna MBRL; `modelRollout(e0, u_seq)` |
+| `ScenarioMPC` | ScenarioMPC.h | N_s-scenario noise-averaged QP; H constant per episode |
+| `BayesianOptimizer` | BayesianOptimizer.h | GP surrogate + UCB/EI; header-only |
+
+### Infrastructure (Part 33)
+| Class | Header | Notes |
+|-------|--------|-------|
+| `ControllerRegistry` | ControllerRegistry.h | Meyers singleton; `CTRL_REGISTER_FEATURE` macro |
+| `ControllerMonitor` | ControllerMonitor.h | CUSUM + EWMA SPC as `IControllerObserver` |
+
+### Infrastructure (always)
 `ControllerStack`, `ControllerTraits`, `MetricsAnalyzer`, `SystemAnalysis`,
 `BalancedTruncation`, `ZeroPhaseTrackingFilter`, `LinearisationHelper`,
 `GradientProjectionQP` (FISTA -- shared solver)
@@ -91,8 +114,12 @@
 Controller Toolbox/
 ├── lib/                      Core library headers + sources
 │   ├── ControllerToolbox.h   Umbrella include
-│   ├── IController.h         Abstract base
-│   ├── Features.h            Runtime feature flags
+│   ├── IController.h         Abstract base (now has virtual name() + notifyObserverState())
+│   ├── IControllerObserver.h  Observer (now has virtual onState(key, vec))
+│   ├── Features.h            Delegates to ControllerRegistry::all() (Part 33)
+│   ├── ControllerRegistry.h  Meyers-singleton self-registration (Part 33)
+│   ├── ControllerRegistrations.h  Pre-M2 centralized registrations (Part 33)
+│   ├── ControllerMonitor.h   CUSUM + EWMA SPC observer (Part 33)
 │   ├── GradientProjectionQP.h FISTA (header-only)
 │   └── hal/                  HAL: SimScheduler, FreeRTOS/Zephyr stubs
 ├── bindings/                 pybind11 C++ + smoke_test.py
@@ -100,16 +127,20 @@ Controller Toolbox/
 │   ├── estimation_bindings.cpp
 │   └── smoke_test.py
 ├── tests/                    Catch2 + standalone test programs
-│   ├── test_catch2_advanced.cpp  (main suite, 65 cases)
+│   ├── test_catch2_advanced.cpp  (main suite, ~95 cases including Part 33)
 │   ├── test_stability_margins.cpp (3 cases)
-│   └── ...
-├── examples/                 69 C++ examples (ex01-ex69+)
-│   └── python/               Python mirror examples
-├── case-study/               Full physics case studies (Part 26: all rosters expanded)
+│   ├── test_boiler_regression.cpp  (6 cases -- Part 33)
+│   ├── test_smismo_regression.cpp  (6 cases -- Part 33)
+│   ├── test_solar_regression.cpp   (6 cases -- Part 33)
+│   └── test_humid_regression.cpp   (6 cases -- Part 33)
+├── examples/                 79 C++ examples (ex01-ex79)
+│   └── python/               102 Python examples (ex01-ex102)
+├── case-study/               Full physics case studies
 │   ├── Boiler Control/                   27 controllers, boiler_sim, 216 runs
 │   ├── Tug Boat Numerical Simulation/    16 controllers, tug_sim, 64 runs
 │   ├── meter in meter out control/       14 controllers, smismo_sim, 42 runs (SMISMO)
-│   └── Solar-Driven Cooling System/      9 controllers, solar_cooling_sim, 45 runs
+│   ├── Solar-Driven Cooling System/      9 controllers, solar_cooling_sim, 45 runs
+│   └── Porous Fiber Plate Humidification System/  10 controllers, humidification_sim, 50 runs
 ├── docs/
 │   ├── PROJECT_MASTER_STATE.md       <- this file
 │   ├── compact_bug_report_parts_1-25.md  (archived tribal knowledge)
@@ -173,17 +204,19 @@ Python binding rule: all `IController` subclasses need
 
 ---
 
-## 6. Open Items (Part 27+)
+## 6. Open Items (Part 34+)
 
-Priorities are now driven by the **Part 26 senior review** (top of
-`docs/cumulative_bug_report.md`). The review tags are R/M/G/T.
+Priorities are driven by the **Part 26 senior review** (top of `docs/cumulative_bug_report.md`).
 
 | ID | Description | Priority | Status |
 |----|-------------|----------|--------|
 | **P26-CS** | Meter-in-meter-out hydraulic case study (14 controllers) | HIGH | **DONE (Part 26)** |
-| **T1** | Case-study regression tests (Boiler/SMISMO/Solar -- 50/65 ctrls untested) | HIGH | Open |
-| **M2** | Self-registration registry to replace hand-maintained `Features.h` map | HIGH | Open |
-| **M3** | `onState()` telemetry hook on `IControllerObserver` (nonlinear debug) | MED | Open |
+| **T1** | Case-study regression tests (Boiler/SMISMO/Solar/Humid) | HIGH | **DONE (Part 33)** |
+| **M2** | Self-registration registry (`ControllerRegistry`) | HIGH | **DONE (Part 33)** |
+| **M3** | `onState()` telemetry + `ControllerMonitor` SPC | MED | **DONE (Part 33)** |
+| **A1–A11** | ML/DD algorithm batch (DeePC through DynaController) | HIGH | **DONE (Parts 30–33)** |
+| **SMPC** | ScenarioMPC stochastic QP | MED | **DONE (Part 33)** |
+| **BO** | BayesianOptimizer GP surrogate | MED | **DONE (Part 33)** |
 | **R1** | NaN-guard helper + edge-case contract matrix (only ADRC fails safe) | MED | Open |
 | G1/T4 | MHE state constraints (linear inequalities) -- "missing 50%" of MHE | Low | Open |
 | G1/T2 | MIMO nu-gap (blocks AutoGS on Boiler/Tug MIMO plants) | Low | Open |
@@ -212,26 +245,26 @@ Priorities are now driven by the **Part 26 senior review** (top of
 | Part 26 | Case-study controllers wrap `lib/` algos behind a per-study `ControllerBase`, NOT `ctrl::IController` | Each plant has a different I/O signature (MIMO force vector, valve increment, coupled spool cmd); a uniform scalar `IController` would force lossy adapters |
 | Part 26 | `AutoGS`/`GainScheduled` `design_fn` wraps an LQR gain in a `DiscretePID`, not a raw `DiscreteLQR` | `DiscreteLQR` is not an `IController`; the scheduler needs `shared_ptr<IController>` (review G2/M1) |
 | Part 26 | Senior review (R/M/G/T findings) is the new prioritisation source of truth | Captured forward-looking debt before it compounded across 60+ algorithms |
+| Part 33 | `ControllerRegistrations.h` must be included AFTER all other lib/ headers in ControllerToolbox.h | Meyers-singleton `map_()` must exist before any `addFeature()` call; pre-M2 controllers have no self-registration |
+| Part 33 | `CTRL_REGISTER_FEATURE` macro placed in headers (not .cpp files) | `inline const bool` fires per-include in headers; `.cpp` placement risks dead-strip in static archives |
+| Part 33 | Case-study regression tests use `late_rmse < early_rmse * threshold`, not absolute IAE | Avoids baselines that rot when operating points change; catches divergence, sign flips, crashes |
 
 ---
 
-## 8. Next Immediate Steps (Part 27)
+## 8. Next Immediate Steps (Part 34)
 
-The case-study expansion is done. Next work is the review's high-priority debt:
+The major Part 26 senior-review debt is closed. Remaining open items in priority order:
 
-1. **[T1]** Add case-study regression tests -- `tests/test_boiler_regression.cpp`,
-   `test_smismo_regression.cpp`, `test_solar_regression.cpp`, asserting per-controller
-   IAE / settling thresholds. Mirror `tests/test_tugsim_regression.cpp`. (50 of 65
-   case-study controllers currently have no correctness check beyond "exe exited 0".)
-2. **[M2]** Self-registration registry: `CTRL_REGISTER(Type)` macro + static factory map
-   to replace the hand-maintained `lib/Features.h` unordered_map and shrink the 8-file
-   "add a controller" checklist.
-3. **[M3]** Add `IControllerObserver::onState(key, VectorXd)`; emit ESO/sliding-surface/
-   QP-iteration internals from the nonlinear controllers.
-4. **[REL]** Rebuild `ctrl_toolbox.pyd` in Release -- resolves 15 QP warnings, unblocks
-   16 SKIPped Python examples.
-5. **Verify baseline** before any work: `conda run -n soft_robotics -- python run.py`
-   -> 90 C++ | 88 Python, case studies 216/42/45/64.
+1. **[R1]** NaN-guard helper `ctrl::sanitize(double, fallback)` + edge-case contract matrix.
+   Apply `sanitize()` at every `compute()` boundary; add Catch2 tests asserting graceful
+   handling of `NaN` input, sustained saturation (anti-windup bound), and non-stabilizable
+   plant (`isHealthy()==false`) for every controller family.
+2. **Verify baseline** before any work: `conda run -n soft_robotics -- python run.py`
+   → ~163 C++ | ~103 Python, case studies 216/42/45/64/50, `bug_report.txt` 0 blocks.
+3. **[REL]** Rebuild `ctrl_toolbox.pyd` in Release — silences 15 stale-.pyd QP warnings,
+   unlocks any Python examples that still have SKIP guards.
+4. Low-priority backlog: G1/T2 (MIMO nu-gap), T3 (DK-iteration rational D), T5 (LinearBlend
+   bumpless), T7 (compare_controllers.py IAE/ISE table).
 
 ---
 
@@ -247,4 +280,4 @@ Also update `docs/cumulative_bug_report.md` (Part 26+ living issue log) and `pro
 
 ---
 
-*Last updated: 2026-05-31 | Part 26 complete (case-study expansion + senior review)*
+*Last updated: 2026-06-03 | Part 33 complete (T1a–T1d + A11 + SMPC + BO + M2 + M3/SPC)*

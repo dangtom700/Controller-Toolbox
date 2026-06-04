@@ -88,4 +88,10 @@ public:
     {
         PYBIND11_OVERRIDE_NAME(void, ctrl::IControllerObserver, "on_reset", onReset);
     }
+
+    void onState(std::string_view key, const Eigen::VectorXd& value) override
+    {
+        PYBIND11_OVERRIDE_NAME(void, ctrl::IControllerObserver, "on_state", onState,
+                               std::string(key), value);
+    }
 };

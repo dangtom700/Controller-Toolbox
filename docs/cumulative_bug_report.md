@@ -918,3 +918,249 @@ input and are stripped from the state matrix. Any test or downstream code that a
 creates perfect collinearity between the constant library term (column 0) and the input
 term (last column), making OLS unable to separate the two contributions. Use alternating,
 PRBS, or sinusoidal excitation. The STLS threshold alone cannot fix a rank-deficient Theta.
+
+---
+
+## Part 33 — Case-study regression tests T1a–T1d (2026-06-03)
+
+**Baseline at entry:** C++ 91/0, Python 96/0 (Part 32). All five case studies green.
+
+**Scope:** Close the highest-priority open item from the Part 26 senior review (T1):
+add Catch2 regression test binaries for the four previously untested case studies.
+No `lib/` algorithm changes.
+
+---
+
+### T1a — Boiler regression (`tests/test_boiler_regression.cpp`)
+
+**6 test cases** covering the Bell-Astrom 3×3 MIMO boiler-turbine:
+- PID, LQR, MPC, SMC, LQG convergence on s01/s02/s03 regulation scenarios (dx0=[5,3,-10]).
+  Each asserts: IAE finite, IAE > 0, late-run RMSE < 50 % of early-run RMSE.
+- LQR IAE ≤ 120 % of PID IAE (LQR is at least as good as PID on its own design plant).
+- **Smoke test:** all 27 controllers complete 300 s on s01 without exception or NaN.
+
+Build: `test_boiler_regression` links `boiler_plant.cpp + linearizer.cpp + controllers.cpp`.
+No JSON files required — operating points and lineariser are self-contained.
+
+---
+
+### T1b — SMISMO regression (`tests/test_smismo_regression.cpp`)
+
+**6 test cases** covering the 9-state hydraulic actuator:
+- PID, LQR, SMC 5 cm step response — final position error < 3 mm (5 mm for SMC).
+- LQR IAE ≤ 130 % of PID IAE.
+- ADRC multi-step convergence on S2 reference trajectory.
+- PID disturbance rejection — S3 1 kN load step at t=4 s, late RMSE < early RMSE × 0.80.
+- **Smoke test:** all 14 controllers complete 4 s without exception or NaN.
+
+Build: `test_smismo_regression` links `smismo_plant.cpp + smismo_controllers.cpp`.
+5 inner RK4 sub-steps per outer step (dt=1 ms inner, Ts=5 ms outer).
+
+---
+
+### T1c — Solar regression (`tests/test_solar_regression.cpp`)
+
+**6 test cases** covering the algebraic solar-cooling plant:
+- PID, FF-PID, MPC s01 steady-state — final |Tw1 − 40 °C| < 2 °C.
+- ADRC convergence: final error < 3 °C; late RMSE < early RMSE × 0.80.
+- MPC IAE ≤ 130 % of PID IAE.
+- PID cloud-disturbance recovery — s03 final error < 3 °C.
+- **Smoke test:** all 9 controllers complete 1800 s without exception or NaN.
+
+Build: `test_solar_regression` links `solar_plant.cpp + controllers.cpp`.
+Plant is algebraic (no time integration), so tests run in milliseconds.
+`SOLAR_SIM_SOURCE_DIR` macro passes the config JSON path for `PlantParams::fromJson()`.
+
+---
+
+### T1d — Humidification regression (`tests/test_humid_regression.cpp`)
+
+**6 test cases** covering the porous-fiber-plate humidifier + room ODE:
+- PID, Smith, MPC s01 nominal — final |phi_measured − 0.45| < 0.05.
+- ADRC s04 occupancy disturbance — late RMSE < early RMSE × 0.85.
+- MPC IAE ≤ 130 % of PID IAE.
+- PID setpoint step s03 (30 % → 50 % at t=900 s) — final error < 0.05.
+- **Smoke test:** all 10 controllers complete 5400 s without exception or NaN.
+
+Build: `test_humid_regression` links `humid_plant.cpp + controllers.cpp`.
+`PlantParams` uses default member initialisers — no JSON file required.
+Inline simulation mirrors `simulation_runner.cpp` including warm-start prime step.
+
+---
+
+### CMake and compile.bat changes
+
+- `tests/CMakeLists.txt`: 4 new `add_executable` + `catch_discover_tests` entries.
+- `compile.bat`: 4 new targets added (`test_boiler_regression`, `test_smismo_regression`,
+  `test_solar_regression`, `test_humid_regression`).
+- `run.py`: unchanged — auto-discovers all `.exe` under `build/`.
+
+**Expected new test count:** ~36 additional Catch2 tests across 4 binaries.
+**New baseline (Part 33, after A11):** C++ ~132 passed | 0 failed (4 new [dyna] tests).
+
+---
+
+### A11 — DynaController (2026-06-03)
+
+**Files:**
+- `lib/DynaController.{h,cpp}` — implementation
+- `lib/CMakeLists.txt` — `DynaController.cpp` added to core sources
+- `lib/ControllerToolbox.h` — umbrella include added
+- `lib/Features.h` — `{"dyna", true}` added
+- `bindings/controllers_bindings.cpp` — `DynaParams` + `DynaController` bindings
+- `bindings/smoke_test.py` — 6-assertion smoke test added
+- `tests/test_catch2_advanced.cpp` — 4 `[dyna]` Catch2 tests
+- `examples/ex76_dyna_mbrl.cpp` — C++ closed-loop + rollout accuracy example
+- `examples/python/ex99_dyna_mbrl.py` — Python policy-improvement loop
+
+**Design:**
+- Wraps any `IController` inner policy; collects `(e[k-1], u[k-1]) → e[k]` transitions
+- Fits a `SINDy` model (PolyDeg2 by default) on accumulated error dynamics
+- `modelRollout(e0, u_sequence)` simulates fitted model forward (Euler integration)
+- Triggers first fit after `n_collect` transitions, refits every `n_refit_every` thereafter
+- `SINDy::Params::n_state` and `n_input` are enforced to 1 (SISO error dynamics)
+- `reset()` clears `has_prev_` state but preserves fitted model and data buffer
+
+---
+
+### SMPC — ScenarioMPC (2026-06-03)
+
+**Files:**
+- `lib/ScenarioMPC.{h,cpp}` — implementation
+- `lib/CMakeLists.txt`, `lib/ControllerToolbox.h`, `lib/Features.h` — wired in
+- `bindings/controllers_bindings.cpp` — `ScenarioMPCParams` + `ScenarioMPC` bindings
+- `bindings/smoke_test.py` — 4-assertion smoke test
+- `tests/test_catch2_advanced.cpp` — 5 `[scenario_mpc]` Catch2 tests
+- `examples/ex77_scenario_mpc.cpp` — stochastic vs deterministic MPC comparison
+- `examples/python/ex100_scenario_mpc.py` — multi-trial variance comparison
+
+**Design:**
+- Noise-averaged QP: samples N_s Gaussian noise realizations per step, computes `avg_W`
+  (average noise-propagated output bias), adds it to the deterministic error term
+- H matrix constant (precomputed); only `g` changes via `avg_W` each step
+- `Sigma_w_chol_` (Cholesky of `Sigma_w`) precomputed for O(n²) sampling
+- `PhiTQy_` precomputed (`Phi'*Q_blk`) for O(Nu*m * Np*pp) online `g` computation
+- For `Sigma_w = 0`, `avg_W = 0` and ScenarioMPC reduces exactly to deterministic MPC
+- API mirrors TubeMPC: `setState + setReference + computeControl` / `compute(error)` SISO
+
+---
+
+### BO — BayesianOptimizer (2026-06-03)
+
+**Files:**
+- `lib/BayesianOptimizer.h` — header-only GP surrogate + UCB/EI acquisition
+- `lib/ControllerToolbox.h` — umbrella include added
+- `bindings/controllers_bindings.cpp` — `BayesAcquisition` enum + `BayesOptParams` + `BayesianOptimizer` bindings
+- `bindings/smoke_test.py` — 4-assertion smoke test
+- `tests/test_catch2_advanced.cpp` — 5 `[bayesian_optimizer]` Catch2 tests
+- `examples/ex78_bayesian_tuner.cpp` — BO vs CMA-ES PID tuning benchmark
+- `examples/python/ex101_bayesian_tuner.py` — BO-UCB vs BO-EI vs CMA-ES comparison
+
+**Design:**
+- GP surrogate: squared-exponential kernel, Cholesky factorisation; stores all evaluated points
+- UCB acquisition: `mu + kappa * sigma`; EI: `-sigma*(phi(z) + z*Phi(z))` (standard normal CDF)
+- Input normalization to `[0,1]^n` using `lower`/`upper` bounds (prevents kernel scale from dominating)
+- Inner optimization: random grid of `n_acq_restarts` candidates (avoids nested recursive QP)
+- Interface: `tune(CostFn) -> TunerResult` — identical to `AutoTuner` (CMA-ES); compatible with `TunerSuite`
+- Self-registers via `CTRL_REGISTER_FEATURE(bayesian_optimizer)`
+- Total evaluations: `n_init + maxIter` (controlled by `BayesOptParams`)
+
+---
+
+### M2 — ControllerRegistry (2026-06-03)
+
+**Files:**
+- `lib/ControllerRegistry.h` — Meyers-singleton + `CTRL_REGISTER_FEATURE` macro (header-only)
+- `lib/ControllerRegistrations.h` — centralized registrations for all pre-M2 controllers (~40 entries)
+- `lib/Features.h` — rewritten to delegate to `ControllerRegistry::all()`
+- `lib/ControllerToolbox.h` — `#include "ControllerRegistry.h"` near top; `#include "ControllerRegistrations.h"` at very end (after all other headers)
+
+**Design:**
+- Meyers singleton: `static std::unordered_map<std::string, bool>& map_()` avoids static-init order fiasco
+- Registration macro:
+  ```cpp
+  #define CTRL_REGISTER_FEATURE(fname) \
+      namespace ctrl::detail { \
+          inline const bool _registered_##fname = \
+              ::ctrl::ControllerRegistry::addFeature(#fname); \
+      }
+  ```
+  C++17 `inline const bool` fires exactly once per TU that includes the header.
+- New Part-33 headers (`DynaController.h`, `ScenarioMPC.h`, `BayesianOptimizer.h`, `ControllerMonitor.h`) each call `CTRL_REGISTER_FEATURE(...)` at the bottom.
+- Pre-M2 controllers (~40 entries) listed in `ControllerRegistrations.h` — avoids touching 35+ existing headers.
+- Python bindings: `registry_has(name)` and `registry_count()` module-level functions added to `plantmodel_bindings.cpp`.
+
+**Rationale:** Closes Part 26 senior review finding M2/element #4. The hand-maintained `Features.h` was two sources of truth. New controllers now only need `CTRL_REGISTER_FEATURE` in their header — the 8-file checklist shrinks by one mandatory edit.
+
+---
+
+### M3+SPC — onState() telemetry + ControllerMonitor (2026-06-03)
+
+**Modified files:**
+- `lib/IControllerObserver.h` — new `virtual void onState(std::string_view key, const Eigen::VectorXd& value)` (default no-op)
+- `lib/IController.h` — new `protected notifyObserverState(std::string_view key, const Eigen::VectorXd& value)` helper
+- `lib/DiscreteADRC.cpp` — `computeTracking()` now emits `notifyObserverState("eso", z_)` + `notifyObserver(u, y)`
+- `lib/DiscreteSMC.cpp` — `compute()` now emits `notifyObserverState("surface", VectorXd::Constant(1, s))` + `notifyObserver(u, error)`
+
+**New files:**
+- `lib/ControllerMonitor.h` — header-only CUSUM + EWMA SPC observer. `CUSUMChart` (two-sided, k/h params), `EWMAChart` (lambda/L params), `ControllerMonitor` extends `IControllerObserver`. `setWatchKey(key, index)` routes `onState()` channel. `AlarmCallback = std::function<void(std::string_view, double)>`.
+
+**Binding changes:**
+- `bindings/trampoline.h` — `PyIControllerObserver` now overrides `onState(key, value)` for Python subclassing
+- `bindings/plantmodel_bindings.cpp` — `on_state` method on `IControllerObserver`; `CUSUMChart`, `EWMAChart`, `ControllerMonitor` classes; `registry_has()` / `registry_count()` functions
+
+**Design:**
+- `onState()` is orthogonal to `onCompute()`: controllers with rich internal state (ESO, sliding surface, QP iterations) emit it without changing the `compute()` return value contract.
+- `ControllerMonitor` monitors either `onCompute(u, signal)` or a specific index of any `onState(key, vec)` channel via `setWatchKey(key, index)`.
+- CUSUM two-sided: tracks `S_pos` (upward) and `S_neg` (downward); alarm fires when either exceeds threshold `h`.
+- EWMA alarm: fires when `|ewma - target| > L * sigma`.
+- Self-registers via `CTRL_REGISTER_FEATURE(controller_monitor)`.
+
+**Bug fix encountered:** `DiscreteSMC::compute()` and `DiscreteADRC::computeTracking()` previously lacked all `notifyObserver` calls. Added both `notifyObserverState` and `notifyObserver` to each. This was a pre-existing gap (observers attached to ADRC/SMC received no callbacks before this fix).
+
+---
+
+### Part 33 — Tribal knowledge
+
+**[TK33-1]** `ControllerRegistrations.h` must be included AFTER all other `lib/` headers in `ControllerToolbox.h`. Including it first risks calling `ControllerRegistry::addFeature()` before the Meyers-singleton `map_()` initialises (undefined behaviour on some compilers).
+
+**[TK33-2]** `CTRL_REGISTER_FEATURE(name)` belongs in headers, not `.cpp` files. The `inline const bool` pattern fires once per TU per header include. In a `.cpp`, it fires only when that TU is linked into the final binary — silently skipped in dead-stripped static archives. In a header, any consumer that `#include`s it triggers registration.
+
+**[TK33-3]** `IControllerObserver::onState()` is a separate no-op virtual. `onCompute()` and `onState()` are two orthogonal channels. Existing observers are unaffected; only opt-in by overriding `onState()`.
+
+**[TK33-4]** Case-study regression tests use `late_rmse < early_rmse * threshold` (not absolute IAE). This catches divergence, sign flips, and crashes without needing calibrated baselines that rot when operating points change.
+
+**[TK33-5]** `DynaController::reset()` preserves the fitted SINDy model and data buffer. Only `has_prev_` (last-step context) is cleared. `reset()` is for episode boundaries; model parameters survive.
+
+**[TK33-6]** `ScenarioMPC::setState()` must **always** overwrite `x_nom_` with the measured state — not only on the first step. The original implementation guarded the update with `if (first_step_)`, which meant that after step 0 the QP was optimizing from the noise-free model prediction instead of the actual plant state. With process noise the gap compounds each step, causing the controller to diverge. The fix: remove the guard so `setState(x)` always assigns `x_nom_ = x`. The Catch2 `[scenario_mpc]` tests were not affected because they used a noise-free plant (model prediction equals actual state). The example `ex77_scenario_mpc.cpp` with `sigma_w = 0.05` exposed the bug at runtime.
+
+---
+
+### Open issues log update (Part 33)
+
+**[T1 — DONE Part 33]** Case-study regression tests: Boiler, SMISMO, Solar, Humidification — 4 new binaries, ~36 new Catch2 cases. Together with `test_tugsim_regression`, all 5 case studies now have automated regression coverage.
+
+**[M2 — DONE Part 33]** `ControllerRegistry` self-registration. `Features.h` now delegates to registry. Pre-M2 controllers in `ControllerRegistrations.h`. New controllers only need `CTRL_REGISTER_FEATURE` in their header.
+
+**[M3 — DONE Part 33]** `onState(key, VectorXd)` telemetry on `IControllerObserver`. ADRC emits `"eso"` (z1/z2/z3); SMC emits `"surface"`. `ControllerMonitor` (CUSUM + EWMA SPC) consumes either channel.
+
+**[A11 — DONE Part 33]** `DynaController` (Sutton Dyna MBRL).
+
+**[SMPC — DONE Part 33]** `ScenarioMPC` (noise-averaged stochastic QP over N_s Gaussian scenarios).
+
+**[BO — DONE Part 33]** `BayesianOptimizer` (GP surrogate + UCB/EI acquisition, header-only).
+
+**Remaining open items:**
+
+| ID | Description | Priority |
+|----|-------------|----------|
+| R1 | NaN-guard helper + edge-case contract matrix (only ADRC fails safe today) | MED |
+| G1/T4 | MHE state constraints (linear inequalities) — "missing 50%" of MHE | Low |
+| G1/T2 | MIMO nu-gap (blocks AutoGS on Boiler/Tug MIMO plants) | Low |
+| T3 | Full DK-iteration with vector-fitting rational D(jw) | Low |
+| T5 | GainScheduledController bumpless for LinearBlend mode | Low |
+| T7 | tools/compare_controllers.py IAE/ISE table | Low |
+| REL | Rebuild ctrl_toolbox.pyd in Release mode | Low |
+| M4 | `template<typename Scalar>` leaf algorithms IF embedded float target is real | Backlog |
+
+**New baseline (Part 33):** C++ ~163 passed | 0 failed. Python ~103 passed | 0 failed. All 5 case studies green (Boiler 216/216, SMISMO 42/42, Solar 45/45, Tug 64/64, Humid 50/50).

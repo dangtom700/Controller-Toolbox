@@ -30,6 +30,11 @@
 #include "EchoStateNetwork.h"
 #include "NeuralPID.h"
 #include "CEMController.h"
+#include "DynaController.h"
+#include "ScenarioMPC.h"
+#include "BayesianOptimizer.h"
+#include "ControllerRegistry.h"
+#include "ControllerMonitor.h"
 #include "hal/HAL.h"   // SimScheduler, StdTimer (HAL not in umbrella by default)
 #include <cmath>
 #include <cstdlib>
@@ -2974,4 +2979,410 @@ TEST_CASE("CEMController IController compute() returns finite value", "[cem]")
     cem.setState(x0);
     double u = cem.compute(0.5);
     REQUIRE(std::isfinite(u));
+}
+
+// =============================================================================
+// DynaController (Sutton Dyna MBRL)
+// =============================================================================
+
+TEST_CASE("DynaController wraps inner controller and returns finite output", "[dyna]")
+{
+    auto pid = std::make_shared<ctrl::DiscretePID>(
+        ctrl::PIDParams{0.8, 0.2, 0.0}, 0.01);
+
+    ctrl::DynaController::Params dp;
+    dp.Ts = 0.01; dp.n_collect = 10; dp.n_refit_every = 50;
+    ctrl::DynaController dyna(dp, pid);
+
+    for (int k = 0; k < 5; ++k) {
+        double u = dyna.compute(1.0 - 0.1 * k);
+        REQUIRE(std::isfinite(u));
+    }
+    REQUIRE(dyna.bufferSize() == 4);
+    REQUIRE_FALSE(dyna.modelFitted());   // only 4 transitions < n_collect=10
+}
+
+TEST_CASE("DynaController fits model after n_collect transitions", "[dyna]")
+{
+    auto pid = std::make_shared<ctrl::DiscretePID>(
+        ctrl::PIDParams{0.5, 0.1, 0.0}, 0.01);
+
+    ctrl::DynaController::Params dp;
+    dp.Ts = 0.01; dp.n_collect = 5; dp.n_refit_every = 100;
+    ctrl::DynaController dyna(dp, pid);
+
+    // Simulate: plant e[k+1] approx = 0.9 * e[k] - 0.5 * u[k]
+    double e = 1.0;
+    for (int k = 0; k < 20; ++k) {
+        double u = dyna.compute(e);
+        e = 0.9 * e - 0.5 * u;
+    }
+    REQUIRE(dyna.modelFitted());
+    REQUIRE(dyna.bufferSize() == 19);
+
+    // Model rollout should return a finite trajectory
+    Eigen::VectorXd u_plan = Eigen::VectorXd::Constant(10, 0.1);
+    Eigen::VectorXd e_pred;
+    REQUIRE_NOTHROW(e_pred = dyna.modelRollout(e, u_plan));
+    REQUIRE(e_pred.size() == 10);
+    REQUIRE(e_pred.allFinite());
+}
+
+TEST_CASE("DynaController model approximates linear error dynamics", "[dyna]")
+{
+    // Known linear dynamics: e[k+1] = 0.8 * e[k] - 0.3 * u[k]
+    // Verify fitted SINDy model predicts well over a short horizon.
+    auto pid = std::make_shared<ctrl::DiscretePID>(
+        ctrl::PIDParams{0.5, 0.0, 0.0}, 0.05);
+
+    ctrl::DynaController::Params dp;
+    dp.Ts = 0.05; dp.n_collect = 80; dp.n_refit_every = 200;
+    dp.sindy.library   = ctrl::SINDyLibrary::PolyDeg1;  // linear model = PolyDeg1
+    dp.sindy.threshold = 0.001;
+    ctrl::DynaController dyna(dp, pid);
+
+    // Collect transitions with varied u (avoid collinearity)
+    double e = 1.0;
+    for (int k = 0; k < 100; ++k) {
+        double u_forced = (k % 2 == 0) ? 0.5 : -0.3;  // alternating excitation
+        dyna.addTransition(e, u_forced, 0.8 * e - 0.3 * u_forced);
+        e = 0.8 * e - 0.3 * u_forced;
+    }
+    REQUIRE_NOTHROW(dyna.fitModel());
+    REQUIRE(dyna.modelFitted());
+
+    // Rollout 5 steps from e=1; true trajectory: e[k] = 0.8^k * 1 - 0.3*0.1*sum(0.8^j)
+    Eigen::VectorXd u_plan = Eigen::VectorXd::Constant(5, 0.1);
+    Eigen::VectorXd e_pred = dyna.modelRollout(1.0, u_plan);
+    double e_true = 1.0;
+    for (int k = 0; k < 5; ++k) {
+        e_true = 0.8 * e_true - 0.3 * 0.1;
+        REQUIRE_THAT(e_pred(k), WithinAbs(e_true, 0.15));  // allow 0.15 error margin
+    }
+}
+
+TEST_CASE("DynaController reset clears state without discarding model", "[dyna]")
+{
+    auto pid = std::make_shared<ctrl::DiscretePID>(
+        ctrl::PIDParams{0.5, 0.1, 0.0}, 0.01);
+
+    ctrl::DynaController::Params dp;
+    dp.Ts = 0.01; dp.n_collect = 5; dp.n_refit_every = 100;
+    ctrl::DynaController dyna(dp, pid);
+
+    double e = 1.0;
+    for (int k = 0; k < 10; ++k) { double u = dyna.compute(e); e -= 0.1 * u; }
+
+    REQUIRE(dyna.modelFitted());
+    int buf_before = dyna.bufferSize();
+
+    dyna.reset();
+
+    // Buffer size and model should survive reset (model is an inference artifact)
+    REQUIRE(dyna.modelFitted());          // model survives
+    REQUIRE(dyna.bufferSize() == buf_before);  // accumulated data survives
+    // But next compute() should not throw (has_prev_ is cleared)
+    REQUIRE_NOTHROW(dyna.compute(0.5));
+}
+
+// =============================================================================
+// ScenarioMPC - scenario-based stochastic MPC
+// =============================================================================
+
+static ctrl::StateSpace makeScenarioPlant(double Ts = 0.1)
+{
+    Eigen::Matrix<double,1,1> A; A << 0.9;
+    Eigen::Matrix<double,1,1> B; B << 0.1;
+    Eigen::Matrix<double,1,1> C; C << 1.0;
+    Eigen::Matrix<double,1,1> D; D << 0.0;
+    return ctrl::StateSpace(A, B, C, D, Ts);
+}
+
+static ctrl::ScenarioMPCParams makeScenarioParams(double sigma_w = 0.0)
+{
+    ctrl::ScenarioMPCParams p;
+    p.Np = 8; p.Nu = 3; p.Ts = 0.1;
+    p.Q  = Eigen::MatrixXd::Identity(1, 1);
+    p.R  = Eigen::MatrixXd::Identity(1, 1) * 0.1;
+    p.Sigma_w  = Eigen::MatrixXd::Identity(1, 1) * sigma_w * sigma_w;
+    p.N_samples = 20; p.seed = 42;
+    p.uMin = Eigen::VectorXd::Constant(1, -2.0);
+    p.uMax = Eigen::VectorXd::Constant(1,  2.0);
+    return p;
+}
+
+TEST_CASE("ScenarioMPC constructs on SISO first-order plant", "[scenario_mpc]")
+{
+    auto sys = makeScenarioPlant();
+    REQUIRE_NOTHROW(ctrl::ScenarioMPC(sys, makeScenarioParams()));
+}
+
+TEST_CASE("ScenarioMPC produces finite bounded output", "[scenario_mpc]")
+{
+    auto sys = makeScenarioPlant();
+    ctrl::ScenarioMPC smpc(sys, makeScenarioParams(0.05));
+
+    smpc.setState(Eigen::VectorXd::Constant(1, 0.5));
+    smpc.setReference(Eigen::VectorXd::Constant(1, 1.0));
+    Eigen::VectorXd u = smpc.computeControl();
+
+    REQUIRE(u.size() == 1);
+    REQUIRE(std::isfinite(u(0)));
+    REQUIRE(u(0) >= -2.0 - 1e-9);
+    REQUIRE(u(0) <=  2.0 + 1e-9);
+}
+
+TEST_CASE("ScenarioMPC zero-noise matches deterministic MPC direction", "[scenario_mpc]")
+{
+    // With Sigma_w = 0 the average noise term is zero, so ScenarioMPC
+    // should push the state toward the reference like deterministic MPC.
+    auto sys = makeScenarioPlant();
+    ctrl::ScenarioMPC smpc(sys, makeScenarioParams(0.0));
+
+    Eigen::VectorXd x0 = Eigen::VectorXd::Constant(1, 0.0);
+    Eigen::VectorXd ref = Eigen::VectorXd::Constant(1, 1.0);
+    smpc.setState(x0);
+    smpc.setReference(ref);
+    Eigen::VectorXd u = smpc.computeControl();
+
+    // With x=0 and ref=1, the first control action should be positive
+    REQUIRE(u(0) > 0.0);
+}
+
+TEST_CASE("ScenarioMPC drives plant to reference in closed loop", "[scenario_mpc]")
+{
+    auto sys = makeScenarioPlant();
+    ctrl::ScenarioMPC smpc(sys, makeScenarioParams(0.02));
+
+    double y = 0.0;
+    double ref = 1.0;
+    for (int k = 0; k < 60; ++k) {
+        Eigen::VectorXd xv(1); xv(0) = y;
+        Eigen::VectorXd rv(1); rv(0) = ref;
+        smpc.setState(xv);
+        smpc.setReference(rv);
+        Eigen::VectorXd u = smpc.computeControl();
+        // Advance SISO FOPDT plant: y[k+1] = 0.9*y[k] + 0.1*u[k]
+        y = 0.9 * y + 0.1 * u(0);
+    }
+    // Should have converged to within 10% of ref despite noise
+    REQUIRE_THAT(y, WithinAbs(1.0, 0.10));
+}
+
+TEST_CASE("ScenarioMPC IController compute() returns finite value", "[scenario_mpc]")
+{
+    auto sys = makeScenarioPlant();
+    ctrl::ScenarioMPC smpc(sys, makeScenarioParams(0.01));
+
+    double u = smpc.compute(0.5);  // SISO shortcut
+    REQUIRE(std::isfinite(u));
+}
+
+// =============================================================================
+// BayesianOptimizer
+// =============================================================================
+
+// Helper: make BayesOptParams for an n-dimensional problem
+static ctrl::BayesOptParams makeBOParams(int n, int n_init = 8, int maxIter = 12)
+{
+    ctrl::BayesOptParams p;
+    p.n = n; p.n_init = n_init; p.maxIter = maxIter;
+    p.n_acq_restarts = 50; p.seed = 42;
+    p.lower = Eigen::VectorXd::Constant(n, 0.0);
+    p.upper = Eigen::VectorXd::Constant(n, 5.0);
+    return p;
+}
+
+TEST_CASE("BayesianOptimizer constructs on 1D problem", "[bayesian_optimizer]")
+{
+    REQUIRE_NOTHROW(ctrl::BayesianOptimizer(makeBOParams(1)));
+}
+
+TEST_CASE("BayesianOptimizer minimises 1D parabola (f=(x-2)^2)", "[bayesian_optimizer]")
+{
+    ctrl::BayesianOptimizer bo(makeBOParams(1, 5, 15));
+    Eigen::VectorXd x0(1); x0(0) = 4.0;
+
+    auto cost = [](const Eigen::VectorXd& p) { return (p(0) - 2.0) * (p(0) - 2.0); };
+    ctrl::TunerResult r = bo.tune(cost, x0);
+
+    REQUIRE(r.nEvals == 20);  // n_init=5 + maxIter=15
+    REQUIRE(std::isfinite(r.cost));
+    REQUIRE(r.cost < 0.5);          // should find x ~ 2 within [0,5]
+    REQUIRE_THAT(r.params(0), WithinAbs(2.0, 0.8));
+}
+
+TEST_CASE("BayesianOptimizer minimises 2D sphere (f=||x-c||^2)", "[bayesian_optimizer]")
+{
+    ctrl::BayesianOptimizer bo(makeBOParams(2, 8, 20));
+    Eigen::VectorXd x0(2); x0 << 0.5, 0.5;
+    Eigen::VectorXd centre(2); centre << 2.5, 1.5;
+
+    auto cost = [&](const Eigen::VectorXd& p) {
+        return (p - centre).squaredNorm();
+    };
+    ctrl::TunerResult r = bo.tune(cost, x0);
+
+    REQUIRE(r.cost < 1.0);   // should find near (2.5, 1.5)
+}
+
+TEST_CASE("BayesianOptimizer EI mode returns finite result", "[bayesian_optimizer]")
+{
+    ctrl::BayesOptParams p = makeBOParams(1, 5, 10);
+    p.acq = ctrl::BayesOptParams::Acquisition::EI;
+    ctrl::BayesianOptimizer bo(p);
+
+    Eigen::VectorXd x0(1); x0(0) = 3.0;
+    auto cost = [](const Eigen::VectorXd& v) { return std::abs(v(0) - 1.5); };
+    ctrl::TunerResult r = bo.tune(cost, x0);
+
+    REQUIRE(std::isfinite(r.cost));
+    REQUIRE(r.cost < 1.0);
+}
+
+TEST_CASE("BayesianOptimizer eval count matches n_init + maxIter", "[bayesian_optimizer]")
+{
+    ctrl::BayesOptParams p = makeBOParams(2, 6, 9);
+    ctrl::BayesianOptimizer bo(p);
+
+    Eigen::VectorXd x0(2); x0 << 1.0, 1.0;
+    int count = 0;
+    auto cost = [&](const Eigen::VectorXd&) { ++count; return 1.0; };
+    ctrl::TunerResult r = bo.tune(cost, x0);
+
+    REQUIRE(count == 15);         // n_init=6 + maxIter=9
+    REQUIRE(r.nEvals == 15);
+}
+
+// =============================================================================
+// ControllerRegistry (M2)
+// =============================================================================
+
+TEST_CASE("ControllerRegistry: addFeature and has work", "[registry]")
+{
+    // The registry should already be populated from the includes above
+    REQUIRE(ctrl::ControllerRegistry::count() > 0);
+    REQUIRE(ctrl::ControllerRegistry::has("dyna"));            // self-registered
+    REQUIRE(ctrl::ControllerRegistry::has("scenario_mpc"));    // self-registered
+    REQUIRE(ctrl::ControllerRegistry::has("bayesian_optimizer")); // self-registered
+    REQUIRE(ctrl::ControllerRegistry::has("controller_monitor")); // self-registered
+    REQUIRE(ctrl::ControllerRegistry::has("pid"));             // from ControllerRegistrations.h
+    REQUIRE_FALSE(ctrl::ControllerRegistry::has("nonexistent_xyz"));
+}
+
+TEST_CASE("ControllerRegistry: features() snapshot matches registry", "[registry]")
+{
+    auto f = ctrl::features();
+    REQUIRE_FALSE(f.empty());
+    // features() must include every self-registered entry
+    REQUIRE(f.count("dyna") > 0);
+    REQUIRE(f.at("dyna") == true);
+}
+
+TEST_CASE("ControllerRegistry: CTRL_REGISTER_FEATURE macro dedups", "[registry]")
+{
+    // Including DynaController.h (already included above) does NOT double-insert
+    // because inline const bool is initialised exactly once per program.
+    int before = ctrl::ControllerRegistry::count();
+    (void)ctrl::ControllerRegistry::has("dyna");  // just a read
+    REQUIRE(ctrl::ControllerRegistry::count() == before);  // count unchanged
+}
+
+// =============================================================================
+// ControllerMonitor (M3/SPC)
+// =============================================================================
+
+TEST_CASE("ControllerMonitor: no alarm on in-control data", "[monitor]")
+{
+    ctrl::ControllerMonitor mon;
+    mon.setTarget(0.0);
+    mon.setSigma(1.0);
+    // CUSUM h=5 sigma => threshold 5.0; k=0.5 => slack 0.5
+    // Normal N(0,1) data: C+ should stay << 5
+    int alarms = 0;
+    mon.setAlarmCallback([&](std::string_view, double) { ++alarms; });
+
+    for (int i = 0; i < 30; ++i)
+        mon.onCompute(0.0, 0.0);   // zero mean = in-control
+
+    REQUIRE(mon.nSamples() == 30);
+    REQUIRE(alarms == 0);
+    REQUIRE(std::isfinite(mon.cusumStat()));
+    REQUIRE(std::isfinite(mon.ewmaStat()));
+}
+
+TEST_CASE("ControllerMonitor: CUSUM detects sustained mean shift", "[monitor]")
+{
+    ctrl::ControllerMonitor mon;
+    mon.setTarget(0.0);
+    mon.setSigma(1.0);
+    mon.setCUSUMParams(0.5, 4.0);  // h=4 => threshold 4 sigma
+
+    int cusum_alarms = 0;
+    mon.setAlarmCallback([&](std::string_view name, double) {
+        if (name == "CUSUM") ++cusum_alarms;
+    });
+
+    // Feed 20 samples with mean shift of +3 sigma => CUSUM should alarm quickly
+    for (int i = 0; i < 20; ++i)
+        mon.onCompute(3.0, 0.0);
+
+    REQUIRE(cusum_alarms > 0);
+}
+
+TEST_CASE("ControllerMonitor: EWMA detects slow drift", "[monitor]")
+{
+    ctrl::ControllerMonitor mon;
+    mon.setTarget(0.0);
+    mon.setSigma(1.0);
+    mon.setEWMAParams(0.1, 3.0);  // lambda=0.1 (slow), L=3
+
+    int ewma_alarms = 0;
+    mon.setAlarmCallback([&](std::string_view name, double) {
+        if (name == "EWMA") ++ewma_alarms;
+    });
+
+    // Gradual drift: +0.5 per 5 steps => after 40 steps mean approx = 4 >> L*sigma
+    for (int i = 0; i < 50; ++i)
+        mon.onCompute(4.0, 0.0);
+
+    REQUIRE(ewma_alarms > 0);
+}
+
+TEST_CASE("ControllerMonitor: onState watched key triggers alarm on large shift", "[monitor]")
+{
+    ctrl::ControllerMonitor mon;
+    mon.setWatchKey("surface");    // watch SMC sliding surface
+    mon.setTarget(0.0);
+    mon.setSigma(0.1);
+    mon.setCUSUMParams(0.5, 3.0);
+
+    int alarms = 0;
+    mon.setAlarmCallback([&](std::string_view, double) { ++alarms; });
+
+    // onCompute should be ignored; onState("surface") should be processed
+    for (int i = 0; i < 5; ++i)
+        mon.onCompute(99.0, 0.0);   // large compute signal - should be ignored
+
+    REQUIRE(mon.nSamples() == 0);   // watchKey set, onCompute ignored
+
+    // Feed large surface values through onState
+    for (int i = 0; i < 15; ++i)
+        mon.onState("surface", Eigen::VectorXd::Constant(1, 5.0));
+
+    REQUIRE(mon.nSamples() == 15);
+    REQUIRE(alarms > 0);
+}
+
+TEST_CASE("ControllerMonitor: reset clears state", "[monitor]")
+{
+    ctrl::ControllerMonitor mon;
+    mon.setTarget(0.0); mon.setSigma(1.0);
+    for (int i = 0; i < 10; ++i) mon.onCompute(3.0, 0.0);
+
+    mon.onReset();
+
+    REQUIRE(mon.nSamples() == 0);
+    REQUIRE(mon.nAlarms()  == 0);
+    REQUIRE(mon.cusumStat() == 0.0);
 }

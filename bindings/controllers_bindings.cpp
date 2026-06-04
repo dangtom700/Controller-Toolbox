@@ -13,6 +13,9 @@
 #include "EchoStateNetwork.h"
 #include "NeuralPID.h"
 #include "CEMController.h"
+#include "DynaController.h"
+#include "ScenarioMPC.h"
+#include "BayesianOptimizer.h"
 
 namespace py = pybind11;
 
@@ -854,6 +857,66 @@ Usage
            "Run CMA-ES to minimize cost(params) starting from x0.");
 
     // -----------------------------------------------------------------------
+    // BayesOptParams + BayesianOptimizer
+    // -----------------------------------------------------------------------
+    py::enum_<ctrl::BayesOptParams::Acquisition>(m, "BayesAcquisition",
+        "Acquisition function for BayesianOptimizer.")
+        .value("UCB", ctrl::BayesOptParams::Acquisition::UCB,
+               "Lower confidence bound: mu - kappa*sigma.")
+        .value("EI",  ctrl::BayesOptParams::Acquisition::EI,
+               "Expected improvement over current best.")
+        .export_values();
+
+    py::class_<ctrl::BayesOptParams>(m, "BayesOptParams",
+        "Parameters for BayesianOptimizer.")
+        .def(py::init<>())
+        .def_readwrite("n",              &ctrl::BayesOptParams::n)
+        .def_readwrite("n_init",         &ctrl::BayesOptParams::n_init,
+                       "Random initialisation evaluations before BO starts.")
+        .def_readwrite("maxIter",        &ctrl::BayesOptParams::maxIter,
+                       "BO iterations after initialisation. Total evals = n_init + maxIter.")
+        .def_readwrite("n_acq_restarts", &ctrl::BayesOptParams::n_acq_restarts,
+                       "Candidate points for acquisition maximisation each step.")
+        .def_readwrite("kappa",          &ctrl::BayesOptParams::kappa,
+                       "UCB exploration weight (larger = more exploration).")
+        .def_readwrite("xi",             &ctrl::BayesOptParams::xi,
+                       "EI improvement margin xi.")
+        .def_readwrite("acq",            &ctrl::BayesOptParams::acq,
+                       "Acquisition function: BayesAcquisition.UCB or .EI.")
+        .def_readwrite("lower",          &ctrl::BayesOptParams::lower)
+        .def_readwrite("upper",          &ctrl::BayesOptParams::upper)
+        .def_readwrite("gp",             &ctrl::BayesOptParams::gp,
+                       "GP surrogate hyperparameters (GaussianProcess.Params).")
+        .def_readwrite("seed",           &ctrl::BayesOptParams::seed);
+
+    py::class_<ctrl::BayesianOptimizer>(m, "BayesianOptimizer", R"doc(
+Bayesian Optimization with GP surrogate and UCB/EI acquisition.
+
+Preferred over AutoTuner (CMA-ES) when cost evaluations are expensive
+(hardware-in-the-loop, long simulations). Uses only n_init + maxIter evals.
+
+Usage
+-----
+>>> bp = ctrl.BayesOptParams(); bp.n = 3; bp.maxIter = 40
+>>> bp.lower = np.array([0., 0., 0.]); bp.upper = np.array([5., 2., 1.])
+>>> bo = ctrl.BayesianOptimizer(bp)
+>>> result = bo.tune(lambda p: iae_sim(p), x0)
+>>> print(result.params, result.cost)
+)doc")
+        .def(py::init<const ctrl::BayesOptParams&>(), py::arg("params"))
+        .def("tune",
+             [](ctrl::BayesianOptimizer& self,
+                py::object cost_py,
+                const Eigen::VectorXd& x0) {
+                 auto cost_fn = [cost_py](const Eigen::VectorXd& p) -> double {
+                     return cost_py(p).cast<double>();
+                 };
+                 return self.tune(cost_fn, x0);
+             },
+             py::arg("cost"), py::arg("x0"),
+             "Minimise cost(params) starting from x0. Returns TunerResult.");
+
+    // -----------------------------------------------------------------------
     // TubeMPC - robust MPC with mRPI tube (Mayne, Seron, Rakovic 2005)
     // -----------------------------------------------------------------------
     py::class_<ctrl::TubeMPCParams>(m, "TubeMPCParams",
@@ -918,6 +981,66 @@ params : TubeMPCParams
              py::return_value_policy::copy, "Tightened lower u bound after mRPI constraint tightening.")
         .def("tightened_umax", &ctrl::TubeMPC::tightenedUMax,
              py::return_value_policy::copy, "Tightened upper u bound after mRPI constraint tightening.");
+
+    // -----------------------------------------------------------------------
+    // ScenarioMPC - scenario-based stochastic MPC
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::ScenarioMPCParams>(m, "ScenarioMPCParams",
+        "Parameters for ScenarioMPC: horizon, weights, noise covariance, and sample count.")
+        .def(py::init<>())
+        .def_readwrite("Np",         &ctrl::ScenarioMPCParams::Np)
+        .def_readwrite("Nu",         &ctrl::ScenarioMPCParams::Nu)
+        .def_readwrite("Q",          &ctrl::ScenarioMPCParams::Q)
+        .def_readwrite("R",          &ctrl::ScenarioMPCParams::R)
+        .def_readwrite("Sigma_w",    &ctrl::ScenarioMPCParams::Sigma_w,
+                       "Process noise covariance (n x n). N(0, Sigma_w) drawn per step and horizon.")
+        .def_readwrite("N_samples",  &ctrl::ScenarioMPCParams::N_samples,
+                       "Number of noise scenarios sampled per control step.")
+        .def_readwrite("uMin",       &ctrl::ScenarioMPCParams::uMin)
+        .def_readwrite("uMax",       &ctrl::ScenarioMPCParams::uMax)
+        .def_readwrite("Ts",         &ctrl::ScenarioMPCParams::Ts)
+        .def_readwrite("qp_max_iter",&ctrl::ScenarioMPCParams::qpMaxIter)
+        .def_readwrite("qp_tol",     &ctrl::ScenarioMPCParams::qpTol)
+        .def_readwrite("seed",       &ctrl::ScenarioMPCParams::seed);
+
+    py::class_<ctrl::ScenarioMPC, ctrl::IController,
+               std::shared_ptr<ctrl::ScenarioMPC>>(m, "ScenarioMPC", R"doc(
+Scenario-based Stochastic MPC (Calafiore & Campi 2006).
+
+Extends DiscreteMPC by averaging the tracking cost over N_samples Gaussian
+noise trajectories. More flexible than TubeMPC (handles unbounded Gaussian
+noise; not limited to worst-case bounded disturbances).
+
+Usage
+-----
+>>> p = ctrl.ScenarioMPCParams()
+>>> p.Np = 10; p.Nu = 3; p.Ts = 0.1; p.N_samples = 30
+>>> p.Q = np.eye(n); p.R = np.eye(m)*0.1
+>>> p.Sigma_w = np.eye(n)*0.01
+>>> p.uMin = np.array([-1.0]); p.uMax = np.array([1.0])
+>>> smpc = ctrl.ScenarioMPC(sys, p)
+>>> smpc.set_state(x); smpc.set_reference(np.array([1.0]))
+>>> u = smpc.compute_control()   # or smpc.compute(error) for SISO
+)doc")
+        .def(py::init<const ctrl::StateSpace &, const ctrl::ScenarioMPCParams &>(),
+             py::arg("sys"), py::arg("params"))
+        .def("set_state",       &ctrl::ScenarioMPC::setState,      py::arg("x"))
+        .def("set_reference",   &ctrl::ScenarioMPC::setReference,  py::arg("y_ref"))
+        .def("compute_ref",     &ctrl::ScenarioMPC::computeRef,
+             py::arg("x"), py::arg("y_ref"), py::return_value_policy::copy)
+        .def("compute_control", &ctrl::ScenarioMPC::computeControl,
+             py::return_value_policy::copy)
+        .def("compute",         &ctrl::ScenarioMPC::compute,     py::arg("error"))
+        .def("reset",           &ctrl::ScenarioMPC::reset)
+        .def("sample_time",     &ctrl::ScenarioMPC::sampleTime)
+        .def("is_healthy",      &ctrl::ScenarioMPC::isHealthy)
+        .def("last_qp_converged",&ctrl::ScenarioMPC::lastQPConverged)
+        .def("nominal_state",   &ctrl::ScenarioMPC::nominalState,
+             py::return_value_policy::copy,
+             "Current nominal state x_nom (n,).")
+        .def("last_avg_noise_bias", &ctrl::ScenarioMPC::lastAvgNoiseBias,
+             py::return_value_policy::copy,
+             "Average noise-propagated output bias from last solve (Np*pp,).");
 
     // -----------------------------------------------------------------------
     // AntiWindupWrapper - generic conditioning-technique decorator (Hanus 1987)
@@ -1306,6 +1429,58 @@ Example
         .def("set_reference", &ctrl::CEMController::setReference, py::arg("r_ref"))
         .def("reset",         &ctrl::CEMController::reset)
         .def("last_cost",     &ctrl::CEMController::lastCost);
+
+    // -----------------------------------------------------------------------
+    // DynaController (Sutton Dyna MBRL)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::DynaController::Params>(m, "DynaParams",
+        "DynaController design parameters.")
+        .def(py::init<>())
+        .def_readwrite("n_collect",      &ctrl::DynaController::Params::n_collect,
+                       "Transitions to collect before first SINDy model fit.")
+        .def_readwrite("n_refit_every",  &ctrl::DynaController::Params::n_refit_every,
+                       "Refit interval (new transitions) after initial fit.")
+        .def_readwrite("Ts",             &ctrl::DynaController::Params::Ts,
+                       "Sample time [s].")
+        .def_readwrite("sindy",          &ctrl::DynaController::Params::sindy,
+                       "SINDy model parameters (n_state=1 and n_input=1 are enforced).");
+
+    py::class_<ctrl::DynaController, ctrl::IController,
+               std::shared_ptr<ctrl::DynaController>>(m, "DynaController", R"doc(
+Dyna model-based RL controller (Sutton 1991).
+
+Wraps any IController base policy and augments it with online SINDy model learning
+and model-based rollout for policy improvement.
+
+Usage
+-----
+>>> pid   = ctrl.DiscretePID(pid_p, Ts)
+>>> dp    = ctrl.DynaParams(); dp.Ts = Ts; dp.n_collect = 50
+>>> dyna  = ctrl.DynaController(dp, pid)
+>>> u     = dyna.compute(error)                   # run closed loop
+>>> if dyna.model_fitted():
+...     e_pred = dyna.model_rollout(e0, u_plan)   # synthetic rollout
+)doc")
+        .def(py::init<const ctrl::DynaController::Params&,
+                      std::shared_ptr<ctrl::IController>>(),
+             py::arg("params"), py::arg("inner"),
+             "Wrap *inner* with Dyna online learning.")
+        .def("compute",          &ctrl::DynaController::compute,       py::arg("error"))
+        .def("reset",            &ctrl::DynaController::reset)
+        .def("sample_time",      &ctrl::DynaController::sampleTime)
+        .def("add_transition",   &ctrl::DynaController::addTransition,
+             py::arg("e"), py::arg("u"), py::arg("e_next"),
+             "Manually add a (e[k], u[k], e[k+1]) transition.")
+        .def("fit_model",        &ctrl::DynaController::fitModel,
+             "Fit SINDy on accumulated transitions. Returns True on success.")
+        .def("model_rollout",    &ctrl::DynaController::modelRollout,
+             py::arg("e0"), py::arg("u_sequence"),
+             "Simulate fitted model from e0 given u_sequence. Returns predicted error vector.")
+        .def("model_fitted",     &ctrl::DynaController::modelFitted)
+        .def("buffer_size",      &ctrl::DynaController::bufferSize)
+        .def("new_since_last_fit", &ctrl::DynaController::newSinceLastFit)
+        .def("inner_controller", &ctrl::DynaController::innerController,
+             py::return_value_policy::reference_internal);
 
     // -----------------------------------------------------------------------
     // Fuzzy module (optional - guarded by CTRL_HAS_FUZZY)

@@ -113,6 +113,10 @@ for %%T in (
     ex73_l1_adaptive
     ex74_cbf_safety
     ex75_gp_esn_neural
+    ex76_dyna_mbrl
+    ex77_scenario_mpc
+    ex78_bayesian_tuner
+    ex79_registry_monitor
     test_autoscheduling
     test_stability_margins
     example_pid_feedback
@@ -133,6 +137,10 @@ for %%T in (
     test_catch2_advanced
     test_tugsim_regression
     test_humidification
+    test_boiler_regression
+    test_smismo_regression
+    test_solar_regression
+    test_humid_regression
 ) do (
     echo.
     echo ----------------------------------------------------------

@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 #include <memory>
 #include <stdexcept>
+#include <string_view>
 
 namespace ctrl
 {
@@ -174,6 +175,20 @@ protected:
     void notifyObserverReset() const
     {
         if (observer_) observer_->onReset();
+    }
+
+    /**
+     * @brief Fire the observer's onState() callback (M3 internal-state telemetry).
+     *
+     * Call from compute() to emit richer diagnostics (ESO states, sliding surface, etc.).
+     * Zero cost when no observer is attached.
+     *
+     * @param key    Short identifier (e.g. "eso", "surface", "qp_iters").
+     * @param value  Quantity as VectorXd (use Eigen::VectorXd::Constant(1, x) for scalars).
+     */
+    void notifyObserverState(std::string_view key, const Eigen::VectorXd& value) const
+    {
+        if (observer_) observer_->onState(key, value);
     }
 
 private:

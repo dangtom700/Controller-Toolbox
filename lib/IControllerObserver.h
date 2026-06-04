@@ -1,5 +1,6 @@
 #pragma once
 #include <Eigen/Dense>
+#include <string_view>
 
 /**
  * @file IControllerObserver.h
@@ -74,6 +75,23 @@ public:
      * resetting a running average) whenever the controller is reinitialised.
      */
     virtual void onReset() {}
+
+    /**
+     * @brief Called by controllers that expose internal state for diagnostics (M3).
+     *
+     * Fired by `notifyObserverState()` after compute() for controllers that
+     * emit richer telemetry:
+     *   - DiscreteADRC: key="eso",  value=[z1,z2,z3] (ESO state)
+     *   - DiscreteSMC:  key="surface", value=[s]      (sliding surface)
+     *   - DynaController: key="model_fitted", value=[1 or 0]
+     *
+     * The default is a no-op so existing observers are unaffected.
+     *
+     * @param key    Short identifier for the emitted quantity (e.g. "eso").
+     * @param value  Quantity as a column vector (may be 1-D for scalars).
+     */
+    virtual void onState(std::string_view /*key*/,
+                         const Eigen::VectorXd& /*value*/) {}
 };
 
 } // namespace ctrl

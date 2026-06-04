@@ -62,6 +62,8 @@ set(CTRL_CORE_SOURCES
     EchoStateNetwork.cpp
     NeuralPID.cpp
     CEMController.cpp
+    DynaController.cpp
+    ScenarioMPC.cpp
 )
 
 # --- Optional sources --------------------------------------------------------

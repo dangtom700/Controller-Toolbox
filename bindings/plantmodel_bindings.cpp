@@ -4,6 +4,8 @@
 
 #include "ControllerToolbox.h"
 #include "trampoline.h"
+#include "ControllerMonitor.h"
+#include "ControllerRegistry.h"
 
 namespace py = pybind11;
 
@@ -163,7 +165,95 @@ Example
              py::arg("u"), py::arg("signal"),
              "Called after every MIMO computeVec() invocation.")
         .def("on_reset",       &ctrl::IControllerObserver::onReset,
-             "Called after every reset() invocation.");
+             "Called after every reset() invocation.")
+        .def("on_state",
+             [](ctrl::IControllerObserver& self,
+                const std::string& key,
+                const Eigen::VectorXd& value) {
+                 self.onState(key, value);
+             },
+             py::arg("key"), py::arg("value"),
+             "Called by controllers that emit internal state (ESO z, SMC surface, etc.).");
+
+    // -----------------------------------------------------------------------
+    // ControllerMonitor - SPC charts (CUSUM + EWMA) on controller output (M3/SPC)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::CUSUMChart>(m, "CUSUMChart", "Two-sided CUSUM chart parameters and state.")
+        .def(py::init<>())
+        .def_readwrite("target",   &ctrl::CUSUMChart::target)
+        .def_readwrite("sigma",    &ctrl::CUSUMChart::sigma)
+        .def_readwrite("k",        &ctrl::CUSUMChart::k,   "Slack parameter (multiples of sigma).")
+        .def_readwrite("h",        &ctrl::CUSUMChart::h,   "Threshold (multiples of sigma).")
+        .def_readwrite("C_plus",   &ctrl::CUSUMChart::C_plus)
+        .def_readwrite("C_minus",  &ctrl::CUSUMChart::C_minus)
+        .def("reset",              &ctrl::CUSUMChart::reset)
+        .def("update",             &ctrl::CUSUMChart::update,  py::arg("x"))
+        .def("statistic",          &ctrl::CUSUMChart::statistic);
+
+    py::class_<ctrl::EWMAChart>(m, "EWMAChart", "EWMA chart parameters and state.")
+        .def(py::init<>())
+        .def_readwrite("target",   &ctrl::EWMAChart::target)
+        .def_readwrite("sigma",    &ctrl::EWMAChart::sigma)
+        .def_property("lambda_",
+             [](const ctrl::EWMAChart& e) { return e.lambda; },
+             [](ctrl::EWMAChart& e, double v) { e.lambda = v; },
+             "Smoothing weight lambda in (0, 1].")
+        .def_readwrite("L",        &ctrl::EWMAChart::L,    "Control limit multiplier.")
+        .def_readwrite("Z",        &ctrl::EWMAChart::Z,    "Current EWMA statistic.")
+        .def("reset",              &ctrl::EWMAChart::reset)
+        .def("update",             &ctrl::EWMAChart::update, py::arg("x"))
+        .def("statistic",          &ctrl::EWMAChart::statistic);
+
+    py::class_<ctrl::ControllerMonitor, ctrl::IControllerObserver,
+               std::shared_ptr<ctrl::ControllerMonitor>>(m, "ControllerMonitor", R"doc(
+Statistical Process Control (SPC) observer: CUSUM + EWMA charts on controller output.
+
+Attach to any IController to monitor its output for mean shifts and drifts.
+
+Usage
+-----
+>>> mon = ctrl.ControllerMonitor()
+>>> mon.set_target(0.0); mon.set_sigma(0.05)
+>>> mon.set_alarm_callback(lambda chart, stat: print(f"[ALARM] {chart}: {stat:.3f}"))
+>>> pid.attach_observer(mon)
+>>> # After running closed loop:
+>>> print(mon.n_alarms(), mon.cusum_stat(), mon.ewma_stat())
+)doc")
+        .def(py::init<>())
+        .def("set_target",          &ctrl::ControllerMonitor::setTarget,       py::arg("mu0"))
+        .def("set_sigma",           &ctrl::ControllerMonitor::setSigma,        py::arg("sigma"))
+        .def("set_cusum_params",    &ctrl::ControllerMonitor::setCUSUMParams,  py::arg("k"), py::arg("h"))
+        .def("set_ewma_params",     &ctrl::ControllerMonitor::setEWMAParams,   py::arg("lambda_val"), py::arg("L"))
+        .def("set_watch_key",
+             [](ctrl::ControllerMonitor& self, const std::string& key, int idx) {
+                 self.setWatchKey(key, idx);
+             }, py::arg("key"), py::arg("index") = 0,
+             "Monitor an onState channel instead of compute() output.")
+        .def("set_alarm_callback",
+             [](ctrl::ControllerMonitor& self, py::object cb_py) {
+                 self.setAlarmCallback([cb_py](std::string_view key, double stat) {
+                     cb_py(std::string(key), stat);
+                 });
+             }, py::arg("callback"))
+        .def("on_compute",  &ctrl::ControllerMonitor::onCompute,  py::arg("u"), py::arg("signal"))
+        .def("on_state",
+             [](ctrl::ControllerMonitor& self,
+                const std::string& key, const Eigen::VectorXd& value) {
+                 self.onState(key, value);
+             }, py::arg("key"), py::arg("value"))
+        .def("on_reset",    &ctrl::ControllerMonitor::onReset)
+        .def("n_samples",   &ctrl::ControllerMonitor::nSamples)
+        .def("n_alarms",    &ctrl::ControllerMonitor::nAlarms)
+        .def("cusum_stat",  &ctrl::ControllerMonitor::cusumStat)
+        .def("ewma_stat",   &ctrl::ControllerMonitor::ewmaStat);
+
+    // -----------------------------------------------------------------------
+    // ControllerRegistry (M2: self-registration feature map)
+    // -----------------------------------------------------------------------
+    m.def("registry_has",   &ctrl::ControllerRegistry::has,   py::arg("name"),
+          "Return True if the named feature is registered (header was included).");
+    m.def("registry_count", &ctrl::ControllerRegistry::count,
+          "Return the number of registered features.");
 
     // -----------------------------------------------------------------------
     // IController (abstract base - Python can subclass)
