@@ -277,6 +277,7 @@ Eigen::VectorXd TubeMPC::computeControl()
 // ---------------------------------------------------------------------------
 double TubeMPC::compute(double error)
 {
+    if (!std::isfinite(error)) return 0.0;
     // Reconstruct scalar reference from current y (= C*x_nom approx) + error
     const double y_approx = (sys_.C * x_nom_)(0);
     const double r = y_approx + error;

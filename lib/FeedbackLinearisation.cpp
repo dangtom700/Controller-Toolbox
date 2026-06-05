@@ -30,6 +30,7 @@ FeedbackLinearisationController::FeedbackLinearisationController(
 
 double FeedbackLinearisationController::compute(double error)
 {
+    if (!std::isfinite(error)) return u_last_;
     // Step 1: inner controller computes the virtual control v
     const double v = inner_->compute(error);
 

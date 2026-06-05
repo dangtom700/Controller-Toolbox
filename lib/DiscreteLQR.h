@@ -141,9 +141,32 @@ public:
     LQRAdapter(DiscreteLQR &lqr,
                std::function<Eigen::VectorXd()> stateProvider,
                std::function<Eigen::VectorXd()> refProvider = {})
-        : lqr_(lqr), stateFn_(std::move(stateProvider)), refFn_(std::move(refProvider))
-    {
-    }
+        : lqr_owned_(nullptr),
+          lqr_(lqr),
+          stateFn_(std::move(stateProvider)),
+          refFn_(std::move(refProvider))
+    {}
+
+    /**
+     * @brief Owning constructor: the adapter takes shared ownership of the DiscreteLQR.
+     *
+     * Use this inside callbacks (e.g., AutoGainScheduler design_fn) where no external
+     * object holds the DiscreteLQR alive. Prefer the free function makeLQRController()
+     * which wraps this constructor.
+     *
+     * @param lqr_owned Shared pointer to the DiscreteLQR (must be non-null).
+     * @param stateProvider Callable returning x[k] (n * 1).
+     * @param refProvider   Callable returning x_ref[k] (n * 1); optional.
+     * @throws std::invalid_argument If lqr_owned is null.
+     */
+    LQRAdapter(std::shared_ptr<DiscreteLQR>          lqr_owned,
+               std::function<Eigen::VectorXd()>       stateProvider,
+               std::function<Eigen::VectorXd()>       refProvider = {})
+        : lqr_owned_(std::move(lqr_owned)),
+          lqr_(derefChecked(lqr_owned_)),
+          stateFn_(std::move(stateProvider)),
+          refFn_(std::move(refProvider))
+    {}
 
     /**
      * @brief Compute u[k] - @p signal is ignored; state and reference come from callbacks.
@@ -187,7 +210,12 @@ public:
         Eigen::VectorXd x_ref;
         if (refFn_)
             x_ref = refFn_();
-        return lqr_.compute(stateFn_(), x_ref);
+        const auto u = lqr_.compute(stateFn_(), x_ref);
+        // Emit DARE health once per step so observers can detect a non-converged gain.
+        notifyObserverState("health",
+            Eigen::VectorXd::Constant(1, lqr_.dareConverged() ? 1.0 : 0.0));
+        notifyObserverVec(u, Eigen::VectorXd::Zero(u.size()));
+        return u;
     }
 
     /** @brief No-op - DiscreteLQR is stateless at runtime. */
@@ -208,10 +236,54 @@ public:
     bool isHealthy() const override { return lqr_.dareConverged(); }
 
 private:
-    DiscreteLQR &lqr_;
+    std::shared_ptr<DiscreteLQR>     lqr_owned_; ///< Non-null only in the owning-constructor variant.
+    DiscreteLQR                     &lqr_;
     std::function<Eigen::VectorXd()> stateFn_;
     std::function<Eigen::VectorXd()> refFn_;
     mutable bool warned_mimo_ = false; ///< One-shot MIMO truncation warning guard.
+
+    // Validates non-null before the reference member is bound in the initialiser list.
+    static DiscreteLQR& derefChecked(const std::shared_ptr<DiscreteLQR>& p) {
+        if (!p) throw std::invalid_argument("LQRAdapter: lqr_owned must not be null.");
+        return *p;
+    }
 };
+
+/**
+ * @brief Convenience factory: design an LQR and immediately wrap it in an
+ *        IController-compatible LQRAdapter that owns the DiscreteLQR internally.
+ *
+ * Intended for use in AutoGainScheduler design_fn callbacks and anywhere a
+ * `shared_ptr<IController>` must be returned without an external owner for the
+ * DiscreteLQR object.
+ *
+ * @code
+ *   Eigen::VectorXd x_state(n);  // updated by the simulation loop
+ *   auto design_fn = [&x_state](const ctrl::StateSpace& sys, double) -> std::shared_ptr<ctrl::IController> {
+ *       ctrl::LQRParams lp;
+ *       lp.Q = Eigen::MatrixXd::Identity(sys.stateSize(), sys.stateSize());
+ *       lp.R = Eigen::MatrixXd::Identity(sys.inputSize(),  sys.inputSize());
+ *       return ctrl::makeLQRController(sys, lp, [&x_state]{ return x_state; });
+ *   };
+ * @endcode
+ *
+ * @param plant         Discrete-time state-space model.
+ * @param params        LQR weighting matrices (Q, R).
+ * @param stateProvider Callable returning the current state vector x[k] (n * 1).
+ * @param refProvider   Callable returning reference x_ref[k] (n * 1); optional.
+ * @return shared_ptr<LQRAdapter> (implicitly convertible to shared_ptr<IController>).
+ * @see LQRAdapter, DiscreteLQR
+ */
+inline std::shared_ptr<LQRAdapter> makeLQRController(
+    const StateSpace&                plant,
+    const LQRParams&                 params,
+    std::function<Eigen::VectorXd()> stateProvider,
+    std::function<Eigen::VectorXd()> refProvider = {})
+{
+    auto lqr = std::make_shared<DiscreteLQR>(plant, params);
+    return std::make_shared<LQRAdapter>(std::move(lqr),
+                                       std::move(stateProvider),
+                                       std::move(refProvider));
+}
 
 } // namespace ctrl

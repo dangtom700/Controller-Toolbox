@@ -76,7 +76,8 @@ public:
      */
     explicit GainScheduledController(double Ts,
                                      GainScheduleMode mode = GainScheduleMode::LinearBlend)
-        : Ts_(Ts), mode_(mode), current_p_(0.0), last_output_(0.0), active_idx_(-1)
+        : Ts_(Ts), mode_(mode), current_p_(0.0), last_output_(0.0),
+          active_idx_(-1), prev_lo_(-1), prev_hi_(-1)
     {}
 
     /**
@@ -164,6 +165,22 @@ public:
             notifyObserver(last_output_, error);
             return last_output_;
         }
+
+        // Bumpless transfer: when a controller newly enters the active bracket
+        // (was outside any bracket on the previous step) pre-condition it so its
+        // integrator state matches the current blended output.  Controllers that
+        // were already in the previous bracket carry their state naturally.
+        if (lo != prev_lo_ || hi != prev_hi_) {
+            const bool lo_is_new = (lo != prev_lo_ && lo != prev_hi_);
+            const bool hi_is_new = (hi != prev_hi_ && hi != prev_lo_);
+            if (prev_lo_ >= 0) {  // skip on very first call (no prior output yet)
+                if (lo_is_new) schedule_[lo].ctrl->bumplessInit(last_output_, error);
+                if (hi_is_new) schedule_[hi].ctrl->bumplessInit(last_output_, error);
+            }
+            prev_lo_ = lo;
+            prev_hi_ = hi;
+        }
+
         double p0 = schedule_[lo].p, p1 = schedule_[hi].p;
         double alpha = (p1 > p0) ? (current_p_ - p0) / (p1 - p0) : 0.0;
         alpha = std::max(0.0, std::min(1.0, alpha));
@@ -179,6 +196,8 @@ public:
         for (auto& sp : schedule_) sp.ctrl->reset();
         last_output_ = 0.0;
         active_idx_ = -1; // -1 signals "no controller active yet" for bumplessInit
+        prev_lo_    = -1; // -1 signals "no prior bracket" for LinearBlend bumpless init
+        prev_hi_    = -1;
         notifyObserverReset();
     }
 
@@ -198,6 +217,8 @@ private:
     double            current_p_;
     double            last_output_;
     int               active_idx_;
+    int               prev_lo_;  ///< Lower bracket index from previous LinearBlend step (-1 = none).
+    int               prev_hi_;  ///< Upper bracket index from previous LinearBlend step (-1 = none).
 
     // Returns index of the largest p_i <= current_p (clamped to valid range).
     int lowerIndex(double p) const noexcept {

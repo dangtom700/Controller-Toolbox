@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.16...3.31)
 
 # ---------------------------------------------------------------------------
 # Python bindings for Controller Toolbox via pybind11
@@ -25,13 +25,28 @@ if(NOT pybind11_FOUND)
         GIT_TAG        v2.13.6
         GIT_SHALLOW    TRUE
     )
-    # pybind11 v2.13 uses cmake_minimum_required(VERSION 3.5). CMake 3.27+ warns
-    # "Compatibility with CMake < 3.10 will be removed" for any sub-project that
-    # declares a minimum below 3.10. Our root already requires 3.16, so the
-    # warning is a false alarm - suppress it for the duration of this fetch.
-    set(CMAKE_WARN_DEPRECATED OFF)
-    FetchContent_MakeAvailable(pybind11)
-    set(CMAKE_WARN_DEPRECATED ON)
+    # pybind11 v2.13 uses cmake_minimum_required(VERSION 3.5). CMake 3.27+ emits
+    # "Compatibility with CMake < 3.10 will be removed" from its internal engine --
+    # CMAKE_WARN_DEPRECATED does NOT suppress this class of warning (it only covers
+    # user message(DEPRECATION ...) calls). The reliable fix is to patch the fetched
+    # source in-place before CMake processes it, upgrading the declaration to the
+    # min...max range syntax which suppresses the deprecation for that file.
+    FetchContent_GetProperties(pybind11)
+    if(NOT pybind11_POPULATED)
+        # CMP0169 (CMake 3.30+) deprecates FetchContent_Populate(name) - allow OLD
+        # behaviour so we can patch the fetched source before add_subdirectory.
+        if(POLICY CMP0169)
+            cmake_policy(SET CMP0169 OLD)
+        endif()
+        FetchContent_Populate(pybind11)
+        file(READ "${pybind11_SOURCE_DIR}/CMakeLists.txt" _pb11_cmake)
+        string(REPLACE
+            "cmake_minimum_required(VERSION 3.5)"
+            "cmake_minimum_required(VERSION 3.5...3.31)"
+            _pb11_cmake "${_pb11_cmake}")
+        file(WRITE "${pybind11_SOURCE_DIR}/CMakeLists.txt" "${_pb11_cmake}")
+    endif()
+    add_subdirectory("${pybind11_SOURCE_DIR}" "${pybind11_BINARY_DIR}")
 endif()
 
 pybind11_add_module(ctrl_toolbox

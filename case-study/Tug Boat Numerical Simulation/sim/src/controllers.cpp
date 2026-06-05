@@ -820,6 +820,9 @@ static Eigen::VectorXd tugDynamics(const Eigen::VectorXd& x,
     // M_re_inv * (-D_re*nu + tau)
     Vector3d nu_dot = pp.M_re_inv * (-pp.D_re * nu + u.head<3>());
 
+    // Forward-Euler integration at the control sample time pp.dt.
+    // Valid for the tug's low-frequency maneuvering dynamics (dominant time constants >> dt).
+    // If dt is increased or higher-frequency modes are added, replace with RK4.
     Eigen::VectorXd x_next(6);
     x_next.head<3>() = x.head<3>() + pp.dt * eta_dot;
     x_next.tail<3>() = nu + pp.dt * nu_dot;

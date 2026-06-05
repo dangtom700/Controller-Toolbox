@@ -111,6 +111,7 @@ namespace ctrl
     // IController wrapper - reconstructs reference from error and delegates to computeRef.
     double DiscreteMPC::compute(double error)
     {
+        if (!std::isfinite(error)) return u_prev_(0);
         const Eigen::VectorXd y_hat = plant_.C * x_hat_ + plant_.D * u_prev_;
         const Eigen::VectorXd r_ref = y_hat.array() + error; // r = y + (r - y)
         return computeRef(x_hat_, r_ref)(0);
@@ -181,6 +182,14 @@ namespace ctrl
             DeltaU_, grad_k_, DU_new_);
         last_qp_converged_ = qp.converged;
         last_qp_iters_     = qp.iters;
+
+        // Emit convergence telemetry via observer (M3/R3).
+        // "qp_iters" carries the iteration count; "health" is 1.0 (ok) / 0.0 (failed).
+        // Zero-cost when no observer is attached.
+        notifyObserverState("qp_iters",
+            Eigen::VectorXd::Constant(1, static_cast<double>(last_qp_iters_)));
+        if (!last_qp_converged_)
+            notifyObserverState("health", Eigen::VectorXd::Constant(1, 0.0));
 
         // Non-convergence is queryable via lastQPConverged() / isHealthy().
         // The clog print is debug-only: it produces ~50 k lines per boiler run at

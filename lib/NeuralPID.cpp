@@ -62,6 +62,7 @@ Eigen::Vector3d NeuralPID::forward(const Eigen::Vector3d& z,
 
 double NeuralPID::compute(double error)
 {
+    if (!std::isfinite(error)) return u_prev_;
     const double e     = error;
     const double e_dot = (e - e_prev_) / p_.Ts;
     e_int_ += e * p_.Ts;

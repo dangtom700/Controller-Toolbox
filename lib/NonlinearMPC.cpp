@@ -218,6 +218,7 @@ Eigen::VectorXd NonlinearMPC::computeRef(const Eigen::VectorXd &x_current,
 
 double NonlinearMPC::compute(double error)
 {
+    if (!std::isfinite(error)) return last_output_;
     // Reconstruct scalar output reference from error: y_ref = y + error
     const Eigen::VectorXd y_current = C_ * x_current_;
     y_ref_ = y_current.array() + error;

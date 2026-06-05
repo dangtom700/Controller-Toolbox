@@ -1091,7 +1091,10 @@ NMPCBoilerCtrl::NMPCBoilerCtrl(const ctrl::StateSpace& ss, const OperatingPoint&
         const double u1_op = op.u1, u2_op = op.u2, u3_op = op.u3;
         const double Ts    = ss.Ts;
 
-        // Nonlinear discrete dynamics in deviation space (Euler integration, Ts=1s)
+        // Nonlinear discrete dynamics in deviation space (forward Euler, Ts=1s).
+        // Euler is acceptable here: Bell-Astrom boiler has thermal time constants of
+        // ~10-30 s so truncation error at Ts=1s is < 3%.  If Ts is reduced below 0.5s
+        // or faster modes are modelled, replace with a 2-3 RK4 sub-steps.
         auto f_dev = [x1_op, x2_op, x3_op, u1_op, u2_op, u3_op, Ts]
                      (const Eigen::VectorXd& x_dev, const Eigen::VectorXd& u_dev)
                      -> Eigen::VectorXd {

@@ -25,6 +25,12 @@ namespace ctrl
         // Linearise f around x^[k|k] to get the state Jacobian F = df/dx.
         // F is used only for the covariance propagation P = F*P*F' + Q; the
         // state itself is propagated through the exact nonlinear function f.
+        //
+        // Stability assumption: f_ must be a well-conditioned discrete-time map.
+        // If f_ is internally a forward-Euler step at the control Ts, accuracy and
+        // stability degrade for stiff plants (e.g. hydraulic actuators with high bulk
+        // modulus, electrical systems with fast electrical time constants).  For such
+        // plants, implement f_ with RK4 or a fixed-step ODE solver at a sub-step Ts/N.
         const Eigen::MatrixXd F = Fjac_(x_hat_, u);
         x_hat_ = f_(x_hat_, u);
         P_ = F * P_ * F.transpose() + Q_;

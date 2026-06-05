@@ -17,6 +17,7 @@ namespace ctrl
 
     double RepetitiveController::compute(double error)
     {
+        if (!std::isfinite(error)) return 0.0;
         const int N = p_.periodSteps;
 
         // v_buf_ is a circular buffer of length N holding one full period of corrections.

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.16...3.31)
 
 add_executable(tune_all tune_all.cpp)
 target_link_libraries(tune_all PRIVATE controller_toolbox)

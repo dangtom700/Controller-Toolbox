@@ -1,9 +1,13 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.16...3.31)
 project(ControllerToolbox VERSION 1.0.0 LANGUAGES CXX)
 enable_testing()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+# Disable experimental C++20 module dependency scanning (CMake 3.28+ CMP0155 NEW).
+# This project uses standard #include headers - GCC/MinGW's -fmodules-ts scanner
+# crashes on paths with spaces on Windows. Harmless on older CMake versions.
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 # Absolute path to the root data/ directory, injected as a compile definition so
 # all CSV-generating binaries write to the same place regardless of CWD at runtime.

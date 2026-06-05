@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.16...3.31)
 
 add_executable(toolbox_examples toolbox_examples.cpp)
 target_link_libraries(toolbox_examples PRIVATE controller_toolbox)

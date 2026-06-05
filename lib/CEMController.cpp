@@ -96,10 +96,10 @@ Eigen::VectorXd CEMController::computeRef(const Eigen::VectorXd& x_cur,
     return u_out;
 }
 
-double CEMController::compute(double /*error*/)
+double CEMController::compute(double error)
 {
-    if (x_.size() == 0 || r_.size() == 0)
-        return 0.0;   // not initialised
+    if (!std::isfinite(error) || x_.size() == 0 || r_.size() == 0)
+        return 0.0;
 
     auto u = computeRef(x_, r_);
     return u(0);

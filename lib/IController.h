@@ -1,12 +1,28 @@
 #pragma once
 #include "IControllerObserver.h"
 #include <Eigen/Dense>
+#include <cmath>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
 
 namespace ctrl
 {
+
+/**
+ * @brief Return @p v if finite, otherwise @p fallback (default 0.0).
+ *
+ * Apply at every compute() entry point to prevent NaN/Inf from corrupting
+ * integrator and observer states downstream. Input sanitisation is the
+ * library's responsibility - callers must not be required to pre-filter sensor
+ * readings before calling compute().
+ *
+ * @throws nothing - noexcept by design.
+ */
+inline double sanitize(double v, double fallback = 0.0) noexcept
+{
+    return std::isfinite(v) ? v : fallback;
+}
 
 /**
  * @brief Abstract interface for all discrete-time controllers.
@@ -102,6 +118,20 @@ public:
      * @return @c true if the last computation was nominal; @c false if suboptimal.
      */
     virtual bool isHealthy() const { return true; }
+
+    /**
+     * @brief Query whether the controller has built-in anti-windup.
+     *
+     * Returns @c true when the controller manages its own integrator saturation
+     * internally (e.g., DiscretePID with Kb != 0).  AntiWindupWrapper checks this
+     * at construction and refuses to wrap a controller that already has anti-windup,
+     * preventing double-correction which would destabilise the loop.
+     *
+     * The default returns @c false. Override only in controllers with internal AW.
+     *
+     * @return @c true if the controller handles anti-windup internally.
+     */
+    virtual bool hasInternalAntiWindup() const { return false; }
 
     /** @brief Human-readable controller identifier. Override in each subclass. */
     virtual std::string name() const { return ""; }

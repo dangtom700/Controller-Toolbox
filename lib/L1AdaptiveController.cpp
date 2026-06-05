@@ -27,6 +27,7 @@ L1AdaptiveController::L1AdaptiveController(const Params& p, double Ts)
 
 double L1AdaptiveController::compute(double y_plant)
 {
+    if (!std::isfinite(y_plant)) return v_lp_;  // hold last LP-filter output
     // Step 1: prediction error
     pred_err_         = x_hat_ - y_plant;
 

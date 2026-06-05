@@ -63,6 +63,20 @@ struct MHEParams
     double wMax     =  1e9;  ///< Per-element upper bound on process noise w.
     int    qpMaxIter = 300;  ///< Gradient-projection iteration limit.
     double qpTol     = 1e-8; ///< QP convergence tolerance.
+
+    /**
+     * @brief Per-element lower bound on the arrival state x_0 (size n, or empty = unconstrained).
+     *
+     * x_0 is the oldest state in the estimation window and is the first n elements of the QP
+     * decision variable.  Constraining it prevents physically impossible values (e.g. negative
+     * concentrations) from entering the estimate.
+     *
+     * @note Only x_0 is directly box-constrained.  States x_1..x_N are determined by the
+     *       dynamics x_{i+1} = A*x_i + B*u_i + w_i; to bound them, also tighten wMin/wMax
+     *       so that the propagation cannot drift outside the intended region.
+     */
+    Eigen::VectorXd xMin; ///< Lower box bound on x_0 (size n), empty = no constraint.
+    Eigen::VectorXd xMax; ///< Upper box bound on x_0 (size n), empty = no constraint.
 };
 
 /**

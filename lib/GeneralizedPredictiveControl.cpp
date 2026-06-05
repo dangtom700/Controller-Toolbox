@@ -169,6 +169,12 @@ namespace ctrl
         last_qp_converged_ = qp.converged;
         last_qp_iters_     = qp.iters;
 
+        // Emit convergence telemetry via observer (M3/R3).
+        notifyObserverState("qp_iters",
+            Eigen::VectorXd::Constant(1, static_cast<double>(last_qp_iters_)));
+        if (!last_qp_converged_)
+            notifyObserverState("health", Eigen::VectorXd::Constant(1, 0.0));
+
 #ifndef NDEBUG
         if (!last_qp_converged_)
             std::clog << "[GPC] WARNING: QP solver reached max iterations ("
@@ -195,6 +201,7 @@ namespace ctrl
 
     double GeneralizedPredictiveController::compute(double error)
     {
+        if (!std::isfinite(error)) return u_prev_(0);
         // Reconstruct y from stored setpoint and error = r - y
         const double y = r_ref_ - error;
         return computeRef(y, r_ref_);

@@ -3,6 +3,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <Eigen/Dense>
+#include <Eigen/SVD>
 
 namespace ctrl {
 
@@ -56,13 +57,39 @@ double chordalDist(std::complex<double> p1, std::complex<double> p2)
     return (den < 1e-15) ? 0.0 : num / den;
 }
 
+double subspaceDist(const Eigen::MatrixXcd& H1, const Eigen::MatrixXcd& H2)
+{
+    // Form normalised graphs G_i = [H_i; I_{m}] of shape (p+m) x m, then extract
+    // orthonormal column bases U_i via thin SVD.  The subspace chordal distance is:
+    //   d = sqrt(1 - sigma_min(U1^H * U2)^2)
+    // This reduces to chordalDist() for SISO (p=m=1) -- see header for proof.
+    const int p = static_cast<int>(H1.rows());
+    const int m = static_cast<int>(H1.cols());
+
+    Eigen::MatrixXcd G1(p + m, m), G2(p + m, m);
+    G1.topRows(p)    = H1;
+    G1.bottomRows(m) = Eigen::MatrixXcd::Identity(m, m);
+    G2.topRows(p)    = H2;
+    G2.bottomRows(m) = Eigen::MatrixXcd::Identity(m, m);
+
+    // Thin SVD: U_i is (p+m) x m with orthonormal columns.
+    Eigen::JacobiSVD<Eigen::MatrixXcd> svd1(G1, Eigen::ComputeThinU);
+    Eigen::JacobiSVD<Eigen::MatrixXcd> svd2(G2, Eigen::ComputeThinU);
+
+    // Smallest singular value of the m x m inner product matrix U1^H * U2.
+    Eigen::JacobiSVD<Eigen::MatrixXcd> svd_cross(
+        svd1.matrixU().adjoint() * svd2.matrixU());
+    const double sigma_min = svd_cross.singularValues().minCoeff();
+    return std::sqrt(std::max(0.0, 1.0 - sigma_min * sigma_min));
+}
+
 double nuGap(const StateSpace& P1, const StateSpace& P2,
              int freq_points, double omega_min)
 {
-    if (P1.inputSize()  != 1 || P1.outputSize() != 1 ||
-        P2.inputSize()  != 1 || P2.outputSize() != 1)
+    if (P1.inputSize()  != P2.inputSize() ||
+        P1.outputSize() != P2.outputSize())
         throw std::invalid_argument(
-            "nuGap: only SISO systems accepted (inputSize=1, outputSize=1).");
+            "nuGap: both systems must have the same input/output dimensions.");
 
     if (std::abs(P1.Ts - P2.Ts) > 1e-10 * P1.Ts)
         throw std::invalid_argument(
@@ -70,13 +97,19 @@ double nuGap(const StateSpace& P1, const StateSpace& P2,
 
     if (freq_points < 2) freq_points = 2;
 
+    const bool siso = (P1.inputSize() == 1 && P1.outputSize() == 1);
     auto grid = logFreqGrid(P1.Ts, freq_points, omega_min);
     auto H1   = freqResponseGrid(P1, grid);
     auto H2   = freqResponseGrid(P2, grid);
 
     double gap = 0.0;
     for (int i = 0; i < freq_points; ++i) {
-        double d = chordalDist(H1[i](0, 0), H2[i](0, 0));
+        // SISO: use the exact chordal formula (no SVD overhead).
+        // MIMO: subspace chordal distance via normalised-graph SVD (reduces to
+        //       chordal for p=m=1 -- see subspaceDist() derivation in header).
+        const double d = siso
+            ? chordalDist(H1[i](0, 0), H2[i](0, 0))
+            : subspaceDist(H1[i], H2[i]);
         if (d > gap) gap = d;
     }
     return gap;

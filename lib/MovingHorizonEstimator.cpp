@@ -178,9 +178,16 @@ Eigen::VectorXd MovingHorizonEstimator::estimate(const Eigen::VectorXd &y,
     Eigen::VectorXd f_eff = -H_prior * z_prior
                              - Psi_eff.transpose() * C_bar_eff.transpose() * R_bar * Y_res;
 
-    // Box constraints on z: x_0 is unconstrained; w_i must satisfy [wMin, wMax]
+    // Box constraints on z: x_0 state bounds + per-element w noise bounds.
+    // Decision vector layout: z = [x_0 (n); w_0 (n); w_1 (n); ...; w_{eff_N-1} (n)]
     Eigen::VectorXd lb_eff = Eigen::VectorXd::Constant(dz, -1e30);
     Eigen::VectorXd ub_eff = Eigen::VectorXd::Constant(dz,  1e30);
+
+    // x_0 state bounds (MHEParams::xMin / xMax), if provided.
+    if (params_.xMin.size() == n_) lb_eff.head(n_) = params_.xMin;
+    if (params_.xMax.size() == n_) ub_eff.head(n_) = params_.xMax;
+
+    // Process-noise bounds for w_1..w_{eff_N}.
     for (int i = 1; i < eff_Np1; ++i) {
         lb_eff.segment(i * n_, n_).fill(params_.wMin);
         ub_eff.segment(i * n_, n_).fill(params_.wMax);

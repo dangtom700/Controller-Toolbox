@@ -82,6 +82,11 @@ public:
     {
         if (!inner_)
             throw std::invalid_argument("AntiWindupWrapper: inner controller is nullptr.");
+        if (inner_->hasInternalAntiWindup())
+            throw std::invalid_argument(
+                "AntiWindupWrapper: inner controller already has built-in anti-windup "
+                "(e.g., DiscretePID with Kb != 0). Wrapping it doubles the correction "
+                "and may destabilise the loop. Set the inner controller's Kb = 0 first.");
         if (uMin_ >= uMax_)
             throw std::invalid_argument("AntiWindupWrapper: uMin must be < uMax.");
         if (Kb_ < 0.0)

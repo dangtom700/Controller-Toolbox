@@ -155,6 +155,14 @@ public:
     double lastOutput() const { return u_prev_; }
 
     /**
+     * @brief True when back-calculation anti-windup is active (Kb != 0).
+     *
+     * AntiWindupWrapper checks this at construction to prevent double-correction.
+     * Set PIDParams::Kb = 0 before wrapping with AntiWindupWrapper.
+     */
+    bool hasInternalAntiWindup() const override { return p_.Kb != 0.0; }
+
+    /**
      * @brief Bumpless initialisation - sets integral so compute(error) returns u_target.
      *
      * Called by ControllerStack (Supervisory mode) on activation to avoid an output bump.

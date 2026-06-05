@@ -29,6 +29,7 @@ namespace ctrl
     // ---------------------------------------------------------------------------
     double ExtremumSeeker::compute(double y)
     {
+        if (!std::isfinite(y)) return 0.0;
         // Advance phase accumulator - stays bounded in [0, 2pi) for arbitrarily long runs,
         // avoiding the floating-point precision loss of step_ * Ts_ at large step counts
         // and the 32-bit overflow of a long counter on embedded targets.

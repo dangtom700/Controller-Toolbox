@@ -660,7 +660,7 @@ def phase_bug_report(log_path):
     The report includes context lines around each failure (or cluster of failures)
     and a summary.  The log file is read with error resilience.
     """
-    keywords = ['fail', 'error', 'exception', 'fatal', 'abort', 'assert', 'nan', 'warn']
+    keywords = ['fail', 'error', 'exception', 'fatal', 'abort', 'assert', 'nan', 'warn', 'alarm', 'critical', 'Traceback']
     context_lines = 10          # lines before and after each failure marker
 
     # Phrases that mark a line as "passed / no bug" even if a keyword appears in it.
@@ -744,7 +744,11 @@ def phase_bug_report(log_path):
         'mean position error',   # ex71_sindy: "EKF with SINDy model - mean position error: 0.6629"
         '|   u     | fitted |',  # ex76_dyna_mbrl table header "Step | error | u | fitted | buffer"
         'mean abs error',        # ex89_gp_regression: "Mean abs error: 0.0995  (< 0.30 expected)"
-        'zero error after reset',# ex91_neural_pid: "Reset test: zero error after reset"
+        'zero error',            # "zero error after reset" (ex91 section header) and
+                                 # "u after reset (zero error): 0.000" (NeuralPID per-step line)
+        '[alarm] cusum',         # ControllerMonitor CUSUM alarms are intentional demo output;
+                                 # ex79_registry_monitor prints [ALARM] CUSUM on z3: ... on every
+                                 # step while running — example still exits 0 / [PASS]
     ]
 
     # Try to read the log - fall back to latin‑1 if UTF‑8 fails

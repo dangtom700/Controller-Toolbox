@@ -44,11 +44,13 @@
  *   auto x0_fn   = [](double p) {
  *       Eigen::VectorXd x(2); x(0) = p; x(1) = 0.0; return x; };
  *
- *   auto design_fn = [Ts](const ctrl::StateSpace& sys, double) {
+ *   Eigen::VectorXd x_current(2);  // updated by the simulation loop
+ *   auto design_fn = [&x_current](const ctrl::StateSpace& sys, double) -> std::shared_ptr<ctrl::IController> {
  *       ctrl::LQRParams lp;
  *       lp.Q = 10 * Eigen::MatrixXd::Identity(2, 2);
  *       lp.R = Eigen::MatrixXd::Identity(1, 1);
- *       return std::make_shared<ctrl::DiscreteLQR>(sys, lp);
+ *       // makeLQRController() owns the DiscreteLQR so no dangling reference arises.
+ *       return ctrl::makeLQRController(sys, lp, [&x_current]{ return x_current; });
  *   };
  *
  *   auto sched = ctrl::buildAutoGainScheduler(

@@ -26,6 +26,7 @@ MRACController::MRACController(const MRACParams &params, double Ts)
 
 double MRACController::compute(double y_plant)
 {
+    if (!std::isfinite(y_plant)) return 0.0;
     // 1. Model tracking error: e_m[k] = y[k] - y_m[k]
     e_m_ = y_plant - y_m_;
 

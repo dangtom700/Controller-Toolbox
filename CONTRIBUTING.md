@@ -35,8 +35,8 @@ conda run -n soft_robotics -- python run.py
 
 **Never use** `cmake --build build --parallel` - sequential compilation per `compile.bat` is required.
 
-**Expected baseline (as of Part 26, 2026-05-31):** `C++ 90/90 passed | Python 88/88 passed`,
-plus the four case studies reporting full run counts (Boiler 216, SMISMO 42, Solar 45, Tug 64).
+**Expected baseline (as of Part 34, 2026-06-04):** `C++ ~163 passed | Python ~100 passed`,
+plus five case studies (Boiler 216, Solar 45, Tug 64, Humid 50).
 This number drifts every part - treat the latest `run_*.log` as the source of truth, not this line.
 
 A log file `run_YYYYMMDD_HHMMSS.log` is written to the project root after every run.
@@ -112,6 +112,21 @@ These conventions are tribal knowledge. They **must** be respected when implemen
 
 ---
 
+## Architecture Pattern
+
+**DiscreteLQR / LQRAdapter is the deliberate "stateless math + thin adapter" exception.**
+
+`DiscreteLQR` is a pure algorithm class: it holds no `IController` state and can be shared across multiple adapters. `LQRAdapter` is a thin `IController` shim that wires a `DiscreteLQR` to state/reference callbacks.
+
+Every other algorithm in `lib/` embeds both the math and the `IController` interface in a single class (`DiscretePID`, `DiscreteMPC`, etc.). This is intentional: for controllers with significant internal state (integrators, observers, covariance matrices), the overhead of separating "algorithm" from "interface" produces little benefit and adds indirection. The `DiscreteLQR` split exists specifically because the gain matrix `K*` is computed once at construction and shared across use sites-a genuinely stateless operation.
+
+**When adding a new controller:**
+- Follow the single-class pattern (implement `IController` directly).
+- If the core computation is truly stateless (no internal memory), consider the `DiscreteLQR` split. Document the choice in the header.
+- Do **not** add an `Adapter` class "for consistency"-it adds complexity without benefit.
+
+---
+
 ## Numerical Safety Rules
 
 1. **Matrix inverses:** Never call `.inverse()` directly. Use `.ldlt().solve()` and check `.info() != Eigen::Success`.
@@ -120,6 +135,8 @@ These conventions are tribal knowledge. They **must** be respected when implemen
 4. **Discretisation:** Default to ZOH (`ctrl::c2d(..., C2dMethod::ZOH)`). Document the choice in a comment when using Tustin or TustinPrewarped.
 5. **Stability limit for backward-Euler ADRC:** `omega_o * Ts < 0.5` for stability. At `Ts = 1s`, `omega_o <= 0.5`.
 6. **No warnings in Release:** All `std::cerr`/`std::clog` calls that fire during normal simulation must be wrapped in `#ifndef NDEBUG`. Use `lastQPConverged()` / `isHealthy()` in application code to detect non-convergence.
+7. **NaN guard at every compute() boundary:** The first statement of every `compute()` override must be a non-finite check: `if (!std::isfinite(signal)) return u_prev_;` (or `return 0.0;` if no last-output state). Use `ctrl::sanitize(v, fallback)` (defined in `IController.h`) for inline substitution rather than early return. This is the library's contract - callers must not be required to pre-filter sensor readings.
+8. **Euler integration in discrete dynamics callbacks:** If a `DiscreteDynamics` or `StateFunc` callback uses forward Euler at the control `Ts`, add a comment stating the dominant plant time constant and the `Ts` for which Euler accuracy holds. For stiff systems or `Ts > tau_min / 5`, use RK4 sub-steps internally.
 
 ---
 
@@ -131,6 +148,12 @@ The gold standard is the DARE doubling derivation in `lib/DiscreteLQR.cpp:40-57`
   The canonical failure: `DiscreteLeadLag::phaseAt()` said "in degrees" when it returned radians (fixed in P12-21).
 - **Tolerance choices in tests** must be justified in a comment; never "loose tolerance" without explanation.
 - **No multi-paragraph docstrings.** One `@brief` line + `@code` example + key `@param`/`@return`/`@see` entries.
+- **`@throws` is mandatory** for any constructor or method that throws. State the exception type and the exact condition:  
+  ```cpp
+  /// @throws std::invalid_argument If Ts <= 0 or Q is not positive-semidefinite.
+  ```  
+  If a method is `noexcept`, mark it explicitly (`noexcept` keyword + no `@throws`).
+- **Discrete-time convention:** Always `@see` the canonical conventions table in `CONTRIBUTING.md#sign-conventions` rather than re-stating the sign rule per-class.
 - Document in `docs/cumulative_bug_report.md` following the Part numbering convention. Next part: check the current highest part number and increment.
 
 ---

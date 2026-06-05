@@ -35,6 +35,7 @@ DynaController::DynaController(const Params& p, std::shared_ptr<IController> inn
 
 double DynaController::compute(double error)
 {
+    if (!std::isfinite(error)) return u_prev_;
     double u = inner_->compute(error);
 
     if (has_prev_) {

@@ -19,6 +19,7 @@ CBFSafetyFilter::CBFSafetyFilter(std::shared_ptr<IController> nominal,
 
 double CBFSafetyFilter::compute(double error)
 {
+    if (!std::isfinite(error)) return u_nom_;  // hold last safe output
     // Step 1: nominal controller output
     u_nom_   = nominal_->compute(error);
 
