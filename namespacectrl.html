@@ -134,6 +134,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1CohenCoonTuner.html">CohenCoonTuner</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cohen-Coon PID tuner from a FOPDT model.  <a href="classctrl_1_1CohenCoonTuner.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ComputationalDelayWrapper.html">ComputationalDelayWrapper</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> decorator that introduces exactly one sample of computational delay.  <a href="classctrl_1_1ComputationalDelayWrapper.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerMonitor.html">ControllerMonitor</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classctrl_1_1ControllerMonitor.html" title="ControllerMonitor - observer that runs SPC charts on controller output.">ControllerMonitor</a> - observer that runs SPC charts on controller output.  <a href="classctrl_1_1ControllerMonitor.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -675,6 +678,9 @@ Functions</h2></td></tr>
 <tr class="separator:a847d18f960deac4bd58803a0cf34d11b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f88ce31d2b44d52a66fee321e29391d" id="r_a7f88ce31d2b44d52a66fee321e29391d"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a7f88ce31d2b44d52a66fee321e29391d">isPBHDetectable</a> (const Eigen::MatrixXd &amp;A, const Eigen::MatrixXd &amp;Q)</td></tr>
 <tr class="separator:a7f88ce31d2b44d52a66fee321e29391d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f8b591ebf0c74ed79fce0578ff79817" id="r_a9f8b591ebf0c74ed79fce0578ff79817"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classctrl_1_1LQRAdapter.html">LQRAdapter</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a9f8b591ebf0c74ed79fce0578ff79817">makeLQRController</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;plant, const <a class="el" href="structctrl_1_1LQRParams.html">LQRParams</a> &amp;params, std::function&lt; Eigen::VectorXd()&gt; stateProvider, std::function&lt; Eigen::VectorXd()&gt; refProvider={})</td></tr>
+<tr class="memdesc:a9f8b591ebf0c74ed79fce0578ff79817"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience factory: design an LQR and immediately wrap it in an IController-compatible <a class="el" href="classctrl_1_1LQRAdapter.html" title="Adapter that wraps DiscreteLQR as an IController for use in ControllerStack.">LQRAdapter</a> that owns the <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> internally.  <br /></td></tr>
+<tr class="separator:a9f8b591ebf0c74ed79fce0578ff79817"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af78198fd4d57f2d014484b3f16ef5b61" id="r_af78198fd4d57f2d014484b3f16ef5b61"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structctrl_1_1SINDy_1_1Params.html">SINDy::Params</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#af78198fd4d57f2d014484b3f16ef5b61">fixSindyParams</a> (<a class="el" href="structctrl_1_1SINDy_1_1Params.html">SINDy::Params</a> sp)</td></tr>
 <tr class="separator:af78198fd4d57f2d014484b3f16ef5b61"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c5350675a644a3ab773529c5aea79ca" id="r_a2c5350675a644a3ab773529c5aea79ca"><td class="memItemLeft" align="right" valign="top">std::unordered_map&lt; std::string, bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a2c5350675a644a3ab773529c5aea79ca">features</a> ()</td></tr>
@@ -712,6 +718,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a4ad546d4af8e1245e3dd4336283c94ef" id="r_a4ad546d4af8e1245e3dd4336283c94ef"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a4ad546d4af8e1245e3dd4336283c94ef">chordalDist</a> (std::complex&lt; double &gt; p1, std::complex&lt; double &gt; p2)</td></tr>
 <tr class="memdesc:a4ad546d4af8e1245e3dd4336283c94ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">SISO chordal distance on the Riemann sphere.  <br /></td></tr>
 <tr class="separator:a4ad546d4af8e1245e3dd4336283c94ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80e6f60e0afc024c8162eeefe17936cc" id="r_a80e6f60e0afc024c8162eeefe17936cc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a80e6f60e0afc024c8162eeefe17936cc">subspaceDist</a> (const Eigen::MatrixXcd &amp;H1, const Eigen::MatrixXcd &amp;H2)</td></tr>
+<tr class="memdesc:a80e6f60e0afc024c8162eeefe17936cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subspace chordal distance between two MIMO frequency-response matrices.  <br /></td></tr>
+<tr class="separator:a80e6f60e0afc024c8162eeefe17936cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9907faa4d8fc82361e6d224da681e0d7" id="r_a9907faa4d8fc82361e6d224da681e0d7"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a9907faa4d8fc82361e6d224da681e0d7">nuGap</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;P1, const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;P2, int freq_points=200, double omega_min=1e-2)</td></tr>
 <tr class="memdesc:a9907faa4d8fc82361e6d224da681e0d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nu-gap upper bound between two discrete-time systems (SISO or MIMO).  <br /></td></tr>
 <tr class="separator:a9907faa4d8fc82361e6d224da681e0d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -721,12 +730,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a51fde5bfdb017e748806ed5d80959b97" id="r_a51fde5bfdb017e748806ed5d80959b97"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a51fde5bfdb017e748806ed5d80959b97">nuGapMatrix</a> (const std::vector&lt; <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &gt; &amp;models, int freq_points=200)</td></tr>
 <tr class="memdesc:a51fde5bfdb017e748806ed5d80959b97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Symmetric N*N nu-gap distance matrix for a collection of systems.  <br /></td></tr>
 <tr class="separator:a51fde5bfdb017e748806ed5d80959b97"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a80e6f60e0afc024c8162eeefe17936cc" id="r_a80e6f60e0afc024c8162eeefe17936cc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a80e6f60e0afc024c8162eeefe17936cc">subspaceDist</a> (const Eigen::MatrixXcd &amp;H1, const Eigen::MatrixXcd &amp;H2)</td></tr>
-<tr class="memdesc:a80e6f60e0afc024c8162eeefe17936cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subspace chordal distance between two MIMO frequency-response matrices.  <br /></td></tr>
-<tr class="separator:a80e6f60e0afc024c8162eeefe17936cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35c170c14a2cf3926e4b26bf41a38ff1" id="r_a35c170c14a2cf3926e4b26bf41a38ff1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1QPSolveResult.html">QPSolveResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a35c170c14a2cf3926e4b26bf41a38ff1">solveGradientProjectionQP</a> (const Eigen::MatrixXd &amp;H, const Eigen::VectorXd &amp;g, const Eigen::VectorXd &amp;lb, const Eigen::VectorXd &amp;ub, const Eigen::LDLT&lt; Eigen::MatrixXd &gt; &amp;ldlt, double L, int maxIter, double tol, Eigen::VectorXd &amp;x, Eigen::VectorXd &amp;tmp1, Eigen::VectorXd &amp;tmp2)</td></tr>
 <tr class="memdesc:a35c170c14a2cf3926e4b26bf41a38ff1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve a box-constrained QP via FISTA (zero-allocation per iteration).  <br /></td></tr>
 <tr class="separator:a35c170c14a2cf3926e4b26bf41a38ff1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ff58f1a1f4c4f0a1ead0f2dd43f9606" id="r_a4ff58f1a1f4c4f0a1ead0f2dd43f9606"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a4ff58f1a1f4c4f0a1ead0f2dd43f9606">sanitize</a> (double v, double fallback=0.0) noexcept</td></tr>
+<tr class="memdesc:a4ff58f1a1f4c4f0a1ead0f2dd43f9606"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return <code>v</code> if finite, otherwise <code>fallback</code> (default 0.0).  <br /></td></tr>
+<tr class="separator:a4ff58f1a1f4c4f0a1ead0f2dd43f9606"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a250ebc9ea0eab12cf24cb43d45c7241e" id="r_a250ebc9ea0eab12cf24cb43d45c7241e"><td class="memItemLeft" align="right" valign="top">static Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a250ebc9ea0eab12cf24cb43d45c7241e">numJacImpl</a> (const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x0, double eps_scale)</td></tr>
 <tr class="separator:a250ebc9ea0eab12cf24cb43d45c7241e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6cc60eb5b71614401fe3c46d67629805" id="r_a6cc60eb5b71614401fe3c46d67629805"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a6cc60eb5b71614401fe3c46d67629805">jacobianX</a> (const <a class="el" href="namespacectrl.html#a084e413f17f1128b83fe38d6ebc6c289">StateFunc</a> &amp;func, const Eigen::VectorXd &amp;x0, const Eigen::VectorXd &amp;u0, double eps_scale=1e-4)</td></tr>
@@ -1598,9 +1607,9 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="AutoGainScheduler_8h_source.html#l00131">131</a> of file <a class="el" href="AutoGainScheduler_8h_source.html">AutoGainScheduler.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AutoGainScheduler_8h_source.html#l00133">133</a> of file <a class="el" href="AutoGainScheduler_8h_source.html">AutoGainScheduler.h</a>.</p>
 
-<p class="reference">References <a class="el" href="LinearModelCluster_8h_source.html#l00067">clusterByGap()</a>, <a class="el" href="AutoGainScheduler_8h_source.html#l00090">findEquilibrium()</a>, <a class="el" href="namespacectrl.html#ac4b116227149e74ff44404995b9b5f9fa6e14db3e35ac130427b397988bfd00df">LinearBlend</a>, <a class="el" href="LinearisationHelper_8cpp_source.html#l00056">lineariseAtPoint()</a>, <a class="el" href="GapMetric_8cpp_source.html#l00091">nuGapMatrix()</a>, <a class="el" href="LinearModelCluster_8h_source.html#l00052">ctrl::ClusterResult::numClusters</a>, and <a class="el" href="LinearModelCluster_8h_source.html#l00050">ctrl::ClusterResult::representatives</a>.</p>
+<p class="reference">References <a class="el" href="LinearModelCluster_8h_source.html#l00067">clusterByGap()</a>, <a class="el" href="AutoGainScheduler_8h_source.html#l00092">findEquilibrium()</a>, <a class="el" href="namespacectrl.html#ac4b116227149e74ff44404995b9b5f9fa6e14db3e35ac130427b397988bfd00df">LinearBlend</a>, <a class="el" href="LinearisationHelper_8cpp_source.html#l00056">lineariseAtPoint()</a>, <a class="el" href="GapMetric_8cpp_source.html#l00124">nuGapMatrix()</a>, <a class="el" href="LinearModelCluster_8h_source.html#l00052">ctrl::ClusterResult::numClusters</a>, and <a class="el" href="LinearModelCluster_8h_source.html#l00050">ctrl::ClusterResult::representatives</a>.</p>
 
 </div>
 </div>
@@ -1792,9 +1801,9 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 <p>d(p1, p2) = |p1 - p2| / sqrt((1 + |p1|^2) * (1 + |p2|^2))</p>
 <p>Range [0, 1]. Equals 0 iff p1 == p2. </p>
 
-<p class="definition">Definition at line <a class="el" href="GapMetric_8cpp_source.html#l00052">52</a> of file <a class="el" href="GapMetric_8cpp_source.html">GapMetric.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GapMetric_8cpp_source.html#l00053">53</a> of file <a class="el" href="GapMetric_8cpp_source.html">GapMetric.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="GapMetric_8cpp_source.html#l00059">nuGap()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="GapMetric_8cpp_source.html#l00086">nuGap()</a>.</p>
 
 </div>
 </div>
@@ -1847,7 +1856,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 <p class="reference">References <a class="el" href="LinearModelCluster_8h_source.html#l00049">ctrl::ClusterResult::labels</a>, <a class="el" href="LinearModelCluster_8h_source.html#l00051">ctrl::ClusterResult::maxIntraGap</a>, <a class="el" href="LinearModelCluster_8h_source.html#l00052">ctrl::ClusterResult::numClusters</a>, <a class="el" href="LinearModelCluster_8h_source.html#l00050">ctrl::ClusterResult::representatives</a>, and <a class="el" href="LinearModelCluster_8h_source.html#l00053">ctrl::ClusterResult::threshold</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="AutoGainScheduler_8h_source.html#l00131">buildAutoGainScheduler()</a>, <a class="el" href="LinearModelCluster_8h_source.html#l00144">clusterByGap()</a>, and <a class="el" href="LinearModelCluster_8h_source.html#l00164">suggestGapThreshold()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="AutoGainScheduler_8h_source.html#l00133">buildAutoGainScheduler()</a>, <a class="el" href="LinearModelCluster_8h_source.html#l00144">clusterByGap()</a>, and <a class="el" href="LinearModelCluster_8h_source.html#l00164">suggestGapThreshold()</a>.</p>
 
 </div>
 </div>
@@ -1903,7 +1912,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 <p class="definition">Definition at line <a class="el" href="LinearModelCluster_8h_source.html#l00144">144</a> of file <a class="el" href="LinearModelCluster_8h_source.html">LinearModelCluster.h</a>.</p>
 
-<p class="reference">References <a class="el" href="LinearModelCluster_8h_source.html#l00067">clusterByGap()</a>, and <a class="el" href="GapMetric_8cpp_source.html#l00091">nuGapMatrix()</a>.</p>
+<p class="reference">References <a class="el" href="LinearModelCluster_8h_source.html#l00067">clusterByGap()</a>, and <a class="el" href="GapMetric_8cpp_source.html#l00124">nuGapMatrix()</a>.</p>
 
 </div>
 </div>
@@ -2131,11 +2140,11 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="AutoGainScheduler_8h_source.html#l00090">90</a> of file <a class="el" href="AutoGainScheduler_8h_source.html">AutoGainScheduler.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AutoGainScheduler_8h_source.html#l00092">92</a> of file <a class="el" href="AutoGainScheduler_8h_source.html">AutoGainScheduler.h</a>.</p>
 
 <p class="reference">References <a class="el" href="LinearisationHelper_8cpp_source.html#l00038">jacobianX()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="AutoGainScheduler_8h_source.html#l00131">buildAutoGainScheduler()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="AutoGainScheduler_8h_source.html#l00133">buildAutoGainScheduler()</a>.</p>
 
 </div>
 </div>
@@ -2205,11 +2214,11 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of p_out*m_in complex matrices, one per frequency. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="GapMetric_8cpp_source.html#l00025">25</a> of file <a class="el" href="GapMetric_8cpp_source.html">GapMetric.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GapMetric_8cpp_source.html#l00026">26</a> of file <a class="el" href="GapMetric_8cpp_source.html">GapMetric.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00069">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00096">ctrl::StateSpace::outputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00094">ctrl::StateSpace::stateSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="GapMetric_8cpp_source.html#l00059">nuGap()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="GapMetric_8cpp_source.html#l00086">nuGap()</a>.</p>
 
 </div>
 </div>
@@ -2565,7 +2574,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 <p class="reference">References <a class="el" href="LinearisationHelper_8cpp_source.html#l00010">numJacImpl()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="AutoGainScheduler_8h_source.html#l00090">findEquilibrium()</a>, and <a class="el" href="LinearisationHelper_8cpp_source.html#l00056">lineariseAtPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="AutoGainScheduler_8h_source.html#l00092">findEquilibrium()</a>, and <a class="el" href="LinearisationHelper_8cpp_source.html#l00056">lineariseAtPoint()</a>.</p>
 
 </div>
 </div>
@@ -2804,7 +2813,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 <p class="reference">References <a class="el" href="PlantModel_8cpp_source.html#l00197">c2d()</a>, <a class="el" href="LinearisationHelper_8cpp_source.html#l00047">jacobianU()</a>, <a class="el" href="LinearisationHelper_8cpp_source.html#l00038">jacobianX()</a>, <a class="el" href="LinearisationHelper_8cpp_source.html#l00010">numJacImpl()</a>, and <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd">ZOH</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="AutoGainScheduler_8h_source.html#l00131">buildAutoGainScheduler()</a>, and <a class="el" href="LinearisationHelper_8cpp_source.html#l00080">lineariseAtPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="AutoGainScheduler_8h_source.html#l00133">buildAutoGainScheduler()</a>, and <a class="el" href="LinearisationHelper_8cpp_source.html#l00080">lineariseAtPoint()</a>.</p>
 
 </div>
 </div>
@@ -2877,7 +2886,84 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 <p class="definition">Definition at line <a class="el" href="SmithPredictor_8cpp_source.html#l00013">13</a> of file <a class="el" href="SmithPredictor_8cpp_source.html">SmithPredictor.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="SmithPredictor_8cpp_source.html#l00153">ctrl::SmithPredictor::setModel()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="SmithPredictor_8cpp_source.html#l00154">ctrl::SmithPredictor::setModel()</a>.</p>
+
+</div>
+</div>
+<a id="a9f8b591ebf0c74ed79fce0578ff79817" name="a9f8b591ebf0c74ed79fce0578ff79817"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f8b591ebf0c74ed79fce0578ff79817">&#9670;&#160;</a></span>makeLQRController()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::shared_ptr&lt; <a class="el" href="classctrl_1_1LQRAdapter.html">LQRAdapter</a> &gt; ctrl::makeLQRController </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;&#160;</td>
+          <td class="paramname"><em>plant</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structctrl_1_1LQRParams.html">LQRParams</a> &amp;&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::function&lt; Eigen::VectorXd()&gt;&#160;</td>
+          <td class="paramname"><em>stateProvider</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::function&lt; Eigen::VectorXd()&gt;&#160;</td>
+          <td class="paramname"><em>refProvider</em> = <code>{}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Convenience factory: design an LQR and immediately wrap it in an IController-compatible <a class="el" href="classctrl_1_1LQRAdapter.html" title="Adapter that wraps DiscreteLQR as an IController for use in ControllerStack.">LQRAdapter</a> that owns the <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> internally. </p>
+<p>Intended for use in AutoGainScheduler design_fn callbacks and anywhere a <code>shared_ptr&lt;<a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a>&gt;</code> must be returned without an external owner for the <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> object.</p>
+<div class="fragment"><div class="line">Eigen::VectorXd x_state(n);  <span class="comment">// updated by the simulation loop</span></div>
+<div class="line"><span class="keyword">auto</span> design_fn = [&amp;x_state](<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a>&amp; sys, double) -&gt; std::shared_ptr&lt;ctrl::IController&gt; {</div>
+<div class="line">    <a class="code hl_struct" href="structctrl_1_1LQRParams.html">ctrl::LQRParams</a> lp;</div>
+<div class="line">    lp.<a class="code hl_variable" href="structctrl_1_1LQRParams.html#a2519111db115bc6ce3760e63fca054e3">Q</a> = Eigen::MatrixXd::Identity(sys.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a2fb0b092751ef357a0b6c2beb0efba8a">stateSize</a>(), sys.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a2fb0b092751ef357a0b6c2beb0efba8a">stateSize</a>());</div>
+<div class="line">    lp.<a class="code hl_variable" href="structctrl_1_1LQRParams.html#ab2e060a8d2cb1b80bbaf93d9e7f22fc3">R</a> = Eigen::MatrixXd::Identity(sys.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a7ad091cf54b39bd4564617daf686b104">inputSize</a>(),  sys.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a7ad091cf54b39bd4564617daf686b104">inputSize</a>());</div>
+<div class="line">    <span class="keywordflow">return</span> <a class="code hl_function" href="namespacectrl.html#a9f8b591ebf0c74ed79fce0578ff79817">ctrl::makeLQRController</a>(sys, lp, [&amp;x_state]{ <span class="keywordflow">return</span> x_state; });</div>
+<div class="line">};</div>
+<div class="ttc" id="anamespacectrl_html_a9f8b591ebf0c74ed79fce0578ff79817"><div class="ttname"><a href="namespacectrl.html#a9f8b591ebf0c74ed79fce0578ff79817">ctrl::makeLQRController</a></div><div class="ttdeci">std::shared_ptr&lt; LQRAdapter &gt; makeLQRController(const StateSpace &amp;plant, const LQRParams &amp;params, std::function&lt; Eigen::VectorXd()&gt; stateProvider, std::function&lt; Eigen::VectorXd()&gt; refProvider={})</div><div class="ttdoc">Convenience factory: design an LQR and immediately wrap it in an IController-compatible LQRAdapter th...</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLQR_8h_source.html#l00277">DiscreteLQR.h:277</a></div></div>
+<div class="ttc" id="astructctrl_1_1LQRParams_html"><div class="ttname"><a href="structctrl_1_1LQRParams.html">ctrl::LQRParams</a></div><div class="ttdoc">LQR weighting matrices.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLQR_8h_source.html#l00042">DiscreteLQR.h:43</a></div></div>
+<div class="ttc" id="astructctrl_1_1LQRParams_html_a2519111db115bc6ce3760e63fca054e3"><div class="ttname"><a href="structctrl_1_1LQRParams.html#a2519111db115bc6ce3760e63fca054e3">ctrl::LQRParams::Q</a></div><div class="ttdeci">Eigen::MatrixXd Q</div><div class="ttdoc">State cost (n * n, positive semi-definite). Increase Q_ii to tighten tracking of state i.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLQR_8h_source.html#l00044">DiscreteLQR.h:44</a></div></div>
+<div class="ttc" id="astructctrl_1_1LQRParams_html_ab2e060a8d2cb1b80bbaf93d9e7f22fc3"><div class="ttname"><a href="structctrl_1_1LQRParams.html#ab2e060a8d2cb1b80bbaf93d9e7f22fc3">ctrl::LQRParams::R</a></div><div class="ttdeci">Eigen::MatrixXd R</div><div class="ttdoc">Control cost (m * m, positive definite). Increase R_jj to penalise actuator j.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLQR_8h_source.html#l00045">DiscreteLQR.h:45</a></div></div>
+<div class="ttc" id="astructctrl_1_1StateSpace_html_a2fb0b092751ef357a0b6c2beb0efba8a"><div class="ttname"><a href="structctrl_1_1StateSpace.html#a2fb0b092751ef357a0b6c2beb0efba8a">ctrl::StateSpace::stateSize</a></div><div class="ttdeci">int stateSize() const</div><div class="ttdoc">Number of states n.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00094">PlantModel.h:94</a></div></div>
+<div class="ttc" id="astructctrl_1_1StateSpace_html_a7ad091cf54b39bd4564617daf686b104"><div class="ttname"><a href="structctrl_1_1StateSpace.html#a7ad091cf54b39bd4564617daf686b104">ctrl::StateSpace::inputSize</a></div><div class="ttdeci">int inputSize() const</div><div class="ttdoc">Number of inputs m.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00095">PlantModel.h:95</a></div></div>
+</div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">plant</td><td>Discrete-time state-space model. </td></tr>
+    <tr><td class="paramname">params</td><td>LQR weighting matrices (Q, R). </td></tr>
+    <tr><td class="paramname">stateProvider</td><td>Callable returning the current state vector x[k] (n * 1). </td></tr>
+    <tr><td class="paramname">refProvider</td><td>Callable returning reference x_ref[k] (n * 1); optional. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>shared_ptr&lt;LQRAdapter&gt; (implicitly convertible to shared_ptr&lt;IController&gt;). </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="classctrl_1_1LQRAdapter.html" title="Adapter that wraps DiscreteLQR as an IController for use in ControllerStack.">LQRAdapter</a>, <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00277">277</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
 </div>
 </div>
@@ -3327,11 +3413,11 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="GapMetric_8cpp_source.html#l00059">59</a> of file <a class="el" href="GapMetric_8cpp_source.html">GapMetric.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GapMetric_8cpp_source.html#l00086">86</a> of file <a class="el" href="GapMetric_8cpp_source.html">GapMetric.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="GapMetric_8cpp_source.html#l00052">chordalDist()</a>, <a class="el" href="GapMetric_8cpp_source.html#l00025">freqResponseGrid()</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00096">ctrl::StateSpace::outputSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
+<p class="reference">References <a class="el" href="GapMetric_8cpp_source.html#l00053">chordalDist()</a>, <a class="el" href="GapMetric_8cpp_source.html#l00026">freqResponseGrid()</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00096">ctrl::StateSpace::outputSize()</a>, <a class="el" href="GapMetric_8cpp_source.html#l00060">subspaceDist()</a>, and <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::Ts</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="GapMetric_8cpp_source.html#l00085">nuGap()</a>, and <a class="el" href="GapMetric_8cpp_source.html#l00091">nuGapMatrix()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="GapMetric_8cpp_source.html#l00118">nuGap()</a>, and <a class="el" href="GapMetric_8cpp_source.html#l00124">nuGapMatrix()</a>.</p>
 
 </div>
 </div>
@@ -3376,9 +3462,9 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 <p>Nu-gap upper bound between two SISO discrete TF models. </p>
 <p>Converts both to state-space internally. </p>
 
-<p class="definition">Definition at line <a class="el" href="GapMetric_8cpp_source.html#l00085">85</a> of file <a class="el" href="GapMetric_8cpp_source.html">GapMetric.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GapMetric_8cpp_source.html#l00118">118</a> of file <a class="el" href="GapMetric_8cpp_source.html">GapMetric.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="GapMetric_8cpp_source.html#l00059">nuGap()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00048">tf2ss()</a>.</p>
+<p class="reference">References <a class="el" href="GapMetric_8cpp_source.html#l00086">nuGap()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00048">tf2ss()</a>.</p>
 
 </div>
 </div>
@@ -3419,11 +3505,11 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>N*N symmetric Eigen matrix of gap distances. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="GapMetric_8cpp_source.html#l00091">91</a> of file <a class="el" href="GapMetric_8cpp_source.html">GapMetric.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GapMetric_8cpp_source.html#l00124">124</a> of file <a class="el" href="GapMetric_8cpp_source.html">GapMetric.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="GapMetric_8cpp_source.html#l00059">nuGap()</a>.</p>
+<p class="reference">References <a class="el" href="GapMetric_8cpp_source.html#l00086">nuGap()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="AutoGainScheduler_8h_source.html#l00131">buildAutoGainScheduler()</a>, and <a class="el" href="LinearModelCluster_8h_source.html#l00144">clusterByGap()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="AutoGainScheduler_8h_source.html#l00133">buildAutoGainScheduler()</a>, and <a class="el" href="LinearModelCluster_8h_source.html#l00144">clusterByGap()</a>.</p>
 
 </div>
 </div>
@@ -3592,6 +3678,53 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 </div>
 </div>
+<a id="a4ff58f1a1f4c4f0a1ead0f2dd43f9606" name="a4ff58f1a1f4c4f0a1ead0f2dd43f9606"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ff58f1a1f4c4f0a1ead0f2dd43f9606">&#9670;&#160;</a></span>sanitize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ctrl::sanitize </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>fallback</em> = <code>0.0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Return <code>v</code> if finite, otherwise <code>fallback</code> (default 0.0). </p>
+<p>Apply at every compute() entry point to prevent NaN/Inf from corrupting integrator and observer states downstream. Input sanitisation is the library's responsibility - callers must not be required to pre-filter sensor readings before calling compute().</p>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">nothing</td><td>- noexcept by design. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00022">22</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+
+</div>
+</div>
 <a id="a35c170c14a2cf3926e4b26bf41a38ff1" name="a35c170c14a2cf3926e4b26bf41a38ff1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a35c170c14a2cf3926e4b26bf41a38ff1">&#9670;&#160;</a></span>solveGradientProjectionQP()</h2>
 
@@ -3709,7 +3842,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 <p class="reference">References <a class="el" href="GradientProjectionQP_8h_source.html#l00053">ctrl::QPSolveResult::converged</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ScenarioMPC_8cpp_source.html#l00142">ctrl::ScenarioMPC::computeControl()</a>, <a class="el" href="TubeMPC_8cpp_source.html#l00225">ctrl::TubeMPC::computeControl()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00137">ctrl::DiscreteMPC::computeRef()</a>, <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>, and <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00076">ctrl::MovingHorizonEstimator::estimate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ScenarioMPC_8cpp_source.html#l00142">ctrl::ScenarioMPC::computeControl()</a>, <a class="el" href="TubeMPC_8cpp_source.html#l00225">ctrl::TubeMPC::computeControl()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00138">ctrl::DiscreteMPC::computeRef()</a>, <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>, and <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00076">ctrl::MovingHorizonEstimator::estimate()</a>.</p>
 
 </div>
 </div>
@@ -3896,6 +4029,10 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Subspace chordal distance in [0, 1]. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="GapMetric_8cpp_source.html#l00060">60</a> of file <a class="el" href="GapMetric_8cpp_source.html">GapMetric.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="GapMetric_8cpp_source.html#l00086">nuGap()</a>.</p>
 
 </div>
 </div>
@@ -4119,7 +4256,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00034">ctrl::TransferFunction::den</a>, <a class="el" href="PlantModel_8h_source.html#l00033">ctrl::TransferFunction::num</a>, <a class="el" href="PlantModel_8h_source.html#l00054">ctrl::TransferFunction::order()</a>, and <a class="el" href="PlantModel_8h_source.html#l00035">ctrl::TransferFunction::Ts</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ZeroPhaseTrackingFilter_8cpp_source.html#l00099">designZPETC()</a>, <a class="el" href="GapMetric_8cpp_source.html#l00085">nuGap()</a>, and <a class="el" href="RecursiveLeastSquares_8cpp_source.html#l00128">ctrl::RecursiveLeastSquares::toStateSpace()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ZeroPhaseTrackingFilter_8cpp_source.html#l00099">designZPETC()</a>, <a class="el" href="GapMetric_8cpp_source.html#l00118">nuGap()</a>, and <a class="el" href="RecursiveLeastSquares_8cpp_source.html#l00128">ctrl::RecursiveLeastSquares::toStateSpace()</a>.</p>
 
 </div>
 </div>

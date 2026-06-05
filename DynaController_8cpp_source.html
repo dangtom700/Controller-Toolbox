@@ -124,123 +124,124 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00036" data-start="{" data-end="}">
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="classctrl_1_1DynaController.html#af57cc19b9b1322721a58c5452bde0a27">   36</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1DynaController.html#af57cc19b9b1322721a58c5452bde0a27">DynaController::compute</a>(<span class="keywordtype">double</span> error)</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>{</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordtype">double</span> u = inner_-&gt;compute(error);</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordflow">if</span> (has_prev_) {</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <a class="code hl_function" href="classctrl_1_1DynaController.html#a7c125ec3f519b8bf9d83ee3ad2410b5f">addTransition</a>(e_prev_, u_prev_, error);</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <span class="keyword">const</span> <span class="keywordtype">bool</span> should_fit =</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>            (!model_fitted_ &amp;&amp; n_total_ &gt;= p_.<a class="code hl_variable" href="structctrl_1_1DynaController_1_1Params.html#a4a9f538d49b24c88723ed37062adc2d7">n_collect</a>) ||</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>            (model_fitted_  &amp;&amp; steps_since_fit_ &gt;= p_.<a class="code hl_variable" href="structctrl_1_1DynaController_1_1Params.html#adf5aff4a07f2cf7e920cfc3c66945f3b">n_refit_every</a>);</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        <span class="keywordflow">if</span> (should_fit)</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>            <a class="code hl_function" href="classctrl_1_1DynaController.html#a0773d51f5eecd5438e6bb3ae37e3a1ab">fitModel</a>();</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    }</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    e_prev_   = error;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    u_prev_   = u;</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    has_prev_ = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <a class="code hl_function" href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">notifyObserver</a>(u, error);</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">return</span> u;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>}</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordflow">if</span> (!std::isfinite(error)) <span class="keywordflow">return</span> u_prev_;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keywordtype">double</span> u = inner_-&gt;compute(error);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordflow">if</span> (has_prev_) {</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        <a class="code hl_function" href="classctrl_1_1DynaController.html#a7c125ec3f519b8bf9d83ee3ad2410b5f">addTransition</a>(e_prev_, u_prev_, error);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        <span class="keyword">const</span> <span class="keywordtype">bool</span> should_fit =</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>            (!model_fitted_ &amp;&amp; n_total_ &gt;= p_.<a class="code hl_variable" href="structctrl_1_1DynaController_1_1Params.html#a4a9f538d49b24c88723ed37062adc2d7">n_collect</a>) ||</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>            (model_fitted_  &amp;&amp; steps_since_fit_ &gt;= p_.<a class="code hl_variable" href="structctrl_1_1DynaController_1_1Params.html#adf5aff4a07f2cf7e920cfc3c66945f3b">n_refit_every</a>);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keywordflow">if</span> (should_fit)</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>            <a class="code hl_function" href="classctrl_1_1DynaController.html#a0773d51f5eecd5438e6bb3ae37e3a1ab">fitModel</a>();</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    }</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    e_prev_   = error;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    u_prev_   = u;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    has_prev_ = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <a class="code hl_function" href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">notifyObserver</a>(u, error);</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordflow">return</span> u;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>}</div>
 </div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="foldopen" id="foldopen00059" data-start="{" data-end="}">
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="classctrl_1_1DynaController.html#a3f89c6cc39f077d4b55e318b25cbba4e">   59</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1DynaController.html#a3f89c6cc39f077d4b55e318b25cbba4e">DynaController::reset</a>()</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>{</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    inner_-&gt;reset();</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    e_prev_   = 0.0;</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    u_prev_   = 0.0;</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    has_prev_ = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <a class="code hl_function" href="classctrl_1_1IController.html#add3b2b28b1048f8cd5c1130b80676138">notifyObserverReset</a>();</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>}</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="foldopen" id="foldopen00060" data-start="{" data-end="}">
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="classctrl_1_1DynaController.html#a3f89c6cc39f077d4b55e318b25cbba4e">   60</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1DynaController.html#a3f89c6cc39f077d4b55e318b25cbba4e">DynaController::reset</a>()</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>{</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    inner_-&gt;reset();</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    e_prev_   = 0.0;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    u_prev_   = 0.0;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    has_prev_ = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <a class="code hl_function" href="classctrl_1_1IController.html#add3b2b28b1048f8cd5c1130b80676138">notifyObserverReset</a>();</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>}</div>
 </div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="comment">// Data collection</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="foldopen" id="foldopen00072" data-start="{" data-end="}">
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="classctrl_1_1DynaController.html#a7c125ec3f519b8bf9d83ee3ad2410b5f">   72</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1DynaController.html#a7c125ec3f519b8bf9d83ee3ad2410b5f">DynaController::addTransition</a>(<span class="keywordtype">double</span> e, <span class="keywordtype">double</span> u, <span class="keywordtype">double</span> e_next)</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>{</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    Eigen::VectorXd e_v(1);  e_v(0)  = e;</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    Eigen::VectorXd en_v(1); en_v(0) = e_next;</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    Eigen::VectorXd u_v(1);  u_v(0)  = u;</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="comment">// addSnapshotFD(x_k, x_k1, u_k, Ts) - computes xdot = (x_k1 - x_k) / Ts</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    sindy_.<a class="code hl_function" href="classctrl_1_1SINDy.html#a2f5b8ea693001915195c8c1d6d543cad">addSnapshotFD</a>(e_v, en_v, u_v, p_.<a class="code hl_variable" href="structctrl_1_1DynaController_1_1Params.html#af2e4fe5b68fdc60b75f4ad06fe6cebc7">Ts</a>);</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    ++n_total_;</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    ++steps_since_fit_;</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>}</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="comment">// Data collection</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="foldopen" id="foldopen00073" data-start="{" data-end="}">
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="classctrl_1_1DynaController.html#a7c125ec3f519b8bf9d83ee3ad2410b5f">   73</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1DynaController.html#a7c125ec3f519b8bf9d83ee3ad2410b5f">DynaController::addTransition</a>(<span class="keywordtype">double</span> e, <span class="keywordtype">double</span> u, <span class="keywordtype">double</span> e_next)</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>{</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    Eigen::VectorXd e_v(1);  e_v(0)  = e;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    Eigen::VectorXd en_v(1); en_v(0) = e_next;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    Eigen::VectorXd u_v(1);  u_v(0)  = u;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="comment">// addSnapshotFD(x_k, x_k1, u_k, Ts) - computes xdot = (x_k1 - x_k) / Ts</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    sindy_.<a class="code hl_function" href="classctrl_1_1SINDy.html#a2f5b8ea693001915195c8c1d6d543cad">addSnapshotFD</a>(e_v, en_v, u_v, p_.<a class="code hl_variable" href="structctrl_1_1DynaController_1_1Params.html#af2e4fe5b68fdc60b75f4ad06fe6cebc7">Ts</a>);</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    ++n_total_;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    ++steps_since_fit_;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>}</div>
 </div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
-<div class="foldopen" id="foldopen00085" data-start="{" data-end="}">
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="classctrl_1_1DynaController.html#a0773d51f5eecd5438e6bb3ae37e3a1ab">   85</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classctrl_1_1DynaController.html#a0773d51f5eecd5438e6bb3ae37e3a1ab">DynaController::fitModel</a>()</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>{</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keywordflow">if</span> (n_total_ &lt; p_.<a class="code hl_variable" href="structctrl_1_1DynaController_1_1Params.html#a4a9f538d49b24c88723ed37062adc2d7">n_collect</a>)</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    model_        = sindy_.<a class="code hl_function" href="classctrl_1_1SINDy.html#a3bdae4694ed9c3648a5bc38968fb3395">fit</a>();</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    model_fitted_ = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    steps_since_fit_ = 0;</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>}</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="foldopen" id="foldopen00086" data-start="{" data-end="}">
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classctrl_1_1DynaController.html#a0773d51f5eecd5438e6bb3ae37e3a1ab">   86</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="classctrl_1_1DynaController.html#a0773d51f5eecd5438e6bb3ae37e3a1ab">DynaController::fitModel</a>()</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>{</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordflow">if</span> (n_total_ &lt; p_.<a class="code hl_variable" href="structctrl_1_1DynaController_1_1Params.html#a4a9f538d49b24c88723ed37062adc2d7">n_collect</a>)</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    model_        = sindy_.<a class="code hl_function" href="classctrl_1_1SINDy.html#a3bdae4694ed9c3648a5bc38968fb3395">fit</a>();</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    model_fitted_ = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    steps_since_fit_ = 0;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>}</div>
 </div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="comment">// Model-based rollout (used by Python for policy improvement)</span></div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
-<div class="foldopen" id="foldopen00100" data-start="{" data-end="}">
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="classctrl_1_1DynaController.html#a743dd95ce4641d1738b70bf2e49f7404">  100</a></span>Eigen::VectorXd <a class="code hl_function" href="classctrl_1_1DynaController.html#a743dd95ce4641d1738b70bf2e49f7404">DynaController::modelRollout</a>(<span class="keywordtype">double</span>                  e0,</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>                                               <span class="keyword">const</span> Eigen::VectorXd&amp;  u_sequence)<span class="keyword"> const</span></div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    <span class="keywordflow">if</span> (!model_fitted_)</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        <span class="keywordflow">throw</span> std::logic_error(<span class="stringliteral">&quot;DynaController::modelRollout: model not fitted - &quot;</span></div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>                                <span class="stringliteral">&quot;call compute() for at least n_collect steps first&quot;</span>);</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> n_steps = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(u_sequence.size());</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    Eigen::VectorXd e_traj(n_steps);</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    Eigen::VectorXd e(1);  e(0) = e0;</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    Eigen::VectorXd u(1);</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; n_steps; ++k) {</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>        u(0) = u_sequence(k);</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        Eigen::VectorXd edot = model_.<a class="code hl_function" href="classctrl_1_1SINDyModel.html#ac8b8a02e6af885275cb4fb2326072b1b">predict</a>(e, u);</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        e = e + p_.<a class="code hl_variable" href="structctrl_1_1DynaController_1_1Params.html#af2e4fe5b68fdc60b75f4ad06fe6cebc7">Ts</a> * edot;          <span class="comment">// Euler forward step</span></div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        e_traj(k) = e(0);</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    }</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <span class="keywordflow">return</span> e_traj;</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>}</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="comment">// Model-based rollout (used by Python for policy improvement)</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="foldopen" id="foldopen00101" data-start="{" data-end="}">
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="classctrl_1_1DynaController.html#a743dd95ce4641d1738b70bf2e49f7404">  101</a></span>Eigen::VectorXd <a class="code hl_function" href="classctrl_1_1DynaController.html#a743dd95ce4641d1738b70bf2e49f7404">DynaController::modelRollout</a>(<span class="keywordtype">double</span>                  e0,</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>                                               <span class="keyword">const</span> Eigen::VectorXd&amp;  u_sequence)<span class="keyword"> const</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="keywordflow">if</span> (!model_fitted_)</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        <span class="keywordflow">throw</span> std::logic_error(<span class="stringliteral">&quot;DynaController::modelRollout: model not fitted - &quot;</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>                                <span class="stringliteral">&quot;call compute() for at least n_collect steps first&quot;</span>);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> n_steps = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(u_sequence.size());</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    Eigen::VectorXd e_traj(n_steps);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    Eigen::VectorXd e(1);  e(0) = e0;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    Eigen::VectorXd u(1);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; n_steps; ++k) {</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        u(0) = u_sequence(k);</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        Eigen::VectorXd edot = model_.<a class="code hl_function" href="classctrl_1_1SINDyModel.html#ac8b8a02e6af885275cb4fb2326072b1b">predict</a>(e, u);</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        e = e + p_.<a class="code hl_variable" href="structctrl_1_1DynaController_1_1Params.html#af2e4fe5b68fdc60b75f4ad06fe6cebc7">Ts</a> * edot;          <span class="comment">// Euler forward step</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>        e_traj(k) = e(0);</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    }</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="keywordflow">return</span> e_traj;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>}</div>
 </div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="comment">// Accessors</span></div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
-<div class="foldopen" id="foldopen00126" data-start="{" data-end="}">
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno"><a class="line" href="classctrl_1_1DynaController.html#a8934902408f0db93e7a8ac1bc12d1d2a">  126</a></span><span class="keyword">const</span> <a class="code hl_class" href="classctrl_1_1SINDyModel.html">SINDyModel</a>&amp; <a class="code hl_function" href="classctrl_1_1DynaController.html#a8934902408f0db93e7a8ac1bc12d1d2a">DynaController::model</a>()<span class="keyword"> const</span></div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="keywordflow">if</span> (!model_fitted_)</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>        <span class="keywordflow">throw</span> std::logic_error(<span class="stringliteral">&quot;DynaController::model: not fitted yet&quot;</span>);</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keywordflow">return</span> model_;</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>}</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="comment">// Accessors</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="foldopen" id="foldopen00127" data-start="{" data-end="}">
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="classctrl_1_1DynaController.html#a8934902408f0db93e7a8ac1bc12d1d2a">  127</a></span><span class="keyword">const</span> <a class="code hl_class" href="classctrl_1_1SINDyModel.html">SINDyModel</a>&amp; <a class="code hl_function" href="classctrl_1_1DynaController.html#a8934902408f0db93e7a8ac1bc12d1d2a">DynaController::model</a>()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="keywordflow">if</span> (!model_fitted_)</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>        <span class="keywordflow">throw</span> std::logic_error(<span class="stringliteral">&quot;DynaController::model: not fitted yet&quot;</span>);</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="keywordflow">return</span> model_;</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>}</div>
 </div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aDynaController_8h_html"><div class="ttname"><a href="DynaController_8h.html">DynaController.h</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DynaController_html_a0773d51f5eecd5438e6bb3ae37e3a1ab"><div class="ttname"><a href="classctrl_1_1DynaController.html#a0773d51f5eecd5438e6bb3ae37e3a1ab">ctrl::DynaController::fitModel</a></div><div class="ttdeci">bool fitModel()</div><div class="ttdoc">Fit the SINDy model on all accumulated transitions.</div><div class="ttdef"><b>Definition</b> <a href="DynaController_8cpp_source.html#l00085">DynaController.cpp:85</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DynaController_html_a3f89c6cc39f077d4b55e318b25cbba4e"><div class="ttname"><a href="classctrl_1_1DynaController.html#a3f89c6cc39f077d4b55e318b25cbba4e">ctrl::DynaController::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset all internal states (integrators, delay buffers, estimators).</div><div class="ttdef"><b>Definition</b> <a href="DynaController_8cpp_source.html#l00059">DynaController.cpp:59</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DynaController_html_a743dd95ce4641d1738b70bf2e49f7404"><div class="ttname"><a href="classctrl_1_1DynaController.html#a743dd95ce4641d1738b70bf2e49f7404">ctrl::DynaController::modelRollout</a></div><div class="ttdeci">Eigen::VectorXd modelRollout(double e0, const Eigen::VectorXd &amp;u_sequence) const</div><div class="ttdoc">Simulate the fitted model forward from an initial error.</div><div class="ttdef"><b>Definition</b> <a href="DynaController_8cpp_source.html#l00100">DynaController.cpp:100</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DynaController_html_a7c125ec3f519b8bf9d83ee3ad2410b5f"><div class="ttname"><a href="classctrl_1_1DynaController.html#a7c125ec3f519b8bf9d83ee3ad2410b5f">ctrl::DynaController::addTransition</a></div><div class="ttdeci">void addTransition(double e, double u, double e_next)</div><div class="ttdoc">Manually add a SISO error-dynamics transition.</div><div class="ttdef"><b>Definition</b> <a href="DynaController_8cpp_source.html#l00072">DynaController.cpp:72</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DynaController_html_a8934902408f0db93e7a8ac1bc12d1d2a"><div class="ttname"><a href="classctrl_1_1DynaController.html#a8934902408f0db93e7a8ac1bc12d1d2a">ctrl::DynaController::model</a></div><div class="ttdeci">const SINDyModel &amp; model() const</div><div class="ttdoc">Fitted SINDy model.</div><div class="ttdef"><b>Definition</b> <a href="DynaController_8cpp_source.html#l00126">DynaController.cpp:126</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DynaController_html_a0773d51f5eecd5438e6bb3ae37e3a1ab"><div class="ttname"><a href="classctrl_1_1DynaController.html#a0773d51f5eecd5438e6bb3ae37e3a1ab">ctrl::DynaController::fitModel</a></div><div class="ttdeci">bool fitModel()</div><div class="ttdoc">Fit the SINDy model on all accumulated transitions.</div><div class="ttdef"><b>Definition</b> <a href="DynaController_8cpp_source.html#l00086">DynaController.cpp:86</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DynaController_html_a3f89c6cc39f077d4b55e318b25cbba4e"><div class="ttname"><a href="classctrl_1_1DynaController.html#a3f89c6cc39f077d4b55e318b25cbba4e">ctrl::DynaController::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset all internal states (integrators, delay buffers, estimators).</div><div class="ttdef"><b>Definition</b> <a href="DynaController_8cpp_source.html#l00060">DynaController.cpp:60</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DynaController_html_a743dd95ce4641d1738b70bf2e49f7404"><div class="ttname"><a href="classctrl_1_1DynaController.html#a743dd95ce4641d1738b70bf2e49f7404">ctrl::DynaController::modelRollout</a></div><div class="ttdeci">Eigen::VectorXd modelRollout(double e0, const Eigen::VectorXd &amp;u_sequence) const</div><div class="ttdoc">Simulate the fitted model forward from an initial error.</div><div class="ttdef"><b>Definition</b> <a href="DynaController_8cpp_source.html#l00101">DynaController.cpp:101</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DynaController_html_a7c125ec3f519b8bf9d83ee3ad2410b5f"><div class="ttname"><a href="classctrl_1_1DynaController.html#a7c125ec3f519b8bf9d83ee3ad2410b5f">ctrl::DynaController::addTransition</a></div><div class="ttdeci">void addTransition(double e, double u, double e_next)</div><div class="ttdoc">Manually add a SISO error-dynamics transition.</div><div class="ttdef"><b>Definition</b> <a href="DynaController_8cpp_source.html#l00073">DynaController.cpp:73</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DynaController_html_a8934902408f0db93e7a8ac1bc12d1d2a"><div class="ttname"><a href="classctrl_1_1DynaController.html#a8934902408f0db93e7a8ac1bc12d1d2a">ctrl::DynaController::model</a></div><div class="ttdeci">const SINDyModel &amp; model() const</div><div class="ttdoc">Fitted SINDy model.</div><div class="ttdef"><b>Definition</b> <a href="DynaController_8cpp_source.html#l00127">DynaController.cpp:127</a></div></div>
 <div class="ttc" id="aclassctrl_1_1DynaController_html_a8fd8dd975b9182e4c456c906285864d8"><div class="ttname"><a href="classctrl_1_1DynaController.html#a8fd8dd975b9182e4c456c906285864d8">ctrl::DynaController::DynaController</a></div><div class="ttdeci">DynaController(const Params &amp;p, std::shared_ptr&lt; IController &gt; inner)</div><div class="ttdoc">Construct DynaController wrapping a base policy.</div><div class="ttdef"><b>Definition</b> <a href="DynaController_8cpp_source.html#l00023">DynaController.cpp:23</a></div></div>
 <div class="ttc" id="aclassctrl_1_1DynaController_html_af57cc19b9b1322721a58c5452bde0a27"><div class="ttname"><a href="classctrl_1_1DynaController.html#af57cc19b9b1322721a58c5452bde0a27">ctrl::DynaController::compute</a></div><div class="ttdeci">double compute(double error) override</div><div class="ttdoc">Call inner controller, collect one transition, auto-refit if due.</div><div class="ttdef"><b>Definition</b> <a href="DynaController_8cpp_source.html#l00036">DynaController.cpp:36</a></div></div>
-<div class="ttc" id="aclassctrl_1_1IController_html_add3b2b28b1048f8cd5c1130b80676138"><div class="ttname"><a href="classctrl_1_1IController.html#add3b2b28b1048f8cd5c1130b80676138">ctrl::IController::notifyObserverReset</a></div><div class="ttdeci">void notifyObserverReset() const</div><div class="ttdoc">Fire the observer's onReset() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00175">IController.h:175</a></div></div>
-<div class="ttc" id="aclassctrl_1_1IController_html_aff795d6bd36f8a8d20796d0670fef301"><div class="ttname"><a href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">ctrl::IController::notifyObserver</a></div><div class="ttdeci">void notifyObserver(double u, double signal) const</div><div class="ttdoc">Fire the observer's onCompute() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00155">IController.h:155</a></div></div>
+<div class="ttc" id="aclassctrl_1_1IController_html_add3b2b28b1048f8cd5c1130b80676138"><div class="ttname"><a href="classctrl_1_1IController.html#add3b2b28b1048f8cd5c1130b80676138">ctrl::IController::notifyObserverReset</a></div><div class="ttdeci">void notifyObserverReset() const</div><div class="ttdoc">Fire the observer's onReset() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00205">IController.h:205</a></div></div>
+<div class="ttc" id="aclassctrl_1_1IController_html_aff795d6bd36f8a8d20796d0670fef301"><div class="ttname"><a href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">ctrl::IController::notifyObserver</a></div><div class="ttdeci">void notifyObserver(double u, double signal) const</div><div class="ttdoc">Fire the observer's onCompute() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00185">IController.h:185</a></div></div>
 <div class="ttc" id="aclassctrl_1_1SINDyModel_html"><div class="ttname"><a href="classctrl_1_1SINDyModel.html">ctrl::SINDyModel</a></div><div class="ttdoc">Fitted SINDy model: xdot = Theta(x,u) .</div><div class="ttdef"><b>Definition</b> <a href="SINDy_8h_source.html#l00075">SINDy.h:75</a></div></div>
 <div class="ttc" id="aclassctrl_1_1SINDyModel_html_ac8b8a02e6af885275cb4fb2326072b1b"><div class="ttname"><a href="classctrl_1_1SINDyModel.html#ac8b8a02e6af885275cb4fb2326072b1b">ctrl::SINDyModel::predict</a></div><div class="ttdeci">Eigen::VectorXd predict(const Eigen::VectorXd &amp;x_dev, const Eigen::VectorXd &amp;u_dev) const</div><div class="ttdoc">Predict the state derivative at (x_dev, u_dev).</div><div class="ttdef"><b>Definition</b> <a href="SINDy_8cpp_source.html#l00226">SINDy.cpp:226</a></div></div>
 <div class="ttc" id="aclassctrl_1_1SINDy_html_a2f5b8ea693001915195c8c1d6d543cad"><div class="ttname"><a href="classctrl_1_1SINDy.html#a2f5b8ea693001915195c8c1d6d543cad">ctrl::SINDy::addSnapshotFD</a></div><div class="ttdeci">void addSnapshotFD(const Eigen::VectorXd &amp;x_k, const Eigen::VectorXd &amp;x_k1, const Eigen::VectorXd &amp;u_k, double Ts)</div><div class="ttdoc">Add a snapshot using forward finite difference of consecutive states.</div><div class="ttdef"><b>Definition</b> <a href="SINDy_8cpp_source.html#l00120">SINDy.cpp:120</a></div></div>

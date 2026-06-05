@@ -103,6 +103,12 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a7347c942bf0bf1304310488090221af1" id="r_a7347c942bf0bf1304310488090221af1"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MHEParams.html#a7347c942bf0bf1304310488090221af1">qpTol</a> = 1e-8</td></tr>
 <tr class="memdesc:a7347c942bf0bf1304310488090221af1"><td class="mdescLeft">&#160;</td><td class="mdescRight">QP convergence tolerance.  <br /></td></tr>
 <tr class="separator:a7347c942bf0bf1304310488090221af1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65c7b39c3c03f8d681836a6d5a659888" id="r_a65c7b39c3c03f8d681836a6d5a659888"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MHEParams.html#a65c7b39c3c03f8d681836a6d5a659888">xMin</a></td></tr>
+<tr class="memdesc:a65c7b39c3c03f8d681836a6d5a659888"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-element lower bound on the arrival state x_0 (size n, or empty = unconstrained).  <br /></td></tr>
+<tr class="separator:a65c7b39c3c03f8d681836a6d5a659888"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac098ff457036444a2004ada3ec123777" id="r_ac098ff457036444a2004ada3ec123777"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MHEParams.html#ac098ff457036444a2004ada3ec123777">xMax</a></td></tr>
+<tr class="memdesc:ac098ff457036444a2004ada3ec123777"><td class="mdescLeft">&#160;</td><td class="mdescRight">Upper box bound on x_0 (size n), empty = no constraint.  <br /></td></tr>
+<tr class="separator:ac098ff457036444a2004ada3ec123777"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Parameters for <a class="el" href="classctrl_1_1MovingHorizonEstimator.html" title="Moving Horizon Estimator.">MovingHorizonEstimator</a>. </p>
@@ -125,7 +131,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00061">61</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00076">ctrl::MovingHorizonEstimator::estimate()</a>, <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00012">ctrl::MovingHorizonEstimator::MovingHorizonEstimator()</a>, and <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00248">ctrl::MovingHorizonEstimator::setHorizon()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00076">ctrl::MovingHorizonEstimator::estimate()</a>, <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00012">ctrl::MovingHorizonEstimator::MovingHorizonEstimator()</a>, and <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00255">ctrl::MovingHorizonEstimator::setHorizon()</a>.</p>
 
 </div>
 </div>
@@ -204,6 +210,48 @@ Public Attributes</h2></td></tr>
 <p>Per-element lower bound on process noise w. </p>
 
 <p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00062">62</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00076">ctrl::MovingHorizonEstimator::estimate()</a>.</p>
+
+</div>
+</div>
+<a id="ac098ff457036444a2004ada3ec123777" name="ac098ff457036444a2004ada3ec123777"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac098ff457036444a2004ada3ec123777">&#9670;&#160;</a></span>xMax</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::VectorXd ctrl::MHEParams::xMax</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Upper box bound on x_0 (size n), empty = no constraint. </p>
+
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00079">79</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00076">ctrl::MovingHorizonEstimator::estimate()</a>.</p>
+
+</div>
+</div>
+<a id="a65c7b39c3c03f8d681836a6d5a659888" name="a65c7b39c3c03f8d681836a6d5a659888"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65c7b39c3c03f8d681836a6d5a659888">&#9670;&#160;</a></span>xMin</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::VectorXd ctrl::MHEParams::xMin</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Per-element lower bound on the arrival state x_0 (size n, or empty = unconstrained). </p>
+<p>x_0 is the oldest state in the estimation window and is the first n elements of the QP decision variable. Constraining it prevents physically impossible values (e.g. negative concentrations) from entering the estimate.</p>
+<dl class="section note"><dt>Note</dt><dd>Only x_0 is directly box-constrained. States x_1..x_N are determined by the dynamics x_{i+1} = A*x_i + B*u_i + w_i; to bound them, also tighten wMin/wMax so that the propagation cannot drift outside the intended region. Lower box bound on x_0 (size n), empty = no constraint. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00078">78</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00076">ctrl::MovingHorizonEstimator::estimate()</a>.</p>
 

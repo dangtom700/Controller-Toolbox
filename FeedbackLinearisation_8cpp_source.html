@@ -117,41 +117,42 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00031" data-start="{" data-end="}">
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="classctrl_1_1FeedbackLinearisationController.html#a47fe6716adb2ba790a5640199d5a1667">   31</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1FeedbackLinearisationController.html#a47fe6716adb2ba790a5640199d5a1667">FeedbackLinearisationController::compute</a>(<span class="keywordtype">double</span> error)</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>{</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="comment">// Step 1: inner controller computes the virtual control v</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> v = inner_-&gt;compute(error);</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="comment">// Step 2: evaluate the drift and gain at the current state</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> f_val = f_(x_, u_last_);</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> g_val = g_(x_, u_last_);</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="comment">// Step 3: regularise to prevent division by zero</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="comment">// Preserve sign of g so the inversion direction is correct</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> g_sign = (g_val &gt;= 0.0) ? 1.0 : -1.0;</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> g_eff  = g_sign * std::max(std::abs(g_val), params_.<a class="code hl_variable" href="structctrl_1_1FLParams.html#af03e417b886413fab0d9752db616f05a">regularisationEps</a>);</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="comment">// Step 4: feedback linearisation inversion</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordtype">double</span> u = (v - f_val) / g_eff;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="comment">// Step 5: saturate and store</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    u = std::clamp(u, params_.<a class="code hl_variable" href="structctrl_1_1FLParams.html#a4dec54c3991d85f23c1d98637d798957">uMin</a>, params_.<a class="code hl_variable" href="structctrl_1_1FLParams.html#a4a49a8cafcd8562f7b3d7a403445f503">uMax</a>);</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    u_last_ = u;</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordflow">return</span> u;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>}</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keywordflow">if</span> (!std::isfinite(error)) <span class="keywordflow">return</span> u_last_;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="comment">// Step 1: inner controller computes the virtual control v</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> v = inner_-&gt;compute(error);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="comment">// Step 2: evaluate the drift and gain at the current state</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> f_val = f_(x_, u_last_);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> g_val = g_(x_, u_last_);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="comment">// Step 3: regularise to prevent division by zero</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="comment">// Preserve sign of g so the inversion direction is correct</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> g_sign = (g_val &gt;= 0.0) ? 1.0 : -1.0;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> g_eff  = g_sign * std::max(std::abs(g_val), params_.<a class="code hl_variable" href="structctrl_1_1FLParams.html#af03e417b886413fab0d9752db616f05a">regularisationEps</a>);</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="comment">// Step 4: feedback linearisation inversion</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keywordtype">double</span> u = (v - f_val) / g_eff;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="comment">// Step 5: saturate and store</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    u = std::clamp(u, params_.<a class="code hl_variable" href="structctrl_1_1FLParams.html#a4dec54c3991d85f23c1d98637d798957">uMin</a>, params_.<a class="code hl_variable" href="structctrl_1_1FLParams.html#a4a49a8cafcd8562f7b3d7a403445f503">uMax</a>);</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    u_last_ = u;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordflow">return</span> u;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>}</div>
 </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="foldopen" id="foldopen00054" data-start="{" data-end="}">
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="classctrl_1_1FeedbackLinearisationController.html#a6a88b1911c3c36d6cd09d55c6a4d540f">   54</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1FeedbackLinearisationController.html#a6a88b1911c3c36d6cd09d55c6a4d540f">FeedbackLinearisationController::reset</a>()</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>{</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    u_last_ = 0.0;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordflow">if</span> (inner_)</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        inner_-&gt;reset();</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>}</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="foldopen" id="foldopen00055" data-start="{" data-end="}">
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="classctrl_1_1FeedbackLinearisationController.html#a6a88b1911c3c36d6cd09d55c6a4d540f">   55</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1FeedbackLinearisationController.html#a6a88b1911c3c36d6cd09d55c6a4d540f">FeedbackLinearisationController::reset</a>()</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>{</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    u_last_ = 0.0;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordflow">if</span> (inner_)</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        inner_-&gt;reset();</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>}</div>
 </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aFeedbackLinearisation_8h_html"><div class="ttname"><a href="FeedbackLinearisation_8h.html">FeedbackLinearisation.h</a></div><div class="ttdoc">Discrete-time feedback linearisation controller (SISO, relative degree 1).</div></div>
 <div class="ttc" id="aclassctrl_1_1FeedbackLinearisationController_html_a47fe6716adb2ba790a5640199d5a1667"><div class="ttname"><a href="classctrl_1_1FeedbackLinearisationController.html#a47fe6716adb2ba790a5640199d5a1667">ctrl::FeedbackLinearisationController::compute</a></div><div class="ttdeci">double compute(double error) override</div><div class="ttdoc">Compute one control step.</div><div class="ttdef"><b>Definition</b> <a href="FeedbackLinearisation_8cpp_source.html#l00031">FeedbackLinearisation.cpp:31</a></div></div>
-<div class="ttc" id="aclassctrl_1_1FeedbackLinearisationController_html_a6a88b1911c3c36d6cd09d55c6a4d540f"><div class="ttname"><a href="classctrl_1_1FeedbackLinearisationController.html#a6a88b1911c3c36d6cd09d55c6a4d540f">ctrl::FeedbackLinearisationController::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset inner controller and clear u_last_.</div><div class="ttdef"><b>Definition</b> <a href="FeedbackLinearisation_8cpp_source.html#l00054">FeedbackLinearisation.cpp:54</a></div></div>
+<div class="ttc" id="aclassctrl_1_1FeedbackLinearisationController_html_a6a88b1911c3c36d6cd09d55c6a4d540f"><div class="ttname"><a href="classctrl_1_1FeedbackLinearisationController.html#a6a88b1911c3c36d6cd09d55c6a4d540f">ctrl::FeedbackLinearisationController::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset inner controller and clear u_last_.</div><div class="ttdef"><b>Definition</b> <a href="FeedbackLinearisation_8cpp_source.html#l00055">FeedbackLinearisation.cpp:55</a></div></div>
 <div class="ttc" id="aclassctrl_1_1FeedbackLinearisationController_html_a83839bdc70c74e72556b00ca1a43446b"><div class="ttname"><a href="classctrl_1_1FeedbackLinearisationController.html#a83839bdc70c74e72556b00ca1a43446b">ctrl::FeedbackLinearisationController::DriftFn</a></div><div class="ttdeci">std::function&lt; double(const Eigen::VectorXd &amp;x, double u_prev)&gt; DriftFn</div><div class="ttdoc">Drift term f in xdot = f(x) + g(x).u, evaluated at (state, previous_u).</div><div class="ttdef"><b>Definition</b> <a href="FeedbackLinearisation_8h_source.html#l00085">FeedbackLinearisation.h:85</a></div></div>
 <div class="ttc" id="aclassctrl_1_1FeedbackLinearisationController_html_aedd5df705e77da7ec686069655cbdff6"><div class="ttname"><a href="classctrl_1_1FeedbackLinearisationController.html#aedd5df705e77da7ec686069655cbdff6">ctrl::FeedbackLinearisationController::FeedbackLinearisationController</a></div><div class="ttdeci">FeedbackLinearisationController(DriftFn f, GainFn g, std::shared_ptr&lt; IController &gt; inner, const FLParams &amp;params, double Ts)</div><div class="ttdoc">Construct the feedback linearisation controller.</div><div class="ttdef"><b>Definition</b> <a href="FeedbackLinearisation_8cpp_source.html#l00009">FeedbackLinearisation.cpp:9</a></div></div>
 <div class="ttc" id="aclassctrl_1_1FeedbackLinearisationController_html_af62aa17695f5350aa96f35147de9908e"><div class="ttname"><a href="classctrl_1_1FeedbackLinearisationController.html#af62aa17695f5350aa96f35147de9908e">ctrl::FeedbackLinearisationController::GainFn</a></div><div class="ttdeci">std::function&lt; double(const Eigen::VectorXd &amp;x, double u_prev)&gt; GainFn</div><div class="ttdoc">Input gain g in xdot = f(x) + g(x).u, evaluated at (state, previous_u).</div><div class="ttdef"><b>Definition</b> <a href="FeedbackLinearisation_8h_source.html#l00087">FeedbackLinearisation.h:87</a></div></div>

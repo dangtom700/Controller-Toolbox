@@ -299,7 +299,7 @@ Static Public Member Functions</h2></td></tr>
 <div class="line">    <span class="keywordflow">return</span> <a class="code hl_function" href="classctrl_1_1ExtendedKalmanFilter.html#a6bdfea525d975b161d6f1b11a9bffc5a">ExtendedKalmanFilter::numericalJacobian</a>(</div>
 <div class="line">        [&amp;](<span class="keyword">const</span> Eigen::VectorXd&amp; xx){ <span class="keywordflow">return</span> f(xx, u); }, x);</div>
 <div class="line">};</div>
-<div class="ttc" id="aclassctrl_1_1ExtendedKalmanFilter_html_a6bdfea525d975b161d6f1b11a9bffc5a"><div class="ttname"><a href="classctrl_1_1ExtendedKalmanFilter.html#a6bdfea525d975b161d6f1b11a9bffc5a">ctrl::ExtendedKalmanFilter::numericalJacobian</a></div><div class="ttdeci">static Eigen::MatrixXd numericalJacobian(const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x, double eps_scale=1e-4)</div><div class="ttdoc">Central-difference numerical Jacobian with state-scaled step size.</div><div class="ttdef"><b>Definition</b> <a href="ExtendedKalmanFilter_8cpp_source.html#l00071">ExtendedKalmanFilter.cpp:71</a></div></div>
+<div class="ttc" id="aclassctrl_1_1ExtendedKalmanFilter_html_a6bdfea525d975b161d6f1b11a9bffc5a"><div class="ttname"><a href="classctrl_1_1ExtendedKalmanFilter.html#a6bdfea525d975b161d6f1b11a9bffc5a">ctrl::ExtendedKalmanFilter::numericalJacobian</a></div><div class="ttdeci">static Eigen::MatrixXd numericalJacobian(const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x, double eps_scale=1e-4)</div><div class="ttdoc">Central-difference numerical Jacobian with state-scaled step size.</div><div class="ttdef"><b>Definition</b> <a href="ExtendedKalmanFilter_8cpp_source.html#l00077">ExtendedKalmanFilter.cpp:77</a></div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">func</td><td>Scalar-to-vector function to differentiate. </td></tr>
@@ -310,7 +310,7 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Jacobian matrix (output_dim * input_dim). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00071">71</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00077">77</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
 </div>
 </div>
@@ -340,7 +340,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00023">23</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00058">step()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00064">step()</a>.</p>
 
 </div>
 </div>
@@ -361,7 +361,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Reset state estimate to zero and covariance to P0 (or identity). </p>
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00065">65</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00071">71</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
 </div>
 </div>
@@ -494,9 +494,9 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00058">58</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00064">64</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00023">predict()</a>, and <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00033">update()</a>.</p>
+<p class="reference">References <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00023">predict()</a>, and <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00039">update()</a>.</p>
 
 </div>
 </div>
@@ -535,9 +535,9 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00033">33</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00039">39</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00058">step()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00064">step()</a>.</p>
 
 </div>
 </div>

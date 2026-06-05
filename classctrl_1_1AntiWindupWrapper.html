@@ -134,6 +134,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController" id="r_a9d81dd5427e094d72906d54dd5e6548e"><td class="memItemLeft" align="right" valign="top">virtual Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e">computeVec</a> (const Eigen::VectorXd &amp;signal)</td></tr>
 <tr class="memdesc:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance one sample step - vector MIMO interface.  <br /></td></tr>
 <tr class="separator:a9d81dd5427e094d72906d54dd5e6548e inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3147fb76b4d9ed978f58737e521a50b inherit pub_methods_classctrl_1_1IController" id="r_ad3147fb76b4d9ed978f58737e521a50b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#ad3147fb76b4d9ed978f58737e521a50b">hasInternalAntiWindup</a> () const</td></tr>
+<tr class="memdesc:ad3147fb76b4d9ed978f58737e521a50b inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query whether the controller has built-in anti-windup.  <br /></td></tr>
+<tr class="separator:ad3147fb76b4d9ed978f58737e521a50b inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55604bce75cc319383cbf86f7048612c inherit pub_methods_classctrl_1_1IController" id="r_a55604bce75cc319383cbf86f7048612c"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a55604bce75cc319383cbf86f7048612c">name</a> () const</td></tr>
 <tr class="memdesc:a55604bce75cc319383cbf86f7048612c inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Human-readable controller identifier.  <br /></td></tr>
 <tr class="separator:a55604bce75cc319383cbf86f7048612c inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -286,7 +289,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00162">162</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00167">167</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
 
 </div>
 </div>
@@ -326,9 +329,9 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00102">102</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00107">107</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
 
-<p class="reference">References <a class="el" href="IController_8h_source.html#l00155">ctrl::IController::notifyObserver()</a>.</p>
+<p class="reference">References <a class="el" href="IController_8h_source.html#l00185">ctrl::IController::notifyObserver()</a>.</p>
 
 </div>
 </div>
@@ -356,7 +359,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>Pointer to the inner controller (non-owning). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00225">225</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00230">230</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
 
 </div>
 </div>
@@ -388,7 +391,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00150">150</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00155">155</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
 
 </div>
 </div>
@@ -419,7 +422,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Useful for logging and supervisory logic. The flag is cleared by <a class="el" href="classctrl_1_1AntiWindupWrapper.html#a93f3b723c84982a9f485a1e52b45f914" title="Reset the wrapper and the inner controller.">reset()</a>.</p>
 <dl class="section return"><dt>Returns</dt><dd>true if |u_raw - u_sat| &gt; 1e-12 on the last step. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00188">188</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00193">193</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
 
 </div>
 </div>
@@ -449,7 +452,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Last saturated output u[k] returned by <a class="el" href="classctrl_1_1AntiWindupWrapper.html#a898ccbdcb7f81cff249be6ae9c7278c5" title="Advance one step with saturation and conditioning.">compute()</a>. </p>
 <dl class="section return"><dt>Returns</dt><dd>u_last [engineering units - same as inner controller output]. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00179">179</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00184">184</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
 
 </div>
 </div>
@@ -481,9 +484,9 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac69ef6691d5831cda3adcdc59971fcac">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00130">130</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00135">135</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
 
-<p class="reference">References <a class="el" href="IController_8h_source.html#l00175">ctrl::IController::notifyObserverReset()</a>.</p>
+<p class="reference">References <a class="el" href="IController_8h_source.html#l00205">ctrl::IController::notifyObserverReset()</a>.</p>
 
 </div>
 </div>
@@ -513,7 +516,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac1d1ab003ea7fa4f0ab49291d97473a0">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00142">142</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00147">147</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
 
 </div>
 </div>
@@ -544,7 +547,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Negative when the output was clamped below uMax; positive when clamped above uMin. Zero when not saturated.</p>
 <dl class="section return"><dt>Returns</dt><dd>Saturation error [engineering units]. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00198">198</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00203">203</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
 
 </div>
 </div>
@@ -582,7 +585,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00212">212</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AntiWindupWrapper_8h_source.html#l00217">217</a> of file <a class="el" href="AntiWindupWrapper_8h_source.html">AntiWindupWrapper.h</a>.</p>
 
 </div>
 </div>

@@ -121,6 +121,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2181cd169d2691a6d0be718e907a8306" id="r_a2181cd169d2691a6d0be718e907a8306"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscretePID.html#a2181cd169d2691a6d0be718e907a8306">lastOutput</a> () const</td></tr>
 <tr class="memdesc:a2181cd169d2691a6d0be718e907a8306"><td class="mdescLeft">&#160;</td><td class="mdescRight">Control output produced at the previous sample (u[k-1]).  <br /></td></tr>
 <tr class="separator:a2181cd169d2691a6d0be718e907a8306"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84d600b24d5cdfb545ca5a1204c9a9b4" id="r_a84d600b24d5cdfb545ca5a1204c9a9b4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscretePID.html#a84d600b24d5cdfb545ca5a1204c9a9b4">hasInternalAntiWindup</a> () const override</td></tr>
+<tr class="memdesc:a84d600b24d5cdfb545ca5a1204c9a9b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">True when back-calculation anti-windup is active (Kb != 0).  <br /></td></tr>
+<tr class="separator:a84d600b24d5cdfb545ca5a1204c9a9b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:affdf4f330e63da4691d4b462b02d197e" id="r_affdf4f330e63da4691d4b462b02d197e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DiscretePID.html#affdf4f330e63da4691d4b462b02d197e">bumplessInit</a> (double u_target, double error) override</td></tr>
 <tr class="memdesc:affdf4f330e63da4691d4b462b02d197e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation - sets integral so compute(error) returns u_target.  <br /></td></tr>
 <tr class="separator:affdf4f330e63da4691d4b462b02d197e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -311,7 +314,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="DiscretePID_8cpp_source.html#l00022">22</a> of file <a class="el" href="DiscretePID_8cpp_source.html">DiscretePID.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="DiscretePID_8h_source.html#l00069">ctrl::PIDParams::Kb</a>, <a class="el" href="DiscretePID_8h_source.html#l00039">ctrl::PIDParams::Kd</a>, <a class="el" href="DiscretePID_8h_source.html#l00038">ctrl::PIDParams::Ki</a>, <a class="el" href="DiscretePID_8h_source.html#l00037">ctrl::PIDParams::Kp</a>, <a class="el" href="DiscretePID_8h_source.html#l00054">ctrl::PIDParams::N</a>, <a class="el" href="IController_8h_source.html#l00155">ctrl::IController::notifyObserver()</a>, <a class="el" href="DiscretePID_8h_source.html#l00057">ctrl::PIDParams::uMax</a>, and <a class="el" href="DiscretePID_8h_source.html#l00056">ctrl::PIDParams::uMin</a>.</p>
+<p class="reference">References <a class="el" href="DiscretePID_8h_source.html#l00069">ctrl::PIDParams::Kb</a>, <a class="el" href="DiscretePID_8h_source.html#l00039">ctrl::PIDParams::Kd</a>, <a class="el" href="DiscretePID_8h_source.html#l00038">ctrl::PIDParams::Ki</a>, <a class="el" href="DiscretePID_8h_source.html#l00037">ctrl::PIDParams::Kp</a>, <a class="el" href="DiscretePID_8h_source.html#l00054">ctrl::PIDParams::N</a>, <a class="el" href="IController_8h_source.html#l00185">ctrl::IController::notifyObserver()</a>, <a class="el" href="DiscretePID_8h_source.html#l00057">ctrl::PIDParams::uMax</a>, and <a class="el" href="DiscretePID_8h_source.html#l00056">ctrl::PIDParams::uMin</a>.</p>
 
 </div>
 </div>
@@ -360,6 +363,40 @@ Additional Inherited Members</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="DiscretePID_8cpp_source.html#l00085">85</a> of file <a class="el" href="DiscretePID_8cpp_source.html">DiscretePID.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="DiscretePID_8h_source.html#l00086">ctrl::PIDParams::b_weight</a>, <a class="el" href="DiscretePID_8h_source.html#l00069">ctrl::PIDParams::Kb</a>, <a class="el" href="DiscretePID_8h_source.html#l00039">ctrl::PIDParams::Kd</a>, <a class="el" href="DiscretePID_8h_source.html#l00038">ctrl::PIDParams::Ki</a>, <a class="el" href="DiscretePID_8h_source.html#l00037">ctrl::PIDParams::Kp</a>, <a class="el" href="DiscretePID_8h_source.html#l00054">ctrl::PIDParams::N</a>, <a class="el" href="DiscretePID_8h_source.html#l00057">ctrl::PIDParams::uMax</a>, and <a class="el" href="DiscretePID_8h_source.html#l00056">ctrl::PIDParams::uMin</a>.</p>
+
+</div>
+</div>
+<a id="a84d600b24d5cdfb545ca5a1204c9a9b4" name="a84d600b24d5cdfb545ca5a1204c9a9b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84d600b24d5cdfb545ca5a1204c9a9b4">&#9670;&#160;</a></span>hasInternalAntiWindup()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ctrl::DiscretePID::hasInternalAntiWindup </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>True when back-calculation anti-windup is active (Kb != 0). </p>
+<p><a class="el" href="classctrl_1_1AntiWindupWrapper.html" title="Generic anti-windup decorator for any IController.">AntiWindupWrapper</a> checks this at construction to prevent double-correction. Set <a class="el" href="structctrl_1_1PIDParams.html#a7626dbcc40d8b82afa45b6f7ee9627fe" title="Anti-windup back-calculation gain (0 = disabled, 1 = default).">PIDParams::Kb</a> = 0 before wrapping with <a class="el" href="classctrl_1_1AntiWindupWrapper.html" title="Generic anti-windup decorator for any IController.">AntiWindupWrapper</a>. </p>
+
+<p>Reimplemented from <a class="el" href="classctrl_1_1IController.html#ad3147fb76b4d9ed978f58737e521a50b">ctrl::IController</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="DiscretePID_8h_source.html#l00163">163</a> of file <a class="el" href="DiscretePID_8h_source.html">DiscretePID.h</a>.</p>
+
+<p class="reference">References <a class="el" href="DiscretePID_8h_source.html#l00069">ctrl::PIDParams::Kb</a>.</p>
 
 </div>
 </div>
@@ -452,7 +489,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="DiscretePID_8cpp_source.html#l00053">53</a> of file <a class="el" href="DiscretePID_8cpp_source.html">DiscretePID.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="IController_8h_source.html#l00175">ctrl::IController::notifyObserverReset()</a>.</p>
+<p class="reference">References <a class="el" href="IController_8h_source.html#l00205">ctrl::IController::notifyObserverReset()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="DiscretePID_8cpp_source.html#l00008">DiscretePID()</a>.</p>
 

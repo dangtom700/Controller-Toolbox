@@ -85,6 +85,7 @@ $(function() {
 <code>#include &lt;cmath&gt;</code><br />
 <code>#include &lt;stdexcept&gt;</code><br />
 <code>#include &lt;Eigen/Dense&gt;</code><br />
+<code>#include &lt;Eigen/SVD&gt;</code><br />
 </div>
 <p><a href="GapMetric_8cpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -101,6 +102,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a4ad546d4af8e1245e3dd4336283c94ef" id="r_a4ad546d4af8e1245e3dd4336283c94ef"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a4ad546d4af8e1245e3dd4336283c94ef">ctrl::chordalDist</a> (std::complex&lt; double &gt; p1, std::complex&lt; double &gt; p2)</td></tr>
 <tr class="memdesc:a4ad546d4af8e1245e3dd4336283c94ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">SISO chordal distance on the Riemann sphere.  <br /></td></tr>
 <tr class="separator:a4ad546d4af8e1245e3dd4336283c94ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80e6f60e0afc024c8162eeefe17936cc" id="r_a80e6f60e0afc024c8162eeefe17936cc"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a80e6f60e0afc024c8162eeefe17936cc">ctrl::subspaceDist</a> (const Eigen::MatrixXcd &amp;H1, const Eigen::MatrixXcd &amp;H2)</td></tr>
+<tr class="memdesc:a80e6f60e0afc024c8162eeefe17936cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subspace chordal distance between two MIMO frequency-response matrices.  <br /></td></tr>
+<tr class="separator:a80e6f60e0afc024c8162eeefe17936cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9907faa4d8fc82361e6d224da681e0d7" id="r_a9907faa4d8fc82361e6d224da681e0d7"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a9907faa4d8fc82361e6d224da681e0d7">ctrl::nuGap</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;P1, const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;P2, int freq_points=200, double omega_min=1e-2)</td></tr>
 <tr class="memdesc:a9907faa4d8fc82361e6d224da681e0d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nu-gap upper bound between two discrete-time systems (SISO or MIMO).  <br /></td></tr>
 <tr class="separator:a9907faa4d8fc82361e6d224da681e0d7"><td class="memSeparator" colspan="2">&#160;</td></tr>

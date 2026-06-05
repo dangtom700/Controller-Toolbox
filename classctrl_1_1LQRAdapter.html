@@ -100,6 +100,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a83bc714547dbe21e26b898e60bada666" id="r_a83bc714547dbe21e26b898e60bada666"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1LQRAdapter.html#a83bc714547dbe21e26b898e60bada666">LQRAdapter</a> (<a class="el" href="classctrl_1_1DiscreteLQR.html">DiscreteLQR</a> &amp;lqr, std::function&lt; Eigen::VectorXd()&gt; stateProvider, std::function&lt; Eigen::VectorXd()&gt; refProvider={})</td></tr>
 <tr class="memdesc:a83bc714547dbe21e26b898e60bada666"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct the adapter with state and optional reference providers.  <br /></td></tr>
 <tr class="separator:a83bc714547dbe21e26b898e60bada666"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab9f37870b3a056d03ce847ce3a81a50" id="r_aab9f37870b3a056d03ce847ce3a81a50"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1LQRAdapter.html#aab9f37870b3a056d03ce847ce3a81a50">LQRAdapter</a> (std::shared_ptr&lt; <a class="el" href="classctrl_1_1DiscreteLQR.html">DiscreteLQR</a> &gt; lqr_owned, std::function&lt; Eigen::VectorXd()&gt; stateProvider, std::function&lt; Eigen::VectorXd()&gt; refProvider={})</td></tr>
+<tr class="memdesc:aab9f37870b3a056d03ce847ce3a81a50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Owning constructor: the adapter takes shared ownership of the <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a>.  <br /></td></tr>
+<tr class="separator:aab9f37870b3a056d03ce847ce3a81a50"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa98cd8c81bd08aa25a099ea9c7c25cf9" id="r_aa98cd8c81bd08aa25a099ea9c7c25cf9"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1LQRAdapter.html#aa98cd8c81bd08aa25a099ea9c7c25cf9">compute</a> (double) override</td></tr>
 <tr class="memdesc:aa98cd8c81bd08aa25a099ea9c7c25cf9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute u[k] - <code>signal</code> is ignored; state and reference come from callbacks.  <br /></td></tr>
 <tr class="separator:aa98cd8c81bd08aa25a099ea9c7c25cf9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -121,6 +124,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController" id="r_a20821745ef7099941a9e9fdb6eeddd07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a20821745ef7099941a9e9fdb6eeddd07">bumplessInit</a> (double, double)</td></tr>
 <tr class="memdesc:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bumpless initialisation - prepares the controller for smooth activation.  <br /></td></tr>
 <tr class="separator:a20821745ef7099941a9e9fdb6eeddd07 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3147fb76b4d9ed978f58737e521a50b inherit pub_methods_classctrl_1_1IController" id="r_ad3147fb76b4d9ed978f58737e521a50b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#ad3147fb76b4d9ed978f58737e521a50b">hasInternalAntiWindup</a> () const</td></tr>
+<tr class="memdesc:ad3147fb76b4d9ed978f58737e521a50b inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query whether the controller has built-in anti-windup.  <br /></td></tr>
+<tr class="separator:ad3147fb76b4d9ed978f58737e521a50b inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55604bce75cc319383cbf86f7048612c inherit pub_methods_classctrl_1_1IController" id="r_a55604bce75cc319383cbf86f7048612c"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a55604bce75cc319383cbf86f7048612c">name</a> () const</td></tr>
 <tr class="memdesc:a55604bce75cc319383cbf86f7048612c inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Human-readable controller identifier.  <br /></td></tr>
 <tr class="separator:a55604bce75cc319383cbf86f7048612c inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -160,7 +166,7 @@ Additional Inherited Members</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00131">131</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a83bc714547dbe21e26b898e60bada666" name="a83bc714547dbe21e26b898e60bada666"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a83bc714547dbe21e26b898e60bada666">&#9670;&#160;</a></span>LQRAdapter()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a83bc714547dbe21e26b898e60bada666">&#9670;&#160;</a></span>LQRAdapter() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -213,6 +219,67 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
+<a id="aab9f37870b3a056d03ce847ce3a81a50" name="aab9f37870b3a056d03ce847ce3a81a50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab9f37870b3a056d03ce847ce3a81a50">&#9670;&#160;</a></span>LQRAdapter() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ctrl::LQRAdapter::LQRAdapter </td>
+          <td>(</td>
+          <td class="paramtype">std::shared_ptr&lt; <a class="el" href="classctrl_1_1DiscreteLQR.html">DiscreteLQR</a> &gt;&#160;</td>
+          <td class="paramname"><em>lqr_owned</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::function&lt; Eigen::VectorXd()&gt;&#160;</td>
+          <td class="paramname"><em>stateProvider</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::function&lt; Eigen::VectorXd()&gt;&#160;</td>
+          <td class="paramname"><em>refProvider</em> = <code>{}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Owning constructor: the adapter takes shared ownership of the <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a>. </p>
+<p>Use this inside callbacks (e.g., AutoGainScheduler design_fn) where no external object holds the <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> alive. Prefer the free function <a class="el" href="namespacectrl.html#a9f8b591ebf0c74ed79fce0578ff79817" title="Convenience factory: design an LQR and immediately wrap it in an IController-compatible LQRAdapter th...">makeLQRController()</a> which wraps this constructor.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">lqr_owned</td><td>Shared pointer to the <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> (must be non-null). </td></tr>
+    <tr><td class="paramname">stateProvider</td><td>Callable returning x[k] (n * 1). </td></tr>
+    <tr><td class="paramname">refProvider</td><td>Callable returning x_ref[k] (n * 1); optional. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>If lqr_owned is null. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00162">162</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="aa98cd8c81bd08aa25a099ea9c7c25cf9" name="aa98cd8c81bd08aa25a099ea9c7c25cf9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa98cd8c81bd08aa25a099ea9c7c25cf9">&#9670;&#160;</a></span>compute()</h2>
@@ -250,7 +317,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00157">157</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00180">180</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
 <p class="reference">References <a class="el" href="DiscreteLQR_8cpp_source.html#l00172">ctrl::DiscreteLQR::compute()</a>.</p>
 
@@ -292,9 +359,9 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00185">185</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00208">208</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
-<p class="reference">References <a class="el" href="DiscreteLQR_8cpp_source.html#l00172">ctrl::DiscreteLQR::compute()</a>.</p>
+<p class="reference">References <a class="el" href="DiscreteLQR_8cpp_source.html#l00172">ctrl::DiscreteLQR::compute()</a>, <a class="el" href="DiscreteLQR_8h_source.html#l00101">ctrl::DiscreteLQR::dareConverged()</a>, <a class="el" href="IController_8h_source.html#l00219">ctrl::IController::notifyObserverState()</a>, and <a class="el" href="IController_8h_source.html#l00195">ctrl::IController::notifyObserverVec()</a>.</p>
 
 </div>
 </div>
@@ -327,7 +394,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00208">208</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00236">236</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
 <p class="reference">References <a class="el" href="DiscreteLQR_8h_source.html#l00101">ctrl::DiscreteLQR::dareConverged()</a>.</p>
 
@@ -360,7 +427,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac69ef6691d5831cda3adcdc59971fcac">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00194">194</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00222">222</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
 </div>
 </div>
@@ -391,7 +458,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac1d1ab003ea7fa4f0ab49291d97473a0">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00197">197</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00225">225</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
 <p class="reference">References <a class="el" href="DiscreteLQR_8h_source.html#l00107">ctrl::DiscreteLQR::sampleTime()</a>.</p>
 

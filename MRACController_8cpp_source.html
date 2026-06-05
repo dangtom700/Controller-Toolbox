@@ -113,59 +113,60 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00027" data-start="{" data-end="}">
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classctrl_1_1MRACController.html#ab71bd7a2d3e05ae0722fe9169e8df813">   27</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1MRACController.html#ab71bd7a2d3e05ae0722fe9169e8df813">MRACController::compute</a>(<span class="keywordtype">double</span> y_plant)</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>{</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="comment">// 1. Model tracking error: e_m[k] = y[k] - y_m[k]</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    e_m_ = y_plant - y_m_;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="comment">// 2. Control law: u[k] = theta_r * r + theta_y * y</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keywordtype">double</span> u = theta_r_ * r_ + theta_y_ * y_plant;</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    u = std::clamp(u, params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a1ef4ce7346fd7c097e6b4dbc72f3b594">uMin</a>, params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#ae18cebdf8608adfcfa505c52cf46e75d">uMax</a>);</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="comment">// 3. Lyapunov adaptation with sigma-modification (discrete gradient descent + damping)</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="comment">//    theta[k+1] = theta[k] - Ts * (gamma * e_m * phi + sigma * theta[k])</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    theta_r_ -= Ts_ * (params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#acb6da2fe291dcb17ffbf4d096209bfcd">gamma_r</a> * e_m_ * r_        + params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#acff9db3da3245599c8d5b762fac721f8">sigma</a> * theta_r_);</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    theta_y_ -= Ts_ * (params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a7a9b1586a85969cc3d0bcb9a470037b9">gamma_y</a> * e_m_ * y_plant   + params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#acff9db3da3245599c8d5b762fac721f8">sigma</a> * theta_y_);</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="comment">// 4. Parameter projection: clamp ||theta||2 &lt;= theta_max</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> theta_norm = std::sqrt(theta_r_ * theta_r_ + theta_y_ * theta_y_);</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordflow">if</span> (theta_norm &gt; params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#abbd602b0aeed16233d4bc0bfe1fb65fc">theta_max</a>)</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    {</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="keyword">const</span> <span class="keywordtype">double</span> scale = params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#abbd602b0aeed16233d4bc0bfe1fb65fc">theta_max</a> / theta_norm;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        theta_r_ *= scale;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        theta_y_ *= scale;</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    }</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="comment">// 5. Advance reference model: y_m[k+1] = a_m * y_m[k] + b_m * r[k]</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    y_m_ = params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a3ebb513981df6c7308c0eae8fc1fb689">a_m</a> * y_m_ + params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a9f933d97587863d3c8bcf83f0497fc21">b_m</a> * r_;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">return</span> u;</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>}</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keywordflow">if</span> (!std::isfinite(y_plant)) <span class="keywordflow">return</span> 0.0;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="comment">// 1. Model tracking error: e_m[k] = y[k] - y_m[k]</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    e_m_ = y_plant - y_m_;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="comment">// 2. Control law: u[k] = theta_r * r + theta_y * y</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keywordtype">double</span> u = theta_r_ * r_ + theta_y_ * y_plant;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    u = std::clamp(u, params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a1ef4ce7346fd7c097e6b4dbc72f3b594">uMin</a>, params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#ae18cebdf8608adfcfa505c52cf46e75d">uMax</a>);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="comment">// 3. Lyapunov adaptation with sigma-modification (discrete gradient descent + damping)</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="comment">//    theta[k+1] = theta[k] - Ts * (gamma * e_m * phi + sigma * theta[k])</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    theta_r_ -= Ts_ * (params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#acb6da2fe291dcb17ffbf4d096209bfcd">gamma_r</a> * e_m_ * r_        + params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#acff9db3da3245599c8d5b762fac721f8">sigma</a> * theta_r_);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    theta_y_ -= Ts_ * (params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a7a9b1586a85969cc3d0bcb9a470037b9">gamma_y</a> * e_m_ * y_plant   + params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#acff9db3da3245599c8d5b762fac721f8">sigma</a> * theta_y_);</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="comment">// 4. Parameter projection: clamp ||theta||2 &lt;= theta_max</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> theta_norm = std::sqrt(theta_r_ * theta_r_ + theta_y_ * theta_y_);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keywordflow">if</span> (theta_norm &gt; params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#abbd602b0aeed16233d4bc0bfe1fb65fc">theta_max</a>)</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    {</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <span class="keyword">const</span> <span class="keywordtype">double</span> scale = params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#abbd602b0aeed16233d4bc0bfe1fb65fc">theta_max</a> / theta_norm;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        theta_r_ *= scale;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        theta_y_ *= scale;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    }</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="comment">// 5. Advance reference model: y_m[k+1] = a_m * y_m[k] + b_m * r[k]</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    y_m_ = params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a3ebb513981df6c7308c0eae8fc1fb689">a_m</a> * y_m_ + params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a9f933d97587863d3c8bcf83f0497fc21">b_m</a> * r_;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordflow">return</span> u;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>}</div>
 </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="foldopen" id="foldopen00056" data-start="{" data-end="}">
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="classctrl_1_1MRACController.html#a8bf97693b819192e771f6e8deba0427b">   56</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1MRACController.html#a8bf97693b819192e771f6e8deba0427b">MRACController::reset</a>()</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>{</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    theta_r_ = (params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a64d917abf55aaf0bae2d11cee71fde2d">theta_r0</a> != 0.0) ? params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a64d917abf55aaf0bae2d11cee71fde2d">theta_r0</a> : params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a9f933d97587863d3c8bcf83f0497fc21">b_m</a>;</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    theta_y_ = params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#ac2a12366248114f90f46bf1db6d0fdd1">theta_y0</a>;</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    y_m_     = 0.0;</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    r_       = 0.0;</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    e_m_     = 0.0;</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>}</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="foldopen" id="foldopen00057" data-start="{" data-end="}">
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="classctrl_1_1MRACController.html#a8bf97693b819192e771f6e8deba0427b">   57</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1MRACController.html#a8bf97693b819192e771f6e8deba0427b">MRACController::reset</a>()</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>{</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    theta_r_ = (params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a64d917abf55aaf0bae2d11cee71fde2d">theta_r0</a> != 0.0) ? params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a64d917abf55aaf0bae2d11cee71fde2d">theta_r0</a> : params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a9f933d97587863d3c8bcf83f0497fc21">b_m</a>;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    theta_y_ = params_.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#ac2a12366248114f90f46bf1db6d0fdd1">theta_y0</a>;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    y_m_     = 0.0;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    r_       = 0.0;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    e_m_     = 0.0;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>}</div>
 </div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
-<div class="foldopen" id="foldopen00065" data-start="{" data-end="}">
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classctrl_1_1MRACController.html#a5d93214be3f9192b5005daf354e1f7b0">   65</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1MRACController.html#a5d93214be3f9192b5005daf354e1f7b0">MRACController::setParams</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1MRACParams.html">MRACParams</a> &amp;p)</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>{</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    params_  = p;</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    theta_r_ = (p.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a64d917abf55aaf0bae2d11cee71fde2d">theta_r0</a> != 0.0) ? p.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a64d917abf55aaf0bae2d11cee71fde2d">theta_r0</a> : p.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a9f933d97587863d3c8bcf83f0497fc21">b_m</a>;</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    theta_y_ = p.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#ac2a12366248114f90f46bf1db6d0fdd1">theta_y0</a>;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>}</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="foldopen" id="foldopen00066" data-start="{" data-end="}">
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="classctrl_1_1MRACController.html#a5d93214be3f9192b5005daf354e1f7b0">   66</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1MRACController.html#a5d93214be3f9192b5005daf354e1f7b0">MRACController::setParams</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1MRACParams.html">MRACParams</a> &amp;p)</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>{</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    params_  = p;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    theta_r_ = (p.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a64d917abf55aaf0bae2d11cee71fde2d">theta_r0</a> != 0.0) ? p.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a64d917abf55aaf0bae2d11cee71fde2d">theta_r0</a> : p.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#a9f933d97587863d3c8bcf83f0497fc21">b_m</a>;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    theta_y_ = p.<a class="code hl_variable" href="structctrl_1_1MRACParams.html#ac2a12366248114f90f46bf1db6d0fdd1">theta_y0</a>;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>}</div>
 </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aMRACController_8h_html"><div class="ttname"><a href="MRACController_8h.html">MRACController.h</a></div><div class="ttdoc">Discrete-time Model Reference Adaptive Control (MRAC) - SISO, relative degree 1.</div></div>
 <div class="ttc" id="aclassctrl_1_1MRACController_html_a087fe1589c530373343aff0312396236"><div class="ttname"><a href="classctrl_1_1MRACController.html#a087fe1589c530373343aff0312396236">ctrl::MRACController::MRACController</a></div><div class="ttdeci">MRACController(const MRACParams &amp;params, double Ts)</div><div class="ttdoc">Construct with parameters and sample time.</div><div class="ttdef"><b>Definition</b> <a href="MRACController_8cpp_source.html#l00009">MRACController.cpp:9</a></div></div>
-<div class="ttc" id="aclassctrl_1_1MRACController_html_a5d93214be3f9192b5005daf354e1f7b0"><div class="ttname"><a href="classctrl_1_1MRACController.html#a5d93214be3f9192b5005daf354e1f7b0">ctrl::MRACController::setParams</a></div><div class="ttdeci">void setParams(const MRACParams &amp;p)</div><div class="ttdoc">Update parameters at runtime (resets theta to new theta_r0/theta_y0 if changed).</div><div class="ttdef"><b>Definition</b> <a href="MRACController_8cpp_source.html#l00065">MRACController.cpp:65</a></div></div>
-<div class="ttc" id="aclassctrl_1_1MRACController_html_a8bf97693b819192e771f6e8deba0427b"><div class="ttname"><a href="classctrl_1_1MRACController.html#a8bf97693b819192e771f6e8deba0427b">ctrl::MRACController::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset theta to initial values, y_m to 0, e_m to 0.</div><div class="ttdef"><b>Definition</b> <a href="MRACController_8cpp_source.html#l00056">MRACController.cpp:56</a></div></div>
+<div class="ttc" id="aclassctrl_1_1MRACController_html_a5d93214be3f9192b5005daf354e1f7b0"><div class="ttname"><a href="classctrl_1_1MRACController.html#a5d93214be3f9192b5005daf354e1f7b0">ctrl::MRACController::setParams</a></div><div class="ttdeci">void setParams(const MRACParams &amp;p)</div><div class="ttdoc">Update parameters at runtime (resets theta to new theta_r0/theta_y0 if changed).</div><div class="ttdef"><b>Definition</b> <a href="MRACController_8cpp_source.html#l00066">MRACController.cpp:66</a></div></div>
+<div class="ttc" id="aclassctrl_1_1MRACController_html_a8bf97693b819192e771f6e8deba0427b"><div class="ttname"><a href="classctrl_1_1MRACController.html#a8bf97693b819192e771f6e8deba0427b">ctrl::MRACController::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset theta to initial values, y_m to 0, e_m to 0.</div><div class="ttdef"><b>Definition</b> <a href="MRACController_8cpp_source.html#l00057">MRACController.cpp:57</a></div></div>
 <div class="ttc" id="aclassctrl_1_1MRACController_html_ab71bd7a2d3e05ae0722fe9169e8df813"><div class="ttname"><a href="classctrl_1_1MRACController.html#ab71bd7a2d3e05ae0722fe9169e8df813">ctrl::MRACController::compute</a></div><div class="ttdeci">double compute(double y_plant) override</div><div class="ttdoc">Compute one control step.</div><div class="ttdef"><b>Definition</b> <a href="MRACController_8cpp_source.html#l00027">MRACController.cpp:27</a></div></div>
 <div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AdaptiveSmithPredictor_8cpp_source.html#l00005">AdaptiveSmithPredictor.cpp:6</a></div></div>
 <div class="ttc" id="astructctrl_1_1MRACParams_html"><div class="ttname"><a href="structctrl_1_1MRACParams.html">ctrl::MRACParams</a></div><div class="ttdoc">Parameters for MRACController.</div><div class="ttdef"><b>Definition</b> <a href="MRACController_8h_source.html#l00068">MRACController.h:69</a></div></div>

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Controller Toolbox: ctrl::RepetitiveController Class Reference</title>
+<title>Controller Toolbox: ctrl::ComputationalDelayWrapper Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -70,57 +70,51 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="namespacectrl.html">ctrl</a></li><li class="navelem"><a class="el" href="classctrl_1_1RepetitiveController.html">RepetitiveController</a></li>  </ul>
+<li class="navelem"><a class="el" href="namespacectrl.html">ctrl</a></li><li class="navelem"><a class="el" href="classctrl_1_1ComputationalDelayWrapper.html">ComputationalDelayWrapper</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="classctrl_1_1RepetitiveController-members.html">List of all members</a>  </div>
-  <div class="headertitle"><div class="title">ctrl::RepetitiveController Class Reference</div></div>
+<a href="classctrl_1_1ComputationalDelayWrapper-members.html">List of all members</a>  </div>
+  <div class="headertitle"><div class="title">ctrl::ComputationalDelayWrapper Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Discrete-time Plug-in Repetitive Controller.  
- <a href="classctrl_1_1RepetitiveController.html#details">More...</a></p>
+<p><a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> decorator that introduces exactly one sample of computational delay.  
+ <a href="classctrl_1_1ComputationalDelayWrapper.html#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="ComputationalDelayWrapper_8h_source.html">ComputationalDelayWrapper.h</a>&gt;</code></p>
 <div class="dynheader">
-Inheritance diagram for ctrl::RepetitiveController:</div>
+Inheritance diagram for ctrl::ComputationalDelayWrapper:</div>
 <div class="dyncontent">
  <div class="center">
-  <img src="classctrl_1_1RepetitiveController.png" usemap="#ctrl::RepetitiveController_map" alt=""/>
-  <map id="ctrl::RepetitiveController_map" name="ctrl::RepetitiveController_map">
-<area href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers." alt="ctrl::IController" shape="rect" coords="0,0,147,24"/>
+  <img src="classctrl_1_1ComputationalDelayWrapper.png" usemap="#ctrl::ComputationalDelayWrapper_map" alt=""/>
+  <map id="ctrl::ComputationalDelayWrapper_map" name="ctrl::ComputationalDelayWrapper_map">
+<area href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers." alt="ctrl::IController" shape="rect" coords="0,0,197,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a29032bcbf6fd7081cd952d5f516da051" id="r_a29032bcbf6fd7081cd952d5f516da051"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RepetitiveController.html#a29032bcbf6fd7081cd952d5f516da051">RepetitiveController</a> (std::shared_ptr&lt; <a class="el" href="classctrl_1_1IController.html">IController</a> &gt; inner, const <a class="el" href="structctrl_1_1RepetitiveParams.html">RepetitiveParams</a> &amp;<a class="el" href="classctrl_1_1RepetitiveController.html#a8c6698a74f4010e5fa8381609dc7f863">params</a>, double Ts)</td></tr>
-<tr class="memdesc:a29032bcbf6fd7081cd952d5f516da051"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct the repetitive controller.  <br /></td></tr>
-<tr class="separator:a29032bcbf6fd7081cd952d5f516da051"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8984d8d408e6c3bd1b49da0771598920" id="r_a8984d8d408e6c3bd1b49da0771598920"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RepetitiveController.html#a8984d8d408e6c3bd1b49da0771598920">compute</a> (double error) override</td></tr>
-<tr class="memdesc:a8984d8d408e6c3bd1b49da0771598920"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute base control + repetitive correction, clamped to [uMin, uMax].  <br /></td></tr>
-<tr class="separator:a8984d8d408e6c3bd1b49da0771598920"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac6fdbb0d8248a56304d66dc94b60700f" id="r_ac6fdbb0d8248a56304d66dc94b60700f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RepetitiveController.html#ac6fdbb0d8248a56304d66dc94b60700f">reset</a> () override</td></tr>
-<tr class="memdesc:ac6fdbb0d8248a56304d66dc94b60700f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset circular learning buffer and inner controller state.  <br /></td></tr>
-<tr class="separator:ac6fdbb0d8248a56304d66dc94b60700f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a14d65cb7e23f4283eb76cf94b36a09cb" id="r_a14d65cb7e23f4283eb76cf94b36a09cb"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RepetitiveController.html#a14d65cb7e23f4283eb76cf94b36a09cb">sampleTime</a> () const override</td></tr>
-<tr class="memdesc:a14d65cb7e23f4283eb76cf94b36a09cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
-<tr class="separator:a14d65cb7e23f4283eb76cf94b36a09cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2db3c541bd433585f7fa2c6f19208dcc" id="r_a2db3c541bd433585f7fa2c6f19208dcc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RepetitiveController.html#a2db3c541bd433585f7fa2c6f19208dcc">setParams</a> (const <a class="el" href="structctrl_1_1RepetitiveParams.html">RepetitiveParams</a> &amp;p)</td></tr>
-<tr class="memdesc:a2db3c541bd433585f7fa2c6f19208dcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update parameters and resize the learning buffer if periodSteps changes.  <br /></td></tr>
-<tr class="separator:a2db3c541bd433585f7fa2c6f19208dcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8c6698a74f4010e5fa8381609dc7f863" id="r_a8c6698a74f4010e5fa8381609dc7f863"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structctrl_1_1RepetitiveParams.html">RepetitiveParams</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RepetitiveController.html#a8c6698a74f4010e5fa8381609dc7f863">params</a> () const</td></tr>
-<tr class="memdesc:a8c6698a74f4010e5fa8381609dc7f863"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read-only access to current parameters.  <br /></td></tr>
-<tr class="separator:a8c6698a74f4010e5fa8381609dc7f863"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac4b38e3a994c4119f0ec2e6b68ed8af4" id="r_ac4b38e3a994c4119f0ec2e6b68ed8af4"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RepetitiveController.html#ac4b38e3a994c4119f0ec2e6b68ed8af4">correction</a> () const</td></tr>
-<tr class="memdesc:ac4b38e3a994c4119f0ec2e6b68ed8af4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current repetitive correction term v[k].  <br /></td></tr>
-<tr class="separator:ac4b38e3a994c4119f0ec2e6b68ed8af4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4eb67a6db60d8da059b01e6d9115353" id="r_af4eb67a6db60d8da059b01e6d9115353"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classctrl_1_1IController.html">IController</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1RepetitiveController.html#af4eb67a6db60d8da059b01e6d9115353">innerController</a> ()</td></tr>
-<tr class="memdesc:af4eb67a6db60d8da059b01e6d9115353"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access the wrapped inner controller for runtime tuning.  <br /></td></tr>
-<tr class="separator:af4eb67a6db60d8da059b01e6d9115353"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46ceaa4a0ee0fda753b9c7fb80f44e1f" id="r_a46ceaa4a0ee0fda753b9c7fb80f44e1f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ComputationalDelayWrapper.html#a46ceaa4a0ee0fda753b9c7fb80f44e1f">ComputationalDelayWrapper</a> (std::shared_ptr&lt; <a class="el" href="classctrl_1_1IController.html">IController</a> &gt; <a class="el" href="classctrl_1_1ComputationalDelayWrapper.html#aa30753421ce6f508ab4ee0e463332c5c">inner</a>, double initial_output=0.0)</td></tr>
+<tr class="memdesc:a46ceaa4a0ee0fda753b9c7fb80f44e1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct the wrapper around an existing controller.  <br /></td></tr>
+<tr class="separator:a46ceaa4a0ee0fda753b9c7fb80f44e1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26e6df59e4eb123c15e791c5e39f20fe" id="r_a26e6df59e4eb123c15e791c5e39f20fe"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ComputationalDelayWrapper.html#a26e6df59e4eb123c15e791c5e39f20fe">compute</a> (double signal) override</td></tr>
+<tr class="memdesc:a26e6df59e4eb123c15e791c5e39f20fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the delayed output.  <br /></td></tr>
+<tr class="separator:a26e6df59e4eb123c15e791c5e39f20fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad81bf153d5da399bcce891ec69848d2d" id="r_ad81bf153d5da399bcce891ec69848d2d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ComputationalDelayWrapper.html#ad81bf153d5da399bcce891ec69848d2d">reset</a> () override</td></tr>
+<tr class="memdesc:ad81bf153d5da399bcce891ec69848d2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset the inner controller and clear the delayed output to 0.  <br /></td></tr>
+<tr class="separator:ad81bf153d5da399bcce891ec69848d2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4c9a7f850a854f89512fa49def91f75" id="r_ac4c9a7f850a854f89512fa49def91f75"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ComputationalDelayWrapper.html#ac4c9a7f850a854f89512fa49def91f75">sampleTime</a> () const override</td></tr>
+<tr class="memdesc:ac4c9a7f850a854f89512fa49def91f75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time inherited from the wrapped controller.  <br /></td></tr>
+<tr class="separator:ac4c9a7f850a854f89512fa49def91f75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab818290192eb7f946f2147b6b8da43f5" id="r_ab818290192eb7f946f2147b6b8da43f5"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ComputationalDelayWrapper.html#ab818290192eb7f946f2147b6b8da43f5">lastOutput</a> () const</td></tr>
+<tr class="memdesc:ab818290192eb7f946f2147b6b8da43f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">The output that will be delivered on the next <a class="el" href="classctrl_1_1ComputationalDelayWrapper.html#a26e6df59e4eb123c15e791c5e39f20fe" title="Compute the delayed output.">compute()</a> call.  <br /></td></tr>
+<tr class="separator:ab818290192eb7f946f2147b6b8da43f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa30753421ce6f508ab4ee0e463332c5c" id="r_aa30753421ce6f508ab4ee0e463332c5c"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classctrl_1_1IController.html">IController</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ComputationalDelayWrapper.html#aa30753421ce6f508ab4ee0e463332c5c">inner</a> () const</td></tr>
+<tr class="memdesc:aa30753421ce6f508ab4ee0e463332c5c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read-only access to the inner controller.  <br /></td></tr>
+<tr class="separator:aa30753421ce6f508ab4ee0e463332c5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classctrl_1_1IController"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classctrl_1_1IController')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classctrl_1_1IController.html">ctrl::IController</a></td></tr>
 <tr class="memitem:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController" id="r_a209dd6532b22278f93430a0757aae4c7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a209dd6532b22278f93430a0757aae4c7">~IController</a> ()=default</td></tr>
 <tr class="separator:a209dd6532b22278f93430a0757aae4c7 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -169,19 +163,22 @@ Additional Inherited Members</h2></td></tr>
 <tr class="separator:a8209b0a7f469ab75271a71ef25617a1e inherit pro_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Discrete-time Plug-in Repetitive Controller. </p>
-<p>Inherits from <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> so it can be used directly in <a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a>. </p>
+<div class="textblock"><p><a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> decorator that introduces exactly one sample of computational delay. </p>
+<p>The wrapped controller computes its output every step; the output is held for one step before being returned to the caller. The initial delayed output is <code>initial_output</code> (default 0). </p>
 
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00058">58</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ComputationalDelayWrapper_8h_source.html#l00040">40</a> of file <a class="el" href="ComputationalDelayWrapper_8h_source.html">ComputationalDelayWrapper.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a29032bcbf6fd7081cd952d5f516da051" name="a29032bcbf6fd7081cd952d5f516da051"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a29032bcbf6fd7081cd952d5f516da051">&#9670;&#160;</a></span>RepetitiveController()</h2>
+<a id="a46ceaa4a0ee0fda753b9c7fb80f44e1f" name="a46ceaa4a0ee0fda753b9c7fb80f44e1f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46ceaa4a0ee0fda753b9c7fb80f44e1f">&#9670;&#160;</a></span>ComputationalDelayWrapper()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">ctrl::RepetitiveController::RepetitiveController </td>
+          <td class="memname">ctrl::ComputationalDelayWrapper::ComputationalDelayWrapper </td>
           <td>(</td>
           <td class="paramtype">std::shared_ptr&lt; <a class="el" href="classctrl_1_1IController.html">IController</a> &gt;&#160;</td>
           <td class="paramname"><em>inner</em>, </td>
@@ -189,14 +186,8 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="structctrl_1_1RepetitiveParams.html">RepetitiveParams</a> &amp;&#160;</td>
-          <td class="paramname"><em>params</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>Ts</em>&#160;</td>
+          <td class="paramname"><em>initial_output</em> = <code>0.0</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -204,27 +195,35 @@ Additional Inherited Members</h2></td></tr>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p>Construct the repetitive controller. </p>
+<p>Construct the wrapper around an existing controller. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">inner</td><td>Base stabilising controller (must already close the loop adequately). </td></tr>
-    <tr><td class="paramname">params</td><td>Repetitive learning parameters (period, gain, forgetting factor, limits). </td></tr>
-    <tr><td class="paramname">Ts</td><td>Sample time [s]. </td></tr>
+    <tr><td class="paramname">inner</td><td>Inner <a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> whose output will be delayed by one sample. </td></tr>
+    <tr><td class="paramname">initial_output</td><td>Value returned on the very first <a class="el" href="classctrl_1_1ComputationalDelayWrapper.html#a26e6df59e4eb123c15e791c5e39f20fe" title="Compute the delayed output.">compute()</a> call before the inner controller has produced any output (default 0.0). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>If inner is null. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8cpp_source.html#l00008">8</a> of file <a class="el" href="RepetitiveController_8cpp_source.html">RepetitiveController.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="RepetitiveController_8h_source.html#l00046">ctrl::RepetitiveParams::periodSteps</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ComputationalDelayWrapper_8h_source.html#l00051">51</a> of file <a class="el" href="ComputationalDelayWrapper_8h_source.html">ComputationalDelayWrapper.h</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a8984d8d408e6c3bd1b49da0771598920" name="a8984d8d408e6c3bd1b49da0771598920"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8984d8d408e6c3bd1b49da0771598920">&#9670;&#160;</a></span>compute()</h2>
+<a id="a26e6df59e4eb123c15e791c5e39f20fe" name="a26e6df59e4eb123c15e791c5e39f20fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26e6df59e4eb123c15e791c5e39f20fe">&#9670;&#160;</a></span>compute()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -233,39 +232,41 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">double ctrl::RepetitiveController::compute </td>
+          <td class="memname">double ctrl::ComputationalDelayWrapper::compute </td>
           <td>(</td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>error</em></td><td>)</td>
+          <td class="paramname"><em>signal</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Compute base control + repetitive correction, clamped to [uMin, uMax]. </p>
+<p>Compute the delayed output. </p>
+<p>Returns the output computed in the <em>previous</em> step; schedules the inner controller's computation for delivery next step.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">error</td><td>Current tracking error e[k]. </td></tr>
+    <tr><td class="paramname">signal</td><td>Input to the inner controller (tracking error or plant output, depending on the wrapped controller's convention). </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Composite control output u[k]. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>u[k-1] - the inner controller's output from the previous step. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>CONTRIBUTING.md::sign-conventions </dd></dl>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8cpp_source.html#l00018">18</a> of file <a class="el" href="RepetitiveController_8cpp_source.html">RepetitiveController.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ComputationalDelayWrapper_8h_source.html#l00071">71</a> of file <a class="el" href="ComputationalDelayWrapper_8h_source.html">ComputationalDelayWrapper.h</a>.</p>
 
-<p class="reference">References <a class="el" href="RepetitiveController_8h_source.html#l00047">ctrl::RepetitiveParams::Krc</a>, <a class="el" href="RepetitiveController_8h_source.html#l00046">ctrl::RepetitiveParams::periodSteps</a>, <a class="el" href="RepetitiveController_8h_source.html#l00048">ctrl::RepetitiveParams::Q</a>, <a class="el" href="RepetitiveController_8h_source.html#l00050">ctrl::RepetitiveParams::uMax</a>, and <a class="el" href="RepetitiveController_8h_source.html#l00049">ctrl::RepetitiveParams::uMin</a>.</p>
+<p class="reference">References <a class="el" href="IController_8h_source.html#l00185">ctrl::IController::notifyObserver()</a>.</p>
 
 </div>
 </div>
-<a id="ac4b38e3a994c4119f0ec2e6b68ed8af4" name="ac4b38e3a994c4119f0ec2e6b68ed8af4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac4b38e3a994c4119f0ec2e6b68ed8af4">&#9670;&#160;</a></span>correction()</h2>
+<a id="aa30753421ce6f508ab4ee0e463332c5c" name="aa30753421ce6f508ab4ee0e463332c5c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa30753421ce6f508ab4ee0e463332c5c">&#9670;&#160;</a></span>inner()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -274,7 +275,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">double ctrl::RepetitiveController::correction </td>
+          <td class="memname">const <a class="el" href="classctrl_1_1IController.html">IController</a> &amp; ctrl::ComputationalDelayWrapper::inner </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -287,15 +288,14 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Current repetitive correction term v[k]. </p>
-<p>Useful for monitoring learning convergence. Should approach the negative of the periodic disturbance after sufficient repetitions. </p>
+<p>Read-only access to the inner controller. </p>
 
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00099">99</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ComputationalDelayWrapper_8h_source.html#l00101">101</a> of file <a class="el" href="ComputationalDelayWrapper_8h_source.html">ComputationalDelayWrapper.h</a>.</p>
 
 </div>
 </div>
-<a id="af4eb67a6db60d8da059b01e6d9115353" name="af4eb67a6db60d8da059b01e6d9115353"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af4eb67a6db60d8da059b01e6d9115353">&#9670;&#160;</a></span>innerController()</h2>
+<a id="ab818290192eb7f946f2147b6b8da43f5" name="ab818290192eb7f946f2147b6b8da43f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab818290192eb7f946f2147b6b8da43f5">&#9670;&#160;</a></span>lastOutput()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -304,37 +304,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classctrl_1_1IController.html">IController</a> &amp; ctrl::RepetitiveController::innerController </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Access the wrapped inner controller for runtime tuning. </p>
-<dl class="section return"><dt>Returns</dt><dd>Mutable reference to the base controller. </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00105">105</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
-
-</div>
-</div>
-<a id="a8c6698a74f4010e5fa8381609dc7f863" name="a8c6698a74f4010e5fa8381609dc7f863"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8c6698a74f4010e5fa8381609dc7f863">&#9670;&#160;</a></span>params()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="structctrl_1_1RepetitiveParams.html">RepetitiveParams</a> &amp; ctrl::RepetitiveController::params </td>
+          <td class="memname">double ctrl::ComputationalDelayWrapper::lastOutput </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -347,14 +317,14 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Read-only access to current parameters. </p>
+<p>The output that will be delivered on the next <a class="el" href="classctrl_1_1ComputationalDelayWrapper.html#a26e6df59e4eb123c15e791c5e39f20fe" title="Compute the delayed output.">compute()</a> call. </p>
 
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00091">91</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ComputationalDelayWrapper_8h_source.html#l00098">98</a> of file <a class="el" href="ComputationalDelayWrapper_8h_source.html">ComputationalDelayWrapper.h</a>.</p>
 
 </div>
 </div>
-<a id="ac6fdbb0d8248a56304d66dc94b60700f" name="ac6fdbb0d8248a56304d66dc94b60700f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac6fdbb0d8248a56304d66dc94b60700f">&#9670;&#160;</a></span>reset()</h2>
+<a id="ad81bf153d5da399bcce891ec69848d2d" name="ad81bf153d5da399bcce891ec69848d2d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad81bf153d5da399bcce891ec69848d2d">&#9670;&#160;</a></span>reset()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -363,7 +333,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void ctrl::RepetitiveController::reset </td>
+          <td class="memname">void ctrl::ComputationalDelayWrapper::reset </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -371,21 +341,23 @@ Additional Inherited Members</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Reset circular learning buffer and inner controller state. </p>
+<p>Reset the inner controller and clear the delayed output to 0. </p>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac69ef6691d5831cda3adcdc59971fcac">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8cpp_source.html#l00045">45</a> of file <a class="el" href="RepetitiveController_8cpp_source.html">RepetitiveController.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ComputationalDelayWrapper_8h_source.html#l00087">87</a> of file <a class="el" href="ComputationalDelayWrapper_8h_source.html">ComputationalDelayWrapper.h</a>.</p>
+
+<p class="reference">References <a class="el" href="IController_8h_source.html#l00205">ctrl::IController::notifyObserverReset()</a>.</p>
 
 </div>
 </div>
-<a id="a14d65cb7e23f4283eb76cf94b36a09cb" name="a14d65cb7e23f4283eb76cf94b36a09cb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a14d65cb7e23f4283eb76cf94b36a09cb">&#9670;&#160;</a></span>sampleTime()</h2>
+<a id="ac4c9a7f850a854f89512fa49def91f75" name="ac4c9a7f850a854f89512fa49def91f75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4c9a7f850a854f89512fa49def91f75">&#9670;&#160;</a></span>sampleTime()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -394,7 +366,7 @@ Additional Inherited Members</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">double ctrl::RepetitiveController::sampleTime </td>
+          <td class="memname">double ctrl::ComputationalDelayWrapper::sampleTime </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -407,47 +379,16 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Sample time Ts [s]. </p>
+<p>Sample time inherited from the wrapped controller. </p>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac1d1ab003ea7fa4f0ab49291d97473a0">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8h_source.html#l00082">82</a> of file <a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ComputationalDelayWrapper_8h_source.html#l00095">95</a> of file <a class="el" href="ComputationalDelayWrapper_8h_source.html">ComputationalDelayWrapper.h</a>.</p>
 
 </div>
 </div>
-<a id="a2db3c541bd433585f7fa2c6f19208dcc" name="a2db3c541bd433585f7fa2c6f19208dcc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2db3c541bd433585f7fa2c6f19208dcc">&#9670;&#160;</a></span>setParams()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ctrl::RepetitiveController::setParams </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="structctrl_1_1RepetitiveParams.html">RepetitiveParams</a> &amp;&#160;</td>
-          <td class="paramname"><em>p</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Update parameters and resize the learning buffer if periodSteps changes. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">p</td><td>New repetitive parameters. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p class="definition">Definition at line <a class="el" href="RepetitiveController_8cpp_source.html#l00053">53</a> of file <a class="el" href="RepetitiveController_8cpp_source.html">RepetitiveController.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="RepetitiveController_8h_source.html#l00046">ctrl::RepetitiveParams::periodSteps</a>.</p>
-
-</div>
-</div>
-<hr/>The documentation for this class was generated from the following files:<ul>
-<li>lib/<a class="el" href="RepetitiveController_8h_source.html">RepetitiveController.h</a></li>
-<li>lib/<a class="el" href="RepetitiveController_8cpp_source.html">RepetitiveController.cpp</a></li>
+<hr/>The documentation for this class was generated from the following file:<ul>
+<li>lib/<a class="el" href="ComputationalDelayWrapper_8h_source.html">ComputationalDelayWrapper.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

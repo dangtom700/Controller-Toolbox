@@ -154,6 +154,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController" id="r_a2dc30a3b9bfb8b9649cef7218ad9e68b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#a2dc30a3b9bfb8b9649cef7218ad9e68b">isHealthy</a> () const</td></tr>
 <tr class="memdesc:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Health query for supervisory fault-tolerant control.  <br /></td></tr>
 <tr class="separator:a2dc30a3b9bfb8b9649cef7218ad9e68b inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3147fb76b4d9ed978f58737e521a50b inherit pub_methods_classctrl_1_1IController" id="r_ad3147fb76b4d9ed978f58737e521a50b"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#ad3147fb76b4d9ed978f58737e521a50b">hasInternalAntiWindup</a> () const</td></tr>
+<tr class="memdesc:ad3147fb76b4d9ed978f58737e521a50b inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query whether the controller has built-in anti-windup.  <br /></td></tr>
+<tr class="separator:ad3147fb76b4d9ed978f58737e521a50b inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController" id="r_abe5b62c21069e869261e870363ee8ab5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html#abe5b62c21069e869261e870363ee8ab5">attachObserver</a> (<a class="el" href="classctrl_1_1IControllerObserver.html">IControllerObserver</a> *obs)</td></tr>
 <tr class="memdesc:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attach a telemetry observer.  <br /></td></tr>
 <tr class="separator:abe5b62c21069e869261e870363ee8ab5 inherit pub_methods_classctrl_1_1IController"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -301,7 +304,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="DynaController_8cpp_source.html#l00072">72</a> of file <a class="el" href="DynaController_8cpp_source.html">DynaController.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DynaController_8cpp_source.html#l00073">73</a> of file <a class="el" href="DynaController_8cpp_source.html">DynaController.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="SINDy_8cpp_source.html#l00120">ctrl::SINDy::addSnapshotFD()</a>, and <a class="el" href="DynaController_8h_source.html#l00058">ctrl::DynaController::Params::Ts</a>.</p>
 
@@ -368,7 +371,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="DynaController_8cpp_source.html#l00036">36</a> of file <a class="el" href="DynaController_8cpp_source.html">DynaController.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="DynaController_8cpp_source.html#l00072">addTransition()</a>, <a class="el" href="DynaController_8cpp_source.html#l00085">fitModel()</a>, <a class="el" href="DynaController_8h_source.html#l00056">ctrl::DynaController::Params::n_collect</a>, <a class="el" href="DynaController_8h_source.html#l00057">ctrl::DynaController::Params::n_refit_every</a>, and <a class="el" href="IController_8h_source.html#l00155">ctrl::IController::notifyObserver()</a>.</p>
+<p class="reference">References <a class="el" href="DynaController_8cpp_source.html#l00073">addTransition()</a>, <a class="el" href="DynaController_8cpp_source.html#l00086">fitModel()</a>, <a class="el" href="DynaController_8h_source.html#l00056">ctrl::DynaController::Params::n_collect</a>, <a class="el" href="DynaController_8h_source.html#l00057">ctrl::DynaController::Params::n_refit_every</a>, and <a class="el" href="IController_8h_source.html#l00185">ctrl::IController::notifyObserver()</a>.</p>
 
 </div>
 </div>
@@ -392,7 +395,7 @@ Additional Inherited Members</h2></td></tr>
 <dd>
 false if fewer than n_collect transitions have been collected. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="DynaController_8cpp_source.html#l00085">85</a> of file <a class="el" href="DynaController_8cpp_source.html">DynaController.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DynaController_8cpp_source.html#l00086">86</a> of file <a class="el" href="DynaController_8cpp_source.html">DynaController.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="SINDy_8cpp_source.html#l00193">ctrl::SINDy::fit()</a>, and <a class="el" href="DynaController_8h_source.html#l00056">ctrl::DynaController::Params::n_collect</a>.</p>
 
@@ -452,7 +455,7 @@ false if fewer than n_collect transitions have been collected. </dd></dl>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="DynaController_8cpp_source.html#l00126">126</a> of file <a class="el" href="DynaController_8cpp_source.html">DynaController.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DynaController_8cpp_source.html#l00127">127</a> of file <a class="el" href="DynaController_8cpp_source.html">DynaController.cpp</a>.</p>
 
 </div>
 </div>
@@ -527,7 +530,7 @@ false if fewer than n_collect transitions have been collected. </dd></dl>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="DynaController_8cpp_source.html#l00100">100</a> of file <a class="el" href="DynaController_8cpp_source.html">DynaController.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DynaController_8cpp_source.html#l00101">101</a> of file <a class="el" href="DynaController_8cpp_source.html">DynaController.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="SINDy_8cpp_source.html#l00226">ctrl::SINDyModel::predict()</a>, and <a class="el" href="DynaController_8h_source.html#l00058">ctrl::DynaController::Params::Ts</a>.</p>
 
@@ -621,9 +624,9 @@ false if fewer than n_collect transitions have been collected. </dd></dl>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac69ef6691d5831cda3adcdc59971fcac">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="DynaController_8cpp_source.html#l00059">59</a> of file <a class="el" href="DynaController_8cpp_source.html">DynaController.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DynaController_8cpp_source.html#l00060">60</a> of file <a class="el" href="DynaController_8cpp_source.html">DynaController.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="IController_8h_source.html#l00175">ctrl::IController::notifyObserverReset()</a>.</p>
+<p class="reference">References <a class="el" href="IController_8h_source.html#l00205">ctrl::IController::notifyObserverReset()</a>.</p>
 
 </div>
 </div>

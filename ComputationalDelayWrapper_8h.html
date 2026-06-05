@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Controller Toolbox: lib/IController.h File Reference</title>
+<title>Controller Toolbox: lib/ComputationalDelayWrapper.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -76,38 +76,43 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a> &#124;
-<a href="#func-members">Functions</a>  </div>
-  <div class="headertitle"><div class="title">IController.h File Reference</div></div>
+<a href="#namespaces">Namespaces</a>  </div>
+  <div class="headertitle"><div class="title">ComputationalDelayWrapper.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="IControllerObserver_8h_source.html">IControllerObserver.h</a>&quot;</code><br />
-<code>#include &lt;Eigen/Dense&gt;</code><br />
-<code>#include &lt;cmath&gt;</code><br />
+
+<p>One-sample computational delay wrapper for any IController.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="IController_8h_source.html">IController.h</a>&quot;</code><br />
 <code>#include &lt;memory&gt;</code><br />
+<code>#include &lt;cmath&gt;</code><br />
 <code>#include &lt;stdexcept&gt;</code><br />
-<code>#include &lt;string_view&gt;</code><br />
 </div>
-<p><a href="IController_8h_source.html">Go to the source code of this file.</a></p>
+<p><a href="ComputationalDelayWrapper_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1IController.html">ctrl::IController</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract interface for all discrete-time controllers.  <a href="classctrl_1_1IController.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ComputationalDelayWrapper.html">ctrl::ComputationalDelayWrapper</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> decorator that introduces exactly one sample of computational delay.  <a href="classctrl_1_1ComputationalDelayWrapper.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacectrl" id="r_namespacectrl"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html">ctrl</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:a4ff58f1a1f4c4f0a1ead0f2dd43f9606" id="r_a4ff58f1a1f4c4f0a1ead0f2dd43f9606"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a4ff58f1a1f4c4f0a1ead0f2dd43f9606">ctrl::sanitize</a> (double v, double fallback=0.0) noexcept</td></tr>
-<tr class="memdesc:a4ff58f1a1f4c4f0a1ead0f2dd43f9606"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return <code>v</code> if finite, otherwise <code>fallback</code> (default 0.0).  <br /></td></tr>
-<tr class="separator:a4ff58f1a1f4c4f0a1ead0f2dd43f9606"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>One-sample computational delay wrapper for any IController. </p>
+<p>Real digital control loops have at least one sample of computational delay: the control law computed at step k cannot reach the actuator until step k+1 because ADC sampling, computation, and DAC output take time. This wrapper models that delay explicitly so that simulations and frequency-domain robustness analyses reflect the actual deployed loop behaviour.</p>
+<p><b>Timing model:</b> </p><div class="fragment"><div class="line">u_inner[k] = inner-&gt;compute(signal[k])   <span class="comment">// computed this step</span></div>
+<div class="line">u_out[k]   = u_inner[k-1]                <span class="comment">// applied to the plant (one step late)</span></div>
+</div><!-- fragment --><dl class="section note"><dt>Note</dt><dd>A one-sample delay shifts the discrete-time Nyquist frequency phase margin by -pi (180 deg), which can destabilise loops tuned without it. Use this wrapper to expose that margin to the controller designer, not to fix it.</dd></dl>
+<dl class="section see"><dt>See also</dt><dd>CONTRIBUTING.md::numerical-safety-rules (Rule 8, G3) </dd>
+<dd>
+Astrom &amp; Wittenmark, "Computer-Controlled Systems" Section 3.3. </dd></dl>
+
+<p class="definition">Definition in file <a class="el" href="ComputationalDelayWrapper_8h_source.html">ComputationalDelayWrapper.h</a>.</p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8

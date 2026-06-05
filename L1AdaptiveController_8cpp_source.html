@@ -114,47 +114,48 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00028" data-start="{" data-end="}">
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="classctrl_1_1L1AdaptiveController.html#a1a8bb49ec17c5f92f7534fd27914dcd2">   28</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1L1AdaptiveController.html#a1a8bb49ec17c5f92f7534fd27914dcd2">L1AdaptiveController::compute</a>(<span class="keywordtype">double</span> y_plant)</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>{</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="comment">// Step 1: prediction error</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    pred_err_         = x_hat_ - y_plant;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="comment">// Step 2: adaptation law (gradient descent on Lyapunov function)</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="comment">// sigma^[k+1] = sigma^[k] - Gamma.Ts.(ẽ[k] . b_m . P)</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    sigma_hat_        -= p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#a888ac449b01eecdb51193e57e5bb3225">Gamma</a> * Ts_ * (pred_err_ * p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#a56cb8ec121ae05dfff751ab47c99ec1e">b_m</a> * P_);</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    sigma_hat_         = std::clamp(sigma_hat_, -p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#af573cb05845aedb4f8bd31760986f35f">sigma_max</a>, p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#af573cb05845aedb4f8bd31760986f35f">sigma_max</a>);</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="comment">// Step 3: desired input to the LP filter  eta = -sigma^</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="comment">//         full signal = k_g*r + eta</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> eta     = -sigma_hat_;</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> signal  = p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#a39c325786dae647d5dea5f0954e49f18">k_g</a> * r_ + eta;</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="comment">// Step 4: LP filter  v[k+1] = a_lp * v[k] + b_lp * signal</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    v_lp_   = a_lp_ * v_lp_ + b_lp_ * signal;</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordtype">double</span> u = std::clamp(v_lp_, p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#a412b3adc33d756a81413bf872b40f02e">uMin</a>, p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#a279df64e33167af8a78be994b39357ff">uMax</a>);</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="comment">// Step 5: advance state predictor</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="comment">// x^[k+1] = a_m * x^[k] + b_m * (u[k] + sigma^[k])</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    x_hat_  = p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#a072e126b5f8f1a735113d025d8c9e5b2">a_m</a> * x_hat_ + p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#a56cb8ec121ae05dfff751ab47c99ec1e">b_m</a> * (u + sigma_hat_);</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <a class="code hl_function" href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">notifyObserver</a>(u, y_plant);</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordflow">return</span> u;</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>}</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keywordflow">if</span> (!std::isfinite(y_plant)) <span class="keywordflow">return</span> v_lp_;  <span class="comment">// hold last LP-filter output</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="comment">// Step 1: prediction error</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    pred_err_         = x_hat_ - y_plant;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="comment">// Step 2: adaptation law (gradient descent on Lyapunov function)</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="comment">// sigma^[k+1] = sigma^[k] - Gamma.Ts.(ẽ[k] . b_m . P)</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    sigma_hat_        -= p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#a888ac449b01eecdb51193e57e5bb3225">Gamma</a> * Ts_ * (pred_err_ * p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#a56cb8ec121ae05dfff751ab47c99ec1e">b_m</a> * P_);</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    sigma_hat_         = std::clamp(sigma_hat_, -p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#af573cb05845aedb4f8bd31760986f35f">sigma_max</a>, p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#af573cb05845aedb4f8bd31760986f35f">sigma_max</a>);</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="comment">// Step 3: desired input to the LP filter  eta = -sigma^</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="comment">//         full signal = k_g*r + eta</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> eta     = -sigma_hat_;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> signal  = p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#a39c325786dae647d5dea5f0954e49f18">k_g</a> * r_ + eta;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="comment">// Step 4: LP filter  v[k+1] = a_lp * v[k] + b_lp * signal</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    v_lp_   = a_lp_ * v_lp_ + b_lp_ * signal;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordtype">double</span> u = std::clamp(v_lp_, p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#a412b3adc33d756a81413bf872b40f02e">uMin</a>, p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#a279df64e33167af8a78be994b39357ff">uMax</a>);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="comment">// Step 5: advance state predictor</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="comment">// x^[k+1] = a_m * x^[k] + b_m * (u[k] + sigma^[k])</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    x_hat_  = p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#a072e126b5f8f1a735113d025d8c9e5b2">a_m</a> * x_hat_ + p_.<a class="code hl_variable" href="structctrl_1_1L1AdaptiveController_1_1Params.html#a56cb8ec121ae05dfff751ab47c99ec1e">b_m</a> * (u + sigma_hat_);</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <a class="code hl_function" href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">notifyObserver</a>(u, y_plant);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordflow">return</span> u;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>}</div>
 </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="foldopen" id="foldopen00055" data-start="{" data-end="}">
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="classctrl_1_1L1AdaptiveController.html#a66357f4f13561c78d9849daa6355be69">   55</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1L1AdaptiveController.html#a66357f4f13561c78d9849daa6355be69">L1AdaptiveController::reset</a>()</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>{</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    x_hat_     = 0.0;</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    sigma_hat_ = 0.0;</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    v_lp_      = 0.0;</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    pred_err_  = 0.0;</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>}</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="foldopen" id="foldopen00056" data-start="{" data-end="}">
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="classctrl_1_1L1AdaptiveController.html#a66357f4f13561c78d9849daa6355be69">   56</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1L1AdaptiveController.html#a66357f4f13561c78d9849daa6355be69">L1AdaptiveController::reset</a>()</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>{</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    x_hat_     = 0.0;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    sigma_hat_ = 0.0;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    v_lp_      = 0.0;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    pred_err_  = 0.0;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>}</div>
 </div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aL1AdaptiveController_8h_html"><div class="ttname"><a href="L1AdaptiveController_8h.html">L1AdaptiveController.h</a></div></div>
-<div class="ttc" id="aclassctrl_1_1IController_html_aff795d6bd36f8a8d20796d0670fef301"><div class="ttname"><a href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">ctrl::IController::notifyObserver</a></div><div class="ttdeci">void notifyObserver(double u, double signal) const</div><div class="ttdoc">Fire the observer's onCompute() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00155">IController.h:155</a></div></div>
+<div class="ttc" id="aclassctrl_1_1IController_html_aff795d6bd36f8a8d20796d0670fef301"><div class="ttname"><a href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">ctrl::IController::notifyObserver</a></div><div class="ttdeci">void notifyObserver(double u, double signal) const</div><div class="ttdoc">Fire the observer's onCompute() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00185">IController.h:185</a></div></div>
 <div class="ttc" id="aclassctrl_1_1L1AdaptiveController_html_a1a8bb49ec17c5f92f7534fd27914dcd2"><div class="ttname"><a href="classctrl_1_1L1AdaptiveController.html#a1a8bb49ec17c5f92f7534fd27914dcd2">ctrl::L1AdaptiveController::compute</a></div><div class="ttdeci">double compute(double y_plant) override</div><div class="ttdoc">Compute control action.</div><div class="ttdef"><b>Definition</b> <a href="L1AdaptiveController_8cpp_source.html#l00028">L1AdaptiveController.cpp:28</a></div></div>
-<div class="ttc" id="aclassctrl_1_1L1AdaptiveController_html_a66357f4f13561c78d9849daa6355be69"><div class="ttname"><a href="classctrl_1_1L1AdaptiveController.html#a66357f4f13561c78d9849daa6355be69">ctrl::L1AdaptiveController::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset all internal states (integrators, delay buffers, estimators).</div><div class="ttdef"><b>Definition</b> <a href="L1AdaptiveController_8cpp_source.html#l00055">L1AdaptiveController.cpp:55</a></div></div>
+<div class="ttc" id="aclassctrl_1_1L1AdaptiveController_html_a66357f4f13561c78d9849daa6355be69"><div class="ttname"><a href="classctrl_1_1L1AdaptiveController.html#a66357f4f13561c78d9849daa6355be69">ctrl::L1AdaptiveController::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset all internal states (integrators, delay buffers, estimators).</div><div class="ttdef"><b>Definition</b> <a href="L1AdaptiveController_8cpp_source.html#l00056">L1AdaptiveController.cpp:56</a></div></div>
 <div class="ttc" id="aclassctrl_1_1L1AdaptiveController_html_a7f2821629bbc5dc3ae266b272f5b1f56"><div class="ttname"><a href="classctrl_1_1L1AdaptiveController.html#a7f2821629bbc5dc3ae266b272f5b1f56">ctrl::L1AdaptiveController::L1AdaptiveController</a></div><div class="ttdeci">L1AdaptiveController(const Params &amp;p, double Ts)</div><div class="ttdef"><b>Definition</b> <a href="L1AdaptiveController_8cpp_source.html#l00008">L1AdaptiveController.cpp:8</a></div></div>
 <div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AdaptiveSmithPredictor_8cpp_source.html#l00005">AdaptiveSmithPredictor.cpp:6</a></div></div>
 <div class="ttc" id="astructctrl_1_1L1AdaptiveController_1_1Params_html"><div class="ttname"><a href="structctrl_1_1L1AdaptiveController_1_1Params.html">ctrl::L1AdaptiveController::Params</a></div><div class="ttdef"><b>Definition</b> <a href="L1AdaptiveController_8h_source.html#l00059">L1AdaptiveController.h:59</a></div></div>
