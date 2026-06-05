@@ -1,6 +1,7 @@
 # Submarine Maneuvering Mathematical Model
 
 ## Reference
+
 **Title:** A study on a physical based manoeuvring mathematical model for submarines  
 **Authors:** Sungwook Lee, Jin-Hyeong Ahn  
 **Journal:** Ocean Engineering, Vol. 311, 2024, Article 118839  
@@ -8,152 +9,229 @@
 
 ---
 
-## System Description
+## Overview
 
-This paper develops and validates a **Karasuno-type physical-based maneuvering model** for submarines, generalising a technique previously applied only to fishing vessels. Submarines operate in full 6-DOF (surge, sway, heave, roll, pitch, yaw) and, unlike surface vessels, must handle **large drift angles and angles of attack** during depth control, emergency rising, and low-speed harbor maneuvers, where Taylor-series based models break down.
+This case study simulates **heading and depth autopilots** for the MARIN BB2 benchmark submarine using the Karasuno physical-based hydrodynamic force model.  10 controllers × 5 scenarios = **50 runs**. All results are logged as CSV files to `logs/`.
 
-The model characterises hydrodynamic forces and moments using **lift, drag, and cross-flow drag** coefficients (physically interpretable) rather than polynomial regression on captive-model coefficients. Validation uses CFD data for the MARIN BB2 benchmark submarine.
-
----
-
-## Mathematical Model
-
-### 6-DOF equations of motion
-
-```
-(m - Xᵤ.) u. = X_hydro + X_prop
-(m - Yᵥ.) v. = Y_hydro
-(m - Zẇ.) ẇ = Z_hydro + B_z
-(Iₓₓ - Kₚ.) ṗ = K_hydro + K_righting
-(Iyy - Mq..) q. = M_hydro
-(Izz - Nṙ.) ṙ = N_hydro
-```
-
-where `u, v, w` are body-frame linear velocities (surge, sway, heave) and `p, q, r` are angular rates (roll, pitch, yaw). Added-mass terms `Xᵤ., Yᵥ., ...` come from potential theory.
-
-### Kinematic equations
-
-```
-xdot = u cos(ψ)cos(theta) + v(...) + w(...)
-ydot = ...
-ż = -u sin(theta) + v sin(phi)cos(theta) + w cos(phi)cos(theta)
-phi. = p + (q sin(phi) + r cos(phi)) tan(theta)
-theta. = q cos(phi) - r sin(phi)
-ψ. = (q sin(phi) + r cos(phi)) / cos(theta)
-```
-
-### Karasuno-type hydrodynamic force model
-
-Hydrodynamic forces are decomposed into **lift (L), drag (D), and cross-flow drag (Cd)**:
-
-```
-Y_hydro = ½ rho L_pp^2 V^2 [Cy_L(alpha) sin(2alpha) + Cy_D(alpha) sin(alpha)|sin(alpha)|
-           + Cy_cf(alpha) sin(alpha)|sin(alpha)|] + Cdelta_r deltar
-N_hydro = ½ rho L_pp^3 V^2 [Cn_L(alpha) sin(2alpha) + ... ] + Cdelta_r_n deltar
-```
-
-where:
-- `alpha` - drift angle (horizontal) or angle of attack (vertical)
-- `L_pp` - between-perpendiculars length
-- `V` - resultant speed
-- `Cy_L, Cy_D, Cy_cf` - lift, drag, cross-flow coefficients (functions of `alpha`)
-
-Vertical-plane forces use the same structure with `beta` (angle of attack).
-
-### Propulsion
-
-```
-X_prop = (1 - t_w) T(n, Va)
-T = rho n^2 D^4 Kt(J)    where J = Va / (n D)
-```
-
-### Control surfaces
-
-Rudder and stern/sail planes modelled as thin foils:
-
-```
-Y_rudder = ½ rho V^2 A_r Cy_r(deltar, alpha_r)
-M_stern  = ½ rho V^2 A_s Cz_s(deltas, beta_s)
-```
+The plant is a **4-DOF decoupled model**: the horizontal plane (sway `v`, yaw rate `r`, heading `ψ`) and vertical plane (heave `w`, pitch rate `q`, pitch `θ`, depth `z`) are integrated simultaneously but their hydrodynamic coupling is approximated via centripetal kinematic terms only. Earth-frame position `(x, y)` is tracked for trajectory visualisation. This simplified model is sufficient to assess autopilot performance without the full 6-DOF nonlinear complexity.
 
 ---
 
-## State Variables
+## MARIN BB2 Plant Parameters
 
-| Symbol | Description | Unit |
-|--------|-------------|------|
-| `u, v, w` | Body-frame linear velocities | m/s |
-| `p, q, r` | Angular rates (roll, pitch, yaw) | rad/s |
-| `x, y, z` | Earth-frame position | m |
-| `phi, theta, ψ` | Euler angles (roll, pitch, yaw) | rad |
+The model uses the model-scale MARIN BB2 geometry (scale 1:18.348) operating at design speed:
 
-**State vector dimension:** 12
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `L` | 3.826 m | Between-perpendiculars length (model scale) |
+| `m` | 737.0 kg | Displaced mass (neutrally buoyant) |
+| `Iyy` | 300.0 kg·m² | Pitch moment of inertia |
+| `Izz` | 300.0 kg·m² | Yaw moment of inertia |
+| `U` | 1.4 m/s | Design forward speed |
+| `BG` | 0.100 m | Vertical separation of buoyancy and gravity centres |
+| `m22` | 1000.0 kg | Sway added mass (circular-cylinder potential theory) |
+| `m33` | 1000.0 kg | Heave added mass |
+| `m55` | 1250.0 kg·m² | Pitch added moment of inertia |
+| `m66` | 1250.0 kg·m² | Yaw added moment of inertia |
 
-## Inputs / Actuators
+### Re-dimensionalised Hydrodynamic Derivatives (SI units, Table 11)
 
-| Signal | Description | Range |
-|--------|-------------|-------|
-| `deltar` | Rudder angle | +/-35^\circ |
-| `deltas_stern` | Stern plane angle | +/-35^\circ |
-| `deltas_sail` | Sail plane angle | +/-35^\circ |
-| `n` | Propeller speed | rpm |
+Derivatives are re-dimensionalised from non-dimensional form as:  
+`F_dim = F'_coeff × 0.5 × ρ × L^n × U` (n=2 for force, n=3 for moment, n=4 for yaw damping, etc.)
 
-## Outputs / Measurements
+**Horizontal plane:**
 
-| Signal | Description |
-|--------|-------------|
-| `z` | Depth | m |
-| `theta` | Pitch angle | rad |
-| `ψ` | Heading | rad |
-| `u` | Speed | m/s |
+| Derivative | Value [SI] | Physical interpretation |
+|------------|-----------|------------------------|
+| `Yv` | −586 N·s/m | Sway damping (linear) |
+| `Yr` | −346 N·s | Sway-yaw cross-coupling |
+| `Yvv` | −734 N/m² | Cross-flow sway drag |
+| `Yrr` | −209 N·s²/m | Cross-flow yaw drag on sway |
+| `Nv` | −696 N·s | Yaw moment from sway |
+| `Nr` | −895 N·m·s | Yaw damping (stable: Nr < 0) |
+| `Nvv` | +391 N/m | Cross-coupling |
+| `Nrr` | +378 N·m·s² | Cross-coupling |
+| `Ydr` | −200 N/rad | Rudder sway force |
+| `Ndr` | +1014 N·m/rad | Rudder yaw moment (Ndr > 0 → positive δr = starboard turn) |
+
+**Vertical plane:**
+
+| Derivative | Value [SI] | Physical interpretation |
+|------------|-----------|------------------------|
+| `Zw` | −290 N·s/m | Heave damping |
+| `Zq` | +453 N·s | Heave-pitch cross-coupling |
+| `Zww` | −405 N/m² | Cross-flow heave drag |
+| `Mw` | +350 N·s | Pitch from heave |
+| `Mq` | −877 N·m·s | Pitch damping (stable: Mq < 0) |
+| `Mqq` | −93 N·m·s² | Nonlinear pitch damping |
+| `Zds` | −200 N/rad | Stern plane heave force |
+| `Mds` | +400 N·m/rad | Stern plane pitch moment |
+
+### Equations of Motion
+
+**Horizontal plane** (centripetal coupling from body-frame kinematics: `Y = m(v̇ + Ur)`):
+
+```
+(m + m22)·v̇ = Yv·v + Yr·r + Yvv·v|v| + Yrr·r|r| + Ydr·δr + dist_Y − m·U·r
+(Izz + m66)·ṙ = Nv·v + Nr·r + Nvv·v|v| + Nrr·r|r| + Ndr·δr
+ψ̇ = r
+```
+
+**Vertical plane** (centripetal coupling: `Z = m(ẇ − Uq)`):
+
+```
+(m + m33)·ẇ = Zw·w + Zq·q + Zww·w|w| + Zds·δs + m·U·q
+(Iyy + m55)·q̇ = Mw·w + Mq·q + Mqq·q|q| + Mds·δs − m·g·BG·sin(θ)
+θ̇ = q
+ż = U·sin(θ) − w·cos(θ)
+```
+
+**Earth-frame position:**
+
+```
+ẋ = U·cos(ψ) − v·sin(ψ)
+ẏ = U·sin(ψ) + v·cos(ψ)
+```
+
+**Stability analysis at design speed (linearised):**
+
+- Horizontal eigenvalues: λ₁ ≈ +0.15 s⁻¹ (mildly unstable yaw, τ ≈ 6.6 s), λ₂ ≈ −0.80 s⁻¹ (stable sway)
+- Vertical eigenvalues: all stable (BG = 0.1 m restoring moment dominates)
+- All controllers must actively stabilise the yaw channel
+
+**Control surface saturation:** ±35° = ±0.611 rad (rudder and stern planes).
 
 ---
 
-## Control Objectives
+## Cascade Depth Control Architecture
 
-1. **Depth control** - regulate `z(t)` to setpoint with minimal pitch excursion.
-2. **Heading control** - track `ψ_ref` during turning maneuvers.
-3. **Speed control** - maintain target surge velocity against drag and sea-state variation.
-4. **Emergency ascent** - maximum-rate rise while keeping pitch within safe bounds.
+All 10 controllers share the same **two-loop depth channel**:
 
----
+```
+z_ref ──► [Outer P: Kz=0.05] ──► θ_ref (clamped ±10°) ──► [Inner PID] ──► δs ──► Plant
+                                                                    ▲
+                                                               θ feedback
+```
 
-## Relevant Control Methods
+- Outer P gain `Kz = 0.05` maps depth error (m) to pitch reference (rad), clamped to ±0.175 rad
+- Inner PID: `Kp=0.4, Ki=0.05, Kd=0.5, N=5`, limits ±0.611 rad
 
-| Method | Notes |
-|--------|-------|
-| **PID (classical)** | Depth-pitch cascade; industry standard |
-| **LQR** | Linear state-feedback at trim condition |
-| **MPC** | Handles plane saturation constraints; enables coupled depth + heading |
-| **Sliding Mode Control (SMC)** | Robust to large-angle model uncertainty |
-| **ADRC** | Treats hydrodynamic nonlinearity as "total disturbance" |
-| **MRAC** | Adapts to changing speed/depth/loading conditions |
+Each controller overrides only the **heading channel** (δr), while the depth channel above runs identically for all 10.
 
 ---
 
-## Key Parameters
+## Controller Roster
 
-| Parameter | Description |
-|-----------|-------------|
-| `L_pp` | Between-perpendiculars length [m] - MARIN BB2 benchmark |
-| `rho` | Water density approx = 1025 kg/m^3 |
-| `m` | Submarine mass (neutrally buoyant: m = rho * nabla) |
-| `Ixx, Iyy, Izz` | Moments of inertia in body frame |
-| Validation basis | MARIN BB2 geometry; CFD data for coefficients |
+| # | Name | Class | Heading Strategy | Key Parameters |
+|---|------|-------|-----------------|----------------|
+| 1 | `PID_ZN` | `PIDZNCtrl` | Discrete PID (Ziegler-Nichols aggressive) | Kp=3.0, Ki=0.3, Kd=8.0 |
+| 2 | `PID_Cons` | `PIDConsCtrl` | Discrete PID (conservative) | Kp=1.5, Ki=0.1, Kd=5.0 |
+| 3 | `MPC` | `MPCHeadingCtrl` | DiscreteMPC on linearised 3-state heading model [v, r, ψ] | Np=20, Nc=5, ρ_y=10, ρ_u=0.01 |
+| 4 | `LQR` | `LQRHeadingCtrl` | DiscreteLQR full-state feedback [v, r, ψ] | Q=diag(0.1,0.01,100), R=0.001 |
+| 5 | `ADRC` | `ADRCHeadingCtrl` | DiscreteADRC — treats yaw nonlinearity as total disturbance | b₀=0.654, ωc=0.5, ωo=2.0 (ωo·Ts=0.10 < 0.5 ✓) |
+| 6 | `SMC` | `SMCHeadingCtrl` | DiscreteSMC with boundary layer | ce=1.0, cde=0.015, K=1.5, φ=0.1 |
+| 7 | `MRAC` | `MRACHeadingCtrl` | MRACController — adapts to speed/depth changes | am=0.70, bm=0.30, γr=γy=0.002 |
+| 8 | `L1` | `L1HeadingCtrl` | L1AdaptiveController — fast adaptation with LP filter | am=0.985, Γ=50, ωc=0.3 |
+| 9 | `GainSched` | `GainSchedHeadingCtrl` | GainScheduledController (NearestNeighbor) — 3 PIDs scheduled on \|ψ_err\| | p₀=0°→Kp=1.5; p₁=15°→Kp=2.5; p₂=30°→Kp=3.5 |
+| 10 | `Smith` | `SmithHeadingCtrl` | SmithPredictor compensating 1-step heading sensor delay | Inner PID: Kp=2.5, Ki=0.25, Kd=7.0 |
+
+### Linearised Heading Model for MPC / LQR / Smith
+
+The 3-state continuous model `ẋ = Ac·x + Bc·δr, y = Cc·x` is derived by linearising at U:
+
+```
+        ⎡ Yv/A22    (Yr−mU)/A22   0 ⎤         ⎡ Ydr/A22 ⎤
+Ac  =   ⎢ Nv/A66    Nr/A66        0 ⎥  ,  Bc = ⎢ Ndr/A66 ⎥ ,  Cc = [0  0  1]
+        ⎣   0          1           0 ⎦         ⎣    0    ⎦
+```
+
+Discretised via ZOH at Ts = 0.05 s (20 Hz).  The (Yr−mU)/A22 term is the centripetal correction that makes the heading model slightly non-minimum-phase and must not be neglected.
+
+### Sign Convention Reminders (from CLAUDE.md)
+
+| Controller | compute() argument |
+|---|---|
+| PID, ADRC, Smith | `compute(wrapAngle(ψ_ref − ψ))` — error |
+| SMC | `compute(wrapAngle(ψ − ψ_ref))` — reversed |
+| MRAC, L1 | `setReference(ψ_ref); compute(ψ)` — plant output, not error |
 
 ---
 
-## Scenarios (from paper)
+## Scenarios
 
-- **Turning circle** - constant rudder angle from straight-ahead
-- **Zig-zag maneuver** - alternating rudder for heading overshoot assessment
-- **Vertical plane** - stern-plane step for depth change
-- **Large drift angle** - static drift up to +/-20^\circ, angle of attack up to +/-15^\circ (outside Taylor validity)
+| ID | Description | Duration | ψ_ref | z_ref | Disturbance |
+|----|-------------|----------|-------|-------|-------------|
+| `s01_turn20` | 20° port heading step | 300 s | −0.349 rad (−20°) | 0 m | none |
+| `s02_turn90` | 90° port heading step | 400 s | −1.571 rad (−90°) | 0 m | none |
+| `s03_zigzag10` | 10/10 zig-zag (time-based alternating ±10°) | 300 s | ±0.175 rad, switch every 30 s | 0 m | none |
+| `s04_disturbance` | Course keeping with ocean current | 300 s | 0 rad | 0 m | 150 N sway at t ≥ 50 s |
+| `s05_depth_dive` | Depth change 0 → 20 m, heading hold | 400 s | 0 rad | 20 m at t ≥ 30 s | none |
+
+**Sample time:** Ts = 0.05 s (20 Hz, consistent with model-scale dynamics at U = 1.4 m/s)
+
+**Initial state:** All scenarios start from rest (v = r = w = q = 0, ψ = θ = z = 0) except `s05_depth_dive` which also starts at z = 0 and dives.
+
+---
+
+## CSV Output Format
+
+Each run produces `logs/run_<scenario>_<controller>.csv` with 15 columns:
+
+| Column | Symbol | Unit | Description |
+|--------|--------|------|-------------|
+| `t` | t | s | Simulation time |
+| `psi_ref` | ψ_ref | rad | Heading reference |
+| `psi` | ψ | rad | Actual heading |
+| `psi_err` | ψ_err | rad | Wrapped heading error (ref − actual) |
+| `delta_r` | δr | rad | Rudder angle command |
+| `r` | r | rad/s | Yaw rate |
+| `v` | v | m/s | Sway velocity |
+| `z_ref` | z_ref | m | Depth reference |
+| `z` | z | m | Actual depth |
+| `delta_s` | δs | rad | Stern plane command |
+| `theta` | θ | rad | Pitch angle |
+| `w` | w | m/s | Heave velocity |
+| `q` | q | rad/s | Pitch rate |
+| `x` | x | m | Earth-frame forward position |
+| `y` | y | m | Earth-frame lateral position |
+
+Per-run metrics (printed to console): IAE_ψ [rad·s], IAE_z [m·s].
+
+---
+
+## Build and Run
+
+```bash
+# From the repo root — run.py handles compile + all case studies automatically
+conda run -n soft_robotics -- python run.py
+
+# Or build just this target (from the build directory)
+cmake --build build --target submarine_sim
+./build/submarine_sim.exe
+```
+
+Logs are written to `case-study/Submarine Maneuvering Mathematical Model/logs/`.
 
 ---
 
 ## Implementation Notes
 
-- The Karasuno model requires **fewer captive-test matrices** than Taylor-polynomial models: only drift-motion tests are needed; rotation coefficients can be estimated empirically.
-- For a C++ case study: a 12-state ODE integrator (4th-order Runge-Kutta) with the Karasuno force equations drives the plant; `DiscreteADRC` or a cascade PID can be the depth controller.
-- The `KalmanFilter` / `EKF` in `lib/` can be used for state estimation from depth+pitch sensors and noisy velocity measurements.
+### Karasuno vs Taylor-series Model
+
+The paper's Karasuno model decomposes forces into lift/drag/cross-flow components that remain physically valid at large drift angles (α > 15°) where Taylor polynomials diverge. The case study uses a simpler **linearised + nonlinear cross-flow drag** approximation: linear sway/yaw derivatives (from the Taylor coefficients of Table 11, valid for small angles) plus the quadratic cross-flow terms `Yvv·v|v|` and `Yrr·r|r|`. This is sufficient for autopilot evaluation in the operating range of the scenarios (heading errors up to 90°, moderate drift).
+
+### Mildly Unstable Yaw Channel
+
+The linearised horizontal model has an **open-loop unstable yaw mode** (λ₁ ≈ +0.15 s⁻¹). All controllers must provide active stabilisation — pure observers or integral-only designs will fail. ADRC, MRAC, and L1 handle this via their inherent robustness; LQR and MPC explicitly stabilise the [v, r, ψ] state.
+
+### ADRC Stability Constraint
+
+`omega_o × Ts = 2.0 × 0.05 = 0.10 < 0.5` — the backward-Euler stability condition for DiscreteADRC is satisfied with margin.
+
+### Heading Angle Wrapping
+
+All heading errors are wrapped to (−π, π] via `wrapAngle()` defined in `sim/include/controllers.h`. This is essential for 90° turns and zig-zag maneuvers where the unwrapped error would exceed ±π.
+
+### Depth–Heading Decoupling
+
+The lateral (heading) and vertical (depth) dynamics are coupled via `U·q` in the heave equation and `U·r` in the sway equation, but this coupling is small at model scale. The cascade PID depth loop and the heading autopilot are designed independently; coupled MPC could improve performance on the `s05_depth_dive` scenario where simultaneous heading hold and depth change exercises both loops.

@@ -166,10 +166,18 @@ public:
             return last_output_;
         }
 
-        // Bumpless transfer: when a controller newly enters the active bracket
-        // (was outside any bracket on the previous step) pre-condition it so its
-        // integrator state matches the current blended output.  Controllers that
-        // were already in the previous bracket carry their state naturally.
+        const double p0 = schedule_[lo].p, p1 = schedule_[hi].p;
+        double alpha = (p1 > p0) ? (current_p_ - p0) / (p1 - p0) : 0.0;
+        alpha = std::max(0.0, std::min(1.0, alpha));
+
+        // Compute the blended output from the natural (un-overridden) controller states.
+        const double u0 = schedule_[lo].ctrl->compute(error);
+        const double u1 = schedule_[hi].ctrl->compute(error);
+        last_output_ = (1.0 - alpha) * u0 + alpha * u1;
+
+        // After computing, pre-condition any controller newly entering this bracket
+        // so its integrator is primed for the NEXT step (post-compute so the current
+        // natural output is used for the blend, not the bumpless-overridden value).
         if (lo != prev_lo_ || hi != prev_hi_) {
             const bool lo_is_new = (lo != prev_lo_ && lo != prev_hi_);
             const bool hi_is_new = (hi != prev_hi_ && hi != prev_lo_);
@@ -181,12 +189,6 @@ public:
             prev_hi_ = hi;
         }
 
-        double p0 = schedule_[lo].p, p1 = schedule_[hi].p;
-        double alpha = (p1 > p0) ? (current_p_ - p0) / (p1 - p0) : 0.0;
-        alpha = std::max(0.0, std::min(1.0, alpha));
-        double u0 = schedule_[lo].ctrl->compute(error);
-        double u1 = schedule_[hi].ctrl->compute(error);
-        last_output_ = (1.0 - alpha) * u0 + alpha * u1;
         notifyObserver(last_output_, error);
         return last_output_;
     }

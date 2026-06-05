@@ -12,6 +12,16 @@ TubeMPC::TubeMPC(const StateSpace &sys, const TubeMPCParams &p)
       m_(static_cast<int>(sys.B.cols())),
       pp_(static_cast<int>(sys.C.rows()))
 {
+    // --- auto-fill optional parameters ---
+    if (p_.K.size() == 0)
+        p_.K = Eigen::MatrixXd::Zero(m_, n_);
+    if (p_.wMax.size() == 0)
+        p_.wMax = Eigen::VectorXd::Zero(n_);
+    if (p_.uMin.size() == 0)
+        p_.uMin = Eigen::VectorXd::Constant(m_, -1e9);
+    if (p_.uMax.size() == 0)
+        p_.uMax = Eigen::VectorXd::Constant(m_,  1e9);
+
     // --- dimension checks ---
     if (p_.Nu > p_.Np)
         throw std::invalid_argument("TubeMPC: Nu must be <= Np.");

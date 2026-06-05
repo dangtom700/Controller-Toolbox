@@ -31,22 +31,7 @@ if(NOT pybind11_FOUND)
     # user message(DEPRECATION ...) calls). The reliable fix is to patch the fetched
     # source in-place before CMake processes it, upgrading the declaration to the
     # min...max range syntax which suppresses the deprecation for that file.
-    FetchContent_GetProperties(pybind11)
-    if(NOT pybind11_POPULATED)
-        # CMP0169 (CMake 3.30+) deprecates FetchContent_Populate(name) - allow OLD
-        # behaviour so we can patch the fetched source before add_subdirectory.
-        if(POLICY CMP0169)
-            cmake_policy(SET CMP0169 OLD)
-        endif()
-        FetchContent_Populate(pybind11)
-        file(READ "${pybind11_SOURCE_DIR}/CMakeLists.txt" _pb11_cmake)
-        string(REPLACE
-            "cmake_minimum_required(VERSION 3.5)"
-            "cmake_minimum_required(VERSION 3.5...3.31)"
-            _pb11_cmake "${_pb11_cmake}")
-        file(WRITE "${pybind11_SOURCE_DIR}/CMakeLists.txt" "${_pb11_cmake}")
-    endif()
-    add_subdirectory("${pybind11_SOURCE_DIR}" "${pybind11_BINARY_DIR}")
+    FetchContent_MakeAvailable(pybind11)
 endif()
 
 pybind11_add_module(ctrl_toolbox
