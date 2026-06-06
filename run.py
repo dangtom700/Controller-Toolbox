@@ -749,6 +749,9 @@ def phase_bug_report(log_path):
         '[alarm] cusum',         # ControllerMonitor CUSUM alarms are intentional demo output;
                                  # ex79_registry_monitor prints [ALARM] CUSUM on z3: ... on every
                                  # step while running — example still exits 0 / [PASS]
+        'alarms: 0',             # ex79_registry_monitor summary line "Monitor samples: 0  alarms: 0";
+                                 # keyword 'alarm' matches 'alarms' — this is a passing summary, not a
+                                 # failure (see Part 36 B36-1). Keeps bug_report.txt at 0 blocks.
     ]
 
     # Try to read the log - fall back to latin‑1 if UTF‑8 fails
