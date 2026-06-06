@@ -19,7 +19,7 @@ Lines 3536 - 3556
 >>> 3546: Monitor samples: 0  alarms: 0
     3547: [PASS] All checks passed.
     3548: 
-    3549:   EXIT 0 — PASSED
+    3549:   EXIT 0 - PASSED
     3550: 
     3551: ------------------------------------------------------------------------
     3552:   [84/103]  build\examples\example_pid_feedback.exe
