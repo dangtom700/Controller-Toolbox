@@ -26,10 +26,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Eigen3 and nlohmann-json via vcpkg
+      - name: Cache vcpkg packages
+        uses: actions/cache@v4
+        with:
+          path: C:\vcpkg\packages
+          key: vcpkg-${{ matrix.arch }}-eigen3-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: vcpkg-${{ matrix.arch }}-eigen3-
+
+      - name: Install Eigen3 via vcpkg
         run: |
           $triplet = if ("${{ matrix.arch }}" -eq "x64") { "x64-windows-static" } else { "x86-windows-static" }
-          vcpkg install "eigen3:$triplet" "nlohmann-json:$triplet"
+          vcpkg install "eigen3:$triplet"
 
       - name: Configure
         run: |
