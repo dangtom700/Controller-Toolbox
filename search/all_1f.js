@@ -1,7 +1,9 @@
 var searchData=
 [
-  ['y_5finf_0',['Y_inf',['../structctrl_1_1HinfResult.html#a07e57b48748357d27db5c3325440e9fe',1,'ctrl::HinfResult']]],
-  ['ymax_1',['yMax',['../structctrl_1_1GPCParams.html#a475a872939da2061ade940fe57d3899c',1,'ctrl::GPCParams']]],
-  ['ymin_2',['yMin',['../structctrl_1_1GPCParams.html#aba8cd01282626a3046ed8aff446c5b42',1,'ctrl::GPCParams']]],
-  ['your_20own_20source_20for_20in_20container_20builds_3',['Mount your own source for in-container builds',['../index.html#autotoc_md22',1,'']]]
+  ['x_20const_20eigen_3a_3avectorxd_20u_20tt_0',['x const eigen::vectorxd u tt',['../md_docs_2DOCUMENTATION.html#autotoc_md68',1,'&lt;tt&gt;Eigen::VectorXd ssStep(const StateSpace&amp;, Eigen::Ref&lt;Eigen::VectorXd&gt; x, const Eigen::VectorXd&amp; u)&lt;/tt&gt;'],['../md_docs_2DOCUMENTATION.html#autotoc_md69',1,'&lt;tt&gt;std::pair&lt;Eigen::VectorXd, Eigen::VectorXd&gt; ssStepCopy(const StateSpace&amp;, const Eigen::VectorXd&amp; x, const Eigen::VectorXd&amp; u)&lt;/tt&gt;']]],
+  ['x_5feq_1',['x_eq',['../structctrl_1_1OperatingPoint.html#a1d63c5b25b6ae9bad57f7742c68de4ac',1,'ctrl::OperatingPoint']]],
+  ['x_5finf_2',['X_inf',['../structctrl_1_1HinfResult.html#a1f5829d4c831486d1672430264c15078',1,'ctrl::HinfResult']]],
+  ['xi_3',['xi',['../structctrl_1_1BayesOptParams.html#a0e0a0787c340aefda6c888c1cc80ecee',1,'ctrl::BayesOptParams']]],
+  ['xmax_4',['xMax',['../structctrl_1_1MHEParams.html#ac098ff457036444a2004ada3ec123777',1,'ctrl::MHEParams']]],
+  ['xmin_5',['xMin',['../structctrl_1_1MHEParams.html#a65c7b39c3c03f8d681836a6d5a659888',1,'ctrl::MHEParams']]]
 ];

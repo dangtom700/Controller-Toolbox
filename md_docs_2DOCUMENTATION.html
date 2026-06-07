@@ -85,11 +85,12 @@ Table of Contents</h1>
 <li>Class Reference<ul>
 <li>5.1 Core Types</li>
 <li>5.2 Controllers (incl. Fuzzy Logic Module)</li>
-<li>5.3 Estimators, Identification &amp; Optimisation (incl. GainScheduledController, GapMetric, LPVSystemID, NonlinearMPC, AdaptiveSmithPredictor, AutoTuner, AntiWindupWrapper)</li>
+<li>5.3 Estimators, Identification &amp; Optimisation (incl. GainScheduledController, GapMetric, LPVSystemID, NonlinearMPC, AdaptiveSmithPredictor, AutoTuner, AntiWindupWrapper, TubeMPC, ParticleFilter)</li>
 <li>5.4 Tuning Layer</li>
 <li>5.5 Composition &amp; Orchestration</li>
 <li>5.6 Analysis &amp; Metrics</li>
 <li>5.7 Real-Time Utilities &amp; HAL</li>
+<li>5.8 Data-Driven &amp; ML Controllers (ILC, SINDy, KoopmanEDMD, L1Adaptive, CBFSafetyFilter, GaussianProcess, EchoStateNetwork, NeuralPID, CEMController, DynaController, ScenarioMPC, BayesianOptimizer, ControllerRegistry, ControllerMonitor, ComputationalDelayWrapper)</li>
 </ul>
 </li>
 <li>Deployment Cross-References</li>
@@ -124,7 +125,7 @@ Table of Contents</h1>
 <div class="line">|-- CMakeLists.txt          # Root build, subdir aggregator</div>
 <div class="line">|-- lib/                    # Library sources (build target: controller_toolbox)</div>
 <div class="line">|-- examples/               # Single-file demos (ex01..ex22) + advanced cpp/ folder</div>
-<div class="line">|-- case-study/             # 4 physics studies: boiler-turbine, SMISMO hydraulic, tug boat, solar cooling</div>
+<div class="line">|-- case-study/             # 8 case studies: 6 C++ built + 2 Python-only (5 spec-only stubs)</div>
 <div class="line">|-- tests/                  # CTest-driven unit + integration tests</div>
 <div class="line">|-- scripts/                # tune_all / simulate_all / realtime_all batch tools</div>
 <div class="line">|-- cheatsheet/             # Markdown reference notes (tuning, identification)</div>
@@ -265,26 +266,56 @@ Table of Contents</h1>
 <p><b>Python examples</b> (<code>examples/python/</code>, <code>ex01_*</code> through <code>ex75_*</code>): NumPy/python-control cross-validation and pybind11 binding demonstrations for every C++ class. Python examples 61-70 mirror corrector patterns; 71-75 mirror the new algorithm extensions.</p>
 <h2><a class="anchor" id="autotoc_md46"></a>
 3.3 Case Studies (&lt;tt&gt;case-study/&lt;/tt&gt;)</h2>
-<p>Four self-contained physics studies exercise the library end-to-end. Each pairs a nonlinear plant simulator with a roster of controllers that <b>wrap</b> the <code>lib/</code> algorithms behind a study-specific <code>ControllerBase</code> (not <code><a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">ctrl::IController</a></code> directly, because each plant has a different I/O signature), then sweeps every controller across several scenarios and writes CSV telemetry for post-processing. Counts below are the Part 26 state.</p>
+<p>Each case study pairs a nonlinear plant simulator with a roster of controllers, sweeps every controller across several scenarios, and writes CSV telemetry to <code>logs/</code> for post-processing. C++ studies build as self-contained executables; Python-only studies run via <code>sim/main.py</code> (discovered automatically by <code>run.py</code> Phase 6). See docs/CASE_STUDIES.md for full implementation status.</p>
+<h3><a class="anchor" id="autotoc_md47"></a>
+C++ built (6) — registered in &lt;tt&gt;case-study/CMakeLists.txt&lt;/tt&gt; + &lt;tt&gt;compile.bat&lt;/tt&gt;</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Study   </th><th class="markdownTableHeadNone">Plant   </th><th class="markdownTableHeadNone">Controllers   </th><th class="markdownTableHeadNone">Scenarios   </th><th class="markdownTableHeadNone">Runs   </th><th class="markdownTableHeadNone">Build target    </th></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><a href="case-study/Boiler%20Control/"><code>Boiler Control/</code></a>   </td><td class="markdownTableBodyNone">Bell-Astrom 3x3 MIMO boiler-turbine, 3 operating points   </td><td class="markdownTableBodyNone">27   </td><td class="markdownTableBodyNone">8   </td><td class="markdownTableBodyNone">216   </td><td class="markdownTableBodyNone"><code>boiler_sim</code>    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><a href="case-study/Meter%20In%20Meter%20Out%20Control/"><code>Meter In Meter Out Control/</code></a>   </td><td class="markdownTableBodyNone">SMISMO 9-state hydraulic actuator (separate meter-in/meter-out spools)   </td><td class="markdownTableBodyNone">14   </td><td class="markdownTableBodyNone">3   </td><td class="markdownTableBodyNone">42   </td><td class="markdownTableBodyNone"><code>smismo_sim</code>    </td></tr>
-<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><a href="case-study/Tug%20Boat%20Numerical%20Simulation/"><code>Tug Boat Numerical Simulation/</code></a>   </td><td class="markdownTableBodyNone">3-DOF marine vessel (Li et al. 2026, Ocean Engineering 357), 6-state MIMO + thrust allocation   </td><td class="markdownTableBodyNone">16   </td><td class="markdownTableBodyNone">4   </td><td class="markdownTableBodyNone">64   </td><td class="markdownTableBodyNone"><code>tug_sim</code>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><a href="case-study/Solar-Driven%20Cooling%20System%20with%20Photovoltaic%20Evaporative%20Chimney/"><code>Solar-Driven Cooling .../</code></a>   </td><td class="markdownTableBodyNone">Algebraic SISO solar cooling + PV evaporative chimney (Ruiz et al. 2024)   </td><td class="markdownTableBodyNone">9   </td><td class="markdownTableBodyNone">5   </td><td class="markdownTableBodyNone">45   </td><td class="markdownTableBodyNone"><code>solar_cooling_sim</code>    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><a href="case-study/Solar-Driven%20Cooling%20System%20with%20Photovoltaic%20Evaporative%20Chimney/"><code>Solar-Driven Cooling .../</code></a>   </td><td class="markdownTableBodyNone">Algebraic SISO solar cooling + PV evaporative chimney (Ruiz et al. 2024)   </td><td class="markdownTableBodyNone">9   </td><td class="markdownTableBodyNone">5   </td><td class="markdownTableBodyNone">45   </td><td class="markdownTableBodyNone"><code>solar_cooling_sim</code>   </td></tr>
+<td class="markdownTableBodyNone"><a href="case-study/Porous%20Fiber%20Plate%20Humidification%20System/"><code>Porous Fiber Plate Humidification System/</code></a>   </td><td class="markdownTableBodyNone">Laminar flat-plate evaporative humidifier + room moisture ODE + 2-step sensor delay   </td><td class="markdownTableBodyNone">10   </td><td class="markdownTableBodyNone">5   </td><td class="markdownTableBodyNone">50   </td><td class="markdownTableBodyNone"><code>humidification_sim</code>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><a href="case-study/Active%20Suspension%20Mathematical%20Modeling%20and%20Optimization%202025/"><code>Active Suspension Mathematical Modeling and Optimization 2025/</code></a>   </td><td class="markdownTableBodyNone">2-DOF quarter-car, 4-state RK4, F_act ±2000 N (Abdulwahab et al. 2025)   </td><td class="markdownTableBodyNone">10   </td><td class="markdownTableBodyNone">5   </td><td class="markdownTableBodyNone">50   </td><td class="markdownTableBodyNone"><code>susp_sim</code>    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><a href="case-study/Non-Inverting%20Buck-Boost%20Converter/"><code>Non-Inverting Buck-Boost Converter/</code></a>   </td><td class="markdownTableBodyNone">Averaged 2-state buck-boost, RK4 at 50 kHz, mode hysteresis ±0.1 V (Almasi et al. 2017)   </td><td class="markdownTableBodyNone">12   </td><td class="markdownTableBodyNone">5   </td><td class="markdownTableBodyNone">60   </td><td class="markdownTableBodyNone"><code>buck_boost_sim</code>   </td></tr>
 </table>
-<p><b>Boiler-Turbine</b> controllers span PID, LQR, LQG, MPC, SMC, ESC, ADRC, Lead-Lag+PID, Smith Predictor, GPC-RLS, EKF-LQR, UKF-LQR, FuzzyPID, FuzzySup-MPC, three <code>ControllerStack</code> compositions, Repetitive, MRAC, H-infinity, Adaptive Smith Predictor, plus Part 26 additions: NonlinearMPC, Feedback Linearisation, MHE-LQR, LPV gain-scheduled, SubspaceID-LQG, and automated (gap-metric) gain-scheduled LQR.</p>
-<p><b>Tug Boat</b> controllers: PID, KF-PID, SMC, MPC, ESC, FuzzyPID, FuzzySup-MPC, ADRC, Repetitive, plus Part 26 additions: 6-state MIMO LQR, LQG, per-axis TubeMPC, EKF-LQR, MRAC, automated gain-scheduled LQR, and NonlinearMPC. Uses <code>FuzzyLogic</code>, <code>KalmanFilter</code>, <code>DiscreteMPC</code>, <code>DiscreteSMC</code>, <code>ExtremumSeeker</code>, <code>DiscreteLQR/LQG</code>, <code>TubeMPC</code>, <code>ExtendedKalmanFilter</code>, <code>NonlinearMPC</code>, and <code>PlantModel</code>.</p>
-<p><b>SMISMO</b> and <b>Solar</b> rosters are documented in their respective <code>sim/include/*controllers.h</code> headers. The example wrapper <a href="examples/ex21_boiler_turbine_case_study.cpp">ex21_boiler_turbine_case_study.cpp</a> is the standalone boiler demo; the full multi-controller sweeps live under the <code>case-study/</code> subdirectories and build as the targets in the table above (all listed in <code>compile.bat</code>).</p>
-<blockquote class="doxtable">
-<p>&zwj;<b>Note:</b> only the Tug study currently has a Catch2 regression test (<code>tests/test_tugsim_regression.cpp</code>). Adding equivalent IAE/settling-threshold tests for Boiler, SMISMO, and Solar is the top open task (see the Part 26 review in <code>docs/cumulative_bug_report.md</code>, finding T1). </p>
-</blockquote>
-<h2><a class="anchor" id="autotoc_md47"></a>
+<p><b>Boiler-Turbine</b> controllers: PID, LQR, LQG, MPC, SMC, ESC, ADRC, Lead-Lag+PID, Smith Predictor, GPC-RLS, EKF-LQR, UKF-LQR, FuzzyPID, FuzzySup-MPC, three <code>ControllerStack</code> compositions, Repetitive, MRAC, H-infinity, AdaptiveSmithPredictor, NonlinearMPC, FeedbackLinearisation, MHE-LQR, LPV gain-scheduled, SubspaceID-LQG, AutoGainScheduler-LQR.</p>
+<p><b>Tug Boat</b> controllers: PID, KF-PID, SMC, MPC, ESC, FuzzyPID, FuzzySup-MPC, ADRC, Repetitive, MIMO LQR, LQG, per-axis TubeMPC, EKF-LQR, MRAC, AutoGainScheduler-LQR, NonlinearMPC.</p>
+<p><b>Buck-Boost</b> controllers include 4 fuzzy variants (FuzzyPD, FuzzyPID-Buck, FuzzyPID-Boost, TLCS-FuzzyPI) that validate the Almasi et al. T-S fuzzy TLCS result, plus PI-Buck, PI-Boost, TLCS-ClassicPI, GainScheduled, ADRC, MPC, LQR, and OpenLoop.</p>
+<h3><a class="anchor" id="autotoc_md48"></a>
+Python-only (2) — &lt;tt&gt;sim/main.py&lt;/tt&gt;, run by Phase 6 of &lt;tt&gt;run.py&lt;/tt&gt;</h3>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Study   </th><th class="markdownTableHeadNone">Plant   </th><th class="markdownTableHeadNone">Controllers   </th><th class="markdownTableHeadNone">Scenarios   </th><th class="markdownTableHeadNone">Runs    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><a href="case-study/Vertical%20Drill%20String%20Mathematical%20Review%202025/"><code>Vertical Drill String Mathematical Review 2025/</code></a>   </td><td class="markdownTableBodyNone">2-DOF torsional model with Stribeck friction, RK4 at Ts=0.1 s   </td><td class="markdownTableBodyNone">10   </td><td class="markdownTableBodyNone">5   </td><td class="markdownTableBodyNone">50    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><a href="case-study/Multi-Body%20Floating%20Wind-Wave%20Platform/"><code>Multi-Body Floating Wind-Wave Platform/</code></a>   </td><td class="markdownTableBodyNone">4-state FOWT heave + WEC arm, sinusoidal wave forcing, RK4 at Ts=0.5 s   </td><td class="markdownTableBodyNone">8   </td><td class="markdownTableBodyNone">5   </td><td class="markdownTableBodyNone">40   </td></tr>
+</table>
+<p><b>Drill String</b> controllers: OpenLoop, PID, ADRC, SMC, LQR, MPC, MRAC, GainScheduled, L1Adaptive, NeuralPID.</p>
+<p><b>Wind-Wave</b> controllers: Passive (B_opt damping), Reactive (complex-conjugate), PID, ADRC, SMC, LQR, MPC, MRAC.</p>
+<h3><a class="anchor" id="autotoc_md49"></a>
+Spec-only stubs (4) — &lt;tt&gt;README.md&lt;/tt&gt; present, no &lt;tt&gt;sim/&lt;/tt&gt;, not built</h3>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">Study   </th><th class="markdownTableHeadNone">Notes    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>Electrostatic MEMS with Tilted Micro-Pillars/</code>   </td><td class="markdownTableBodyNone">10 controllers × 5 scenarios spec'd in README    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>Bubble Column Bioreactor CO2 Biodiesel/</code>   </td><td class="markdownTableBodyNone">Plant model needs design first    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>High-Altitude Aerial Firefighting Bag Drop/</code>   </td><td class="markdownTableBodyNone">Monte-Carlo drop pattern, thin spec    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>Floating Nuclear Power Plant Ice Load Sensing/</code>   </td><td class="markdownTableBodyNone">Ice-load estimation showcase (EKF/MHE), thin spec   </td></tr>
+</table>
+<p>The standalone boiler demo <a href="examples/ex21_boiler_turbine_case_study.cpp">ex21_boiler_turbine_case_study.cpp</a> exercises the boiler plant directly without the full multi-controller sweep. All C++ targets are listed in <code>compile.bat</code>; Python-only studies are <b>not</b> in <code>CMakeLists.txt</code> or <code>compile.bat</code>.</p>
+<h2><a class="anchor" id="autotoc_md50"></a>
 3.4 Tests (&lt;tt&gt;tests/&lt;/tt&gt;)</h2>
 <ul>
 <li><code>test_controllers.cpp</code> - per-class unit tests (custom <code>test_framework.h</code> harness)</li>
@@ -294,8 +325,8 @@ Table of Contents</h1>
 <li><code>test_catch2_pilot.cpp</code> - Catch2 v3 pilot tests (5 test cases, 21 assertions): LQRAdapter MIMO <code>computeVec()</code>, EKF scaled-epsilon Jacobian, PID DoM derivative suppression, 2DOF b_weight overshoot reduction, observer telemetry wiring</li>
 <li><code>test_framework.h</code> - lightweight assertion macros for the custom harness</li>
 </ul>
-<p><b>Current totals (2026-05-28):</b> 78 C++ executables pass | 79 Python examples pass | 0 failures.</p>
-<h2><a class="anchor" id="autotoc_md48"></a>
+<p><b>Current totals:</b> run <code>conda run -n soft_robotics -- python run.py</code> to get the live count. The 2026-05-28 snapshot (78 C++ / 79 Python) predates Part 31-38 additions; treat it as a lower bound only.</p>
+<h2><a class="anchor" id="autotoc_md51"></a>
 3.5 Scripts (&lt;tt&gt;scripts/&lt;/tt&gt;)</h2>
 <ul>
 <li><code>tune_all.cpp</code> - runs every tuner against canonical plants</li>
@@ -303,13 +334,13 @@ Table of Contents</h1>
 <li><code>realtime_all.cpp</code> - RT timing benchmark (links <code>pthread</code> on POSIX)</li>
 <li><code>create_controller.py</code>, <code>generate_test_data.py</code> - Python helpers</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md49"></a>
+<h2><a class="anchor" id="autotoc_md52"></a>
 3.6 Cheatsheets (&lt;tt&gt;cheatsheet/&lt;/tt&gt;)</h2>
 <p>Quick-reference notes covering: tuning methods, controller categories, controller list, system identification (FOPDT, ARMAX, N4SID), model evaluation, and the full control-design pipeline.</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md51"></a>
+<h1><a class="anchor" id="autotoc_md54"></a>
 4. Usage Guide</h1>
-<h2><a class="anchor" id="autotoc_md52"></a>
+<h2><a class="anchor" id="autotoc_md55"></a>
 4.1 Minimum Closed-Loop Example (SISO PID)</h2>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="ControllerToolbox_8h.html">ControllerToolbox.h</a>&quot;</span></div>
 <div class="line"> </div>
@@ -338,7 +369,7 @@ Table of Contents</h1>
 <div class="ttc" id="astructctrl_1_1PIDParams_html_ae47f28adcce19093b8509be3423ce350"><div class="ttname"><a href="structctrl_1_1PIDParams.html#ae47f28adcce19093b8509be3423ce350">ctrl::PIDParams::N</a></div><div class="ttdeci">double N</div><div class="ttdoc">Derivative filter coefficient N [rad/s].</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00054">DiscretePID.h:54</a></div></div>
 <div class="ttc" id="astructctrl_1_1StateSpace_html"><div class="ttname"><a href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a></div><div class="ttdoc">Discrete-time state-space model.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00067">PlantModel.h:68</a></div></div>
 <div class="ttc" id="astructctrl_1_1TransferFunction_html"><div class="ttname"><a href="structctrl_1_1TransferFunction.html">ctrl::TransferFunction</a></div><div class="ttdoc">Discrete-time transfer function in z^-^1 polynomial form.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00031">PlantModel.h:32</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md53"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md56"></a>
 4.2 Auto-Tuning Workflow (Relay -&gt; PID)</h2>
 <div class="fragment"><div class="line"><a class="code hl_struct" href="structctrl_1_1RelayTunerConfig.html">ctrl::RelayTunerConfig</a> cfg; cfg.<a class="code hl_variable" href="structctrl_1_1RelayTunerConfig.html#a64273cf3502e05d816b9034078ef2a9b">relayAmplitude</a> = 1.0; cfg.<a class="code hl_variable" href="structctrl_1_1RelayTunerConfig.html#ac6cae77f414d8d71797db566d10e9881">cyclesRequired</a> = 3;</div>
 <div class="line"><a class="code hl_class" href="classctrl_1_1RelayAutoTuner.html">ctrl::RelayAutoTuner</a> tuner(cfg, Ts);</div>
@@ -354,7 +385,7 @@ Table of Contents</h1>
 <div class="ttc" id="astructctrl_1_1RelayTunerConfig_html"><div class="ttname"><a href="structctrl_1_1RelayTunerConfig.html">ctrl::RelayTunerConfig</a></div><div class="ttdoc">Configuration for RelayAutoTuner.</div><div class="ttdef"><b>Definition</b> <a href="ControllerTuner_8h_source.html#l00072">ControllerTuner.h:73</a></div></div>
 <div class="ttc" id="astructctrl_1_1RelayTunerConfig_html_a64273cf3502e05d816b9034078ef2a9b"><div class="ttname"><a href="structctrl_1_1RelayTunerConfig.html#a64273cf3502e05d816b9034078ef2a9b">ctrl::RelayTunerConfig::relayAmplitude</a></div><div class="ttdeci">double relayAmplitude</div><div class="ttdoc">Relay output amplitude +/-d.</div><div class="ttdef"><b>Definition</b> <a href="ControllerTuner_8h_source.html#l00074">ControllerTuner.h:74</a></div></div>
 <div class="ttc" id="astructctrl_1_1RelayTunerConfig_html_ac6cae77f414d8d71797db566d10e9881"><div class="ttname"><a href="structctrl_1_1RelayTunerConfig.html#ac6cae77f414d8d71797db566d10e9881">ctrl::RelayTunerConfig::cyclesRequired</a></div><div class="ttdeci">int cyclesRequired</div><div class="ttdoc">Stable oscillation cycles required before the tuner exits.</div><div class="ttdef"><b>Definition</b> <a href="ControllerTuner_8h_source.html#l00086">ControllerTuner.h:86</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md54"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md57"></a>
 4.3 LQR + Kalman = LQG (Output Feedback)</h2>
 <div class="fragment"><div class="line"><a class="code hl_struct" href="structctrl_1_1LQRParams.html">ctrl::LQRParams</a> lqr_p = <a class="code hl_function" href="classctrl_1_1LQRWeightTuner.html#a59deb8f98e587269d8cc14ac2e696f49">ctrl::LQRWeightTuner::brysonMethod</a>(xmax, umax);</div>
 <div class="line">Eigen::MatrixXd Qn = 1e-4 * Eigen::MatrixXd::Identity(n, n);</div>
@@ -365,7 +396,7 @@ Table of Contents</h1>
 <div class="ttc" id="aclassctrl_1_1DiscreteLQG_html"><div class="ttname"><a href="classctrl_1_1DiscreteLQG.html">ctrl::DiscreteLQG</a></div><div class="ttdoc">Discrete-time LQG controller (LQR + Kalman filter).</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLQG_8h_source.html#l00041">DiscreteLQG.h:42</a></div></div>
 <div class="ttc" id="aclassctrl_1_1LQRWeightTuner_html_a59deb8f98e587269d8cc14ac2e696f49"><div class="ttname"><a href="classctrl_1_1LQRWeightTuner.html#a59deb8f98e587269d8cc14ac2e696f49">ctrl::LQRWeightTuner::brysonMethod</a></div><div class="ttdeci">static LQRParams brysonMethod(const Eigen::VectorXd &amp;maxStateDeviation, const Eigen::VectorXd &amp;maxControlEffort)</div><div class="ttdoc">Bryson's rule: Q = diag(1/xmax^2), R = diag(1/umax^2) - unchecked.</div><div class="ttdef"><b>Definition</b> <a href="ControllerTuner_8cpp_source.html#l00258">ControllerTuner.cpp:258</a></div></div>
 <div class="ttc" id="astructctrl_1_1LQRParams_html"><div class="ttname"><a href="structctrl_1_1LQRParams.html">ctrl::LQRParams</a></div><div class="ttdoc">LQR weighting matrices.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLQR_8h_source.html#l00042">DiscreteLQR.h:43</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md55"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md58"></a>
 4.4 MPC with Online Re-Linearisation (Adaptive MPC)</h2>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> rec = <a class="code hl_function" href="classctrl_1_1MPCHorizonTuner.html#a1972178869cc1d09f4ee5180cac91208">ctrl::MPCHorizonTuner::recommend</a>(plant, Ts);</div>
 <div class="line"><a class="code hl_struct" href="structctrl_1_1MPCParams.html">ctrl::MPCParams</a> mp; mp.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#af9281564b038417138f22da60f5708bd">Np</a> = rec.Np; mp.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#ad1b1940642dcc9f8473da14ed6ef8be1">Nc</a> = rec.Nc;</div>
@@ -384,7 +415,7 @@ Table of Contents</h1>
 <div class="ttc" id="astructctrl_1_1MPCParams_html_ad1b1940642dcc9f8473da14ed6ef8be1"><div class="ttname"><a href="structctrl_1_1MPCParams.html#ad1b1940642dcc9f8473da14ed6ef8be1">ctrl::MPCParams::Nc</a></div><div class="ttdeci">int Nc</div><div class="ttdoc">Control horizon [steps], Nc &lt;= Np. Fewer = smoother moves.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8h_source.html#l00044">DiscreteMPC.h:44</a></div></div>
 <div class="ttc" id="astructctrl_1_1MPCParams_html_af0ed73f900022f389b80f2e14f145705"><div class="ttname"><a href="structctrl_1_1MPCParams.html#af0ed73f900022f389b80f2e14f145705">ctrl::MPCParams::rho_u</a></div><div class="ttdeci">double rho_u</div><div class="ttdoc">Move suppression weight (Ru = rhou.I_{Nc.m}).</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8h_source.html#l00062">DiscreteMPC.h:62</a></div></div>
 <div class="ttc" id="astructctrl_1_1MPCParams_html_af9281564b038417138f22da60f5708bd"><div class="ttname"><a href="structctrl_1_1MPCParams.html#af9281564b038417138f22da60f5708bd">ctrl::MPCParams::Np</a></div><div class="ttdeci">int Np</div><div class="ttdoc">Prediction horizon [steps]. Cover approx. settling time.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8h_source.html#l00043">DiscreteMPC.h:43</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md56"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md59"></a>
 4.5 Fuzzy PID and Fuzzy Supervisor</h2>
 <div class="fragment"><div class="line"><span class="comment">// -- FuzzyPID (HVAC, motor, marine - any axis needing smooth nonlinear P+D+I) --</span></div>
 <div class="line"><a class="code hl_struct" href="structctrl_1_1FuzzyPIDParams.html">ctrl::FuzzyPIDParams</a> fp;</div>
@@ -469,7 +500,7 @@ Table of Contents</h1>
 <div class="ttc" id="astructctrl_1_1SupervisorParams_html_a8c497ea5b6a80340113a41e14311dfa8"><div class="ttname"><a href="structctrl_1_1SupervisorParams.html#a8c497ea5b6a80340113a41e14311dfa8">ctrl::SupervisorParams::trend_threshold</a></div><div class="ttdeci">double trend_threshold</div><div class="ttdoc">d|e|/dt considered &quot;Increasing fast&quot; [units/s].</div><div class="ttdef"><b>Definition</b> <a href="FuzzyLogic_8h_source.html#l00483">FuzzyLogic.h:483</a></div></div>
 <div class="ttc" id="astructctrl_1_1SupervisorParams_html_ada70cb220190389accdbb8bf8f758b48"><div class="ttname"><a href="structctrl_1_1SupervisorParams.html#ada70cb220190389accdbb8bf8f758b48">ctrl::SupervisorParams::cooldown_steps</a></div><div class="ttdeci">int cooldown_steps</div><div class="ttdoc">Hysteresis cooldown.</div><div class="ttdef"><b>Definition</b> <a href="FuzzyLogic_8h_source.html#l00492">FuzzyLogic.h:492</a></div></div>
 <div class="ttc" id="astructctrl_1_1SupervisorParams_html_af692884ca6b3763128d0263c2293ac65"><div class="ttname"><a href="structctrl_1_1SupervisorParams.html#af692884ca6b3763128d0263c2293ac65">ctrl::SupervisorParams::signal_threshold</a></div><div class="ttdeci">double signal_threshold</div><div class="ttdoc">relinearize_signal &gt; this value triggers the action flag.</div><div class="ttdef"><b>Definition</b> <a href="FuzzyLogic_8h_source.html#l00484">FuzzyLogic.h:484</a></div></div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md57"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md60"></a>
 4.6 Composed Controllers (&lt;tt&gt;ControllerStack&lt;/tt&gt;)</h2>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> stack = std::make_shared&lt;ctrl::ControllerStack&gt;(<a class="code hl_enumvalue" href="namespacectrl.html#a4312ec6fe1026061128af26aaf161458a45ed3b27103b66790c200c1af5f94c33">ctrl::StackMode::Supervisory</a>, Ts);</div>
 <div class="line">stack-&gt;addController(std::make_shared&lt;ctrl::DiscretePID&gt;(pp, Ts), <span class="stringliteral">&quot;PID&quot;</span>);</div>
@@ -484,7 +515,7 @@ Table of Contents</h1>
 <li><b>Observer+SF</b> (manual, not via stack): estimator provides <code>setState()</code> to feedback law &ndash; see <code>ex50_ekf_mpc.cpp</code>.</li>
 <li><b>Supervisory / Bumpless</b> (<code>Supervisory</code> mode): condition switches between controllers &ndash; see <code>ex54_bumpless_transfer.cpp</code>.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md58"></a>
+<h2><a class="anchor" id="autotoc_md61"></a>
 4.7 Background Tuning, RT Reads</h2>
 <div class="fragment"><div class="line"><a class="code hl_class" href="classctrl_1_1AtomicParamBuffer.html">ctrl::AtomicParamBuffer&lt;ctrl::PIDParams&gt;</a> buf(pp_initial);</div>
 <div class="line"> </div>
@@ -497,15 +528,15 @@ Table of Contents</h1>
 <div class="line">buf.publish(newly_computed_params);         <span class="comment">// atomic swap</span></div>
 <div class="ttc" id="aclassctrl_1_1AtomicParamBuffer_html"><div class="ttname"><a href="classctrl_1_1AtomicParamBuffer.html">ctrl::AtomicParamBuffer</a></div><div class="ttdoc">Seqlock double-buffer for lock-free parameter hand-off between a background writer thread and a real-...</div><div class="ttdef"><b>Definition</b> <a href="AtomicParamBuffer_8h_source.html#l00054">AtomicParamBuffer.h:54</a></div></div>
 </div><!-- fragment --><hr  />
-<h1><a class="anchor" id="autotoc_md60"></a>
+<h1><a class="anchor" id="autotoc_md63"></a>
 5. Class Reference</h1>
 <blockquote class="doxtable">
 <p>&zwj;Each entry lists: <b>Purpose</b>, <b>Inputs / parameters</b>, <b>Outputs / returns</b>, and <b>key methods</b>. Method signatures are abbreviated for brevity - see the header for full declarations. </p>
 </blockquote>
 <p><a class="anchor" id="51-core-types-iplantmodel"></a> </p>
-<h2><a class="anchor" id="autotoc_md61"></a>
+<h2><a class="anchor" id="autotoc_md64"></a>
 5.1 Core Types (&lt;a href="lib/PlantModel.h" &gt;PlantModel.h&lt;/a&gt;)</h2>
-<h3><a class="anchor" id="autotoc_md62"></a>
+<h3><a class="anchor" id="autotoc_md65"></a>
 &lt;tt&gt;TransferFunction&lt;/tt&gt;</h3>
 <ul>
 <li><b>Purpose:</b> SISO discrete-time TF in <code>z^-^1</code> form: <code>H(z^-^1) = num / den</code>.</li>
@@ -513,35 +544,35 @@ Table of Contents</h1>
 <li><b>Throws:</b> <code>std::invalid_argument</code> if <code>den[0] != 1</code>.</li>
 <li><b>Methods:</b> <code>order() -&gt; int</code>.</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md63"></a>
+<h3><a class="anchor" id="autotoc_md66"></a>
 &lt;tt&gt;StateSpace&lt;/tt&gt;</h3>
 <ul>
 <li><b>Purpose:</b> Discrete-time SS model <code>x[k+1] = A x + B u</code>, <code>y = C x + D u</code>.</li>
 <li><b>Inputs:</b> Eigen <code>MatrixXd</code> A (n*n), B (n*m), C (p*n), D (p*m), <code>Ts</code>.</li>
 <li><b>Methods:</b> <code>stateSize()</code>, <code>inputSize()</code>, <code>outputSize()</code> - all return <code>int</code>.</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md64"></a>
+<h3><a class="anchor" id="autotoc_md67"></a>
 &lt;tt&gt;StateSpace tf2ss(const TransferFunction&amp;)&lt;/tt&gt;</h3>
 <p>SISO TF -&gt; controllable canonical SS conversion.</p>
-<h3><a class="anchor" id="autotoc_md65"></a>
+<h3><a class="anchor" id="autotoc_md68"></a>
 &lt;tt&gt;Eigen::VectorXd ssStep(const StateSpace&amp;, Eigen::Ref&lt;Eigen::VectorXd&gt; x, const Eigen::VectorXd&amp; u)&lt;/tt&gt;</h3>
 <ul>
 <li><b>Returns:</b> <code>y[k] = C x + D u</code>. <b>Side effect:</b> updates <code>x</code> in-place to <code>x[k+1]</code>.</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md66"></a>
+<h3><a class="anchor" id="autotoc_md69"></a>
 &lt;tt&gt;std::pair&lt;Eigen::VectorXd, Eigen::VectorXd&gt; ssStepCopy(const StateSpace&amp;, const Eigen::VectorXd&amp; x, const Eigen::VectorXd&amp; u)&lt;/tt&gt;</h3>
 <ul>
 <li><b>Returns:</b> <code>{y[k], x[k+1]}</code> without modifying <code>x</code>. Semantically identical to <code>ssStep</code> but non-mutating.</li>
 <li><b>When to use:</b> Preferred from Python bindings (pybind11 cannot bind <code>Eigen::Ref&lt;&gt;</code> out-params to NumPy arrays); also useful in functional-style simulation loops where mutation of <code>x</code> is undesirable.</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md67"></a>
+<h3><a class="anchor" id="autotoc_md70"></a>
 &lt;tt&gt;std::unordered_map&lt;std::string, bool&gt; ctrl::features()&lt;/tt&gt; (&lt;a href="lib/Features.h" &gt;Features.h&lt;/a&gt;)</h3>
 <ul>
 <li><b>Purpose:</b> Runtime discovery of which optional modules were compiled in.</li>
 <li><b>Returns:</b> Map with keys <code>"hinf"</code>, <code>"subspace"</code>, <code>"fuzzy"</code>, <code>"function_approx"</code>, <code>"advanced_kalman"</code> each mapping to <code>true</code> if the corresponding <code>CTRL_HAS_*</code> flag was defined at compile time.</li>
 <li><b>Typical use:</b> Python bindings and plugin-discovery code that cannot inspect compile-time <code>#if</code> guards.</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md68"></a>
+<h3><a class="anchor" id="autotoc_md71"></a>
 &lt;tt&gt;IController&lt;/tt&gt; (&lt;a href="lib/IController.h" &gt;IController.h&lt;/a&gt;)</h3>
 <ul>
 <li><b>Purpose:</b> Abstract base for all SISO controllers; uniform interface for stacking and tuning.</li>
@@ -550,9 +581,9 @@ Table of Contents</h1>
 <li><b>Observer (telemetry):</b> <code>attachObserver(IControllerObserver*)</code> stores a non-owning raw pointer &ndash; caller must ensure the observer outlives the controller. <code>attachObserver(std::shared_ptr&lt;IControllerObserver&gt;)</code> co-owns the observer, safe for Python bindings and dynamically-allocated observers. <code>detachObserver()</code> releases both.</li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md70"></a>
+<h2><a class="anchor" id="autotoc_md73"></a>
 5.2 Controllers</h2>
-<h3><a class="anchor" id="autotoc_md71"></a>
+<h3><a class="anchor" id="autotoc_md74"></a>
 &lt;tt&gt;DiscretePID&lt;/tt&gt; (&lt;a href="lib/DiscretePID.h" &gt;DiscretePID.h&lt;/a&gt;)</h3>
 <ul>
 <li><b>Purpose:</b> Backward-Euler PID with filtered derivative and back-calculation anti-windup.</li>
@@ -562,7 +593,7 @@ Table of Contents</h1>
 <li><b>Integral law (backward Euler):</b> <code>I[k] = I[k-1] + Ki.Ts.e[k] + Kb.(u_sat[k] - u_unsat[k])</code>. The current-step error <code>e[k]</code> is included in both <code>I[k]</code> and <code>u[k]</code> before the state is advanced, matching true backward Euler discretisation.</li>
 <li><b>Constraints:</b> <code>Ki*Ts &lt; 2*Kp</code> for discrete stability (see <a class="el" href="md_docs_2DEPLOYMENT.html">DEPLOYMENT.md Section 1</a>).</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md72"></a>
+<h3><a class="anchor" id="autotoc_md75"></a>
 &lt;tt&gt;DiscreteLQR&lt;/tt&gt; (&lt;a href="lib/DiscreteLQR.h" &gt;DiscreteLQR.h&lt;/a&gt;)</h3>
 <ul>
 <li><b>Purpose:</b> Optimal full-state feedback <code>u = -K*(x - x_ref) + u_ff</code> with DARE solved offline via value iteration.</li>
@@ -570,9 +601,9 @@ Table of Contents</h1>
 <li><b>Inputs:</b> <code>compute(x, x_ref = \emptyset, u_ff = \emptyset)</code> - full state vector required.</li>
 <li><b>Returns:</b> <code>Eigen::VectorXd u[k]</code> (size m).</li>
 <li><b>Methods:</b> <code>gainMatrix()</code>, <code>riccatiSolution()</code>, <code>dareConverged()</code>, <code>dareIterations()</code>, <code>sampleTime()</code>.</li>
-<li><b>Helper:</b> <code>LQRAdapter</code> - wraps LQR as <code>IController</code> for use inside <code>ControllerStack</code>.</li>
+<li><b>Helper:</b> <code>LQRAdapter</code> (Part 34) - wraps <code>DiscreteLQR</code> as <code>IController</code>. Two constructors: reference-capture (<code>LQRAdapter(lqr, state_fn)</code>) and owning (<code>LQRAdapter(owned_lqr, state_fn)</code>). Free function <code>makeLQRController(sys, lqr_params, state_fn)</code> creates a <code>shared_ptr&lt;IController&gt;</code>-compatible instance in one call — use this for <code>AutoGainScheduler</code>/<code>GainScheduledController</code> <code>design_fn</code> callbacks. MIMO note: <code>compute()</code> returns <code>u[0]</code> only; use <code>computeVec()</code> for the full vector.</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md73"></a>
+<h3><a class="anchor" id="autotoc_md76"></a>
 &lt;tt&gt;DiscreteMPC&lt;/tt&gt; (&lt;a href="lib/DiscreteMPC.h" &gt;DiscreteMPC.h&lt;/a&gt;)</h3>
 <ul>
 <li><b>Purpose:</b> Condensed receding-horizon QP with hard box constraints on <code>Deltau</code> and <code>u</code>.</li>
@@ -583,7 +614,7 @@ Table of Contents</h1>
 <li><b>Methods:</b> <code>computeRef(...)</code>, <code>setPlant(plant)</code> (online re-linearisation), <code>setState(x)</code>, <code>setParams(p)</code>, <code>compute(error)</code> (SISO convenience).</li>
 <li><b>Performance:</b> Condensed matrices F, G_u, Phi, H are pre-built in the constructor; per-step cost is one LDLT solve.</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md74"></a>
+<h3><a class="anchor" id="autotoc_md77"></a>
 &lt;tt&gt;DiscreteLQG&lt;/tt&gt; (&lt;a href="lib/DiscreteLQG.h" &gt;DiscreteLQG.h&lt;/a&gt;)</h3>
 <ul>
 <li><b>Purpose:</b> LQR on Kalman-estimated state - output-feedback optimal control (separation principle).</li>
@@ -593,7 +624,7 @@ Table of Contents</h1>
 <li><b>Methods:</b> <code>step(...)</code>, <code>compute(...)</code>, <code>setReference(x_ref)</code>, <code>setUPrev(u)</code>, <code>reset()</code>, <code>gainMatrix()</code>.</li>
 <li><b>D != 0 note:</b> If the plant's D matrix is non-zero, a <code>std::cerr</code> warning is printed at construction. The Kalman innovation <code>y - C.x^ - D.u</code> must use <code>u[k-1]</code> (one step stale) because <code>u[k]</code> has not yet been computed at update time. Accuracy degrades proportionally to D's magnitude. Set D = 0 in the model for accurate filtering.</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md75"></a>
+<h3><a class="anchor" id="autotoc_md78"></a>
 &lt;tt&gt;DiscreteSMC&lt;/tt&gt; (&lt;a href="lib/DiscreteSMC.h" &gt;DiscreteSMC.h&lt;/a&gt;)</h3>
 <ul>
 <li><b>Purpose:</b> First-order SMC with sliding surface <code>s = c_e.e + c_de.(e - e_prev)</code> and saturation <code>sat(s/phi)</code> to reduce chattering.</li>
@@ -604,7 +635,7 @@ Table of Contents</h1>
 <li><b>**<code>c_de</code> sizing:** <code>c_de</code> absorbs the sample time <code>Ts</code>. To match a continuous-time slope <code>lambda</code> [1/s], set <code>c_de = lambda . Ts</code>. Passing a continuous-time <code>lambda</code> directly as <code>c_de</code> over-weights the rate term by a factor of <code>1/Ts</code>.</b></li>
 </ul>
 <p><b></b></p>
-<h3><a class="anchor" id="autotoc_md76"></a>
+<h3><a class="anchor" id="autotoc_md79"></a>
 &lt;tt&gt;DiscreteADRC&lt;/tt&gt; (&lt;a href="lib/DiscreteADRC.h" &gt;DiscreteADRC.h&lt;/a&gt;)</h3>
 <p><b></p><ul>
 <li><b>Purpose:</b> Bandwidth-parameterised 2nd-order Linear ADRC - ESO estimates total disturbance, PD law cancels it.</li>
@@ -615,7 +646,7 @@ Table of Contents</h1>
 </ul>
 <p></b></p>
 <p><b></b></p>
-<h3><a class="anchor" id="autotoc_md77"></a>
+<h3><a class="anchor" id="autotoc_md80"></a>
 &lt;tt&gt;DiscreteLeadLag&lt;/tt&gt; (&lt;a href="lib/DiscreteLeadLag.h" &gt;DiscreteLeadLag.h&lt;/a&gt;)</h3>
 <p><b></p><ul>
 <li><b>Purpose:</b> Tustin-discretised first-order compensator <code>C(s) = K.(s + z_c)/(s + p_c)</code>. Lead if <code>p &gt; z</code>; lag if <code>p &lt; z</code>.</li>
@@ -626,7 +657,7 @@ Table of Contents</h1>
 </ul>
 <p></b></p>
 <p><b></b></p>
-<h3><a class="anchor" id="autotoc_md78"></a>
+<h3><a class="anchor" id="autotoc_md81"></a>
 &lt;tt&gt;SmithPredictor&lt;/tt&gt; (&lt;a href="lib/SmithPredictor.h" &gt;SmithPredictor.h&lt;/a&gt;)</h3>
 <p><b></p><ul>
 <li><b>Purpose:</b> Dead-time compensator wrapping any <code>IController</code>; replaces feedback delay with internal-model prediction.</li>
@@ -638,7 +669,7 @@ Table of Contents</h1>
 </ul>
 <p></b></p>
 <p><b></b></p>
-<h3><a class="anchor" id="autotoc_md79"></a>
+<h3><a class="anchor" id="autotoc_md82"></a>
 &lt;tt&gt;ExtremumSeeker&lt;/tt&gt; (&lt;a href="lib/ExtremumSeeker.h" &gt;ExtremumSeeker.h&lt;/a&gt;)</h3>
 <p><b></p><ul>
 <li><b>Purpose:</b> Perturbation-based optimiser - injects dither, demodulates output, integrates gradient to climb to the extremum of an unknown static cost surface.</li>
@@ -650,7 +681,7 @@ Table of Contents</h1>
 </ul>
 <p></b></p>
 <p><b><b></b></b></p>
-<h3><a class="anchor" id="autotoc_md80"></a>
+<h3><a class="anchor" id="autotoc_md83"></a>
 &lt;tt&gt;RepetitiveController&lt;/tt&gt; (&lt;a href="lib/RepetitiveController.h" &gt;RepetitiveController.h&lt;/a&gt;)</h3>
 <p><b><b></p><ul>
 <li><b>Purpose:</b> Internal Model Principle (IMP) controller for periodic reference/disturbance rejection. Stores one period of correction signal in a circular buffer and blends it with current error via a Q-filter.</li>
@@ -661,7 +692,7 @@ Table of Contents</h1>
 </ul>
 <p></b></b></p>
 <p><b><b></b></b></p>
-<h3><a class="anchor" id="autotoc_md81"></a>
+<h3><a class="anchor" id="autotoc_md84"></a>
 &lt;tt&gt;FeedforwardController&lt;/tt&gt; (&lt;a href="lib/FeedforwardController.h" &gt;FeedforwardController.h&lt;/a&gt;)</h3>
 <p><b><b></p><ul>
 <li><b>Purpose:</b> Reference model feedforward - computes <code>u_ff = Kff * r</code> (static) or filters the reference through a model-inverse transfer function. Use additively with a feedback controller: <code>u = u_feedback + u_ff</code>.</li>
@@ -671,7 +702,7 @@ Table of Contents</h1>
 </ul>
 <p></b></b></p>
 <p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md82"></a>
+<h3><a class="anchor" id="autotoc_md85"></a>
 &lt;tt&gt;GeneralizedPredictiveController&lt;/tt&gt; (&lt;a href="lib/GeneralizedPredictiveControl.h" &gt;GeneralizedPredictiveControl.h&lt;/a&gt;)</h3>
 <p><b><b><b></p><ul>
 <li><b>Purpose:</b> GPC based on the CARIMA (Controlled AutoRegressive Integrated Moving Average) process model. Supports online model adaptation via RLS using <code>setPlant()</code>.</li>
@@ -684,7 +715,7 @@ Table of Contents</h1>
 </ul>
 <p></b></b></b></p>
 <p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md83"></a>
+<h3><a class="anchor" id="autotoc_md86"></a>
 &lt;tt&gt;DiscreteHinf&lt;/tt&gt; (&lt;a href="lib/DiscreteHinf.h" &gt;DiscreteHinf.h&lt;/a&gt;)</h3>
 <p><b><b><b></p><ul>
 <li><b>Purpose:</b> H-infinity synthesis via gamma-bisection. Also supports mixed-sensitivity design (<code>mixedSensitivity()</code>) and mu-synthesis via full DK-iteration (<code>solveMuSyn()</code>).</li>
@@ -695,12 +726,12 @@ Table of Contents</h1>
 </ul>
 <p></b></b></b></p>
 <p><b><b><b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md84"></a>
+<h3><a class="anchor" id="autotoc_md87"></a>
 Fuzzy Logic Module (&lt;a href="lib/FuzzyLogic.h" &gt;FuzzyLogic.h&lt;/a&gt;)</h3>
 <p><b><b><b></b></b></b></p>
 <p><b><b><b>The fuzzy module provides a self-contained Mamdani / Takagi-Sugeno inference engine together with three ready-to-use <code>IController</code> wrappers. All classes live in the <code>ctrl</code> namespace and are included via <code><a class="el" href="ControllerToolbox_8h.html" title="Discrete-Time Controller Toolbox - umbrella include.">ControllerToolbox.h</a></code>.</b></b></b></p>
 <p><b><b><b></b></b></b></p>
-<h4><a class="anchor" id="autotoc_md85"></a>
+<h4><a class="anchor" id="autotoc_md88"></a>
 Membership function factories</h4>
 <p><b><b><b> </p><table class="markdownTable">
 <tr class="markdownTableHead">
@@ -721,7 +752,7 @@ Membership function factories</h4>
 <p></b></b></b></p>
 <p><b><b><b>All factories return <code><a class="el" href="structctrl_1_1MF.html" title="Value-type tagged-union membership function.">ctrl::MF</a> = std::function&lt;double(double)&gt;</code> capturing parameters by value.</b></b></b></p>
 <p><b><b><b></b></b></b></p>
-<h4><a class="anchor" id="autotoc_md86"></a>
+<h4><a class="anchor" id="autotoc_md89"></a>
 &lt;tt&gt;LinguisticVariable&lt;/tt&gt;</h4>
 <p><b><b><b></p><ul>
 <li>Holds <code>name</code>, universe <code>[lo, hi]</code>, and a <code>std::vector&lt;LinguisticTerm&gt;</code> (name + MF pairs).</li>
@@ -730,7 +761,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></p>
 <p><b><b><b></b></b></b></p>
-<h4><a class="anchor" id="autotoc_md87"></a>
+<h4><a class="anchor" id="autotoc_md90"></a>
 &lt;tt&gt;FuzzySystem&lt;/tt&gt;</h4>
 <p><b><b><b></p><ul>
 <li><b>Purpose:</b> Core inference engine supporting both Mamdani and TS inference on a single output variable.</li>
@@ -743,7 +774,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></p>
 <p><b><b><b></b></b></b></p>
-<h4><a class="anchor" id="autotoc_md88"></a>
+<h4><a class="anchor" id="autotoc_md91"></a>
 &lt;tt&gt;FuzzyPD&lt;/tt&gt; (implements &lt;tt&gt;IController&lt;/tt&gt;)</h4>
 <p><b><b><b></p><ul>
 <li><b>Purpose:</b> Convenience Mamdani PD controller for one axis; builds its own <code>FuzzySystem</code> automatically from the canonical 5-term partition <code>{NL, NS, ZE, PS, PL}</code> with 25-rule diagonal rule table.</li>
@@ -753,7 +784,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></p>
 <p><b><b><b></b></b></b></p>
-<h4><a class="anchor" id="autotoc_md89"></a>
+<h4><a class="anchor" id="autotoc_md92"></a>
 &lt;tt&gt;FuzzyPID&lt;/tt&gt; (implements &lt;tt&gt;IController&lt;/tt&gt;)</h4>
 <p><b><b><b></p><ul>
 <li><b>Purpose:</b> <code>FuzzyPD</code> block + crisp backward-Euler integral with back-calculation anti-windup.</li>
@@ -763,7 +794,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></p>
 <p><b><b><b></b></b></b></p>
-<h4><a class="anchor" id="autotoc_md90"></a>
+<h4><a class="anchor" id="autotoc_md93"></a>
 &lt;tt&gt;FuzzySupervisor&lt;/tt&gt;</h4>
 <p><b><b><b></p><ul>
 <li><b>Purpose:</b> Monitors a closed-loop error channel and returns a <code>SupervisorDecision</code> indicating whether the underlying controller's linearised plant model should be refreshed.</li>
@@ -777,11 +808,11 @@ Membership function factories</h4>
 <p><b><b><b><b></p><hr  />
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h2><a class="anchor" id="autotoc_md92"></a>
+<h2><a class="anchor" id="autotoc_md95"></a>
 5.3 Estimators &amp; Identification</h2>
 <p><b><b><b><b></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md93"></a>
+<h3><a class="anchor" id="autotoc_md96"></a>
 &lt;tt&gt;KalmanFilter&lt;/tt&gt; (&lt;a href="lib/KalmanFilter.h" &gt;KalmanFilter.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Linear discrete Kalman filter (predict / update) with Joseph-form covariance update.</li>
@@ -796,7 +827,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md94"></a>
+<h3><a class="anchor" id="autotoc_md97"></a>
 &lt;tt&gt;ExtendedKalmanFilter&lt;/tt&gt; (&lt;a href="lib/ExtendedKalmanFilter.h" &gt;ExtendedKalmanFilter.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> EKF for nonlinear state estimation. Linearises the dynamics and measurement functions around the current estimate at each step.</li>
@@ -806,7 +837,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md95"></a>
+<h3><a class="anchor" id="autotoc_md98"></a>
 &lt;tt&gt;UnscentedKalmanFilter&lt;/tt&gt; (&lt;a href="lib/UnscentedKalmanFilter.h" &gt;UnscentedKalmanFilter.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> UKF using the unscented transform (2n+1 sigma points) for higher-order nonlinear estimation accuracy without Jacobians.</li>
@@ -816,7 +847,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md96"></a>
+<h3><a class="anchor" id="autotoc_md99"></a>
 &lt;tt&gt;MovingHorizonEstimator&lt;/tt&gt; (&lt;a href="lib/MovingHorizonEstimator.h" &gt;MovingHorizonEstimator.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> MHE via condensed QP &ndash; the dual of MPC for state estimation. Optimises the state trajectory over a moving window of N measurements with box constraints on process noise.</li>
@@ -829,7 +860,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md97"></a>
+<h3><a class="anchor" id="autotoc_md100"></a>
 &lt;tt&gt;FOPDTIdentifier&lt;/tt&gt; (&lt;a href="lib/FOPDTIdentifier.h" &gt;FOPDTIdentifier.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Identifies a First-Order Plus Dead-Time (FOPDT) model from open-loop step response data.</li>
@@ -839,7 +870,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md98"></a>
+<h3><a class="anchor" id="autotoc_md101"></a>
 &lt;tt&gt;SOPDTIdentifier&lt;/tt&gt; (&lt;a href="lib/SOPDTIdentifier.h" &gt;SOPDTIdentifier.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Identifies a Second-Order Plus Dead-Time (SOPDT) model from open-loop step response data. Convention: <code>tau1 &gt;= tau2</code>.</li>
@@ -852,7 +883,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md99"></a>
+<h3><a class="anchor" id="autotoc_md102"></a>
 &lt;tt&gt;MRACController&lt;/tt&gt; (&lt;a href="lib/MRACController.h" &gt;MRACController.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Discrete-time Model Reference Adaptive Control &ndash; SISO, first-order reference model. Forces plant output to track y_m[k+1] = a_m*y_m + b_m*r via two-parameter Lyapunov adaptation with σ-modification and Euclidean projection.</li>
@@ -865,7 +896,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md100"></a>
+<h3><a class="anchor" id="autotoc_md103"></a>
 &lt;tt&gt;FeedbackLinearisationController&lt;/tt&gt; (&lt;a href="lib/FeedbackLinearisation.h" &gt;FeedbackLinearisation.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Exact feedback linearisation for SISO affine-in-control systems ẋ = f(x) + g(x)*u, relative degree 1. Cancels nonlinear terms algebraically; inner IController drives the resulting virtual integrator.</li>
@@ -878,7 +909,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md101"></a>
+<h3><a class="anchor" id="autotoc_md104"></a>
 &lt;tt&gt;RecursiveLeastSquares&lt;/tt&gt; (&lt;a href="lib/RecursiveLeastSquares.h" &gt;RecursiveLeastSquares.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Online ARX parameter estimation using exponential forgetting (<code>lambda</code> factor).</li>
@@ -888,7 +919,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md102"></a>
+<h3><a class="anchor" id="autotoc_md105"></a>
 &lt;tt&gt;LinearisationHelper&lt;/tt&gt; (&lt;a href="lib/LinearisationHelper.h" &gt;LinearisationHelper.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Numerical Jacobians and ZOH linearisation of continuous-time nonlinear models at a given operating point. Central-difference with step <code>h_i = ε*max(|x_i|, 1)</code> for heterogeneous state magnitudes.</li>
@@ -904,7 +935,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md103"></a>
+<h3><a class="anchor" id="autotoc_md106"></a>
 &lt;tt&gt;BalancedTruncation&lt;/tt&gt; (&lt;a href="lib/BalancedTruncation.h" &gt;BalancedTruncation.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Moore (1981) model order reduction via balanced realisation. Replaces an n-state stable system with an r-state approximation preserving the most energetically significant modes. Provides a-priori H∞ error bound.</li>
@@ -920,7 +951,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md104"></a>
+<h3><a class="anchor" id="autotoc_md107"></a>
 &lt;tt&gt;ZeroPhaseTrackingFilter&lt;/tt&gt; (&lt;a href="lib/ZeroPhaseTrackingFilter.h" &gt;ZeroPhaseTrackingFilter.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> ZPETC (Tomizuka 1987) feedforward prefilter. Inverts the minimum-phase part of a plant's numerator causally, normalises DC gain to 1, and produces zero phase error for min-phase zeros.</li>
@@ -935,7 +966,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md105"></a>
+<h3><a class="anchor" id="autotoc_md108"></a>
 &lt;tt&gt;SubspaceID&lt;/tt&gt; (&lt;a href="lib/SubspaceID.h" &gt;SubspaceID.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> N4SID subspace identification of MIMO state-space models from PRBS or arbitrary excitation data.</li>
@@ -944,7 +975,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md106"></a>
+<h3><a class="anchor" id="autotoc_md109"></a>
 &lt;tt&gt;GainScheduledController&lt;/tt&gt; (&lt;a href="lib/GainScheduledController.h" &gt;GainScheduledController.h&lt;/a&gt;) &lt;em&gt;Part 20+23&lt;/em&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> IController wrapper that interpolates between a sorted list of (p, IController) schedule points.</li>
@@ -955,7 +986,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md107"></a>
+<h3><a class="anchor" id="autotoc_md110"></a>
 &lt;tt&gt;GapMetric&lt;/tt&gt; (&lt;a href="lib/GapMetric.h" &gt;GapMetric.h&lt;/a&gt;) &lt;em&gt;Part 20&lt;/em&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Nu-gap upper bound (SISO chordal metric) for measuring plant model distance.</li>
@@ -964,7 +995,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md108"></a>
+<h3><a class="anchor" id="autotoc_md111"></a>
 &lt;tt&gt;LinearModelCluster&lt;/tt&gt; (&lt;a href="lib/LinearModelCluster.h" &gt;LinearModelCluster.h&lt;/a&gt;) &lt;em&gt;Part 20&lt;/em&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Single-linkage agglomerative clustering of plant models by nu-gap distance.</li>
@@ -972,7 +1003,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md109"></a>
+<h3><a class="anchor" id="autotoc_md112"></a>
 &lt;tt&gt;LPVSystemID&lt;/tt&gt; (&lt;a href="lib/LPVSystemID.h" &gt;LPVSystemID.h&lt;/a&gt;) &lt;em&gt;Part 20&lt;/em&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Polynomial LPV system identification via QR regression.</li>
@@ -982,7 +1013,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md110"></a>
+<h3><a class="anchor" id="autotoc_md113"></a>
 &lt;tt&gt;AutoGainScheduler&lt;/tt&gt; (&lt;a href="lib/AutoGainScheduler.h" &gt;AutoGainScheduler.h&lt;/a&gt;) &lt;em&gt;Part 20&lt;/em&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Pipeline: nonlinear plant -&gt; equilibrium grid -&gt; linearise -&gt; gap cluster -&gt; design controllers -&gt; assemble GainScheduledController.</li>
@@ -991,7 +1022,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md111"></a>
+<h3><a class="anchor" id="autotoc_md114"></a>
 &lt;tt&gt;NonlinearMPC&lt;/tt&gt; (&lt;a href="lib/NonlinearMPC.h" &gt;NonlinearMPC.h&lt;/a&gt;) &lt;em&gt;Part 22&lt;/em&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Nonlinear MPC via Real-Time Iteration (RTI, Diehl 2005). Discrete-time dynamics <code>x[k+1] = f(x[k], u[k])</code>.</li>
@@ -1002,7 +1033,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md112"></a>
+<h3><a class="anchor" id="autotoc_md115"></a>
 &lt;tt&gt;AdaptiveSmithPredictor&lt;/tt&gt; (&lt;a href="lib/AdaptiveSmithPredictor.h" &gt;AdaptiveSmithPredictor.h&lt;/a&gt;) &lt;em&gt;Part 22&lt;/em&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> SmithPredictor with online dead-time estimation via cross-correlation <code>R_uy(tau) = sum u[k-tau]*y[k]</code>. Rebuilds SP when delay estimate changes.</li>
@@ -1011,7 +1042,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md113"></a>
+<h3><a class="anchor" id="autotoc_md116"></a>
 &lt;tt&gt;AutoTuner&lt;/tt&gt; (&lt;a href="lib/AutoTuner.h" &gt;AutoTuner.h&lt;/a&gt;) &lt;em&gt;Part 22, header-only&lt;/em&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> CMA-ES black-box optimizer for controller parameter tuning (minimises arbitrary cost function).</li>
@@ -1021,7 +1052,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md114"></a>
+<h3><a class="anchor" id="autotoc_md117"></a>
 &lt;tt&gt;AntiWindupWrapper&lt;/tt&gt; (&lt;a href="lib/AntiWindupWrapper.h" &gt;AntiWindupWrapper.h&lt;/a&gt;) &lt;em&gt;Part 24, header-only&lt;/em&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Generic anti-windup decorator for any IController using the Hanus (1987) conditioning technique. Prevents integrator windup in controllers without built-in saturation handling (DiscreteLQG, DiscreteHinf, GPC, custom).</li>
@@ -1032,14 +1063,35 @@ Membership function factories</h4>
 <li><b>Python:</b> <code><a class="el" href="classctrl_1_1AntiWindupWrapper.html" title="Generic anti-windup decorator for any IController.">ctrl.AntiWindupWrapper</a>(inner, uMin, uMax, Kb=1.0)</code>.</li>
 </ul>
 <p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md118"></a>
+&lt;tt&gt;TubeMPC&lt;/tt&gt; (&lt;a href="lib/TubeMPC.h" &gt;TubeMPC.h&lt;/a&gt;) &lt;em&gt;Part 26&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Robust MPC with mRPI tube guarantee for bounded additive disturbances <code>w[k] ∈ W</code> (Mayne, Seron &amp; Rakovic 2005). The actual state stays inside <code>Z = {e : |e_i| ≤ z_max_i}</code> around the nominal trajectory for all admissible disturbances.</li>
+<li>**Parameters (<code>TubeMPCParams</code>):** <code>Np</code>, <code>Nu</code>, <code>Q</code> (state cost), <code>R</code> (control cost), <code>K</code> (stabilising feedback — must make A+B*K stable), <code>wMax</code> (disturbance bound per state), <code>uMin/uMax</code>, <code>Ts</code>.</li>
+<li><b>Offline (ctor):</b> computes mRPI set, tightens input constraints by K*Z, builds condensed QP matrices.</li>
+<li><b>Online:</b> <code>setState(x)</code>, <code>computeRef(x, y_ref)</code> applies composite law <code>u = K*(x - x_nom) + V*[0]</code>.</li>
+<li><b>Cave:</b> <code>y_ss ≈ Q/(Q+R)*r</code> without integral action; for ~0.5% error use <code>Q=10, R=0.05</code>. MATLAB <code>lqr()</code> sign: pass <code>K = -K_lqr</code> (negate).</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md119"></a>
+&lt;tt&gt;ParticleFilter&lt;/tt&gt; (&lt;a href="lib/ParticleFilter.h" &gt;ParticleFilter.h&lt;/a&gt;)</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> SIR (Bootstrap) particle filter for nonlinear / non-Gaussian state estimation (Gordon, Salmond &amp; Smith 1993). Use over EKF/UKF when the posterior is multimodal or heavy-tailed.</li>
+<li><b>Parameters:</b> <code>n_particles</code>, process-noise <code>Q</code>, measurement-noise <code>R</code>, <code>resample_threshold</code> (ESS fraction, typically 0.5).</li>
+<li><b>Usage:</b> provide <code>state_fn(x, u)</code> (dynamics) + <code>obs_fn(x, u)</code> (measurement model); call <code>update(u, y)</code> → <code>estimate()</code> returns weighted mean.</li>
+<li><b>Benchmark:</b> Kitagawa <code>y = x²/20 + noise</code> — RMSE 4–10 is normal (bimodal posterior).</li>
+</ul>
+<p></b></b></b></b></p>
 <p><b><b><b><b></p><hr  />
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h2><a class="anchor" id="autotoc_md116"></a>
+<h2><a class="anchor" id="autotoc_md121"></a>
 5.4 Tuning Layer</h2>
 <p><b><b><b><b></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md117"></a>
+<h3><a class="anchor" id="autotoc_md122"></a>
 &lt;tt&gt;RelayAutoTuner&lt;/tt&gt; (&lt;a href="lib/ControllerTuner.h" &gt;ControllerTuner.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Astrom-Hagglund relay-feedback test -&gt; extracts ultimate gain <code>Ku</code> and period <code>Tu</code>.</li>
@@ -1049,7 +1101,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md118"></a>
+<h3><a class="anchor" id="autotoc_md123"></a>
 &lt;tt&gt;StepResponseTuner&lt;/tt&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Open-loop FOPDT identification (<code>K, tau, theta</code>) from step response data; produces PID gains via IMC.</li>
@@ -1057,7 +1109,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md119"></a>
+<h3><a class="anchor" id="autotoc_md124"></a>
 &lt;tt&gt;LQRWeightTuner&lt;/tt&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><code>brysonMethod(xmax, umax)</code> - Bryson's rule: <code>Q = diag(1/xmax^2)</code>, <code>R = diag(1/umax^2)</code>.</li>
@@ -1065,7 +1117,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md120"></a>
+<h3><a class="anchor" id="autotoc_md125"></a>
 &lt;tt&gt;MPCHorizonTuner&lt;/tt&gt;</h3>
 <p><b><b><b><b></p><ul>
 <li><code>recommend(plant, Ts, rho_y, rho_u)</code> -&gt; <code>Recommendation { Np, Nc, rho_y, rho_u, estimatedSettlingTime }</code>.</li>
@@ -1073,11 +1125,11 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md121"></a>
+<h3><a class="anchor" id="autotoc_md126"></a>
 &lt;tt&gt;ZieglerNicholsTuner&lt;/tt&gt;, &lt;tt&gt;CohenCoonTuner&lt;/tt&gt;, &lt;tt&gt;LoopShapingTuner&lt;/tt&gt;, &lt;tt&gt;KalmanWeightTuner&lt;/tt&gt;</h3>
 <p><b><b><b><b> Standalone heuristics; each exposes <code>tuneImpl(...)</code> (unchecked) and <code>tuneFor&lt;C&gt;(...)</code> (template wrapper enforcing compile-time <code>ControllerTraits&lt;C&gt;</code> compatibility - produces actionable error messages for incompatible types).</b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md122"></a>
+<h3><a class="anchor" id="autotoc_md127"></a>
 &lt;tt&gt;TunerSuite&lt;/tt&gt; (&lt;a href="lib/TunerSuite.h" &gt;TunerSuite.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Unified front-end dispatching to the eight tuning families with <b>runtime soft-warnings</b> (IDEAL -&gt; no warning; SOFT -&gt; diagnostic + <code>result.warned == true</code>; FALLBACK -&gt; default params + <code>success == false</code>).</li>
@@ -1086,7 +1138,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md123"></a>
+<h3><a class="anchor" id="autotoc_md128"></a>
 &lt;tt&gt;ControllerTraits&lt;C&gt;&lt;/tt&gt; (&lt;a href="lib/ControllerTraits.h" &gt;ControllerTraits.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Compile-time mapping from controller type to supported tuners (booleans <code>supports_heuristic_pid</code>, <code>supports_lqr_tuning</code>, <code>supports_mpc_tuning</code>, <code>supports_freq_tuning</code>, <code>supports_kalman_tuning</code>).</li>
@@ -1096,11 +1148,11 @@ Membership function factories</h4>
 <p><b><b><b><b></p><hr  />
 <p></b></b></b></b></p>
 <p><b><b><b><b><a class="anchor" id="55-composition--orchestration"></a> </b></b></b></b></p>
-<h2><a class="anchor" id="autotoc_md125"></a>
+<h2><a class="anchor" id="autotoc_md130"></a>
 5.5 Composition &amp; Orchestration</h2>
 <p><b><b><b><b></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md126"></a>
+<h3><a class="anchor" id="autotoc_md131"></a>
 &lt;tt&gt;ControllerStack&lt;/tt&gt; (&lt;a href="lib/ControllerStack.h" &gt;ControllerStack.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Multi-controller orchestrator with three modes.<ul>
@@ -1115,11 +1167,11 @@ Membership function factories</h4>
 <p><b><b><b><b></p><hr  />
 <p></b></b></b></b></p>
 <p><b><b><b><b><a class="anchor" id="56-analysis--metrics"></a> </b></b></b></b></p>
-<h2><a class="anchor" id="autotoc_md128"></a>
+<h2><a class="anchor" id="autotoc_md133"></a>
 5.6 Analysis &amp; Metrics</h2>
 <p><b><b><b><b></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md129"></a>
+<h3><a class="anchor" id="autotoc_md134"></a>
 &lt;tt&gt;MetricsAnalyzer&lt;/tt&gt; (&lt;a href="lib/MetricsAnalyzer.h" &gt;MetricsAnalyzer.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Extract time-domain metrics from step-response data.</li>
@@ -1127,7 +1179,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md130"></a>
+<h3><a class="anchor" id="autotoc_md135"></a>
 &lt;tt&gt;SystemAnalysis&lt;/tt&gt; (&lt;a href="lib/SystemAnalysis.h" &gt;SystemAnalysis.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Frequency-domain and stability analysis utilities (static methods).</li>
@@ -1137,11 +1189,11 @@ Membership function factories</h4>
 <p><b><b><b><b></p><hr  />
 <p></b></b></b></b></p>
 <p><b><b><b><b><a class="anchor" id="57-real-time-utilities--hal"></a> </b></b></b></b></p>
-<h2><a class="anchor" id="autotoc_md132"></a>
+<h2><a class="anchor" id="autotoc_md137"></a>
 5.7 Real-Time Utilities &amp; HAL</h2>
 <p><b><b><b><b></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md133"></a>
+<h3><a class="anchor" id="autotoc_md138"></a>
 &lt;tt&gt;AtomicParamBuffer&lt;Params&gt;&lt;/tt&gt; (&lt;a href="lib/AtomicParamBuffer.h" &gt;AtomicParamBuffer.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><ul>
 <li><b>Purpose:</b> Seqlock-based double-buffered parameter handoff between a background tuner and the real-time control thread. Single-writer / single-reader, data-race-free under the C++ memory model.</li>
@@ -1155,7 +1207,7 @@ Membership function factories</h4>
 </ul>
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h3><a class="anchor" id="autotoc_md134"></a>
+<h3><a class="anchor" id="autotoc_md139"></a>
 HAL (&lt;a href="lib/hal/HAL.h" &gt;lib/hal/HAL.h&lt;/a&gt;)</h3>
 <p><b><b><b><b> Bundles <code>ISensor</code>, <code>IActuator</code>, <code>SimPlant</code>, <code>SimSensor</code>, <code>SimActuator</code> for closed-loop simulation against a <code>StateSpace</code> plant. Suitable as a stand-in for real hardware drivers when developing/testing.</b></b></b></b></p>
 <p><b><b><b><b></p><div class="fragment"><div class="line"><a class="code hl_class" href="classctrl_1_1SimPlant.html">ctrl::SimPlant</a>    plant(sys);</div>
@@ -1173,7 +1225,137 @@ HAL (&lt;a href="lib/hal/HAL.h" &gt;lib/hal/HAL.h&lt;/a&gt;)</h3>
 <p><b><b><b><b></p><hr  />
 <p></b></b></b></b></p>
 <p><b><b><b><b></b></b></b></b></p>
-<h1><a class="anchor" id="autotoc_md136"></a>
+<h2><a class="anchor" id="autotoc_md141"></a>
+5.8 Data-Driven &amp; ML Controllers (Parts 31–34)</h2>
+<p><b><b><b><b></b></b></b></b></p>
+<p><b><b><b><b>All algorithms below are in <code>lib/</code>, included by <a href="lib/ControllerToolbox.h">ControllerToolbox.h</a>, and have pybind11 bindings + Catch2 tests.</b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md142"></a>
+&lt;tt&gt;ILCController&lt;/tt&gt; (&lt;a href="lib/IterativeLearningControl.h" &gt;IterativeLearningControl.h&lt;/a&gt;) &lt;em&gt;Part 31&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Iterative Learning Control — learns a feedforward correction that eliminates repeating tracking errors across fixed-duration trials (Bristow 2006).</li>
+<li><b>Modes:</b> <code>P_type</code> (<code>u_{j+1} = u_j + L_p*e_j</code>), <code>D_type</code> (adds derivative term), <code>NormOptimal</code> (minimises <code>||e_{j+1}||²_R + ||Δu_j||²_Q</code> using the Markov-parameter matrix G).</li>
+<li><b>Usage:</b> <code>newTrial()</code> → run the trial → <code>endTrial(e_vec)</code> → <code>getNextInput(k)</code> for the feedforward at step k.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md143"></a>
+&lt;tt&gt;SINDy&lt;/tt&gt; + &lt;tt&gt;SINDyModel&lt;/tt&gt; (&lt;a href="lib/SINDy.h" &gt;SINDy.h&lt;/a&gt;) &lt;em&gt;Part 31&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Sparse Identification of Nonlinear Dynamics — builds a sparse polynomial/trig equation of motion from state-derivative data via STLS regression (Brunton 2016).</li>
+<li><b>Library options:</b> <code>PolyDeg1</code>, <code>PolyDeg2</code>, <code>PolyDeg3</code>, <code>PolyDeg1Trig</code> (adds sin/cos columns).</li>
+<li><b>Usage:</b> <code>fit(X_dot, X, U)</code> → <code>SINDyModel</code>; <code>model.stateFunc()</code> returns a <code>StateFunc</code> compatible with <code>NonlinearMPC</code>, <code>CEMController</code>, and <code>DynaController</code>.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md144"></a>
+&lt;tt&gt;KoopmanEDMD&lt;/tt&gt; (&lt;a href="lib/KoopmanEDMD.h" &gt;KoopmanEDMD.h&lt;/a&gt;) &lt;em&gt;Part 31&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Extended Dynamic Mode Decomposition — lifts a nonlinear system to a high-dimensional linear representation via a dictionary of basis functions (Williams 2015).</li>
+<li><b>Dictionaries:</b> <code>PolyDeg1</code>, <code>PolyDeg2</code>, <code>RBF</code> (radial basis), and combinations.</li>
+<li><b>Methods:</b> <code>fit(X, U, Y)</code> → <code>StateSpace</code> (full lifting); <code>fitProjected()</code> → <code>StateSpace</code> restricted to the original state coordinates. The output drops directly into <code>DiscreteMPC</code> or <code>DiscreteLQR</code>.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md145"></a>
+&lt;tt&gt;L1AdaptiveController&lt;/tt&gt; (&lt;a href="lib/L1AdaptiveController.h" &gt;L1AdaptiveController.h&lt;/a&gt;) &lt;em&gt;Part 31&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> L1 adaptive control — state predictor + low-pass-filtered adaptation law; guarantees bounded transient performance independent of adaptation gain (Hovakimyan &amp; Cao 2010).</li>
+<li><b>Usage (Python/C++):</b> <code>set_reference(r)</code> then <code>compute(y_plant)</code> — <b>not</b> <code>compute(r - y)</code>.</li>
+<li><b>Key params:</b> <code>a_m</code> (model pole), <code>b_m</code> (model gain), <code>Gamma</code> (adaptation rate), <code>omega_c</code> (LP filter cutoff), <code>sigma_max</code> (projection bound). Constraint: <code>a_m</code> must give a stable reference model.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md146"></a>
+&lt;tt&gt;CBFSafetyFilter&lt;/tt&gt; (&lt;a href="lib/CBFSafetyFilter.h" &gt;CBFSafetyFilter.h&lt;/a&gt;) &lt;em&gt;Part 31&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Control Barrier Function safety filter — 1D analytical QP wrapper that minimally modifies any <code>IController</code>'s output to keep the system inside a safe set <code>{x : h(x) ≥ 0}</code> (Ames et al. 2017).</li>
+<li><b>Usage:</b> provide <code>h_fn(x)</code> and <code>grad_h_fn(x)</code> (scalar + gradient); wraps any <code>shared_ptr&lt;IController&gt;</code>.</li>
+<li><b>1D analytical solve:</b> avoids a full QP; closed-form projection onto the CBF halfspace.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md147"></a>
+&lt;tt&gt;GaussianProcess&lt;/tt&gt; (&lt;a href="lib/GaussianProcess.h" &gt;GaussianProcess.h&lt;/a&gt;) &lt;em&gt;Part 31&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Gaussian Process Regression with squared-exponential kernel and Cholesky inference (Rasmussen &amp; Williams 2006). Fixed-budget online mode evicts oldest point at <code>N_max</code>.</li>
+<li><b>Methods:</b> <code>train(X, y)</code>, <code>predict(x*)</code> → <code>{mean, variance}</code>. Kernel params: <code>sigma_f</code> (signal std), <code>ell</code> (length scale), <code>sigma_n</code> (noise std).</li>
+<li><b>Note:</b> Not an <code>IController</code>; used as a surrogate for GP-MPC or inside <code>BayesianOptimizer</code>.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md148"></a>
+&lt;tt&gt;EchoStateNetwork&lt;/tt&gt; (&lt;a href="lib/EchoStateNetwork.h" &gt;EchoStateNetwork.h&lt;/a&gt;) &lt;em&gt;Part 31&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Echo State Network / Reservoir Computing — fixed random reservoir, trained readout only via ridge regression (Jaeger 2001). Identifies nonlinear dynamics without backprop.</li>
+<li><b>Methods:</b> <code>train(U, Y, washout)</code> fits <code>W_out</code>; <code>step(u)</code> → <code>y_hat</code>. Returns a <code>StateFunc</code> for use in predictive controllers.</li>
+<li><b>Key param:</b> <code>spectral_radius</code> — must be <code>&lt; 1</code> for echo state property (typically 0.9).</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md149"></a>
+&lt;tt&gt;NeuralPID&lt;/tt&gt; (&lt;a href="lib/NeuralPID.h" &gt;NeuralPID.h&lt;/a&gt;) &lt;em&gt;Part 31&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Online neural PID — 3-layer network <code>[e, ė, ∫e] → [Kp, Ki, Kd]</code> adapts weights each step via backprop through the linearised plant Jacobian.</li>
+<li>**Params (<code>NeuralPIDParams</code>):** <code>n_hidden</code>, <code>lr</code>, <code>Ts</code>, <code>plant_gain</code>, <code>max_weight_norm</code>, <code>uMin/uMax</code>, <code>Kp0/Ki0/Kd0</code>. <b>Note:</b> <code>Ts</code> IS a field of <code>NeuralPIDParams</code> (unlike <code>PIDParams</code> where Ts is a constructor arg).</li>
+<li><b>Constructor:</b> <code>NeuralPID(params)</code> — single-arg, no separate Ts.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md150"></a>
+&lt;tt&gt;CEMController&lt;/tt&gt; (&lt;a href="lib/CEMController.h" &gt;CEMController.h&lt;/a&gt;) &lt;em&gt;Part 31&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Cross-Entropy Method MPC — derivative-free stochastic rollout optimisation. Samples N action sequences, keeps elite set, refits Gaussian, warm-starts with previous solution.</li>
+<li><b>Params:</b> <code>N_samples</code> (typically 50), <code>elite_frac</code> (0.1), <code>n_iter</code>, <code>Np</code>, <code>sigma_init</code>.</li>
+<li><b>Usage:</b> provide <code>state_fn</code> (dynamics) + <code>cost_fn</code> (per-step cost); call <code>compute(error)</code>.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md151"></a>
+&lt;tt&gt;DynaController&lt;/tt&gt; (&lt;a href="lib/DynaController.h" &gt;DynaController.h&lt;/a&gt;) &lt;em&gt;Part 33&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Model-based RL (Dyna, Sutton 1991) — wraps any base <code>IController</code>, accumulates transition data, fits a SINDy error-dynamics model, exposes <code>modelRollout()</code> for synthetic planning.</li>
+<li><b>Usage:</b> <code>compute(error)</code> delegates to the wrapped policy + learns in the background once <code>min_data_points</code> transitions are collected. Call <code>modelRollout(u_seq, x0)</code> from Python to improve the policy on synthetic data.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md152"></a>
+&lt;tt&gt;ScenarioMPC&lt;/tt&gt; (&lt;a href="lib/ScenarioMPC.h" &gt;ScenarioMPC.h&lt;/a&gt;) &lt;em&gt;Part 33&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Scenario-based stochastic MPC (Calafiore &amp; Campi 2006) — averages the QP cost over N_s sampled Gaussian noise trajectories. More conservative than <code>DiscreteMPC</code>, less conservative than <code>TubeMPC</code>.</li>
+<li><b>Params:</b> <code>N_s</code> (scenario count), <code>Sigma_w</code> (process-noise covariance), plus the usual <code>MPCParams</code> fields. API mirrors <code>DiscreteMPC</code>.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md153"></a>
+&lt;tt&gt;BayesianOptimizer&lt;/tt&gt; (&lt;a href="lib/BayesianOptimizer.h" &gt;BayesianOptimizer.h&lt;/a&gt;) &lt;em&gt;Part 33, header-only&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> Bayesian Optimization for expensive controller parameter tuning — GP surrogate + UCB or EI acquisition (Srinivas 2010). Use instead of <code>AutoTuner</code> (CMA-ES) when each cost evaluation is costly (hardware test, long simulation).</li>
+<li><b>Acquisition:</b> <code>UCB</code> (exploration weight <code>kappa</code>) or <code>EI</code> (expected improvement <code>xi</code>).</li>
+<li><b>Shared types with AutoTuner:</b> <code>TunerResult</code>, <code>CostFn</code> — plug into the same cost wrappers.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md154"></a>
+&lt;tt&gt;ControllerRegistry&lt;/tt&gt; + &lt;tt&gt;ControllerMonitor&lt;/tt&gt; (&lt;a href="lib/ControllerRegistry.h" &gt;ControllerRegistry.h&lt;/a&gt;, &lt;a href="lib/ControllerMonitor.h" &gt;ControllerMonitor.h&lt;/a&gt;) &lt;em&gt;Part 33&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Registry:</b> Meyers-singleton self-registration. Each algorithm header places <code><a class="el" href="ControllerRegistry_8h.html#ae8187c4a512daf1ad11234f8e9c413b9">CTRL_REGISTER_FEATURE(name)</a></code> at its bottom; <code><a class="el" href="namespacectrl.html#a2c5350675a644a3ab773529c5aea79ca" title="Return a snapshot of all registered features.">ctrl::features()</a></code> then returns the live map. <code>CTRL_HAS_*</code> compile-time flags set conditional entries.</li>
+<li><b>Monitor:</b> Attaches to any <code>IController</code> as an <code>IControllerObserver</code>. Runs CUSUM (mean-shift detection, params <code>k</code>/<code>h</code>) and EWMA (drift detection, params <code>lambda</code>/<code>L</code>) SPC charts on the output stream. Fires a configurable <code>alarm_cb(chart_name, value)</code> on fault. Also listens to <code>onState(key, vec)</code> — ADRC emits <code>"eso"</code> z-vector, SMC emits <code>"surface"</code>.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h3><a class="anchor" id="autotoc_md155"></a>
+&lt;tt&gt;ComputationalDelayWrapper&lt;/tt&gt; (&lt;a href="lib/ComputationalDelayWrapper.h" &gt;ComputationalDelayWrapper.h&lt;/a&gt;) &lt;em&gt;Part 34, header-only&lt;/em&gt;</h3>
+<p><b><b><b><b></p><ul>
+<li><b>Purpose:</b> One-sample actuator delay decorator — models the realistic digital loop where computation at step k cannot reach the actuator until step k+1.</li>
+<li><b>Behaviour:</b> <code>u_out[k] = u_inner[k-1]</code> (first call returns 0, the held initial value). Shifts Nyquist phase margin by −π; use this to expose that margin during tuning, not to fix it.</li>
+<li><b>Note:</b> Output is initialised to 0.0; warm up one step before trusting the output.</li>
+</ul>
+<p></b></b></b></b></p>
+<p><b><b><b><b></p><hr  />
+<p></b></b></b></b></p>
+<p><b><b><b><b></b></b></b></b></p>
+<h1><a class="anchor" id="autotoc_md157"></a>
 6. Deployment Cross-References</h1>
 <p><b><b><b><b></b></b></b></b></p>
 <p><b><b><b><b>For production deployment, parameter-stability constraints, RTOS integration, and troubleshooting recipes, consult <a class="el" href="md_docs_2DEPLOYMENT.html">DEPLOYMENT.md</a>:</b></b></b></b></p>
