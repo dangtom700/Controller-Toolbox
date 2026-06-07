@@ -1,0 +1,10 @@
+{
+  "id":             "s02_slow_ramp",
+  "description":    "Slow ramp from 2 to 18 rad/s over 60s, avoids stick-slip onset",
+  "T_sim":          90.0,
+  "ref_type":       "ramp",
+  "omega_init":     2.0,
+  "omega_final":    18.0,
+  "ramp_start":     5.0,
+  "ramp_duration":  60.0
+}

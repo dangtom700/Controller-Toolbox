@@ -1164,3 +1164,180 @@ Inline simulation mirrors `simulation_runner.cpp` including warm-start prime ste
 | M4 | `template<typename Scalar>` leaf algorithms IF embedded float target is real | Backlog |
 
 **New baseline (Part 33):** C++ ~163 passed | 0 failed. Python ~103 passed | 0 failed. All 5 case studies green (Boiler 216/216, SMISMO 42/42, Solar 45/45, Tug 64/64, Humid 50/50).
+
+---
+
+## Part 34 — Low-priority debt + CMake fixes (2026-06-04)
+
+**Baseline at entry:** C++ ~163/0, Python ~103/0 (Part 33). All 5 case studies green.
+
+**Scope:** Close G2, G3, T2, T4, T5, T7 from the Part 26 senior review; fix CMake
+warnings under CMake 3.30+ / MinGW on Windows.
+
+### G2 — LQRAdapter factory (`lib/DiscreteLQR.h`)
+
+Added `makeLQRController()` free function that wraps `DiscreteLQR + LQRAdapter` in a
+`shared_ptr<IController>`. Closes the `AutoGainScheduler`/`GainScheduled` `design_fn` gap
+where `DiscreteLQR` is not an `IController`. 2 `[lqr_factory]` Catch2 tests.
+
+### G3 — ComputationalDelayWrapper (`lib/ComputationalDelayWrapper.h`, header-only)
+
+One-sample actuator delay decorator wrapping any `IController`. NaN hold on missing inner
+output. `CTRL_REGISTER_FEATURE(computational_delay)`. 3 `[delay_wrapper]` Catch2 tests.
+
+**Tribal knowledge:** `output` is initialised to 0.0; first `compute()` returns 0 (the
+held value), not the fresh inner output. Warm up one step before trusting output.
+
+### T2 — MIMO nu-gap (`lib/GapMetric.cpp`)
+
+`subspaceDist()` via normalised-graph thin SVD. `nuGap()` now dispatches `chordalDist`
+(SISO) or `subspaceDist` (MIMO), removing the SISO-only restriction. 3 `[mimo_nugap]`
+Catch2 tests.
+
+### T4 — MHE state constraints (`lib/MovingHorizonEstimator.{h,cpp}`)
+
+`MHEParams::xMin`/`xMax` box constraints on arrival state x_0; applied directly to the
+`z[0:n]` block of the FISTA decision variable. 2 `[mhe_constraints]` Catch2 tests.
+
+### T5 — LinearBlend bumpless transfer (`lib/GainScheduledController.h`)
+
+When the active bracket `[lo, hi]` changes, any controller newly entering the bracket gets
+`bumplessInit(last_output_, error)` called; guarded on first step. 1 `[gain_scheduled]`
+Catch2 test.
+
+### T7 — compare_controllers.py (`tools/compare_controllers.py`)
+
+IAE/ISE comparison table across all case-study CSVs; auto-discovers
+`case-study/*/logs/*.csv`; supports `--study`/`--scenario`/`--sort`/`--wide` flags.
+
+### CMake fixes
+
+- `cmake_minimum_required(VERSION 3.16...3.31)` range syntax in all CMakeLists — silences
+  CMP0000 warning on CMake 3.30+.
+- `set(CMAKE_CXX_SCAN_FOR_MODULES OFF)` in root CMakeLists — disables CMP0155 C++20 module
+  scanning that crashed GCC/MinGW on paths containing spaces.
+- `cmake_policy(SET CMP0169 OLD)` in `bindings/CMakeLists.txt` — allows
+  `FetchContent_Populate` pybind11 source-patch on CMake 3.30+.
+
+### Bug fixes
+
+- `MPCParams::Q`/`R` → `rho_y`/`rho_u` in two `[health_contract]` tests.
+- `run.py` safe_phrases: added `[alarm] cusum` + `zero error`, net +1 to 37 entries.
+
+---
+
+## Part 35 — Submarine Maneuvering case study (2026-06-04) — ⚠ REVERTED in `37a17ef`
+
+**Scope:** Added 6th case study (MARIN BB2, Lee & Ahn 2024, Ocean Eng. 311, 118839). Plant:
+Karasuno physical-based 4-DOF model (horizontal: v,r,ψ; vertical: w,q,theta,z; earth: x,y).
+10 controllers × 5 scenarios = 50 runs. Subsequently deleted in commit `37a17ef`
+("remove a case study for now"). The README survives as a build-ready spec.
+
+To restore: `git show 37a17ef^:"case-study/Submarine Maneuvering Mathematical Model/sim/src/main.cpp"`
+
+---
+
+## Part 36 — Documentation reconciliation (2026-06-05)
+
+**Scope:** No code changes. CLAUDE.md reconciled against commit `37a17ef`: corrected
+case-study table (SMISMO and Submarine removed from "Built" list), updated open-items IDs,
+added C1 and B36-1 to Closed. Added `'alarms: 0'` to `run.py` safe_phrases (B36-1) to
+suppress the `ex79_registry_monitor` false positive from the CUSUM monitor summary line.
+
+---
+
+## Part 37 — Active Suspension + Non-Inverting Buck-Boost case studies (2026-06-06)
+
+**Baseline at entry:** C++ ~163/0, Python ~103/0 (Part 33 baseline; counts for 34/35/36
+unchanged). 4 case studies green (Boiler 216/216, Solar 45/45, Tug 64/64, Humid 50/50).
+
+**Scope:** Two new case studies added. Total case studies now 6.
+
+---
+
+### Active Suspension Mathematical Modeling and Optimization 2025
+
+**Reference:** Abdulwahab et al. (2025) "Mathematical modeling and optimization of the
+active suspension system," Alexandria Engineering Journal.
+
+**Plant:** 2-DOF quarter-car, 4-state RK4 integration at Ts=5 ms.
+- States: `[z_s, dz_s, z_u, dz_u]` (sprung/unsprung displacement + velocity)
+- Parameters: m_s=240 kg, m_u=36 kg, k_s=16000 N/m, c_s=980 N·s/m, k_t=160000 N/m
+- Actuator force saturation: ±2000 N
+
+**Controllers (10):** Passive, PID, ADRC, SMC, LQR (Bryson), LQG (Kalman + LQR),
+MPC (2-state body linearisation, ZOH c2d), MRAC, FuzzyPID, TubeMPC.
+
+**Scenarios (5):** s1_step_bump, s2_sine_resonance, s3_rough_road, s4_speed_bump,
+s5_compound. **Total: 10 × 5 = 50 runs.**
+
+**CSV columns:** `t, z_r, z_s, dz_s, z_u, dz_u, F_act, defl_susp, defl_tyre, accel_body`.
+
+**Files:**
+- `sim/include/{susp_plant.h, road_profile.h, controllers.h, simulation_runner.h}`
+- `sim/src/{susp_plant.cpp, road_profile.cpp, controllers.cpp, simulation_runner.cpp, main.cpp}`
+- `CMakeLists.txt`, `config/plant_params.json`, `config/scenarios/s{1-5}_*.json`
+- `case-study/CMakeLists.txt`: `add_subdirectory("Active Suspension Mathematical Modeling and Optimization 2025")`
+- `compile.bat`: `susp_sim` target added.
+
+---
+
+### Non-Inverting Buck-Boost Converter
+
+**Reference:** Almasi et al. (2017) "Two-level control scheme for non-inverting buck-boost
+converter based on T-S fuzzy logic," ISA Transactions 67, 515–527.
+
+**Plant:** Averaged state-space 2-state model (i_L, v_C) integrated with RK4 at Ts=20 µs
+(f_s=50 kHz). Parameters: L=50 µH, C=1.8 mF, R=2 Ω, V_in=10 V.
+
+**Mode logic:** BUCK mode when V_ref ≤ V_in − 0.1 V; BOOST when V_ref ≥ V_in + 0.1 V;
+hold current mode in the ±0.1 V hysteresis band.
+
+**Controllers (12):** OpenLoop (d_ff only), PI-Buck, PI-Boost, TLCS-ClassicPI
+(bumpless PI pair), FuzzyPD (feed-forward duty-cycle), FuzzyPID-Buck, FuzzyPID-Boost,
+**TLCS-FuzzyPI** (paper's main result; two dedicated FuzzyPID + bumpless transfer),
+GainScheduled (V_in/V_ref scheduling), ADRC (b0=V_in/LC≈1.11e8), MPC (ZOH SS), LQR (Bryson).
+
+**Scenarios (5):** s01_buck (8 V, 60 ms), s02_boost (15 V, 60 ms),
+s03_crossing_up (8→15 V at t=30 ms), s04_crossing_down (15→4 V at t=30 ms),
+s05_full (8→15→4 V). **Total: 12 × 5 = 60 runs.**
+
+**CSV columns:** `t, v_in, v_ref, v_out, i_L, d, mode, error`.
+**Metrics per run:** IAE, RMS_err, MaxErr, sat_d (duty-cycle saturation count).
+
+**Files:**
+- `sim/include/{buck_boost_plant.h, input_profile.h, controllers.h, simulation_runner.h}`
+- `sim/src/{buck_boost_plant.cpp, input_profile.cpp, controllers.cpp, simulation_runner.cpp, main.cpp}`
+- `CMakeLists.txt`, `config/plant_params.json`, `config/scenarios/s{01-05}_*.json`
+- `case-study/CMakeLists.txt`: `add_subdirectory("Non-Inverting Buck-Boost Converter")`
+- `compile.bat`: `buck_boost_sim` target added.
+
+**Implementation notes:**
+- `FuzzyPIDParams.pd.uMin/uMax = ±1.0` (loose inner bounds). The outer `FuzzyPID.uMin/uMax`
+  clamps the duty cycle to `[0, 1]`. Tight inner bounds (`[0, 1]`) block overshoot
+  suppression since negative PD correction is clamped to zero.
+- TLCS bumpless transfer: `inactive_ctrl.bumplessInit(d_active, e)` is called every step,
+  not just at mode transitions. This keeps the inactive integrator continuously tracking
+  the active one so the transition is seamless.
+- LQR name-lookup fix: `makeBuckLQR(p)` is a file-scope static free function. Calling a
+  static member inside a lambda in a constructor member initializer list causes name-lookup
+  ambiguity under some compilers.
+- Folder name: **must use ASCII hyphens** (U+002D). CMake on Windows normalizes Unicode
+  NON-BREAKING HYPHEN (U+2011) and EN DASH (U+2013) to ASCII when reading paths, causing
+  a directory-not-found error if the disk folder uses Unicode characters.
+
+**Tribal knowledge (Buck-Boost):**
+- ADRC b0 = V_in / (L×C) ≈ 1.111×10⁸; omega_c=2000, omega_o=6000 → omega_o×Ts=0.12 < 0.5 ✓
+- Boost mode has a RHP zero → narrower bandwidth than buck mode; the mode-dedicted FuzzyPI
+  controllers tune for this (smaller u_scale in boost FuzzyPD: 0.058 vs 0.163 in buck).
+- Duty-cycle feed-forward: d_ff = V_ref/V_in (buck) or 1 − V_in/V_ref (boost). Used by
+  FuzzyPD, OpenLoop, LQR to operate around the correct steady-state operating point.
+
+### Open-issues update (Part 37)
+
+**[C2 — PARTIAL]** Active Suspension (50 runs) and Buck-Boost (60 runs) are now built and
+registered. 5 spec-only stubs remain: Submarine (restore from `37a17ef^`), MEMS (full
+spec), and 3 thin-spec studies. C2 stays open until all stubs are implemented.
+
+**New baseline (Part 37, unverified):** Run `conda run -n soft_robotics -- python run.py`
+to confirm. Expected additional runs: ActiveSuspension 50/50, BuckBoost 60/60.

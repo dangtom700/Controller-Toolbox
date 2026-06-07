@@ -1,0 +1,9 @@
+{
+  "id":          "s04_high_speed",
+  "description": "Step to 20 rad/s - high-speed drilling operation",
+  "T_sim":       60.0,
+  "ref_type":    "step",
+  "omega_init":  0.0,
+  "omega_final": 20.0,
+  "step_time":   5.0
+}

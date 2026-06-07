@@ -1,0 +1,11 @@
+{
+  "id":          "s05_freq_change",
+  "description": "Wave period steps from T=10s to T=14s at t=150s - robustness test",
+  "T_sim":       300.0,
+  "wave_type":   "step_freq",
+  "T_wave_1":    10.0,
+  "T_wave_2":    14.0,
+  "H_wave":      2.0,
+  "step_time":   150.0,
+  "A_ref_scale": 1.0
+}

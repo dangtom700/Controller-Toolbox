@@ -1,0 +1,9 @@
+{
+  "id":          "s03_short_period",
+  "description": "Short-period waves T=7s H=1m - above resonance",
+  "T_sim":       300.0,
+  "wave_type":   "regular",
+  "T_wave":      7.0,
+  "H_wave":      1.0,
+  "A_ref_scale": 0.6
+}

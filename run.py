@@ -842,6 +842,92 @@ def phase_bug_report(log_path):
 
 
 # ---------------------------------------------------------------------------
+# Phase 6 — Run Python-only case studies
+# ---------------------------------------------------------------------------
+
+def phase_python_case_studies():
+    """Discover case-study/*/sim/main.py and run each via conda.
+
+    Python-only case studies are not registered in CMakeLists / compile.bat.
+    They are discovered here and run sequentially.  Failures are reported but
+    do not abort the overall run (same policy as Phase 5).
+    """
+    _divider()
+    print('  Phase 6 - Python case studies')
+    _divider()
+    print()
+
+    case_dir = 'case-study'
+    if not os.path.isdir(case_dir):
+        print(f'[SKIP] {case_dir} not found\n')
+        return
+
+    mains = []
+    for study in sorted(os.listdir(case_dir)):
+        main_py = os.path.join(case_dir, study, 'sim', 'main.py')
+        if os.path.isfile(main_py):
+            mains.append(main_py)
+
+    if not mains:
+        print('No Python case study main.py files found.\n')
+        return
+
+    print(f'Found {len(mains)} Python case study main(s):')
+    for i, m in enumerate(mains, 1):
+        print(f'  [{i:>2}] {m}')
+    print()
+
+    passed, failed = [], []
+
+    for i, main_py in enumerate(mains, 1):
+        _divider('-')
+        print(f'  [{i}/{len(mains)}]  {main_py}')
+        _divider('-')
+        print()
+
+        main_abs = os.path.abspath(main_py)
+        cmd = ['conda', 'run', '-n', 'soft_robotics', '--', 'python', main_abs]
+        try:
+            with subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding='utf-8',
+                errors='backslashreplace',
+            ) as proc:
+                for line in proc.stdout:
+                    sys.stdout.write(line)
+                proc.wait()
+                rc = proc.returncode
+        except Exception as exc:
+            print(f'\n  ERROR launching: {exc}')
+            failed.append(main_py)
+            continue
+
+        print()
+        if rc == 0:
+            passed.append(main_py)
+            print('  EXIT 0 - PASSED')
+        else:
+            failed.append(main_py)
+            print(f'  EXIT {rc} - FAILED')
+        print()
+
+    _divider()
+    print(f'  Python case studies: {len(passed)} passed  |  {len(failed)} failed')
+    _divider()
+
+    if failed:
+        print('\n  Failed:')
+        for m in failed:
+            print(f'    {m}')
+        print()
+        print('  WARNING: some Python case studies failed.  '
+              'Check ctrl_toolbox binding is built and scipy is installed.\n')
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
@@ -858,6 +944,7 @@ if __name__ == '__main__':
         phase_bindings()   # build ctrl_toolbox .pyd + smoke test
         phase_run()
         phase_python()
+        phase_python_case_studies()
     finally:
         sys.stdout = sys.__stdout__
         _log_file.close()

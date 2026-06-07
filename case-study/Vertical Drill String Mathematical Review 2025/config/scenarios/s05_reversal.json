@@ -1,0 +1,10 @@
+{
+  "id":           "s05_reversal",
+  "description":  "Two-step: 0 to 10 rad/s at t=5s then reverse to -5 rad/s at t=25s",
+  "T_sim":        60.0,
+  "ref_type":     "two_step",
+  "omega_first":  10.0,
+  "omega_second": -5.0,
+  "step_time1":   5.0,
+  "step_time2":   25.0
+}
