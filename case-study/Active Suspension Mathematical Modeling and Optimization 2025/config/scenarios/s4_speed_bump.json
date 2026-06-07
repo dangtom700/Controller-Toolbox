@@ -1,0 +1,10 @@
+{
+    "id":           "S4",
+    "description":  "Versine speed bump: 50 mm height, 0.5 m length at 30 km/h - tests impact transient",
+    "road_type":    "speed_bump",
+    "amplitude":    0.050,
+    "vehicle_speed": 8.333,
+    "bump_length":   0.500,
+    "duration_s":   3.0,
+    "seed":         42
+}

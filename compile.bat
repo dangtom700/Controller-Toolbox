@@ -131,6 +131,8 @@ for %%T in (
     tug_sim
     solar_cooling_sim
     humidification_sim
+    susp_sim
+    buck_boost_sim
     toolbox_examples
     test_catch2_pilot
     test_catch2_advanced

@@ -2,7 +2,7 @@ SUMMARY OF: Numerical-approaches-for-solving-complex-order-mon_2024_Alexandria-E
 
 # Paper Title (to be filled)
 
-**Reference:** Author(s) (Year) – brief descriptor of the system studied (e.g., “Marine Hull Trim Control Using Model Predictive Design”).
+**Reference:** Author(s) (Year) - brief descriptor of the system studied (e.g., "Marine Hull Trim Control Using Model Predictive Design").
 
 ---
 
@@ -20,7 +20,7 @@ SUMMARY OF: Numerical-approaches-for-solving-complex-order-mon_2024_Alexandria-E
 |-------|--------|-------------|------|
 | 0 | $x$ | Position (e.g., roll angle) | rad |
 | 1 | $\dot{x}$ | Velocity of position state | rad/s |
-| … | … | … | … |
+| ... | ... | ... | ... |
 
 ### Governing Equations  
 
@@ -28,18 +28,18 @@ SUMMARY OF: Numerical-approaches-for-solving-complex-order-mon_2024_Alexandria-E
 - Provide the differential equations governing the evolution of states (e.g., `$\dot{\eta} = f(\eta, u)$`).  
 
 **Dynamics Model**  
-- Full nonlinear dynamics expressed in state‑space form:  
+- Full nonlinear dynamics expressed in state-space form:  
   $$\underbrace{M(\theta)\,\ddot{x}}_{\text{acceleration}} + C(\dot{x})\,\dot{x} + G(x) = f_{\text{control}}(u) + f_{\text{disturbance}}$$  
-- Include any linearization points, assumptions (small‑angle approximation, steady‑state), and integration scheme used.
+- Include any linearization points, assumptions (small-angle approximation, steady-state), and integration scheme used.
 
 ### Parameter Values  
 
 | Symbol | Value | Source / Reasoning |
 |--------|-------|--------------------|
-| $M$   | Inertia matrix (kg·m²) | Measured hull mass distribution |
+| $M$   | Inertia matrix (kg.m^2) | Measured hull mass distribution |
 | $C$   | Coriolis/Centrifugal term coefficients | From hydrodynamic model |
-| $G$   | Gravity‑related restoring forces | Defined in text |
-| …       | …     | … |
+| $G$   | Gravity-related restoring forces | Defined in text |
+| ...       | ...     | ... |
 
 ---
 
@@ -48,7 +48,7 @@ SUMMARY OF: Numerical-approaches-for-solving-complex-order-mon_2024_Alexandria-E
 Extract every key equation (linearized models, full nonlinear dynamics, transfer functions) from the paper. For each:
 
 - **Physical meaning** of variables and terms.  
-- **Assumptions**: linearity, time‑invariance, neglect of certain hydrodynamic modes, Gaussian noise on measurements, etc.  
+- **Assumptions**: linearity, time-invariance, neglect of certain hydrodynamic modes, Gaussian noise on measurements, etc.  
 - **Validity range**: operating speed band, angle range, disturbance magnitude where model holds.
 
 Present equations in inline LaTeX or display math as appropriate (e.g., `$M\dot{x} = -C(\dot{x})x + u_{ref}$`).
@@ -60,10 +60,10 @@ Present equations in inline LaTeX or display math as appropriate (e.g., `$M\dot{
 Based solely on the mathematical structure derived above, provide a hierarchical recommendation of viable controller types:
 
 1. **Simple/Static Controllers**  
-   - *PID*: Suitable when dynamics are mildly nonlinear and disturbances are slowly varying; drawback is poor performance under high‑frequency disturbance or saturation.  
-2. **Linear State‑Space Design**  
-   - *LQR / LQG*: Requires controllability and observability, Gaussian noise assumption – would be ideal if the linearized model meets these criteria.  
-3. **Nonlinear/Optimization‑Based Controllers**  
+   - *PID*: Suitable when dynamics are mildly nonlinear and disturbances are slowly varying; drawback is poor performance under high-frequency disturbance or saturation.  
+2. **Linear State-Space Design**  
+   - *LQR / LQG*: Requires controllability and observability, Gaussian noise assumption - would be ideal if the linearized model meets these criteria.  
+3. **Nonlinear/Optimization-Based Controllers**  
    - *MPC (Constrained)*: Naturally handles state constraints (e.g., torque limits) and external disturbances; may suffer from conservatism unless horizon is chosen carefully.  
 4. **Robust/Adaptive Approaches**  
    - *Sliding Mode / Tube MPC*: Designed for actuator nonlinearities and uncertainties; adds chattering if not properly damped.  
@@ -76,9 +76,9 @@ Based solely on the mathematical structure derived above, provide a hierarchical
 
 | Scenario ID | Description | Key Parameters |
 |-------------|-------------|----------------|
-| S1          | Steady‑state hull trim under steady wind load | Wind speed = 5 m/s, pitch reference = 0.2° |
+| S1          | Steady-state hull trim under steady wind load | Wind speed = 5 m/s, pitch reference = 0.2^\circ |
 | S2          | Transient disturbance (wave peak) | Wave amplitude = 0.15 rad, duration = 4 s |
-| …           | … | … |
+| ...           | ... | ... |
 
 ---
 
@@ -100,10 +100,10 @@ List performance metrics used in the paper (e.g., Integral of Absolute Error (IA
 
 If the authors discuss them, detail:
 
-- Model approximations (small‑angle assumption), 
-- Constraints on controller implementation (computational resources, real‑time constraints),
+- Model approximations (small-angle assumption), 
+- Constraints on controller implementation (computational resources, real-time constraints),
 - Areas for extension such as nonlinear parameter adaptation or integration with sensor fusion algorithms.
 
 --- 
 
-*Note:* Replace placeholders (e.g., “Paper Title”, “Author(s) (Year)”) and fill in actual content extracted from the provided research paper. If any section is not explicitly stated in the text, note “Not explicitly stated” while preserving the heading structure.
+*Note:* Replace placeholders (e.g., "Paper Title", "Author(s) (Year)") and fill in actual content extracted from the provided research paper. If any section is not explicitly stated in the text, note "Not explicitly stated" while preserving the heading structure.

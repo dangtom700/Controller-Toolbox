@@ -1,0 +1,9 @@
+{
+    "id":          "S3",
+    "description": "High-frequency rough road at 8 Hz, 5 mm amplitude - tests wheel hop rejection",
+    "road_type":   "rough_road",
+    "amplitude":   0.005,
+    "frequency":   8.0,
+    "duration_s":  5.0,
+    "seed":        42
+}

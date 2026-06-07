@@ -1,0 +1,9 @@
+{
+    "id":          "S2",
+    "description": "Sinusoidal road at body resonance 1.3 Hz, 15 mm amplitude - tests resonance rejection",
+    "road_type":   "sine_resonance",
+    "amplitude":   0.015,
+    "frequency":   1.3,
+    "duration_s":  5.0,
+    "seed":        42
+}

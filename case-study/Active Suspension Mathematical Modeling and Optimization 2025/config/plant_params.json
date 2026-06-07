@@ -1,0 +1,14 @@
+{
+    "m_s":      240.0,
+    "m_u":       36.0,
+    "k_s":    16000.0,
+    "c_s":      980.0,
+    "k_t":   160000.0,
+    "F_max":   2000.0,
+    "Ts":       0.005,
+    "duration": 5.0,
+
+    "_comment_body_fn":  "f_n_body  = sqrt(k_s/m_s)/(2*pi)  = 1.30 Hz",
+    "_comment_wheel_fn": "f_n_wheel = sqrt((k_s+k_t)/m_u)/(2*pi) = 11.1 Hz",
+    "_comment_zeta":     "zeta_body = c_s/(2*sqrt(k_s*m_s))  = 0.25  (underdamped passive)"
+}

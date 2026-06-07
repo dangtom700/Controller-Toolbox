@@ -2,7 +2,7 @@ SUMMARY OF: Sliding-mode-control-of-a-soft-robot-based-on-data-d_2024_Control-En
 
 # Paper Title (to be filled)
 
-**Reference:** Author et al. (Year) – brief descriptor.
+**Reference:** Author et al. (Year) - brief descriptor.
 
 ---
 
@@ -17,7 +17,7 @@ If multiple configurations are discussed, specify which one is used and why it w
 |-------|--------|-------------|------|
 | 0 | x | Position / displacement | m |
 | 1 | v | Velocity | m/s |
-| … | … | … | … |
+| ... | ... | ... | ... |
 
 ### Inputs and Disturbances  
 
@@ -26,8 +26,8 @@ If multiple configurations are discussed, specify which one is used and why it w
 
 ### Governing Equations  
 
-**Kinematics / state evolution** (if applicable): e.g., `η̇ = f(η, ν)`.  
-**Dynamics:** e.g., `M * ν̈ = τ_control + τ_dist - C(ν)*ν - D*ν + g(η)`.
+**Kinematics / state evolution** (if applicable): e.g., `eta. = f(eta, ν)`.  
+**Dynamics:** e.g., `M * ν̈ = tau_control + tau_dist - C(ν)*ν - D*ν + g(eta)`.
 
 **Integration method** (e.g., RK4, Euler).
 
@@ -37,19 +37,19 @@ Key numeric parameters in a table:
 
 | Parameter | Symbol | Value | Units |
 |-----------|--------|-------|-------|
-| Mass      | m      | …     | kg    |
-| Damping   | c      | …     | N·s/m |
-| Inertia   | J      | …     | kg·m² |
-| Wave height | H_w  | …     | m    |
+| Mass      | m      | ...     | kg    |
+| Damping   | c      | ...     | N.s/m |
+| Inertia   | J      | ...     | kg.m^2 |
+| Wave height | H_w  | ...     | m    |
 
 ---
 
 ## Mathematical Models and Assumptions  
 
-Extract **all** key equations from the paper (state‑space, transfer functions, nonlinearities, time delays). For each equation note:
+Extract **all** key equations from the paper (state-space, transfer functions, nonlinearities, time delays). For each equation note:
 
 - What physical phenomenon it represents.
-- Underlying assumptions (linearity, time‑invariance, neglected effects).
+- Underlying assumptions (linearity, time-invariance, neglected effects).
 - Validity ranges (e.g., low speed, small angles).
 
 Write equations in inline LaTeX or display math as appropriate.
@@ -58,14 +58,14 @@ Write equations in inline LaTeX or display math as appropriate.
 
 ## Controller Selection Recommendations  
 
-Based **only** on the system’s mathematical structure extracted above, provide a hierarchical recommendation of controller types – from simple/static to advanced/robust.
+Based **only** on the system's mathematical structure extracted above, provide a hierarchical recommendation of controller types - from simple/static to advanced/robust.
 
 For each recommended controller, briefly justify suitability:
 
-1. **Simple / baseline (e.g., PID, lead‑lag)** – when does it work? what are its limitations here?
-2. **Linear state‑space (e.g., LQR, LQG)** – assumptions required (observability, controllability, Gaussian noise)?
-3. **Nonlinear / optimisation‑based (e.g., MPC, NMPC)** – constraints or nonlinearities motivating this approach?
-4. **Robust / adaptive (e.g., sliding mode, tube MPC, MRAC, H∞)** – specific uncertainties or disturbances requiring robustness?
+1. **Simple / baseline (e.g., PID, lead-lag)** - when does it work? what are its limitations here?
+2. **Linear state-space (e.g., LQR, LQG)** - assumptions required (observability, controllability, Gaussian noise)?
+3. **Nonlinear / optimisation-based (e.g., MPC, NMPC)** - constraints or nonlinearities motivating this approach?
+4. **Robust / adaptive (e.g., sliding mode, tube MPC, MRAC, Hinf)** - specific uncertainties or disturbances requiring robustness?
 
 If the paper already implements certain controllers, critique their choice and suggest alternatives that might perform better.
 
@@ -77,7 +77,7 @@ Table with ID, Description, key parameters (reference signals, disturbance level
 
 | Scenario | Description | Reference Signal | Disturbance Level |
 |----------|-------------|------------------|-------------------|
-| S1       | …           | …                | …                 |
+| S1       | ...           | ...                | ...                 |
 
 ---
 

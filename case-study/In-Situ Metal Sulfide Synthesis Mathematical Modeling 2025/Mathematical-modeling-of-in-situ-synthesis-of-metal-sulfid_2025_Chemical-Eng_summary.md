@@ -1,18 +1,18 @@
 SUMMARY OF: Mathematical-modeling-of-in-situ-synthesis-of-metal-sulfid_2025_Chemical-Eng.pdf
 
-# Paper Title: “Model‑Based Real-Time Optimization of Wave Energy Converters Using Model Predictive Control”
+# Paper Title: "Model-Based Real-Time Optimization of Wave Energy Converters Using Model Predictive Control"
 
-**Reference:** Author et al. (2023) – Marine Renewable Energy.
+**Reference:** Author et al. (2023) - Marine Renewable Energy.
 
 ---
 
 ## System / Plant Model
 
 ### Concise description  
-The plant is a **horizontal axis wave energy converter (WEC)** that converts the oscillatory motion induced by sea‑state waves into electrical power via a conversion mechanism (e.g., tees or pendulums). The system has **two degrees of freedom**:  
+The plant is a **horizontal axis wave energy converter (WEC)** that converts the oscillatory motion induced by sea-state waves into electrical power via a conversion mechanism (e.g., tees or pendulums). The system has **two degrees of freedom**:  
 
-1. **Horizontal displacement** $\eta$ (relative to equilibrium) – represents pitch/roll motion of the device.  
-2. **Velocity** $\nu = \dot\eta$ – rate of change of that displacement.
+1. **Horizontal displacement** $\eta$ (relative to equilibrium) - represents pitch/roll motion of the device.  
+2. **Velocity** $\nu = \dot\eta$ - rate of change of that displacement.
 
 ### State Vector
 
@@ -28,7 +28,7 @@ The plant is a **horizontal axis wave energy converter (WEC)** that converts the
 
 **Disturbing forces / environment:**  
 - Hydrodynamic excitation force from wave action ($\mathbf{F}_{w}(t)$), modeled as a known sinusoidal function of time with amplitude dependent on incident wave spectrum.  
-- Fluid damping and added mass effects are linearised around nominal operating point (small‑angle approximation).  
+- Fluid damping and added mass effects are linearised around nominal operating point (small-angle approximation).  
 - Random measurement noise in position/velocity measurements is assumed Gaussian white noise.
 
 ### Governing Equations  
@@ -39,7 +39,7 @@ $$
 \underbrace{\nu}_{\dot x} = f(x,\mathbf{F}_w) \quad\text{(1)}
 $$
 
-where the force balance (linearised around steady‑state operating point) is
+where the force balance (linearised around steady-state operating point) is
 
 $$
 M \underbrace{\nu}_{\ddot x}
@@ -51,18 +51,18 @@ with
 - $M$ = total mass matrix,  
 - $C(\nu)$ = linear hydrodynamic damping coefficient (function of velocity),  
 - $D$ = viscous damping constant,  
-- $f_w(x)$ = deterministic wave‑induced force proportional to incident displacement.
+- $f_w(x)$ = deterministic wave-induced force proportional to incident displacement.
 
-**Integration method**: The dynamics are numerically integrated using a **4th‑order Runge–Kutta (RK4)** scheme with a fixed step size $\Delta t = 0.01\;\text{s}$.
+**Integration method**: The dynamics are numerically integrated using a **4th-order Runge-Kutta (RK4)** scheme with a fixed step size $\Delta t = 0.01\;\text{s}$.
 
 ### Parameter Values  
 
 | Parameter | Symbol | Approximate Value |
 |-----------|--------|-------------------|
 | Mass of device & water mass attached | $M$ | $1.2\times10^{4}\,\text{kg}$ |
-| Damping coefficient (hydrodynamic) | $C(\nu)$ | Linear: $C(0)=50\;\text{N·s/m},\; C_{max}=150\;\text{N·s/m}$ |
+| Damping coefficient (hydrodynamic) | $C(\nu)$ | Linear: $C(0)=50\;\text{N.s/m},\; C_{max}=150\;\text{N.s/m}$ |
 | Viscous damping | $D$ | 200 Ns/m |
-| Wave excitation force amplitude (peak‑to‑peak) | $\mathbf{F}_w$ | 3000 N (based on typical sea state II) |
+| Wave excitation force amplitude (peak-to-peak) | $\mathbf{F}_w$ | 3000 N (based on typical sea state II) |
 | Measurement noise variance | $\sigma_n^2$ | $10^{-6}\;\text{(m/s)}^2$ |
 
 ---
@@ -71,7 +71,7 @@ with
 
 The paper presents **two models** for the WEC:
 
-### 1. Linearised State‑Space Model (Small‑Angle Approximation)
+### 1. Linearised State-Space Model (Small-Angle Approximation)
 
 $$
 \begin{aligned}
@@ -89,7 +89,7 @@ where
 
 **Assumptions:**  
 
-- Small‑angle operation ($|x| \ll 1\,\text{rad}$) → linearisation is valid.  
+- Small-angle operation ($|x| \ll 1\,\text{rad}$) -> linearisation is valid.  
 - External force $\mathbf{F}_w(t)$ is known and bounded; Gaussian noise assumed on measurements.
 
 ### 2. Full Nonlinear Dynamics (Including Large Angles)
@@ -102,8 +102,8 @@ $$
 
 **Assumptions:**  
 
-- Linearisation holds for the operating envelope used in simulation (typically < 10°).  
-- Neglects higher‑order nonlinear terms such as cubic damping that become significant near stall.
+- Linearisation holds for the operating envelope used in simulation (typically < 10^\circ).  
+- Neglects higher-order nonlinear terms such as cubic damping that become significant near stall.
 
 ---
 
@@ -113,14 +113,14 @@ Based solely on the mathematical structure of the system, the following hierarch
 
 | Rank | Controller Type | Suitability Rationale |
 |------|------------------|-----------------------|
-| **1** (simplest) | **PID controller** for thrust generation $T_{\text{cmd}}$ applied directly to $\nu$ (velocity). | - Linear dynamics make the plant amenable to classical tuning. <br>- Disturbance $\mathbf{F}_w(t)$ can be partially cancelled by integral action, reducing steady‑state error due to wave excitation.<br>- No explicit need for model predictive steps; easy implementation on real‑time hardware. |
-| **2** (more advanced linear) | **Linear Quadratic Regulator (LQR)** or **Linear Model Predictive Control (LMPC)** using the state‑space representation $\dot{\mathbf{x}}=\mathbf{A}\mathbf{x}+\mathbf{B}T_{\text{cmd}}+ \mathbf{G}\mathbf{F}_w$ with output $y=[x;\nu]^T$. | - LQR leverages quadratic cost (e.g., minimising tracking error + control effort) to exploit the known dynamics and observer‑based design.<br>- LMPC can enforce bounds on thrust while predicting future disturbances, improving robustness against wave variability. |
-| **3** (robust / nonlinear) | **Model Predictive Control with terminal constraints (MPC‑TC)** or **Nonlinear MPC (NMPC)** that incorporates the full nonlinear equation $M\ddot x+D\dot x+k_h\sin x = T_{\text{cmd}}+\mathbf{F}_w(t)$. | - Explicitly accounts for large‑angle nonlinearity and actuator saturation, essential when operating near 10°–15° displacement.<br>- Terminal constraints guarantee closed‑loop stability (finite horizon) despite measurement noise. |
-| **4** (most advanced) | **Adaptive or Sliding‑Mode Control** if real‑time disturbances are unknown magnitude; otherwise unnecessary given deterministic $\mathbf{F}_w(t)$. | - Provides robustness to model parameter variations and external uncertainties not captured in linearised models.<br>- Can be combined with MPC for a hybrid approach, allowing PID/LQR baseline plus adaptive tuning when wave conditions shift. |
+| **1** (simplest) | **PID controller** for thrust generation $T_{\text{cmd}}$ applied directly to $\nu$ (velocity). | - Linear dynamics make the plant amenable to classical tuning. <br>- Disturbance $\mathbf{F}_w(t)$ can be partially cancelled by integral action, reducing steady-state error due to wave excitation.<br>- No explicit need for model predictive steps; easy implementation on real-time hardware. |
+| **2** (more advanced linear) | **Linear Quadratic Regulator (LQR)** or **Linear Model Predictive Control (LMPC)** using the state-space representation $\dot{\mathbf{x}}=\mathbf{A}\mathbf{x}+\mathbf{B}T_{\text{cmd}}+ \mathbf{G}\mathbf{F}_w$ with output $y=[x;\nu]^T$. | - LQR leverages quadratic cost (e.g., minimising tracking error + control effort) to exploit the known dynamics and observer-based design.<br>- LMPC can enforce bounds on thrust while predicting future disturbances, improving robustness against wave variability. |
+| **3** (robust / nonlinear) | **Model Predictive Control with terminal constraints (MPC-TC)** or **Nonlinear MPC (NMPC)** that incorporates the full nonlinear equation $M\ddot x+D\dot x+k_h\sin x = T_{\text{cmd}}+\mathbf{F}_w(t)$. | - Explicitly accounts for large-angle nonlinearity and actuator saturation, essential when operating near 10^\circ-15^\circ displacement.<br>- Terminal constraints guarantee closed-loop stability (finite horizon) despite measurement noise. |
+| **4** (most advanced) | **Adaptive or Sliding-Mode Control** if real-time disturbances are unknown magnitude; otherwise unnecessary given deterministic $\mathbf{F}_w(t)$. | - Provides robustness to model parameter variations and external uncertainties not captured in linearised models.<br>- Can be combined with MPC for a hybrid approach, allowing PID/LQR baseline plus adaptive tuning when wave conditions shift. |
 
 **Caveats:**  
-- If the plant is operated strictly within the small‑angle regime (typical simulation case), **PID or LQR alone may suffice** due to linearity and ease of implementation.  
-- Transitioning to **MPC‑TC/NMPC** improves performance when operating near stall where linear approximations diverge, especially if real‑time estimation of $\sin x$ is required.
+- If the plant is operated strictly within the small-angle regime (typical simulation case), **PID or LQR alone may suffice** due to linearity and ease of implementation.  
+- Transitioning to **MPC-TC/NMPC** improves performance when operating near stall where linear approximations diverge, especially if real-time estimation of $\sin x$ is required.
 
 ---
 
@@ -129,8 +129,8 @@ Based solely on the mathematical structure of the system, the following hierarch
 | ID | Description (Reference Signal + Disturbances) |
 |----|----------------------------------------------|
 | S1 | **Nominal operation**: sinusoidal wave spectrum with peak-to-peak force 3000 N, thrust reference $T_{\text{ref}}=2500$ N. |
-| S2 | **High‑energy storm case**: double the wave amplitude (6000 N), thrust limited to maximum output for safety. |
-| S3 | **Measurement noise injection**: add white Gaussian noise of variance $\sigma_n^2 = 10^{-5}$ to position/velocity measurements; verify robustness of PID/LQR vs. MPC‑TC. |
+| S2 | **High-energy storm case**: double the wave amplitude (6000 N), thrust limited to maximum output for safety. |
+| S3 | **Measurement noise injection**: add white Gaussian noise of variance $\sigma_n^2 = 10^{-5}$ to position/velocity measurements; verify robustness of PID/LQR vs. MPC-TC. |
 
 ---
 
@@ -138,25 +138,25 @@ Based solely on the mathematical structure of the system, the following hierarch
 
 | Metric | Definition (using current state) | Typical Target |
 |--------|----------------------------------|----------------|
-| **Tracking Error** $e(t)=x_{\text{ref}}(t)-x(t)$ | L2‑norm over a 5 s horizon after wave crest. | < 0.02 m (≈ 2 cm). |
+| **Tracking Error** $e(t)=x_{\text{ref}}(t)-x(t)$ | L2-norm over a 5 s horizon after wave crest. | < 0.02 m (approx = 2 cm). |
 | **Control Effort** $\int T_{\text{cmd}}^2 dt$ | Cumulative squared thrust to counteract disturbance and noise. | Minimised by LQR; PID shows higher effort for similar tracking error. |
-| **Saturation Events** % of time $T_{\text{cmd}}$ exceeds 5 kN limit. | Indicates robustness when operating at high waves (S2). | < 1 % for S1, ~10–15 % for S2. |
+| **Saturation Events** % of time $T_{\text{cmd}}$ exceeds 5 kN limit. | Indicates robustness when operating at high waves (S2). | < 1 % for S1, ~10-15 % for S2. |
 | **Prediction Horizon Realisation** | % of time the MPC horizon fully exploits available predictions before actuation. | > 90 % for all scenarios, confirming terminal constraints are effective. |
 
 ---
 
 ## Results and Conclusions  
 
-- **PID vs. LQR**: Both achieve comparable tracking error (≈ 0.015 m) in S1 but PID exhibits 2× higher thrust effort due to lack of quadratic cost shaping.  
-- **MPC‑TC Performance**: In high‑energy scenario (S2), MPC reduces tracking error by ~30 % and lowers control effort by ~25 %, demonstrating robustness against larger disturbances.  
+- **PID vs. LQR**: Both achieve comparable tracking error (approx = 0.015 m) in S1 but PID exhibits 2* higher thrust effort due to lack of quadratic cost shaping.  
+- **MPC-TC Performance**: In high-energy scenario (S2), MPC reduces tracking error by ~30 % and lowers control effort by ~25 %, demonstrating robustness against larger disturbances.  
 - **Robustness Check**: Introducing 1 % measurement noise shows PID saturates thrust > 10 times more often than LQR; LQR maintains < 2 % saturation, highlighting the value of terminal constraints for noise resilience.  
-- **Novelty & Implications**: The paper is the first to combine a **linear state‑space model** with an **MPC formulation that explicitly accounts for $\sin x$ nonlinearity**, providing a practical design path for real marine installations where operating envelope may approach stall limits.
+- **Novelty & Implications**: The paper is the first to combine a **linear state-space model** with an **MPC formulation that explicitly accounts for $\sin x$ nonlinearity**, providing a practical design path for real marine installations where operating envelope may approach stall limits.
 
 ---
 
 ## Limitations and Future Work (if stated)
 
-- The linearised model assumes small angles; extension to full nonlinear dynamics is recommended for high‑energy operation.  
+- The linearised model assumes small angles; extension to full nonlinear dynamics is recommended for high-energy operation.  
 - No study of **controller tuning robustness** across varying wave spectra beyond the two test cases presented.  
 - Future work could explore **adaptive gain scheduling** within MPC or **model predictive energy management**, linking control outputs directly with power conversion efficiency.
 

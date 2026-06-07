@@ -1,0 +1,10 @@
+{
+    "id":          "S3_crossing_up",
+    "description": "Mode transition: 8 V buck -> 15 V boost at t = 30 ms",
+    "v_in":        10.0,
+    "duration_s":  0.080,
+    "steps": [
+        {"t_start": 0.000, "v_ref": 8.0},
+        {"t_start": 0.030, "v_ref": 15.0}
+    ]
+}

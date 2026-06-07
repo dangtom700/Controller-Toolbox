@@ -2,7 +2,7 @@ SUMMARY OF: Mathematical-Neuron-Neural-Networks-Dynamics-Modeling_2026_Journal-o
 
 # Paper Title (to be filled by user)
 
-**Reference:** Author(s) et al. (Year) – brief descriptor.
+**Reference:** Author(s) et al. (Year) - brief descriptor.
 
 ---
 
@@ -17,12 +17,12 @@ If the paper describes multiple configurations, clarify which one is used.
 |-------|--------|-------------|------|
 | 0 | x | Position / displacement | m |
 | 1 | v | Velocity | m/s |
-| … | … | … | … |
+| ... | ... | ... | ... |
 
 ### Inputs and Disturbances  
 
 **Control inputs:** list with saturation limits if given.  
-**Environmental / external disturbances:** wind, waves, current, noise, etc. – specify parameters.
+**Environmental / external disturbances:** wind, waves, current, noise, etc. - specify parameters.
 
 ### Governing Equations  
 
@@ -30,7 +30,7 @@ If the paper describes multiple configurations, clarify which one is used.
 `eta_dot = f(eta, nu)`
 
 **Dynamics:**  
-`M * nu_dot = τ_control + τ_dist - C(nu)*nu - D*ν + g(η)`  
+`M * nu_dot = tau_control + tau_dist - C(nu)*nu - D*ν + g(eta)`  
 
 **Integration method** (e.g., RK4, Euler).
 
@@ -42,11 +42,11 @@ Key numeric parameters (mass, damping, inertia, etc.) in a table.
 
 ## Mathematical Models and Assumptions
 
-Extract **all** key equations from the paper (state‑space, transfer functions, nonlinearities, time delays).  
+Extract **all** key equations from the paper (state-space, transfer functions, nonlinearities, time delays).  
 For each equation, note:  
 
 - What physical phenomenon it represents.  
-- Underlying assumptions (linearity, time‑invariance, neglect of certain effects).  
+- Underlying assumptions (linearity, time-invariance, neglect of certain effects).  
 - Validity ranges (e.g., low speed, small angles).
 
 Write equations in **inline LaTeX** `$...$` or **display math** `$$...$$`.  
@@ -56,14 +56,14 @@ If the paper compares multiple models (e.g., linear vs. nonlinear), present them
 
 ## Controller Selection Recommendations  
 
-Based **only on the system’s mathematical structure** (nonlinearities, coupling, constraints, disturbances, uncertainty) extracted above, provide a **hierarchical recommendation** of controller types – from **simple/static** to **advanced/robust**.
+Based **only on the system's mathematical structure** (nonlinearities, coupling, constraints, disturbances, uncertainty) extracted above, provide a **hierarchical recommendation** of controller types - from **simple/static** to **advanced/robust**.
 
 For each recommended controller, briefly justify why it would be suitable:
 
-1. **Simple / baseline (e.g., PID, lead‑lag)** – when does it work? what are its limitations here?  
-2. **Linear state‑space (e.g., LQR, LQG)** – what assumptions must hold (observability, controllability, Gaussian noise)?  
-3. **Nonlinear / optimisation‑based (e.g., MPC, NMPC)** – what constraints or nonlinearities motivate this?  
-4. **Robust / adaptive (e.g., sliding mode, tube MPC, MRAC, H∞)** – what specific uncertainties or disturbances require robustness?
+1. **Simple / baseline (e.g., PID, lead-lag)** - when does it work? what are its limitations here?  
+2. **Linear state-space (e.g., LQR, LQG)** - what assumptions must hold (observability, controllability, Gaussian noise)?  
+3. **Nonlinear / optimisation-based (e.g., MPC, NMPC)** - what constraints or nonlinearities motivate this?  
+4. **Robust / adaptive (e.g., sliding mode, tube MPC, MRAC, Hinf)** - what specific uncertainties or disturbances require robustness?
 
 If the paper already implements certain controllers, critique their choice and suggest alternatives that might perform better.
 
@@ -95,4 +95,4 @@ Explicitly mentioned limitations and suggested extensions.
 
 --- 
 
-*Note: Sections not explicitly covered in the paper should be labeled “Not explicitly stated.”*
+*Note: Sections not explicitly covered in the paper should be labeled "Not explicitly stated."*
