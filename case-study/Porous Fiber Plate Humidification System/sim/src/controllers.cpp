@@ -388,4 +388,198 @@ ControlInput GPCRLSHumidCtrl::compute(double phi_measured, double ref_phi)
     return {fan, kTa_nom};
 }
 
+// ---------------------------------------------------------------------------
+// 11. DynaMBRL
+//
+// DynaController wraps a PID and accumulates (e[k], e[k+1]) transitions to
+// fit a SINDy error-dynamics model.  After n_collect=30 steps (900 s) the
+// model supplements the PID via simulated rollouts on future error reduction.
+// At Ts=30 s the 5-scenario runs span ~120-480 steps so the model will be
+// refitted ~4-16 times per run.
+// ---------------------------------------------------------------------------
+DynaHumidCtrl::DynaHumidCtrl(double Ts)
+    : dyna_(ctrl::DynaController::Params{
+        .n_collect     = 30,
+        .n_refit_every = 15,
+        .Ts            = Ts
+      },
+      std::make_shared<ctrl::DiscretePID>(
+          ctrl::PIDParams{
+              .Kp   =  0.10,
+              .Ki   =  1.39e-5,
+              .Kd   =  0.0,
+              .N    =  5.0,
+              .uMin =  1.0,
+              .uMax =  3.5,
+              .Kb   =  0.1
+          }, Ts))
+{}
+
+void DynaHumidCtrl::reset() { dyna_.reset(); }
+
+ControlInput DynaHumidCtrl::compute(double phi_measured, double ref_phi)
+{
+    double e   = (ref_phi - phi_measured) * 100.0;
+    double fan = cFan(dyna_.compute(e));
+    return {fan, kTa_nom};
+}
+
+// ---------------------------------------------------------------------------
+// 12. ILCHumidCtrl
+// Uses deviation-from-mid convention (like MPCHumidCtrl): pid and ILC work in
+// delta-fan space (+/-1.25 m/s), then fan = cFan(kFanMid + u_pid + u_ff).
+// ---------------------------------------------------------------------------
+ILCHumidCtrl::ILCHumidCtrl(double Ts)
+    : ilc_([&]() {
+        ctrl::ILC::Params ip;
+        ip.N        = N_TRIAL;
+        ip.mode     = ctrl::ILC::Mode::PType;
+        ip.Lp       = 0.5;
+        ip.Ts       = Ts;
+        ip.Q_filter = 0.95;
+        ip.uMin     = -1.25;
+        ip.uMax     =  1.25;
+        return ctrl::ILC(ip);
+      }())
+    , pid_(ctrl::PIDParams{
+        .Kp   =  0.10,
+        .Ki   =  1.39e-5,
+        .Kd   =  0.0,
+        .N    =  5.0,
+        .uMin = -1.25,
+        .uMax =  1.25,
+        .Kb   =  0.1
+      }, Ts)
+{}
+
+void ILCHumidCtrl::reset()
+{
+    ilc_.reset();
+    pid_.reset();
+    k_      = 0;
+    phase2_ = false;
+}
+
+ControlInput ILCHumidCtrl::compute(double phi_measured, double ref_phi)
+{
+    double e     = (ref_phi - phi_measured) * 100.0;
+    double u_pid = pid_.compute(e);
+
+    if (!phase2_) {
+        if (k_ < N_TRIAL)
+            ilc_.recordError(k_, e);
+        if (++k_ == N_TRIAL) {
+            ilc_.updateFeedforward();
+            phase2_ = true;
+            k_      = 0;
+        }
+        return {cFan(kFanMid + u_pid), kTa_nom};
+    } else {
+        int    kc   = std::min(k_++, N_TRIAL - 1);
+        double u_ff = ilc_.feedforward(kc);
+        return {cFan(kFanMid + u_pid + u_ff), kTa_nom};
+    }
+}
+
+// ---------------------------------------------------------------------------
+// 13. NeuralPIDHumidCtrl
+// ---------------------------------------------------------------------------
+NeuralPIDHumidCtrl::NeuralPIDHumidCtrl(double Ts)
+    : npid_(ctrl::NeuralPID::Params{
+        .n_hidden   = 8,
+        .lr         = 1e-6,
+        .Ts         = Ts,
+        .plant_gain = 0.04917,   // B = b0*Ts = 1.639e-3*30 [% per m/s]
+        .uMin       = -1.25,
+        .uMax       =  1.25,
+        .Kp0        = 0.10,
+        .Ki0        = 0.0,
+        .Kd0        = 0.0
+      })
+{}
+
+void NeuralPIDHumidCtrl::reset() { npid_.reset(); }
+
+ControlInput NeuralPIDHumidCtrl::compute(double phi_measured, double ref_phi)
+{
+    double e   = (ref_phi - phi_measured) * 100.0;
+    double fan = cFan(kFanMid + npid_.compute(e));
+    return {fan, kTa_nom};
+}
+
+// ---------------------------------------------------------------------------
+// 14. L1AdaptiveHumidCtrl
+// ---------------------------------------------------------------------------
+L1AdaptiveHumidCtrl::L1AdaptiveHumidCtrl(double Ts)
+    : l1_(ctrl::L1AdaptiveController::Params{
+        .a_m       = 0.9512,
+        .b_m       = 0.0488,
+        .k_g       = 1.0,
+        .Gamma     = 5.0,
+        .omega_c   = 0.003,
+        .sigma_max = 5.0,
+        .Q_lyap    = 1.0,
+        .uMin      = 1.0,
+        .uMax      = 3.5
+      }, Ts)
+{}
+
+void L1AdaptiveHumidCtrl::reset() { l1_.reset(); }
+
+ControlInput L1AdaptiveHumidCtrl::compute(double phi_measured, double ref_phi)
+{
+    l1_.setReference(ref_phi * 100.0);
+    double fan = cFan(l1_.compute(phi_measured * 100.0));
+    return {fan, kTa_nom};
+}
+
+// ---------------------------------------------------------------------------
+// 15. CBFSafetyHumidCtrl
+// Barrier h(phi) = phi_max - phi prevents over-humidification.
+// g = continuous gain from fan speed to phi rate: b0 / 100 = 1.639e-5 [fraction/s per m/s].
+// alpha = 0.001 so CBF activates within ~5% RH of the barrier.
+// Nominal PID outputs fan speed directly [1.0, 3.5].
+// ---------------------------------------------------------------------------
+CBFSafetyHumidCtrl::CBFSafetyHumidCtrl(double Ts)
+    : cbf_([&]() {
+        constexpr double phi_max  = 0.80;
+        constexpr double g_val    = 1.639e-5;   // b0/100 [fraction/s per m/s]
+
+        auto nominal = std::make_shared<ctrl::DiscretePID>(
+            ctrl::PIDParams{
+                .Kp   =  0.10,
+                .Ki   =  1.39e-5,
+                .Kd   =  0.0,
+                .N    =  5.0,
+                .uMin =  1.0,
+                .uMax =  3.5,
+                .Kb   =  0.1
+            }, Ts);
+
+        ctrl::CBFSafetyFilter::Params cp;
+        cp.alpha = 0.001;
+        cp.uMin  = 1.0;
+        cp.uMax  = 3.5;
+
+        return ctrl::CBFSafetyFilter(
+            nominal,
+            [phi_max](double phi) { return phi_max - phi; },   // h
+            [](double)            { return -1.0; },              // dh/dphi
+            [](double)            { return 0.0; },               // f0 (conservative)
+            [g_val](double)       { return g_val; },             // g
+            cp,
+            Ts);
+      }())
+{}
+
+void CBFSafetyHumidCtrl::reset() { cbf_.reset(); }
+
+ControlInput CBFSafetyHumidCtrl::compute(double phi_measured, double ref_phi)
+{
+    cbf_.setState(phi_measured);
+    double e   = (ref_phi - phi_measured) * 100.0;
+    double fan = cFan(cbf_.compute(e));
+    return {fan, kTa_nom};
+}
+
 } // namespace humid

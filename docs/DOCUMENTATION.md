@@ -15,11 +15,13 @@ Target audience: control engineers and software developers familiar with discret
    - 5.1 [Core Types](#51-core-types-iplantmodel)
    - 5.2 [Controllers](#52-controllers) (incl. Fuzzy Logic Module)
    - 5.3 [Estimators, Identification & Optimisation](#53-estimators--identification)
-          (incl. GainScheduledController, GapMetric, LPVSystemID, NonlinearMPC, AdaptiveSmithPredictor, AutoTuner, AntiWindupWrapper)
+          (incl. GainScheduledController, GapMetric, LPVSystemID, NonlinearMPC, AdaptiveSmithPredictor, AutoTuner, AntiWindupWrapper, TubeMPC, ParticleFilter)
    - 5.4 [Tuning Layer](#54-tuning-layer)
    - 5.5 [Composition & Orchestration](#55-composition--orchestration)
    - 5.6 [Analysis & Metrics](#56-analysis--metrics)
    - 5.7 [Real-Time Utilities & HAL](#57-real-time-utilities--hal)
+   - 5.8 [Data-Driven & ML Controllers](#58-data-driven--ml-controllers-parts-3134)
+          (ILC, SINDy, KoopmanEDMD, L1Adaptive, CBFSafetyFilter, GaussianProcess, EchoStateNetwork, NeuralPID, CEMController, DynaController, ScenarioMPC, BayesianOptimizer, ControllerRegistry, ControllerMonitor, ComputationalDelayWrapper)
 6. [Deployment Cross-References](#6-deployment-cross-references)
 
 ---
@@ -55,7 +57,7 @@ controller/
 |-- CMakeLists.txt          # Root build, subdir aggregator
 |-- lib/                    # Library sources (build target: controller_toolbox)
 |-- examples/               # Single-file demos (ex01..ex22) + advanced cpp/ folder
-|-- case-study/             # 4 physics studies: boiler-turbine, SMISMO hydraulic, tug boat, solar cooling
+|-- case-study/             # 8 case studies: 6 C++ built + 2 Python-only (5 spec-only stubs)
 |-- tests/                  # CTest-driven unit + integration tests
 |-- scripts/                # tune_all / simulate_all / realtime_all batch tools
 |-- cheatsheet/             # Markdown reference notes (tuning, identification)
@@ -179,22 +181,46 @@ cmake --build build --target docs
 
 ### 3.3 Case Studies (`case-study/`)
 
-Four self-contained physics studies exercise the library end-to-end. Each pairs a nonlinear plant simulator with a roster of controllers that **wrap** the `lib/` algorithms behind a study-specific `ControllerBase` (not `ctrl::IController` directly, because each plant has a different I/O signature), then sweeps every controller across several scenarios and writes CSV telemetry for post-processing. Counts below are the Part 26 state.
+Each case study pairs a nonlinear plant simulator with a roster of controllers, sweeps every controller across several scenarios, and writes CSV telemetry to `logs/` for post-processing. C++ studies build as self-contained executables; Python-only studies run via `sim/main.py` (discovered automatically by `run.py` Phase 6). See [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md) for full implementation status.
+
+#### C++ built (6) — registered in `case-study/CMakeLists.txt` + `compile.bat`
 
 | Study | Plant | Controllers | Scenarios | Runs | Build target |
 |---|---|---|---|---|---|
 | [`Boiler Control/`](case-study/Boiler%20Control/) | Bell-Astrom 3x3 MIMO boiler-turbine, 3 operating points | 27 | 8 | 216 | `boiler_sim` |
-| [`Meter In Meter Out Control/`](case-study/Meter%20In%20Meter%20Out%20Control/) | SMISMO 9-state hydraulic actuator (separate meter-in/meter-out spools) | 14 | 3 | 42 | `smismo_sim` |
 | [`Tug Boat Numerical Simulation/`](case-study/Tug%20Boat%20Numerical%20Simulation/) | 3-DOF marine vessel (Li et al. 2026, Ocean Engineering 357), 6-state MIMO + thrust allocation | 16 | 4 | 64 | `tug_sim` |
 | [`Solar-Driven Cooling .../`](case-study/Solar-Driven%20Cooling%20System%20with%20Photovoltaic%20Evaporative%20Chimney/) | Algebraic SISO solar cooling + PV evaporative chimney (Ruiz et al. 2024) | 9 | 5 | 45 | `solar_cooling_sim` |
+| [`Porous Fiber Plate Humidification System/`](case-study/Porous%20Fiber%20Plate%20Humidification%20System/) | Laminar flat-plate evaporative humidifier + room moisture ODE + 2-step sensor delay | 10 | 5 | 50 | `humidification_sim` |
+| [`Active Suspension Mathematical Modeling and Optimization 2025/`](case-study/Active%20Suspension%20Mathematical%20Modeling%20and%20Optimization%202025/) | 2-DOF quarter-car, 4-state RK4, F_act ±2000 N (Abdulwahab et al. 2025) | 10 | 5 | 50 | `susp_sim` |
+| [`Non-Inverting Buck-Boost Converter/`](case-study/Non-Inverting%20Buck-Boost%20Converter/) | Averaged 2-state buck-boost, RK4 at 50 kHz, mode hysteresis ±0.1 V (Almasi et al. 2017) | 12 | 5 | 60 | `buck_boost_sim` |
 
-**Boiler-Turbine** controllers span PID, LQR, LQG, MPC, SMC, ESC, ADRC, Lead-Lag+PID, Smith Predictor, GPC-RLS, EKF-LQR, UKF-LQR, FuzzyPID, FuzzySup-MPC, three `ControllerStack` compositions, Repetitive, MRAC, H-infinity, Adaptive Smith Predictor, plus Part 26 additions: NonlinearMPC, Feedback Linearisation, MHE-LQR, LPV gain-scheduled, SubspaceID-LQG, and automated (gap-metric) gain-scheduled LQR.
+**Boiler-Turbine** controllers: PID, LQR, LQG, MPC, SMC, ESC, ADRC, Lead-Lag+PID, Smith Predictor, GPC-RLS, EKF-LQR, UKF-LQR, FuzzyPID, FuzzySup-MPC, three `ControllerStack` compositions, Repetitive, MRAC, H-infinity, AdaptiveSmithPredictor, NonlinearMPC, FeedbackLinearisation, MHE-LQR, LPV gain-scheduled, SubspaceID-LQG, AutoGainScheduler-LQR.
 
-**Tug Boat** controllers: PID, KF-PID, SMC, MPC, ESC, FuzzyPID, FuzzySup-MPC, ADRC, Repetitive, plus Part 26 additions: 6-state MIMO LQR, LQG, per-axis TubeMPC, EKF-LQR, MRAC, automated gain-scheduled LQR, and NonlinearMPC. Uses `FuzzyLogic`, `KalmanFilter`, `DiscreteMPC`, `DiscreteSMC`, `ExtremumSeeker`, `DiscreteLQR/LQG`, `TubeMPC`, `ExtendedKalmanFilter`, `NonlinearMPC`, and `PlantModel`.
+**Tug Boat** controllers: PID, KF-PID, SMC, MPC, ESC, FuzzyPID, FuzzySup-MPC, ADRC, Repetitive, MIMO LQR, LQG, per-axis TubeMPC, EKF-LQR, MRAC, AutoGainScheduler-LQR, NonlinearMPC.
 
-**SMISMO** and **Solar** rosters are documented in their respective `sim/include/*controllers.h` headers. The example wrapper [ex21_boiler_turbine_case_study.cpp](examples/ex21_boiler_turbine_case_study.cpp) is the standalone boiler demo; the full multi-controller sweeps live under the `case-study/` subdirectories and build as the targets in the table above (all listed in `compile.bat`).
+**Buck-Boost** controllers include 4 fuzzy variants (FuzzyPD, FuzzyPID-Buck, FuzzyPID-Boost, TLCS-FuzzyPI) that validate the Almasi et al. T-S fuzzy TLCS result, plus PI-Buck, PI-Boost, TLCS-ClassicPI, GainScheduled, ADRC, MPC, LQR, and OpenLoop.
 
-> **Note:** only the Tug study currently has a Catch2 regression test (`tests/test_tugsim_regression.cpp`). Adding equivalent IAE/settling-threshold tests for Boiler, SMISMO, and Solar is the top open task (see the Part 26 review in `docs/cumulative_bug_report.md`, finding T1).
+#### Python-only (2) — `sim/main.py`, run by Phase 6 of `run.py`
+
+| Study | Plant | Controllers | Scenarios | Runs |
+|---|---|---|---|---|
+| [`Vertical Drill String Mathematical Review 2025/`](case-study/Vertical%20Drill%20String%20Mathematical%20Review%202025/) | 2-DOF torsional model with Stribeck friction, RK4 at Ts=0.1 s | 10 | 5 | 50 |
+| [`Multi-Body Floating Wind-Wave Platform/`](case-study/Multi-Body%20Floating%20Wind-Wave%20Platform/) | 4-state FOWT heave + WEC arm, sinusoidal wave forcing, RK4 at Ts=0.5 s | 8 | 5 | 40 |
+
+**Drill String** controllers: OpenLoop, PID, ADRC, SMC, LQR, MPC, MRAC, GainScheduled, L1Adaptive, NeuralPID.
+
+**Wind-Wave** controllers: Passive (B_opt damping), Reactive (complex-conjugate), PID, ADRC, SMC, LQR, MPC, MRAC.
+
+#### Spec-only stubs (4) — `README.md` present, no `sim/`, not built
+
+| Study | Notes |
+|---|---|
+| `Electrostatic MEMS with Tilted Micro-Pillars/` | 10 controllers × 5 scenarios spec'd in README |
+| `Bubble Column Bioreactor CO2 Biodiesel/` | Plant model needs design first |
+| `High-Altitude Aerial Firefighting Bag Drop/` | Monte-Carlo drop pattern, thin spec |
+| `Floating Nuclear Power Plant Ice Load Sensing/` | Ice-load estimation showcase (EKF/MHE), thin spec |
+
+The standalone boiler demo [ex21_boiler_turbine_case_study.cpp](examples/ex21_boiler_turbine_case_study.cpp) exercises the boiler plant directly without the full multi-controller sweep. All C++ targets are listed in `compile.bat`; Python-only studies are **not** in `CMakeLists.txt` or `compile.bat`.
 
 ### 3.4 Tests (`tests/`)
 
@@ -205,7 +231,7 @@ Four self-contained physics studies exercise the library end-to-end. Each pairs 
 - `test_catch2_pilot.cpp` - Catch2 v3 pilot tests (5 test cases, 21 assertions): LQRAdapter MIMO `computeVec()`, EKF scaled-epsilon Jacobian, PID DoM derivative suppression, 2DOF b_weight overshoot reduction, observer telemetry wiring
 - `test_framework.h` - lightweight assertion macros for the custom harness
 
-**Current totals (2026-05-28):** 78 C++ executables pass | 79 Python examples pass | 0 failures.
+**Current totals:** run `conda run -n soft_robotics -- python run.py` to get the live count. The 2026-05-28 snapshot (78 C++ / 79 Python) predates Part 31-38 additions; treat it as a lower bound only.
 
 ### 3.5 Scripts (`scripts/`)
 
@@ -422,7 +448,7 @@ SISO TF -> controllable canonical SS conversion.
 - **Inputs:** `compute(x, x_ref = \emptyset, u_ff = \emptyset)` - full state vector required.
 - **Returns:** `Eigen::VectorXd u[k]` (size m).
 - **Methods:** `gainMatrix()`, `riccatiSolution()`, `dareConverged()`, `dareIterations()`, `sampleTime()`.
-- **Helper:** `LQRAdapter` - wraps LQR as `IController` for use inside `ControllerStack`.
+- **Helper:** `LQRAdapter` (Part 34) - wraps `DiscreteLQR` as `IController`. Two constructors: reference-capture (`LQRAdapter(lqr, state_fn)`) and owning (`LQRAdapter(owned_lqr, state_fn)`). Free function `makeLQRController(sys, lqr_params, state_fn)` creates a `shared_ptr<IController>`-compatible instance in one call — use this for `AutoGainScheduler`/`GainScheduledController` `design_fn` callbacks. MIMO note: `compute()` returns `u[0]` only; use `computeVec()` for the full vector.
 
 #### `DiscreteMPC` ([DiscreteMPC.h](lib/DiscreteMPC.h))
 - **Purpose:** Condensed receding-horizon QP with hard box constraints on `Deltau` and `u`.
@@ -718,6 +744,19 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 - **Do NOT use on DiscretePID** -- PID already has back-calculation via `PIDParams::Kb`. Double-wrapping applies conditioning twice.
 - **Python:** `ctrl.AntiWindupWrapper(inner, uMin, uMax, Kb=1.0)`.
 
+#### `TubeMPC` ([TubeMPC.h](lib/TubeMPC.h)) *Part 26*
+- **Purpose:** Robust MPC with mRPI tube guarantee for bounded additive disturbances `w[k] ∈ W` (Mayne, Seron & Rakovic 2005). The actual state stays inside `Z = {e : |e_i| ≤ z_max_i}` around the nominal trajectory for all admissible disturbances.
+- **Parameters (`TubeMPCParams`):** `Np`, `Nu`, `Q` (state cost), `R` (control cost), `K` (stabilising feedback — must make A+B*K stable), `wMax` (disturbance bound per state), `uMin/uMax`, `Ts`.
+- **Offline (ctor):** computes mRPI set, tightens input constraints by K*Z, builds condensed QP matrices.
+- **Online:** `setState(x)`, `computeRef(x, y_ref)` applies composite law `u = K*(x - x_nom) + V*[0]`.
+- **Cave:** `y_ss ≈ Q/(Q+R)*r` without integral action; for ~0.5% error use `Q=10, R=0.05`. MATLAB `lqr()` sign: pass `K = -K_lqr` (negate).
+
+#### `ParticleFilter` ([ParticleFilter.h](lib/ParticleFilter.h))
+- **Purpose:** SIR (Bootstrap) particle filter for nonlinear / non-Gaussian state estimation (Gordon, Salmond & Smith 1993). Use over EKF/UKF when the posterior is multimodal or heavy-tailed.
+- **Parameters:** `n_particles`, process-noise `Q`, measurement-noise `R`, `resample_threshold` (ESS fraction, typically 0.5).
+- **Usage:** provide `state_fn(x, u)` (dynamics) + `obs_fn(x, u)` (measurement model); call `update(u, y)` → `estimate()` returns weighted mean.
+- **Benchmark:** Kitagawa `y = x²/20 + noise` — RMSE 4–10 is normal (bimodal posterior).
+
 ---
 
 ### 5.4 Tuning Layer
@@ -803,6 +842,79 @@ for (int k = 0; k < N; ++k) {
     actuator.write(u);    // steps plant
 }
 ```
+
+---
+
+### 5.8 Data-Driven & ML Controllers (Parts 31–34)
+
+All algorithms below are in `lib/`, included by [ControllerToolbox.h](lib/ControllerToolbox.h), and have pybind11 bindings + Catch2 tests.
+
+#### `ILCController` ([IterativeLearningControl.h](lib/IterativeLearningControl.h)) *Part 31*
+- **Purpose:** Iterative Learning Control — learns a feedforward correction that eliminates repeating tracking errors across fixed-duration trials (Bristow 2006).
+- **Modes:** `P_type` (`u_{j+1} = u_j + L_p*e_j`), `D_type` (adds derivative term), `NormOptimal` (minimises `||e_{j+1}||²_R + ||Δu_j||²_Q` using the Markov-parameter matrix G).
+- **Usage:** `newTrial()` → run the trial → `endTrial(e_vec)` → `getNextInput(k)` for the feedforward at step k.
+
+#### `SINDy` + `SINDyModel` ([SINDy.h](lib/SINDy.h)) *Part 31*
+- **Purpose:** Sparse Identification of Nonlinear Dynamics — builds a sparse polynomial/trig equation of motion from state-derivative data via STLS regression (Brunton 2016).
+- **Library options:** `PolyDeg1`, `PolyDeg2`, `PolyDeg3`, `PolyDeg1Trig` (adds sin/cos columns).
+- **Usage:** `fit(X_dot, X, U)` → `SINDyModel`; `model.stateFunc()` returns a `StateFunc` compatible with `NonlinearMPC`, `CEMController`, and `DynaController`.
+
+#### `KoopmanEDMD` ([KoopmanEDMD.h](lib/KoopmanEDMD.h)) *Part 31*
+- **Purpose:** Extended Dynamic Mode Decomposition — lifts a nonlinear system to a high-dimensional linear representation via a dictionary of basis functions (Williams 2015).
+- **Dictionaries:** `PolyDeg1`, `PolyDeg2`, `RBF` (radial basis), and combinations.
+- **Methods:** `fit(X, U, Y)` → `StateSpace` (full lifting); `fitProjected()` → `StateSpace` restricted to the original state coordinates. The output drops directly into `DiscreteMPC` or `DiscreteLQR`.
+
+#### `L1AdaptiveController` ([L1AdaptiveController.h](lib/L1AdaptiveController.h)) *Part 31*
+- **Purpose:** L1 adaptive control — state predictor + low-pass-filtered adaptation law; guarantees bounded transient performance independent of adaptation gain (Hovakimyan & Cao 2010).
+- **Usage (Python/C++):** `set_reference(r)` then `compute(y_plant)` — **not** `compute(r - y)`.
+- **Key params:** `a_m` (model pole), `b_m` (model gain), `Gamma` (adaptation rate), `omega_c` (LP filter cutoff), `sigma_max` (projection bound). Constraint: `a_m` must give a stable reference model.
+
+#### `CBFSafetyFilter` ([CBFSafetyFilter.h](lib/CBFSafetyFilter.h)) *Part 31*
+- **Purpose:** Control Barrier Function safety filter — 1D analytical QP wrapper that minimally modifies any `IController`'s output to keep the system inside a safe set `{x : h(x) ≥ 0}` (Ames et al. 2017).
+- **Usage:** provide `h_fn(x)` and `grad_h_fn(x)` (scalar + gradient); wraps any `shared_ptr<IController>`.
+- **1D analytical solve:** avoids a full QP; closed-form projection onto the CBF halfspace.
+
+#### `GaussianProcess` ([GaussianProcess.h](lib/GaussianProcess.h)) *Part 31*
+- **Purpose:** Gaussian Process Regression with squared-exponential kernel and Cholesky inference (Rasmussen & Williams 2006). Fixed-budget online mode evicts oldest point at `N_max`.
+- **Methods:** `train(X, y)`, `predict(x*)` → `{mean, variance}`. Kernel params: `sigma_f` (signal std), `ell` (length scale), `sigma_n` (noise std).
+- **Note:** Not an `IController`; used as a surrogate for GP-MPC or inside `BayesianOptimizer`.
+
+#### `EchoStateNetwork` ([EchoStateNetwork.h](lib/EchoStateNetwork.h)) *Part 31*
+- **Purpose:** Echo State Network / Reservoir Computing — fixed random reservoir, trained readout only via ridge regression (Jaeger 2001). Identifies nonlinear dynamics without backprop.
+- **Methods:** `train(U, Y, washout)` fits `W_out`; `step(u)` → `y_hat`. Returns a `StateFunc` for use in predictive controllers.
+- **Key param:** `spectral_radius` — must be `< 1` for echo state property (typically 0.9).
+
+#### `NeuralPID` ([NeuralPID.h](lib/NeuralPID.h)) *Part 31*
+- **Purpose:** Online neural PID — 3-layer network `[e, ė, ∫e] → [Kp, Ki, Kd]` adapts weights each step via backprop through the linearised plant Jacobian.
+- **Params (`NeuralPIDParams`):** `n_hidden`, `lr`, `Ts`, `plant_gain`, `max_weight_norm`, `uMin/uMax`, `Kp0/Ki0/Kd0`. **Note:** `Ts` IS a field of `NeuralPIDParams` (unlike `PIDParams` where Ts is a constructor arg).
+- **Constructor:** `NeuralPID(params)` — single-arg, no separate Ts.
+
+#### `CEMController` ([CEMController.h](lib/CEMController.h)) *Part 31*
+- **Purpose:** Cross-Entropy Method MPC — derivative-free stochastic rollout optimisation. Samples N action sequences, keeps elite set, refits Gaussian, warm-starts with previous solution.
+- **Params:** `N_samples` (typically 50), `elite_frac` (0.1), `n_iter`, `Np`, `sigma_init`.
+- **Usage:** provide `state_fn` (dynamics) + `cost_fn` (per-step cost); call `compute(error)`.
+
+#### `DynaController` ([DynaController.h](lib/DynaController.h)) *Part 33*
+- **Purpose:** Model-based RL (Dyna, Sutton 1991) — wraps any base `IController`, accumulates transition data, fits a SINDy error-dynamics model, exposes `modelRollout()` for synthetic planning.
+- **Usage:** `compute(error)` delegates to the wrapped policy + learns in the background once `min_data_points` transitions are collected. Call `modelRollout(u_seq, x0)` from Python to improve the policy on synthetic data.
+
+#### `ScenarioMPC` ([ScenarioMPC.h](lib/ScenarioMPC.h)) *Part 33*
+- **Purpose:** Scenario-based stochastic MPC (Calafiore & Campi 2006) — averages the QP cost over N_s sampled Gaussian noise trajectories. More conservative than `DiscreteMPC`, less conservative than `TubeMPC`.
+- **Params:** `N_s` (scenario count), `Sigma_w` (process-noise covariance), plus the usual `MPCParams` fields. API mirrors `DiscreteMPC`.
+
+#### `BayesianOptimizer` ([BayesianOptimizer.h](lib/BayesianOptimizer.h)) *Part 33, header-only*
+- **Purpose:** Bayesian Optimization for expensive controller parameter tuning — GP surrogate + UCB or EI acquisition (Srinivas 2010). Use instead of `AutoTuner` (CMA-ES) when each cost evaluation is costly (hardware test, long simulation).
+- **Acquisition:** `UCB` (exploration weight `kappa`) or `EI` (expected improvement `xi`).
+- **Shared types with AutoTuner:** `TunerResult`, `CostFn` — plug into the same cost wrappers.
+
+#### `ControllerRegistry` + `ControllerMonitor` ([ControllerRegistry.h](lib/ControllerRegistry.h), [ControllerMonitor.h](lib/ControllerMonitor.h)) *Part 33*
+- **Registry:** Meyers-singleton self-registration. Each algorithm header places `CTRL_REGISTER_FEATURE(name)` at its bottom; `ctrl::features()` then returns the live map. `CTRL_HAS_*` compile-time flags set conditional entries.
+- **Monitor:** Attaches to any `IController` as an `IControllerObserver`. Runs CUSUM (mean-shift detection, params `k`/`h`) and EWMA (drift detection, params `lambda`/`L`) SPC charts on the output stream. Fires a configurable `alarm_cb(chart_name, value)` on fault. Also listens to `onState(key, vec)` — ADRC emits `"eso"` z-vector, SMC emits `"surface"`.
+
+#### `ComputationalDelayWrapper` ([ComputationalDelayWrapper.h](lib/ComputationalDelayWrapper.h)) *Part 34, header-only*
+- **Purpose:** One-sample actuator delay decorator — models the realistic digital loop where computation at step k cannot reach the actuator until step k+1.
+- **Behaviour:** `u_out[k] = u_inner[k-1]` (first call returns 0, the held initial value). Shifts Nyquist phase margin by −π; use this to expose that margin during tuning, not to fix it.
+- **Note:** Output is initialised to 0.0; warm up one step before trusting the output.
 
 ---
 

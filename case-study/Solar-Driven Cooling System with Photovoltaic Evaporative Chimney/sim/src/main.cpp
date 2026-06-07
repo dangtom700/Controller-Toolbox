@@ -118,10 +118,10 @@ int main(int argc, char* argv[])
     std::cout << "Ts      : " << Ts        << " s\n";
     std::cout << "Duration: " << params.duration << " s\n";
     std::cout << "Scenarios: " << scenarios.size() << "\n";
-    std::cout << "Controllers per scenario: 9  (PID, FFPID, MPC, ADRC, FuzzyPID, SmithPredictor, MRAC, ESC, GPC-RLS)\n";
-    std::cout << "Total runs: " << scenarios.size() * 9 << "\n\n";
+    std::cout << "Controllers per scenario: 14  (PID, FFPID, MPC, ADRC, FuzzyPID, SmithPredictor, MRAC, ESC, GPC-RLS, ILC, NeuralPID, L1Adaptive, DynaCtrl, CEM)\n";
+    std::cout << "Total runs: " << scenarios.size() * 14 << "\n\n";
 
-    int total = static_cast<int>(scenarios.size()) * 9;
+    int total = static_cast<int>(scenarios.size()) * 14;
     int done  = 0;
 
     for (const auto& sc : scenarios) {
@@ -139,6 +139,12 @@ int main(int argc, char* argv[])
         // Wave 3 additions
         controllers.push_back(std::make_unique<solar::ESCSolarCtrl>(Ts));
         controllers.push_back(std::make_unique<solar::GPCRLSSolarCtrl>(Ts, 40.0));
+        // ML/DD additions (Wave 4)
+        controllers.push_back(std::make_unique<solar::ILCSolarCtrl>(Ts));
+        controllers.push_back(std::make_unique<solar::NeuralPIDSolarCtrl>(Ts));
+        controllers.push_back(std::make_unique<solar::L1AdaptiveSolarCtrl>(Ts));
+        controllers.push_back(std::make_unique<solar::DynaSolarCtrl>(Ts));
+        controllers.push_back(std::make_unique<solar::CEMSolarCtrl>(Ts, 40.0));
 
         for (auto& ctrl : controllers) {
             try {

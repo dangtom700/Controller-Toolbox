@@ -1110,4 +1110,114 @@ void NMPCTugCtrl::reset()
     nmpc_.reset();
 }
 
+// ===========================================================================
+// Mode 17 - L1Adaptive (3-axis)
+// ===========================================================================
+
+static ctrl::L1AdaptiveController::Params l1ParamsForAxis(int axis,
+                                                           const PlantParameters& pp)
+{
+    ctrl::L1AdaptiveController::Params lp;
+    lp.a_m       = 0.97;
+    lp.b_m       = 0.03;
+    lp.k_g       = 1.0;
+    lp.Gamma     = 1.0;
+    lp.omega_c   = 0.05;
+    lp.sigma_max = 1.0e8;
+    lp.Q_lyap    = 1.0;
+    if (axis < 2) {
+        lp.uMin = -TAU_XY_MAX;
+        lp.uMax =  TAU_XY_MAX;
+    } else {
+        lp.uMin = -TAU_PSI_MAX;
+        lp.uMax =  TAU_PSI_MAX;
+    }
+    return lp;
+}
+
+L1AdaptiveTugCtrl::L1AdaptiveTugCtrl(const PlantParameters& p)
+    : pp_(p)
+    , l1s_{ ctrl::L1AdaptiveController(l1ParamsForAxis(0, p), p.dt),
+            ctrl::L1AdaptiveController(l1ParamsForAxis(1, p), p.dt),
+            ctrl::L1AdaptiveController(l1ParamsForAxis(2, p), p.dt) }
+{}
+
+Vector3d L1AdaptiveTugCtrl::compute(const Vector3d& ref,
+                                    const Matrix<double,6,1>& state)
+{
+    Vector3d tau;
+    for (int i = 0; i < 3; ++i) {
+        l1s_[i].setReference(ref(i));
+        tau(i) = l1s_[i].compute(state(i));
+    }
+    return saturateTau(tau);
+}
+
+void L1AdaptiveTugCtrl::reset()
+{
+    for (auto& l : l1s_) l.reset();
+}
+
+// ===========================================================================
+// Mode 18 - ScenarioMPC (3x per-axis stochastic MPC)
+// ===========================================================================
+
+static ctrl::ScenarioMPC makeScenarioMPCForAxis(int axis, const PlantParameters& pp)
+{
+    ctrl::StateSpace sys = makeAxisSS(axis, pp);
+    const double kN = 1.0e3;
+    const double tau_max_kN = (axis < 2) ? TAU_XY_MAX / kN : TAU_PSI_MAX / kN;
+
+    // Wave disturbance in kN units: 50 kN / mass -> velocity step per step
+    double wv_kN = (axis < 2)
+        ? (50.0e3 / kN) / pp.M_re(axis, axis) * pp.dt   // (kN) / mass -> kN velocity
+        : (50.0e3 / kN) / pp.M_re(2, 2) * pp.dt;
+    wv_kN = std::max(wv_kN, 1.0e-9);
+
+    ctrl::ScenarioMPCParams sp;
+    sp.Np        = 60;
+    sp.Nu        = 5;
+    sp.Q         = Eigen::MatrixXd::Identity(1, 1);
+    sp.R         = Eigen::MatrixXd::Identity(1, 1);
+    sp.Sigma_w   = Eigen::MatrixXd::Zero(2, 2);
+    sp.Sigma_w(0,0) = 1e-6;             // position noise variance
+    sp.Sigma_w(1,1) = wv_kN * wv_kN;   // velocity noise variance
+    sp.N_samples = 30;
+    sp.uMin      = Eigen::VectorXd::Constant(1, -tau_max_kN);
+    sp.uMax      = Eigen::VectorXd::Constant(1,  tau_max_kN);
+    sp.Ts        = pp.dt;
+    return ctrl::ScenarioMPC(sys, sp);
+}
+
+ScenarioMPCTugCtrl::ScenarioMPCTugCtrl(const PlantParameters& p)
+    : pp_(p)
+    , smpcs_{ makeScenarioMPCForAxis(0, p),
+              makeScenarioMPCForAxis(1, p),
+              makeScenarioMPCForAxis(2, p) }
+{}
+
+Vector3d ScenarioMPCTugCtrl::compute(const Vector3d& ref,
+                                     const Matrix<double,6,1>& state)
+{
+    Vector3d e = bodyError(ref, state);
+    Vector3d tau;
+
+    for (int axis = 0; axis < 3; ++axis) {
+        Eigen::VectorXd x_ax(2);
+        x_ax(0) = e(axis);
+        x_ax(1) = state(3 + axis);
+
+        Eigen::VectorXd r_ax(1); r_ax(0) = 0.0;
+
+        Eigen::VectorXd u_kN = smpcs_[axis].computeRef(x_ax, r_ax);
+        tau(axis) = u_kN(0) * 1.0e3;   // kN -> N
+    }
+    return saturateTau(tau);
+}
+
+void ScenarioMPCTugCtrl::reset()
+{
+    for (auto& s : smpcs_) s.reset();
+}
+
 } // namespace tug

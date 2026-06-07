@@ -32,8 +32,11 @@ NeuralPID::NeuralPID(const Params& p) : p_(p)
     }
 
     // Bias initialisation: set b2 so initial gains approx = [Kp0, Ki0, Kd0]
-    // softplus^{-1}(y) = log(exp(y) - 1)
-    auto sp_inv = [](double y) { return std::log(std::expm1(y)); };
+    // softplus^{-1}(y) = log(exp(y) - 1); for y > 20, softplus(y) approx = y so use y directly
+    // to avoid exp() overflow (e.g. Kp0=2000 would overflow to inf otherwise)
+    auto sp_inv = [](double y) {
+        return (y > 20.0) ? y : std::log(std::expm1(y));
+    };
     b2_(0) = sp_inv(p_.Kp0);
     b2_(1) = sp_inv(p_.Ki0 + 1e-6);
     b2_(2) = sp_inv(p_.Kd0 + 1e-6);

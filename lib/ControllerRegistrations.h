@@ -62,7 +62,6 @@ CTRL_REGISTER_FEATURE(tube_mpc)
 CTRL_REGISTER_FEATURE(particle_filter)
 CTRL_REGISTER_FEATURE(gpc)
 CTRL_REGISTER_FEATURE(repetitive)
-CTRL_REGISTER_FEATURE(deepc)
 
 // --- Part 31 ML/DD algorithms ----------------------------------------------
 CTRL_REGISTER_FEATURE(ilc)

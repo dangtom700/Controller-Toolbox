@@ -68,6 +68,8 @@ int main(int argc, char* argv[])
     // Wave 3 additions
     controllers.push_back(std::make_unique<tug::AutoGSTugCtrl>(plant));
     controllers.push_back(std::make_unique<tug::NMPCTugCtrl>(plant));
+    controllers.push_back(std::make_unique<tug::L1AdaptiveTugCtrl>(plant));
+    controllers.push_back(std::make_unique<tug::ScenarioMPCTugCtrl>(plant));
 
     // -- Run all (scenario x controller) pairs ---------------------------------
     int total = static_cast<int>(scenario_files.size() * controllers.size());

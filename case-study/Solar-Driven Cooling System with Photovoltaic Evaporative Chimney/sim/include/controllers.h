@@ -196,4 +196,89 @@ private:
     static constexpr double kMwMax = 0.22;
 };
 
+// ---------------------------------------------------------------------------
+// 10. ILCSolarCtrl - two-phase P-type ILC wrapping a PID baseline
+// Phase 1 (0..N_TRIAL-1): PID only; record error at each step.
+// Phase 2 (remaining):    PID + learned feedforward.
+// N_TRIAL=180 -> 1800 s phase-1 window at Ts=10 s.
+// ---------------------------------------------------------------------------
+class ILCSolarCtrl : public ControllerBase {
+public:
+    explicit ILCSolarCtrl(double Ts);
+    ControlInput compute(double ref_Tw1, double measured_Tw1, double G) override;
+    void reset() override;
+    std::string name() const override { return "ILC"; }
+private:
+    ctrl::ILC         ilc_;
+    ctrl::DiscretePID pid_;
+    int               k_      = 0;
+    bool              phase2_ = false;
+    static constexpr int    N_TRIAL = 180;
+    static constexpr double kr_nom_ = 0.85;
+};
+
+// ---------------------------------------------------------------------------
+// 11. NeuralPIDSolarCtrl - online NN that adapts [Kp,Ki,Kd] each step
+// plant_gain = b*Ts (gradient path: de/du = -b*Ts -> plant_gain = b*Ts).
+// m_dot_w = clampMw(kMwNom - npid.compute(e)).
+// ---------------------------------------------------------------------------
+class NeuralPIDSolarCtrl : public ControllerBase {
+public:
+    explicit NeuralPIDSolarCtrl(double Ts);
+    ControlInput compute(double ref_Tw1, double measured_Tw1, double G) override;
+    void reset() override;
+    std::string name() const override { return "NeuralPID"; }
+private:
+    ctrl::NeuralPID npid_;
+    static constexpr double kr_nom_ = 0.85;
+};
+
+// ---------------------------------------------------------------------------
+// 12. L1AdaptiveSolarCtrl - L1 adaptive; outputs m_dot_w directly.
+// setReference(ref_Tw1), compute(measured_Tw1) -> m_dot_w.
+// Reference model: a_m=0.70, b_m=0.30 (same as MRACSolarCtrl, DC gain=1).
+// ---------------------------------------------------------------------------
+class L1AdaptiveSolarCtrl : public ControllerBase {
+public:
+    explicit L1AdaptiveSolarCtrl(double Ts);
+    ControlInput compute(double ref_Tw1, double measured_Tw1, double G) override;
+    void reset() override;
+    std::string name() const override { return "L1Adaptive"; }
+private:
+    ctrl::L1AdaptiveController l1_;
+    static constexpr double kr_nom_ = 0.85;
+};
+
+// ---------------------------------------------------------------------------
+// 13. DynaSolarCtrl - Dyna MBRL wrapping PID; SINDy supplements after warmup.
+// m_dot_w = clampMw(kMwNom - dyna.compute(e)).
+// ---------------------------------------------------------------------------
+class DynaSolarCtrl : public ControllerBase {
+public:
+    explicit DynaSolarCtrl(double Ts);
+    ControlInput compute(double ref_Tw1, double measured_Tw1, double G) override;
+    void reset() override;
+    std::string name() const override { return "DynaCtrl"; }
+private:
+    ctrl::DynaController dyna_;
+    static constexpr double kr_nom_ = 0.85;
+};
+
+// ---------------------------------------------------------------------------
+// 14. CEMSolarCtrl - CEM-MPC over FOPDT deviation model.
+// x_dev = Tw1 - nom; u_dev = m_dot_w - kMwNom; B = -b*Ts (negative gain).
+// m_dot_w = clampMw(kMwNom + cem.computeRef(x_dev, r_dev)(0)).
+// ---------------------------------------------------------------------------
+class CEMSolarCtrl : public ControllerBase {
+public:
+    explicit CEMSolarCtrl(double Ts, double Tw1_nom = 40.0);
+    ControlInput compute(double ref_Tw1, double measured_Tw1, double G) override;
+    void reset() override;
+    std::string name() const override { return "CEM"; }
+private:
+    ctrl::CEMController cem_;
+    double Tw1_nom_;
+    static constexpr double kr_nom_ = 0.85;
+};
+
 } // namespace solar

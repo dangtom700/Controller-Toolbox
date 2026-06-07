@@ -19,6 +19,8 @@
 #include "MRACController.h"
 #include "NonlinearMPC.h"
 #include "AutoGainScheduler.h"
+#include "L1AdaptiveController.h"
+#include "ScenarioMPC.h"
 #include <Eigen/Dense>
 #include <array>
 #include <memory>
@@ -367,6 +369,38 @@ public:
 private:
     const PlantParameters& pp_;
     ctrl::NonlinearMPC nmpc_;
+};
+
+// -- Mode 17: L1Adaptive (3-axis) ---------------------------------------------
+// One L1AdaptiveController per axis. Reference model: a_m=0.97, b_m=0.03
+// (same as MRACTugCtrl). omega_c=0.05 rad/s LP filter; sigma_max=1e8.
+// Output in N/N.m; saturateTau applied.
+class L1AdaptiveTugCtrl : public ControllerBase {
+public:
+    explicit L1AdaptiveTugCtrl(const PlantParameters& p);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref,
+                            const Eigen::Matrix<double,6,1>& state) override;
+    void reset() override;
+    std::string name() const override { return "L1Adaptive"; }
+private:
+    const PlantParameters& pp_;
+    std::array<ctrl::L1AdaptiveController, 3> l1s_;
+};
+
+// -- Mode 18: ScenarioMPC (3-axis per-axis stochastic MPC) --------------------
+// One ScenarioMPC per axis using the same 2-state [e,nu] model as TubeMPCTugCtrl.
+// Input in kN; Np=60, Nu=5, N_samples=30. Sigma_w from JONSWAP wave disturbance.
+// Output scaled back to N/N.m; saturateTau applied.
+class ScenarioMPCTugCtrl : public ControllerBase {
+public:
+    explicit ScenarioMPCTugCtrl(const PlantParameters& p);
+    Eigen::Vector3d compute(const Eigen::Vector3d& ref,
+                            const Eigen::Matrix<double,6,1>& state) override;
+    void reset() override;
+    std::string name() const override { return "ScenarioMPC"; }
+private:
+    const PlantParameters& pp_;
+    std::array<ctrl::ScenarioMPC, 3> smpcs_;
 };
 
 } // namespace tug

@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
         },
     };
 
-    constexpr int kNumControllers = 10;
+    constexpr int kNumControllers = 15;
 
     std::cout << "Porous Fiber Plate Humidification System - Simulation\n";
     std::cout << "=======================================================\n";
@@ -134,6 +134,11 @@ int main(int argc, char* argv[])
         controllers.push_back(std::make_unique<humid::MPCHumidCtrl>(Ts));
         controllers.push_back(std::make_unique<humid::MRACHumidCtrl>(Ts));
         controllers.push_back(std::make_unique<humid::GPCRLSHumidCtrl>(Ts));
+        controllers.push_back(std::make_unique<humid::DynaHumidCtrl>(Ts));
+        controllers.push_back(std::make_unique<humid::ILCHumidCtrl>(Ts));
+        controllers.push_back(std::make_unique<humid::NeuralPIDHumidCtrl>(Ts));
+        controllers.push_back(std::make_unique<humid::L1AdaptiveHumidCtrl>(Ts));
+        controllers.push_back(std::make_unique<humid::CBFSafetyHumidCtrl>(Ts));
 
         for (auto& c : controllers) {
             try {

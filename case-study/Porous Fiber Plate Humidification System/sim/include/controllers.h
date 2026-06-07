@@ -174,4 +174,84 @@ private:
     static constexpr int kRLSInterval = 20;
 };
 
+// ---------------------------------------------------------------------------
+// 11. DynaMBRL - Dyna MBRL wrapping PID; SINDy error-dynamics fit online
+//     n_collect=30 (900 s), refit every 15 steps (450 s); Ts=30 s.
+// ---------------------------------------------------------------------------
+class DynaHumidCtrl : public ControllerBase {
+public:
+    explicit DynaHumidCtrl(double Ts);
+    ControlInput compute(double phi_measured, double ref_phi) override;
+    void reset() override;
+    std::string name() const override { return "DynaMBRL"; }
+private:
+    ctrl::DynaController dyna_;
+};
+
+// ---------------------------------------------------------------------------
+// 12. ILCHumidCtrl - two-phase P-type ILC wrapping a PID baseline
+// e = (ref_phi - phi_measured)*100 [%]; u output is delta-fan [m/s].
+// fan = cFan(kFanMid + u_pid + u_ff).
+// N_TRIAL=80 -> 2400 s phase-1 at Ts=30 s.
+// ---------------------------------------------------------------------------
+class ILCHumidCtrl : public ControllerBase {
+public:
+    explicit ILCHumidCtrl(double Ts);
+    ControlInput compute(double phi_measured, double ref_phi) override;
+    void reset() override;
+    std::string name() const override { return "ILC"; }
+private:
+    ctrl::ILC         ilc_;
+    ctrl::DiscretePID pid_;
+    int               k_      = 0;
+    bool              phase2_ = false;
+    static constexpr int N_TRIAL = 80;
+};
+
+// ---------------------------------------------------------------------------
+// 13. NeuralPIDHumidCtrl - online NeuralPID adapting [Kp,Ki,Kd]
+// e = (ref_phi - phi_measured)*100 [%]; plant_gain = B = 0.04917 [% per m/s].
+// fan = cFan(kFanMid + npid.compute(e)).  uMin/uMax = +-1.25 (delta).
+// ---------------------------------------------------------------------------
+class NeuralPIDHumidCtrl : public ControllerBase {
+public:
+    explicit NeuralPIDHumidCtrl(double Ts);
+    ControlInput compute(double phi_measured, double ref_phi) override;
+    void reset() override;
+    std::string name() const override { return "NeuralPID"; }
+private:
+    ctrl::NeuralPID npid_;
+};
+
+// ---------------------------------------------------------------------------
+// 14. L1AdaptiveHumidCtrl - L1 adaptive; outputs fan speed directly.
+// setReference(ref_phi*100), compute(phi_measured*100) -> fan.
+// Reference model: a_m=0.9512, b_m=0.0488 (same as MRACHumidCtrl, DC gain=1).
+// ---------------------------------------------------------------------------
+class L1AdaptiveHumidCtrl : public ControllerBase {
+public:
+    explicit L1AdaptiveHumidCtrl(double Ts);
+    ControlInput compute(double phi_measured, double ref_phi) override;
+    void reset() override;
+    std::string name() const override { return "L1Adaptive"; }
+private:
+    ctrl::L1AdaptiveController l1_;
+};
+
+// ---------------------------------------------------------------------------
+// 15. CBFSafetyHumidCtrl - CBF safety filter; prevents over-humidification.
+// Barrier: h(phi) = 0.80 - phi (prevents condensation near 80% RH).
+// Nominal PID computes delta fan; CBF limits it when phi approaches 0.80.
+// g = 1.639e-5 [fraction/s per m/s]; alpha=0.001; f0=0 (conservative).
+// ---------------------------------------------------------------------------
+class CBFSafetyHumidCtrl : public ControllerBase {
+public:
+    explicit CBFSafetyHumidCtrl(double Ts);
+    ControlInput compute(double phi_measured, double ref_phi) override;
+    void reset() override;
+    std::string name() const override { return "CBFSafety"; }
+private:
+    ctrl::CBFSafetyFilter cbf_;
+};
+
 } // namespace humid

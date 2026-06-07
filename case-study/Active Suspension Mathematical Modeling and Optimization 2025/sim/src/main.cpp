@@ -66,6 +66,11 @@ int main(int argc, char* argv[])
     controllers.push_back(std::make_unique<susp::MRACSuspCtrl>(plant));
     controllers.push_back(std::make_unique<susp::FuzzyPIDSuspCtrl>(plant));
     controllers.push_back(std::make_unique<susp::TubeMPCSuspCtrl>(plant));
+    controllers.push_back(std::make_unique<susp::ILCSuspCtrl>(plant));
+    controllers.push_back(std::make_unique<susp::CBFSuspCtrl>(plant));
+    controllers.push_back(std::make_unique<susp::L1AdaptiveSuspCtrl>(plant));
+    controllers.push_back(std::make_unique<susp::ScenarioMPCSuspCtrl>(plant));
+    controllers.push_back(std::make_unique<susp::DynaSuspCtrl>(plant));
 
     // -- Run all pairs --------------------------------------------------------
     int total = static_cast<int>(scen_files.size() * controllers.size());

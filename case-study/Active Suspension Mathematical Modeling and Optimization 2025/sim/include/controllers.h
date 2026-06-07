@@ -166,4 +166,81 @@ private:
     static ctrl::StateSpace buildBodySS(const PlantParams& p);
 };
 
+// ---------------------------------------------------------------------------
+// 11. ILC - two-phase iterative learning on body displacement
+//     Phase 1 (first N_TRIAL steps): PID only, record errors.
+//     Phase 2 (remaining steps): PID + learned feedforward correction.
+// ---------------------------------------------------------------------------
+class ILCSuspCtrl : public ControllerBase {
+public:
+    explicit ILCSuspCtrl(const PlantParams& p);
+    double  compute(const Eigen::Vector4d& state, double z_r) override;
+    void    reset() override;
+    std::string name() const override { return "ILC"; }
+private:
+    ctrl::ILC          ilc_;
+    ctrl::DiscretePID  pid_;
+    int                k_      = 0;
+    bool               phase2_ = false;
+    static constexpr int N_TRIAL = 1000;  // 5 s at Ts=0.005
+};
+
+// ---------------------------------------------------------------------------
+// 12. CBFSafety - body velocity barrier (h = v_max - dz_s) wrapping PID
+// ---------------------------------------------------------------------------
+class CBFSuspCtrl : public ControllerBase {
+public:
+    explicit CBFSuspCtrl(const PlantParams& p);
+    double  compute(const Eigen::Vector4d& state, double z_r) override;
+    void    reset() override;
+    std::string name() const override { return "CBFSafety"; }
+private:
+    ctrl::CBFSafetyFilter cbf_;
+};
+
+// ---------------------------------------------------------------------------
+// 13. L1AdaptiveSuspCtrl - L1 adaptive on body displacement z_s.
+// Reference model: a_m = exp(-4*Ts), b_m = 1-a_m (same as MRACSuspCtrl).
+// setReference(0.0), compute(z_s) -> F_act [N].
+// ---------------------------------------------------------------------------
+class L1AdaptiveSuspCtrl : public ControllerBase {
+public:
+    explicit L1AdaptiveSuspCtrl(const PlantParams& p);
+    double  compute(const Eigen::Vector4d& state, double z_r) override;
+    void    reset() override;
+    std::string name() const override { return "L1Adaptive"; }
+private:
+    ctrl::L1AdaptiveController l1_;
+};
+
+// ---------------------------------------------------------------------------
+// 14. ScenarioMPCSuspCtrl - scenario-based stochastic MPC on 2-state body model.
+// Mirrors TubeMPCSuspCtrl: same 2-state SS, Np=10, Nu=3.
+// Sigma_w models wheel-coupling disturbance (small process noise).
+// ---------------------------------------------------------------------------
+class ScenarioMPCSuspCtrl : public ControllerBase {
+public:
+    explicit ScenarioMPCSuspCtrl(const PlantParams& p);
+    double  compute(const Eigen::Vector4d& state, double z_r) override;
+    void    reset() override;
+    std::string name() const override { return "ScenarioMPC"; }
+private:
+    ctrl::ScenarioMPC smpc_;
+    static ctrl::StateSpace buildBodySS(const PlantParams& p);
+};
+
+// ---------------------------------------------------------------------------
+// 15. DynaSuspCtrl - Dyna MBRL wrapping PID on body displacement.
+// error = 0 - z_s = -state(0). compute(error) -> F_act [N].
+// ---------------------------------------------------------------------------
+class DynaSuspCtrl : public ControllerBase {
+public:
+    explicit DynaSuspCtrl(const PlantParams& p);
+    double  compute(const Eigen::Vector4d& state, double z_r) override;
+    void    reset() override;
+    std::string name() const override { return "DynaCtrl"; }
+private:
+    ctrl::DynaController dyna_;
+};
+
 } // namespace susp

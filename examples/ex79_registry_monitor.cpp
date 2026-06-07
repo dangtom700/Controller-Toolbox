@@ -61,15 +61,18 @@ int main()
     mon.setSigma(0.05);
     mon.setCUSUMParams(0.5, 4.0);
 
+    // Create shared_ptr first; set callback on it so the attached observer
+    // and the alarm counter reference the same instance.
+    auto mon_ptr = std::make_shared<ctrl::ControllerMonitor>(mon);
     int z3_alarms = 0;
-    mon.setAlarmCallback([&](std::string_view chart, double stat) {
+    mon_ptr->setAlarmCallback([&](std::string_view chart, double stat) {
         if (chart == "CUSUM") {
             ++z3_alarms;
             std::cout << "  [ALARM] CUSUM on z3: statistic=" << stat
-                      << " at sample " << mon.nSamples() << '\n';
+                      << " at sample " << mon_ptr->nSamples() << '\n';
         }
     });
-    adrc.attachObserver(std::make_shared<ctrl::ControllerMonitor>(mon));
+    adrc.attachObserver(mon_ptr);
 
     // Closed loop simulation
     double y = 0.0;
@@ -83,12 +86,10 @@ int main()
         y = a * y + b * (u + disturbance);
     }
 
-    // Retrieve monitor from attached observer (use the local mon copy for diagnostic)
-    std::cout << "Monitor samples: " << mon.nSamples()
-              << "  alarms: " << mon.nAlarms() << '\n';
+    std::cout << "Monitor samples: " << mon_ptr->nSamples()
+              << "  alarms: " << mon_ptr->nAlarms() << '\n';
 
-    // Note: the shared_ptr copy of mon may differ from local; we check indirectly
-    if (z3_alarms == 0 && mon.nAlarms() == 0) {
+    if (z3_alarms == 0 && mon_ptr->nAlarms() == 0) {
         // Try standalone monitor feed to verify CUSUM logic
         ctrl::ControllerMonitor test_mon;
         test_mon.setTarget(0.0); test_mon.setSigma(0.05);

@@ -1,6 +1,6 @@
 """
 controllers.py
-Ten controllers for the drill string velocity tracking case study.
+Seventeen controllers for the drill string velocity tracking case study.
 
 All controllers share the interface:
   name()  -> str
@@ -299,10 +299,338 @@ class NeuralPIDCtrl(DrillController):
 
 
 # ---------------------------------------------------------------------------
+# 11. ILC (Iterative Learning Control - two-phase within one run)
+#
+# Phase 1 (k < N_TRIAL): pure PID feedback; record errors for trial 0.
+# At k = N_TRIAL: update_feedforward() computes trial-1 feedforward.
+# Phase 2 (k >= N_TRIAL): PID + ILC feedforward from learned trial.
+# ---------------------------------------------------------------------------
+class ILCCtrl(DrillController):
+    N_TRIAL = 300  # 30 s at Ts=0.1
+
+    def __init__(self, p: dict):
+        Ts = p['Ts']
+        pp = ctrl.PIDParams()
+        pp.Kp = 2.0; pp.Ki = 0.6; pp.Kd = 0.1
+        pp.uMin = -30.0; pp.uMax = 30.0; pp.Kb = 0.5
+        self._pid = ctrl.DiscretePID(pp, Ts)
+        ip = ctrl.ILCParams()
+        ip.N = self.N_TRIAL; ip.Ts = Ts
+        ip.mode = ctrl.ILCMode.PType
+        ip.Lp = 0.6; ip.Q_filter = 0.95
+        ip.uMin = -15.0; ip.uMax = 15.0
+        self._ilc = ctrl.ILC(ip)
+        self._k = 0
+        self._phase2 = False
+
+    def name(self): return "ILC"
+
+    def reset(self):
+        self._pid.reset()
+        self._ilc.reset()
+        self._k = 0
+        self._phase2 = False
+
+    def compute(self, omega_ref, omega_b, phi, t):
+        e = omega_ref - omega_b
+        u_pid = self._pid.compute(e)
+        if not self._phase2:
+            if self._k < self.N_TRIAL:
+                self._ilc.record_error(self._k, e)
+            self._k += 1
+            if self._k == self.N_TRIAL:
+                self._ilc.update_feedforward()
+                self._phase2 = True
+                self._k = 0
+            return omega_ref + u_pid
+        else:
+            k2 = min(self._k, self.N_TRIAL - 1)
+            u_ff = self._ilc.feedforward(k2)
+            self._k += 1
+            return omega_ref + u_pid + u_ff
+
+
+# ---------------------------------------------------------------------------
+# 12. DynaCtrl (Dyna MBRL: PID + SINDy error-dynamics model)
+#
+# DynaController wraps an IController, accumulates (error, u) transitions,
+# and fits a SINDy model after n_collect steps. During simulation it behaves
+# identically to the inner PID; the model is available for offline rollouts.
+# ---------------------------------------------------------------------------
+class DynaCtrl(DrillController):
+    def __init__(self, p: dict):
+        Ts = p['Ts']
+        pp = ctrl.PIDParams()
+        pp.Kp = 2.0; pp.Ki = 0.6; pp.Kd = 0.1
+        pp.uMin = -30.0; pp.uMax = 30.0; pp.Kb = 0.5
+        pid = ctrl.DiscretePID(pp, Ts)
+        dp = ctrl.DynaParams()
+        dp.Ts = Ts; dp.n_collect = 80; dp.n_refit_every = 50
+        self._dyna = ctrl.DynaController(dp, pid)
+
+    def name(self): return "DynaCtrl"
+
+    def reset(self):
+        self._dyna.reset()
+
+    def compute(self, omega_ref, omega_b, phi, t):
+        return omega_ref + self._dyna.compute(omega_ref - omega_b)
+
+
+# ---------------------------------------------------------------------------
+# 13. CEMCtrl (Cross-Entropy Method MPC on linearized drill string model)
+#
+# Uses the ZOH-linearized state function as the CEM rollout model.
+# Tracks omega_b via the C = [0,1] output. "Bad fit" for stick-slip
+# scenarios where the nonlinear friction makes the linear model inaccurate.
+# ---------------------------------------------------------------------------
+class CEMCtrl(DrillController):
+    def __init__(self, p: dict, ss_model):
+        Ts = p['Ts']
+        A = ss_model.A; B = ss_model.B
+
+        def _f(x, u):
+            return A @ x + B @ u
+
+        C = ss_model.C  # shape (1, 2) - outputs omega_b
+
+        cp = ctrl.CEMParams()
+        cp.Np = 10; cp.N_samples = 50; cp.n_iter = 3
+        cp.elite_frac = 0.1
+        cp.Q = 100.0; cp.R = 0.01
+        cp.uMin = -25.0; cp.uMax = 25.0
+        cp.sigma_init = 2.0; cp.seed = 7
+        self._cem = ctrl.CEMController(cp, _f, C, Ts)
+
+    def name(self): return "CEMCtrl"
+
+    def reset(self):
+        self._cem.reset()
+
+    def compute(self, omega_ref, omega_b, phi, t):
+        x = np.array([phi, omega_b])
+        r = np.array([omega_ref])
+        self._cem.set_state(x)
+        self._cem.set_reference(r)
+        return float(self._cem.compute_ref(x, r)[0])
+
+
+# ---------------------------------------------------------------------------
+# 14. ScenarioMPCCtrl (Scenario MPC - stochastic robustness on linear model)
+#
+# Averages tracking cost over N_samples noise scenarios. Sigma_w is
+# intentionally large to show effect of process-noise averaging.
+# ---------------------------------------------------------------------------
+class ScenarioMPCCtrl(DrillController):
+    def __init__(self, p: dict, ss_model):
+        Ts = p['Ts']
+        sp = ctrl.ScenarioMPCParams()
+        sp.Np = 15; sp.Nu = 5; sp.Ts = Ts
+        sp.Q = np.array([[50.0]])
+        sp.R = np.array([[0.01]])
+        sp.Sigma_w = np.eye(2) * 0.5
+        sp.N_samples = 20; sp.seed = 13
+        sp.uMin = np.array([-25.0]); sp.uMax = np.array([25.0])
+        sp.qp_max_iter = 300; sp.qp_tol = 1e-4
+        self._smpc = ctrl.ScenarioMPC(ss_model, sp)
+
+    def name(self): return "ScenarioMPC"
+
+    def reset(self):
+        self._smpc.reset()
+
+    def compute(self, omega_ref, omega_b, phi, t):
+        x = np.array([phi, omega_b])
+        self._smpc.set_state(x)
+        self._smpc.set_reference(np.array([omega_ref]))
+        return float(self._smpc.compute_control()[0])
+
+
+# ---------------------------------------------------------------------------
+# 15. KoopmanMPCCtrl (EDMD + DiscreteMPC)
+#
+# Warmup: first 80 steps collect plant snapshots while using PID fallback.
+# After warmup: fit_projected() yields a linear model; build DiscreteMPC on it.
+# The projected C is replaced to track omega_b only.
+# ---------------------------------------------------------------------------
+class KoopmanMPCCtrl(DrillController):
+    _WARMUP = 80
+
+    def __init__(self, p: dict):
+        self._p = p
+        self._Ts = p['Ts']
+        self._reset_internals()
+
+    def _make_pid(self):
+        pp = ctrl.PIDParams()
+        pp.Kp = 2.0; pp.Ki = 0.6; pp.Kd = 0.1
+        pp.uMin = -30.0; pp.uMax = 30.0; pp.Kb = 0.5
+        return ctrl.DiscretePID(pp, self._Ts)
+
+    def _make_edmd(self):
+        kp = ctrl.KoopmanEDMDParams()
+        kp.n_state = 2; kp.n_input = 1
+        kp.dict = ctrl.KoopmanDict.PolyDeg1; kp.tikhonov = 1e-6
+        return ctrl.KoopmanEDMD(kp)
+
+    def _reset_internals(self):
+        self._pid   = self._make_pid()
+        self._edmd  = self._make_edmd()
+        self._mpc   = None
+        self._step  = 0
+        self._x_prev = None
+        self._u_prev = 0.0
+        self._fitted = False
+
+    def name(self): return "KoopmanMPC"
+
+    def reset(self):
+        self._reset_internals()
+
+    def compute(self, omega_ref, omega_b, phi, t):
+        x_now = np.array([phi, omega_b])
+        e = omega_ref - omega_b
+
+        # Accumulate snapshots from previous step
+        if self._step > 0 and not self._fitted and self._x_prev is not None:
+            self._edmd.add_snapshot(
+                self._x_prev, np.array([self._u_prev]), x_now)
+
+            if self._edmd.snapshot_count() >= self._WARMUP:
+                try:
+                    ss_proj = self._edmd.fit_projected()
+                    # Replace C to track omega_b (state index 1) and fix Ts
+                    C_new = np.array([[0.0, 1.0]])
+                    D_new = np.array([[0.0]])
+                    ss_fixed = ctrl.StateSpace(
+                        ss_proj.A, ss_proj.B, C_new, D_new, self._Ts)
+                    mp = ctrl.MPCParams()
+                    mp.Np = 15; mp.Nc = 5
+                    mp.rho_y = 50.0; mp.rho_u = 0.01
+                    mp.uMin = -25.0; mp.uMax = 25.0
+                    mp.duMin = -5.0; mp.duMax = 5.0
+                    mp.qp_max_iter = 300
+                    self._mpc = ctrl.DiscreteMPC(ss_fixed, mp)
+                    self._fitted = True
+                except Exception:
+                    pass  # fit failed; keep using PID
+
+        # Compute control
+        if self._fitted and self._mpc is not None:
+            try:
+                self._mpc.set_state(x_now)
+                u = float(self._mpc.compute_ref(x_now, np.array([omega_ref]))[0])
+            except Exception:
+                u = omega_ref + self._pid.compute(e)
+        else:
+            u = omega_ref + self._pid.compute(e)
+
+        self._x_prev = x_now.copy()
+        self._u_prev = u
+        self._step  += 1
+        return u
+
+
+# ---------------------------------------------------------------------------
+# 16. ESNCtrl (Echo State Network predictor + model-inversion correction)
+#
+# Pre-trained on synthetic drill-string dynamics in __init__.
+# At each step: predict omega_b_next using (u_prev, omega_b) as input;
+# add a correction proportional to predicted tracking error.
+# ---------------------------------------------------------------------------
+class ESNCtrl(DrillController):
+    def __init__(self, p: dict):
+        Ts = p['Ts']
+        ep = ctrl.ESNParams()
+        ep.n_res = 50; ep.n_in = 2; ep.n_out = 1
+        ep.spectral_radius = 0.9; ep.sparsity = 0.85
+        ep.alpha = 0.3; ep.ridge = 1e-4; ep.washout = 20; ep.seed = 42
+        self._esn = ctrl.EchoStateNetwork(ep)
+
+        # Pre-train on simplified drill string: omega_b_next approx = a*omega_b + b*omega_t
+        c_t = p['c_t']; J_b = p['J_b']
+        a = 1.0 - (c_t / J_b) * Ts   # approx = 0.973
+        b = (c_t / J_b) * Ts          # approx = 0.027
+        rng = np.random.default_rng(42)
+        ob = 0.0
+        for _ in range(300):
+            ot = float(rng.uniform(-20.0, 20.0))
+            ob_next = a * ob + b * ot
+            self._esn.step_reservoir(np.array([ot, ob]))
+            self._esn.add_training_target(np.array([ob_next]))
+            ob = ob_next
+        self._esn.fit_readout()
+        self._esn.reset()
+        self._u_prev = 0.0
+
+    def name(self): return "ESNCtrl"
+
+    def reset(self):
+        self._esn.reset()
+        self._u_prev = 0.0
+
+    def compute(self, omega_ref, omega_b, phi, t):
+        # Predict omega_b_next using previous control and current state
+        pred_next = float(self._esn.predict(
+            np.array([self._u_prev, omega_b]))[0])
+        e = omega_ref - omega_b
+        pred_err = omega_ref - pred_next
+        # Proportional tracking + prediction-based feedforward correction
+        u = omega_ref + 2.0 * e + 0.5 * pred_err
+        u = float(np.clip(u, -25.0, 25.0))
+        self._u_prev = u
+        return u
+
+
+# ---------------------------------------------------------------------------
+# 17. CBFCtrl (Control Barrier Function safety filter wrapping PID)
+#
+# Nominal: PID correction. CBF constrains the correction with barrier
+# h(omega_b) = omega_max - omega_b >= 0 (upper speed limit).
+# Note: CBF constrains the correction, not the full omega_t; the safety
+# guarantee is approximate. Intentional "bad fit" for comparison analysis.
+# ---------------------------------------------------------------------------
+class CBFCtrl(DrillController):
+    def __init__(self, p: dict):
+        Ts = p['Ts']
+        omega_max = p['omega_max']
+
+        pp = ctrl.PIDParams()
+        pp.Kp = 2.0; pp.Ki = 0.6; pp.Kd = 0.1
+        pp.uMin = -omega_max; pp.uMax = omega_max; pp.Kb = 0.5
+        pid = ctrl.DiscretePID(pp, Ts)
+
+        cbf_p = ctrl.CBFParams()
+        cbf_p.alpha = 2.0
+        cbf_p.uMin = -omega_max; cbf_p.uMax = omega_max
+
+        self._cbf = ctrl.CBFSafetyFilter(
+            pid,
+            lambda x: omega_max - x,   # h(omega_b) = omega_max - omega_b
+            lambda x: -1.0,             # dh/dx
+            lambda x: 0.0,              # f0: no drift term
+            lambda x: 1.0,              # g: unit gain on correction
+            cbf_p,
+            Ts
+        )
+        self._omega_max = omega_max
+
+    def name(self): return "CBFSafety"
+
+    def reset(self):
+        self._cbf.reset()
+
+    def compute(self, omega_ref, omega_b, phi, t):
+        self._cbf.set_state(omega_b)
+        correction = self._cbf.compute(omega_ref - omega_b)
+        return omega_ref + correction
+
+
+# ---------------------------------------------------------------------------
 # Factory
 # ---------------------------------------------------------------------------
 def make_controllers(plant_params: dict):
-    """Return a list of all 10 DrillController instances."""
+    """Return a list of all 17 DrillController instances."""
     controllers = [OpenLoopCtrl()]
     if not CTRL_AVAILABLE:
         print("WARNING: ctrl_toolbox not available - only OpenLoop will run.")
@@ -319,5 +647,12 @@ def make_controllers(plant_params: dict):
         GainScheduledCtrl(plant_params),
         L1AdaptiveCtrl(plant_params),
         NeuralPIDCtrl(plant_params),
+        ILCCtrl(plant_params),
+        DynaCtrl(plant_params),
+        CEMCtrl(plant_params, ss),
+        ScenarioMPCCtrl(plant_params, ss),
+        KoopmanMPCCtrl(plant_params),
+        ESNCtrl(plant_params),
+        CBFCtrl(plant_params),
     ]
     return controllers

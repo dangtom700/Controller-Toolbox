@@ -393,4 +393,231 @@ double TubeMPCSuspCtrl::compute(const Vector4d& state, double /*z_r*/)
 
 void TubeMPCSuspCtrl::reset() { tmpc_.reset(); }
 
+// ===========================================================================
+// 11. ILC
+//
+// Two-phase iterative learning on body displacement error (e = 0 - z_s).
+// Phase 1 (steps 0..N_TRIAL-1): PID feedback only; error is recorded.
+// At k == N_TRIAL: updateFeedforward() computes the learned correction.
+// Phase 2 (remaining steps): PID + ILC feedforward added to F_act.
+//
+// N_TRIAL = 1000 steps = 5 s at Ts=0.005 s.
+// Lp=0.6, Q_filter=0.95: moderate learning rate, stable across 5 scenarios.
+// ===========================================================================
+
+ILCSuspCtrl::ILCSuspCtrl(const PlantParams& p)
+    : ilc_([&]() {
+        ctrl::ILC::Params ip;
+        ip.N        = N_TRIAL;
+        ip.mode     = ctrl::ILC::Mode::PType;
+        ip.Lp       = 0.6;
+        ip.Ts       = p.Ts;
+        ip.Q_filter = 0.95;
+        ip.uMin     = -F_ACT_MAX;
+        ip.uMax     =  F_ACT_MAX;
+        return ctrl::ILC(ip);
+      }())
+    , pid_(ctrl::PIDParams{
+        .Kp   = 2000.0,
+        .Ki   = 30.0,
+        .Kd   = 500.0,
+        .N    = 10.0,
+        .uMin = -F_ACT_MAX,
+        .uMax =  F_ACT_MAX,
+        .Kb   = 1.0
+      }, p.Ts)
+{}
+
+double ILCSuspCtrl::compute(const Vector4d& state, double /*z_r*/)
+{
+    double e     = -state(0);          // error = 0 - z_s
+    double u_pid = pid_.compute(e);
+
+    if (!phase2_) {
+        if (k_ < N_TRIAL)
+            ilc_.recordError(k_, e);
+        if (++k_ == N_TRIAL) {
+            ilc_.updateFeedforward();
+            phase2_ = true;
+            k_      = 0;
+        }
+        return std::clamp(u_pid, -F_ACT_MAX, F_ACT_MAX);
+    } else {
+        int    kc   = std::min(k_++, N_TRIAL - 1);
+        double u_ff = ilc_.feedforward(kc);
+        return std::clamp(u_pid + u_ff, -F_ACT_MAX, F_ACT_MAX);
+    }
+}
+
+void ILCSuspCtrl::reset()
+{
+    ilc_.reset();
+    pid_.reset();
+    k_      = 0;
+    phase2_ = false;
+}
+
+// ===========================================================================
+// 12. CBFSafety
+//
+// CBFSafetyFilter with barrier on body velocity dz_s (state index 1).
+//   h(v)    = v_max - v        (upper velocity limit)
+//   dh/dx   = -1
+//   f0(v)   = 0                (drift ignored; wheel coupling treated as disturbance)
+//   g(v)    = 1/m_s            (F_act directly drives body acceleration)
+//
+// When |dz_s| > v_max the CBF limits F_act to decelerate the body.
+// The PID nominal provides baseline force; CBF modifies only when barrier
+// would be violated. fit is approximate (ignores spring/damper coupling).
+// ===========================================================================
+
+CBFSuspCtrl::CBFSuspCtrl(const PlantParams& p)
+    : cbf_([&]() {
+        auto nominal = std::make_shared<ctrl::DiscretePID>(
+            ctrl::PIDParams{
+                .Kp   = 2000.0,
+                .Ki   = 30.0,
+                .Kd   = 500.0,
+                .N    = 10.0,
+                .uMin = -F_ACT_MAX,
+                .uMax =  F_ACT_MAX,
+                .Kb   = 1.0
+            }, p.Ts);
+
+        const double v_max   = 0.5;           // [m/s] maximum body velocity
+        const double g_val   = 1.0 / p.m_s;  // F_act -> d(dz_s)/dt
+
+        ctrl::CBFSafetyFilter::Params cp;
+        cp.alpha = 5.0;
+        cp.uMin  = -F_ACT_MAX;
+        cp.uMax  =  F_ACT_MAX;
+
+        return ctrl::CBFSafetyFilter(
+            nominal,
+            [v_max](double v) { return v_max - v; },   // h
+            [](double)        { return -1.0; },          // dh/dx
+            [](double)        { return 0.0; },            // f0 (drift)
+            [g_val](double)   { return g_val; },          // g (input gain)
+            cp,
+            p.Ts);
+      }())
+{}
+
+double CBFSuspCtrl::compute(const Vector4d& state, double /*z_r*/)
+{
+    cbf_.setState(state(1));        // CBF state = dz_s (body velocity)
+    return cbf_.compute(-state(0)); // nominal error = 0 - z_s
+}
+
+void CBFSuspCtrl::reset() { cbf_.reset(); }
+
+// ===========================================================================
+// 13. L1Adaptive
+//
+// L1 adaptive on body displacement z_s.
+// Reference model poles matched to MRACSuspCtrl: a_m = exp(-4*Ts).
+// Gamma large (fast adaptation); LP filter omega_c = 2.0 rad/s provides robustness.
+// sigma_max = 5000 bounds the estimated disturbance (force-scale).
+// ===========================================================================
+
+L1AdaptiveSuspCtrl::L1AdaptiveSuspCtrl(const PlantParams& p)
+    : l1_([&]() {
+        const double a_m = std::exp(-4.0 * p.Ts);
+        ctrl::L1AdaptiveController::Params lp;
+        lp.a_m       = a_m;
+        lp.b_m       = 1.0 - a_m;
+        lp.k_g       = 1.0;
+        lp.Gamma     = 200.0;
+        lp.omega_c   = 2.0;
+        lp.sigma_max = 5000.0;
+        lp.Q_lyap    = 1.0;
+        lp.uMin      = -F_ACT_MAX;
+        lp.uMax      =  F_ACT_MAX;
+        return ctrl::L1AdaptiveController(lp, p.Ts);
+      }())
+{}
+
+double L1AdaptiveSuspCtrl::compute(const Vector4d& state, double /*z_r*/)
+{
+    l1_.setReference(0.0);
+    return std::clamp(l1_.compute(state(0)), -F_ACT_MAX, F_ACT_MAX);
+}
+
+void L1AdaptiveSuspCtrl::reset() { l1_.reset(); }
+
+// ===========================================================================
+// 14. ScenarioMPC
+//
+// Scenario-based stochastic MPC on 2-state body model.
+// Mirrors TubeMPCSuspCtrl: same SS, Np=10, Nu=3.
+// Sigma_w tuned to wheel-coupling disturbance bound (2 mm / 40 mm/s per step).
+// ===========================================================================
+
+ctrl::StateSpace ScenarioMPCSuspCtrl::buildBodySS(const PlantParams& p)
+{
+    return makeBodySS(p);
+}
+
+ScenarioMPCSuspCtrl::ScenarioMPCSuspCtrl(const PlantParams& p)
+    : smpc_([&]() {
+        ctrl::StateSpace sys = buildBodySS(p);
+
+        ctrl::ScenarioMPCParams sp;
+        sp.Np        = 10;
+        sp.Nu        = 3;
+        sp.Q         = Eigen::MatrixXd::Constant(1, 1, 1.0 / (0.025 * 0.025));
+        sp.R         = Eigen::MatrixXd::Constant(1, 1, 1.0 / (p.F_max * p.F_max));
+        sp.Sigma_w   = Eigen::MatrixXd::Zero(2, 2);
+        sp.Sigma_w(0,0) = 4e-6;    // position variance (2 mm std)
+        sp.Sigma_w(1,1) = 1.6e-3;  // velocity variance (40 mm/s std)
+        sp.N_samples = 30;
+        sp.uMin      = Eigen::VectorXd::Constant(1, -p.F_max);
+        sp.uMax      = Eigen::VectorXd::Constant(1,  p.F_max);
+        sp.Ts        = p.Ts;
+        return ctrl::ScenarioMPC(sys, sp);
+      }())
+{}
+
+double ScenarioMPCSuspCtrl::compute(const Vector4d& state, double /*z_r*/)
+{
+    Eigen::VectorXd x2(2); x2 << state(0), state(1);
+    Eigen::VectorXd r(1);  r(0) = 0.0;
+    Eigen::VectorXd u = smpc_.computeRef(x2, r);
+    return std::clamp(u(0), -F_ACT_MAX, F_ACT_MAX);
+}
+
+void ScenarioMPCSuspCtrl::reset() { smpc_.reset(); }
+
+// ===========================================================================
+// 15. DynaCtrl
+//
+// Dyna MBRL wrapping PID on body displacement. Same PID gains as PIDSuspCtrl.
+// After n_collect=50 steps SINDy fits error dynamics and supplements PID.
+// ===========================================================================
+
+DynaSuspCtrl::DynaSuspCtrl(const PlantParams& p)
+    : dyna_(ctrl::DynaController::Params{
+        .n_collect     = 50,
+        .n_refit_every = 25,
+        .Ts            = p.Ts
+      },
+      std::make_shared<ctrl::DiscretePID>(
+          ctrl::PIDParams{
+              .Kp   = 2000.0,
+              .Ki   = 30.0,
+              .Kd   = 500.0,
+              .N    = 10.0,
+              .uMin = -F_ACT_MAX,
+              .uMax =  F_ACT_MAX,
+              .Kb   = 1.0
+          }, p.Ts))
+{}
+
+double DynaSuspCtrl::compute(const Vector4d& state, double /*z_r*/)
+{
+    return std::clamp(dyna_.compute(-state(0)), -F_ACT_MAX, F_ACT_MAX);
+}
+
+void DynaSuspCtrl::reset() { dyna_.reset(); }
+
 } // namespace susp

@@ -386,4 +386,191 @@ ControlInput GPCRLSSolarCtrl::compute(double ref_Tw1, double measured_Tw1, doubl
     return {mw, kr_nom_};
 }
 
+// ---------------------------------------------------------------------------
+// 10. ILCSolarCtrl
+// ---------------------------------------------------------------------------
+ILCSolarCtrl::ILCSolarCtrl(double Ts)
+    : ilc_([&]() {
+        ctrl::ILC::Params ip;
+        ip.N        = N_TRIAL;
+        ip.mode     = ctrl::ILC::Mode::PType;
+        ip.Lp       = 0.5;
+        ip.Ts       = Ts;
+        ip.Q_filter = 0.95;
+        ip.uMin     = -(kMwMax - kMwNom);
+        ip.uMax     =   kMwNom - kMwMin;
+        return ctrl::ILC(ip);
+      }())
+    , pid_(ctrl::PIDParams{
+        .Kp   =  0.0005,
+        .Ki   =  0.00005,
+        .Kd   =  0.0,
+        .N    =  5.0,
+        .uMin = -(kMwMax - kMwNom),
+        .uMax =   kMwNom - kMwMin,
+        .Kb   =  0.5
+      }, Ts)
+{}
+
+void ILCSolarCtrl::reset()
+{
+    ilc_.reset();
+    pid_.reset();
+    k_      = 0;
+    phase2_ = false;
+}
+
+ControlInput ILCSolarCtrl::compute(double ref_Tw1, double measured_Tw1, double /*G*/)
+{
+    double e     = ref_Tw1 - measured_Tw1;
+    double u_pid = pid_.compute(e);
+
+    if (!phase2_) {
+        if (k_ < N_TRIAL)
+            ilc_.recordError(k_, e);
+        if (++k_ == N_TRIAL) {
+            ilc_.updateFeedforward();
+            phase2_ = true;
+            k_      = 0;
+        }
+        return {clampMw(kMwNom - u_pid), kr_nom_};
+    } else {
+        int    kc   = std::min(k_++, N_TRIAL - 1);
+        double u_ff = ilc_.feedforward(kc);
+        return {clampMw(kMwNom - (u_pid + u_ff)), kr_nom_};
+    }
+}
+
+// ---------------------------------------------------------------------------
+// 11. NeuralPIDSolarCtrl
+// ---------------------------------------------------------------------------
+NeuralPIDSolarCtrl::NeuralPIDSolarCtrl(double Ts)
+    : npid_(ctrl::NeuralPID::Params{
+        .n_hidden   = 8,
+        .lr         = 1e-7,
+        .Ts         = Ts,
+        .plant_gain = 4.5 * Ts,
+        .uMin       = -(kMwMax - kMwNom),
+        .uMax       =   kMwNom - kMwMin,
+        .Kp0        = 0.0005,
+        .Ki0        = 0.00005,
+        .Kd0        = 0.0
+      })
+{}
+
+void NeuralPIDSolarCtrl::reset() { npid_.reset(); }
+
+ControlInput NeuralPIDSolarCtrl::compute(double ref_Tw1, double measured_Tw1, double /*G*/)
+{
+    double e       = ref_Tw1 - measured_Tw1;
+    double m_dot_w = clampMw(kMwNom - npid_.compute(e));
+    return {m_dot_w, kr_nom_};
+}
+
+// ---------------------------------------------------------------------------
+// 12. L1AdaptiveSolarCtrl
+// ---------------------------------------------------------------------------
+L1AdaptiveSolarCtrl::L1AdaptiveSolarCtrl(double Ts)
+    : l1_(ctrl::L1AdaptiveController::Params{
+        .a_m       = 0.70,
+        .b_m       = 0.30,
+        .k_g       = 1.0,
+        .Gamma     = 10.0,
+        .omega_c   = 0.02,
+        .sigma_max = 20.0,
+        .Q_lyap    = 1.0,
+        .uMin      = kMwMin,
+        .uMax      = kMwMax
+      }, Ts)
+{}
+
+void L1AdaptiveSolarCtrl::reset() { l1_.reset(); }
+
+ControlInput L1AdaptiveSolarCtrl::compute(double ref_Tw1, double measured_Tw1, double /*G*/)
+{
+    l1_.setReference(ref_Tw1);
+    double m_dot_w = clampMw(l1_.compute(measured_Tw1));
+    return {m_dot_w, kr_nom_};
+}
+
+// ---------------------------------------------------------------------------
+// 13. DynaSolarCtrl
+// ---------------------------------------------------------------------------
+DynaSolarCtrl::DynaSolarCtrl(double Ts)
+    : dyna_(ctrl::DynaController::Params{
+        .n_collect     = 30,
+        .n_refit_every = 15,
+        .Ts            = Ts
+      },
+      std::make_shared<ctrl::DiscretePID>(
+          ctrl::PIDParams{
+              .Kp   =  0.0005,
+              .Ki   =  0.00005,
+              .Kd   =  0.0,
+              .N    =  5.0,
+              .uMin = -(kMwMax - kMwNom),
+              .uMax =   kMwNom - kMwMin,
+              .Kb   =  0.5
+          }, Ts))
+{}
+
+void DynaSolarCtrl::reset() { dyna_.reset(); }
+
+ControlInput DynaSolarCtrl::compute(double ref_Tw1, double measured_Tw1, double /*G*/)
+{
+    double e       = ref_Tw1 - measured_Tw1;
+    double m_dot_w = clampMw(kMwNom - dyna_.compute(e));
+    return {m_dot_w, kr_nom_};
+}
+
+// ---------------------------------------------------------------------------
+// 14. CEMSolarCtrl
+// FOPDT deviation model; B is negative (more spray -> lower Tw1).
+// ---------------------------------------------------------------------------
+static ctrl::CEMController makeSolarCEM(double Ts)
+{
+    const double A = 1.0 - 0.018 * Ts;
+    const double B = -4.5 * Ts;
+
+    ctrl::StateFunc f = [A, B](const Eigen::VectorXd& x,
+                                const Eigen::VectorXd& u) -> Eigen::VectorXd {
+        Eigen::VectorXd xn(1);
+        xn(0) = A * x(0) + B * u(0);
+        return xn;
+    };
+    Eigen::MatrixXd C(1, 1); C << 1.0;
+
+    ctrl::CEMController::Params cp;
+    cp.Np        = 10;
+    cp.N_samples = 50;
+    cp.n_iter    = 3;
+    cp.Q         = 10.0;
+    cp.R         = 0.5;
+    cp.uMin      = kMwMin - kMwNom;
+    cp.uMax      = kMwMax - kMwNom;
+    return ctrl::CEMController(cp, f, C, Ts);
+}
+
+CEMSolarCtrl::CEMSolarCtrl(double Ts, double Tw1_nom)
+    : cem_(makeSolarCEM(Ts))
+    , Tw1_nom_(Tw1_nom)
+{}
+
+void CEMSolarCtrl::reset() { cem_.reset(); }
+
+ControlInput CEMSolarCtrl::compute(double ref_Tw1, double measured_Tw1, double /*G*/)
+{
+    double x_dev = measured_Tw1 - Tw1_nom_;
+    double r_dev = ref_Tw1      - Tw1_nom_;
+
+    Eigen::VectorXd x(1); x << x_dev;
+    Eigen::VectorXd r(1); r << r_dev;
+
+    cem_.setState(x);
+    Eigen::VectorXd u = cem_.computeRef(x, r);
+
+    double m_dot_w = clampMw(kMwNom + u(0));
+    return {m_dot_w, kr_nom_};
+}
+
 } // namespace solar
