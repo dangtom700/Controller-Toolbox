@@ -1,17 +1,17 @@
 # Real-Time Tracking Control of Electro-Hydraulic Force Servo Systems
 
 ## Reference
-Gang Shen, Zhencai Zhu, Jinsong Zhao, Weidong Zhu, Yu Tang, Xiang Li (2017). "Real-time tracking control of electro-hydraulic force servo systems using offline feedback control and adaptive control." *ISA Transactions* 67, 356–370.
+Gang Shen, Zhencai Zhu, Jinsong Zhao, Weidong Zhu, Yu Tang, Xiang Li (2017). "Real-time tracking control of electro-hydraulic force servo systems using offline feedback control and adaptive control." *ISA Transactions* 67, 356-370.
 
 ---
 
 ## Plant Model
 
-An **electro-hydraulic force servo system** (EHFS) used for material testing, hardware-in-loop simulation, and structural loading. A servo valve commands hydraulic flow to a double-acting actuator whose rod force is measured and fed back. The control objective is high-bandwidth, precise force tracking — a harder problem than position control because force depends on the actuator's environment (load stiffness) and exhibits nonlinear valve dynamics and friction.
+An **electro-hydraulic force servo system** (EHFS) used for material testing, hardware-in-loop simulation, and structural loading. A servo valve commands hydraulic flow to a double-acting actuator whose rod force is measured and fed back. The control objective is high-bandwidth, precise force tracking - a harder problem than position control because force depends on the actuator's environment (load stiffness) and exhibits nonlinear valve dynamics and friction.
 
 ### Physical Description
 
-- **Servo valve:** 4/3 proportional directional valve (electrohydraulic); spool position proportional to electrical command `u_v` with bandwidth ~100–300 Hz
+- **Servo valve:** 4/3 proportional directional valve (electrohydraulic); spool position proportional to electrical command `u_v` with bandwidth ~100-300 Hz
 - **Actuator:** Double-acting hydraulic cylinder; force = `(P_A * A_A - P_B * A_B) - F_friction`
 - **Load:** Test specimen modelled as a spring `k_L` (stiffness load) or a spring-mass-damper; compliance of the load determines the force-position coupling
 - **Force sensor:** Load cell on actuator rod; bandwidth 500+ Hz; low-noise
@@ -33,7 +33,7 @@ An **electro-hydraulic force servo system** (EHFS) used for material testing, ha
 ```
 tau_v * dx_v/dt + x_v = k_v * u_v
 ```
-where `tau_v = 1/(2*pi*f_v)` with valve bandwidth `f_v ≈ 100 Hz`.
+where `tau_v = 1/(2*pi*f_v)` with valve bandwidth `f_v approx = 100 Hz`.
 
 **Actuator flow continuity:**
 ```
@@ -56,26 +56,26 @@ F = A_A * P_A - A_B * P_B - m_rod * g  [or F = k_L * x_p if elastic load]
 | Parameter | Symbol | Typical Value | Description |
 |-----------|--------|---------------|-------------|
 | Supply pressure | P_S | 210 bar | Hydraulic power unit |
-| Piston area | A_A | 20–50 cm^2 | Cap side |
-| Rod area | A_B | 15–40 cm^2 | Rod side (A_B = A_A - pi/4 * d_rod^2) |
+| Piston area | A_A | 20-50 cm^2 | Cap side |
+| Rod area | A_B | 15-40 cm^2 | Rod side (A_B = A_A - pi/4 * d_rod^2) |
 | Bulk modulus | beta | 1.5 GPa | Hydraulic oil (includes trapped air) |
 | Valve bandwidth | f_v | 100 Hz | Typical proportional servo valve |
-| Load stiffness | k_L | 1e4–1e8 N/m | Rigid to very compliant |
-| Effective mass | m_eff | 10–200 kg | Piston + rod + attached mass |
-| Coulomb friction | F_c | 100–500 N | Seal friction |
-| Sampling time | Ts | 0.2–1 ms | High-bandwidth force servo |
+| Load stiffness | k_L | 1e4-1e8 N/m | Rigid to very compliant |
+| Effective mass | m_eff | 10-200 kg | Piston + rod + attached mass |
+| Coulomb friction | F_c | 100-500 N | Seal friction |
+| Sampling time | Ts | 0.2-1 ms | High-bandwidth force servo |
 
 ---
 
 ## Control Objective
 
-Track a desired force reference `F_ref(t)` — typically sinusoidal (fatigue testing) or arbitrary waveform (earthquake simulation, hardware-in-loop) — with:
+Track a desired force reference `F_ref(t)` - typically sinusoidal (fatigue testing) or arbitrary waveform (earthquake simulation, hardware-in-loop) - with:
 - High bandwidth (up to 50 Hz tracking)
 - Low phase lag (critical for hardware-in-loop fidelity)
 - Robustness to load stiffness variation (the specimen stiffness `k_L` changes as material yields/cracks)
 - Rejection of friction-induced force ripple at velocity reversal
 
-The **Shen et al. (2017)** approach combines a **PI** base loop with an **H∞ offline designed feedback controller (ODFC)** and an online **normalised LMS (nLMS) adaptive compensator** that identifies and cancels residual nonlinear force disturbances in real time via a continuous system identification algorithm (CSIA). This three-layer architecture (PI + H∞ ODFC + nLMS) is the paper's key result and is benchmarked against the ±15 kN test rig at 0–20 Hz.
+The **Shen et al. (2017)** approach combines a **PI** base loop with an **Hinf offline designed feedback controller (ODFC)** and an online **normalised LMS (nLMS) adaptive compensator** that identifies and cancels residual nonlinear force disturbances in real time via a continuous system identification algorithm (CSIA). This three-layer architecture (PI + Hinf ODFC + nLMS) is the paper's key result and is benchmarked against the +/-15 kN test rig at 0-20 Hz.
 
 ---
 
@@ -106,7 +106,7 @@ The **Shen et al. (2017)** approach combines a **PI** base loop with an **H∞ o
 | s02_sine_5hz | Sinusoidal force 5 kN amplitude, 5 Hz | F_ref = 5000*sin(2*pi*5*t) N | High amplitude; pressure saturation risk |
 | s03_step | Step force commands 0 -> 10 kN at t=0.01 s | Step function | Transient response; overshoot |
 | s04_stiffness_change | Sine tracking; k_L steps 1e5 -> 1e7 N/m at t=0.5 s | F_ref = 2000*sin(2*pi*2*t) N | Specimen stiffness change (specimen yielding) |
-| s05_earthquake | Irregular broadband waveform (El Centro ground motion scaled to ±15 kN) | Measured earthquake data replay | Broadband; hardware-in-loop fidelity |
+| s05_earthquake | Irregular broadband waveform (El Centro ground motion scaled to +/-15 kN) | Measured earthquake data replay | Broadband; hardware-in-loop fidelity |
 
 **Total runs:** 12 controllers * 5 scenarios = 60.
 
@@ -114,12 +114,12 @@ The **Shen et al. (2017)** approach combines a **PI** base loop with an **H∞ o
 
 ## Implementation Notes
 
-- **Fast dynamics:** Pressure dynamics have time constants of 1–5 ms. Use Ts = 0.5 ms with RK4 integration. The 5-state system {F, v_p, P_A, P_B, x_v} is appropriate.
-- **ADRC omega_o constraint:** With Ts = 0.5 ms, require `omega_o * Ts < 0.5` → `omega_o < 1000 rad/s`. Use omega_o = 800, omega_c = 240.
-- **Valve dead-band:** Proportional servo valves have dead-band ~0–5% of stroke. Include `x_v = max(|u| - dead_band, 0) * sign(u)` in the plant model for realism.
-- **Force vs. position control:** Unlike position control where a stiff actuator is forgiving, force control on a stiff load (high k_L) becomes position control — small position error generates large force error. This makes force control on stiff specimens inherently less stable; reduce integral gain accordingly.
+- **Fast dynamics:** Pressure dynamics have time constants of 1-5 ms. Use Ts = 0.5 ms with RK4 integration. The 5-state system {F, v_p, P_A, P_B, x_v} is appropriate.
+- **ADRC omega_o constraint:** With Ts = 0.5 ms, require `omega_o * Ts < 0.5` -> `omega_o < 1000 rad/s`. Use omega_o = 800, omega_c = 240.
+- **Valve dead-band:** Proportional servo valves have dead-band ~0-5% of stroke. Include `x_v = max(|u| - dead_band, 0) * sign(u)` in the plant model for realism.
+- **Force vs. position control:** Unlike position control where a stiff actuator is forgiving, force control on a stiff load (high k_L) becomes position control - small position error generates large force error. This makes force control on stiff specimens inherently less stable; reduce integral gain accordingly.
 - **ILC applicability:** ILC is ideal for scenario s01/s02 (periodic fatigue tests). Set trial length to exactly one period of the sinusoidal reference. D-type ILC with Lp=0.6 converges in ~10 trials for clean sinusoidal reference.
-- **Pressure saturation:** Enforce `P_A >= 0` and `P_B >= 0` (cavitation prevention) in plant simulation. At velocity reversal, if return chamber pressure drops to zero, the force servo loses authority suddenly — this is a key failure mode to test.
+- **Pressure saturation:** Enforce `P_A >= 0` and `P_B >= 0` (cavitation prevention) in plant simulation. At velocity reversal, if return chamber pressure drops to zero, the force servo loses authority suddenly - this is a key failure mode to test.
 - **Load stiffness uncertainty:** The main source of model uncertainty in this system is the unknown and time-varying load stiffness `k_L`. Adaptive controllers (MRAC, L1Adaptive) are expected to outperform fixed-gain designs in scenario s04.
 - **CSV columns:** `t, F_ref, F, x_p, v_p, P_A, P_B, u_v, phase_error_deg, iae_cumulative`
 
@@ -127,4 +127,4 @@ The **Shen et al. (2017)** approach combines a **PI** base loop with an **H∞ o
 
 ## Status
 
-Spec only — `sim/` not present, not registered, not built.
+Spec only - `sim/` not present, not registered, not built.

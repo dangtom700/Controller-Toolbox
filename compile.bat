@@ -133,6 +133,8 @@ for %%T in (
     humidification_sim
     susp_sim
     buck_boost_sim
+    solar_cooker_sim
+    sotec_sim
     toolbox_examples
     test_catch2_pilot
     test_catch2_advanced

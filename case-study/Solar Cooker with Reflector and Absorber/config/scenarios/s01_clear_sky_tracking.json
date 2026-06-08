@@ -1,0 +1,13 @@
+{
+    "id":          "s01_clear_sky_tracking",
+    "description": "Full clear sky, constant G=800 W/m^2; tests TBPR tracking and heat-up",
+    "T_ref":       95.0,
+    "T_abs_init":  30.0,
+    "T_pot_init":  30.0,
+    "duration_s":  5400.0,
+    "g_type":      "constant",
+    "G_0":         800.0,
+    "T_amb_0":     30.0,
+    "v_type":      "constant",
+    "V_wind_0":    1.0
+}

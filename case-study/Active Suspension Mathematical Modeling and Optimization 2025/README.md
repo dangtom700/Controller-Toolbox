@@ -1,8 +1,8 @@
 # Active Suspension Mathematical Modeling and Optimization 2025
 
-**Reference:** Berk Aydogan, Ahmet Yildiz (2025). "Mathematical modeling and optimization of the active suspension system of a 6×6 electric vehicle." *Alexandria Engineering Journal* 127, 989–1003.
+**Reference:** Berk Aydogan, Ahmet Yildiz (2025). "Mathematical modeling and optimization of the active suspension system of a 6*6 electric vehicle." *Alexandria Engineering Journal* 127, 989-1003.
 
-**Note on plant model:** The paper analyses a full 6×6 in-wheel electric vehicle with 15-DOF body + 5-DOF human model optimised via GA/PSO/DE. The simulation here uses a standard **2-DOF quarter-car** active suspension derived from the per-corner sprung/unsprung mass subsystem of such models, which is the well-established benchmark for active suspension controller design and comparison.
+**Note on plant model:** The paper analyses a full 6*6 in-wheel electric vehicle with 15-DOF body + 5-DOF human model optimised via GA/PSO/DE. The simulation here uses a standard **2-DOF quarter-car** active suspension derived from the per-corner sprung/unsprung mass subsystem of such models, which is the well-established benchmark for active suspension controller design and comparison.
 
 ---
 

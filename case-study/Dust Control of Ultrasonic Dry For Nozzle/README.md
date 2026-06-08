@@ -7,7 +7,7 @@ Xinzhe Wang, Pengfei Wang, Yun Peng, Yongjun Li, YaFei Luo, Shilin Li (2026). "S
 
 ## Plant Model
 
-An **ultrasonic dry fog dust suppression system** in which a high-frequency (ultrasonic) nozzle atomises water into sub-10 µm droplets (dry fog). These micro-droplets collide with and capture airborne dust particles (typically PM10 and PM2.5), causing them to agglomerate and settle. The paper develops a mathematical model linking system operating parameters (water flow rate, ultrasonic frequency, air pressure) to **dust suppression efficiency** η.
+An **ultrasonic dry fog dust suppression system** in which a high-frequency (ultrasonic) nozzle atomises water into sub-10 mum droplets (dry fog). These micro-droplets collide with and capture airborne dust particles (typically PM10 and PM2.5), causing them to agglomerate and settle. The paper develops a mathematical model linking system operating parameters (water flow rate, ultrasonic frequency, air pressure) to **dust suppression efficiency** eta.
 
 ### Governing Physics
 
@@ -35,7 +35,7 @@ where `n_d` = droplet number density, `A_d` = droplet cross-section, `L` = trave
 |--------|-------------|------|
 | `C_dust(t)` | Airborne dust concentration (outlet) | mg/m^3 |
 | `eta(t)` | Instantaneous dust suppression efficiency | % |
-| `d_32(t)` | Sauter mean droplet diameter | µm |
+| `d_32(t)` | Sauter mean droplet diameter | mum |
 | `Q_w(t)` | Water flow rate | L/min |
 
 ### Control Inputs
@@ -51,13 +51,13 @@ where `n_d` = droplet number density, `A_d` = droplet cross-section, `L` = trave
 | Parameter | Symbol | Typical Value | Description |
 |-----------|--------|---------------|-------------|
 | Ultrasonic frequency | f | 40 kHz | Fixed or variable |
-| Water surface tension | sigma | 0.072 N/m | At 20°C |
+| Water surface tension | sigma | 0.072 N/m | At 20^\circC |
 | Liquid density | rho_l | 1000 kg/m^3 | Water |
-| Dust particle density | rho_p | 1500–2600 kg/m^3 | Coal dust / silica |
-| Dust particle diameter | d_p | 1–50 µm | PM10/PM2.5 target |
-| Droplet diameter (target) | d_d | 1–10 µm | Dry fog regime |
-| Air velocity in duct | v_air | 0.5–3 m/s | Mine tunnel or workshop |
-| Sampling time | Ts | 1–5 s | Dust sensor response time |
+| Dust particle density | rho_p | 1500-2600 kg/m^3 | Coal dust / silica |
+| Dust particle diameter | d_p | 1-50 mum | PM10/PM2.5 target |
+| Droplet diameter (target) | d_d | 1-10 mum | Dry fog regime |
+| Air velocity in duct | v_air | 0.5-3 m/s | Mine tunnel or workshop |
+| Sampling time | Ts | 1-5 s | Dust sensor response time |
 
 ---
 
@@ -65,7 +65,7 @@ where `n_d` = droplet number density, `A_d` = droplet cross-section, `L` = trave
 
 Regulate the outlet dust concentration `C_dust` to below a regulatory threshold (e.g., 4 mg/m^3 for coal mines in China) by manipulating water flow rate `Q_w` and/or air pressure `P_air`. A secondary objective is minimising water consumption (operating cost).
 
-The key challenge is a **nonlinear, time-delayed** relationship between the control input (water flow) and the measured dust concentration (sensor response lag 2–30 s depending on sensor placement distance).
+The key challenge is a **nonlinear, time-delayed** relationship between the control input (water flow) and the measured dust concentration (sensor response lag 2-30 s depending on sensor placement distance).
 
 ---
 
@@ -104,7 +104,7 @@ The key challenge is a **nonlinear, time-delayed** relationship between the cont
 
 ## Implementation Notes
 
-- **Transport delay:** Model the dust sensor as a first-order lag plus pure delay: `C_sensor(s) = K_s / (tau_s*s + 1) * exp(-L_d*s)` with L_d = 5–30 s. Discretise with ZOH for MPC/GPC prediction model.
+- **Transport delay:** Model the dust sensor as a first-order lag plus pure delay: `C_sensor(s) = K_s / (tau_s*s + 1) * exp(-L_d*s)` with L_d = 5-30 s. Discretise with ZOH for MPC/GPC prediction model.
 - **Reverse-acting loop:** Higher `Q_w` reduces `C_dust`. PID error should be `e = C_ref - C_dust` but the output polarity must drive `Q_w` up when dust is high. If using `DiscretePID`, wrap with sign inversion or negate the output before clamping.
 - **ADRC b0:** For a first-order plant model `dC/dt = -a*C + b*Q_w + d`, set `b0 = b = K_plant / tau_plant`.
 - **Water consumption metric:** Log cumulative `integral(Q_w * dt)` per scenario for efficiency comparison.
@@ -115,4 +115,4 @@ The key challenge is a **nonlinear, time-delayed** relationship between the cont
 
 ## Status
 
-Spec only — `sim/` not present, not registered, not built.
+Spec only - `sim/` not present, not registered, not built.

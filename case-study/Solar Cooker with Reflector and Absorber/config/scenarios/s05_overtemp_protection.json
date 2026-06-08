@@ -1,0 +1,13 @@
+{
+    "id":          "s05_overtemp_protection",
+    "description": "G=1050 W/m^2, low wind; tests absorber protection (T_abs <= 280 C)",
+    "T_ref":       90.0,
+    "T_abs_init":  30.0,
+    "T_pot_init":  30.0,
+    "duration_s":  3600.0,
+    "g_type":      "constant",
+    "G_0":         1050.0,
+    "T_amb_0":     38.0,
+    "v_type":      "constant",
+    "V_wind_0":    0.5
+}

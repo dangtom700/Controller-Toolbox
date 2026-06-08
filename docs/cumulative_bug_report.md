@@ -1555,3 +1555,50 @@ T_h values (54, 63, 72°C); ScenarioMPC tightens pressure margin to 1.30 MPa.
 
 No simulation code changed. C2 (spec-only stubs) partially addressed by improved specs
 for two studies; MEMS, Bioreactor, Firefighting, Nuclear remain. B36-3 and REL unchanged.
+
+---
+
+## Part 43 — Solar Cooker + S-OTEC C++ Case Studies (2026-06-08)
+
+### New studies implemented
+
+#### Solar Cooker with Reflector and Absorber (`solar_cooker_sim`)
+- **Plant model:** 2-state absorber+pot ODE with PCM effective heat capacity method.
+  State: `[T_abs, T_pot]`. Input: `f_shade ∈ [0,1]`. RK4 with N_SUBSTEPS=10 inner 3s steps per Ts=30s.
+- **PCM:** `C_eff = m_abs*cp_abs + m_pcm*lambda_pcm/delta_T` inside melting band; avoids implicit solve.
+- **Sign convention:** Direct-acting, `e = T_pot - T_ref`. Negative-gain plant (more shade → less heat).
+- **12 controllers:** OpenLoop, PID, ADRC, MPC, FuzzyPID, SMC, GainScheduled, MRAC, L1Adaptive,
+  NeuralPID (`plant_gain = -0.002*Ts`), DynaCtrl, ScenarioMPC.
+- **5 scenarios:** s01_clear_sky_tracking, s02_wind_disturbance, s03_pcm_charge_discharge,
+  s04_cloudy_morning, s05_overtemp_protection.
+- **ADRC params:** `omega_o=0.013, omega_c=0.004` → `omega_o*Ts=0.39 < 0.5` ✓.
+- **MPC model:** FOPDT `a=exp(-Ts/600)`, `b = -K*(1-a)` negative (correct for negative-gain plant).
+- **ScenarioMPC:** 2-state linearized around T_abs_nom=120°C, T_pot_nom=95°C.
+- **60 runs (12×5).** Target: `solar_cooker_sim`.
+
+#### Solar Ocean Thermal Energy Conversion System (`sotec_sim`)
+- **Plant model:** 2-state collector+tank ODE (`[T_h, T_coll]`). Inputs: `[m_dot_f, m_dot_wf]`.
+  Forward Euler at Ts=30s. ORC: algebraic P_inlet, W_net, η_th computed each step.
+- **Hard constraint:** `P_inlet = a0 + a1*T_h + a2*m_dot_wf ≤ 1.38 MPa`; `m_dot_wf_max_safe()` enforced.
+- **Control architecture:** Primary loop: T_h via m_dot_f (positive gain). Secondary: pressure-
+  constrained m_dot_wf feedforward: `m_dot_wf = 0.9*(1.38 - a0 - a1*T_h)/a2`.
+- **12 controllers:** OpenLoop, PID, ADRC, MPC, LQR, FuzzyPID, MRAC, L1Adaptive, GainScheduled,
+  ScenarioMPC, DynaCtrl, NeuralPID.
+- **5 scenarios:** s01_mppt_steady, s02_irradiance_step, s03_setpoint_step, s04_high_irradiance,
+  s05_solar_ramp.
+- **ADRC params:** `omega_o=0.013, Ts=30s → omega_o*Ts=0.39 < 0.5` ✓. b0=fopdt_b(Ts)≈1.47.
+- **LQR:** 2-state Bryson around (T_h=63°C, T_coll=70°C). Gain K_ stored as MatrixXd.
+- **ScenarioMPC:** 2-state model, Q=1×1 (output weight, pp=1), Sigma_w=2×2 (state noise, n=2).
+- **MRAC/L1Adaptive:** `setReference(T_h_ref)` then `compute(T_h)` → outputs absolute `m_dot_f`.
+- **60 runs (12×5).** Target: `sotec_sim`.
+
+### Files created
+- `case-study/Solar Cooker.../sim/{include,src}/` — 8 source files + CMakeLists.txt + 6 JSON configs
+- `case-study/Solar Ocean.../sim/{include,src}/` — 8 source files + CMakeLists.txt + 6 JSON configs
+- `case-study/CMakeLists.txt` — 2 new `add_subdirectory` lines
+- `compile.bat` — `solar_cooker_sim` and `sotec_sim` added
+
+### Open-issues update (Part 43)
+
+C2 (spec-only stubs): Solar Cooker and S-OTEC now C++ built → 2 spec-only stubs remain
+(Firefighting and Nuclear; MEMS and Bioreactor also remain as 4 total). B36-3 and REL unchanged.

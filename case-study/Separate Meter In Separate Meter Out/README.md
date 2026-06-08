@@ -1,7 +1,7 @@
 # Separate Meter-In Separate Meter-Out Hydraulic Actuator Control
 
 ## Reference
-Guangrong Chen, Junzheng Wang, Shoukun Wang, Jiangbo Zhao, Wei Shen (2018). "Indirect adaptive robust dynamic surface control for separate meter-in separate meter-out hydraulic system." *Control Engineering Practice* 72, 138–150.
+Guangrong Chen, Junzheng Wang, Shoukun Wang, Jiangbo Zhao, Wei Shen (2018). "Indirect adaptive robust dynamic surface control for separate meter-in separate meter-out hydraulic system." *Control Engineering Practice* 72, 138-150.
 
 ---
 
@@ -52,14 +52,14 @@ where `x_v(u)` is the valve spool position (proportional to input signal with sa
 
 | Parameter | Symbol | Typical Value | Description |
 |-----------|--------|---------------|-------------|
-| Piston mass + load | m_eff | 50–500 kg | Includes reflected inertia |
-| Piston area (cap side) | A_A | 20–80 cm^2 | Larger than rod side |
-| Rod area (rod side) | A_B | 15–60 cm^2 | A_B = A_A - A_rod |
-| Bulk modulus | beta | 1.0–1.7 GPa | Hydraulic oil at temperature |
-| Supply pressure | P_S | 100–210 bar | Fixed pump pressure |
-| Valve flow gain | Kq | 1e-3–1e-2 m^2/s | At nominal opening |
-| Viscous damping | B_v | 500–5000 N·s/m | |
-| Sampling time | Ts | 0.5–2 ms | Fast pressure dynamics |
+| Piston mass + load | m_eff | 50-500 kg | Includes reflected inertia |
+| Piston area (cap side) | A_A | 20-80 cm^2 | Larger than rod side |
+| Rod area (rod side) | A_B | 15-60 cm^2 | A_B = A_A - A_rod |
+| Bulk modulus | beta | 1.0-1.7 GPa | Hydraulic oil at temperature |
+| Supply pressure | P_S | 100-210 bar | Fixed pump pressure |
+| Valve flow gain | Kq | 1e-3-1e-2 m^2/s | At nominal opening |
+| Viscous damping | B_v | 500-5000 N.s/m | |
+| Sampling time | Ts | 0.5-2 ms | Fast pressure dynamics |
 
 ---
 
@@ -109,11 +109,11 @@ The SMISMO configuration opens a second degree of freedom: the split of control 
 
 ## Implementation Notes
 
-- **Fast dynamics:** Pressure dynamics have time constants of 1–10 ms. Use Ts = 1 ms and RK4 integration. The 4-state system is stiff due to large bulk modulus.
-- **Position-dependent volumes:** `V_A(x)` and `V_B(x)` change with piston position — this makes the pressure Jacobian position-dependent. LQR/MPC should be linearised at nominal mid-stroke position, or use the full nonlinear StateFunc.
-- **Valve dead-band:** Real proportional valves have a dead-band of ±2–5% of command range. Model as: `x_v = max(|u| - dead_band, 0) * sign(u)`. This causes limit cycling with integral control — add dead-band compensation.
+- **Fast dynamics:** Pressure dynamics have time constants of 1-10 ms. Use Ts = 1 ms and RK4 integration. The 4-state system is stiff due to large bulk modulus.
+- **Position-dependent volumes:** `V_A(x)` and `V_B(x)` change with piston position - this makes the pressure Jacobian position-dependent. LQR/MPC should be linearised at nominal mid-stroke position, or use the full nonlinear StateFunc.
+- **Valve dead-band:** Real proportional valves have a dead-band of +/-2-5% of command range. Model as: `x_v = max(|u| - dead_band, 0) * sign(u)`. This causes limit cycling with integral control - add dead-band compensation.
 - **SMISMO energy allocation:** For energy-optimal operation, at each step partition total velocity demand between V_mi and V_mo to minimise `P_S * Q_mi - P_B * Q_mo`. The Chen et al. (2018) paper achieves this via Indirect Adaptive Robust Dynamic Surface Control (IARDSC) with a grey predictor for supply flow estimation and a disturbance observer; the MPC/NonlinearMPC objective captures the same energy-saving intent.
-- **ADRC omega_o:** With Ts = 1 ms, require `omega_o * Ts < 0.5` → `omega_o < 500 rad/s`. Use omega_o = 400, omega_c = 120.
+- **ADRC omega_o:** With Ts = 1 ms, require `omega_o * Ts < 0.5` -> `omega_o < 500 rad/s`. Use omega_o = 400, omega_c = 120.
 - **Cavitation prevention:** Hard constraint `P_B >= P_min = 2 bar` for all controllers. Saturate valve opening before cavitation threshold.
 - **Coulomb friction:** Include Stribeck friction model `F_f = (F_c + (F_s - F_c)*exp(-(v/v_s)^2)) * sign(v)` for realistic velocity reversal behaviour.
 - **CSV columns:** `t, x_ref, x_p, v_p, P_A, P_B, u_mi, u_mo, F_load, energy_cumul, iae_cumulative`
@@ -122,4 +122,4 @@ The SMISMO configuration opens a second degree of freedom: the split of control 
 
 ## Status
 
-Spec only — `sim/` not present, not registered, not built.
+Spec only - `sim/` not present, not registered, not built.

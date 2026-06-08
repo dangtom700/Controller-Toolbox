@@ -133,8 +133,8 @@ For the simplified two-body case an analytical expression for the natural freque
 This study runs as a **Python-only case study** via `sim/main.py` (Phase 6 of `run.py`). It uses `ctrl_toolbox` Python bindings directly. No C++ compilation needed; NOT in `CMakeLists.txt` or `compile.bat`.
 
 Plant: 4-state simplified FOWT heave + WEC arm model (Ts = 0.5 s):
-- States: `[z, zdot, x_rel, xrel_dot]` — FOWT heave and WEC arm relative displacement
-- Input: `F_PTO` — hydraulic PTO force
+- States: `[z, zdot, x_rel, xrel_dot]` - FOWT heave and WEC arm relative displacement
+- Input: `F_PTO` - hydraulic PTO force
 - Wave forcing: sinusoidal `F_wave(t)` driving heave; WEC resonant at T = 10 s
 - Integration: RK4 at Ts = 0.5 s
 
@@ -144,14 +144,14 @@ Plant: 4-state simplified FOWT heave + WEC arm model (Ts = 0.5 s):
 
 | # | Name | lib/ Python Algorithm | Design Notes |
 |---|------|--------------------|--------------|
-| 1 | Passive | — | Optimal passive damping `B_opt = sqrt(k_w * m_w)`; baseline |
-| 2 | Reactive | — | Cancel spring stiffness + optimal damping: `F_PTO = -k_w*x_rel + B_opt*xrel_dot` |
+| 1 | Passive | - | Optimal passive damping `B_opt = sqrt(k_w * m_w)`; baseline |
+| 2 | Reactive | - | Cancel spring stiffness + optimal damping: `F_PTO = -k_w*x_rel + B_opt*xrel_dot` |
 | 3 | PID | `ctrl.DiscretePID` | e = -x_rel (minimise relative displacement); standard tuning |
-| 4 | ADRC | `ctrl.DiscreteADRC` | omega_o=0.8, Ts=0.5 → omega_o*Ts=0.40 < 0.5 (check); ESO estimates wave forcing |
+| 4 | ADRC | `ctrl.DiscreteADRC` | omega_o=0.8, Ts=0.5 -> omega_o*Ts=0.40 < 0.5 (check); ESO estimates wave forcing |
 | 5 | SMC | `ctrl.DiscreteSMC` | compute(y - ref) convention; sliding on WEC velocity tracking |
 | 6 | LQR | `ctrl.DiscreteLQR` | Full 4-state; LQR equilibrium compensation: u = u_ss + lqr.compute(x, x_ref)[0] |
 | 7 | MPC | `ctrl.DiscreteMPC` | ZOH linearised 4-state; Np=20, Nu=5 |
-| 8 | MRAC | `ctrl.MRACController` | `ctrl.set_reference(r)` then `compute(y_plant)` — NOT compute(r-y) |
+| 8 | MRAC | `ctrl.MRACController` | `ctrl.set_reference(r)` then `compute(y_plant)` - NOT compute(r-y) |
 | 9 | L1Adaptive | `ctrl.L1AdaptiveController` | `set_reference(r)` then `compute(y_plant)`; adapts to wave period variation |
 | 10 | ILC | `ctrl.ILCController` | Periodic wave learning; trial_length = one wave period |
 | 11 | DynaCtrl | `ctrl.DynaController` | Wraps PID; online SINDy model of WEC-wave coupling |
@@ -161,7 +161,7 @@ Plant: 4-state simplified FOWT heave + WEC arm model (Ts = 0.5 s):
 | 15 | ESNCtrl | `ctrl.EchoStateNetwork` | Reservoir readout trained on wave-PTO data; W_out via ridge regression |
 | 16 | CBFSafety | `ctrl.CBFSafetyFilter` | Barrier on PTO stroke limit; wraps Reactive controller |
 
-**Total runs: 16 controllers × 5 scenarios = 80**
+**Total runs: 16 controllers * 5 scenarios = 80**
 
 ---
 
@@ -173,15 +173,15 @@ Plant: 4-state simplified FOWT heave + WEC arm model (Ts = 0.5 s):
 | s02_storm_waves | Storm condition | T = 12 s | H = 5 m | High energy; PTO force limits |
 | s03_short_period | Short-period waves (off resonance) | T = 7 s | H = 1 m | Low WEC response |
 | s04_irregular_wave | Bi-chromatic wave (10 s + 6 s) | Mixed | Mixed | Tests adaptation to non-periodic forcing |
-| s05_freq_change | Wave period steps 10 s → 14 s at t = 150 s | 10→14 s | H = 2 m | Tests adaptation to frequency shift |
+| s05_freq_change | Wave period steps 10 s -> 14 s at t = 150 s | 10->14 s | H = 2 m | Tests adaptation to frequency shift |
 
 ---
 
 ## Implementation Notes
 
 - **LQR equilibrium compensation:** Must compute `x_ref = [phi_ss, omega_ref]` and `u_ss` from steady-state WEC equations; then `u = u_ss + lqr.compute(x, x_ref)[0]`. Plain `lqr.compute(x)` will not work.
-- **ADRC omega_o constraint:** With Ts = 0.5 s, require `omega_o * 0.5 < 0.5` → `omega_o < 1.0 rad/s`. Use omega_o = 0.8.
-- **MRAC/L1 convention:** `ctrl.set_reference(r)` then `ctrl.compute(y_plant)` — the controller outputs absolute F_PTO, not a correction.
+- **ADRC omega_o constraint:** With Ts = 0.5 s, require `omega_o * 0.5 < 0.5` -> `omega_o < 1.0 rad/s`. Use omega_o = 0.8.
+- **MRAC/L1 convention:** `ctrl.set_reference(r)` then `ctrl.compute(y_plant)` - the controller outputs absolute F_PTO, not a correction.
 - **GainScheduledController Python:** Constructor needs Ts: `ctrl.GainScheduledController(Ts)`.
 - **Module path:** `sim/` sets binding path 4 levels up from `sim/`: `_ROOT = dirname(dirname(dirname(abspath(__file__))))`.
 - **CSV columns:** `time, x_ref, z, zdot, x_rel, xrel_dot, F_pto, power, fowt_rms_cumul`

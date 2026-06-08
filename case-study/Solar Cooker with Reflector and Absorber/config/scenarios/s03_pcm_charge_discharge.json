@@ -1,0 +1,15 @@
+{
+    "id":          "s03_pcm_charge_discharge",
+    "description": "G=900 for first 2700s then G=0; tests PCM charge then discharge cycle",
+    "T_ref":       80.0,
+    "T_abs_init":  30.0,
+    "T_pot_init":  30.0,
+    "duration_s":  5400.0,
+    "g_type":      "step",
+    "G_0":         900.0,
+    "G_1":         0.0,
+    "t_G_step":    2700.0,
+    "T_amb_0":     30.0,
+    "v_type":      "constant",
+    "V_wind_0":    1.0
+}

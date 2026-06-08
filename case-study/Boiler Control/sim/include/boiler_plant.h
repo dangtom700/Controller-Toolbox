@@ -5,9 +5,9 @@
 // Bell-Astrom (1987) nonlinear boiler-turbine plant.
 //
 // States:  x = [x1, x2, x3]
-//   x1 = drum pressure        [kg/cm²]
+//   x1 = drum pressure        [kg/cm^2]
 //   x2 = electric power       [MW]
-//   x3 = fluid density in drum [kg/cm³]
+//   x3 = fluid density in drum [kg/cm^3]
 //
 // Inputs:  u = [u1, u2, u3]  (all in [0, 1])
 //   u1 = fuel flow valve

@@ -155,7 +155,7 @@ gains in a numerically sensible range; PID gains are therefore in units of m/s p
 | 9 | MRAC | `MRACController` | a_m=0.9512, b_m=0.0488; gamma_r=gamma_y=0.005; sigma=0.005 | tau_m=600 s; `compute(phi*100)` NOT error; call `setReference(ref*100)` each step |
 | 10 | GPC_RLS | `GeneralizedPredictiveController` + `RecursiveLeastSquares` | Np=15, Nu=4; lambda=0.97; 60-step warmup | RLS na=1, nb=1; update every 20 steps; `rls.update(y_pct, u_fan)` output first |
 | 11 | DynaCtrl | `DynaController` | n_collect=30, n_refit=15 at Ts=30 s; ~900 s warmup before first SINDy fit; wraps PID | Learns humidity dynamics from operating data |
-| 12 | ILC | `ILCController` | N_trial=80; P-type ILC; delta-fan ±1.25 m/s authority | Learns periodic humidity cycle feedforward |
+| 12 | ILC | `ILCController` | N_trial=80; P-type ILC; delta-fan +/-1.25 m/s authority | Learns periodic humidity cycle feedforward |
 | 13 | NeuralPID | `NeuralPID` | lr=1e-6; plant_gain=0.04917 (FOPDT B parameter) | Online PID gain adaptation; scales error to % |
 | 14 | L1Adaptive | `L1AdaptiveController` | a_m=0.9512, b_m=0.0488, omega_c=0.1; absolute fan output; scales *100 | Adapts to seasonal plant gain variation |
 | 15 | CBFSafety | `CBFSafetyFilter` | Barrier phi_max=0.80; g=1.639e-5; alpha=0.001; prevents over-humidification | Wraps PID; enforces condensation avoidance constraint |

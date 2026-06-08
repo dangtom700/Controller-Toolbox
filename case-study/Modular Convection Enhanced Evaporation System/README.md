@@ -20,8 +20,8 @@ A **modular convection-enhanced evaporation (CEE) system** for brine concentrati
 
 | Symbol | Description | Unit |
 |--------|-------------|------|
-| `T_w(t)` | Water film temperature | °C |
-| `T_a(t)` | Air bulk temperature leaving module | °C |
+| `T_w(t)` | Water film temperature | ^\circC |
+| `T_a(t)` | Air bulk temperature leaving module | ^\circC |
 | `omega_a(t)` | Air humidity ratio leaving module | kg_w / kg_dry |
 | `C_s(t)` | Salt concentration in brine | g/L |
 | `m_w(t)` | Water film mass flow rate | kg/s |
@@ -54,23 +54,23 @@ d(C_s * V_w)/dt = C_s_in * m_w_in - C_s * m_w_out
 
 | Parameter | Symbol | Typical Value | Description |
 |-----------|--------|---------------|-------------|
-| Air mass flow rate | m_a | 0.5–3.0 kg/s | Forced convection fan |
-| Feed water flow rate | m_w | 0.1–1.0 kg/s per module | Falling film |
-| Inlet water temperature | T_w0 | 40–80 °C | Pre-heated by solar or waste heat |
-| Inlet air humidity | omega_in | 0.005–0.015 kg/kg | Ambient |
-| Heat transfer coefficient | h_wa | 50–200 W/(m^2 K) | Depends on packing and flow |
-| Packing surface area | A | 2–10 m^2 per module | Modular design |
-| Number of modules | N | 2–8 | Series/parallel arrangement |
-| Sampling time | Ts | 5–30 s | Slow thermal dynamics |
+| Air mass flow rate | m_a | 0.5-3.0 kg/s | Forced convection fan |
+| Feed water flow rate | m_w | 0.1-1.0 kg/s per module | Falling film |
+| Inlet water temperature | T_w0 | 40-80 ^\circC | Pre-heated by solar or waste heat |
+| Inlet air humidity | omega_in | 0.005-0.015 kg/kg | Ambient |
+| Heat transfer coefficient | h_wa | 50-200 W/(m^2 K) | Depends on packing and flow |
+| Packing surface area | A | 2-10 m^2 per module | Modular design |
+| Number of modules | N | 2-8 | Series/parallel arrangement |
+| Sampling time | Ts | 5-30 s | Slow thermal dynamics |
 
 ---
 
 ## Control Objective
 
 Regulate the **brine outlet concentration** `C_s_out` (or equivalently the **evaporation rate** per module) to a setpoint by manipulating:
-1. **Air flow rate** `m_a` (fan speed) — primary manipulated variable
-2. **Feed water flow rate** `m_w` — secondary manipulated variable
-3. **Inlet water temperature** `T_w_in` — tertiary (heat input from solar/waste heat)
+1. **Air flow rate** `m_a` (fan speed) - primary manipulated variable
+2. **Feed water flow rate** `m_w` - secondary manipulated variable
+3. **Inlet water temperature** `T_w_in` - tertiary (heat input from solar/waste heat)
 
 Secondary objectives: maximise water recovery ratio (WRR = evaporate / feed), minimise fan energy consumption (operating cost), prevent salt precipitation (`C_s < C_s_max`).
 
@@ -99,11 +99,11 @@ Secondary objectives: maximise water recovery ratio (WRR = evaporate / feed), mi
 
 | ID | Description | Operating Condition | Stress Factor |
 |----|-------------|--------------------|--------------| 
-| s01_nominal | Regulate C_s to 70 g/L, steady solar | T_w_in=60°C, m_a=1.5 kg/s | Baseline |
-| s02_solar_step | Solar input step ±20% at t=60 s | T_w_in 60->72°C | Thermal disturbance from irradiance change |
+| s01_nominal | Regulate C_s to 70 g/L, steady solar | T_w_in=60^\circC, m_a=1.5 kg/s | Baseline |
+| s02_solar_step | Solar input step +/-20% at t=60 s | T_w_in 60->72^\circC | Thermal disturbance from irradiance change |
 | s03_ramp_concentration | Ramp C_s setpoint from 50 to 90 g/L over 300 s | Full range traverse | Tests integral action; precipitation boundary |
 | s04_fouling | h_wa degrades 30% over 600 s (packing fouling) | Nominal setpoint | Slow parametric drift; tests adaptation |
-| s05_multi_module | Two modules in series; setpoint on outlet of module 2 | T_w_in=65°C | MIMO interaction; upstream disturbance propagates |
+| s05_multi_module | Two modules in series; setpoint on outlet of module 2 | T_w_in=65^\circC | MIMO interaction; upstream disturbance propagates |
 
 **Total runs:** 12 controllers * 5 scenarios = 60.
 
@@ -111,10 +111,10 @@ Secondary objectives: maximise water recovery ratio (WRR = evaporate / feed), mi
 
 ## Implementation Notes
 
-- **Slow dynamics:** Thermal time constants are 50–300 s. Ts = 10–30 s is appropriate; use Ts = 10 s for a reasonable balance between prediction horizon length and step count.
-- **ADRC omega_o constraint:** With Ts = 10 s, require `omega_o * Ts < 0.5` → `omega_o < 0.05 rad/s`. Use omega_o = 0.04, omega_c = 0.013.
-- **Salt precipitation:** Hard output constraint `C_s <= C_s_precip ≈ 200 g/L` (NaCl saturation at 60°C). MPC should enforce this as an inequality. Non-MPC controllers should saturate the setpoint.
-- **Nonlinear evaporation:** The Antoine equation for `omega_s(T_w)` is exponential in T_w — significant nonlinearity above 70°C. Gain-scheduled or adaptive controllers outperform fixed-gain PID here.
+- **Slow dynamics:** Thermal time constants are 50-300 s. Ts = 10-30 s is appropriate; use Ts = 10 s for a reasonable balance between prediction horizon length and step count.
+- **ADRC omega_o constraint:** With Ts = 10 s, require `omega_o * Ts < 0.5` -> `omega_o < 0.05 rad/s`. Use omega_o = 0.04, omega_c = 0.013.
+- **Salt precipitation:** Hard output constraint `C_s <= C_s_precip approx = 200 g/L` (NaCl saturation at 60^\circC). MPC should enforce this as an inequality. Non-MPC controllers should saturate the setpoint.
+- **Nonlinear evaporation:** The Antoine equation for `omega_s(T_w)` is exponential in T_w - significant nonlinearity above 70^\circC. Gain-scheduled or adaptive controllers outperform fixed-gain PID here.
 - **Module coupling:** In series arrangement, the humidity and temperature of air exiting module 1 becomes the inlet condition for module 2. Model this as a cascade with shared disturbance.
 - **LQR/LQG linearisation:** Linearise the 3-state per-module ODE around the nominal operating point. Use `c2d(A, B, Ts, 'zoh')` to obtain discrete-time matrices.
 - **CSV columns:** `t, C_s_ref, C_s_out, T_w, T_a, omega_a, m_a_cmd, m_w, WRR, iae_cumulative`
@@ -123,4 +123,4 @@ Secondary objectives: maximise water recovery ratio (WRR = evaporate / feed), mi
 
 ## Status
 
-Spec only — `sim/` not present, not registered, not built.
+Spec only - `sim/` not present, not registered, not built.

@@ -15,7 +15,7 @@ Run `conda run -n soft_robotics -- python run.py` for live pass/fail counts.
 
 ---
 
-## C++ Built Studies (6)
+## C++ Built Studies (8)
 
 
 ### Boiler Control ✅ C++
@@ -132,6 +132,67 @@ Run `conda run -n soft_robotics -- python run.py` for live pass/fail counts.
 
 ---
 
+### Solar Cooker with Reflector and Absorber ✅ C++
+
+| Field | Value |
+|-------|-------|
+| **Plant** | 2-state absorber+pot ODE ([T_abs, T_coll] °C) with PCM effective heat capacity; RK4 N_SUBSTEPS=10, Ts=30 s |
+| **Reference** | Tarhan & Sari 2010 (Energy Conversion and Management) |
+| **Controllers** | 12 |
+| **Scenarios** | 5 |
+| **Total runs** | 60 (12×5) |
+| **Build target** | `solar_cooker_sim` |
+| **Logs** | `case-study/Solar Cooker with Reflector and Absorber/logs/` |
+
+**Controller roster:** OpenLoop, PID, ADRC, MPC, FuzzyPID, SMC, GainScheduled, MRAC, L1Adaptive, NeuralPID, DynaCtrl, ScenarioMPC.
+
+**Scenarios:** s01_clear_sky_tracking, s02_wind_disturbance, s03_pcm_charge_discharge, s04_cloudy_morning, s05_overtemp_protection.
+
+**CSV columns:** `t, T_ref, T_pot, T_abs, G_b, T_amb, V_wind, phi_pcm, f_shade, Q_absorbed, iae_cumulative`.
+
+**Key caveats:**
+- **Sign convention:** Direct-acting — `e = T_pot - T_ref`; output `f_shade ∈ [0,1]` (negative-gain: more shade → less solar gain → lower T_pot). Error-based controllers produce positive output when T_pot > T_ref.
+- **PCM model:** Effective heat capacity `C_eff = m_abs·cp_abs + m_pcm·λ_pcm/ΔT_pcm` inside melting band `[T_melt − ΔT/2, T_melt + ΔT/2]`; outside this band `C_eff = m_abs·cp_abs`. Avoids implicit solve in RK4.
+- **RK4 sub-stepping:** N_SUBSTEPS=10 inner 3 s steps per Ts=30 s sample.
+- **ADRC:** ω_o=0.013, ω_c=0.004, `ω_o·Ts = 0.39 < 0.5` ✓.
+- **MPC:** FOPDT `a = exp(−Ts/600)`, `b = −K·(1−a)` (negative, reflects negative-gain plant). Deviation form around T_pot_nom=95°C.
+- **NeuralPID:** `plant_gain = −0.002·Ts` (negative to match gradient direction for negative-gain plant).
+- **SMC:** `compute(T_pot − T_ref)` — matches DiscreteSMC convention `compute(y − ref)`.
+- **Overtemp guard:** Simulation runner forces `f_shade = 1.0` when `T_abs ≥ T_abs_max − 1.0°C` (T_abs_max=280°C).
+
+---
+
+### Solar Ocean Thermal Energy Conversion System ✅ C++
+
+| Field | Value |
+|-------|-------|
+| **Plant** | 2-state collector+tank ODE ([T_h, T_coll] °C) + algebraic ORC map; Forward Euler, Ts=30 s |
+| **Reference** | Gao et al. 2024 (Applied Thermal Engineering 245, 122776) |
+| **Controllers** | 12 |
+| **Scenarios** | 5 |
+| **Total runs** | 60 (12×5) |
+| **Build target** | `sotec_sim` |
+| **Logs** | `case-study/Solar Ocean Thermal Energy Conversion System/logs/` |
+
+**Controller roster:** OpenLoop, PID, ADRC, MPC, LQR, FuzzyPID, MRAC, L1Adaptive, GainScheduled, ScenarioMPC, DynaCtrl, NeuralPID.
+
+**Scenarios:** s01_mppt_steady (G=800 W/m²), s02_irradiance_step (G: 800→400 at t=1800 s), s03_setpoint_step (T_h_ref: 54→72°C), s04_high_irradiance (G=1050 W/m²), s05_solar_ramp (sinusoidal G).
+
+**CSV columns:** `t, T_h_ref, T_h, T_coll, T_c, G_b, m_dot_f_cmd, m_dot_wf_cmd, W_net, P_inlet, eta_th, delta_T_super, iae_cumulative`.
+
+**Key caveats:**
+- **Dual output:** All controllers return `CtrlOutput{m_dot_f, m_dot_wf}`. Single-output SISO controllers regulate T_h via m_dot_f; m_dot_wf is always set by pressure-constrained feedforward: `m_dot_wf = 0.9·(P_inlet_max − a0 − a1·T_h)/a2`.
+- **Hard constraint:** `P_inlet = a0 + a1·T_h + a2·m_dot_wf ≤ 1.38 MPa` enforced by `m_dot_wf_max_safe(T_h)` before every plant step and ORC computation.
+- **Sign convention:** Positive-gain plant — more m_dot_f → more collector heat → higher T_h. Error `e = T_h_ref − T_h`. MRAC/L1Adaptive use `setReference(T_h_ref)` then `compute(T_h)` → outputs absolute m_dot_f.
+- **ADRC:** ω_o=0.013, ω_c=0.004, `ω_o·Ts = 0.39 < 0.5` ✓. b0 = fopdt_b(Ts) = K·(1−a), K=30°C/(kg/s), τ=600 s.
+- **MPC:** FOPDT deviation form around T_h_nom=63°C; `a=exp(−Ts/600)`, `b=K·(1−a)>0` (positive-gain).
+- **LQR:** 2-state Bryson design; gain K stored as `Eigen::MatrixXd` (1×2). `DiscreteLQR` used in constructor only to compute K_ — not stored as member.
+- **ScenarioMPC:** 2-state model; Q is 1×1 (output weight, pp=1 since C=[1,0]), Sigma_w is 2×2 (state noise, n=2).
+- **GainScheduled:** 3 schedule points at T_h = 50°C (aggressive), 63°C (nominal), 72°C (soft).
+- **NeuralPID:** Deviation output; `m_dot_f = clamp(M_F_NOM + npid.compute(e), 0.1, 0.5)`.
+
+---
+
 ---
 
 ## Python-Only Studies (2)
@@ -187,26 +248,142 @@ Discovered by `run.py` Phase 6 via `case-study/*/sim/main.py`. Not in `CMakeList
 
 ---
 
-## Spec-Only Stubs (4)
+## Spec-Only Stubs (9)
 
-`README.md` present; no `sim/`, not registered, not built.
+`README.md` (or PDF) present; no `sim/`, not registered, not built. To promote a stub to a C++ study: add `sim/{include,src}/`, a per-study `CMakeLists.txt`, an `add_subdirectory` line in `case-study/CMakeLists.txt`, and the target in `compile.bat`. To promote to Python-only: add `sim/main.py` following the Drill String pattern.
+
+> **Recently graduated (Part 43):** Solar Cooker with Reflector and Absorber → `solar_cooker_sim` (60 runs). Solar Ocean Thermal Energy Conversion System → `sotec_sim` (60 runs).
+
+---
 
 ### Electrostatic MEMS with Tilted Micro-Pillars 🔲 Stub
 
-- **Status:** Full controller roster + plant equations in README. Target: 10 × 5 = 50 runs.
-- **Pattern:** Implement as C++ study following Active Suspension template.
+| Field | Value |
+|-------|-------|
+| **Plant** | Electrostatic actuator with tilted micro-pillars; nonlinear capacitance force model |
+| **Readiness** | High — full plant equations and controller roster in README |
+| **Target runs** | 10 controllers × 5 scenarios = 50 |
+| **Pattern** | C++ study following Active Suspension template |
+
+- **Status:** Full controller roster + plant equations in README. All that is needed is `sim/{include,src}/` implementation.
+- **Blocker:** None — spec is complete.
+
+---
 
 ### Bubble Column Bioreactor CO2 Biodiesel 🔲 Stub
 
-- **Status:** Thin spec. Plant model needs to be designed before controller roster can be built.
+| Field | Value |
+|-------|-------|
+| **Plant** | Bubble column reactor for CO₂-to-biodiesel conversion; gas-liquid mass transfer dynamics |
+| **Readiness** | Low — thin spec, plant ODE not yet defined |
+| **Target runs** | TBD |
+| **Pattern** | C++ or Python-only study |
+
+- **Status:** Thin spec. Plant model (mass transfer coefficients, gas hold-up, lipid accumulation ODE) needs to be designed before the controller roster can be built.
+- **Blocker:** Plant model design required first.
+
+---
 
 ### High-Altitude Aerial Firefighting Bag Drop 🔲 Stub
 
-- **Status:** Thin spec. Monte-Carlo drop pattern — not a classic reference-tracking loop; task is stochastic trajectory planning.
+| Field | Value |
+|-------|-------|
+| **Plant** | Aerodynamic drop trajectory model; wind disturbances, altitude, bag release timing |
+| **Readiness** | Low — thin spec, non-standard control problem |
+| **Target runs** | TBD |
+| **Pattern** | Monte-Carlo Python study (not a classic tracking loop) |
+
+- **Status:** Thin spec. The task is stochastic trajectory planning (optimal drop timing under uncertain wind), not a reference-tracking feedback loop. Controller metrics would be CEP (circular error probable), not IAE.
+- **Blocker:** Problem formulation and plant model need to be defined. Consider CEM/ScenarioMPC as the primary algorithms.
+
+---
 
 ### Floating Nuclear Power Plant Ice Load Sensing 🔲 Stub
 
-- **Status:** Thin spec. Focus is ice-load **estimation** (EKF/MHE showcase), not output tracking.
+| Field | Value |
+|-------|-------|
+| **Plant** | Floating platform under ice loading; structural dynamics + mooring forces |
+| **Readiness** | Low — thin spec, estimation-focused not tracking-focused |
+| **Target runs** | TBD |
+| **Pattern** | C++ or Python estimation study (EKF/MHE showcase) |
+
+- **Status:** Thin spec. The focus is ice-load **estimation** (EKF, MHE, particle filter) rather than output tracking. Controller metrics would be estimation RMSE and latency, not IAE.
+- **Blocker:** Plant model and sensor model need to be defined. Estimation loop is non-standard for this codebase's IController interface.
+
+---
+
+### Dust Control of Ultrasonic Dry Fog Nozzle 🔲 Stub
+
+| Field | Value |
+|-------|-------|
+| **Plant** | Ultrasonic dry fog atomiser; droplet collision model; output = dust suppression efficiency η |
+| **Reference** | Wang et al. 2026, Powder Technology 476, 122382 |
+| **Readiness** | Medium — README present with full plant equations |
+| **Target runs** | TBD (suggested: 10 controllers × 5 scenarios = 50) |
+| **Pattern** | Python-only study (quasi-static efficiency model; no fast dynamics) |
+
+- **Status:** README written (Part 41 rewrite). Plant: Sauter diameter `d_32 = C1·(σ/(ρ_l·f²))^(1/3)`, Stokes-number collision efficiency `η_c`, overall efficiency `η = 1 − exp(−K·n_d·A_d·η_c·L)`. Control variable: water flow rate + ultrasonic frequency to maximise η while minimising water consumption.
+- **Blocker:** Control problem formulation — the plant is a static efficiency map, not an ODE tracking loop. Needs a dynamic disturbance model (particle concentration vs. time) to become a closed-loop study.
+
+---
+
+### Modular Convection-Enhanced Evaporation System 🔲 Stub
+
+| Field | Value |
+|-------|-------|
+| **Plant** | Falling-film brine evaporator; states [T_w, T_a, ω_a, C_s, m_w] per module |
+| **Reference** | Kaddoura et al. 2021, Desalination 510, 115057 |
+| **Readiness** | Medium — README present with state equations |
+| **Target runs** | TBD (suggested: 10 controllers × 5 scenarios = 50) |
+| **Pattern** | Python-only study |
+
+- **Status:** README written (Part 41 rewrite). Plant couples water-film temperature, air temperature, air humidity ratio, salt concentration, and film flow rate across stacked modules. Disturbances: ambient temperature, inlet brine salinity, air flow rate.
+- **Blocker:** Multi-state ODE needs to be discretised and validated numerically before a controller roster can be built. Suggested primary controllers: PID (brine concentration), MPC (multi-variable air + liquid management), MRAC.
+
+---
+
+### Separate Meter-In Separate Meter-Out Hydraulic System 🔲 Stub
+
+| Field | Value |
+|-------|-------|
+| **Plant** | Double-acting hydraulic cylinder with independent meter-in/meter-out proportional valves; states [x_p, v_p, P_A, P_B] |
+| **Reference** | Chen et al. 2018, Control Engineering Practice 72, 138–150 |
+| **Readiness** | Medium — README present; original C++ `sim/` was deleted (commit 37a17ef) |
+| **Target runs** | TBD (suggested: 10 controllers × 5 scenarios = 50) |
+| **Pattern** | C++ study (physical hydraulic dynamics, fast Ts) |
+
+- **Status:** README written (Part 41 rewrite). Plant: bulk-modulus pressure dynamics for both chambers, spool-position-dependent valve flow, nonlinear friction. Paper's primary contribution is indirect adaptive robust dynamic surface control.
+- **Blocker:** `sim/` was deleted in commit `37a17ef` ("remove a case study for now"). To restore: implement `sim/{include,src}/` following the Active Suspension template. Original implementation history is in `37a17ef^` if needed.
+
+---
+
+### Tracking Control of Electro-Hydraulic Force Servo Systems 🔲 Stub
+
+| Field | Value |
+|-------|-------|
+| **Plant** | Servo-valve → hydraulic cylinder → load cell force; states [F, x_p, v_p, P_A, P_B, x_v] |
+| **Reference** | Shen et al. 2017, ISA Transactions 67, 356–370 |
+| **Readiness** | Medium — README present with plant equations |
+| **Target runs** | TBD (suggested: 10 controllers × 5 scenarios = 50) |
+| **Pattern** | C++ study |
+
+- **Status:** README written (Part 41 rewrite). Plant: 4/3 servo valve with spool dynamics, double-acting actuator with compliance load (`k_L`), force measurement via load cell. Paper algorithms: PI + H∞ ODFC + nLMS adaptive feedforward. The H∞/ODFC component requires `DiscreteHinf` from `lib/`.
+- **Blocker:** H∞ offline feedback control design (ODFC) depends on a plant model identified offline — requires a system identification step before the C++ simulation can be built.
+
+---
+
+### Data-Driven Sliding Mode Control of Soft Robot 2024 🔲 Stub
+
+| Field | Value |
+|-------|-------|
+| **Plant** | Continuum soft robot module (205 mm); cable tendons + McKibben muscles; end-effector 3D position via SINDYc model |
+| **Reference** | Papageorgiou et al. 2024, Control Engineering Practice 144, 105836 |
+| **Readiness** | Medium — README present with SINDYc identification procedure |
+| **Target runs** | TBD (suggested: 10 controllers × 5 scenarios = 50) |
+| **Pattern** | Python-only study (SINDy identified model; 40 Hz Ts=0.025 s) |
+
+- **Status:** README written (Part 41 rewrite). No first-principles ODE — plant model is a SINDYc sparse polynomial identified from data: `ẋ = Ξ·Θ(x, u)`. Control algorithms: data-driven Super-Twisting SMC (STSMC), SMC, MPC. SINDy class in `lib/` is available for the identification step.
+- **Blocker:** Simulated training data needs to be generated from a surrogate (or hand-crafted) nonlinear model before SINDYc can be run and the identified model used in closed loop.
 
 ---
 
@@ -215,5 +392,5 @@ Discovered by `run.py` Phase 6 via `case-study/*/sim/main.py`. Not in `CMakeList
 - `DiscreteLQR` is **not** an `IController`. For `GainScheduledController` `design_fn`, use `makeLQRController(sys, lqr_params, state_fn)` which returns `shared_ptr<IController>`.
 - `LQRWeightTuner::brysonMethod` is in `lib/ControllerTuner.h` — include it explicitly in case-study TUs that do not use the umbrella `ControllerToolbox.h`.
 - `RecursiveLeastSquares`: accessor is `params()` (not `theta()`); `update(y, u)` is **output first, input second**.
-- `compile.bat` lists every C++ target explicitly. A missing target silently runs a stale `.exe`. Current C++ case-study targets: `boiler_sim, tug_sim, solar_cooling_sim, humidification_sim, susp_sim, buck_boost_sim`.
+- `compile.bat` lists every C++ target explicitly. A missing target silently runs a stale `.exe`. Current C++ case-study targets: `boiler_sim, tug_sim, solar_cooling_sim, humidification_sim, susp_sim, buck_boost_sim, solar_cooker_sim, sotec_sim`.
 - Each `main.cpp` hard-codes the controller count — bump it when adding a controller.

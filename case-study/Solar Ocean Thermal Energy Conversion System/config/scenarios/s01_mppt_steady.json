@@ -1,0 +1,12 @@
+{
+    "id":           "s01_mppt_steady",
+    "description":  "Clear-sky day G=800 W/m^2; MPPT setpoint T_h_ref=63 C; T_c=6 C",
+    "T_h_ref":      63.0,
+    "T_h_init":     20.0,
+    "T_coll_init":  20.0,
+    "duration_s":   5400.0,
+    "g_type":       "constant",
+    "G_0":          800.0,
+    "T_amb_0":      20.0,
+    "T_c_0":        6.0
+}

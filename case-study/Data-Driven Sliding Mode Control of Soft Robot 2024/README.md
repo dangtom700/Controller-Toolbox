@@ -13,8 +13,8 @@ A **continuum soft robot module** (205 mm length) actuated by a combination of *
 
 - **Actuators:** Cable tendons and McKibben artificial muscles providing bending in two planes
 - **Sensing:** End-effector 3D position tracked via electromagnetic sensors or motion capture
-- **Model identification:** SINDYc with a polynomial + trigonometric function library; identified model is `ẋ = Ξ Θ(x, u)` where `Ξ` is the sparse coefficient matrix learned from data
-- **Operating rate:** 40 Hz (Ts = 0.025 s); quasi-static assumption does not apply — inertial and viscoelastic dynamics matter
+- **Model identification:** SINDYc with a polynomial + trigonometric function library; identified model is `xdot = Ξ Theta(x, u)` where `Ξ` is the sparse coefficient matrix learned from data
+- **Operating rate:** 40 Hz (Ts = 0.025 s); quasi-static assumption does not apply - inertial and viscoelastic dynamics matter
 
 ### State / Output Variables
 
@@ -37,8 +37,8 @@ A **continuum soft robot module** (205 mm length) actuated by a combination of *
 |-----------|-------|-------------|
 | Sampling time | Ts = 0.025 s (40 Hz) | Data acquisition and control loop rate |
 | Module length | ~205 mm | Continuum segment |
-| SINDYc library | Poly deg 1–3 + trig | Sparse function library for model identification |
-| Model states | 4–6 | Curvature + velocity states in reduced-order model |
+| SINDYc library | Poly deg 1-3 + trig | Sparse function library for model identification |
+| Model states | 4-6 | Curvature + velocity states in reduced-order model |
 
 ---
 
@@ -89,16 +89,16 @@ The paper's primary contribution is a **Super-Twisting Sliding Mode Controller (
 
 ## Implementation Notes
 
-- **SINDYc model:** The SINDYc library should include polynomial terms up to degree 2 plus sinusoidal basis functions. The identified model `ẋ = Ξ Θ(x, u)` can be wrapped in a `SINDyModel::stateFunc()` for use in MPC/DynaController.
-- **STSMC design:** For the super-twisting algorithm, the sliding surface is `s = c*e + ė`; the super-twisting control law is `u_eq = -K1*sqrt(|s|)*sign(s) - K2*∫sign(s)dt`. Use `DiscreteSMC` for the equivalent control framework with `compute(y - ref)`.
+- **SINDYc model:** The SINDYc library should include polynomial terms up to degree 2 plus sinusoidal basis functions. The identified model `xdot = Ξ Theta(x, u)` can be wrapped in a `SINDyModel::stateFunc()` for use in MPC/DynaController.
+- **STSMC design:** For the super-twisting algorithm, the sliding surface is `s = c*e + ė`; the super-twisting control law is `u_eq = -K1*sqrt(|s|)*sign(s) - K2*\intsign(s)dt`. Use `DiscreteSMC` for the equivalent control framework with `compute(y - ref)`.
 - **Online input estimator:** The paper's input estimator runs a recursive identification step each period to update the effective input gain. This can be approximated by `RecursiveLeastSquares` updating the `b0` parameter for ADRC.
-- **ADRC b0:** Estimate from SINDYc Jacobian at operating point: `b0 = ∂f/∂u` evaluated at current state.
-- **Workspace constraint:** Hard constraint on combined actuation `|u| <= u_max`. CBFSafetyFilter wraps STSMC with `h(x) = R_max^2 - ||tip||^2` where `g = -2*tip^T * ∂tip/∂u` from SINDYc Jacobian.
-- **Sampling time:** Ts = 0.025 s (40 Hz). ADRC constraint: `omega_o * 0.025 < 0.5` → `omega_o < 20 rad/s`. Use omega_o = 8.
+- **ADRC b0:** Estimate from SINDYc Jacobian at operating point: `b0 = df/du` evaluated at current state.
+- **Workspace constraint:** Hard constraint on combined actuation `|u| <= u_max`. CBFSafetyFilter wraps STSMC with `h(x) = R_max^2 - ||tip||^2` where `g = -2*tip^T * dtip/du` from SINDYc Jacobian.
+- **Sampling time:** Ts = 0.025 s (40 Hz). ADRC constraint: `omega_o * 0.025 < 0.5` -> `omega_o < 20 rad/s`. Use omega_o = 8.
 - **CSV columns:** `t, x_ref, y_ref, z_ref, x, y, z, u1, u2, error_norm, iae_cumulative`
 
 ---
 
 ## Status
 
-Spec only — `sim/` not present, not registered, not built.
+Spec only - `sim/` not present, not registered, not built.

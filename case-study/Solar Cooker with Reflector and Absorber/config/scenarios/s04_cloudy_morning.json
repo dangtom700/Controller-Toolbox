@@ -1,0 +1,15 @@
+{
+    "id":          "s04_cloudy_morning",
+    "description": "G=450+250*sin(2pi/900*t); combined disturbance + partial PCM charge",
+    "T_ref":       95.0,
+    "T_abs_init":  30.0,
+    "T_pot_init":  30.0,
+    "duration_s":  5400.0,
+    "g_type":      "sinusoidal",
+    "G_0":         450.0,
+    "G_amp":       250.0,
+    "G_freq":      0.006981317,
+    "T_amb_0":     25.0,
+    "v_type":      "constant",
+    "V_wind_0":    2.0
+}
