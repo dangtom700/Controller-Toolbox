@@ -1,8 +1,6 @@
 # Solar-Driven Cooling System with Photovoltaic Evaporative Chimney
 
-**Reference:** Ruiz, Martinez, Aguilar & Lucas, "Analytical modelling and optimisation of a
-solar-driven cooling system with photovoltaic evaporative chimney," *Applied Thermal Engineering*
-245, 2024.
+**Reference:** J. Ruiz, P. Martínez, F. Aguilar, M. Lucas (2024). "Analytical modelling and optimisation of a solar-driven cooling system enhanced with a photovoltaic evaporative chimney." *Applied Thermal Engineering* 245, 122878.
 
 ---
 
@@ -142,7 +140,7 @@ and model-predictive control with model uncertainty.
 | s04_setpoint_step | Setpoint step 42->38 ^\circC at t=1800 s | 750 | 32 | 0.45 | 42->38 ^\circC |
 | s05_high_humidity | High humidity reduces evaporative effectiveness | 800 | 38 | 0.90 | 40 ^\circC |
 
-**Total runs: 9 controllers x 5 scenarios = 45**
+**Total runs: 14 controllers x 5 scenarios = 70**
 
 Scenario s05 (high humidity, phi=0.90) is the harshest condition: the wet-bulb temperature
 approaches the dry-bulb, limiting evaporative cooling. Controllers designed for nominal
@@ -169,6 +167,11 @@ feed the plant efficiency metric back without changing the standard `compute()` 
 | 7 | MRAC | `MRACController` | Sigma-modification adapts spray-flow gain; reference model a_m=0.70, b_m=0.30; compute(y_plant) not error; kr=0.85 |
 | 8 | ESC | `ExtremumSeeker` | Maximizes EER_grid via m_dot_w perturbation (seekMinimum=false, cost=-EER_grid); EER fed back via setLastEER(); inner PID keeps Tw1 near ref; m_dot_w in [0.02, 0.22]; kr=0.85 |
 | 9 | GPC-RLS | `GeneralizedPredictiveController` + `RecursiveLeastSquares` | Np=20, Nu=5; RLS na=1, nb=1, lambda=0.98; updates every 20 steps after 50-step warmup; tracks gain variation with irradiance; kr=0.85 |
+| 10 | ILC | `ILCController` | P-type ILC; N_trial=180 (one full day cycle); learns periodic irradiance pattern feedforward |
+| 11 | NeuralPID | `NeuralPID` | n_h=6, lr=1e-5; plant_gain=4.5*Ts; adapts spray-flow gains online; delta-spray convention |
+| 12 | L1Adaptive | `L1AdaptiveController` | a_m=0.70, b_m=0.30, omega_c=0.02; handles wet-bulb temperature uncertainty |
+| 13 | DynaCtrl | `DynaController` | n_collect=30, n_refit=15; wraps PID; builds SINDy error model from daily operation |
+| 14 | CEM | `CEMController` | StateFunc B=-b*Ts (negative spray convention); deviation-form x/u; uMin/uMax=spray bounds [0.02, 0.22] kg/s |
 
 ### Key Implementation Notes
 

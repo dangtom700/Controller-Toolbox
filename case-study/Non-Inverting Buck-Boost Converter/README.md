@@ -1,26 +1,22 @@
-```markdown
-# Non-Inverting Buck-Boost Converter - Bump-less Two-Level T-S Fuzzy PI Control
+# Non-Inverting Buck-Boost Converter — Bump-less Two-Level T-S Fuzzy PI Control
 
 ## Reference
-**Title:** Analysis, control and design of a non-inverting buck-boost converter: A bump-less two-level T-S fuzzy PI control  
-**Authors:** Omid Naghash Almasi, Vahid Fereshtehpoor, Mohammad Hassan Khooban, Frede Blaabjerg  
-**Journal:** ISA Transactions, Vol. 67, 2017, pp. 515-527  
-**DOI:** (available from publisher)
+Omid Naghash Almasi, Vahid Fereshtehpoor, Mohammad Hassan Khooban, Frede Blaabjerg (2017). "Analysis, control and design of a non-inverting buck-boost converter: A bump-less two-level T-S fuzzy PI control." *ISA Transactions* 67, 515–527.
 
 ---
 
 ## System Description
 
-DC-DC converters must often handle input voltages that can be either lower or higher than the desired output (e.g., Li-ion battery: 2.7 V-4.2 V; solar panels with variable irradiance). A **non-inverting buck-boost converter** combines a buck stage and a boost stage with two switches (`S1`, `S2`), an inductor `L`, and a capacitor `C`. It provides positive output voltage and can operate in three modes: **buck** (only `S1` switching, `S2` off), **boost** (`S1` always on, `S2` switching), and **buck-boost** (both switching, avoided here due to efficiency loss).
+DC-DC converters must often handle input voltages that can be either lower or higher than the desired output (e.g., Li-ion battery: 2.7–4.2 V; solar panels with variable irradiance). A **non-inverting buck-boost converter** combines a buck stage and a boost stage with two switches (`S1`, `S2`), an inductor `L`, and a capacitor `C`. It provides positive output voltage and can operate in three modes: **buck** (only `S1` switching, `S2` off), **boost** (`S1` always on, `S2` switching), and **buck-boost** (both switching, avoided here due to efficiency loss).
 
 The converter's dynamics differ fundamentally between buck and boost modes:
-- **Buck mode** - minimum phase, stable, allows wide-bandwidth control.
-- **Boost mode** - non-minimum phase (right-half-plane zero), conditionally stable, requires narrow bandwidth.
+- **Buck mode** — minimum phase, stable, allows wide-bandwidth control.
+- **Boost mode** — non-minimum phase (right-half-plane zero), conditionally stable, requires narrow bandwidth.
 
 Using a single PI controller tuned for boost mode degrades performance in buck mode. The paper proposes a **two-level control scheme (TLCS)** with:
 - Two dedicated fuzzy PI controllers (one for buck, one for boost).
 - A **TSK fuzzy switch** to select the active controller.
-- A **bump-less transfer modification** that eliminates output oscillations when switching between controllers.
+- A **bump-less transfer modification** that eliminates output oscillations when switching.
 
 The approach is validated by simulations and DSP-based experiments (TMS320F28335).
 
@@ -28,149 +24,155 @@ The approach is validated by simulations and DSP-based experiments (TMS320F28335
 
 ## Mathematical Model
 
-### Small-signal transfer functions (linearised state-space averaging)
-
-**Buck mode** (neglecting input voltage disturbances):
-
-```
-Ĝ_buck(s) = V_in/(LC) . (1 + R_C C s) / (s^2 + s/(R_o C) + 1/(LC))
-```
-
-**Boost mode**:
-
-```
-Ĝ_boost(s) = [i_L/L . (V_in/i_L - s) . (1 + R_C C s)] / [s^2 + s/(R_o C) + (1-D2)^2/(LC)]
-```
-
-where:
-- `R_o` - load resistance
-- `L`, `C` - inductance, capacitance
-- `R_C` - equivalent series resistance of capacitor
-- `D2` - duty cycle of `S2` (boost switch)
-- `i_L` - inductor current (steady state)
-- `V_in` - input voltage
-
-The right-half-plane zero in the boost transfer function imposes a bandwidth limit.
-
-### Classic PI controller
-
-```
-V_ctrl(t) = K_p e(t) + K_i \int0ᵀ e(tau) dtau
-```
-
-### Fuzzy PI controller (Takagi-Sugeno-Kang)
-
-Fuzzy PI rules are extracted from input-output data pairs of the tuned classic PI controllers using **subtractive clustering** (no need to pre-specify number of clusters). Each rule has the form:
-
-```
-IF e is Aⁱ AND ė is Bⁱ THEN y = b0ⁱ + b1ⁱ e + b2ⁱ ė
-```
-
-The final output is the weighted average of rule consequents. The consequent coefficients are optimised with **Recursive Least Squares (RLS)** to minimise MSE.
-
-### Bump-less transfer modification
-
-To avoid oscillations when switching between buck and boost controllers, an additional error signal `e_bump` is defined:
-
-```
-e_bump1 = V_ctrl - u_Buck
-e_bump2 = V_ctrl - u_Boost
-```
-
-These are multiplied by gains `K_b1`, `K_b2` and added to the integral term of the respective PI controller. This forces the two controller outputs to be close at the switching instant, eliminating bumps.
-
----
-
-## State / Signal Variables
+### State Variables
 
 | Symbol | Description | Unit |
 |--------|-------------|------|
-| `V_in` | Input voltage (can be > or < `V_ref`) | V |
-| `V_out` | Output voltage (controlled) | V |
-| `V_ref` | Reference voltage | V |
-| `e = V_ref - V_out` | Voltage error | V |
-| `ė` | Derivative of error | V/s |
-| `d` | Duty cycle (control input) | - |
-| `V_ctrl` | Controller output (to PWM generator) | V |
-| `u_Buck`, `u_Boost` | Outputs of buck and boost fuzzy PI controllers | V |
+| `i_L` | Inductor current | A |
+| `v_C` | Capacitor voltage (= output voltage) | V |
 
----
+### Averaged State-Space Model (Buck mode, D = duty cycle of S1)
 
-## Inputs
+The simulation uses the ideal lossless averaged model (no parasitic R_L or R_C):
 
-| Signal | Description |
-|--------|-------------|
-| `V_ref` | Desired output voltage (step changes: 8 V -> 15 V -> 4 V in experiments) |
-| `V_out` (feedback) | Measured output voltage |
-| `V_in` | Measured input voltage (used by fuzzy switch) |
+```
+L * di_L/dt = D*V_in - v_C
+C * dv_C/dt = i_L - v_C/R
+```
 
-## Outputs
+### Averaged State-Space Model (Boost mode, D = duty cycle of S2)
 
-| Signal | Description |
-|--------|-------------|
-| `V_out` | Regulated output voltage |
-| `G1`, `G2` | PWM gate signals for `S1` (buck) and `S2` (boost) |
-| Active mode indicator | Buck / Boost (determined by fuzzy switch) |
+```
+L * di_L/dt = V_in - (1-D)*v_C
+C * dv_C/dt = (1-D)*i_L - v_C/R
+```
+
+The right-half-plane zero in the boost transfer function imposes a bandwidth limit.
+
+### Small-Signal Transfer Functions (ideal model)
+
+**Buck mode:**
+```
+G_buck(s) = V_in/(LC) / (s^2 + s/(R*C) + 1/(LC))
+```
+
+**Boost mode (around operating point D0, I_L0):**
+```
+G_boost(s) = [I_L0/L * (V_in/I_L0 - s)] / [s^2 + s/(R*C) + (1-D0)^2/(LC)]
+```
+
+Note: The paper's full model includes parasitic inductor resistance R_L and capacitor ESR R_C.
+The simulation omits these for clarity; they shift the pole-zero locations slightly but do not
+change the qualitative control challenge (RHP zero in boost, different dynamics in each mode).
+
+### Bump-Less Transfer
+
+```
+e_bump1 = V_ctrl - u_Buck     -> added (scaled by K_b1) to Buck integral
+e_bump2 = V_ctrl - u_Boost    -> added (scaled by K_b2) to Boost integral
+```
+
+Forces the inactive controller output to continuously track the active one, eliminating switching transients.
+
+### Key Parameters
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `V_in` | 10 V | Supply voltage (constant in paper; scenarios vary V_ref) |
+| Switching frequency `f_s` | 50 kHz (Ts = 20 µs) | PWM carrier |
+| Inductance `L` | 50 µH | |
+| Capacitance `C` | 1.8 mF | |
+| Load `R_o` | 2 Ω | |
+| Classic PI (buck) | Kp=0.0163, Ki=29.86 | ZOH-discretised |
+| Classic PI (boost) | Kp=0.0058, Ki=15.05 | ZOH-discretised |
+| Bump gains (fuzzy TLCS) | K_b1=25, K_b2=1200 | |
+| Mode hysteresis band | ±0.1 V | BUCK→BOOST when V_ref > V_in+0.1; BOOST→BUCK when V_ref < V_in−0.1 |
+
+All parameters loaded from `config/plant_params.json`.
 
 ---
 
 ## Control Objectives
 
-- Regulate `V_out` to track step changes in `V_ref` even when `V_in` crosses `V_ref` (transition between buck and boost modes).
-- Achieve **smooth, bump-less transitions** - no oscillations at mode boundaries.
-- Obtain **faster transient response** in buck mode than a single PI controller tuned for boost.
-- Maintain stability in boost mode despite RHP zero.
-- Provide a **model-free, rule-based** design that can handle nonlinearities.
-
----
-
-## Relevant Control/Estimation Methods in `lib/`
-
-| Method | Role |
-|--------|------|
-| **Fuzzy Logic Controller (TSK)** | Core controller - two fuzzy PI regulators (buck / boost) |
-| **RecursiveLeastSquares (RLS)** | Optimisation of consequent parameters in TSK rules |
-| **BayesianOptimizer** | Could replace manual tuning of `K_b1`, `K_b2` for bump-less transfer |
-| **Kalman Filter** | Not used in paper, but could estimate inductor current `i_L` for improved boost control |
-| **Particle Filter** | Alternative for non-Gaussian noise in PWM or sensor signals |
-
----
-
-## Key Parameters
-
-| Parameter | Value (simulation / experiment) |
-|-----------|----------------------------------|
-| `V_in` | 10 V (constant, reference steps 8 V -> 15 V -> 4 V) |
-| Switching frequency `f_s` | 50 kHz |
-| Inductance `L` | 50 muH |
-| Capacitance `C` | 1.8 mF |
-| Load `R_o` | 2 Omega |
-| Classic PI gains (buck) | `K_p = 0.0163`, `K_i = 29.86` |
-| Classic PI gains (boost) | `K_p = 0.0058`, `K_i = 15.05` |
-| Bump gains `K_b1`, `K_b2` | Fuzzy: 25, 1200 ; Classic: 100, 120 |
-| Rise time (buck, fuzzy TLCS) | 5.1 ms |
-| Settling time (buck, fuzzy TLCS) | 9.9 ms |
+- Regulate `v_C` to track step changes in `V_ref`, including transitions where `V_ref` crosses `V_in` (mode change).
+- Achieve **smooth, bump-less transitions** — no output oscillations at mode boundaries.
+- Faster transient response in buck mode than a single boost-tuned PI.
+- Stable operation in boost mode despite RHP zero.
 
 ---
 
 ## Scenarios
 
-- **Step-up transition** - `V_ref` changes from 8 V (< `V_in`) to 15 V (> `V_in`): boost mode activated.
-- **Step-down transition** - `V_ref` changes from 15 V to 4 V: back to buck mode.
-- **Comparison** - one-level PI (boost-tuned) vs. classic TLCS vs. fuzzy TLCS.
-- **Start-up transient** - from 0 V to 8 V in buck mode.
-- **Load / input voltage disturbance rejection** (discussed but not the main focus).
+| ID | Description | V_in [V] | V_ref [V] | Mode |
+|----|-------------|----------|-----------|------|
+| s01_buck | Buck-mode regulation | 10 | 8 | Buck only |
+| s02_boost | Boost-mode regulation | 10 | 15 | Boost only |
+| s03_crossing_up | Step up: 8 V → 15 V (crosses V_in) | 10 | 8→15 | Buck→Boost |
+| s04_crossing_down | Step down: 15 V → 4 V (crosses V_in) | 10 | 15→4 | Boost→Buck |
+| s05_full | Full sequence: 8 V → 15 V → 4 V | 10 | 8→15→4 | Both transitions |
+
+**Total runs: 12 controllers × 5 scenarios = 60**
 
 ---
 
-## Implementation Notes
+## Controller Roster
 
-- The **TSK fuzzy switch** uses two inputs: `e_in = V_in - V_out` and `e_ref = V_ref - V_out`. Membership functions are Gaussian (Fig. 6). Four rules determine whether the buck or boost controller is active.
-- **PWM generation** uses two non-overlapping triangular carriers to avoid the inefficient buck-boost mode (`V_H1 = V_L2`).
-- The **bump-less modification** is implemented by adding `K_b * (V_ctrl - u_other)` to the integral accumulator of each PI. This does **not** reset the integral term, just biases it to match the other controller's output at switching instants.
-- In `lib/`, a `FuzzyTSK` class could implement subtractive clustering and RLS learning. For real-time embedded use, pre-trained rule bases are stored as lookup tables.
-- The controller is **model-free** after training; no online parameter estimation is required.
+Each controller subclasses `buck::ControllerBase`. Its `compute(v_out, v_ref, v_in)` returns
+duty cycle `d ∈ [0, 1]`. Internally, mode is determined by comparing V_ref to V_in ± 0.1 V hysteresis band.
 
-**Source:**  
-Almasi, O.N., Fereshtehpoor, V., Khooban, M.H., Blaabjerg, F. (2017). Analysis, control and design of a non-inverting buck-boost converter: A bump-less two-level T-S fuzzy PI control. *ISA Transactions*, 67, 515-527.
+| # | Name | lib/ Algorithm(s) | Design Notes |
+|---|------|--------------------|--------------|
+| 1 | OpenLoop | — | Fixed d = 0.5; baseline only |
+| 2 | PI-Buck | `DiscretePID` | Kp=0.0163, Ki=29.86; buck gains; operates in all modes (ignores boost instability) |
+| 3 | PI-Boost | `DiscretePID` | Kp=0.0058, Ki=15.05; boost gains; operates in all modes (poor in buck) |
+| 4 | TLCS-ClassicPI | `DiscretePID` x2 | Buck PI + Boost PI with bump-less transfer; K_b1=100, K_b2=120 (classic TLCS) |
+| 5 | FuzzyPD | `FuzzyPDController` | Feed-forward fuzzy PD; inner uMin/uMax=±1.0 (loose) to allow correction in both directions |
+| 6 | FuzzyPID-Buck | `FuzzyPIDController` | TSK fuzzy PI tuned for buck mode only; serves as buck-only baseline |
+| 7 | FuzzyPID-Boost | `FuzzyPIDController` | TSK fuzzy PI tuned for boost mode only; serves as boost-only baseline |
+| 8 | TLCS-FuzzyPI | `FuzzyPIDController` x2 | **Paper result** — buck fuzzy PI + boost fuzzy PI with bump-less transfer; K_b1=25, K_b2=1200 |
+| 9 | GainScheduled | `GainScheduledController` | Scheduling variable xi = V_in/V_ref; two brackets: xi>1 (buck) and xi<1 (boost) |
+| 10 | ADRC | `DiscreteADRC` | b0 = V_in/(L*C_approx) ≈ 1.11e8; omega_o=0.04*f_s; omega_o*Ts = 0.04*20e-6 < 0.5 |
+| 11 | MPC | `DiscreteMPC` | ZOH state-space per active mode; Np=10, Nu=3; u ∈ [0,1] |
+| 12 | LQR | `DiscreteLQR` | Bryson-tuned; x_max=[I_L_max, V_ref]; u_max=1; mode-dependent SS |
+
+### Key Implementation Notes
+
+- **Bump-less TLCS:** Call `inactive_ctrl.bumplessInit(d_active, e)` **every step** (not just at
+  switch) so the inactive controller's integrator continuously tracks the active one. This is
+  critical — doing it only at the switch instant leaves a large integrator mismatch.
+- **FuzzyPID inner bounds:** The inner `FuzzyPDParams.uMin/uMax` must be `±1.0` (loose) so both
+  overshoot and undershoot generate proportional correction. Using `[0,1]` for the inner bounds
+  kills overshoot suppression. Outer `FuzzyPID` clamps to `[0,1]` (duty cycle).
+- **Mode hysteresis:** BUCK→BOOST when `V_ref > V_in + 0.1 V`; BOOST→BUCK when `V_ref < V_in − 0.1 V`.
+  Hold current mode within the ±0.1 V band to prevent chatter at the boundary.
+- **ADRC b0:** `b0 = V_in / L * (1/C)` approximation; for boost mode the effective gain changes.
+  Use ADRC as a SISO loop with the ESO compensating mode-dependent dynamics as total disturbance.
+- **Sampling time:** Ts = 20 µs (50 kHz). ADRC constraint: `omega_o * 20e-6 < 0.5` → `omega_o < 25000 rad/s`.
+
+---
+
+## Metrics
+
+Each run prints and logs:
+
+```
+[Sk | Controller]  IAE=<>  RMS_err=<>  MaxErr=<>  sat_d=<>  settle_ms=<>  wall=<> ms
+```
+
+CSV columns: `t, v_in, v_ref, v_out, i_L, d, mode, error`
+
+CSV logs written to `case-study/Non-Inverting Buck-Boost Converter/logs/`.
+
+---
+
+## Build and Run
+
+```bash
+conda run -n soft_robotics -- python run.py
+```
+
+The `buck_boost_sim` target is built by `compile.bat`. Individual run:
+
+```bash
+build\case-study\"Non-Inverting Buck-Boost Converter"\buck_boost_sim.exe
 ```

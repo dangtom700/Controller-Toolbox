@@ -4,8 +4,10 @@
 
 // Quarter-car active suspension plant.
 //
-// Source: Abdulwahab et al. (2025) "Mathematical modeling and optimization of
-//         the active suspension", Alexandria Engineering Journal.
+// Source: Aydogan & Yildiz (2025) "Mathematical modeling and optimization of
+//         the active suspension system of a 6x6 electric vehicle",
+//         Alexandria Engineering Journal 127, 989-1003.
+//         Simulation uses a standard 2-DOF quarter-car subsystem.
 //
 // 2-DOF quarter-car model; 4 states:
 //   x = [z_s, dz_s, z_u, dz_u]

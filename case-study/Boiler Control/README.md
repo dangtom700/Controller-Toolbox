@@ -1,6 +1,8 @@
 # Boiler Control Case Study
 
-**Reference:** Bell & Astrom (1987), "A Low Order Nonlinear Dynamic Model of a Power Plant Boiler-Turbine Unit"
+**Reference (plant model):** R.D. Bell, K.J. Åström (1987). "A Low Order Nonlinear Dynamic Model of a Power Plant Boiler-Turbine Unit." Lund Institute of Technology Report.
+
+**Reference (controller design study):** Maciej Ławryczuk (2017). "Nonlinear predictive control of a boiler-turbine unit: A state-space approach with successive on-line model linearisation and quadratic optimisation." *ISA Transactions* 67, 476–495.
 
 ---
 
@@ -14,9 +16,9 @@ nonlinear benchmark in the process control literature.
 
 | Index | Symbol | Description | Unit |
 |-------|--------|-------------|------|
-| x1 | p | Drum pressure | bar |
+| x1 | p | Drum pressure | kg/cm² (~bar) |
 | x2 | P_e | Electric power output | MW |
-| x3 | h | Drum water level (steam quality proxy) | cm |
+| x3 | rho | Fluid density in drum | kg/cm³ |
 
 ### Input Vector (valve positions, all in [0, 1])
 
@@ -30,9 +32,9 @@ nonlinear benchmark in the process control literature.
 
 | Index | Description |
 |-------|-------------|
-| y1 | Drum pressure x1 [bar] |
+| y1 | Drum pressure x1 [kg/cm²] |
 | y2 | Electric power x2 [MW] |
-| y3 | Boiler efficiency proxy (nonlinear function of x, u) |
+| y3 | Drum water level deviation [m] — nonlinear function: 0.05*(0.13073*x3 + 100*cs + qe/9 - 67.975) |
 
 ### Governing Equations
 
@@ -46,8 +48,8 @@ Sample time: **Ts = 1.0 s** (1-Hz control loop)
 
 ### Operating Points
 
-| OP | Load Level | p [bar] | P_e [MW] | h [cm] | u1 | u2 | u3 |
-|----|-----------|---------|----------|--------|----|----|-----|
+| OP | Load Level | p [kg/cm²] | P_e [MW] | rho [kg/cm³] | u1 | u2 | u3 |
+|----|-----------|------------|----------|--------------|----|----|-----|
 | A | Low Load | 75.6 | 15.3 | 508.97 | 0.1193 | 0.3806 | 0.1226 |
 | B | Medium Load | 97.2 | 50.5 | 469.51 | 0.2705 | 0.6208 | 0.3398 |
 | C | High Load | 140.0 | 128.0 | 323.68 | 0.5959 | 0.8945 | 0.7883 |

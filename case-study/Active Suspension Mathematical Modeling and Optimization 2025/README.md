@@ -1,7 +1,8 @@
 # Active Suspension Mathematical Modeling and Optimization 2025
 
-**Reference:** Abdulwahab et al. (2025) "Mathematical modeling and optimization of the active
-suspension", Alexandria Engineering Journal.
+**Reference:** Berk Aydogan, Ahmet Yildiz (2025). "Mathematical modeling and optimization of the active suspension system of a 6×6 electric vehicle." *Alexandria Engineering Journal* 127, 989–1003.
+
+**Note on plant model:** The paper analyses a full 6×6 in-wheel electric vehicle with 15-DOF body + 5-DOF human model optimised via GA/PSO/DE. The simulation here uses a standard **2-DOF quarter-car** active suspension derived from the per-corner sprung/unsprung mass subsystem of such models, which is the well-established benchmark for active suspension controller design and comparison.
 
 ---
 
@@ -83,7 +84,7 @@ All scenarios target z_s = 0 (body at equilibrium position regardless of road pr
 | S4 | Speed bump (50 mm versine, 0.5 m at 30 km/h) | Versine | 3 s |
 | S5 | Compound: 10 mm sine 1.3 Hz + 15 mm step at t=2 s | Composite | 5 s |
 
-**Total runs: 10 controllers x 5 scenarios = 50**
+**Total runs: 15 controllers x 5 scenarios = 75**
 
 S1 tests settling time and overshoot suppression. S2 is the primary comfort test -
 body resonance amplification by the passive suspension is the core problem active
@@ -110,6 +111,11 @@ the 4-element state and the road height, and returns actuator force F_act [N].
 | 8 | MRAC | `MRACController` | sigma-modification; a_m=exp(-4*Ts)~0.980; gamma=0.01 (conservative for 4th-order coupling) |
 | 9 | FuzzyPID | `FuzzyPID` | e_scale=0.03m; de_scale=0.5m/s; u_scale=2000N; Ki=50 N/(m.s) |
 | 10 | TubeMPC | `TubeMPC` | 2-state body model; K=-K_lqr; wMax=[0.002m, 0.040m/s] (wheel coupling bound); Np=10, Nu=3 |
+| 11 | ILC | `ILCController` | P-type ILC; Lp=0.6; N_trial=1000; learns periodic road disturbance feedforward trial-to-trial |
+| 12 | CBFSafety | `CBFSafetyFilter` | Barrier on dz_s: h=v_max-dz_s, v_max=0.5 m/s; alpha=5; PID nominal; g=1/m_s (approximate - ignores coupling) |
+| 13 | L1Adaptive | `L1AdaptiveController` | a_m=exp(-4*Ts)~0.980, Gamma=200, omega_c=2.0, sigma_max=5000; adapts to payload variation |
+| 14 | ScenarioMPC | `ScenarioMPC` | 2-state body SS; Np=10, Nu=3; Sigma_w=diag(4e-6,1.6e-3) (wheel noise); N_samples=30 |
+| 15 | DynaCtrl | `DynaController` | Wraps DiscretePID; n_collect=50, n_refit=25; error=-z_s |
 
 ### Key Implementation Notes
 

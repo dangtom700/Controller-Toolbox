@@ -5,9 +5,9 @@
 // Bell-Astrom (1987) nonlinear boiler-turbine plant.
 //
 // States:  x = [x1, x2, x3]
-//   x1 = drum pressure       [bar]
-//   x2 = electric power      [MW]
-//   x3 = water level         [cm]
+//   x1 = drum pressure        [kg/cm²]
+//   x2 = electric power       [MW]
+//   x3 = fluid density in drum [kg/cm³]
 //
 // Inputs:  u = [u1, u2, u3]  (all in [0, 1])
 //   u1 = fuel flow valve
@@ -17,7 +17,7 @@
 // Outputs: y = [y1, y2, y3]
 //   y1 = drum pressure  (= x1)
 //   y2 = electric power (= x2)
-//   y3 = boiler efficiency proxy (nonlinear function of x, u)
+//   y3 = drum water level deviation [m]  = 0.05*(0.13073*x3 + 100*acs + qe/9 - 67.975)
 
 namespace boiler {
 

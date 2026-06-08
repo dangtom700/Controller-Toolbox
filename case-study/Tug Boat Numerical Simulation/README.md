@@ -1,6 +1,7 @@
 # Tug Boat Numerical Simulation Case Study
 
-**Reference:** Li et al. (2026) - 3-DOF unified barge-tugboat dynamic positioning model.
+**Reference:** Ze Li, Yiting Wang, Lei Wang, Ming Ding (2026). "A novel mathematical modeling and simulation of multi-tugboats assisted pushing operations for a barge." *Ocean Engineering* 357, 125514.
+
 Plant parameters and scenario conditions from Table 5 of the paper.
 
 ---
@@ -125,7 +126,7 @@ All scenarios target the origin `[x=0, y=0, psi=0]` (station-keeping).
 | S3 | 135^\circ quartering disturbance (primary validation) | 10 | 1.0 | 2.0 | 10 | 5400 s |
 | S4 | 180^\circ head-on disturbance | 10 | 1.0 | 2.0 | 10 | 5400 s |
 
-**Total runs: 16 controllers x 4 scenarios = 64**
+**Total runs: 18 controllers x 4 scenarios = 72**
 
 S1 is a numerical stability check - all controllers should produce IAE = 0 with no
 environmental forcing. S2-S4 replicate Table 5 conditions from Li et al. (2026).
@@ -156,6 +157,8 @@ generalized forces `tau = [tau_x, tau_y, tau_psi]` which are then allocated to i
 | 14 | MRAC | `MRACController` x3 | Conservative adaptation (gamma=1e-8, large theta_max); handles relative-degree-2 ship dynamics |
 | 15 | AutoGS-LQR | `GainScheduledController` (surge) + `DiscretePID` x2 | Surge axis scheduled on |u_v| in [0,1.5] m/s via nu-gap clustering; sway/yaw remain PID |
 | 16 | NMPC | `NonlinearMPC` | RTI on 6-state discrete nonlinear dynamics; Np=20, Nu=5; C=[I_3, 0_3x3] position tracking |
+| 17 | L1Adaptive | `L1AdaptiveController` x3 | 3-axis decoupled; a_m=0.97, b_m=0.03, omega_c=0.05, sigma_max=1e8; adapts to unmodelled hydrodynamic coupling |
+| 18 | ScenarioMPC | `ScenarioMPC` x3 | Per-axis 2-state model in kN; Np=60, Nu=5, N_samples=30; Sigma_w=JONSWAP wave disturbance covariance |
 
 ### Key Implementation Notes
 

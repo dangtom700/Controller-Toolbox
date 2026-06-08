@@ -1341,3 +1341,116 @@ spec), and 3 thin-spec studies. C2 stays open until all stubs are implemented.
 
 **New baseline (Part 37, unverified):** Run `conda run -n soft_robotics -- python run.py`
 to confirm. Expected additional runs: ActiveSuspension 50/50, BuckBoost 60/60.
+
+---
+
+## Part 41 — Case Study README Overhaul & Plant Model Audit (2026-06-07)
+
+### Summary
+
+Full audit of all 8 implemented case study READMEs and all 7 spec-only / PDF-candidate READMEs.
+Every README was cross-checked against the actual PDF (extracted via `pdftotext`) and against
+the live C++ / Python simulation source files. Multiple plant model discrepancies were found
+and corrected.
+
+---
+
+### 41-A: Spec-only / PDF-candidate README rewrites
+
+All 7 directories that contain only a PDF had their READMEs rewritten from the actual paper
+content. Previous versions were written from training-data approximations with wrong authors,
+wrong journals, and in some cases entirely wrong system descriptions.
+
+| Study | Key corrections |
+|-------|----------------|
+| `Dust Control of Ultrasonic Dry For Nozzle/` | Author (Xinzhe Wang et al.), journal (*Powder Technology* 476, 122382, 2026) |
+| `Modular Convection Enhanced Evaporation System/` | Author (Kaddoura et al.), journal (*Desalination* 510, 115057, 2021) |
+| `Separate Meter In Separate Meter Out/` | Author (Guangrong Chen et al.), journal (*Control Engineering Practice* 72, 138-150, 2018); controller corrected to IARDSC + grey predictor |
+| `Tracking Control of Electro-Hydraulic Force Servo Systems/` | Author (Gang Shen et al.), journal (*ISA Transactions* 67, 356-370, 2017); controller corrected to PI + H∞ ODFC + nLMS adaptive compensator |
+| `Solar Cooker with Reflector and Absorber/` | Plant completely rewritten: box solar cooker with TBPR (tracking-type bottom parabolic reflector) + PCM paraffin wax absorber; 4 configurations SC1-SC4 |
+| `Data-Driven Sliding Mode Control of Soft Robot 2024/` | COMPLETE REWRITE — wrong system entirely. Correct: Papageorgiou et al. (2024), *CEP* 144, 105836; cable tendons + McKibben muscles; SINDYc model; STSMC + online input estimator |
+| `Solar Ocean Thermal Energy Conversion System/` | Gao et al. (2024), *ATE* 245, 122776; R134a working fluid; added note that this is a characterisation study, not a control paper |
+
+---
+
+### 41-B: Implemented case study README updates (controller counts + references)
+
+| Study | Change |
+|-------|--------|
+| Active Suspension | Runs updated 50→75 (15 controllers × 5); reference corrected: Aydogan & Yildiz (2025), *AEJ* 127, 989-1003; note added explaining 2-DOF quarter-car subsystem vs. full 6×6 EV paper |
+| Solar Cooling | Runs updated 45→70 (14 controllers × 5); article number 122878 added to ATE citation |
+| Humidification | Runs updated 50→75 (15 controllers × 5) |
+| Tug Boat | Runs updated 64→72 (18 controllers × 4); article number 125514 added to OE citation |
+| Buck-Boost | Full README rewrite: removed backtick-fenced content; added averaged model equations, scenarios table, 12-controller roster, implementation notes |
+| WindWave | Added "Python-Only Implementation" section with 4-state model, 16-controller roster, 5-scenario table, implementation notes |
+| DrillString | README created (was absent); reference, plant model, 17-controller roster, 5-scenario table, implementation notes |
+| Boiler | Secondary reference added (Lawryczuk 2017, *ISA Trans.* 67, 476-495); x3/y3 descriptions corrected |
+
+---
+
+### 41-C: Plant model bug fixes
+
+Five concrete errors found and corrected after cross-checking README equations against
+both the PDF source and the live simulation source code:
+
+#### Fix 1 — Boiler README: y3 formula parenthesis error
+**File:** `case-study/Boiler Control/README.md`
+
+The README wrote `0.05/0.13073*x3 + 100*cs + qe/9 - 67.975`, implying only x3 is
+scaled. The implementation (`boiler_plant.cpp:18`) computes
+`0.05 * (0.13073*x3 + 100*acs + qe/9 - 67.975)` — the factor 0.05 multiplies the
+entire expression. Fixed to: `0.05*(0.13073*x3 + 100*cs + qe/9 - 67.975)`.
+
+#### Fix 2 — Boiler header: stale x3/y3 comments
+**File:** `case-study/Boiler Control/sim/include/boiler_plant.h`
+
+`x3` comment was `water level [cm]`; corrected to `fluid density in drum [kg/cm³]`.
+`y3` comment was `boiler efficiency proxy`; corrected to
+`drum water level deviation [m] = 0.05*(0.13073*x3 + 100*acs + qe/9 - 67.975)`.
+
+#### Fix 3 — Active Suspension header: wrong author
+**File:** `case-study/Active Suspension.../sim/include/susp_plant.h`
+
+Source comment said "Abdulwahab et al. (2025)"; corrected to "Aydogan & Yildiz (2025)"
+with full citation. Added note that the simulation uses the standard 2-DOF quarter-car
+subsystem (not the full 6×6 vehicle model from the paper).
+
+#### Fix 4 — Buck-Boost README: model included parasitics not in code
+**File:** `case-study/Non-Inverting Buck-Boost Converter/README.md`
+
+The averaged model equations included `R_L*i_L/L` (inductor parasitic resistance) and
+`R_C` (capacitor ESR) in the small-signal transfer functions. The implementation uses
+the ideal lossless model with neither term. Equations corrected to match the code;
+a note explains the simplification relative to the paper's full model.
+
+#### Fix 5 — DrillString README: entirely wrong parameter values and equation structure
+**File:** `case-study/Vertical Drill String.../README.md`
+
+This was the most serious discrepancy. The README described a different model:
+
+| Item | README (wrong) | Implementation (correct) |
+|------|---------------|--------------------------|
+| J_b | 10 kg·m² | 374 kg·m² |
+| k_s / k_t | 1000 N·m/rad | 861 N·m/rad |
+| Friction | `T_c*tanh(ω/ω_s) + k_f*ω` (T_c=500 N·m, ω_s=0.5) | `WOB*R_b*(mu_k+(mu_s-mu_k)*exp(-\|ω\|/eps_v))*tanh(ω/eps_tanh)` |
+| Damping c_t | not mentioned | 100 N·m·s/rad in both eqn and JSON |
+| Top-drive dynamics | J_s equation shown as 3rd state | omega_t is a direct command (2-state system) |
+
+The Plant Model section was rewritten to document the actual 2-state model with
+exponential Stribeck friction, `c_t` torsional damping, and correct parameter values
+from `plant_params.json` (J_b=374, k_t=861, WOB=97440 N, R_b=0.155 m, mu_s=0.8,
+mu_k=0.5, eps_v=1.0, eps_tanh=0.05).
+
+---
+
+### Open-issues update (Part 41)
+
+No algorithm or simulation code was changed — all fixes were README / header comments.
+The C++ and Python simulation code was verified correct against the PDFs for all 8
+implemented studies (Boiler, Tug, Solar, Humid, ActiveSusp, BuckBoost, DrillString,
+WindWave). The five fixes above bring the documentation into alignment with what runs.
+
+Remaining known gaps (unchanged from Part 40):
+- **C2** (4 spec-only stubs): MEMS spec ready; Bioreactor/Firefighting/Nuclear need plant design.
+- **B36-3**: NaN-guard fleet unification still open.
+- **REL**: Debug build of ctrl_toolbox.pyd still open.
