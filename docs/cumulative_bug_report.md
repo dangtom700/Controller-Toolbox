@@ -1454,3 +1454,104 @@ Remaining known gaps (unchanged from Part 40):
 - **C2** (4 spec-only stubs): MEMS spec ready; Bioreactor/Firefighting/Nuclear need plant design.
 - **B36-3**: NaN-guard fleet unification still open.
 - **REL**: Debug build of ctrl_toolbox.pyd still open.
+
+---
+
+## Part 42 — Spec-only README Control Objective Rewrites (2026-06-07)
+
+Two spec-only case study READMEs had their control objective sections rewritten from
+authoritative paper content provided by the user. No simulation code was written or changed.
+
+---
+
+### 42-A: Solar Cooker with Reflector and Absorber
+
+**File:** `case-study/Solar Cooker with Reflector and Absorber/README.md`
+
+The "Control Objective" section was a single paragraph targeting pot temperature setpoint
+tracking. Replaced with a three-objective framework grounded in the actual paper mechanics:
+
+**Objective 1 — TBPR Sun Tracking:**
+The parabolic reflector tilt angle `theta(t)` must follow the sun's angle continuously.
+A 10° deviation from `theta_opt` costs 15–30% of the reflector contribution. This is the
+primary performance lever and requires a dedicated tracking control loop.
+
+**Objective 2 — Maximize Net Useful Thermal Energy Against Weather:**
+The governing energy balance takes `I` (irradiance), `T_a` (ambient temperature), and
+`V` (wind speed) as the three exogenous disturbance inputs. Wind amplifies convective
+losses through both glazed covers. Closed-loop feedback integrates all three effects
+automatically without needing individual feedforward terms per disturbance.
+
+**Objective 3 — PCM Charge/Discharge Cycle Regulation:**
+The paraffin-wax PCM charges during peak irradiance (latent heat absorbed at constant
+T_melt, extending effective heat capacity) and discharges after sunset to sustain cooking
+without solar input. The PCM creates a thermal plateau near T_melt that appears as a
+near-zero plant gain to feedback controllers — controllers not designed for this will
+over-drive the actuator during melting.
+
+**Scenarios** updated to map to the three objectives:
+- s01: TBPR tracking across a full day sweep (Obj 1)
+- s02: wind-gust disturbance rejection (Obj 2)
+- s03: full PCM charge then discharge after G drops to zero (Obj 3)
+- s04: intermittent cloud + partial PCM charge (Obj 2 + 3)
+- s05: absorber overtemp protection at summer noon peak (Obj 2 constraint)
+
+`V_wind` and `phi_pcm` added to CSV column list.
+
+**Controller roster** updated: design notes aligned to the three objectives (GainScheduled
+uses three brackets: heat-up / PCM-plateau / post-melt; ADRC/FuzzyPID explicitly note PCM
+plateau handling).
+
+---
+
+### 42-B: Solar Ocean Thermal Energy Conversion System
+
+**File:** `case-study/Solar Ocean Thermal Energy Conversion System/README.md`
+
+The opening note, key parameters table, control objective section, controller roster,
+scenarios, and CSV columns were all updated.
+
+**Note corrected:** now states that the paper explicitly frames its findings as a
+"benchmark reference for control and operation of S-OTEC systems."
+
+**Key parameters table** updated with paper-specific values:
+- Solar hot water temperature tested range: 54–72°C
+- Superheating degree ΔT_Super added
+- Hard mechanical constraint: expander inlet pressure ≤ **1.38 MPa**
+- Two VFD actuators named explicitly: m_dot_wf (working fluid pump) and m_dot_f (solar pump)
+- Efficiency note: >150% thermal efficiency improvement vs. non-solar OTEC
+
+**Three control objectives** replacing the single-paragraph objective:
+
+**Objective 1 — Maximize W_net, W_ele, η_th, η_ele, η_ex:**
+The W_net optimum is a moving target shifting with both T_h and m_dot_wf. This requires
+an MPPT-style optimisation loop, not a fixed setpoint track.
+
+**Objective 2 — Regulate m_dot_wf Under 1.38 MPa Pressure Constraint:**
+VFD on working fluid pump is the primary power-maximisation actuator. Safety hard
+constraint: P_inlet ≤ 1.38 MPa. MPC encodes this as a QP inequality; all other
+controllers must clamp m_dot_wf via a P_inlet model.
+
+**Objective 3 — Optimise ΔT_Super via Solar Heat Regulation:**
+Solar superheating (T_h 54→72°C) broadens the expander enthalpy drop and raises
+isentropic efficiency. The paper quantifies this as >150% η_th improvement vs. non-solar.
+The two actuators are coupled: raising T_h and raising m_dot_wf both increase P_inlet.
+
+**Scenarios** reworked to map to the three objectives:
+- s01: MPPT steady-state optimisation (Obj 1)
+- s02: T_h step 54→72°C, pressure-constrained (Obj 2 + 3)
+- s03: cloud transient, m_dot_wf regulation to prevent ORC shutdown (Obj 2)
+- s04: reduced cold-source delta_T, efficiency maximisation at lower driving force (Obj 1)
+- s05: dawn startup ramp, coordinating both pumps from cold (Obj 3)
+
+**Controller roster** updated: GainScheduled brackets aligned to paper's three tested
+T_h values (54, 63, 72°C); ScenarioMPC tightens pressure margin to 1.30 MPa.
+
+**CSV columns** updated: `P_inlet` and `delta_T_super` added.
+
+---
+
+### Open-issues update (Part 42)
+
+No simulation code changed. C2 (spec-only stubs) partially addressed by improved specs
+for two studies; MEMS, Bioreactor, Firefighting, Nuclear remain. B36-3 and REL unchanged.
