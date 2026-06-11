@@ -135,6 +135,7 @@ for %%T in (
     buck_boost_sim
     solar_cooker_sim
     sotec_sim
+    smismo_sim
     toolbox_examples
     test_catch2_pilot
     test_catch2_advanced
@@ -143,6 +144,7 @@ for %%T in (
     test_boiler_regression
     test_solar_regression
     test_humid_regression
+    test_smismo_regression
 ) do (
     echo.
     echo ----------------------------------------------------------

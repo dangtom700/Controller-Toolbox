@@ -15,7 +15,7 @@ Run `conda run -n soft_robotics -- python run.py` for live pass/fail counts.
 
 ---
 
-## C++ Built Studies (8)
+## C++ Built Studies (9)
 
 
 ### Boiler Control ✅ C++
@@ -193,9 +193,35 @@ Run `conda run -n soft_robotics -- python run.py` for live pass/fail counts.
 
 ---
 
+### Separate Meter In Separate Meter Out ✅ C++
+
+| Field | Value |
+|-------|-------|
+| **Plant** | SMISMO hydraulic cylinder: 8 states [x_L, v_L, P_1, P_2, xv_1, dxv_1, xv_2, dxv_2]; two independent PDCVs (4-quadrant orifice flow), 2nd-order spool dynamics, identified Stribeck friction; RK4 Ts=1 ms, 4 substeps |
+| **Reference** | Chen et al. 2018 (Control Engineering Practice 72, 138–150) + Liu et al. 2009 (IEEE/ASME AIM, 227–232) |
+| **Controllers** | 12 |
+| **Scenarios** | 5 |
+| **Total runs** | 60 (12×5) |
+| **Build target** | `smismo_sim` |
+| **Logs** | `case-study/Separate Meter In Separate Meter Out/logs/` |
+
+**Controller roster:** PID, CascadePID, LQR, LQG, MPC, ADRC (ω_o=200, ω_o·Ts=0.2 < 0.5 ✓), SMC, FeedbackLinearisation, TubeMPC, L1Adaptive, GainScheduled (on v_L), NonlinearMPC (RTI, internal 10 ms model step).
+
+**Scenarios:** s01_resistive_step (+500 N), s02_overrunning (−800 N, backpressure braking), s03_sine_tracking (paper trajectory `0.25+0.25·sin(πt/2−π/2)`), s04_load_step (paper 500 N disturbance at t=9 s), s05_energy_compare (E = ∫P_s·Q_s dt metric).
+
+**CSV columns:** `t, x_ref, x_p, v_p, P1_bar, P2_bar, u1, u2, F_ext, Q_s_lpm, energy_J, iae_cumulative`.
+
+**Key caveats:**
+- **Dual-loop structure (Liu Fig. 10):** controllers output one scalar working-side command u_ctrl [V]; the shared `ValveAllocator` does mode selection (±0.05 V hysteresis) and regulates the off-side chamber to P_bd=20 bar with flow-matching feedforward + PI.
+- **Valve normalisation:** `Q_i = xv_i·Q_nom_i·sqrt(DP_i/3.5 MPa)` with normalised spool xv ∈ [−1,1] (equivalent to the Cd·W·x_v form; Q_nom2/Q_nom1 = k_v2/k_v1 = 0.67).
+- **Working-side gain for tuning:** v/u ≈ 0.14 (m/s)/V, velocity lag τ_v ≈ 25 ms → 2-state design model shared by LQR/LQG/MPC/TubeMPC.
+- **Friction:** Chen Stribeck law is discontinuous at v=0; regularised linearly inside |v| < 5e-3 m/s.
+- **sqrt(DP) regularisation:** orifice uses `dp/sqrt(|dp|+1e3)` (signed, smooth at 0, allows reverse anti-cavitation flow).
+- **Backpressure is the cavitation guard:** the overrunning s02 scenario stays cavitation-free because the off-side PI holds 20 bar — do not lower P_bd below ~5 bar.
+
 ---
 
-## Python-Only Studies (2)
+## Python-Only Studies (4)
 
 Discovered by `run.py` Phase 6 via `case-study/*/sim/main.py`. Not in `CMakeLists.txt` or `compile.bat`. Each `sim/` module sets `_ROOT` 4 levels up from `sim/` to locate `build/bindings`.
 
@@ -248,11 +274,74 @@ Discovered by `run.py` Phase 6 via `case-study/*/sim/main.py`. Not in `CMakeList
 
 ---
 
-## Spec-Only Stubs (9)
+### Tracking Control of Electro-Hydraulic Force Servo Systems ✅ Python
+
+| Field | Value |
+|-------|-------|
+| **Plant** | 5-state EHFS: [P_A, P_B, x_v, v_p, x_p]; 4/3 servo valve with dead-band, double-acting cylinder, Coulomb + viscous friction, spring load k_L |
+| **Reference** | Shen et al. 2017, ISA Transactions 67, 356–370 |
+| **Integration** | RK4, Ts = 0.5 ms, N_SUBSTEPS = 4 |
+| **Controllers** | 12 |
+| **Scenarios** | 5 |
+| **Total runs** | 60 (12×5) |
+| **Entry point** | `case-study/Tracking Control of Electro-Hydraulic Force Servo Systems/sim/main.py` |
+| **Logs** | `case-study/Tracking Control of Electro-Hydraulic Force Servo Systems/logs/` |
+
+
+**Controller roster:** OpenLoop, PID (Kp=3e-4, Ki=0.5), ADRC (ω_o=800, ω_o·Ts=0.40 < 0.5 ✓, b0=K_F·Ts·(1−e^{−Ts/τ_v})), SMC (compute(F−F_ref)), MPC (2-state [F, x_v] ZOH, Np=20), LQR (2-state deviation-form, Q=diag(1e-8,1)), MRAC (a_m=e^{−300·Ts}, γ_r=1e-9), L1Adaptive (ω_c=200, Γ=1e-5), FeedbackLin (K_xv(P_A,P_B) inversion, λ=300 rad/s), NeuralPID (n_h=8, lr=1e-8), ILC (P-type N_trial=800, Lp=0.6), GainScheduled (2 PIDs on |F_ref|, breakpoint at 5 kN).
+
+**Scenarios:** s01_sine_50hz (±500 N, 50 Hz — high-bandwidth test), s02_sine_5hz (±5 kN, 5 Hz — high-amplitude), s03_step (0→8 kN at t=0.05 s — transient), s04_stiffness_change (±2 kN @ 2 Hz; k_L 3e6→2e7 N/m at t=0.5 s — specimen yielding), s05_earthquake (chirp 0.5→15 Hz ±8 kN — broadband/HiL fidelity).
+
+**CSV columns:** `t, F_ref, F, x_p (mm), v_p (mm/s), P_A_bar, P_B_bar, u_v, phase_error_deg, iae_cumulative`.
+
+**Key caveats:**
+- **ADRC ω_o constraint:** ω_o·Ts = 800·5e-4 = 0.40 < 0.5 ✓. b0 computed from linearised flow gain K_F at nominal pressures.
+- **FeedbackLin gain guard:** K_xv clamped to ≥ 1e4 near valve closure to prevent division by zero.
+- **MRAC/L1 scaling:** force signals are O(1e4 N) vs. u_v ∈ [−1,1]; adaptation gains are very small (γ_r=1e-9) to avoid instability.
+- **Dynamic stiffness (s04):** `plant.k_L` is overridden per step in `simulation_runner.py`. Adaptive controllers (MRAC, L1, FeedbackLin) outperform fixed-gain designs here.
+- **Cavitation guard:** P_A, P_B clamped to ≥ 0 after each RK4 substep.
+- **ILC:** converges on periodic s01/s02; behaves as PID on non-periodic s03/s05.
+
+---
+
+### High-Altitude Aerial Firefighting Bag Drop ✅ Python
+
+| Field | Value |
+|-------|-------|
+| **Plant** | 3D translational bag trajectory: [x, y, z, vx, vy, vz]; aerodynamic drag + gravity + wind disturbance |
+| **Reference** | Sun et al. 2025, Results in Engineering 27, 105940 |
+| **Integration** | RK4, Ts = 0.05 s |
+| **"Controllers"** | 12 drop planners |
+| **Scenarios** | 5 |
+| **Total runs** | 60 (12×5) |
+| **Primary metric** | CEP [m] (50th-percentile radial impact error) — NOT IAE |
+| **Entry point** | `case-study/High-Altitude Aerial Firefighting Bag Drop/sim/main.py` |
+| **Logs** | `case-study/High-Altitude Aerial Firefighting Bag Drop/logs/` |
+
+**Planner roster:** NominalDrop (no correction), WindOffset (simulation-based drift compensation), IterativeRefinement (ILC-style cross-run refinement), MCPredictor (internal 12-sample MC centroid), GPSurrogate (GP on 3×3 wind grid — uses `ctrl.GaussianProcess`), BayesOptDrop (BayesianOptimizer over (x,y) offset — uses `ctrl.BayesianOptimizer`), SIRParticleFilter (60-particle SIR, drift-sensitivity correction), KalmanWind (1-step Kalman on wind estimate), RobustMinMax (worst-case sigma-margin correction), AdaptiveRLS (recursive LS wind-drift model, cross-run adaptation), EnsembleConsensus (weighted average of WindOffset+MC+Robust), ProfileAdaptive (altitude-scaled safety margin).
+
+**Scenarios:** s01_no_wind (h=90 m, σ=0.3), s02_crosswind (h=90 m, wy=5 m/s, σ=1.0), s03_headwind (h=90 m, wx=−8 m/s, σ=0.8), s04_turbulent (h=90 m, wx=2/wy=3 m/s, σ=3.0), s05_high_altitude (h=120 m, wx=3/wy=4 m/s, σ=1.5).
+
+**CSV columns:** `sample_id, x_impact, y_impact, t_flight, wx_true, wy_true, error_x, error_y, radial_error`. One row per Monte Carlo sample. Summary row (CEP, P95, L_pat, W_pat) appended at end of each CSV.
+
+**Key caveats:**
+- **Non-standard problem:** This is a Monte Carlo drop-planning study, not a feedback tracking loop. CEP replaces IAE as the primary figure of merit. Pattern width (95th-pct |y_impact|) and pattern length (80th−20th pct x_impact) are secondary metrics.
+- **Drag coupling:** Forward speed (V_aircraft=50 m/s) dominates the drag force; lateral drift is NOT wy·t_fall — it is much smaller (≈ wy/(D/m) × lag). All planners that use wind compensation must use `_drift_sensitivity()` (two reference simulations) rather than the linear t_fall approximation.
+- **SIR over-correction in no-wind:** SIRParticleFilter adds ~2 m CEP in no-wind because it applies a correction based on a noisy sensor reading even when true wind is zero. This is expected and realistic.
+- **BayesOpt budget:** Uses n_init=4 + maxIter=10 = 14 evaluations, each with 6 MC trajectories. Total inner simulations ≈ 84 per run. Still fast (Ts=0.05 s, fall time ≈4-6 s).
+- **GP training:** GPSurrogate trains on a 3×3 wind grid per run (9 points). At near-zero wind (s01), the GP correction is near zero, matching NominalDrop. At high wind the GP is slightly less accurate than MCPredictor because 9 training points are sparse.
+- **_ROOT path:** `_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(sim_dir)))` — 3 levels up from `sim/` to project root. This differs from the 4-level path in DrillString/WindWave (which go through an extra level).
+
+---
+
+## Spec-Only Stubs (6)
 
 `README.md` (or PDF) present; no `sim/`, not registered, not built. To promote a stub to a C++ study: add `sim/{include,src}/`, a per-study `CMakeLists.txt`, an `add_subdirectory` line in `case-study/CMakeLists.txt`, and the target in `compile.bat`. To promote to Python-only: add `sim/main.py` following the Drill String pattern.
 
 > **Recently graduated (Part 43):** Solar Cooker with Reflector and Absorber → `solar_cooker_sim` (60 runs). Solar Ocean Thermal Energy Conversion System → `sotec_sim` (60 runs).
+> **Recently graduated (Part 44):** Separate Meter In Separate Meter Out → `smismo_sim` (60 runs), reimplemented from both source PDFs (the pre-37a17ef sim was deleted).
+> **Recently graduated (Part 45):** Tracking Control of Electro-Hydraulic Force Servo Systems → Python-only study (60 runs, 12 controllers × 5 scenarios).
+> **Recently graduated (Part 46):** High-Altitude Aerial Firefighting Bag Drop → Python-only study (60 runs, 12 planners × 5 scenarios). Monte Carlo drop pattern analysis; primary metric is CEP [m] rather than IAE.
 
 ---
 
@@ -281,20 +370,6 @@ Discovered by `run.py` Phase 6 via `case-study/*/sim/main.py`. Not in `CMakeList
 
 - **Status:** Thin spec. Plant model (mass transfer coefficients, gas hold-up, lipid accumulation ODE) needs to be designed before the controller roster can be built.
 - **Blocker:** Plant model design required first.
-
----
-
-### High-Altitude Aerial Firefighting Bag Drop 🔲 Stub
-
-| Field | Value |
-|-------|-------|
-| **Plant** | Aerodynamic drop trajectory model; wind disturbances, altitude, bag release timing |
-| **Readiness** | Low — thin spec, non-standard control problem |
-| **Target runs** | TBD |
-| **Pattern** | Monte-Carlo Python study (not a classic tracking loop) |
-
-- **Status:** Thin spec. The task is stochastic trajectory planning (optimal drop timing under uncertain wind), not a reference-tracking feedback loop. Controller metrics would be CEP (circular error probable), not IAE.
-- **Blocker:** Problem formulation and plant model need to be defined. Consider CEM/ScenarioMPC as the primary algorithms.
 
 ---
 
@@ -342,36 +417,6 @@ Discovered by `run.py` Phase 6 via `case-study/*/sim/main.py`. Not in `CMakeList
 
 ---
 
-### Separate Meter-In Separate Meter-Out Hydraulic System 🔲 Stub
-
-| Field | Value |
-|-------|-------|
-| **Plant** | Double-acting hydraulic cylinder with independent meter-in/meter-out proportional valves; states [x_p, v_p, P_A, P_B] |
-| **Reference** | Chen et al. 2018, Control Engineering Practice 72, 138–150 |
-| **Readiness** | Medium — README present; original C++ `sim/` was deleted (commit 37a17ef) |
-| **Target runs** | TBD (suggested: 10 controllers × 5 scenarios = 50) |
-| **Pattern** | C++ study (physical hydraulic dynamics, fast Ts) |
-
-- **Status:** README written (Part 41 rewrite). Plant: bulk-modulus pressure dynamics for both chambers, spool-position-dependent valve flow, nonlinear friction. Paper's primary contribution is indirect adaptive robust dynamic surface control.
-- **Blocker:** `sim/` was deleted in commit `37a17ef` ("remove a case study for now"). To restore: implement `sim/{include,src}/` following the Active Suspension template. Original implementation history is in `37a17ef^` if needed.
-
----
-
-### Tracking Control of Electro-Hydraulic Force Servo Systems 🔲 Stub
-
-| Field | Value |
-|-------|-------|
-| **Plant** | Servo-valve → hydraulic cylinder → load cell force; states [F, x_p, v_p, P_A, P_B, x_v] |
-| **Reference** | Shen et al. 2017, ISA Transactions 67, 356–370 |
-| **Readiness** | Medium — README present with plant equations |
-| **Target runs** | TBD (suggested: 10 controllers × 5 scenarios = 50) |
-| **Pattern** | C++ study |
-
-- **Status:** README written (Part 41 rewrite). Plant: 4/3 servo valve with spool dynamics, double-acting actuator with compliance load (`k_L`), force measurement via load cell. Paper algorithms: PI + H∞ ODFC + nLMS adaptive feedforward. The H∞/ODFC component requires `DiscreteHinf` from `lib/`.
-- **Blocker:** H∞ offline feedback control design (ODFC) depends on a plant model identified offline — requires a system identification step before the C++ simulation can be built.
-
----
-
 ### Data-Driven Sliding Mode Control of Soft Robot 2024 🔲 Stub
 
 | Field | Value |
@@ -392,5 +437,5 @@ Discovered by `run.py` Phase 6 via `case-study/*/sim/main.py`. Not in `CMakeList
 - `DiscreteLQR` is **not** an `IController`. For `GainScheduledController` `design_fn`, use `makeLQRController(sys, lqr_params, state_fn)` which returns `shared_ptr<IController>`.
 - `LQRWeightTuner::brysonMethod` is in `lib/ControllerTuner.h` — include it explicitly in case-study TUs that do not use the umbrella `ControllerToolbox.h`.
 - `RecursiveLeastSquares`: accessor is `params()` (not `theta()`); `update(y, u)` is **output first, input second**.
-- `compile.bat` lists every C++ target explicitly. A missing target silently runs a stale `.exe`. Current C++ case-study targets: `boiler_sim, tug_sim, solar_cooling_sim, humidification_sim, susp_sim, buck_boost_sim, solar_cooker_sim, sotec_sim`.
+- `compile.bat` lists every C++ target explicitly. A missing target silently runs a stale `.exe`. Current C++ case-study targets: `boiler_sim, tug_sim, solar_cooling_sim, humidification_sim, susp_sim, buck_boost_sim, solar_cooker_sim, sotec_sim, smismo_sim`.
 - Each `main.cpp` hard-codes the controller count — bump it when adding a controller.

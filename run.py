@@ -752,6 +752,9 @@ def phase_bug_report(log_path):
         'alarms:',               # ex79_registry_monitor summary line "Monitor samples: N  alarms: N";
                                  # keyword 'alarm' matches 'alarms' — this is a passing summary, not a
                                  # failure (see Part 36 B36-1). Matches any alarm count after B36-2 fix.
+        'radial impact error',   # case-study\High-Altitude Aerial Firefighting Bag Drop\sim\main.py
+                                 # keyword "error" matches the word "error" as a tuning target for the 
+                                 # bag drop scenario; this is a passing test, not a failure indicator
     ]
 
     # Try to read the log - fall back to latin‑1 if UTF‑8 fails

@@ -33,7 +33,7 @@ void GaussianProcess::fit()
 {
     const int N = size();
     if (N == 0) {
-        fitted_ = true;
+        fitted_ = false;   // no data: predict() will correctly throw or return prior
         return;
     }
 

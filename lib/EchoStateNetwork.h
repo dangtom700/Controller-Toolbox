@@ -18,9 +18,13 @@ namespace ctrl {
  *
  * **Architecture:**
  * @code
- *   r[k+1] = tanh(W_res . r[k] + W_in . u[k])      (fixed, random reservoir)
- *   y_hat[k] = W_out . [r[k]; u[k]]                  (trained readout)
+ *   r[k+1] = tanh(W_res . r[k] + W_in . u[k])   (fixed, random reservoir)
+ *   y_hat[k] = W_out . r[k]                       (trained readout, reservoir only)
  * @endcode
+ *
+ * @note The readout uses reservoir state r only (not the extended [r; u] form).
+ *       W_out is n_out x n_res after fitReadout(). initWeights() pre-allocates
+ *       n_out x (n_res + n_in) as a placeholder; fitReadout() resizes to n_res.
  *
  * @note W_res is scaled so its spectral radius rho(W_res) = spectral_radius < 1.
  *       Typical values: spectral_radius = 0.9, sparsity = 0.9, alpha = 0.3.

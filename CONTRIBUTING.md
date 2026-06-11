@@ -8,25 +8,28 @@ This document covers the conventions, workflows, and checklists for adding to or
 
 1. [Build and Test Workflow](#build-and-test-workflow)
 2. [Adding a New Controller](#adding-a-new-controller)
-3. [Sign Conventions](#sign-conventions)
-4. [Numerical Safety Rules](#numerical-safety-rules)
-5. [Documentation Standard](#documentation-standard)
-6. [Python Binding Conventions](#python-binding-conventions)
-7. [NumPy 2.x Compatibility](#numpy-2x-compatibility)
-8. [PR Checklist](#pr-checklist)
+3. [Adding a New Case Study](#adding-a-new-case-study)
+4. [Sign Conventions](#sign-conventions)
+5. [Numerical Safety Rules](#numerical-safety-rules)
+6. [Documentation Standard](#documentation-standard)
+7. [Python Binding Conventions](#python-binding-conventions)
+8. [NumPy 2.x Compatibility](#numpy-2x-compatibility)
+9. [PR Checklist](#pr-checklist)
 
 ---
 
 ## Build and Test Workflow
 
-The project uses a four-phase runner managed by `run.py`:
+The project uses a six-phase runner managed by `run.py`:
 
 | Phase | What happens |
 |---|---|
 | 1 - Non-ASCII scan | Auto-replaces known non-standard Unicode characters in all `.cpp`, `.h`, `.py`, `.txt` files. Write ASCII-only source. |
 | 2 - Compile | Runs `compile.bat` which calls `cmake --build` **sequentially** (no `--parallel`). Targets are listed explicitly in dependency order. |
-| 3 - Run C++ | Runs every `.exe` under `build/`, prints pass/fail. |
-| 4 - Run Python | Runs every `exNN_*.py` under `examples/python/` via the `soft_robotics` conda environment. |
+| 3 - Bindings | Builds `ctrl_toolbox` Python bindings and runs `bindings/smoke_test.py`. |
+| 4 - Run C++ | Runs every `.exe` under `build/` (examples, tests, and case-study `*_sim` targets), prints pass/fail. |
+| 5 - Run Python | Runs every `exNN_*.py` under `examples/python/` via the `soft_robotics` conda environment. |
+| 6 - Python case studies | Discovers and runs `case-study/*/sim/main.py` (Python-only studies). |
 
 **Always invoke via:**
 ```
@@ -35,8 +38,10 @@ conda run -n soft_robotics -- python run.py
 
 **Never use** `cmake --build build --parallel` - sequential compilation per `compile.bat` is required.
 
-**Expected baseline (as of Part 34, 2026-06-04):** `C++ ~163 passed | Python ~100 passed`,
-plus five case studies (Boiler 216, Solar 45, Tug 64, Humid 50).
+**Expected baseline (as of Part 44, 2026-06-10):** `C++ ~174 passed | Python ~100 passed`,
+plus nine C++ case studies (Boiler 216, Tug 72, Solar 70, Humid 75, ActiveSuspension 75,
+BuckBoost 60, SolarCooker 60, SOTEC 60, SMISMO 60) and two Python-only studies
+(DrillString 85, WindWave 80).
 This number drifts every part - treat the latest `run_*.log` as the source of truth, not this line.
 
 A log file `run_YYYYMMDD_HHMMSS.log` is written to the project root after every run.
@@ -91,6 +96,37 @@ Follow these steps in order. Check each off before declaring the work done.
   Missing this causes a "custom holder" `RuntimeError` at `ControllerStack.add_controller()`.
 - Use `py::object` capture in `std::function` lambdas, **not** `py::cpp_function`.
 - Add an assertion to `bindings/smoke_test.py`.
+
+---
+
+## Adding a New Case Study
+
+Per-study status, rosters, and tribal knowledge live in `docs/CASE_STUDIES.md`. Use the
+newest C++ studies (S-OTEC, Solar Cooker, SMISMO) as templates.
+
+**C++ study** (runs in Phase 4 as a `*_sim` executable):
+
+1. `case-study/<StudyName>/sim/include/{<study>_plant.h, controllers.h, simulation_runner.h}`
+   and `sim/src/{<study>_plant.cpp, controllers.cpp, simulation_runner.cpp, main.cpp}`.
+2. `case-study/<StudyName>/config/plant_params.json` + `config/scenarios/sNN_*.json`
+   (loaded with `nlohmann::json`; every field must have a default so tests run JSON-free).
+3. Per-study `CMakeLists.txt` defining the `<study>_sim` target (link `controller_toolbox`
+   + `nlohmann_json::nlohmann_json`, `cxx_std_20`, `<STUDY>_SIM_SOURCE_DIR` compile definition).
+4. `add_subdirectory("<StudyName>")` in `case-study/CMakeLists.txt`. **The folder name must
+   be ASCII-only** (CMake on Windows fails on Unicode dashes in `add_subdirectory` paths).
+5. Add `<study>_sim` to the explicit target list in `compile.bat` - a missing target
+   silently runs a stale `.exe`.
+6. `tests/test_<study>_regression.cpp` (convergence tests for 3-5 controllers + an
+   all-controller smoke test) registered in `tests/CMakeLists.txt` with `catch_discover_tests`.
+7. `README.md` in the study folder: reference, plant equations, parameter table,
+   controller roster, scenarios, CSV columns. Keep it reconciled with the actual sim source.
+8. `main.cpp` hard-codes its controller count (`N_CONTROLLERS` + `static_assert`) - bump it
+   when adding a controller. Update `docs/CASE_STUDIES.md` and the case-study tables in
+   `CLAUDE.md` / root `README.md`.
+
+**Python-only study** (runs in Phase 6): add `sim/main.py` following the Drill String
+pattern; no CMake/compile.bat registration. `sim/` locates the bindings 4 levels up
+(`build/bindings`).
 
 ---
 
@@ -195,7 +231,7 @@ The conda environment uses NumPy 2.4.4. `float()` on a 1-D array raises `TypeErr
 
 Before marking a PR ready for review, confirm all of the following:
 
-- [ ] `conda run -n soft_robotics -- python run.py` passes with **0 failures** in Phase 3 and Phase 4
+- [ ] `conda run -n soft_robotics -- python run.py` passes with **0 failures** in Phases 3-6
 - [ ] New controller has at least one Catch2 test that checks a numeric value (not just "no crash")
 - [ ] Sign convention is correct and documented in a test comment
 - [ ] `lastOutput()` is **not** marked `override` (not virtual in `IController`)

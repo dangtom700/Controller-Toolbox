@@ -4,7 +4,7 @@ A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H
 
 Sixty-plus controller implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.
 
-Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. C++ example programs and 88 Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and new algorithm extension. Five end-to-end physics case studies (boiler-turbine, hydraulic SMISMO, tug boat, solar cooling, porous-plate humidification) exercise the full controller stack on nonlinear plants.
+Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. C++ example programs and 100+ Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and new algorithm extension. Eleven end-to-end physics case studies (nine C++: boiler-turbine, tug boat, solar cooling, porous-plate humidification, active suspension, buck-boost converter, solar cooker, solar OTEC, hydraulic SMISMO; two Python-only: drill string, wind-wave platform) exercise the full controller stack on nonlinear plants.
 
 ---
 
@@ -74,7 +74,7 @@ for (int k = 0; k < 500; ++k) {
 | [docs/TEST_UPDATE.md](docs/TEST_UPDATE.md) | Test suite history, regression coverage, sign-convention notes |
 | [docs/CONTROL_STRATEGIES_DEEP_DIVE.md](docs/CONTROL_STRATEGIES_DEEP_DIVE.md) | Taxonomy of strategy families, plant model interference, decision framework, proposed extensions |
 | [cheatsheet/](cheatsheet/) | Tuning methods, controller categories, system identification notes |
-| [case-study/](case-study/) | Four full physics studies (boiler-turbine, hydraulic SMISMO, tug boat, solar cooling) -- see "Case Studies" below |
+| [case-study/](case-study/) | Eleven full physics studies (9 C++ + 2 Python-only) -- see "Case Studies" below; per-study tracker in [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md) |
 
 ---
 
@@ -84,7 +84,7 @@ for (int k = 0; k < 500; ++k) {
 |-- lib/             # Library sources -> target: controller_toolbox
 |-- examples/        # ex01..ex54 single-file C++ demos (corrector patterns, new algorithms)
 |-- examples/python/ # ex01..ex70 Python companion scripts and binding demos
-|-- case-study/      # 4 physics studies: boiler-turbine, SMISMO hydraulic, tug boat, solar cooling
+|-- case-study/      # 11 physics studies (9 C++ + 2 Python-only) + spec-only stubs
 |-- tests/           # CTest-driven unit + integration tests (Catch2 v3)
 |-- bindings/        # pybind11 binding source files
 |-- scripts/         # tune_all / simulate_all / realtime_all
@@ -96,23 +96,40 @@ for (int k = 0; k < 500; ++k) {
 
 ## Case Studies
 
-Four self-contained physics studies under [case-study/](case-study/) exercise the
+Eleven self-contained physics studies under [case-study/](case-study/) exercise the
 library end-to-end. Each pairs a nonlinear plant simulator with a roster of
 controllers that wrap the `lib/` algorithms, then sweeps every controller across
-several scenarios and writes CSV telemetry for post-processing.
+several scenarios and writes CSV telemetry for post-processing. Per-study status,
+rosters, and caveats are tracked in [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md).
+
+**C++ studies (built by `compile.bat`, run in Phase 4):**
 
 | Study | Plant | Controllers | Scenarios x Runs |
 |---|---|---|---|
 | [Boiler Control](case-study/Boiler%20Control/) | Bell-Astrom 3x3 MIMO boiler-turbine | 27 | 8 -> 216 |
-| [Meter In Meter Out Control](case-study/Meter%20In%20Meter%20Out%20Control/) | SMISMO 9-state hydraulic actuator | 14 | 3 -> 42 |
-| [Tug Boat Numerical Simulation](case-study/Tug%20Boat%20Numerical%20Simulation/) | 3-DOF tug, 6-state MIMO + thrust allocation | 16 | 4 -> 64 |
-| [Solar-Driven Cooling System](case-study/Solar-Driven%20Cooling%20System%20with%20Photovoltaic%20Evaporative%20Chimney/) | Algebraic SISO solar cooling + PV evaporative chimney | 9 | 5 -> 45 |
-| [Porous Fiber Plate Humidification System](case-study/Porous%20Fiber%20Plate%20Humidification%20System/) | Laminar flat-plate evaporative humidifier + room ODE | 10 | 5 -> 50 |
+| [Tug Boat Numerical Simulation](case-study/Tug%20Boat%20Numerical%20Simulation/) | 3-DOF tug, 6-state MIMO + thrust allocation | 18 | 4 -> 72 |
+| [Solar-Driven Cooling System](case-study/Solar-Driven%20Cooling%20System%20with%20Photovoltaic%20Evaporative%20Chimney/) | Algebraic SISO solar cooling + PV evaporative chimney | 14 | 5 -> 70 |
+| [Porous Fiber Plate Humidification System](case-study/Porous%20Fiber%20Plate%20Humidification%20System/) | Laminar flat-plate evaporative humidifier + room ODE | 15 | 5 -> 75 |
+| [Active Suspension](case-study/Active%20Suspension%20Mathematical%20Modeling%20and%20Optimization%202025/) | 2-DOF quarter-car (4-state RK4) | 15 | 5 -> 75 |
+| [Non-Inverting Buck-Boost Converter](case-study/Non-Inverting%20Buck-Boost%20Converter/) | Averaged 2-state converter, 50 kHz, mode hysteresis | 12 | 5 -> 60 |
+| [Solar Cooker with Reflector and Absorber](case-study/Solar%20Cooker%20with%20Reflector%20and%20Absorber/) | 2-state absorber+pot ODE with PCM effective-C | 12 | 5 -> 60 |
+| [Solar Ocean Thermal Energy Conversion](case-study/Solar%20Ocean%20Thermal%20Energy%20Conversion%20System/) | 2-state collector+tank ODE + algebraic ORC map | 12 | 5 -> 60 |
+| [Separate Meter In Separate Meter Out](case-study/Separate%20Meter%20In%20Separate%20Meter%20Out/) | SMISMO hydraulic cylinder, 8-state RK4, dual PDCVs + Stribeck friction | 12 | 5 -> 60 |
+
+**Python-only studies (discovered by `run.py` Phase 6 via `sim/main.py`):**
+
+| Study | Plant | Controllers | Scenarios x Runs |
+|---|---|---|---|
+| [Vertical Drill String](case-study/Vertical%20Drill%20String%20Mathematical%20Review%202025/) | 2-DOF torsional model, Stribeck bit friction (stick-slip) | 17 | 5 -> 85 |
+| [Multi-Body Floating Wind-Wave Platform](case-study/Multi-Body%20Floating%20Wind-Wave%20Platform/) | 4-state FOWT heave + WEC arm, wave forcing | 16 | 5 -> 80 |
 
 Controllers span the full stack: PID, LQR, LQG, MPC, GPC-RLS, SMC, ADRC, Fuzzy-PID,
-Smith Predictor, MRAC, H-infinity, TubeMPC, NonlinearMPC, Feedback Linearisation,
-EKF-LQR, MHE-LQR, SubspaceID-LQG, and gain-scheduled (manual, LPV, and automated
-gap-metric) variants, depending on the plant.
+Smith Predictor, MRAC, H-infinity, TubeMPC, ScenarioMPC, NonlinearMPC, Feedback
+Linearisation, EKF-LQR, MHE-LQR, SubspaceID-LQG, L1Adaptive, ILC, NeuralPID,
+DynaMBRL, CEM-MPC, Koopman-MPC, ESN, CBF safety filtering, and gain-scheduled
+(manual, LPV, and automated gap-metric) variants, depending on the plant.
+Several spec-only stubs (README only, no `sim/`) remain as outstanding work --
+see [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md).
 
 ---
 
@@ -190,9 +207,21 @@ docker run --rm -it -v "$(pwd):/work" -w /work \
 
 ## Project Status
 
-**Baseline (Part 29 - 2026-06-01):** C++ 90 passed | 0 failed . Python 88 passed | 0 failed.  
-Case studies: Boiler 216/216 . SMISMO 42/42 . Solar 45/45 . Tug 64/64 . Humidification 50/50.  
-`bug_report.txt`: 0 blocks after a clean run (36-entry `safe_phrases` list in `run.py` suppresses all known benign messages).
+**Baseline (Part 44 - 2026-06-10, UNVERIFIED until the next clean `run.py`):**
+C++ case studies: Boiler 216/216 . Tug 72/72 . Solar 70/70 . Humidification 75/75 .
+ActiveSuspension 75/75 . BuckBoost 60/60 . SolarCooker 60/60 . SOTEC 60/60 .
+SMISMO 60/60 expected (new in Part 44).
+Python-only (Phase 6): DrillString 85/85 . WindWave 80/80.  
+`bug_report.txt`: 0 blocks expected after a clean run (`safe_phrases` list in `run.py` suppresses all known benign messages).
+
+**Part 44 (2026-06-10):**
+- Reimplemented the **Separate Meter In Separate Meter Out (SMISMO)** hydraulic case study
+  from both source PDFs (Chen et al. 2018 CEP 72; Liu et al. 2009 IEEE/ASME AIM) - the
+  earlier sim had been deleted. 8-state plant (cylinder + dual PDCV spool dynamics +
+  identified Stribeck friction), Liu Fig. 10 dual-loop valve allocation with 20 bar
+  backpressure regulation, 12 controllers x 5 scenarios = 60 runs, target `smismo_sim`.
+- Recreated `tests/test_smismo_regression.cpp` (6 Catch2 tests) and corrected the study
+  README (citation, Table 1 rig parameters, 4-quadrant valve flow, energy-saving equations).
 
 **Part 29 additions and fixes (2026-06-01):**
 - Added fifth case study: **Porous Fiber Plate Humidification System** (Ye et al. 2024) - laminar flat-plate evaporative humidifier + first-order room moisture ODE; 10 controllers * 5 scenarios = 50 runs.

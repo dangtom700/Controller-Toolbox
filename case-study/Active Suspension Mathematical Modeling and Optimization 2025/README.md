@@ -58,7 +58,7 @@ B_road = [0, 0, 0, k_t/m_u]^T     (road disturbance column)
 | Sprung mass (quarter-car) | m_s | 240 kg | Standard compact car quarter |
 | Unsprung mass (wheel assembly) | m_u | 36 kg | Wheel + axle + hub |
 | Suspension spring | k_s | 16 000 N/m | Typical passenger car |
-| Suspension damper | c_s | 980 N.s/m | Passive zeta = 0.25 |
+| Suspension damper | c_s | 980 N.s/m | Passive zeta = 0.790 (heavily damped) |
 | Tyre stiffness | k_t | 160 000 N/m | Standard radial tyre |
 | Actuator saturation | F_max | 2 000 N | Electrohydraulic actuator |
 
@@ -68,7 +68,7 @@ B_road = [0, 0, 0, k_t/m_u]^T     (road disturbance column)
 |------|--------|-------|
 | Body resonance | f_n_body | 1.30 Hz (8.16 rad/s) |
 | Wheel hop | f_n_wheel | 11.1 Hz (69.8 rad/s) |
-| Passive damping ratio | zeta_body | 0.25 (underdamped) |
+| Passive damping ratio | zeta_body | 0.790 (heavily damped); zeta = c_s / (2*sqrt(k_s*m_s)) = 980/(2*sqrt(16000*240)) = 0.790 |
 
 ---
 

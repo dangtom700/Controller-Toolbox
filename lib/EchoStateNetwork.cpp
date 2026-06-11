@@ -35,8 +35,8 @@ void EchoStateNetwork::initWeights()
         for (int j = 0; j < p_.n_in; ++j)
             W_in_(i, j) = p_.input_scaling * u_dist(rng);
 
-    // Readout weights initialised to zero; set by fitReadout()
-    W_out_ = Eigen::MatrixXd::Zero(p_.n_out, p_.n_res + p_.n_in);
+    // Readout weights pre-allocated; fitReadout() resizes to n_out x n_res (reservoir only)
+    W_out_ = Eigen::MatrixXd::Zero(p_.n_out, p_.n_res);
 }
 
 EchoStateNetwork::EchoStateNetwork(const Params& p) : p_(p)
@@ -91,7 +91,7 @@ void EchoStateNetwork::fitReadout()
         throw std::runtime_error("EchoStateNetwork::fitReadout(): no training data");
 
     const int M = static_cast<int>(states_.size());
-    const int D = p_.n_res;   // state dimension (simplified: readout from r_ only)
+    const int D = p_.n_res;   // readout maps from reservoir state r_ only
 
     Eigen::MatrixXd S(M, D);
     Eigen::MatrixXd T(M, p_.n_out);

@@ -1602,3 +1602,70 @@ for two studies; MEMS, Bioreactor, Firefighting, Nuclear remain. B36-3 and REL u
 
 C2 (spec-only stubs): Solar Cooker and S-OTEC now C++ built → 2 spec-only stubs remain
 (Firefighting and Nuclear; MEMS and Bioreactor also remain as 4 total). B36-3 and REL unchanged.
+
+---
+
+## Part 44 — SMISMO C++ Case Study Reimplemented (2026-06-10)
+
+### Source-paper reconciliation (README rewrite)
+
+Both PDFs in `case-study/Separate Meter In Separate Meter Out/` were read and the README
+corrected against them:
+
+- **Wrong citation fixed:** README cited "Indirect adaptive robust dynamic surface control..."
+  (the Chen et al. 2017 *Nonlinear Dynamics* paper). The PDF in the folder is
+  **Chen, Wang, Wang, Zhao, Shen (2018), "Energy saving control in separate meter in and
+  separate meter out control system," Control Engineering Practice 72, 138–150.**
+- **Missing reference added:** Liu, Xu, Yang, Zeng (2009), "Modeling of Separate Meter In and
+  Separate Meter Out Control System," IEEE/ASME AIM, 227–232 (verified component models,
+  rated-flow valve characteristic Eq. 14, dual-loop controller structure Fig. 10).
+- **Parameters:** generic ranges (m=50–500 kg, P_s=100–210 bar, beta_e=1.0–1.7 GPa) replaced
+  with Chen Table 1 rig values: P_s=60 bar, A_1=4.91e-4 m², A_2=2.9e-4 m², m=50 kg,
+  beta_e=890 MPa, C_d=0.62, W=0.0314 m, rho=870 kg/m³, V_10=V_20=1e-3 m³, P_bd=20 bar.
+- **Valve model:** static-with-deadband spool replaced by the papers' 2nd-order spool dynamics
+  (PDCV1: ξ=0.70, ω=86.2 rad/s; PDCV2: ξ=0.68, ω=91.4 rad/s) and 4-quadrant orifice flow
+  (each PDCV connects its chamber to supply OR tank by spool sign — not meter-in-only/out-only).
+- **Friction:** Chen's identified Stribeck law added:
+  `F_f = 68 + 13v + 11e^(−|3v/0.5|)` (v>0), `−79 + 24v − 16e^(−|3v/0.6|)` (v<0) [N].
+- **Energy saving:** Eqs. 37/41/52 documented (P_s = k_f|f_d|+k_v|v|; P_s,min; GM(1,1) grey
+  predictor → pump speed). Experimental result: pressure control ~1/3, flow ~2/3, both ~5/6 saved.
+
+### New study implemented (`smismo_sim`)
+
+- **Plant:** 8-state RK4 (Ts=1 ms, 4 substeps): `[x_L, v_L, P_1, P_2, xv_1, dxv_1, xv_2, dxv_2]`.
+  Chen Eq. 2 (Newton, hanging 50 kg load), Eq. 3 (continuity, position-dependent volumes),
+  Eq. 4–5 orifice flow in Liu Eq. 14 rated-flow form (`Q = xv·Q_nom·sqrt(DP/3.5 MPa)`,
+  Q_nom1=40 L/min, Q_nom2 scaled by k_v2/k_v1=0.67), Eq. 7 spool dynamics.
+  Regularisations: signed `dp/sqrt(|dp|+1e3)` orifice; linear friction band |v|<5e-3 m/s;
+  pressure clamps [0, 50 MPa]; end stops zero velocity. Supply energy `E += P_s·Q_s·dt`.
+- **Dual-loop architecture (Liu Fig. 10):** controllers output a single working-side command
+  u_ctrl ∈ [−10,10] V; shared `ValveAllocator` does mode selection (±0.05 V hysteresis,
+  extend→PDCV1 working / retract→PDCV2 working) and regulates the off-side chamber to
+  P_bd=20 bar with flow-matching feedforward + PI (conditional-integration anti-windup,
+  integrator reset on mode switch).
+- **12 controllers:** PID, CascadePID, LQR, LQG, MPC (Np=60, Nc=5), ADRC (ω_o=200, ω_c=30,
+  b0=K_V/τ_v=5.6; ω_o·Ts=0.2<0.5 ✓), SMC (c_de=50 ⇒ 0.05 s lead), FeedbackLinearisation
+  (g(x)=K_q·sqrt(P_s−P_work)/(u_max·A_work) — Liu calc-flow control), TubeMPC, L1Adaptive,
+  GainScheduled (3 PIDs on v_L), NonlinearMPC (RTI, internal 10 ms step, tanh flow saturation).
+  Shared 2-state design model: v/u ≈ 0.14 (m/s)/V, τ_v ≈ 25 ms.
+- **5 scenarios:** s01_resistive_step (+500 N), s02_overrunning (−800 N), s03_sine_tracking
+  (paper trajectory `0.25+0.25·sin(πt/2−π/2)`), s04_load_step (paper 500 N at t=9 s),
+  s05_energy_compare (3-cycle sine, E = ∫P_s·Q_s dt metric). **60 runs (12×5).**
+- **Tribal knowledge:** the off-side backpressure regulation IS the cavitation guard for the
+  overrunning scenario — keep P_bd ≥ ~5 bar.
+
+### Files created / registered
+- `case-study/Separate Meter In Separate Meter Out/sim/{include,src}/` — 7 source files
+- `case-study/Separate Meter In Separate Meter Out/{CMakeLists.txt, config/plant_params.json, config/scenarios/*.json (5)}`
+- `case-study/CMakeLists.txt` — `add_subdirectory("Separate Meter In Separate Meter Out")`
+- `compile.bat` — `smismo_sim` + `test_smismo_regression` targets
+- `tests/test_smismo_regression.cpp` (recreated) + `tests/CMakeLists.txt` block — 6 tests:
+  PID/CascadePID/LQR/ADRC convergence on the resistive step, backpressure-near-P_bd check,
+  all-12 controller smoke (200 steps, finite + bounds).
+
+### Open-issues update (Part 44)
+
+C2 (spec-only stubs): SMISMO now C++ built → 9 stubs remain (MEMS ready; DustControl /
+ModularEvap / EHForce / SoftRobot / ControlTheory need design; Bioreactor / Firefighting /
+Nuclear thin specs). **Counts UNVERIFIED until the next clean `run.py`** — smismo_sim and
+test_smismo_regression have not been compiled yet (user runs builds).

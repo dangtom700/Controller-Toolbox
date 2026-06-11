@@ -112,7 +112,7 @@ public:
      * @brief Set the reference for the next compute(error) call.
      * @param r Setpoint r[k].
      */
-    void setReference(double r) { r_ = r; r_was_set_ = true; }
+    void setReference(double r) { r_ = r; }
 
     /** @brief Reset ESO state and stored inputs to zero. */
     void reset() override;
@@ -138,10 +138,9 @@ public:
 private:
     ADRCParams p_;
     double Ts_;
-    double r_;            ///< Stored reference (set via setReference()).
+    double r_;            ///< Stored reference (set via setReference(); defaults to 0).
     Eigen::Vector3d z_;   ///< ESO state [z1, z2, z3].
     double u_prev_;       ///< u[k-1] used in ESO state update.
-    bool   r_was_set_;    ///< Guards against compute() without prior setReference().
     double beta1_, beta2_, beta3_; ///< Observer gains derived from omega_o.
 
     /** @brief Recompute beta1, beta2, beta3 from the current omega_o. */

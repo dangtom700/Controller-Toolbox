@@ -12,3 +12,4 @@ add_subdirectory("Active Suspension Mathematical Modeling and Optimization 2025"
 add_subdirectory("Non-Inverting Buck-Boost Converter")
 add_subdirectory("Solar Cooker with Reflector and Absorber")
 add_subdirectory("Solar Ocean Thermal Energy Conversion System")
+add_subdirectory("Separate Meter In Separate Meter Out")

@@ -1,0 +1,9 @@
+{
+  "id":          "s01_sine_50hz",
+  "description": "Sinusoidal force 500 N amplitude at 50 Hz - high-bandwidth tracking test",
+  "T_sim":       1.0,
+  "ref_type":    "sine",
+  "amplitude":   500.0,
+  "frequency":   50.0,
+  "phase_deg":   0.0
+}

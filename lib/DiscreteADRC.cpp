@@ -7,7 +7,7 @@ namespace ctrl
 {
 
     DiscreteADRC::DiscreteADRC(const ADRCParams &params, double sampleTime)
-        : p_(params), Ts_(sampleTime), r_(0.0), r_was_set_(false)
+        : p_(params), Ts_(sampleTime), r_(0.0)
     {
         // Backward-Euler ESO is A-stable: stable for all omega_o * Ts > 0.
         // No stability-limit check needed (unlike the previous Forward-Euler formulation).
@@ -84,14 +84,10 @@ namespace ctrl
     // Recover y from the stored reference and the error so computeTracking() receives
     // the raw plant output it expects.  This keeps the ESO semantics intact while making
     // compute() composable inside ControllerStack without manual sign management.
+    // Note: r_ defaults to 0.0.  Call setReference() before compute() for non-zero
+    // setpoint tracking in standalone use; ControllerStack passes full error so r_=0 is correct.
     double DiscreteADRC::compute(double error)
     {
-        // Guard: if setReference() was never called, r_ == 0 and the controller will
-        // silently drive y to 0 instead of the intended setpoint.
-        assert(r_was_set_ &&
-               "DiscreteADRC::compute() called without setReference(). "
-               "Call setReference(r) once per cycle before compute(error), "
-               "or use computeTracking(y, r) directly.");
         return computeTracking(r_ - error, r_);
     }
 
@@ -100,7 +96,6 @@ namespace ctrl
         z_.setZero();
         u_prev_ = 0.0;
         r_ = 0.0;
-        r_was_set_ = false;
     }
 
 } // namespace ctrl

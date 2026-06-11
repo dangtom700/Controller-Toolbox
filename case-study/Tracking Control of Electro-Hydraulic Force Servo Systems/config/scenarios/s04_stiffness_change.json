@@ -1,0 +1,11 @@
+{
+  "id":          "s04_stiffness_change",
+  "description": "Sine 2 kN @ 2 Hz; load stiffness steps 3e6 -> 2e7 N/m at t=0.5 s (specimen yielding)",
+  "T_sim":       2.0,
+  "ref_type":    "sine",
+  "amplitude":   2000.0,
+  "frequency":   2.0,
+  "phase_deg":   0.0,
+  "k_L_switch":  2.0e7,
+  "k_L_time":    0.5
+}

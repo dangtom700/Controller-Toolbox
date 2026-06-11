@@ -170,7 +170,13 @@ public:
         double alpha = (p1 > p0) ? (current_p_ - p0) / (p1 - p0) : 0.0;
         alpha = std::max(0.0, std::min(1.0, alpha));
 
-        // Compute the blended output from the natural (un-overridden) controller states.
+        // Both bracketing controllers are advanced every step so the blend is smooth.
+        // WARNING: this means the inactive (low-weight) controller's integrators
+        // accumulate continuously. On a large alpha swing the newly-dominant controller
+        // may produce a bump proportional to its wound-up integral. bumplessInit() is
+        // called when a controller first enters the bracket, but not on every step.
+        // Mitigate by keeping schedule breakpoints close together or using NearestNeighbor
+        // mode when large weight swings are expected.
         const double u0 = schedule_[lo].ctrl->compute(error);
         const double u1 = schedule_[hi].ctrl->compute(error);
         last_output_ = (1.0 - alpha) * u0 + alpha * u1;

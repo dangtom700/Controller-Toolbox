@@ -83,6 +83,7 @@ namespace ctrl
 
         e_prev_ = error;
         s_prev_ = s;
+        notifyObserver(u, error);
         return u;
     }
 

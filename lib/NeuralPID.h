@@ -98,9 +98,11 @@ private:
     // Clip weight matrices to max_weight_norm
     void clipWeights();
 
-    // softplus: log(1 + exp(x))  - smooth, always-positive activation for gains
-    static double softplus(double x) { return std::log1p(std::exp(x)); }
-    static double softplus_deriv(double x) { return 1.0 / (1.0 + std::exp(-x)); }
+    // softplus: log(1 + exp(x)) - numerically stable two-branch form
+    // prevents exp() overflow for large positive pre-activations (x > ~710 overflows double)
+    static double softplus(double x) {
+        return x > 0.0 ? x + std::log1p(std::exp(-x)) : std::log1p(std::exp(x));
+    }
 };
 
 } // namespace ctrl
