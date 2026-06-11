@@ -140,6 +140,11 @@ public:
     /** @brief Update parameters at runtime (resets theta to new theta_r0/theta_y0 if changed). */
     void setParams(const MRACParams &p);
 
+    /** @brief Seed the reference model state y_m without triggering adaptation.
+     *  Useful when the plant output is already at a known value at t=0 so the
+     *  reference model starts tracking from that point rather than from 0. */
+    void setYm(double y_m) { y_m_ = y_m; }
+
 private:
     MRACParams params_;
     double     Ts_;

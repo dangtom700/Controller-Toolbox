@@ -148,9 +148,11 @@ MPCCookerCtrl::MPCCookerCtrl(const PlantParams& p)
 
 double MPCCookerCtrl::compute(const Vector2d& state, double T_ref)
 {
-    // Deviation variables
-    const double x_dev = state(1) - T_pot_nom_;
-    const double r_dev = T_ref    - T_pot_nom_;
+    // Use T_ref as the linearisation origin so the FOPDT model predicts
+    // T_pot converging to T_ref (not to the stale T_pot_nom_).  This avoids
+    // premature shading when T_pot < T_ref and the setpoint is far below 95°C.
+    const double x_dev = state(1) - T_ref;
+    const double r_dev = 0.0;
 
     VectorXd x(1); x << x_dev;
     VectorXd r(1); r << r_dev;
@@ -304,11 +306,19 @@ MRACCookerCtrl::MRACCookerCtrl(const PlantParams& p)
 
 double MRACCookerCtrl::compute(const Vector2d& state, double T_ref)
 {
+    // Seed the reference model from the actual T_pot on the first step so that
+    // y_m starts at the current plant temperature rather than 0.  Without this,
+    // e_m = T_pot - 0 >> 0 at k=0 and the adaptation drives theta_r to zero,
+    // causing the controller to apply full shade even when T_pot < T_ref.
+    if (!ym_initialized_) {
+        mrac_.setYm(state(1));
+        ym_initialized_ = true;
+    }
     mrac_.setReference(T_ref);
     return clampShade(mrac_.compute(state(1)));
 }
 
-void MRACCookerCtrl::reset() { mrac_.reset(); }
+void MRACCookerCtrl::reset() { mrac_.reset(); ym_initialized_ = false; }
 
 // ===========================================================================
 // 9. L1Adaptive

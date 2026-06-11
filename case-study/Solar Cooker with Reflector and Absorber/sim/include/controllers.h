@@ -134,6 +134,7 @@ public:
     std::string name() const override { return "MRAC"; }
 private:
     ctrl::MRACController mrac_;
+    bool ym_initialized_ = false;
 };
 
 // ---------------------------------------------------------------------------
