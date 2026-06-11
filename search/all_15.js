@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['n_0',['n',['../structctrl_1_1PIDParams.html#ae47f28adcce19093b8509be3423ce350',1,'ctrl::PIDParams::N'],['../structctrl_1_1ILC_1_1Params.html#aae41faa57c3a183fb115cc02ea44c4dd',1,'ctrl::ILC::Params::N'],['../structctrl_1_1MHEParams.html#a17be4203a89aab8ba18c3d4ccb9eed0b',1,'ctrl::MHEParams::N'],['../structctrl_1_1AutoTunerParams.html#a47499dc657237075947de4f0b95b4812',1,'ctrl::AutoTunerParams::n'],['../structctrl_1_1BayesOptParams.html#a6bea4976dc4ebf0893276313db4cbd48',1,'ctrl::BayesOptParams::n']]],
+  ['n_0',['n',['../structctrl_1_1AutoTunerParams.html#a47499dc657237075947de4f0b95b4812',1,'ctrl::AutoTunerParams::n'],['../structctrl_1_1BayesOptParams.html#a6bea4976dc4ebf0893276313db4cbd48',1,'ctrl::BayesOptParams::n'],['../structctrl_1_1PIDParams.html#ae47f28adcce19093b8509be3423ce350',1,'ctrl::PIDParams::N'],['../structctrl_1_1ILC_1_1Params.html#aae41faa57c3a183fb115cc02ea44c4dd',1,'ctrl::ILC::Params::N'],['../structctrl_1_1MHEParams.html#a17be4203a89aab8ba18c3d4ccb9eed0b',1,'ctrl::MHEParams::N']]],
   ['n4sid_1',['n4sid',['../namespacectrl.html#ac04c2f87d749604186fa29b45048e9a3',1,'ctrl']]],
   ['n_5facq_5frestarts_2',['n_acq_restarts',['../structctrl_1_1BayesOptParams.html#af75c9ce47c9467b1c3f71afb0e3742c3',1,'ctrl::BayesOptParams']]],
   ['n_5fcollect_3',['n_collect',['../structctrl_1_1DynaController_1_1Params.html#a4a9f538d49b24c88723ed37062adc2d7',1,'ctrl::DynaController::Params']]],

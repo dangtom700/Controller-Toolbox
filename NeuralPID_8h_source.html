@@ -149,13 +149,15 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="comment">// Clip weight matrices to max_weight_norm</span></div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <span class="keywordtype">void</span> clipWeights();</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <span class="comment">// softplus: log(1 + exp(x))  - smooth, always-positive activation for gains</span></div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    <span class="keyword">static</span> <span class="keywordtype">double</span> softplus(<span class="keywordtype">double</span> x) { <span class="keywordflow">return</span> std::log1p(std::exp(x)); }</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    <span class="keyword">static</span> <span class="keywordtype">double</span> softplus_deriv(<span class="keywordtype">double</span> x) { <span class="keywordflow">return</span> 1.0 / (1.0 + std::exp(-x)); }</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>};</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <span class="comment">// softplus: log(1 + exp(x)) - numerically stable two-branch form</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    <span class="comment">// prevents exp() overflow for large positive pre-activations (x &gt; ~710 overflows double)</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    <span class="keyword">static</span> <span class="keywordtype">double</span> softplus(<span class="keywordtype">double</span> x) {</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        <span class="keywordflow">return</span> x &gt; 0.0 ? x + std::log1p(std::exp(-x)) : std::log1p(std::exp(x));</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    }</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>};</div>
 </div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aIController_8h_html"><div class="ttname"><a href="IController_8h.html">IController.h</a></div></div>
 <div class="ttc" id="aLinearisationHelper_8h_html"><div class="ttname"><a href="LinearisationHelper_8h.html">LinearisationHelper.h</a></div><div class="ttdoc">Jacobian-based linearisation utilities for nonlinear discrete-time control.</div></div>
 <div class="ttc" id="aclassctrl_1_1IController_html"><div class="ttname"><a href="classctrl_1_1IController.html">ctrl::IController</a></div><div class="ttdoc">Abstract interface for all discrete-time controllers.</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00037">IController.h:38</a></div></div>

@@ -37,7 +37,7 @@ var searchData=
   ['development_34',['Interactive shell for development',['../index.html#autotoc_md21',1,'']]],
   ['dfilters_5fl_35',['dFilters_L',['../structctrl_1_1MuSynResult.html#a2501fc98030c17401d30e05f4e494434',1,'ctrl::MuSynResult']]],
   ['dfilters_5fr_36',['dFilters_R',['../structctrl_1_1MuSynResult.html#a786846d49b7272251c2d1f969756823a',1,'ctrl::MuSynResult']]],
-  ['dict_37',['dict',['../classctrl_1_1KoopmanEDMD.html#a2ff14819f2619d9244ed2712ffde63bd',1,'ctrl::KoopmanEDMD::Dict'],['../structctrl_1_1KoopmanEDMD_1_1Params.html#afbecdacdd22542f56f8e0b40d51bfa51',1,'ctrl::KoopmanEDMD::Params::dict']]],
+  ['dict_37',['dict',['../structctrl_1_1KoopmanEDMD_1_1Params.html#afbecdacdd22542f56f8e0b40d51bfa51',1,'ctrl::KoopmanEDMD::Params::dict'],['../classctrl_1_1KoopmanEDMD.html#a2ff14819f2619d9244ed2712ffde63bd',1,'ctrl::KoopmanEDMD::Dict']]],
   ['discreteadrc_38',['discreteadrc',['../md_docs_2DEPLOYMENT.html#autotoc_md182',1,'DiscreteADRC'],['../classctrl_1_1DiscreteADRC.html#ac0eebddd0d049969da56832720dd86ec',1,'ctrl::DiscreteADRC::DiscreteADRC()'],['../classctrl_1_1DiscreteADRC.html',1,'ctrl::DiscreteADRC']]],
   ['discreteadrc_20tt_20a_20href_20lib_20discreteadrc_20h_20discreteadrc_20h_20a_39',['&lt;tt&gt;DiscreteADRC&lt;/tt&gt; (&lt;a href=&quot;lib/DiscreteADRC.h&quot; &gt;DiscreteADRC.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md79',1,'']]],
   ['discreteadrc_2ecpp_40',['DiscreteADRC.cpp',['../DiscreteADRC_8cpp.html',1,'']]],

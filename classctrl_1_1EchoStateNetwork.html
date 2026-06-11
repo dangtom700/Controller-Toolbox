@@ -126,9 +126,11 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Echo State Network (ESN) / Reservoir Computing. </p>
 <p>Jaeger (2001). A randomly-initialized recurrent network (the "reservoir") where only the readout layer W_out is trained via ridge regression. Identifies nonlinear dynamics without backpropagation.</p>
-<p><b>Architecture:</b> </p><div class="fragment"><div class="line">r[k+1] = tanh(W_res . r[k] + W_in . u[k])      (fixed, random reservoir)</div>
-<div class="line">y_hat[k] = W_out . [r[k]; u[k]]                  (trained readout)</div>
-</div><!-- fragment --><dl class="section note"><dt>Note</dt><dd>W_res is scaled so its spectral radius rho(W_res) = spectral_radius &lt; 1. Typical values: spectral_radius = 0.9, sparsity = 0.9, alpha = 0.3.</dd></dl>
+<p><b>Architecture:</b> </p><div class="fragment"><div class="line">r[k+1] = tanh(W_res . r[k] + W_in . u[k])   (fixed, random reservoir)</div>
+<div class="line">y_hat[k] = W_out . r[k]                       (trained readout, reservoir only)</div>
+</div><!-- fragment --><dl class="section note"><dt>Note</dt><dd>The readout uses reservoir state r only (not the extended [r; u] form). W_out is n_out x n_res after <a class="el" href="classctrl_1_1EchoStateNetwork.html#a0f0d3eade87edf7b9b6f93928627fb6a" title="Compute W_out via ridge regression on all accumulated data.">fitReadout()</a>. initWeights() pre-allocates n_out x (n_res + n_in) as a placeholder; <a class="el" href="classctrl_1_1EchoStateNetwork.html#a0f0d3eade87edf7b9b6f93928627fb6a" title="Compute W_out via ridge regression on all accumulated data.">fitReadout()</a> resizes to n_res.</dd>
+<dd>
+W_res is scaled so its spectral radius rho(W_res) = spectral_radius &lt; 1. Typical values: spectral_radius = 0.9, sparsity = 0.9, alpha = 0.3.</dd></dl>
 <p><b>Usage:</b> </p><div class="fragment"><div class="line"><a class="code hl_struct" href="structctrl_1_1EchoStateNetwork_1_1Params.html">ctrl::EchoStateNetwork::Params</a> p;</div>
 <div class="line">p.<a class="code hl_variable" href="structctrl_1_1EchoStateNetwork_1_1Params.html#ab017500d5b243c5f4b714c8b161c9d02">n_res</a> = 100; p.<a class="code hl_variable" href="structctrl_1_1EchoStateNetwork_1_1Params.html#a0c865b2ef00516a3a21c764db0434f00">n_in</a> = 2; p.<a class="code hl_variable" href="structctrl_1_1EchoStateNetwork_1_1Params.html#a432021b95e9610ebef7fcfd25dec84fe">n_out</a> = 1;</div>
 <div class="line">p.<a class="code hl_variable" href="structctrl_1_1EchoStateNetwork_1_1Params.html#ac057378cd6a47503d40c35f255c5d1c6">spectral_radius</a> = 0.9; p.<a class="code hl_variable" href="structctrl_1_1EchoStateNetwork_1_1Params.html#a38cf1bda54ee7a2dc033ea9180b14756">sparsity</a> = 0.9;</div>
@@ -144,16 +146,16 @@ Public Member Functions</h2></td></tr>
 <div class="line"><span class="comment">// Online prediction</span></div>
 <div class="line">esn.stepReservoir(u_new);</div>
 <div class="line"><span class="keywordtype">double</span> y_hat = esn.predict()(0);</div>
-<div class="ttc" id="aclassctrl_1_1EchoStateNetwork_html"><div class="ttname"><a href="classctrl_1_1EchoStateNetwork.html">ctrl::EchoStateNetwork</a></div><div class="ttdoc">Echo State Network (ESN) / Reservoir Computing.</div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00050">EchoStateNetwork.h:50</a></div></div>
-<div class="ttc" id="astructctrl_1_1EchoStateNetwork_1_1Params_html"><div class="ttname"><a href="structctrl_1_1EchoStateNetwork_1_1Params.html">ctrl::EchoStateNetwork::Params</a></div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00052">EchoStateNetwork.h:52</a></div></div>
-<div class="ttc" id="astructctrl_1_1EchoStateNetwork_1_1Params_html_a0c865b2ef00516a3a21c764db0434f00"><div class="ttname"><a href="structctrl_1_1EchoStateNetwork_1_1Params.html#a0c865b2ef00516a3a21c764db0434f00">ctrl::EchoStateNetwork::Params::n_in</a></div><div class="ttdeci">int n_in</div><div class="ttdoc">Input dimension.</div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00054">EchoStateNetwork.h:54</a></div></div>
-<div class="ttc" id="astructctrl_1_1EchoStateNetwork_1_1Params_html_a38cf1bda54ee7a2dc033ea9180b14756"><div class="ttname"><a href="structctrl_1_1EchoStateNetwork_1_1Params.html#a38cf1bda54ee7a2dc033ea9180b14756">ctrl::EchoStateNetwork::Params::sparsity</a></div><div class="ttdeci">double sparsity</div><div class="ttdoc">Fraction of W_res set to zero (improves memory)</div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00057">EchoStateNetwork.h:57</a></div></div>
-<div class="ttc" id="astructctrl_1_1EchoStateNetwork_1_1Params_html_a432021b95e9610ebef7fcfd25dec84fe"><div class="ttname"><a href="structctrl_1_1EchoStateNetwork_1_1Params.html#a432021b95e9610ebef7fcfd25dec84fe">ctrl::EchoStateNetwork::Params::n_out</a></div><div class="ttdeci">int n_out</div><div class="ttdoc">Output dimension.</div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00055">EchoStateNetwork.h:55</a></div></div>
-<div class="ttc" id="astructctrl_1_1EchoStateNetwork_1_1Params_html_ab017500d5b243c5f4b714c8b161c9d02"><div class="ttname"><a href="structctrl_1_1EchoStateNetwork_1_1Params.html#ab017500d5b243c5f4b714c8b161c9d02">ctrl::EchoStateNetwork::Params::n_res</a></div><div class="ttdeci">int n_res</div><div class="ttdoc">Reservoir size (number of recurrent units)</div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00053">EchoStateNetwork.h:53</a></div></div>
-<div class="ttc" id="astructctrl_1_1EchoStateNetwork_1_1Params_html_ac057378cd6a47503d40c35f255c5d1c6"><div class="ttname"><a href="structctrl_1_1EchoStateNetwork_1_1Params.html#ac057378cd6a47503d40c35f255c5d1c6">ctrl::EchoStateNetwork::Params::spectral_radius</a></div><div class="ttdeci">double spectral_radius</div><div class="ttdoc">Spectral radius of W_res (should be &lt; 1 for echo state property)</div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00056">EchoStateNetwork.h:56</a></div></div>
+<div class="ttc" id="aclassctrl_1_1EchoStateNetwork_html"><div class="ttname"><a href="classctrl_1_1EchoStateNetwork.html">ctrl::EchoStateNetwork</a></div><div class="ttdoc">Echo State Network (ESN) / Reservoir Computing.</div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00054">EchoStateNetwork.h:54</a></div></div>
+<div class="ttc" id="astructctrl_1_1EchoStateNetwork_1_1Params_html"><div class="ttname"><a href="structctrl_1_1EchoStateNetwork_1_1Params.html">ctrl::EchoStateNetwork::Params</a></div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00056">EchoStateNetwork.h:56</a></div></div>
+<div class="ttc" id="astructctrl_1_1EchoStateNetwork_1_1Params_html_a0c865b2ef00516a3a21c764db0434f00"><div class="ttname"><a href="structctrl_1_1EchoStateNetwork_1_1Params.html#a0c865b2ef00516a3a21c764db0434f00">ctrl::EchoStateNetwork::Params::n_in</a></div><div class="ttdeci">int n_in</div><div class="ttdoc">Input dimension.</div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00058">EchoStateNetwork.h:58</a></div></div>
+<div class="ttc" id="astructctrl_1_1EchoStateNetwork_1_1Params_html_a38cf1bda54ee7a2dc033ea9180b14756"><div class="ttname"><a href="structctrl_1_1EchoStateNetwork_1_1Params.html#a38cf1bda54ee7a2dc033ea9180b14756">ctrl::EchoStateNetwork::Params::sparsity</a></div><div class="ttdeci">double sparsity</div><div class="ttdoc">Fraction of W_res set to zero (improves memory)</div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00061">EchoStateNetwork.h:61</a></div></div>
+<div class="ttc" id="astructctrl_1_1EchoStateNetwork_1_1Params_html_a432021b95e9610ebef7fcfd25dec84fe"><div class="ttname"><a href="structctrl_1_1EchoStateNetwork_1_1Params.html#a432021b95e9610ebef7fcfd25dec84fe">ctrl::EchoStateNetwork::Params::n_out</a></div><div class="ttdeci">int n_out</div><div class="ttdoc">Output dimension.</div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00059">EchoStateNetwork.h:59</a></div></div>
+<div class="ttc" id="astructctrl_1_1EchoStateNetwork_1_1Params_html_ab017500d5b243c5f4b714c8b161c9d02"><div class="ttname"><a href="structctrl_1_1EchoStateNetwork_1_1Params.html#ab017500d5b243c5f4b714c8b161c9d02">ctrl::EchoStateNetwork::Params::n_res</a></div><div class="ttdeci">int n_res</div><div class="ttdoc">Reservoir size (number of recurrent units)</div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00057">EchoStateNetwork.h:57</a></div></div>
+<div class="ttc" id="astructctrl_1_1EchoStateNetwork_1_1Params_html_ac057378cd6a47503d40c35f255c5d1c6"><div class="ttname"><a href="structctrl_1_1EchoStateNetwork_1_1Params.html#ac057378cd6a47503d40c35f255c5d1c6">ctrl::EchoStateNetwork::Params::spectral_radius</a></div><div class="ttdeci">double spectral_radius</div><div class="ttdoc">Spectral radius of W_res (should be &lt; 1 for echo state property)</div><div class="ttdef"><b>Definition</b> <a href="EchoStateNetwork_8h_source.html#l00060">EchoStateNetwork.h:60</a></div></div>
 </div><!-- fragment --><dl class="section see"><dt>See also</dt><dd>Jaeger, H. (2001). The echo state approach to analysing and training recurrent neural networks. Technical Report GMD 148, German National Research Center for IT. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="EchoStateNetwork_8h_source.html#l00050">50</a> of file <a class="el" href="EchoStateNetwork_8h_source.html">EchoStateNetwork.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="EchoStateNetwork_8h_source.html#l00054">54</a> of file <a class="el" href="EchoStateNetwork_8h_source.html">EchoStateNetwork.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a4328574c7972c5e8e2994ef20a708d6c" name="a4328574c7972c5e8e2994ef20a708d6c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4328574c7972c5e8e2994ef20a708d6c">&#9670;&#160;</a></span>EchoStateNetwork()</h2>
@@ -181,7 +183,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="EchoStateNetwork_8cpp_source.html#l00042">42</a> of file <a class="el" href="EchoStateNetwork_8cpp_source.html">EchoStateNetwork.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="EchoStateNetwork_8h_source.html#l00054">ctrl::EchoStateNetwork::Params::n_in</a>, <a class="el" href="EchoStateNetwork_8h_source.html#l00055">ctrl::EchoStateNetwork::Params::n_out</a>, <a class="el" href="EchoStateNetwork_8h_source.html#l00053">ctrl::EchoStateNetwork::Params::n_res</a>, and <a class="el" href="EchoStateNetwork_8h_source.html#l00056">ctrl::EchoStateNetwork::Params::spectral_radius</a>.</p>
+<p class="reference">References <a class="el" href="EchoStateNetwork_8h_source.html#l00058">ctrl::EchoStateNetwork::Params::n_in</a>, <a class="el" href="EchoStateNetwork_8h_source.html#l00059">ctrl::EchoStateNetwork::Params::n_out</a>, <a class="el" href="EchoStateNetwork_8h_source.html#l00057">ctrl::EchoStateNetwork::Params::n_res</a>, and <a class="el" href="EchoStateNetwork_8h_source.html#l00060">ctrl::EchoStateNetwork::Params::spectral_radius</a>.</p>
 
 </div>
 </div>
@@ -206,7 +208,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="EchoStateNetwork_8cpp_source.html#l00072">72</a> of file <a class="el" href="EchoStateNetwork_8cpp_source.html">EchoStateNetwork.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="EchoStateNetwork_8h_source.html#l00061">ctrl::EchoStateNetwork::Params::washout</a>.</p>
+<p class="reference">References <a class="el" href="EchoStateNetwork_8h_source.html#l00065">ctrl::EchoStateNetwork::Params::washout</a>.</p>
 
 </div>
 </div>
@@ -229,7 +231,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="EchoStateNetwork_8cpp_source.html#l00088">88</a> of file <a class="el" href="EchoStateNetwork_8cpp_source.html">EchoStateNetwork.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="EchoStateNetwork_8h_source.html#l00055">ctrl::EchoStateNetwork::Params::n_out</a>, <a class="el" href="EchoStateNetwork_8h_source.html#l00053">ctrl::EchoStateNetwork::Params::n_res</a>, and <a class="el" href="EchoStateNetwork_8h_source.html#l00060">ctrl::EchoStateNetwork::Params::ridge</a>.</p>
+<p class="reference">References <a class="el" href="EchoStateNetwork_8h_source.html#l00059">ctrl::EchoStateNetwork::Params::n_out</a>, <a class="el" href="EchoStateNetwork_8h_source.html#l00057">ctrl::EchoStateNetwork::Params::n_res</a>, and <a class="el" href="EchoStateNetwork_8h_source.html#l00064">ctrl::EchoStateNetwork::Params::ridge</a>.</p>
 
 </div>
 </div>
@@ -256,7 +258,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="EchoStateNetwork_8h_source.html#l00107">107</a> of file <a class="el" href="EchoStateNetwork_8h_source.html">EchoStateNetwork.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="EchoStateNetwork_8h_source.html#l00111">111</a> of file <a class="el" href="EchoStateNetwork_8h_source.html">EchoStateNetwork.h</a>.</p>
 
 </div>
 </div>
@@ -332,9 +334,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="EchoStateNetwork_8h_source.html#l00108">108</a> of file <a class="el" href="EchoStateNetwork_8h_source.html">EchoStateNetwork.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="EchoStateNetwork_8h_source.html#l00112">112</a> of file <a class="el" href="EchoStateNetwork_8h_source.html">EchoStateNetwork.h</a>.</p>
 
-<p class="reference">References <a class="el" href="EchoStateNetwork_8h_source.html#l00053">ctrl::EchoStateNetwork::Params::n_res</a>.</p>
+<p class="reference">References <a class="el" href="EchoStateNetwork_8h_source.html#l00057">ctrl::EchoStateNetwork::Params::n_res</a>.</p>
 
 </div>
 </div>
@@ -361,7 +363,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="EchoStateNetwork_8h_source.html#l00110">110</a> of file <a class="el" href="EchoStateNetwork_8h_source.html">EchoStateNetwork.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="EchoStateNetwork_8h_source.html#l00114">114</a> of file <a class="el" href="EchoStateNetwork_8h_source.html">EchoStateNetwork.h</a>.</p>
 
 </div>
 </div>
@@ -390,7 +392,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="EchoStateNetwork_8cpp_source.html#l00135">135</a> of file <a class="el" href="EchoStateNetwork_8cpp_source.html">EchoStateNetwork.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="EchoStateNetwork_8h_source.html#l00059">ctrl::EchoStateNetwork::Params::alpha</a>.</p>
+<p class="reference">References <a class="el" href="EchoStateNetwork_8h_source.html#l00063">ctrl::EchoStateNetwork::Params::alpha</a>.</p>
 
 </div>
 </div>
@@ -433,7 +435,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="EchoStateNetwork_8cpp_source.html#l00065">65</a> of file <a class="el" href="EchoStateNetwork_8cpp_source.html">EchoStateNetwork.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="EchoStateNetwork_8h_source.html#l00059">ctrl::EchoStateNetwork::Params::alpha</a>.</p>
+<p class="reference">References <a class="el" href="EchoStateNetwork_8h_source.html#l00063">ctrl::EchoStateNetwork::Params::alpha</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="EchoStateNetwork_8cpp_source.html#l00129">predict()</a>.</p>
 

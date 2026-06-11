@@ -65,7 +65,7 @@ var searchData=
   ['simscheduler_2eh_62',['SimScheduler.h',['../SimScheduler_8h.html',1,'']]],
   ['simsensor_63',['simsensor',['../classctrl_1_1SimSensor.html',1,'ctrl::SimSensor'],['../classctrl_1_1SimSensor.html#a035b1537876e408b390bdb7911250370',1,'ctrl::SimSensor::SimSensor()']]],
   ['simsensor_2eh_64',['SimSensor.h',['../SimSensor_8h.html',1,'']]],
-  ['sindy_65',['sindy',['../classctrl_1_1SINDy.html',1,'ctrl::SINDy'],['../structctrl_1_1DynaController_1_1Params.html#ac09d58e84a94ceac110fc23c89daab53',1,'ctrl::DynaController::Params::sindy'],['../classctrl_1_1SINDy.html#a45177909d8b597634d5a8f356dbe45e6',1,'ctrl::SINDy::SINDy()'],['../classctrl_1_1SINDyModel.html#a92d364d52109b1de56ecdd2abf68df90',1,'ctrl::SINDyModel::SINDy']]],
+  ['sindy_65',['sindy',['../classctrl_1_1SINDy.html',1,'ctrl::SINDy'],['../classctrl_1_1SINDy.html#a45177909d8b597634d5a8f356dbe45e6',1,'ctrl::SINDy::SINDy()'],['../classctrl_1_1SINDyModel.html#a92d364d52109b1de56ecdd2abf68df90',1,'ctrl::SINDyModel::SINDy'],['../structctrl_1_1DynaController_1_1Params.html#ac09d58e84a94ceac110fc23c89daab53',1,'ctrl::DynaController::Params::sindy']]],
   ['sindy_20tt_20tt_20sindymodel_20tt_20a_20href_20lib_20sindy_20h_20sindy_20h_20a_20em_20part_2031_20em_66',['&lt;tt&gt;SINDy&lt;/tt&gt; + &lt;tt&gt;SINDyModel&lt;/tt&gt; (&lt;a href=&quot;lib/SINDy.h&quot; &gt;SINDy.h&lt;/a&gt;) &lt;em&gt;Part 31&lt;/em&gt;',['../md_docs_2DOCUMENTATION.html#autotoc_md143',1,'']]],
   ['sindy_2ecpp_67',['SINDy.cpp',['../SINDy_8cpp.html',1,'']]],
   ['sindy_2eh_68',['SINDy.h',['../SINDy_8h.html',1,'']]],

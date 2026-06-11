@@ -176,20 +176,21 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        e_prev_ = error;</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        s_prev_ = s;</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <span class="keywordflow">return</span> u;</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    }</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <a class="code hl_function" href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">notifyObserver</a>(u, error);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        <span class="keywordflow">return</span> u;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    }</div>
 </div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
-<div class="foldopen" id="foldopen00089" data-start="{" data-end="}">
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">   89</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">SuperTwistingSMC::reset</a>()</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    {</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        e_prev_ = 0.0;</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        s_prev_ = 0.0;</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        v_      = 0.0;</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    }</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="foldopen" id="foldopen00090" data-start="{" data-end="}">
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">   90</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">SuperTwistingSMC::reset</a>()</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    {</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        e_prev_ = 0.0;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        s_prev_ = 0.0;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        v_      = 0.0;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    }</div>
 </div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aDiscreteSMC_8h_html"><div class="ttname"><a href="DiscreteSMC_8h.html">DiscreteSMC.h</a></div><div class="ttdoc">Discrete-time Sliding Mode Controllers - first-order SMC and super-twisting SMC.</div></div>
 <div class="ttc" id="aclassctrl_1_1DiscreteSMC_html_a065d02a961f7abaa74fed3af119521b9"><div class="ttname"><a href="classctrl_1_1DiscreteSMC.html#a065d02a961f7abaa74fed3af119521b9">ctrl::DiscreteSMC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset previous error, sliding surface, and output.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00044">DiscreteSMC.cpp:44</a></div></div>
 <div class="ttc" id="aclassctrl_1_1DiscreteSMC_html_a6c50a3767e0c08a76090581e6bbca4d0"><div class="ttname"><a href="classctrl_1_1DiscreteSMC.html#a6c50a3767e0c08a76090581e6bbca4d0">ctrl::DiscreteSMC::DiscreteSMC</a></div><div class="ttdeci">DiscreteSMC(const SMCParams &amp;params, double sampleTime)</div><div class="ttdoc">Construct with tuning parameters and fixed sample time.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00008">DiscreteSMC.cpp:8</a></div></div>
@@ -198,7 +199,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aclassctrl_1_1IController_html_aff795d6bd36f8a8d20796d0670fef301"><div class="ttname"><a href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">ctrl::IController::notifyObserver</a></div><div class="ttdeci">void notifyObserver(double u, double signal) const</div><div class="ttdoc">Fire the observer's onCompute() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00185">IController.h:185</a></div></div>
 <div class="ttc" id="aclassctrl_1_1SuperTwistingSMC_html_a0017d1769280062a47caf49fecf153d1"><div class="ttname"><a href="classctrl_1_1SuperTwistingSMC.html#a0017d1769280062a47caf49fecf153d1">ctrl::SuperTwistingSMC::SuperTwistingSMC</a></div><div class="ttdeci">SuperTwistingSMC(const SuperTwistingParams &amp;params, double sampleTime)</div><div class="ttdoc">Construct with tuning parameters and fixed sample time.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00054">DiscreteSMC.cpp:54</a></div></div>
 <div class="ttc" id="aclassctrl_1_1SuperTwistingSMC_html_a8d37fd835fc00be3b448042372a5c90c"><div class="ttname"><a href="classctrl_1_1SuperTwistingSMC.html#a8d37fd835fc00be3b448042372a5c90c">ctrl::SuperTwistingSMC::compute</a></div><div class="ttdeci">double compute(double error) override</div><div class="ttdoc">Compute u[k] from tracking error e[k] = r[k] - y[k].</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00067">DiscreteSMC.cpp:67</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SuperTwistingSMC_html_ad6ace024e00ad947ca294f939b4db1cc"><div class="ttname"><a href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">ctrl::SuperTwistingSMC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset previous error, sliding surface, and integrator state v.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00089">DiscreteSMC.cpp:89</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SuperTwistingSMC_html_ad6ace024e00ad947ca294f939b4db1cc"><div class="ttname"><a href="classctrl_1_1SuperTwistingSMC.html#ad6ace024e00ad947ca294f939b4db1cc">ctrl::SuperTwistingSMC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset previous error, sliding surface, and integrator state v.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8cpp_source.html#l00090">DiscreteSMC.cpp:90</a></div></div>
 <div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AdaptiveSmithPredictor_8cpp_source.html#l00005">AdaptiveSmithPredictor.cpp:6</a></div></div>
 <div class="ttc" id="astructctrl_1_1SMCParams_html"><div class="ttname"><a href="structctrl_1_1SMCParams.html">ctrl::SMCParams</a></div><div class="ttdoc">Tuning parameters for DiscreteSMC.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8h_source.html#l00020">DiscreteSMC.h:21</a></div></div>
 <div class="ttc" id="astructctrl_1_1SMCParams_html_a098f2ef5891177964432117e86cce7c3"><div class="ttname"><a href="structctrl_1_1SMCParams.html#a098f2ef5891177964432117e86cce7c3">ctrl::SMCParams::uMax</a></div><div class="ttdeci">double uMax</div><div class="ttdoc">Output saturation upper limit.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteSMC_8h_source.html#l00057">DiscreteSMC.h:57</a></div></div>
