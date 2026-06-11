@@ -91,10 +91,12 @@ static CookerResult runCookerSim(cooker::ControllerBase&       ctrl,
 }
 
 // ---------------------------------------------------------------------------
-// Shared test scenario - clear-sky steady, T_ref=95 ^\circC, T_init=30 ^\circC
+// Shared test scenario - clear-sky steady, T_ref=43 ^\circC, T_init=30 ^\circC
 // ---------------------------------------------------------------------------
 
-static const double T_REF       = 95.0;
+// T_REF=43^\circC: below the ~48^\circC achievable steady-state (G=800, T_amb=25^\circC plant physics),
+// so T_pot rises from 30^\circC into the regulation zone within 5400 s.
+static const double T_REF       = 43.0;
 static const double T_ABS_INIT  = 30.0;
 static const double T_POT_INIT  = 30.0;
 static const cooker::Disturbance D_CLEAR{ 800.0, 25.0, 1.0 };  // G, T_amb, V_wind

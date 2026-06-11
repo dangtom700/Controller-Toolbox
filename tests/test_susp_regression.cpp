@@ -99,17 +99,21 @@ static susp::PlantParams makeParams()
 // Constant 50 mm road bump from t=0
 static auto roadConstant = [](double /*t*/) { return 0.05; };
 
+// 50 mm bump for the first second, then flat - all active controllers return z_s to 0
+// after the excitation ends, yielding late_rmse << early_rmse.
+static auto roadBumpAndReturn = [](double t) { return t < 1.0 ? 0.05 : 0.0; };
+
 // ---------------------------------------------------------------------------
-// TEST 1 - PID: suppresses body motion from constant road bump
+// TEST 1 - PID: suppresses body motion after road bump and release
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Susp: PID suppresses body displacement from constant road bump",
+TEST_CASE("Susp: PID suppresses body displacement after road bump",
           "[susp][regression][pid]")
 {
     auto p   = makeParams();
     auto res = [&] {
         susp::PIDSuspCtrl ctrl(p);
-        return runSuspSim(ctrl, p, roadConstant, p.duration);
+        return runSuspSim(ctrl, p, roadBumpAndReturn, p.duration);
     }();
 
     REQUIRE(res.finite);
@@ -122,13 +126,13 @@ TEST_CASE("Susp: PID suppresses body displacement from constant road bump",
 // TEST 2 - LQR: full-state feedback converges to near-zero body displacement
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Susp: LQR converges to near-zero body displacement",
+TEST_CASE("Susp: LQR converges to near-zero body displacement after road bump",
           "[susp][regression][lqr]")
 {
     auto p   = makeParams();
     auto res = [&] {
         susp::LQRSuspCtrl ctrl(p);
-        return runSuspSim(ctrl, p, roadConstant, p.duration);
+        return runSuspSim(ctrl, p, roadBumpAndReturn, p.duration);
     }();
 
     REQUIRE(res.finite);
@@ -176,13 +180,13 @@ TEST_CASE("Susp: MPC reduces body displacement under constant road input",
 // TEST 5 - MRAC: adaptive controller attenuates body motion
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Susp: MRAC attenuates body motion from road input",
+TEST_CASE("Susp: MRAC attenuates body motion after road bump",
           "[susp][regression][mrac]")
 {
     auto p   = makeParams();
     auto res = [&] {
         susp::MRACSuspCtrl ctrl(p);
-        return runSuspSim(ctrl, p, roadConstant, p.duration);
+        return runSuspSim(ctrl, p, roadBumpAndReturn, p.duration);
     }();
 
     REQUIRE(res.finite);

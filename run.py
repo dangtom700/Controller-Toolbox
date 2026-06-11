@@ -666,95 +666,95 @@ def phase_bug_report(log_path):
     # Phrases that mark a line as "passed / no bug" even if a keyword appears in it.
     # Checked case-insensitively before the keyword scan; any match skips the line.
     safe_phrases = [
-        # ── Test-pass markers ───────────────────────────────────────────────────
-        'no exception',          # "(no exception)" = test expected no exception, got none
-        '0 failed',              # "90 passed | 0 failed" summary line
-        '0 fail',                # catches "0 failed" / "0 failures" variants
-        'exit 0',                # "EXIT 0 — PASSED" per-executable line
-        '[pass]',                # "[PASS] assert_close ..." / "[PASS] TC-..." output
-        'all tests passed',      # Catch2 final banner
-        'passed | 0',            # "N passed | 0 failed" compact variant
-        # ── Table headers and column labels ─────────────────────────────────────
-        't[s]',                  # "k    t[s]    y    error    u" simulation table header
-        't(s)',                  # "k    t(s)    y    error    u  jitter" RT-runner header
-        'rise_time',             # dashboard header/row; NaN in rise_time is expected for
-                                 # pure-lead controllers that never cross the 90% threshold
-        'ss_error',              # "ss_error" column name in performance dashboard table
-        'achieved snr',          # "SNR (dB) | achieved SNR | a1 error (%)" table header
-        # ── Algorithm accuracy metrics (small numbers = good result) ─────────────
-        'rms error',             # "RMS errors: x1=0.119 ..." / "RMS error: 1.47e-16"
-        'relative error',        # "Jacobian relative errors:  A: 0  B: 0"
-        'coefficient error',     # "Coefficient errors (Frobenius norm):" / "Coefficient errors: A0=..."
-        'error bound',           # "Error bound for r=2: 0.008" / "Hinf error bound:"
-        'error weight',          # "c_e = 1.0  (surface error weight)" parameter label
-        # ── Steady-state error reporting (passing performance metric) ────────────
-        'steady-state error',    # "Steady-state error: 0.0000"
-        'ss error',              # "ISE-opt SS error: 0.0003" / "plain SS error: 0.0001"
-        # ── Filename false positives ─────────────────────────────────────────────
-        'soft_warning',          # "ex26_tuner_suite_soft_warnings.py" in file listings
-        'soft-warning',          # "ex26 - TunerSuite Soft-Warning Dispatch" header (hyphen)
-        # ── Third-party library warnings (scipy / python-control) ────────────────
-        'runtimewarning',        # "RuntimeWarning: divide by zero" from scipy internals
-        'futurewarning',         # "FutureWarning: response property is deprecated"
-        # ── Metric / column-label false positives ────────────────────────────────
-        'dcamplitudeerror',      # "dcAmplitudeError = 6.88e-15" — ZPETC accuracy metric (not an error)
-        'a1 errors',             # "a1 errors by SNR (40->30->20 dB):" — ARX SNR table label
-        'relay fidelity',        # "Relay fidelity: |Ku_relay - Ku_bode|/..." — tuner diagnostic metric
-        '0.000000        nan',   # LeadLag dashboard row: 0 overshoot + NaN rise_time is expected
-                                 # for pure-lead controllers (never cross the 90% rise threshold)
-        '| warned |',            # TunerSuite result table column header contains "warned"
-        # ── CMake / build-system output (not source code errors) ─────────────────
-        'performing test',       # "-- Performing Test HAVE_FLAG_... - Failed" cmake feature probe;
-                                 # routinely fails for unsupported flags, build still succeeds
-        '_deps/catch2-build',    # Catch2 dependency source files being compiled; "exception" appears
-                                 # in filenames like catch_generator_exception.cpp.obj
-        '_deps/pybind11-src',    # pybind11 CMake Deprecation Warning from its own CMakeLists.txt;
-                                 # harmless cmake_minimum_required version note
-        # ── Known-benign runtime warnings (documented, always present) ────────────
-        'pbh stabilizability',   # "[DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test"
-                                 # Tug TubeMPC/AutoGS inner LQRs: slow wave-drift modes near z=1;
-                                 # DARE still converges, controllers run correctly — see Tug README
-        'dare did not converge', # "[DiscreteLQR] WARNING: DARE did not converge in 100 iterations"
-                                 # paired with the PBH warning above; fired by TC-REG-05 intentional
-                                 # unstabilizable-plant test — expected, not a real failure
-        'tc-reg-05',             # "[PASS] TC-REG-05 (Issue I-5): unstabilisable plant" — the PASS line
-                                 # for the intentional LQR convergence test (already covered by [pass]
-                                 # phrase, kept here for documentation clarity)
-        'loopshapingtuner',      # "[LoopShapingTuner] Warning: phase_add_deg must be in (0, 90)"
-                                 # fired by a test that exercises the zero-phase-margin edge case;
-                                 # the test passes (382/0), warning is expected
-        # ── GPC-RLS warm-up NaN (expected during first ~20 steps of RLS init) ─────
-        '| gpc-rls',             # Boiler case-study: GPC-RLS IAE=[nan,nan,nan] for the first
-                                 # ~10-20 steps while RLS builds its covariance matrix;
-                                 # s02/s08 show NaN because these scenarios start fresh — expected
-        # ── Case-study scenario headers (descriptions contain "error" as a word) ──
-        '=== scenario:',         # Boiler/SMISMO/Tug/Solar/Humid scenario header lines contain
-                                 # "error" in prose descriptions (e.g. "periodic error"); these
-                                 # are run labels, not failure indicators
-        # ── Ninja incremental build warnings (benign) ────────────────────────────
-        'premature end of file', # "ninja: warning: premature end of file; recovering" is a
-                                 # benign ninja warning when reading stale .d dependency files;
-                                 # build still succeeds (the [OK] line follows immediately)
-        # ── ex26 TunerSuite table rows: all rows end with | PASS (passing test results) ──
-        'no warning',            # "IDEAL - no warning | No | PASS" rows (warned=No)
-        '1 warning',             # "SOFT - 1 warning | Yes | PASS" and
-                                 # "FALLBACK - 1 warning | Yes | PASS" rows (warned=Yes);
-                                 # "warn" keyword fires on "warning" but result is PASS
-        # ── ML/data-driven example diagnostic metrics (EXIT 0, word "error" in label) ──
-        'mean position error',   # ex71_sindy: "EKF with SINDy model - mean position error: 0.6629"
-        '|   u     | fitted |',  # ex76_dyna_mbrl table header "Step | error | u | fitted | buffer"
-        'mean abs error',        # ex89_gp_regression: "Mean abs error: 0.0995  (< 0.30 expected)"
-        'zero error',            # "zero error after reset" (ex91 section header) and
-                                 # "u after reset (zero error): 0.000" (NeuralPID per-step line)
-        '[alarm] cusum',         # ControllerMonitor CUSUM alarms are intentional demo output;
-                                 # ex79_registry_monitor prints [ALARM] CUSUM on z3: ... on every
-                                 # step while running — example still exits 0 / [PASS]
-        'alarms:',               # ex79_registry_monitor summary line "Monitor samples: N  alarms: N";
-                                 # keyword 'alarm' matches 'alarms' — this is a passing summary, not a
-                                 # failure (see Part 36 B36-1). Matches any alarm count after B36-2 fix.
-        'radial impact error',   # case-study\High-Altitude Aerial Firefighting Bag Drop\sim\main.py
-                                 # keyword "error" matches the word "error" as a tuning target for the 
-                                 # bag drop scenario; this is a passing test, not a failure indicator
+        # # ── Test-pass markers ───────────────────────────────────────────────────
+        # 'no exception',          # "(no exception)" = test expected no exception, got none
+        # '0 failed',              # "90 passed | 0 failed" summary line
+        # '0 fail',                # catches "0 failed" / "0 failures" variants
+        # 'exit 0',                # "EXIT 0 — PASSED" per-executable line
+        # '[pass]',                # "[PASS] assert_close ..." / "[PASS] TC-..." output
+        # 'all tests passed',      # Catch2 final banner
+        # 'passed | 0',            # "N passed | 0 failed" compact variant
+        # # ── Table headers and column labels ─────────────────────────────────────
+        # 't[s]',                  # "k    t[s]    y    error    u" simulation table header
+        # 't(s)',                  # "k    t(s)    y    error    u  jitter" RT-runner header
+        # 'rise_time',             # dashboard header/row; NaN in rise_time is expected for
+        #                          # pure-lead controllers that never cross the 90% threshold
+        # 'ss_error',              # "ss_error" column name in performance dashboard table
+        # 'achieved snr',          # "SNR (dB) | achieved SNR | a1 error (%)" table header
+        # # ── Algorithm accuracy metrics (small numbers = good result) ─────────────
+        # 'rms error',             # "RMS errors: x1=0.119 ..." / "RMS error: 1.47e-16"
+        # 'relative error',        # "Jacobian relative errors:  A: 0  B: 0"
+        # 'coefficient error',     # "Coefficient errors (Frobenius norm):" / "Coefficient errors: A0=..."
+        # 'error bound',           # "Error bound for r=2: 0.008" / "Hinf error bound:"
+        # 'error weight',          # "c_e = 1.0  (surface error weight)" parameter label
+        # # ── Steady-state error reporting (passing performance metric) ────────────
+        # 'steady-state error',    # "Steady-state error: 0.0000"
+        # 'ss error',              # "ISE-opt SS error: 0.0003" / "plain SS error: 0.0001"
+        # # ── Filename false positives ─────────────────────────────────────────────
+        # 'soft_warning',          # "ex26_tuner_suite_soft_warnings.py" in file listings
+        # 'soft-warning',          # "ex26 - TunerSuite Soft-Warning Dispatch" header (hyphen)
+        # # ── Third-party library warnings (scipy / python-control) ────────────────
+        # 'runtimewarning',        # "RuntimeWarning: divide by zero" from scipy internals
+        # 'futurewarning',         # "FutureWarning: response property is deprecated"
+        # # ── Metric / column-label false positives ────────────────────────────────
+        # 'dcamplitudeerror',      # "dcAmplitudeError = 6.88e-15" — ZPETC accuracy metric (not an error)
+        # 'a1 errors',             # "a1 errors by SNR (40->30->20 dB):" — ARX SNR table label
+        # 'relay fidelity',        # "Relay fidelity: |Ku_relay - Ku_bode|/..." — tuner diagnostic metric
+        # '0.000000        nan',   # LeadLag dashboard row: 0 overshoot + NaN rise_time is expected
+        #                          # for pure-lead controllers (never cross the 90% rise threshold)
+        # '| warned |',            # TunerSuite result table column header contains "warned"
+        # # ── CMake / build-system output (not source code errors) ─────────────────
+        # 'performing test',       # "-- Performing Test HAVE_FLAG_... - Failed" cmake feature probe;
+        #                          # routinely fails for unsupported flags, build still succeeds
+        # '_deps/catch2-build',    # Catch2 dependency source files being compiled; "exception" appears
+        #                          # in filenames like catch_generator_exception.cpp.obj
+        # '_deps/pybind11-src',    # pybind11 CMake Deprecation Warning from its own CMakeLists.txt;
+        #                          # harmless cmake_minimum_required version note
+        # # ── Known-benign runtime warnings (documented, always present) ────────────
+        # 'pbh stabilizability',   # "[DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test"
+        #                          # Tug TubeMPC/AutoGS inner LQRs: slow wave-drift modes near z=1;
+        #                          # DARE still converges, controllers run correctly — see Tug README
+        # 'dare did not converge', # "[DiscreteLQR] WARNING: DARE did not converge in 100 iterations"
+        #                          # paired with the PBH warning above; fired by TC-REG-05 intentional
+        #                          # unstabilizable-plant test — expected, not a real failure
+        # 'tc-reg-05',             # "[PASS] TC-REG-05 (Issue I-5): unstabilisable plant" — the PASS line
+        #                          # for the intentional LQR convergence test (already covered by [pass]
+        #                          # phrase, kept here for documentation clarity)
+        # 'loopshapingtuner',      # "[LoopShapingTuner] Warning: phase_add_deg must be in (0, 90)"
+        #                          # fired by a test that exercises the zero-phase-margin edge case;
+        #                          # the test passes (382/0), warning is expected
+        # # ── GPC-RLS warm-up NaN (expected during first ~20 steps of RLS init) ─────
+        # '| gpc-rls',             # Boiler case-study: GPC-RLS IAE=[nan,nan,nan] for the first
+        #                          # ~10-20 steps while RLS builds its covariance matrix;
+        #                          # s02/s08 show NaN because these scenarios start fresh — expected
+        # # ── Case-study scenario headers (descriptions contain "error" as a word) ──
+        # '=== scenario:',         # Boiler/SMISMO/Tug/Solar/Humid scenario header lines contain
+        #                          # "error" in prose descriptions (e.g. "periodic error"); these
+        #                          # are run labels, not failure indicators
+        # # ── Ninja incremental build warnings (benign) ────────────────────────────
+        # 'premature end of file', # "ninja: warning: premature end of file; recovering" is a
+        #                          # benign ninja warning when reading stale .d dependency files;
+        #                          # build still succeeds (the [OK] line follows immediately)
+        # # ── ex26 TunerSuite table rows: all rows end with | PASS (passing test results) ──
+        # 'no warning',            # "IDEAL - no warning | No | PASS" rows (warned=No)
+        # '1 warning',             # "SOFT - 1 warning | Yes | PASS" and
+        #                          # "FALLBACK - 1 warning | Yes | PASS" rows (warned=Yes);
+        #                          # "warn" keyword fires on "warning" but result is PASS
+        # # ── ML/data-driven example diagnostic metrics (EXIT 0, word "error" in label) ──
+        # 'mean position error',   # ex71_sindy: "EKF with SINDy model - mean position error: 0.6629"
+        # '|   u     | fitted |',  # ex76_dyna_mbrl table header "Step | error | u | fitted | buffer"
+        # 'mean abs error',        # ex89_gp_regression: "Mean abs error: 0.0995  (< 0.30 expected)"
+        # 'zero error',            # "zero error after reset" (ex91 section header) and
+        #                          # "u after reset (zero error): 0.000" (NeuralPID per-step line)
+        # '[alarm] cusum',         # ControllerMonitor CUSUM alarms are intentional demo output;
+        #                          # ex79_registry_monitor prints [ALARM] CUSUM on z3: ... on every
+        #                          # step while running — example still exits 0 / [PASS]
+        # 'alarms:',               # ex79_registry_monitor summary line "Monitor samples: N  alarms: N";
+        #                          # keyword 'alarm' matches 'alarms' — this is a passing summary, not a
+        #                          # failure (see Part 36 B36-1). Matches any alarm count after B36-2 fix.
+        # 'radial impact error',   # case-study\High-Altitude Aerial Firefighting Bag Drop\sim\main.py
+        #                          # keyword "error" matches the word "error" as a tuning target for the 
+        #                          # bag drop scenario; this is a passing test, not a failure indicator
     ]
 
     # Try to read the log - fall back to latin‑1 if UTF‑8 fails
