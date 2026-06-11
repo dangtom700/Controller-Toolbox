@@ -39,7 +39,7 @@ var searchData=
   ['mismatch_36',['SmithPredictor Delay Mismatch',['../md_docs_2DEPLOYMENT.html#autotoc_md204',1,'']]],
   ['mixedsensitivity_37',['MixedSensitivity',['../classctrl_1_1MixedSensitivity.html',1,'ctrl']]],
   ['ml_20controllers_20parts_2031–34_38',['5.8 Data-Driven &amp; ML Controllers (Parts 31–34)',['../md_docs_2DOCUMENTATION.html#autotoc_md141',1,'']]],
-  ['mode_39',['mode',['../classctrl_1_1ILC.html#a101cee11d88c37eaee047dc4dde5d934',1,'ctrl::ILC::Mode'],['../structctrl_1_1ILC_1_1Params.html#a729bfdce6ba8b0f75e227a023fc902ab',1,'ctrl::ILC::Params::mode'],['../classctrl_1_1ControllerStack.html#a7699dc65172c47b782b42d668a718cde',1,'ctrl::ControllerStack::mode()']]],
+  ['mode_39',['mode',['../structctrl_1_1ILC_1_1Params.html#a729bfdce6ba8b0f75e227a023fc902ab',1,'ctrl::ILC::Params::mode'],['../classctrl_1_1ControllerStack.html#a7699dc65172c47b782b42d668a718cde',1,'ctrl::ControllerStack::mode()'],['../classctrl_1_1ILC.html#a101cee11d88c37eaee047dc4dde5d934',1,'ctrl::ILC::Mode']]],
   ['model_40',['model',['../classctrl_1_1SimPlant.html#ad71a6b423717b13f00d648b5aca5d941',1,'ctrl::SimPlant::model()'],['../structctrl_1_1SubspaceIDResult.html#a43faac3b1f835579bf140d39b37dac21',1,'ctrl::SubspaceIDResult::model'],['../classctrl_1_1DynaController.html#a8934902408f0db93e7a8ac1bc12d1d2a',1,'ctrl::DynaController::model()'],['../classctrl_1_1FeedforwardController.html#a4daefd82286a5f235ce6dcdb396a95d8',1,'ctrl::FeedforwardController::model()']]],
   ['modelerror_41',['modelError',['../classctrl_1_1MRACController.html#a63f00834d097c1d13cda8b316d4787b3',1,'ctrl::MRACController']]],
   ['modelfitted_42',['modelFitted',['../classctrl_1_1DynaController.html#a26770ea1167d1462cdc960c7fc13a7c6',1,'ctrl::DynaController']]],
