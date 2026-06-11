@@ -150,7 +150,7 @@ double MPCCookerCtrl::compute(const Vector2d& state, double T_ref)
 {
     // Use T_ref as the linearisation origin so the FOPDT model predicts
     // T_pot converging to T_ref (not to the stale T_pot_nom_).  This avoids
-    // premature shading when T_pot < T_ref and the setpoint is far below 95°C.
+    // premature shading when T_pot < T_ref and the setpoint is far below 95^\circC.
     const double x_dev = state(1) - T_ref;
     const double r_dev = 0.0;
 
@@ -294,8 +294,8 @@ MRACCookerCtrl::MRACCookerCtrl(const PlantParams& p)
         ctrl::MRACParams mp;
         mp.a_m       = a_m;
         mp.b_m       = 1.0 - a_m;
-        mp.gamma_r   = 0.01;
-        mp.gamma_y   = 0.01;
+        mp.gamma_r   = -0.01;  // negative-gain plant: more shade -> less heat
+        mp.gamma_y   = -0.01;
         mp.sigma     = 0.01;
         mp.theta_max = 50.0;
         mp.uMin      = F_MIN;
