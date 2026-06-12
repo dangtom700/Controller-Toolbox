@@ -1,0 +1,8 @@
+{
+  "id":          "s05_battery_aging",
+  "description": "5C discharge with 1.5x internal resistance (aged cell). Higher heat generation.",
+  "T_sim":       720.0,
+  "phi_profile": "aged_battery",
+  "c_rate":      5.0,
+  "R_factor":    1.5
+}

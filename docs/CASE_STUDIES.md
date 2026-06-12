@@ -221,9 +221,9 @@ Run `conda run -n soft_robotics -- python run.py` for live pass/fail counts.
 
 ---
 
-## Python-Only Studies (4)
+## Python-Only Studies (6)
 
-Discovered by `run.py` Phase 6 via `case-study/*/sim/main.py`. Not in `CMakeLists.txt` or `compile.bat`. Each `sim/` module sets `_ROOT` 4 levels up from `sim/` to locate `build/bindings`.
+Discovered by `run.py` Phase 6 via `case-study/*/sim/main.py`. Not in `CMakeLists.txt` or `compile.bat`. Each `sim/` module sets `_ROOT` 3–4 levels up from `sim/` to locate `build/bindings`.
 
 ### Vertical Drill String Mathematical Review 2025 ✅ Python
 
@@ -334,7 +334,67 @@ Discovered by `run.py` Phase 6 via `case-study/*/sim/main.py`. Not in `CMakeList
 
 ---
 
-## Spec-Only Stubs (6)
+### Air-Cooled Battery Thermal Management System ✅ Python
+
+| Field | Value |
+|-------|-------|
+| **Plant** | 1-D transient heat transfer model (Zhang et al. 2026): N=9 prismatic cells, 10 parallel channels, J/U/L flow-pattern switching; states [Tb×9, Ta_out×10]; air quasi-static, batteries forward-Euler |
+| **Reference** | Zhang et al. 2026, Applied Thermal Engineering 298, 130921 |
+| **Integration** | Forward Euler, Ts = 1.0 s (air channels quasi-static, fixed-point iteration each step) |
+| **Controllers** | 12 |
+| **Scenarios** | 5 |
+| **Total runs** | 60 (12×5) |
+| **Primary metric** | IAE of ΔT [K·s] (temperature non-uniformity integral) |
+| **Entry point** | `case-study/Air-Cooled Battery Thermal Management System/sim/main.py` |
+| **Logs** | `case-study/Air-Cooled Battery Thermal Management System/logs/` |
+
+**Controller roster:** OpenLoop (fixed J), SelfAdaptive (paper's position rule, ΔT_thresh=0.92 K), PID (threshold adaptation), ADRC (ω_o=0.3, ω_o·Ts=0.30 < 0.5 ✓), SMC (DiscreteSMC on ΔT), MPC (1-step lookahead over J/U/L, native Python), LQR (1-state ΔT model), MRAC (a_m=exp(-1/120), τ=120 s), L1Adaptive (Γ=0.05, ω_c=0.08), NeuralPID (online gains, lr=5e-4), GainScheduled (2 PIDs on SOC), ILC (P-type, N_trial=720, one discharge cycle).
+
+**Scenarios:** s01_5C_discharge (constant 5C, 720 s — paper Section 4.1), s02_varying_conditions (random 5–8×10⁴ W/m³, 3600 s — paper Section 4.2), s03_2C_steady (mild 2C, 1800 s), s04_high_rate_pulse (7C→2C at t=300 s, 900 s), s05_battery_aging (5C, R×1.5 aged cell, 720 s).
+
+**CSV columns:** `t, DeltaT_ref, DeltaT, T_max, T_min, T_avg, flow_pattern, phi_b_kWm3, soc, n_switches, iae_cumulative`.
+
+**Key caveats:**
+- **Controller output maps to threshold:** ctrl_toolbox controllers output u ∈ [-0.5, 0.5] K; effective threshold = max(0.1, ΔT_lim + u). Only the paper's position rule (xmax ≤ L/4 → U, xmax ≤ 3L/4 → L, else J) determines which pattern to activate.
+- **h scaling:** h[j] = h_ref × (Q[j]/Q_ref)^0.8 from the minimum-flow reference channel (J: 43.4, U: 34.2, L: 32.6 W/m²/K at respective reference channels).
+- **Air quasi-static:** τ_air ~ 3 ms ≪ Ts = 1 s; Ta_out solved by fixed-point iteration each step (forward Euler on Ta would be unstable at Ts=1 s).
+- **MPC native Python:** 1-step lookahead evaluates all 3 patterns via `copy.deepcopy` of the plant; no linearisation needed.
+- **ADRC constraint:** ω_o·Ts = 0.3·1.0 = 0.30 < 0.5 ✓.
+
+---
+
+### Nonlinear Surface Ship Manoeuvring Control ✅ Python
+
+| Field | Value |
+|-------|-------|
+| **Plant** | 3-DOF MMG manoeuvring model: states [u, v, r, psi, x, y]; 19 SRUKF-identified parameters from MARIN SIMMAN 2020 free-running tests; propeller + rudder inputs; RK4, Ts = 0.08 s |
+| **Reference** | Meng et al. 2025, Ocean Engineering 321, 120432 |
+| **Integration** | RK4, Ts = 0.08 s (12.5 Hz matching MARIN data rate) |
+| **Controllers** | 12 |
+| **Scenarios** | 5 |
+| **Total runs** | 60 (12×5) |
+| **Primary metric** | Mean position error [m] and IAE [m·s] |
+| **Entry point** | `case-study/Nonlinear Surface Ship Manoeuvring Control/sim/main.py` |
+| **Logs** | `case-study/Nonlinear Surface Ship Manoeuvring Control/logs/` |
+
+**Controller roster:** OpenLoop (n=n_ss, delta=0), PID (heading PID + cross-track correction), SMC (1st-order sliding surface on psi_err), ASMC (paper's full cascade Adaptive SMC with disturbance feedforward — paper result), MPC (DiscreteMPC, linearized [psi,r] ZOH model, Np=20, Nc=5), LQR (Bryson DARE on [psi_e,r], Q=diag(16,4), R=3), MRAC (MRACController, a_m=−0.15, gamma=0.5), L1Adaptive (L1AdaptiveController, Gamma=10, omega_c=0.25), GainScheduled (3-point schedule on |psi_err|, p=[0.15,0.40,0.80] rad), ADRC (DiscreteADRC 2nd-order, b0=c6=0.4045, omega_o=1.5), NeuralPID (online gain adaptation, lr=1e-4), ILC (P-type, Lp=0.5, N=2500; first trial = zero feedforward).
+
+**Scenarios:** s01_sine_trajectory (xd=20sin(0.07t), yd=t — paper Fig. 7), s02_straight_line (xd=0, yd=2t — course-keeping), s03_circle (R=25 m, omega=0.06 rad/s), s04_zigzag (S-curve xd=20sin(pi*t/30)), s05_disturbance (paper scenario + paper disturbance model).
+
+**CSV columns:** `time, xd, yd, x, y, u, v, r, psi_deg, psi_d_deg, n_rps, delta_deg, pos_error, iae_cumulative`.
+
+**Key caveats:**
+- **ASMC dominates:** ASMC achieves ~90% lower IAE than PID on s01 (paper scenario). It includes exact disturbance feedforward so it also outperforms on s05 (with disturbances active).
+- **ADRC constraint:** omega_o=1.5, Ts=0.08 → omega_o·Ts = 0.12 < 0.5 ✓.
+- **alpha_v_dot approximation:** ASMC uses backward finite differences for virtual-control derivatives; one-step delay is acceptable for ship time constants (> 1 s).
+- **ILC first-trial behavior:** ctrl_toolbox ILC runs in pure-feedforward mode; first trial feedforward = 0, so heading control is inactive. Speed loop (n command) still operates.
+- **Equilibrium:** at u_ss=2 m/s, n_ss = sqrt(-a1*u_ss^2 / a5) = 10.72 rev/s = 643 RPM (verify: a1=−0.023, a5=0.0008).
+- **GainScheduledController:** uses `add_schedule_point(p, ctrl)` + `set_scheduling_param(p)` before `compute(error)` — NOT the `addBracket` design-fn pattern used by C++ case studies.
+- **Speed loop:** PI with n_ss bias tracks u_ref = speed of desired trajectory; Kp=2, Ki=0.5.
+
+---
+
+## Spec-Only Stubs (5)
 
 `README.md` (or PDF) present; no `sim/`, not registered, not built. To promote a stub to a C++ study: add `sim/{include,src}/`, a per-study `CMakeLists.txt`, an `add_subdirectory` line in `case-study/CMakeLists.txt`, and the target in `compile.bat`. To promote to Python-only: add `sim/main.py` following the Drill String pattern.
 
@@ -342,6 +402,8 @@ Discovered by `run.py` Phase 6 via `case-study/*/sim/main.py`. Not in `CMakeList
 > **Recently graduated (Part 44):** Separate Meter In Separate Meter Out → `smismo_sim` (60 runs), reimplemented from both source PDFs (the pre-37a17ef sim was deleted).
 > **Recently graduated (Part 45):** Tracking Control of Electro-Hydraulic Force Servo Systems → Python-only study (60 runs, 12 controllers × 5 scenarios).
 > **Recently graduated (Part 46):** High-Altitude Aerial Firefighting Bag Drop → Python-only study (60 runs, 12 planners × 5 scenarios). Monte Carlo drop pattern analysis; primary metric is CEP [m] rather than IAE.
+> **Recently graduated (Part 48):** Air-Cooled Battery Thermal Management System → Python-only study (60 runs, 12 controllers × 5 scenarios). Analytical transient heat transfer model with J/U/L flow-pattern switching; primary metric IAE of ΔT.
+> **Recently graduated (Part 49):** Nonlinear Surface Ship Manoeuvring Control → Python-only study (60 runs, 12 controllers × 5 scenarios). Previously listed as MATLAB/Simulink-only stub; implemented in pure Python using SRUKF-identified Table 5 parameters. ASMC achieves ~90% lower IAE than PID on the paper trajectory.
 
 ---
 

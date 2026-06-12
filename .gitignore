@@ -11,3 +11,4 @@ reference/
 run_corrector_check.txt
 CLAUDE.md
 memory/
+/case-study/**/*.txt

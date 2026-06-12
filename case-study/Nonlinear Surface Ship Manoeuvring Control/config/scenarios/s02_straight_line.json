@@ -1,0 +1,10 @@
+{
+  "id": "s02",
+  "name": "Straight-Line Path Following",
+  "description": "Course-keeping on straight north-bound path: xd=0, yd=2*t",
+  "trajectory": "straight",
+  "yd_speed": 2.0,
+  "t_max": 80.0,
+  "disturbance_scale": 0.0,
+  "note": "Tests heading stabilisation and course-keeping with initial lateral offset of 10 m"
+}

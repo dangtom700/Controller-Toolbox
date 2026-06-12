@@ -1,0 +1,73 @@
+{
+  "model": {
+    "description": "3-DOF MMG manoeuvring model, MARIN free-running scale ship (Lpp=6.07 m)",
+    "Lpp_m": 6.0702,
+    "B_m": 0.8498,
+    "draft_m": 0.2850,
+    "CB": 0.651,
+    "displacement_m3": 0.9565,
+    "data_source": "SIMMAN 2020 workshop, MARIN free-running model tests at 12.5 Hz"
+  },
+  "identified_params": {
+    "comment": "Table 5 of Meng et al. (2025) - SRUKF identification from 20/20 zigzag data",
+    "a1": -0.023,
+    "a2": -3.6141,
+    "a3": -0.8381,
+    "a4": -9.0068,
+    "a5":  0.0008,
+    "a6": -0.0012,
+    "b1": -0.8553,
+    "b2": -0.4944,
+    "b3":  0.4451,
+    "b4": -9.9044,
+    "b5":  2.0548,
+    "b6":  1.0348,
+    "b7":  0.1306,
+    "c1": -0.7215,
+    "c2": -2.4756,
+    "c3":  0.1106,
+    "c4":  0.1936,
+    "c5": 26.5057,
+    "c6":  0.4045
+  },
+  "actuator_limits": {
+    "n_max_rps":        10.7,
+    "n_min_rps":         0.0,
+    "delta_max_rad":     0.6109,
+    "delta_rate_max_rad_s": 0.2492,
+    "comment": "n_max=642 RPM/60=10.7 rev/s; delta_max=35 deg; delta_rate=14.28 deg/s"
+  },
+  "integration": {
+    "Ts": 0.08,
+    "method": "RK4",
+    "comment": "12.5 Hz matching SIMMAN measurement rate"
+  },
+  "initial_state": {
+    "u0":    2.0,
+    "v0":    0.0,
+    "r0":    0.0,
+    "psi0":  0.0,
+    "x0":  -10.0,
+    "y0":   10.0,
+    "comment": "Matching paper numerical experiment (Section 4.2)"
+  },
+  "disturbance": {
+    "d_u_amp": 0.008, "d_u_freq": 0.2,
+    "d_v_amp": 0.008, "d_v_freq": 0.5,
+    "d_r_amp": 0.005, "d_r_freq": 0.5,
+    "comment": "From Eq. (paper Sec 4.1): du=0.008sin(0.2t), dv=0.008cos(0.5t), dr=0.005cos(0.5t)"
+  },
+  "asmc_params": {
+    "rho":     1.5,
+    "C":      10.0,
+    "sigma_v1": 2.5,
+    "sigma_v2": 0.9,
+    "sigma_u1": 1.4,
+    "sigma_u2": 6.0,
+    "Kv":      0.1,
+    "Ku":      0.01,
+    "eps_v":   0.1,
+    "eps_u":   0.1,
+    "comment": "Paper Section 4.2 controller parameter settings"
+  }
+}

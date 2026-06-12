@@ -1,0 +1,10 @@
+{
+  "id":          "s02_varying_conditions",
+  "description": "Random heat generation 5e4-8e4 W/m^3 for 3600 s (paper Section 4.2).",
+  "T_sim":       3600.0,
+  "phi_profile": "varying_random",
+  "phi_lo":      50000.0,
+  "phi_hi":      80000.0,
+  "phi_period":  60.0,
+  "rng_seed":    42
+}

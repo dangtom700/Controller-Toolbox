@@ -1,0 +1,7 @@
+{
+  "id":          "s03_2C_steady",
+  "description": "Mild 2C discharge for 1800 s. Low heat generation; tests controller sensitivity.",
+  "T_sim":       1800.0,
+  "phi_profile": "constant_c_rate",
+  "c_rate":      2.0
+}

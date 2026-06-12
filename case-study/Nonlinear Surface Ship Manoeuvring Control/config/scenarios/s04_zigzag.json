@@ -1,0 +1,12 @@
+{
+  "id": "s04",
+  "name": "Zigzag S-Curve Path",
+  "description": "Sinusoidal lateral S-curve: xd=20*sin(pi*t/30), yd=1.5*t; mimics zigzag manoeuvre",
+  "trajectory": "zigzag",
+  "xd_amp": 20.0,
+  "period": 30.0,
+  "yd_speed": 1.5,
+  "t_max": 120.0,
+  "disturbance_scale": 0.0,
+  "note": "Frequent heading reversals stress-test controller responsiveness and damping"
+}

@@ -223,6 +223,8 @@ def scan_files(directory, show_context=True):
     for root, dirs, files in os.walk(directory):
         dirs[:] = [d for d in dirs if d not in _SKIP_DIRS]
         for filename in sorted(files):
+            if filename.endswith('.txt'):
+                continue    # skip .txt files by default since they often contain arbitrary text (e.g. README, license)
             if filename == _self_basename:
                 continue
             if not filename.endswith(EXTENSIONS):
@@ -712,6 +714,16 @@ def phase_bug_report(log_path):
         'jacobian relative errors',       # Python linearisation helper Jacobian errors
         'zero error after reset',         # NeuralPID reset test section header
         'leadlag',                        # LeadLag row in perf. dashboard (NaN rise_time is expected)
+        'retain residual periodic error', # Scenario: s08_periodic_load
+        'dcAmplitudeError',               # ex60_gap_clustering.exe and 
+        'trial |  RMS error',
+        'model - mean position error:',
+        'a1 errors by SNR',
+        'Step |  error  |',
+        'ex26 - TunerSuite Soft-Warning Dispatch',
+        'zero error',
+        'radial impact error [m]',
+        'Cross-validation state RMS error',
     ]
 
     # Try to read the log - fall back to latin‑1 if UTF‑8 fails
@@ -892,21 +904,21 @@ def phase_python_case_studies():
 # ---------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    # ts = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    # log_path = f'run_{ts}.log'
-    # _log_file = open(log_path, 'w', encoding='utf-8')
-    # sys.stdout = _Tee(sys.__stdout__, _log_file)
-    # print(f'  Log: {log_path}\n')
+    ts = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    log_path = f'run_{ts}.log'
+    _log_file = open(log_path, 'w', encoding='utf-8')
+    sys.stdout = _Tee(sys.__stdout__, _log_file)
+    print(f'  Log: {log_path}\n')
 
-    # try:
-    #     phase_clean()
-    #     phase_compile()
-    #     phase_bindings()   # build ctrl_toolbox .pyd + smoke test
-    #     phase_run()
-    #     phase_python()
-    #     phase_python_case_studies()
-    # finally:
-    #     sys.stdout = sys.__stdout__
-    #     _log_file.close()
+    try:
+        phase_clean()
+        phase_compile()
+        phase_bindings()   # build ctrl_toolbox .pyd + smoke test
+        phase_run()
+        phase_python()
+        phase_python_case_studies()
+    finally:
+        sys.stdout = sys.__stdout__
+        _log_file.close()
 
-    phase_bug_report("run_20260611_094005.log")
+    phase_bug_report(log_path)
