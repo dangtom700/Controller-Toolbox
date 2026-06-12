@@ -88,7 +88,9 @@ $(function() {
 <div class="textblock"><code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;stdexcept&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
+<code>#include &lt;functional&gt;</code><br />
 <code>#include &lt;Eigen/Dense&gt;</code><br />
+<code>#include &quot;<a class="el" href="ControllerRegistry_8h_source.html">ControllerRegistry.h</a>&quot;</code><br />
 </div>
 <p><a href="PlantModel_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -102,6 +104,9 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1DareResult.html">ctrl::DareResult</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result returned by Discrete Algebraic Riccati Equation (DARE) solvers.  <a href="structctrl_1_1DareResult.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1DAESystem.html">ctrl::DAESystem</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index-1 semi-explicit Differential-Algebraic Equation system.  <a href="structctrl_1_1DAESystem.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -138,6 +143,15 @@ Functions</h2></td></tr>
 <tr class="memitem:a336b6d277ba94f21f11fcb2e5283952d" id="r_a336b6d277ba94f21f11fcb2e5283952d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a336b6d277ba94f21f11fcb2e5283952d">ctrl::minreal</a> (const <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;sys, double tol=1e-6)</td></tr>
 <tr class="memdesc:a336b6d277ba94f21f11fcb2e5283952d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the minimal realisation of a state-space model.  <br /></td></tr>
 <tr class="separator:a336b6d277ba94f21f11fcb2e5283952d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21c327dfa2de10884adbffff15e92705" id="r_a21c327dfa2de10884adbffff15e92705"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a21c327dfa2de10884adbffff15e92705">ctrl::consistentInit</a> (const <a class="el" href="structctrl_1_1DAESystem.html">DAESystem</a> &amp;dae, const Eigen::VectorXd &amp;x1_init, double u0, const Eigen::VectorXd &amp;x2_guess, int max_iter=20, double tol=1e-9)</td></tr>
+<tr class="memdesc:a21c327dfa2de10884adbffff15e92705"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find consistent algebraic states: solve g(x1_init, x2, u0) = 0 for x2.  <br /></td></tr>
+<tr class="separator:a21c327dfa2de10884adbffff15e92705"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae262e4114a6d4a2baa7565492e43d13e" id="r_ae262e4114a6d4a2baa7565492e43d13e"><td class="memItemLeft" align="right" valign="top">std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;, double)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ae262e4114a6d4a2baa7565492e43d13e">ctrl::dae2ode</a> (const <a class="el" href="structctrl_1_1DAESystem.html">DAESystem</a> &amp;dae, int newton_max_iter=20, double newton_tol=1e-9)</td></tr>
+<tr class="memdesc:ae262e4114a6d4a2baa7565492e43d13e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a <a class="el" href="structctrl_1_1DAESystem.html" title="Index-1 semi-explicit Differential-Algebraic Equation system.">DAESystem</a> to a discrete-time step function.  <br /></td></tr>
+<tr class="separator:ae262e4114a6d4a2baa7565492e43d13e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a7a8a51ecf472bdbd69ce7a85639ab3" id="r_a5a7a8a51ecf472bdbd69ce7a85639ab3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a5a7a8a51ecf472bdbd69ce7a85639ab3">ctrl::c2d</a> (const <a class="el" href="structctrl_1_1DAESystem.html">DAESystem</a> &amp;dae, const Eigen::VectorXd &amp;x1_op, const Eigen::VectorXd &amp;x2_op, double u_op, double Ts, <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156">C2dMethod</a> method=<a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd">C2dMethod::ZOH</a>)</td></tr>
+<tr class="memdesc:a5a7a8a51ecf472bdbd69ce7a85639ab3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Linearise a <a class="el" href="structctrl_1_1DAESystem.html" title="Index-1 semi-explicit Differential-Algebraic Equation system.">DAESystem</a> at (x1_op, x2_op, u_op), eliminate x2, and discretise.  <br /></td></tr>
+<tr class="separator:a5a7a8a51ecf472bdbd69ce7a85639ab3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete-time plant model representations and utilities. </p>

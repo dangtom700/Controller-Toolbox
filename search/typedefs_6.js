@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['particlefn_0',['ParticleFn',['../namespacectrl.html#a3032ac8419f78cb550ee786567b2d353',1,'ctrl']]],
-  ['particlemeasfn_1',['ParticleMeasFn',['../namespacectrl.html#a7786f7620b405436dbc64206aca63a2a',1,'ctrl']]]
+  ['outputfunc_0',['OutputFunc',['../structctrl_1_1DAESystem.html#a46fff78b00a73acafdf4fd2daa161b4f',1,'ctrl::DAESystem']]]
 ];

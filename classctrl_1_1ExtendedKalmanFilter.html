@@ -116,6 +116,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad85c5c6ae873b66cb2c50d0ecf244d21" id="r_ad85c5c6ae873b66cb2c50d0ecf244d21"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#ad85c5c6ae873b66cb2c50d0ecf244d21">sampleTime</a> () const</td></tr>
 <tr class="memdesc:ad85c5c6ae873b66cb2c50d0ecf244d21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
 <tr class="separator:ad85c5c6ae873b66cb2c50d0ecf244d21"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b1911c3410ebb99c26969eeba7a9aa8" id="r_a2b1911c3410ebb99c26969eeba7a9aa8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#a2b1911c3410ebb99c26969eeba7a9aa8">setAlgebraicConstraint</a> (std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;, const Eigen::VectorXd &amp;, double)&gt; g_alg, int n_diff, int n_alg, double newton_tol=1e-9)</td></tr>
+<tr class="memdesc:a2b1911c3410ebb99c26969eeba7a9aa8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attach a DAE algebraic constraint for post-update algebraic projection (P3).  <br /></td></tr>
+<tr class="separator:a2b1911c3410ebb99c26969eeba7a9aa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5afcf366af9bbbf723462858877a1d09" id="r_a5afcf366af9bbbf723462858877a1d09"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#a5afcf366af9bbbf723462858877a1d09">hasAlgebraicConstraint</a> () const</td></tr>
+<tr class="memdesc:a5afcf366af9bbbf723462858877a1d09"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if an algebraic constraint has been attached via <a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#a2b1911c3410ebb99c26969eeba7a9aa8" title="Attach a DAE algebraic constraint for post-update algebraic projection (P3).">setAlgebraicConstraint()</a>.  <br /></td></tr>
+<tr class="separator:a5afcf366af9bbbf723462858877a1d09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -126,7 +132,7 @@ Static Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete-time Extended Kalman Filter. </p>
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00065">65</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00066">66</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ae3841dcb576b5053ea00c4681f4ca8ff" name="ae3841dcb576b5053ea00c4681f4ca8ff"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae3841dcb576b5053ea00c4681f4ca8ff">&#9670;&#160;</a></span>ExtendedKalmanFilter()</h2>
@@ -249,7 +255,36 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Current error covariance P[k|k] (n * n). </p>
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00122">122</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00123">123</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+
+</div>
+</div>
+<a id="a5afcf366af9bbbf723462858877a1d09" name="a5afcf366af9bbbf723462858877a1d09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5afcf366af9bbbf723462858877a1d09">&#9670;&#160;</a></span>hasAlgebraicConstraint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ctrl::ExtendedKalmanFilter::hasAlgebraicConstraint </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>True if an algebraic constraint has been attached via <a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#a2b1911c3410ebb99c26969eeba7a9aa8" title="Attach a DAE algebraic constraint for post-update algebraic projection (P3).">setAlgebraicConstraint()</a>. </p>
+
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00152">152</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -299,7 +334,7 @@ Static Public Member Functions</h2></td></tr>
 <div class="line">    <span class="keywordflow">return</span> <a class="code hl_function" href="classctrl_1_1ExtendedKalmanFilter.html#a6bdfea525d975b161d6f1b11a9bffc5a">ExtendedKalmanFilter::numericalJacobian</a>(</div>
 <div class="line">        [&amp;](<span class="keyword">const</span> Eigen::VectorXd&amp; xx){ <span class="keywordflow">return</span> f(xx, u); }, x);</div>
 <div class="line">};</div>
-<div class="ttc" id="aclassctrl_1_1ExtendedKalmanFilter_html_a6bdfea525d975b161d6f1b11a9bffc5a"><div class="ttname"><a href="classctrl_1_1ExtendedKalmanFilter.html#a6bdfea525d975b161d6f1b11a9bffc5a">ctrl::ExtendedKalmanFilter::numericalJacobian</a></div><div class="ttdeci">static Eigen::MatrixXd numericalJacobian(const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x, double eps_scale=1e-4)</div><div class="ttdoc">Central-difference numerical Jacobian with state-scaled step size.</div><div class="ttdef"><b>Definition</b> <a href="ExtendedKalmanFilter_8cpp_source.html#l00077">ExtendedKalmanFilter.cpp:77</a></div></div>
+<div class="ttc" id="aclassctrl_1_1ExtendedKalmanFilter_html_a6bdfea525d975b161d6f1b11a9bffc5a"><div class="ttname"><a href="classctrl_1_1ExtendedKalmanFilter.html#a6bdfea525d975b161d6f1b11a9bffc5a">ctrl::ExtendedKalmanFilter::numericalJacobian</a></div><div class="ttdeci">static Eigen::MatrixXd numericalJacobian(const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x, double eps_scale=1e-4)</div><div class="ttdoc">Central-difference numerical Jacobian with state-scaled step size.</div><div class="ttdef"><b>Definition</b> <a href="ExtendedKalmanFilter_8cpp_source.html#l00149">ExtendedKalmanFilter.cpp:149</a></div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">func</td><td>Scalar-to-vector function to differentiate. </td></tr>
@@ -310,7 +345,7 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Jacobian matrix (output_dim * input_dim). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00077">77</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00149">149</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
 </div>
 </div>
@@ -340,7 +375,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00023">23</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00064">step()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00136">step()</a>.</p>
 
 </div>
 </div>
@@ -361,7 +396,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Reset state estimate to zero and covariance to P0 (or identity). </p>
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00071">71</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00143">143</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
 </div>
 </div>
@@ -390,7 +425,67 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Sample time Ts [s]. </p>
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00125">125</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00126">126</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+
+</div>
+</div>
+<a id="a2b1911c3410ebb99c26969eeba7a9aa8" name="a2b1911c3410ebb99c26969eeba7a9aa8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b1911c3410ebb99c26969eeba7a9aa8">&#9670;&#160;</a></span>setAlgebraicConstraint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ctrl::ExtendedKalmanFilter::setAlgebraicConstraint </td>
+          <td>(</td>
+          <td class="paramtype">std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;, const Eigen::VectorXd &amp;, double)&gt;&#160;</td>
+          <td class="paramname"><em>g_alg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n_diff</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n_alg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>newton_tol</em> = <code>1e-9</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Attach a DAE algebraic constraint for post-update algebraic projection (P3). </p>
+<p>After every <code><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#afc408ef1287096c22669ed8a711a8a0f" title="Update step - incorporate measurement y[k].">update()</a></code> / <code><a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#a9d7d137a0e335bc07912f1c7134afaa8" title="Combined predict + update - most common usage.">step()</a></code> call, the algebraic block x2 = x_hat[n_diff:] is re-solved from <code>g_alg(x1, x2, u)</code> = 0 via Newton-Raphson, keeping the estimate on the constraint manifold despite measurement noise. The error covariance is projected accordingly: P &lt;- J_proj . P . J_proj^T where J_proj = [[I_{n_diff}, 0]; [-G2^{-1}.G1, 0_{n_alg}]].</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">g_alg</td><td>Algebraic constraint: 0 = g(x1, x2, u) with signature <code>VectorXd(const VectorXd&amp; x1, const VectorXd&amp; x2, double u)</code>. </td></tr>
+    <tr><td class="paramname">n_diff</td><td>Number of differential states (x1 dimension in the full state). </td></tr>
+    <tr><td class="paramname">n_alg</td><td>Number of algebraic states (x2 dimension = state_size - n_diff). </td></tr>
+    <tr><td class="paramname">newton_tol</td><td>Newton convergence tolerance (default 1e-9). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">std::invalid_argument</td><td>if n_diff + n_alg != n_states. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00071">71</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
 </div>
 </div>
@@ -426,7 +521,7 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00116">116</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00117">117</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -455,7 +550,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Current state estimate x^[k|k] (n * 1). </p>
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00119">119</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8h_source.html#l00120">120</a> of file <a class="el" href="ExtendedKalmanFilter_8h_source.html">ExtendedKalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -494,7 +589,7 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00064">64</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00136">136</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00023">predict()</a>, and <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00039">update()</a>.</p>
 
@@ -537,7 +632,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00039">39</a> of file <a class="el" href="ExtendedKalmanFilter_8cpp_source.html">ExtendedKalmanFilter.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00064">step()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ExtendedKalmanFilter_8cpp_source.html#l00136">step()</a>.</p>
 
 </div>
 </div>

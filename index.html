@@ -73,9 +73,9 @@ $(function() {
   <div class="headertitle"><div class="title">Controller Toolbox </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md_README"></a> A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H-infinity, Lead-Lag, Smith Predictor, Repetitive Control, Feedforward, Extremum Seeking, Kalman/EKF/UKF/MHE filtering, Fuzzy Logic inference, SOPDT/FOPDT identification, RLS and N4SID system identification, plus an integrated tuner suite and analysis layer.</p>
-<p>Sixty-plus controller implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.</p>
-<p>Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. C++ example programs and 100+ Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and new algorithm extension. Eleven end-to-end physics case studies (nine C++: boiler-turbine, tug boat, solar cooling, porous-plate humidification, active suspension, buck-boost converter, solar cooker, solar OTEC, hydraulic SMISMO; two Python-only: drill string, wind-wave platform) exercise the full controller stack on nonlinear plants.</p>
+<div class="textblock"><p><a class="anchor" id="md_README"></a> A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H-infinity, Lead-Lag, Smith Predictor, Repetitive Control, Feedforward, Extremum Seeking, Kalman/EKF/UKF/MHE filtering, Fuzzy Logic inference, SOPDT/FOPDT identification, RLS and N4SID system identification, plus an integrated tuner suite, analysis layer, and Index-1 DAE utilities.</p>
+<p>~85 controller implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.</p>
+<p>Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. C++ example programs and 100+ Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and algorithm extension. Fifteen end-to-end physics case studies (nine C++: boiler-turbine, tug boat, solar cooling, porous-plate humidification, active suspension, buck-boost converter, solar cooker, solar OTEC, hydraulic SMISMO; six Python-only: drill string, wind-wave platform, electro-hydraulic force servo, aerial firefighting bag drop, battery thermal management, surface ship manoeuvring) exercise the full controller stack on nonlinear plants.</p>
 <hr  />
 <h1><a class="anchor" id="autotoc_md2"></a>
 Quick Start</h1>
@@ -125,8 +125,8 @@ Minimal Example</h1>
 <div class="ttc" id="astructctrl_1_1PIDParams_html_a7b0512d735243a9f654eb2914524111f"><div class="ttname"><a href="structctrl_1_1PIDParams.html#a7b0512d735243a9f654eb2914524111f">ctrl::PIDParams::Ki</a></div><div class="ttdeci">double Ki</div><div class="ttdoc">Integral gain (Ki = Kp / Ti).</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00038">DiscretePID.h:38</a></div></div>
 <div class="ttc" id="astructctrl_1_1PIDParams_html_a93322cf198692466ad0919ea06297b31"><div class="ttname"><a href="structctrl_1_1PIDParams.html#a93322cf198692466ad0919ea06297b31">ctrl::PIDParams::Kp</a></div><div class="ttdeci">double Kp</div><div class="ttdoc">Proportional gain.</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00037">DiscretePID.h:37</a></div></div>
 <div class="ttc" id="astructctrl_1_1PIDParams_html_ae47f28adcce19093b8509be3423ce350"><div class="ttname"><a href="structctrl_1_1PIDParams.html#ae47f28adcce19093b8509be3423ce350">ctrl::PIDParams::N</a></div><div class="ttdeci">double N</div><div class="ttdoc">Derivative filter coefficient N [rad/s].</div><div class="ttdef"><b>Definition</b> <a href="DiscretePID_8h_source.html#l00054">DiscretePID.h:54</a></div></div>
-<div class="ttc" id="astructctrl_1_1StateSpace_html"><div class="ttname"><a href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a></div><div class="ttdoc">Discrete-time state-space model.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00067">PlantModel.h:68</a></div></div>
-<div class="ttc" id="astructctrl_1_1TransferFunction_html"><div class="ttname"><a href="structctrl_1_1TransferFunction.html">ctrl::TransferFunction</a></div><div class="ttdoc">Discrete-time transfer function in z^-^1 polynomial form.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00031">PlantModel.h:32</a></div></div>
+<div class="ttc" id="astructctrl_1_1StateSpace_html"><div class="ttname"><a href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a></div><div class="ttdoc">Discrete-time state-space model.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00068">PlantModel.h:69</a></div></div>
+<div class="ttc" id="astructctrl_1_1TransferFunction_html"><div class="ttname"><a href="structctrl_1_1TransferFunction.html">ctrl::TransferFunction</a></div><div class="ttdoc">Discrete-time transfer function in z^-^1 polynomial form.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00032">PlantModel.h:33</a></div></div>
 </div><!-- fragment --><hr  />
 <h1><a class="anchor" id="autotoc_md9"></a>
 Documentation</h1>
@@ -150,18 +150,19 @@ Documentation</h1>
 <h1><a class="anchor" id="autotoc_md11"></a>
 Repository Layout</h1>
 <div class="fragment"><div class="line">|-- lib/             # Library sources -&gt; target: controller_toolbox</div>
-<div class="line">|-- examples/        # ex01..ex54 single-file C++ demos (corrector patterns, new algorithms)</div>
-<div class="line">|-- examples/python/ # ex01..ex70 Python companion scripts and binding demos</div>
-<div class="line">|-- case-study/      # 11 physics studies (9 C++ + 2 Python-only) + spec-only stubs</div>
+<div class="line">|-- examples/        # ex01..ex79 single-file C++ demos (corrector patterns, new algorithms)</div>
+<div class="line">|-- examples/python/ # ex01..ex102 Python companion scripts and binding demos</div>
+<div class="line">|-- case-study/      # 15 physics studies (9 C++ + 6 Python-only) + spec-only stubs</div>
 <div class="line">|-- tests/           # CTest-driven unit + integration tests (Catch2 v3)</div>
 <div class="line">|-- bindings/        # pybind11 binding source files</div>
 <div class="line">|-- scripts/         # tune_all / simulate_all / realtime_all</div>
 <div class="line">|-- cheatsheet/      # Reference notes</div>
 <div class="line">|-- docs/            # Documentation &amp; deployment guides</div>
+<div class="line">|-- tools/           # compare_controllers.py (IAE/ISE table across case-study CSVs)</div>
 </div><!-- fragment --><hr  />
 <h1><a class="anchor" id="autotoc_md13"></a>
 Case Studies</h1>
-<p>Eleven self-contained physics studies under <a href="case-study/">case-study/</a> exercise the library end-to-end. Each pairs a nonlinear plant simulator with a roster of controllers that wrap the <code>lib/</code> algorithms, then sweeps every controller across several scenarios and writes CSV telemetry for post-processing. Per-study status, rosters, and caveats are tracked in docs/CASE_STUDIES.md.</p>
+<p>Fifteen self-contained physics studies under <a href="case-study/">case-study/</a> exercise the library end-to-end. Each pairs a nonlinear plant simulator with a roster of controllers that wrap the <code>lib/</code> algorithms, then sweeps every controller across several scenarios and writes CSV telemetry for post-processing. Per-study status, rosters, and caveats are tracked in docs/CASE_STUDIES.md.</p>
 <p><b>C++ studies (built by <code>compile.bat</code>, run in Phase 4):</b></p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -192,9 +193,17 @@ Case Studies</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><a href="case-study/Vertical%20Drill%20String%20Mathematical%20Review%202025/">Vertical Drill String</a>   </td><td class="markdownTableBodyNone">2-DOF torsional model, Stribeck bit friction (stick-slip)   </td><td class="markdownTableBodyNone">17   </td><td class="markdownTableBodyNone">5 -&gt; 85    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><a href="case-study/Multi-Body%20Floating%20Wind-Wave%20Platform/">Multi-Body Floating Wind-Wave Platform</a>   </td><td class="markdownTableBodyNone">4-state FOWT heave + WEC arm, wave forcing   </td><td class="markdownTableBodyNone">16   </td><td class="markdownTableBodyNone">5 -&gt; 80   </td></tr>
+<td class="markdownTableBodyNone"><a href="case-study/Multi-Body%20Floating%20Wind-Wave%20Platform/">Multi-Body Floating Wind-Wave Platform</a>   </td><td class="markdownTableBodyNone">4-state FOWT heave + WEC arm, sinusoidal wave forcing   </td><td class="markdownTableBodyNone">16   </td><td class="markdownTableBodyNone">5 -&gt; 80    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><a href="case-study/Tracking%20Control%20of%20Electro-Hydraulic%20Force%20Servo%20Systems/">Tracking Control of Electro-Hydraulic Force Servo Systems</a>   </td><td class="markdownTableBodyNone">5-state EHFS [P_A, P_B, x_v, v_p, x_p], servo valve + cylinder, RK4 Ts=0.5ms   </td><td class="markdownTableBodyNone">12   </td><td class="markdownTableBodyNone">5 -&gt; 60    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><a href="case-study/High-Altitude%20Aerial%20Firefighting%20Bag%20Drop/">High-Altitude Aerial Firefighting Bag Drop</a>   </td><td class="markdownTableBodyNone">3D bag trajectory [x,y,z,vx,vy,vz], drag+gravity+wind, RK4 Ts=0.05s   </td><td class="markdownTableBodyNone">12   </td><td class="markdownTableBodyNone">5 -&gt; 60    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><a href="case-study/Air-Cooled%20Battery%20Thermal%20Management%20System/">Air-Cooled Battery Thermal Management System</a>   </td><td class="markdownTableBodyNone">1-D transient HX, N=9 cells, 10 channels, J/U/L flow-pattern switching, Euler Ts=1s   </td><td class="markdownTableBodyNone">12   </td><td class="markdownTableBodyNone">5 -&gt; 60    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><a href="case-study/Nonlinear%20Surface%20Ship%20Manoeuvring%20Control/">Nonlinear Surface Ship Manoeuvring Control</a>   </td><td class="markdownTableBodyNone">3-DOF MMG model, 19 SRUKF-identified params (Meng 2025), [u,v,r,ψ,x,y], RK4 Ts=0.08s   </td><td class="markdownTableBodyNone">12   </td><td class="markdownTableBodyNone">5 -&gt; 60   </td></tr>
 </table>
-<p>Controllers span the full stack: PID, LQR, LQG, MPC, GPC-RLS, SMC, ADRC, Fuzzy-PID, Smith Predictor, MRAC, H-infinity, TubeMPC, ScenarioMPC, NonlinearMPC, Feedback Linearisation, EKF-LQR, MHE-LQR, SubspaceID-LQG, L1Adaptive, ILC, NeuralPID, DynaMBRL, CEM-MPC, Koopman-MPC, ESN, CBF safety filtering, and gain-scheduled (manual, LPV, and automated gap-metric) variants, depending on the plant. Several spec-only stubs (README only, no <code>sim/</code>) remain as outstanding work &ndash; see docs/CASE_STUDIES.md.</p>
+<p>Controllers span the full stack: PID, LQR, LQG, MPC, GPC-RLS, SMC, ADRC, Fuzzy-PID, Smith Predictor, MRAC, H-infinity, TubeMPC, ScenarioMPC, NonlinearMPC, Feedback Linearisation, EKF-LQR, MHE-LQR, SubspaceID-LQG, L1Adaptive, ILC, NeuralPID, DynaMBRL, CEM-MPC, Koopman-MPC, ESN, CBF safety filtering, ASMC, and gain-scheduled (manual, LPV, and automated gap-metric) variants, depending on the plant. Several spec-only stubs (README only, no <code>sim/</code>) remain as outstanding work &ndash; see docs/CASE_STUDIES.md.</p>
 <hr  />
 <h1><a class="anchor" id="autotoc_md15"></a>
 Controller Inventory</h1>
@@ -208,19 +217,23 @@ Controller Inventory</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>Robust / Nonlinear</b>   </td><td class="markdownTableBodyNone">SMC (saturation boundary layer), ADRC (2nd-order LADRC + ESO), Extremum Seeker    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>Adaptive</b>   </td><td class="markdownTableBodyNone">MRACController (Lyapunov + sigma-modification + Euclidean projection), GPC::setPlant (RLS adaptive)    </td></tr>
+<td class="markdownTableBodyNone"><b>Adaptive</b>   </td><td class="markdownTableBodyNone">MRACController (Lyapunov + sigma-modification + Euclidean projection), L1AdaptiveController (state predictor + LP-filtered adaptation), GPC::setPlant (RLS adaptive)    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>Nonlinear</b>   </td><td class="markdownTableBodyNone">FeedbackLinearisationController (affine-in-control SISO, relative degree 1; DriftFn+GainFn)    </td></tr>
+<td class="markdownTableBodyNone"><b>Nonlinear</b>   </td><td class="markdownTableBodyNone">FeedbackLinearisationController (affine-in-control SISO, relative degree 1; DriftFn+GainFn), NonlinearMPC (RTI, user-supplied StateFunc)    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><b>Intelligent</b>   </td><td class="markdownTableBodyNone">FuzzyPD, FuzzyPID, FuzzySupervisor (Mamdani &amp; Takagi-Sugeno)    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>Composition</b>   </td><td class="markdownTableBodyNone">ControllerStack (Supervisory, Additive, Weighted) - cascade, observer+SF, bumpless transfer    </td></tr>
+<td class="markdownTableBodyNone"><b>Composition</b>   </td><td class="markdownTableBodyNone">ControllerStack (Supervisory, Additive, Weighted) - cascade, observer+SF, bumpless transfer; ComputationalDelayWrapper, AntiWindupWrapper, CBFSafetyFilter    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>Estimators</b>   </td><td class="markdownTableBodyNone">KalmanFilter, EKF (analytical/numerical Jacobians), UKF (sigma-point), MovingHorizonEstimator (condensed QP)    </td></tr>
+<td class="markdownTableBodyNone"><b>Estimators</b>   </td><td class="markdownTableBodyNone">KalmanFilter, EKF (analytical/numerical Jacobians + DAE algebraic projection), UKF (sigma-point), MovingHorizonEstimator (condensed QP + state box constraints)    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>Identification</b>   </td><td class="markdownTableBodyNone">FOPDTIdentifier, SOPDTIdentifier + Rivera 1986 IMC, RecursiveLeastSquares, SubspaceID (N4SID)    </td></tr>
+<td class="markdownTableBodyNone"><b>Identification</b>   </td><td class="markdownTableBodyNone">FOPDTIdentifier, SOPDTIdentifier + Rivera 1986 IMC, RecursiveLeastSquares, SubspaceID (N4SID), SINDy (STLS sparse regression), KoopmanEDMD (PolyDeg/RBF dictionary)    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>Model utilities</b>   </td><td class="markdownTableBodyNone">LinearisationHelper (jacobianX/U, lineariseAtPoint ZOH), BalancedTruncation (Hinf bound), ZeroPhaseTrackingFilter (ZPETC + transmissionZeros)   </td></tr>
+<td class="markdownTableBodyNone"><b>ML / Data-driven</b>   </td><td class="markdownTableBodyNone">GaussianProcess (SE kernel, Cholesky, fixed-budget), EchoStateNetwork (spectral-radius reservoir), NeuralPID (3→n_h→3 online backprop), CEMController (elite-sample stochastic MPC), DynaController (Sutton Dyna MBRL + SINDy model), ILC (P-type / D-type / norm-optimal), DeePC (ADMM data-enabled predictive control), ScenarioMPC, BayesianOptimizer    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><b>Model utilities</b>   </td><td class="markdownTableBodyNone">LinearisationHelper (jacobianX/U, lineariseAtPoint ZOH), BalancedTruncation (Hinf bound), ZeroPhaseTrackingFilter (ZPETC + transmissionZeros), GapMetric (chordal SISO + subspace MIMO)    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>DAE utilities</b>   </td><td class="markdownTableBodyNone"><code>DAESystem</code> (Index-1 semi-explicit, <code>f</code>/<code>g</code>/<code>h</code> functors), <code>consistentInit</code> (Newton-Raphson), <code>dae2ode</code> (Euler+Newton discrete step function), <code>c2d(DAESystem)</code> (algebraic elimination + ZOH/Tustin)   </td></tr>
 </table>
 <hr  />
 <h1><a class="anchor" id="autotoc_md17"></a>
@@ -266,21 +279,36 @@ Tested Compilers</h1>
 <hr  />
 <h1><a class="anchor" id="autotoc_md26"></a>
 Project Status</h1>
-<p><b>Baseline (Part 44 - 2026-06-10, UNVERIFIED until the next clean <code>run.py</code>):</b> C++ case studies: Boiler 216/216 . Tug 72/72 . Solar 70/70 . Humidification 75/75 . ActiveSuspension 75/75 . BuckBoost 60/60 . SolarCooker 60/60 . SOTEC 60/60 . SMISMO 60/60 expected (new in Part 44). Python-only (Phase 6): DrillString 85/85 . WindWave 80/80. <br  />
- <code>bug_report.txt</code>: 0 blocks expected after a clean run (<code>safe_phrases</code> list in <code>run.py</code> suppresses all known benign messages).</p>
-<p><b>Part 44 (2026-06-10):</b></p><ul>
-<li>Reimplemented the <b>Separate Meter In Separate Meter Out (SMISMO)</b> hydraulic case study from both source PDFs (Chen et al. 2018 CEP 72; Liu et al. 2009 IEEE/ASME AIM) - the earlier sim had been deleted. 8-state plant (cylinder + dual PDCV spool dynamics + identified Stribeck friction), Liu Fig. 10 dual-loop valve allocation with 20 bar backpressure regulation, 12 controllers x 5 scenarios = 60 runs, target <code>smismo_sim</code>.</li>
-<li>Recreated <code>tests/test_smismo_regression.cpp</code> (6 Catch2 tests) and corrected the study README (citation, Table 1 rig parameters, 4-quadrant valve flow, energy-saving equations).</li>
+<p><b>Baseline (Part 51 - 2026-06-12, UNVERIFIED until next clean <code>run.py</code>):</b> C++ case studies: Boiler 216/216 . Tug 72/72 . Solar 70/70 . Humidification 75/75 . ActiveSuspension 75/75 . BuckBoost 60/60 . SolarCooker 60/60 . SOTEC 60/60 . SMISMO 60/60. Python-only (Phase 6): DrillString 85/85 . WindWave 80/80 . EHFS 60/60 . Firefighting 60/60 . BTMS 60/60 . SurfaceShip 60/60. <code>bug_report.txt</code>: 0 blocks expected after a clean run (<code>safe_phrases</code> list in <code>run.py</code> suppresses all known benign messages).</p>
+<p><b>Part 51 (2026-06-12) — DAE architecture (P1/P2/P3):</b></p><ul>
+<li><code>DAESystem</code> struct (<code><a class="el" href="PlantModel_8h.html" title="Discrete-time plant model representations and utilities.">lib/PlantModel.h</a>/.cpp</code>): Index-1 semi-explicit DAE with <code>f</code> (differential), <code>g</code> (algebraic), <code>h</code> (output) functors; <code>n_diff</code>/<code>n_alg</code>/<code>Ts</code> fields.</li>
+<li><code>consistentInit</code>: Newton-Raphson (LDLT) solving <code>g(x1,x2,u)=0</code> for <code>x2</code>.</li>
+<li><code>dae2ode</code>: discrete step function via forward Euler on <code>x1</code> + Newton projection on <code>x2</code>.</li>
+<li><code>c2d(DAESystem, x1_op, x2_op, u_op, Ts, method)</code>: Index-1 algebraic elimination (<code>A_red = A11 - A12*G2⁻¹*G1</code>), then ZOH/Tustin. Throws <code>runtime_error</code> if G2 singular.</li>
+<li>DAE-aware EKF (<code><a class="el" href="ExtendedKalmanFilter_8h.html" title="Discrete-time Extended Kalman Filter (EKF) for nonlinear systems.">lib/ExtendedKalmanFilter.h</a>/.cpp</code>): <code>setAlgebraicConstraint(g, n_diff, n_alg)</code> projects <code>x2</code> block via Newton after each <code>update()</code>; covariance projected as &lsquo;P = J_proj*P*J_proj&rsquo;<code>.</code></li>
+<li><code>pybind11 bindings:</code>DAESystem<code>,</code>consistent_init<code>,</code>dae2ode<code>,</code>dae_c2d<code>,</code>set_algebraic_constraint<code>on EKF.</code></li>
+<li><code>7 Catch2 tests:</code>[dae_system]<code>×3,</code>[dae_c2d]<code>×2,</code>[dae_ekf]` ×2.</li>
 </ul>
-<p><b>Part 29 additions and fixes (2026-06-01):</b></p><ul>
-<li>Added fifth case study: <b>Porous Fiber Plate Humidification System</b> (Ye et al. 2024) - laminar flat-plate evaporative humidifier + first-order room moisture ODE; 10 controllers * 5 scenarios = 50 runs.</li>
-<li>Fixed <code>pybind11</code> v2.13 CMake 3.27+ deprecation warning (<code>cmake_minimum_required VERSION 3.5</code>) by wrapping <code>FetchContent_MakeAvailable</code> with <code>CMAKE_WARN_DEPRECATED OFF</code> in <code>bindings/CMakeLists.txt</code>.</li>
-<li>Fixed boiler ADRC <code>omega_o=0.50</code> at exact boundary (<code>omega_o*Ts=0.50</code> - strict <code>&lt; 0.5</code> required); reduced to <code>omega_o=0.45</code>, <code>omega_c=0.09</code>.</li>
-<li>Fixed <code>computeY3</code> in boiler plant: guard against division by zero when drum water level <code>x3 -&gt; 0</code>.</li>
-<li>Fixed solar pump efficiency formula: <code>ratio*(1-ratio)</code> gave zero efficiency at rated flow; corrected to <code>ratio*(2-ratio)</code> (parabola centred at BEP).</li>
+<p><b>Part 49 (2026-06-11) — Nonlinear Surface Ship Manoeuvring Control (Python-only):</b></p><ul>
+<li>3-DOF MMG model, 19 SRUKF-identified parameters (Meng 2025 Table 5), [u,v,r,ψ,x,y], RK4 Ts=0.08s.</li>
+<li>12 controllers × 5 scenarios = 60 runs. Includes ASMC (paper cascade + disturbance FF), MPC (ZOH [ψ,r] linearisation), LQR (Bryson DARE), MRAC, L1Adaptive, ADRC, GainScheduled, NeuralPID, ILC.</li>
 </ul>
-<p><b>Part 28 (2026-05-31):</b> 5-phase <code>run.py</code>; <code>AdaptiveSmithPredictor</code> cross-correlation fix; 8 Python example bugs fixed; 36-entry <code>safe_phrases</code> for clean <code>bug_report.txt</code>; 4 case-study READMEs added.</p>
-<p><b>Part 27 (2026-05-31):</b> Python example quality pass - 11 internal <code>[FAIL]</code> checks fixed in 10 example files.</p>
+<p><b>Part 48 (2026-06-11) — Air-Cooled Battery Thermal Management System (Python-only):</b></p><ul>
+<li>1-D transient HX model: N=9 cells, 10 channels, J/U/L flow-pattern switching, Forward Euler Ts=1s.</li>
+<li>12 controllers × 5 scenarios = 60 runs.</li>
+</ul>
+<p><b>Part 46 (2026-06-10) — High-Altitude Aerial Firefighting Bag Drop (Python-only):</b></p><ul>
+<li>3D trajectory [x,y,z,vx,vy,vz], drag+gravity+wind, RK4 Ts=0.05s. Primary metric: CEP (50th-percentile radial error). N_mc=30 Monte-Carlo trajectories per planner/scenario.</li>
+<li>12 planners × 5 scenarios = 60 runs.</li>
+</ul>
+<p><b>Part 45 (2026-06-10) — Electro-Hydraulic Force Servo Systems (Python-only):</b></p><ul>
+<li>5-state EHFS [P_A, P_B, x_v, v_p, x_p], servo valve + cylinder, RK4 Ts=0.5ms.</li>
+<li>12 controllers × 5 scenarios = 60 runs. Includes FeedbackLinearisation, LQR, ADRC (omega_o=800, omega_o*Ts=0.40&lt;0.5), GainScheduled.</li>
+</ul>
+<p><b>Part 44 (2026-06-10) — SMISMO C++ case study reimplemented:</b></p><ul>
+<li>Separate Meter In Separate Meter Out hydraulic cylinder (Chen 2018 + Liu 2009). 8-state RK4, dual PDCV spool dynamics, Stribeck friction, 20 bar backpressure regulation.</li>
+<li>12 controllers × 5 scenarios = 60 runs, target <code>smismo_sim</code>. Recreated <code>test_smismo_regression.cpp</code>.</li>
+</ul>
 <p>Details in docs/cumulative_bug_report.md. Real-time deployment guidance in <a class="el" href="md_docs_2DEPLOYMENT.html">docs/DEPLOYMENT.md</a>. </p>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
