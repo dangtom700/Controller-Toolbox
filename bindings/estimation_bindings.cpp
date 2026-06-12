@@ -197,6 +197,36 @@ Numerical Jacobian example
              py::return_value_policy::copy,
              "Current error covariance P[k|k] (n, n).")
         .def("sample_time",&ctrl::ExtendedKalmanFilter::sampleTime)
+        .def("set_algebraic_constraint",
+             [](ctrl::ExtendedKalmanFilter &ekf, py::object g_py,
+                int n_diff, int n_alg, double tol) {
+                 ekf.setAlgebraicConstraint(
+                     [g_py](const Eigen::VectorXd &x1,
+                            const Eigen::VectorXd &x2,
+                            double u) -> Eigen::VectorXd {
+                         return g_py(x1, x2, u).cast<Eigen::VectorXd>();
+                     },
+                     n_diff, n_alg, tol);
+             },
+             py::arg("g_alg"), py::arg("n_diff"), py::arg("n_alg"),
+             py::arg("newton_tol") = 1e-9,
+             R"doc(
+Attach a DAE algebraic constraint for post-update state projection (P3).
+
+After every update()/step() call, the algebraic block x2 = state[n_diff:]
+is re-solved from g_alg(x1, x2, u) = 0, keeping the estimate on the
+constraint manifold. Covariance is projected accordingly.
+
+Parameters
+----------
+g_alg      : Callable (x1, x2, u: float) -> residual ndarray (n_alg,).
+n_diff     : Number of differential states in the EKF state vector.
+n_alg      : Number of algebraic states (must be state_size - n_diff).
+newton_tol : Newton convergence tolerance (default 1e-9).
+)doc")
+        .def("has_algebraic_constraint",
+             &ctrl::ExtendedKalmanFilter::hasAlgebraicConstraint,
+             "True if an algebraic constraint has been attached.")
         .def_static("numerical_jacobian",
              [](py::object func, const Eigen::VectorXd &x, double eps_scale)
                  -> Eigen::MatrixXd {

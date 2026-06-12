@@ -322,4 +322,218 @@ namespace ctrl
         return StateSpace(A_min, B_min, C_min, sys.D, sys.Ts);
     }
 
+    // ===========================================================================
+    // DAESystem helpers
+    // ===========================================================================
+
+    // Central-difference Jacobian of an AlgFunc w.r.t. x2, with x1 and u fixed.
+    // Step: h_i = eps * max(|x2_i|, 1) (same scaled-epsilon strategy as EKF).
+    static Eigen::MatrixXd algJacX2(const DAESystem::AlgFunc &g,
+                                     const Eigen::VectorXd    &x1,
+                                     const Eigen::VectorXd    &x2,
+                                     double                    u,
+                                     double                    eps = 1e-5)
+    {
+        const Eigen::VectorXd g0 = g(x1, x2, u);
+        const int ny = static_cast<int>(g0.size());
+        const int nx = static_cast<int>(x2.size());
+        Eigen::MatrixXd J(ny, nx);
+        Eigen::VectorXd xp = x2, xm = x2;
+        for (int i = 0; i < nx; ++i)
+        {
+            const double h = eps * std::max(std::abs(x2(i)), 1.0);
+            xp(i) = x2(i) + h;
+            xm(i) = x2(i) - h;
+            J.col(i) = (g(x1, xp, u) - g(x1, xm, u)) / (2.0 * h);
+            xp(i) = x2(i);
+            xm(i) = x2(i);
+        }
+        return J;
+    }
+
+    // Central-difference Jacobian of an AlgFunc or DiffFunc w.r.t. x1, with x2 and u fixed.
+    static Eigen::MatrixXd algJacX1(const DAESystem::AlgFunc &g,
+                                     const Eigen::VectorXd    &x1,
+                                     const Eigen::VectorXd    &x2,
+                                     double                    u,
+                                     double                    eps = 1e-5)
+    {
+        const Eigen::VectorXd g0 = g(x1, x2, u);
+        const int ny = static_cast<int>(g0.size());
+        const int nx = static_cast<int>(x1.size());
+        Eigen::MatrixXd J(ny, nx);
+        Eigen::VectorXd xp = x1, xm = x1;
+        for (int i = 0; i < nx; ++i)
+        {
+            const double h = eps * std::max(std::abs(x1(i)), 1.0);
+            xp(i) = x1(i) + h;
+            xm(i) = x1(i) - h;
+            J.col(i) = (g(xp, x2, u) - g(xm, x2, u)) / (2.0 * h);
+            xp(i) = x1(i);
+            xm(i) = x1(i);
+        }
+        return J;
+    }
+
+    // Central-difference Jacobian w.r.t. scalar u (returns column vector = dy/du).
+    static Eigen::VectorXd algJacU(const DAESystem::AlgFunc &g,
+                                    const Eigen::VectorXd    &x1,
+                                    const Eigen::VectorXd    &x2,
+                                    double                    u,
+                                    double                    eps = 1e-5)
+    {
+        const double h = eps * std::max(std::abs(u), 1.0);
+        return (g(x1, x2, u + h) - g(x1, x2, u - h)) / (2.0 * h);
+    }
+
+    // ---------------------------------------------------------------------------
+    // consistentInit - Newton-Raphson solve for g(x1, x2, u) = 0 over x2.
+    // ---------------------------------------------------------------------------
+    Eigen::VectorXd consistentInit(const DAESystem     &dae,
+                                    const Eigen::VectorXd &x1_init,
+                                    double               u0,
+                                    const Eigen::VectorXd &x2_guess,
+                                    int                  max_iter,
+                                    double               tol)
+    {
+        Eigen::VectorXd x2 = x2_guess;
+        for (int iter = 0; iter < max_iter; ++iter)
+        {
+            const Eigen::VectorXd g_val = dae.g(x1_init, x2, u0);
+            if (g_val.norm() < tol) break;
+
+            const Eigen::MatrixXd G2 = algJacX2(dae.g, x1_init, x2, u0);
+            const auto ldlt = G2.ldlt();
+            if (ldlt.info() != Eigen::Success)
+                break; // singular or near-singular G2: return last iterate
+
+            x2 -= ldlt.solve(g_val);
+        }
+        return x2;
+    }
+
+    // ---------------------------------------------------------------------------
+    // dae2ode - discrete step function via Euler integration + Newton projection.
+    //
+    // The returned function F(x_aug, u) = x_aug_next:
+    //   1. Splits x_aug = [x1; x2].
+    //   2. Newton-projects x2 to satisfy g(x1, x2, u) = 0 (cleans any drift).
+    //   3. Euler-steps x1: x1_next = x1 + Ts * f(x1, x2, u).
+    //   4. Newton-solves x2_next from g(x1_next, x2_next, u) = 0.
+    //   5. Returns [x1_next; x2_next].
+    // ---------------------------------------------------------------------------
+    std::function<Eigen::VectorXd(const Eigen::VectorXd &, double)>
+    dae2ode(const DAESystem &dae, int newton_max_iter, double newton_tol)
+    {
+        if (dae.Ts <= 0.0)
+            throw std::invalid_argument("dae2ode: DAESystem.Ts must be > 0.");
+        if (dae.n_diff <= 0)
+            throw std::invalid_argument("dae2ode: n_diff must be > 0.");
+        if (dae.n_alg < 0)
+            throw std::invalid_argument("dae2ode: n_alg must be >= 0.");
+
+        // Capture by value so the returned lambda is self-contained.
+        return [dae, newton_max_iter, newton_tol](const Eigen::VectorXd &x_aug,
+                                                   double u) -> Eigen::VectorXd
+        {
+            const int n1 = dae.n_diff;
+            const int n2 = dae.n_alg;
+            Eigen::VectorXd x1 = x_aug.head(n1);
+            Eigen::VectorXd x2 = (n2 > 0) ? x_aug.tail(n2)
+                                            : Eigen::VectorXd();
+
+            // Step 1: project x2 onto constraint manifold (eliminates integration drift)
+            if (n2 > 0)
+                x2 = consistentInit(dae, x1, u, x2, newton_max_iter, newton_tol);
+
+            // Step 2: integrate differential states with forward Euler
+            const Eigen::VectorXd x1_dot = dae.f(x1, x2, u);
+            const Eigen::VectorXd x1_next = x1 + dae.Ts * x1_dot;
+
+            // Step 3: solve for algebraic states at the new differential state
+            Eigen::VectorXd x2_next = x2; // warm start from current x2
+            if (n2 > 0)
+                x2_next = consistentInit(dae, x1_next, u, x2, newton_max_iter, newton_tol);
+
+            // Step 4: assemble augmented state
+            Eigen::VectorXd x_aug_next(n1 + n2);
+            x_aug_next.head(n1) = x1_next;
+            if (n2 > 0) x_aug_next.tail(n2) = x2_next;
+            return x_aug_next;
+        };
+    }
+
+    // ---------------------------------------------------------------------------
+    // c2d(DAESystem) - linearise, eliminate x2, then discretise via ZOH/Tustin.
+    //
+    // Index-1 algebraic elimination (continuous time):
+    //   A11 = df/dx1,  A12 = df/dx2,  G1 = dg/dx1,  G2 = dg/dx2
+    //   B1  = df/du (column n1 x 1),  B2  = dg/du (column n2 x 1)
+    //
+    //   A_red = A11 - A12 * G2^{-1} * G1          (n1 x n1)
+    //   B_red = B1  - A12 * G2^{-1} * B2          (n1 x 1)
+    //
+    // Then applies c2d(StateSpace{A_red, B_red, C_red, D_red, 0}, Ts, method).
+    // ---------------------------------------------------------------------------
+    StateSpace c2d(const DAESystem     &dae,
+                   const Eigen::VectorXd &x1_op,
+                   const Eigen::VectorXd &x2_op,
+                   double               u_op,
+                   double               Ts,
+                   C2dMethod            method)
+    {
+        const int n1 = dae.n_diff;
+        const int n2 = dae.n_alg;
+
+        if (n1 <= 0)
+            throw std::invalid_argument("c2d(DAESystem): n_diff must be > 0.");
+
+        // Jacobians of f w.r.t. x1 (A11, n1*n1) and scalar u (B1, n1*1)
+        const Eigen::MatrixXd A11 = algJacX1(dae.f, x1_op, x2_op, u_op);
+        const Eigen::VectorXd B1  = algJacU (dae.f, x1_op, x2_op, u_op);
+
+        Eigen::MatrixXd A_red(A11);
+        Eigen::VectorXd B_red(B1);
+
+        if (n2 > 0)
+        {
+            const Eigen::MatrixXd A12 = algJacX2(dae.f, x1_op, x2_op, u_op); // n1 x n2
+            const Eigen::MatrixXd G1  = algJacX1(dae.g, x1_op, x2_op, u_op); // n2 x n1
+            const Eigen::MatrixXd G2  = algJacX2(dae.g, x1_op, x2_op, u_op); // n2 x n2
+            const Eigen::VectorXd B2  = algJacU (dae.g, x1_op, x2_op, u_op); // n2
+
+            // Check G2 invertibility (Index-1 requirement)
+            Eigen::FullPivLU<Eigen::MatrixXd> lu(G2);
+            if (lu.rcond() < 1e-12)
+                throw std::runtime_error(
+                    "c2d(DAESystem): G2 = dg/dx2 is singular at the operating point "
+                    "(DAE index > 1 or rank-deficient constraint Jacobian).");
+
+            A_red -= A12 * lu.solve(G1); // A_red = A11 - A12 * G2^{-1} * G1
+            B_red -= A12 * lu.solve(B2); // B_red = B1  - A12 * G2^{-1} * B2
+        }
+
+        // Output Jacobians from h; default C = I (full differential-state output)
+        Eigen::MatrixXd C_red;
+        Eigen::MatrixXd D_red;
+        if (dae.h)
+        {
+            C_red = algJacX1(dae.h, x1_op, x2_op, u_op); // ny x n1
+            // algJacU returns a VectorXd column; MatrixXd assignment widens to ny x 1
+            const Eigen::VectorXd d_col = algJacU(dae.h, x1_op, x2_op, u_op);
+            D_red = d_col; // VectorXd -> MatrixXd (ny x 1) via Eigen implicit conversion
+        }
+        else
+        {
+            C_red = Eigen::MatrixXd::Identity(n1, n1);
+            D_red = Eigen::MatrixXd::Zero(n1, 1);
+        }
+
+        // Assemble continuous-time StateSpace (Ts=0) and discretise.
+        // VectorXd B_red assigned to MatrixXd B (n1 x 1) via implicit Eigen conversion.
+        const Eigen::MatrixXd B_red_mat = B_red;
+        StateSpace sys_c(A_red, B_red_mat, C_red, D_red, 0.0);
+        return c2d(sys_c, Ts, method);
+    }
+
 } // namespace ctrl

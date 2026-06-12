@@ -1,10 +1,10 @@
 # Controller Toolbox
 
-A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H-infinity, Lead-Lag, Smith Predictor, Repetitive Control, Feedforward, Extremum Seeking, Kalman/EKF/UKF/MHE filtering, Fuzzy Logic inference, SOPDT/FOPDT identification, RLS and N4SID system identification, plus an integrated tuner suite and analysis layer.
+A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H-infinity, Lead-Lag, Smith Predictor, Repetitive Control, Feedforward, Extremum Seeking, Kalman/EKF/UKF/MHE filtering, Fuzzy Logic inference, SOPDT/FOPDT identification, RLS and N4SID system identification, plus an integrated tuner suite, analysis layer, and Index-1 DAE utilities.
 
-Sixty-plus controller implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.
+~85 controller implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, and a hardware abstraction layer for simulation.
 
-Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. C++ example programs and 100+ Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and new algorithm extension. Eleven end-to-end physics case studies (nine C++: boiler-turbine, tug boat, solar cooling, porous-plate humidification, active suspension, buck-boost converter, solar cooker, solar OTEC, hydraulic SMISMO; two Python-only: drill string, wind-wave platform) exercise the full controller stack on nonlinear plants.
+Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. C++ example programs and 100+ Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and algorithm extension. Fifteen end-to-end physics case studies (nine C++: boiler-turbine, tug boat, solar cooling, porous-plate humidification, active suspension, buck-boost converter, solar cooker, solar OTEC, hydraulic SMISMO; six Python-only: drill string, wind-wave platform, electro-hydraulic force servo, aerial firefighting bag drop, battery thermal management, surface ship manoeuvring) exercise the full controller stack on nonlinear plants.
 
 ---
 
@@ -82,21 +82,22 @@ for (int k = 0; k < 500; ++k) {
 
 ```
 |-- lib/             # Library sources -> target: controller_toolbox
-|-- examples/        # ex01..ex54 single-file C++ demos (corrector patterns, new algorithms)
-|-- examples/python/ # ex01..ex70 Python companion scripts and binding demos
-|-- case-study/      # 11 physics studies (9 C++ + 2 Python-only) + spec-only stubs
+|-- examples/        # ex01..ex79 single-file C++ demos (corrector patterns, new algorithms)
+|-- examples/python/ # ex01..ex102 Python companion scripts and binding demos
+|-- case-study/      # 15 physics studies (9 C++ + 6 Python-only) + spec-only stubs
 |-- tests/           # CTest-driven unit + integration tests (Catch2 v3)
 |-- bindings/        # pybind11 binding source files
 |-- scripts/         # tune_all / simulate_all / realtime_all
 |-- cheatsheet/      # Reference notes
 |-- docs/            # Documentation & deployment guides
+|-- tools/           # compare_controllers.py (IAE/ISE table across case-study CSVs)
 ```
 
 ---
 
 ## Case Studies
 
-Eleven self-contained physics studies under [case-study/](case-study/) exercise the
+Fifteen self-contained physics studies under [case-study/](case-study/) exercise the
 library end-to-end. Each pairs a nonlinear plant simulator with a roster of
 controllers that wrap the `lib/` algorithms, then sweeps every controller across
 several scenarios and writes CSV telemetry for post-processing. Per-study status,
@@ -121,12 +122,16 @@ rosters, and caveats are tracked in [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md)
 | Study | Plant | Controllers | Scenarios x Runs |
 |---|---|---|---|
 | [Vertical Drill String](case-study/Vertical%20Drill%20String%20Mathematical%20Review%202025/) | 2-DOF torsional model, Stribeck bit friction (stick-slip) | 17 | 5 -> 85 |
-| [Multi-Body Floating Wind-Wave Platform](case-study/Multi-Body%20Floating%20Wind-Wave%20Platform/) | 4-state FOWT heave + WEC arm, wave forcing | 16 | 5 -> 80 |
+| [Multi-Body Floating Wind-Wave Platform](case-study/Multi-Body%20Floating%20Wind-Wave%20Platform/) | 4-state FOWT heave + WEC arm, sinusoidal wave forcing | 16 | 5 -> 80 |
+| [Tracking Control of Electro-Hydraulic Force Servo Systems](case-study/Tracking%20Control%20of%20Electro-Hydraulic%20Force%20Servo%20Systems/) | 5-state EHFS [P_A, P_B, x_v, v_p, x_p], servo valve + cylinder, RK4 Ts=0.5ms | 12 | 5 -> 60 |
+| [High-Altitude Aerial Firefighting Bag Drop](case-study/High-Altitude%20Aerial%20Firefighting%20Bag%20Drop/) | 3D bag trajectory [x,y,z,vx,vy,vz], drag+gravity+wind, RK4 Ts=0.05s | 12 | 5 -> 60 |
+| [Air-Cooled Battery Thermal Management System](case-study/Air-Cooled%20Battery%20Thermal%20Management%20System/) | 1-D transient HX, N=9 cells, 10 channels, J/U/L flow-pattern switching, Euler Ts=1s | 12 | 5 -> 60 |
+| [Nonlinear Surface Ship Manoeuvring Control](case-study/Nonlinear%20Surface%20Ship%20Manoeuvring%20Control/) | 3-DOF MMG model, 19 SRUKF-identified params (Meng 2025), [u,v,r,ψ,x,y], RK4 Ts=0.08s | 12 | 5 -> 60 |
 
 Controllers span the full stack: PID, LQR, LQG, MPC, GPC-RLS, SMC, ADRC, Fuzzy-PID,
 Smith Predictor, MRAC, H-infinity, TubeMPC, ScenarioMPC, NonlinearMPC, Feedback
 Linearisation, EKF-LQR, MHE-LQR, SubspaceID-LQG, L1Adaptive, ILC, NeuralPID,
-DynaMBRL, CEM-MPC, Koopman-MPC, ESN, CBF safety filtering, and gain-scheduled
+DynaMBRL, CEM-MPC, Koopman-MPC, ESN, CBF safety filtering, ASMC, and gain-scheduled
 (manual, LPV, and automated gap-metric) variants, depending on the plant.
 Several spec-only stubs (README only, no `sim/`) remain as outstanding work --
 see [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md).
@@ -140,13 +145,15 @@ see [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md).
 | **Classical** | PID (backward-Euler, anti-windup, DoM, 2-DOF, b_weight), Lead-Lag, Smith Predictor (integer + fractional Pade), Feedforward, Repetitive Control |
 | **Optimal** | LQR (DARE doubling), LQG (LQR+KF), MPC (condensed QP + box constraints), GPC (CARIMA+RLS adaptive), H-infinity (gamma bisection, mixed sensitivity, DK mu-synthesis with rational D) |
 | **Robust / Nonlinear** | SMC (saturation boundary layer), ADRC (2nd-order LADRC + ESO), Extremum Seeker |
-| **Adaptive** | MRACController (Lyapunov + sigma-modification + Euclidean projection), GPC::setPlant (RLS adaptive) |
-| **Nonlinear** | FeedbackLinearisationController (affine-in-control SISO, relative degree 1; DriftFn+GainFn) |
+| **Adaptive** | MRACController (Lyapunov + sigma-modification + Euclidean projection), L1AdaptiveController (state predictor + LP-filtered adaptation), GPC::setPlant (RLS adaptive) |
+| **Nonlinear** | FeedbackLinearisationController (affine-in-control SISO, relative degree 1; DriftFn+GainFn), NonlinearMPC (RTI, user-supplied StateFunc) |
 | **Intelligent** | FuzzyPD, FuzzyPID, FuzzySupervisor (Mamdani & Takagi-Sugeno) |
-| **Composition** | ControllerStack (Supervisory, Additive, Weighted) - cascade, observer+SF, bumpless transfer |
-| **Estimators** | KalmanFilter, EKF (analytical/numerical Jacobians), UKF (sigma-point), MovingHorizonEstimator (condensed QP) |
-| **Identification** | FOPDTIdentifier, SOPDTIdentifier + Rivera 1986 IMC, RecursiveLeastSquares, SubspaceID (N4SID) |
-| **Model utilities** | LinearisationHelper (jacobianX/U, lineariseAtPoint ZOH), BalancedTruncation (Hinf bound), ZeroPhaseTrackingFilter (ZPETC + transmissionZeros) |
+| **Composition** | ControllerStack (Supervisory, Additive, Weighted) - cascade, observer+SF, bumpless transfer; ComputationalDelayWrapper, AntiWindupWrapper, CBFSafetyFilter |
+| **Estimators** | KalmanFilter, EKF (analytical/numerical Jacobians + DAE algebraic projection), UKF (sigma-point), MovingHorizonEstimator (condensed QP + state box constraints) |
+| **Identification** | FOPDTIdentifier, SOPDTIdentifier + Rivera 1986 IMC, RecursiveLeastSquares, SubspaceID (N4SID), SINDy (STLS sparse regression), KoopmanEDMD (PolyDeg/RBF dictionary) |
+| **ML / Data-driven** | GaussianProcess (SE kernel, Cholesky, fixed-budget), EchoStateNetwork (spectral-radius reservoir), NeuralPID (3→n_h→3 online backprop), CEMController (elite-sample stochastic MPC), DynaController (Sutton Dyna MBRL + SINDy model), ILC (P-type / D-type / norm-optimal), DeePC (ADMM data-enabled predictive control), ScenarioMPC, BayesianOptimizer |
+| **Model utilities** | LinearisationHelper (jacobianX/U, lineariseAtPoint ZOH), BalancedTruncation (Hinf bound), ZeroPhaseTrackingFilter (ZPETC + transmissionZeros), GapMetric (chordal SISO + subspace MIMO) |
+| **DAE utilities** | `DAESystem` (Index-1 semi-explicit, `f`/`g`/`h` functors), `consistentInit` (Newton-Raphson), `dae2ode` (Euler+Newton discrete step function), `c2d(DAESystem)` (algebraic elimination + ZOH/Tustin) |
 
 ---
 
@@ -207,31 +214,40 @@ docker run --rm -it -v "$(pwd):/work" -w /work \
 
 ## Project Status
 
-**Baseline (Part 44 - 2026-06-10, UNVERIFIED until the next clean `run.py`):**
+**Baseline (Part 51 - 2026-06-12, UNVERIFIED until next clean `run.py`):**
 C++ case studies: Boiler 216/216 . Tug 72/72 . Solar 70/70 . Humidification 75/75 .
-ActiveSuspension 75/75 . BuckBoost 60/60 . SolarCooker 60/60 . SOTEC 60/60 .
-SMISMO 60/60 expected (new in Part 44).
-Python-only (Phase 6): DrillString 85/85 . WindWave 80/80.  
+ActiveSuspension 75/75 . BuckBoost 60/60 . SolarCooker 60/60 . SOTEC 60/60 . SMISMO 60/60.
+Python-only (Phase 6): DrillString 85/85 . WindWave 80/80 . EHFS 60/60 .
+Firefighting 60/60 . BTMS 60/60 . SurfaceShip 60/60.
 `bug_report.txt`: 0 blocks expected after a clean run (`safe_phrases` list in `run.py` suppresses all known benign messages).
 
-**Part 44 (2026-06-10):**
-- Reimplemented the **Separate Meter In Separate Meter Out (SMISMO)** hydraulic case study
-  from both source PDFs (Chen et al. 2018 CEP 72; Liu et al. 2009 IEEE/ASME AIM) - the
-  earlier sim had been deleted. 8-state plant (cylinder + dual PDCV spool dynamics +
-  identified Stribeck friction), Liu Fig. 10 dual-loop valve allocation with 20 bar
-  backpressure regulation, 12 controllers x 5 scenarios = 60 runs, target `smismo_sim`.
-- Recreated `tests/test_smismo_regression.cpp` (6 Catch2 tests) and corrected the study
-  README (citation, Table 1 rig parameters, 4-quadrant valve flow, energy-saving equations).
+**Part 51 (2026-06-12) — DAE architecture (P1/P2/P3):**
+- `DAESystem` struct (`lib/PlantModel.h/.cpp`): Index-1 semi-explicit DAE with `f` (differential), `g` (algebraic), `h` (output) functors; `n_diff`/`n_alg`/`Ts` fields.
+- `consistentInit`: Newton-Raphson (LDLT) solving `g(x1,x2,u)=0` for `x2`.
+- `dae2ode`: discrete step function via forward Euler on `x1` + Newton projection on `x2`.
+- `c2d(DAESystem, x1_op, x2_op, u_op, Ts, method)`: Index-1 algebraic elimination (`A_red = A11 - A12*G2⁻¹*G1`), then ZOH/Tustin. Throws `runtime_error` if G2 singular.
+- DAE-aware EKF (`lib/ExtendedKalmanFilter.h/.cpp`): `setAlgebraicConstraint(g, n_diff, n_alg)` projects `x2` block via Newton after each `update()`; covariance projected as `P = J_proj*P*J_proj'`.
+- pybind11 bindings: `DAESystem`, `consistent_init`, `dae2ode`, `dae_c2d`, `set_algebraic_constraint` on EKF.
+- 7 Catch2 tests: `[dae_system]` ×3, `[dae_c2d]` ×2, `[dae_ekf]` ×2.
 
-**Part 29 additions and fixes (2026-06-01):**
-- Added fifth case study: **Porous Fiber Plate Humidification System** (Ye et al. 2024) - laminar flat-plate evaporative humidifier + first-order room moisture ODE; 10 controllers * 5 scenarios = 50 runs.
-- Fixed `pybind11` v2.13 CMake 3.27+ deprecation warning (`cmake_minimum_required VERSION 3.5`) by wrapping `FetchContent_MakeAvailable` with `CMAKE_WARN_DEPRECATED OFF` in `bindings/CMakeLists.txt`.
-- Fixed boiler ADRC `omega_o=0.50` at exact boundary (`omega_o*Ts=0.50` - strict `< 0.5` required); reduced to `omega_o=0.45`, `omega_c=0.09`.
-- Fixed `computeY3` in boiler plant: guard against division by zero when drum water level `x3 -> 0`.
-- Fixed solar pump efficiency formula: `ratio*(1-ratio)` gave zero efficiency at rated flow; corrected to `ratio*(2-ratio)` (parabola centred at BEP).
+**Part 49 (2026-06-11) — Nonlinear Surface Ship Manoeuvring Control (Python-only):**
+- 3-DOF MMG model, 19 SRUKF-identified parameters (Meng 2025 Table 5), [u,v,r,ψ,x,y], RK4 Ts=0.08s.
+- 12 controllers × 5 scenarios = 60 runs. Includes ASMC (paper cascade + disturbance FF), MPC (ZOH [ψ,r] linearisation), LQR (Bryson DARE), MRAC, L1Adaptive, ADRC, GainScheduled, NeuralPID, ILC.
 
-**Part 28 (2026-05-31):** 5-phase `run.py`; `AdaptiveSmithPredictor` cross-correlation fix; 8 Python example bugs fixed; 36-entry `safe_phrases` for clean `bug_report.txt`; 4 case-study READMEs added.
+**Part 48 (2026-06-11) — Air-Cooled Battery Thermal Management System (Python-only):**
+- 1-D transient HX model: N=9 cells, 10 channels, J/U/L flow-pattern switching, Forward Euler Ts=1s.
+- 12 controllers × 5 scenarios = 60 runs.
 
-**Part 27 (2026-05-31):** Python example quality pass - 11 internal `[FAIL]` checks fixed in 10 example files.
+**Part 46 (2026-06-10) — High-Altitude Aerial Firefighting Bag Drop (Python-only):**
+- 3D trajectory [x,y,z,vx,vy,vz], drag+gravity+wind, RK4 Ts=0.05s. Primary metric: CEP (50th-percentile radial error). N_mc=30 Monte-Carlo trajectories per planner/scenario.
+- 12 planners × 5 scenarios = 60 runs.
+
+**Part 45 (2026-06-10) — Electro-Hydraulic Force Servo Systems (Python-only):**
+- 5-state EHFS [P_A, P_B, x_v, v_p, x_p], servo valve + cylinder, RK4 Ts=0.5ms.
+- 12 controllers × 5 scenarios = 60 runs. Includes FeedbackLinearisation, LQR, ADRC (omega_o=800, omega_o*Ts=0.40<0.5), GainScheduled.
+
+**Part 44 (2026-06-10) — SMISMO C++ case study reimplemented:**
+- Separate Meter In Separate Meter Out hydraulic cylinder (Chen 2018 + Liu 2009). 8-state RK4, dual PDCV spool dynamics, Stribeck friction, 20 bar backpressure regulation.
+- 12 controllers × 5 scenarios = 60 runs, target `smismo_sim`. Recreated `test_smismo_regression.cpp`.
 
 Details in [docs/cumulative_bug_report.md](docs/cumulative_bug_report.md). Real-time deployment guidance in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).

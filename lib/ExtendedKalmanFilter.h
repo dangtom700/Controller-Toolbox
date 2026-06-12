@@ -1,6 +1,7 @@
 #pragma once
 #include <Eigen/Dense>
 #include <functional>
+#include <stdexcept>
 
 /**
  * @file ExtendedKalmanFilter.h
@@ -125,6 +126,32 @@ public:
     double sampleTime()                 const { return Ts_; }
 
     /**
+     * @brief Attach a DAE algebraic constraint for post-update algebraic projection (P3).
+     *
+     * After every @c update() / @c step() call, the algebraic block x2 = x_hat[n_diff:]
+     * is re-solved from @p g_alg(x1, x2, u) = 0 via Newton-Raphson, keeping the estimate
+     * on the constraint manifold despite measurement noise.
+     * The error covariance is projected accordingly: P <- J_proj . P . J_proj^T where
+     * J_proj = [[I_{n_diff}, 0]; [-G2^{-1}.G1, 0_{n_alg}]].
+     *
+     * @param g_alg    Algebraic constraint: 0 = g(x1, x2, u) with signature
+     *                 @c VectorXd(const VectorXd& x1, const VectorXd& x2, double u).
+     * @param n_diff   Number of differential states (x1 dimension in the full state).
+     * @param n_alg    Number of algebraic states (x2 dimension = state_size - n_diff).
+     * @param newton_tol Newton convergence tolerance (default 1e-9).
+     * @throws std::invalid_argument if n_diff + n_alg != n_states.
+     */
+    void setAlgebraicConstraint(
+        std::function<Eigen::VectorXd(const Eigen::VectorXd &,
+                                      const Eigen::VectorXd &,
+                                      double)> g_alg,
+        int n_diff, int n_alg,
+        double newton_tol = 1e-9);
+
+    /** @brief True if an algebraic constraint has been attached via setAlgebraicConstraint(). */
+    bool hasAlgebraicConstraint() const { return alg_set_; }
+
+    /**
      * @brief Central-difference numerical Jacobian with state-scaled step size.
      *
      * Per-element step: h_i = eps_scale . max(|x_i|, 1). This avoids near-zero absolute
@@ -161,6 +188,18 @@ private:
     Eigen::VectorXd x_hat_; ///< State estimate x^[k|k].
     Eigen::MatrixXd P_;     ///< Error covariance P[k|k].
     double Ts_;
+
+    // P3: DAE algebraic projection (optional, activated by setAlgebraicConstraint)
+    using AlgConstraintFn = std::function<Eigen::VectorXd(const Eigen::VectorXd &,
+                                                           const Eigen::VectorXd &,
+                                                           double)>;
+    AlgConstraintFn alg_g_;     ///< Algebraic constraint g(x1, x2, u) = 0.
+    int    n_diff_alg_ = 0;     ///< Number of differential states for projection.
+    int    n_alg_      = 0;     ///< Number of algebraic states for projection.
+    double alg_tol_    = 1e-9;  ///< Newton convergence tolerance.
+    bool   alg_set_    = false; ///< True when constraint is active.
+
+    void projectAlgebraicStates(const Eigen::VectorXd &u);
 };
 
 } // namespace ctrl

@@ -124,7 +124,8 @@ Safe to use with read-only or shared NumPy arrays.
                "Bilinear transform prewarped at a specified frequency [rad/s].")
         .export_values();
 
-    m.def("c2d", &ctrl::c2d,
+    m.def("c2d", py::overload_cast<const ctrl::StateSpace &, double,
+                                    ctrl::C2dMethod, double>(&ctrl::c2d),
           py::arg("sys_c"), py::arg("Ts"),
           py::arg("method")       = ctrl::C2dMethod::ZOH,
           py::arg("prewarp_freq") = 0.0,
@@ -137,6 +138,139 @@ sys_c        : StateSpace with Ts == 0.0 (continuous-time marker).
 Ts           : Desired sample period [s].
 method       : C2dMethod.ZOH (default), .Tustin, or .TustinPrewarped.
 prewarp_freq : Prewarping frequency [rad/s] (only for TustinPrewarped).
+)doc");
+
+    // -----------------------------------------------------------------------
+    // DAESystem - Index-1 semi-explicit DAE (P1/P2)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::DAESystem>(m, "DAESystem", R"doc(
+Index-1 semi-explicit Differential-Algebraic Equation system.
+
+    x1' = f(x1, x2, u)     (n_diff differential states)
+    0   = g(x1, x2, u)     (n_alg  algebraic states, Index-1: dg/dx2 invertible)
+    y   = h(x1, x2, u)     (output map, optional)
+
+Use dae2ode() to simulate, consistent_init() to find initial conditions,
+and dae_c2d() to linearise and discretise for controller design.
+)doc")
+        .def(py::init<>())
+        .def_readwrite("n_diff", &ctrl::DAESystem::n_diff,
+                       "Number of differential states (x1 dimension).")
+        .def_readwrite("n_alg",  &ctrl::DAESystem::n_alg,
+                       "Number of algebraic states (x2 dimension).")
+        .def_readwrite("Ts",     &ctrl::DAESystem::Ts,
+                       "Sample time [s] used by dae2ode() for Euler stepping.")
+        .def("set_f", [](ctrl::DAESystem &dae, py::object f_py) {
+                 dae.f = [f_py](const Eigen::VectorXd &x1,
+                                const Eigen::VectorXd &x2,
+                                double u) -> Eigen::VectorXd {
+                     return f_py(x1, x2, u).cast<Eigen::VectorXd>();
+                 };
+             }, py::arg("f"),
+             "Set differential equations: f(x1, x2, u) -> VectorXd (x1 dimension).")
+        .def("set_g", [](ctrl::DAESystem &dae, py::object g_py) {
+                 dae.g = [g_py](const Eigen::VectorXd &x1,
+                                const Eigen::VectorXd &x2,
+                                double u) -> Eigen::VectorXd {
+                     return g_py(x1, x2, u).cast<Eigen::VectorXd>();
+                 };
+             }, py::arg("g"),
+             "Set algebraic constraints: g(x1, x2, u) -> VectorXd (n_alg dimension, must equal 0).")
+        .def("set_h", [](ctrl::DAESystem &dae, py::object h_py) {
+                 dae.h = [h_py](const Eigen::VectorXd &x1,
+                                const Eigen::VectorXd &x2,
+                                double u) -> Eigen::VectorXd {
+                     return h_py(x1, x2, u).cast<Eigen::VectorXd>();
+                 };
+             }, py::arg("h"),
+             "Set output map: h(x1, x2, u) -> VectorXd (output dimension).")
+        .def("__repr__", [](const ctrl::DAESystem &d) {
+            return "<DAESystem n_diff=" + std::to_string(d.n_diff) +
+                   " n_alg="  + std::to_string(d.n_alg) +
+                   " Ts="     + std::to_string(d.Ts) + ">";
+        });
+
+    m.def("consistent_init",
+          [](const ctrl::DAESystem &dae, const Eigen::VectorXd &x1,
+             double u, const Eigen::VectorXd &x2_guess,
+             int max_iter, double tol) {
+              return ctrl::consistentInit(dae, x1, u, x2_guess, max_iter, tol);
+          },
+          py::arg("dae"), py::arg("x1"), py::arg("u"), py::arg("x2_guess"),
+          py::arg("max_iter") = 20, py::arg("tol") = 1e-9,
+          R"doc(
+Find consistent algebraic states: solve g(x1, x2, u) = 0 for x2.
+
+Parameters
+----------
+dae      : DAESystem whose g defines the constraint.
+x1       : Fixed differential states.
+u        : Fixed scalar input.
+x2_guess : Initial guess for x2.
+max_iter : Newton iteration limit (default 20).
+tol      : Convergence tolerance on norm(g) (default 1e-9).
+
+Returns
+-------
+x2 satisfying norm(g(x1, x2, u)) < tol, or best Newton iterate.
+)doc");
+
+    m.def("dae2ode",
+          [](const ctrl::DAESystem &dae, int max_iter, double tol) {
+              auto step_fn = ctrl::dae2ode(dae, max_iter, tol);
+              // Return a Python-callable wrapper around the C++ step function
+              return py::cpp_function(
+                  [step_fn](const Eigen::VectorXd &x_aug, double u) {
+                      return step_fn(x_aug, u);
+                  },
+                  py::arg("x_aug"), py::arg("u"));
+          },
+          py::arg("dae"), py::arg("newton_max_iter") = 20, py::arg("newton_tol") = 1e-9,
+          R"doc(
+Convert a DAESystem to a discrete-time step function F(x_aug, u) -> x_aug_next.
+
+The returned callable advances the augmented state [x1; x2] by one Euler step,
+then Newton-solves for the consistent algebraic state x2_next.
+
+Parameters
+----------
+dae            : Source DAESystem (must have Ts > 0).
+newton_max_iter : Newton iteration limit (default 20).
+newton_tol     : Newton convergence tolerance (default 1e-9).
+
+Returns
+-------
+Callable (x_aug: ndarray, u: float) -> x_aug_next: ndarray
+)doc");
+
+    m.def("dae_c2d",
+          [](const ctrl::DAESystem &dae, const Eigen::VectorXd &x1_op,
+             const Eigen::VectorXd &x2_op, double u_op, double Ts,
+             ctrl::C2dMethod method) {
+              return ctrl::c2d(dae, x1_op, x2_op, u_op, Ts, method);
+          },
+          py::arg("dae"), py::arg("x1_op"), py::arg("x2_op"), py::arg("u_op"),
+          py::arg("Ts"), py::arg("method") = ctrl::C2dMethod::ZOH,
+          R"doc(
+Linearise a DAESystem, eliminate algebraic states, and discretise.
+
+Computes the reduced continuous-time model:
+    A_red = A11 - A12 * inv(G2) * G1
+    B_red = B1  - A12 * inv(G2) * B2
+Then applies ZOH or Tustin discretisation.
+
+Parameters
+----------
+dae    : Source DAESystem.
+x1_op  : Operating-point differential states.
+x2_op  : Operating-point algebraic states (must satisfy g approx = 0).
+u_op   : Operating-point scalar input.
+Ts     : Desired sample period [s].
+method : C2dMethod.ZOH (default) or .Tustin.
+
+Returns
+-------
+Discrete-time StateSpace of dimension n_diff.
 )doc");
 
     // -----------------------------------------------------------------------

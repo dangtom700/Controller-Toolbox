@@ -710,4 +710,47 @@ assert _mon.n_samples() == 11
 assert _mon.n_alarms() > 0, "Large shift should trigger at least one alarm"
 print('ControllerMonitor smoke test passed.')
 
+# ---- DAESystem (P1/P2): Index-1 semi-explicit DAE ---------------------------
+import numpy as _npdae
+
+# Build a simple RC circuit DAE:
+#   x1' = f(x1, x2, u) = -(x1 + x2) / (R*C) + u/(R*C)   [capacitor voltage]
+#   0   = g(x1, x2, u) = x1 - x2 - R*i                    [resistor voltage drop]
+#   Where x2 = R*i and the algebraic constraint means x2 = x1 - R*i.
+# Simplest Index-1 DAE: x1' = -x1 + u,  0 = x1 - x2  => x2 = x1
+_dae = ctrl.DAESystem()
+_dae.n_diff = 1
+_dae.n_alg  = 1
+_dae.Ts     = 0.05
+
+_dae.set_f(lambda x1, x2, u: _npdae.array([-x1[0] + u]))
+_dae.set_g(lambda x1, x2, u: _npdae.array([x1[0] - x2[0]]))  # x2 = x1
+
+# consistent_init: starting from x2_guess=0, should find x2=x1=1
+_x1_test = _npdae.array([1.0])
+_x2_test = _npdae.array([0.0])  # wrong initial guess
+_x2_found = ctrl.consistent_init(_dae, _x1_test, 0.0, _x2_test)
+assert abs(_x2_found[0] - 1.0) < 1e-8, f"consistent_init failed: x2={_x2_found[0]:.6f}"
+print(f'DAE consistent_init: x2_guess=0 -> x2_solved={_x2_found[0]:.6f} (expected 1.0)')
+
+# dae2ode: step from x_aug=[0.5, 0.5] with u=1; need ~5tau = 100 steps at Ts=0.05 to reach ~0.997
+_step_fn = ctrl.dae2ode(_dae)
+_x_aug = _npdae.array([0.5, 0.5])
+for _ in range(100):
+    _x_aug = _step_fn(_x_aug, 1.0)
+assert abs(_x_aug[0] - 1.0) < 0.05, f"dae2ode step fn diverged: x1={_x_aug[0]:.4f}"
+assert abs(_x_aug[1] - _x_aug[0]) < 1e-6, f"dae2ode x2 != x1 (constraint violated)"
+print(f'DAE dae2ode: x1 after 100 steps = {_x_aug[0]:.4f} (expected ~1.0)')
+
+# dae_c2d: linearise and discretise; reduced model is x1' = -x1 + u => Ad = exp(-Ts)
+_dae.set_h(lambda x1, x2, u: _npdae.array([x1[0]]))  # output = x1
+_ss_dae = ctrl.dae_c2d(_dae, _npdae.array([1.0]), _npdae.array([1.0]), 1.0, _dae.Ts)
+assert _ss_dae.state_size() == 1, f"dae_c2d: expected n=1, got {_ss_dae.state_size()}"
+assert abs(_ss_dae.A[0, 0] - _npdae.exp(-_dae.Ts)) < 0.02, \
+    f"dae_c2d A not near exp(-Ts): A={_ss_dae.A[0,0]:.4f}"
+print(f'DAE dae_c2d: A={_ss_dae.A[0,0]:.4f} (expected ~{_npdae.exp(-_dae.Ts):.4f})')
+
+assert ctrl.registry_has('dae_system'), "dae_system should be registered"
+print('DAESystem smoke tests passed.')
+
 print('\nAll smoke tests passed.')

@@ -2,6 +2,7 @@
 #include <vector>
 #include <stdexcept>
 #include <string>
+#include <functional>
 #include <Eigen/Dense>
 
 /**
@@ -238,4 +239,134 @@ TransferFunction ss2tf(const StateSpace &sys);
  */
 StateSpace minreal(const StateSpace &sys, double tol = 1e-6);
 
+// =============================================================================
+// DAESystem - Index-1 semi-explicit Differential-Algebraic Equation
+//
+//   x1' = f(x1, x2, u)    differential states (integrated by Euler/RK4)
+//   0   = g(x1, x2, u)    algebraic constraints (solved by Newton at each step)
+//   y   = h(x1, x2, u)    outputs
+//
+// Index-1 requirement: dg/dx2 must be invertible at the operating point.
+// Index >= 2 (Pantelides / BLT algorithm) is out of scope.
+// =============================================================================
+
+/**
+ * @brief Index-1 semi-explicit Differential-Algebraic Equation system.
+ *
+ * Represents plants of the form:
+ * @code
+ *   x1' = f(x1, x2, u)     (n_diff differential states)
+ *   0   = g(x1, x2, u)     (n_alg  algebraic states)
+ *   y   = h(x1, x2, u)     (output map)
+ * @endcode
+ *
+ * Use @c dae2ode() to obtain a discrete-time step function, @c consistentInit()
+ * to find consistent initial conditions, and the @c c2d() overload to obtain a
+ * linearised discrete-time StateSpace for controller design (MPC, LQR, LQG).
+ *
+ * @note Only SISO (scalar u) is supported at the DAE level. MIMO extensions
+ *   can be layered on top by the user.
+ */
+struct DAESystem
+{
+    /** @brief x1' = f(x1, x2, u) - differential equations. */
+    using DiffFunc   = std::function<Eigen::VectorXd(const Eigen::VectorXd &x1,
+                                                      const Eigen::VectorXd &x2,
+                                                      double u)>;
+    /** @brief 0 = g(x1, x2, u) - algebraic constraints (n_alg equations). */
+    using AlgFunc    = std::function<Eigen::VectorXd(const Eigen::VectorXd &x1,
+                                                      const Eigen::VectorXd &x2,
+                                                      double u)>;
+    /** @brief y = h(x1, x2, u) - output map. */
+    using OutputFunc = std::function<Eigen::VectorXd(const Eigen::VectorXd &x1,
+                                                      const Eigen::VectorXd &x2,
+                                                      double u)>;
+
+    DiffFunc   f;          ///< Differential equations.
+    AlgFunc    g;          ///< Algebraic constraints.
+    OutputFunc h;          ///< Output map.
+    int        n_diff = 0; ///< Number of differential states (x1 dimension).
+    int        n_alg  = 0; ///< Number of algebraic states  (x2 dimension).
+    double     Ts     = 0.0; ///< Sample time [s] used by dae2ode() for Euler stepping.
+};
+
+/**
+ * @brief Find consistent algebraic states: solve g(x1_init, x2, u0) = 0 for x2.
+ *
+ * Runs Newton-Raphson on the algebraic constraint starting from @p x2_guess.
+ * The numerical Jacobian dg/dx2 is computed via central differences.
+ * Returns the last iterate (not necessarily converged) when the Jacobian is
+ * singular or max_iter is reached - callers should check residual if needed.
+ *
+ * @param dae      DAESystem whose AlgFunc g defines the constraint.
+ * @param x1_init  Fixed differential states (not modified).
+ * @param u0       Fixed input scalar.
+ * @param x2_guess Initial guess for x2.
+ * @param max_iter Maximum Newton iterations (default 20).
+ * @param tol      Convergence tolerance on ||g|| (default 1e-9).
+ * @return         x2 satisfying ||g(x1_init, x2, u0)|| < tol (or best iterate).
+ */
+Eigen::VectorXd consistentInit(const DAESystem     &dae,
+                                const Eigen::VectorXd &x1_init,
+                                double               u0,
+                                const Eigen::VectorXd &x2_guess,
+                                int                  max_iter = 20,
+                                double               tol      = 1e-9);
+
+/**
+ * @brief Convert a DAESystem to a discrete-time step function.
+ *
+ * Returns @c F(x_aug, u) = x_aug_next where x_aug = [x1; x2].
+ * At each call the function:
+ * 1. Projects x2 onto the constraint manifold (Newton solve on g).
+ * 2. Integrates x1 forward by one Euler step using dae.Ts.
+ * 3. Solves for x2_next from g(x1_next, x2_next, u) = 0.
+ *
+ * The resulting step function is directly usable in simulation loops and as the
+ * state prediction function for @c NonlinearMPC / @c CEMController.
+ *
+ * @param dae            DAESystem (must have Ts > 0 for meaningful stepping).
+ * @param newton_max_iter Newton iteration limit (default 20).
+ * @param newton_tol     Newton convergence tolerance (default 1e-9).
+ * @return               Step function @c x_aug_next = F(x_aug, u).
+ */
+std::function<Eigen::VectorXd(const Eigen::VectorXd &, double)>
+dae2ode(const DAESystem &dae,
+        int    newton_max_iter = 20,
+        double newton_tol      = 1e-9);
+
+/**
+ * @brief Linearise a DAESystem at (x1_op, x2_op, u_op), eliminate x2, and discretise.
+ *
+ * Implements index-1 algebraic elimination:
+ * @code
+ *   A_red = A11 - A12 * G2^{-1} * G1
+ *   B_red = B1  - A12 * G2^{-1} * B2
+ * @endcode
+ * where A11=df/dx1, A12=df/dx2, G1=dg/dx1, G2=dg/dx2, B1=df/du, B2=dg/du.
+ *
+ * Then applies the existing @c c2d(StateSpace, Ts, method) to the reduced
+ * continuous-time model (A_red, B_red, C_red, D_red).
+ *
+ * @throws std::runtime_error if G2 is singular ("DAE index > 1 at operating point").
+ *
+ * @param dae      Source DAESystem.
+ * @param x1_op    Operating-point differential states.
+ * @param x2_op    Operating-point algebraic states (must satisfy g approx = 0).
+ * @param u_op     Operating-point input.
+ * @param Ts       Desired sample period [s].
+ * @param method   Discretisation method (default: ZOH).
+ * @return         Discrete-time StateSpace of dimension n_diff.
+ */
+StateSpace c2d(const DAESystem     &dae,
+               const Eigen::VectorXd &x1_op,
+               const Eigen::VectorXd &x2_op,
+               double               u_op,
+               double               Ts,
+               C2dMethod            method = C2dMethod::ZOH);
+
 } // namespace ctrl
+
+// Self-registration - included by ControllerToolbox.h umbrella.
+#include "ControllerRegistry.h"
+CTRL_REGISTER_FEATURE(dae_system)

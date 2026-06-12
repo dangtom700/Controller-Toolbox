@@ -3871,3 +3871,232 @@ TEST_CASE("MHEParams xMax clamps arrival state estimate from above", "[mhe_const
         REQUIRE(x_est(0) <= 1.0 + 0.05);  // clamped near 1, not 5
     }
 }
+
+// =============================================================================
+// P1: DAESystem - consistentInit + dae2ode
+// =============================================================================
+
+// Shared helper: Index-1 DAE with analytic solution.
+// Differential:  x1' = -x1 + u
+// Algebraic:     0   = x1 - x2       (so x2 = x1 at all times)
+// Exact discrete (Euler, Ts=0.1): x1_next = (1-Ts)*x1 + Ts*u
+static ctrl::DAESystem makeTestDAE(double Ts_dae = 0.1)
+{
+    ctrl::DAESystem dae;
+    dae.n_diff = 1;
+    dae.n_alg  = 1;
+    dae.Ts     = Ts_dae;
+    dae.f = [](const Eigen::VectorXd &x1, const Eigen::VectorXd &x2, double u)
+              -> Eigen::VectorXd {
+        Eigen::VectorXd dx(1);
+        dx(0) = -x1(0) + u;  // x1_dot = -x1 + u
+        return dx;
+    };
+    dae.g = [](const Eigen::VectorXd &x1, const Eigen::VectorXd &x2, double u)
+              -> Eigen::VectorXd {
+        Eigen::VectorXd res(1);
+        res(0) = x1(0) - x2(0);  // constraint: x2 = x1
+        return res;
+    };
+    dae.h = [](const Eigen::VectorXd &x1, const Eigen::VectorXd &x2, double u)
+              -> Eigen::VectorXd {
+        return x1;  // output = differential state
+    };
+    return dae;
+}
+
+TEST_CASE("DAESystem consistentInit finds x2 satisfying g=0", "[dae_system]")
+{
+    auto dae = makeTestDAE();
+
+    // x1 = 3.0; correct x2 = 3.0 (from g: x1 - x2 = 0)
+    Eigen::VectorXd x1(1); x1(0) = 3.0;
+    Eigen::VectorXd x2_guess(1); x2_guess(0) = 0.0;  // deliberately wrong
+
+    const Eigen::VectorXd x2_sol = ctrl::consistentInit(dae, x1, 0.0, x2_guess);
+
+    REQUIRE(x2_sol.size() == 1);
+    REQUIRE_THAT(x2_sol(0), WithinAbs(3.0, 1e-7));
+
+    // Residual must be near zero
+    const Eigen::VectorXd g_res = dae.g(x1, x2_sol, 0.0);
+    REQUIRE(g_res.norm() < 1e-8);
+}
+
+TEST_CASE("DAESystem dae2ode step function converges to correct steady state", "[dae_system]")
+{
+    // Steady state: x1' = 0 => -x1 + u = 0 => x1_ss = u = 2.0
+    auto dae = makeTestDAE(0.05);
+    auto step_fn = ctrl::dae2ode(dae, 20, 1e-9);
+
+    const double u_input = 2.0;
+    Eigen::VectorXd x_aug(2); x_aug << 0.0, 0.0;
+
+    // Run 100 steps - should converge to x1 = x2 = 2.0
+    for (int k = 0; k < 100; ++k)
+        x_aug = step_fn(x_aug, u_input);
+
+    REQUIRE_THAT(x_aug(0), WithinAbs(2.0, 0.15));  // x1 converged to u
+    REQUIRE_THAT(x_aug(1), WithinAbs(x_aug(0), 1e-6));  // constraint x2 = x1 maintained
+}
+
+TEST_CASE("DAESystem dae2ode maintains algebraic constraint at every step", "[dae_system]")
+{
+    auto dae = makeTestDAE(0.1);
+    auto step_fn = ctrl::dae2ode(dae, 20, 1e-9);
+
+    Eigen::VectorXd x_aug(2); x_aug << 0.5, 0.0;  // start with inconsistent x2
+
+    for (int k = 0; k < 30; ++k) {
+        const double u = std::sin(k * 0.3);
+        x_aug = step_fn(x_aug, u);
+        // Constraint g = x1 - x2 must hold after every step
+        const double g_resid = std::abs(x_aug(0) - x_aug(1));
+        REQUIRE(g_resid < 1e-7);
+    }
+}
+
+// =============================================================================
+// P2: c2d(DAESystem) - DAE linearisation and discretisation
+// =============================================================================
+
+TEST_CASE("c2d(DAESystem) reduced model has correct ZOH eigenvalue", "[dae_c2d]")
+{
+    // DAE: x1' = -x1 + u,  0 = x1 - x2
+    // Reduced continuous model: x1' = -x1 + u  (A_c = -1, B_c = 1)
+    // ZOH discrete at Ts=0.1: A_d = exp(-0.1) approx = 0.9048, B_d = 1 - exp(-0.1) approx = 0.0952
+    auto dae = makeTestDAE(0.1);
+
+    Eigen::VectorXd x1_op(1); x1_op(0) = 1.0;
+    Eigen::VectorXd x2_op(1); x2_op(0) = 1.0;  // consistent: g=0
+
+    const ctrl::StateSpace ss_d = ctrl::c2d(dae, x1_op, x2_op, 1.0, 0.1);
+
+    REQUIRE(ss_d.stateSize()  == 1);
+    REQUIRE(ss_d.inputSize()  == 1);
+    REQUIRE_THAT(ss_d.A(0, 0), WithinAbs(std::exp(-0.1), 0.02));
+    REQUIRE_THAT(ss_d.B(0, 0), WithinAbs(1.0 - std::exp(-0.1), 0.02));
+}
+
+TEST_CASE("c2d(DAESystem) throws when G2 is singular (index > 1)", "[dae_c2d]")
+{
+    // Degenerate constraint: g = 0 (no x2 dependence) => G2 = 0, singular.
+    ctrl::DAESystem bad_dae;
+    bad_dae.n_diff = 1; bad_dae.n_alg = 1; bad_dae.Ts = 0.1;
+    bad_dae.f = [](const Eigen::VectorXd &x1, const Eigen::VectorXd &, double u)
+                   -> Eigen::VectorXd { return -x1; };
+    bad_dae.g = [](const Eigen::VectorXd &, const Eigen::VectorXd &, double)
+                   -> Eigen::VectorXd {
+        return Eigen::VectorXd::Zero(1);  // G2 = 0 -> singular
+    };
+
+    Eigen::VectorXd x1(1); x1(0) = 1.0;
+    Eigen::VectorXd x2(1); x2(0) = 1.0;
+
+    REQUIRE_THROWS_AS(ctrl::c2d(bad_dae, x1, x2, 0.0, 0.1), std::runtime_error);
+}
+
+// =============================================================================
+// P3: DAE-aware EKF - algebraic projection via setAlgebraicConstraint
+// =============================================================================
+
+TEST_CASE("EKF with algebraic constraint: estimate converges and g residual stays near zero",
+          "[dae_ekf]")
+{
+    // Plant: x_aug = [x1; x2], x1 integrates, x2 = x1 (pure constraint).
+    // EKF process function includes x2 drift to test projection.
+    const double Ts_e = 0.1;
+    const int n_total = 2;
+    const int n_out   = 1;
+
+    // Discrete process: x1_next = 0.9*x1 + 0.1*u;  x2_next = x2 (drifts without projection)
+    ctrl::StateFunc f_ekf = [](const Eigen::VectorXd &x, const Eigen::VectorXd &u) {
+        Eigen::VectorXd xn(2);
+        xn(0) = 0.9 * x(0) + 0.1 * u(0);
+        xn(1) = x(1);  // x2 does NOT track x1 here - projection must enforce this
+        return xn;
+    };
+    ctrl::MeasFunc h_ekf = [](const Eigen::VectorXd &x, const Eigen::VectorXd &) {
+        return x.head(1);  // observe x1 only
+    };
+    ctrl::JacobianFn Fjac = [](const Eigen::VectorXd &, const Eigen::VectorXd &) {
+        Eigen::MatrixXd F(2, 2);
+        F << 0.9, 0.0, 0.0, 1.0;
+        return F;
+    };
+    ctrl::JacobianFn Hjac = [](const Eigen::VectorXd &, const Eigen::VectorXd &) {
+        Eigen::MatrixXd H(1, 2); H << 1.0, 0.0;
+        return H;
+    };
+
+    Eigen::MatrixXd Q = Eigen::MatrixXd::Identity(2, 2) * 1e-4;
+    Eigen::MatrixXd R = Eigen::MatrixXd::Identity(1, 1) * 0.01;
+
+    ctrl::ExtendedKalmanFilter ekf(n_total, n_out, f_ekf, h_ekf, Fjac, Hjac, Q, R, Ts_e);
+
+    // Attach algebraic constraint: x1 - x2 = 0  (same as makeTestDAE)
+    ekf.setAlgebraicConstraint(
+        [](const Eigen::VectorXd &x1, const Eigen::VectorXd &x2, double) {
+            Eigen::VectorXd g(1); g(0) = x1(0) - x2(0);
+            return g;
+        },
+        1, 1);
+
+    REQUIRE(ekf.hasAlgebraicConstraint());
+
+    // Run 20 steps with noisy measurements of a known trajectory (x1 -> 1.0)
+    Eigen::VectorXd x_true(2); x_true << 0.0, 0.0;
+    for (int k = 0; k < 20; ++k) {
+        Eigen::VectorXd u(1); u(0) = 1.0;
+        x_true(0) = 0.9 * x_true(0) + 0.1;
+        x_true(1) = x_true(0);
+
+        Eigen::VectorXd y(1); y(0) = x_true(0) + 0.01;
+        ekf.step(y, u);
+
+        // Constraint must hold after each step
+        const double g_resid = std::abs(ekf.state()(0) - ekf.state()(1));
+        REQUIRE(g_resid < 1e-6);
+    }
+
+    // Estimate should have converged close to x1 = 1.0
+    REQUIRE_THAT(ekf.state()(0), WithinAbs(1.0, 0.15));
+}
+
+TEST_CASE("EKF without algebraic constraint behaves identically to baseline EKF", "[dae_ekf]")
+{
+    // Verify setAlgebraicConstraint is purely additive - not calling it leaves EKF unchanged.
+    const double Ts_e = 0.1;
+    ctrl::StateFunc f_s = [](const Eigen::VectorXd &x, const Eigen::VectorXd &u) {
+        return Eigen::VectorXd(x * 0.9 + u * 0.1);
+    };
+    ctrl::MeasFunc  h_s = [](const Eigen::VectorXd &x, const Eigen::VectorXd &) { return x; };
+    ctrl::JacobianFn Fj = [](const Eigen::VectorXd &, const Eigen::VectorXd &) {
+        return Eigen::MatrixXd::Constant(1, 1, 0.9);
+    };
+    ctrl::JacobianFn Hj = [](const Eigen::VectorXd &, const Eigen::VectorXd &) {
+        return Eigen::MatrixXd::Identity(1, 1);
+    };
+
+    Eigen::MatrixXd Q1 = Eigen::MatrixXd::Identity(1, 1) * 1e-4;
+    Eigen::MatrixXd R1 = Eigen::MatrixXd::Identity(1, 1) * 0.01;
+
+    // Baseline (no constraint)
+    ctrl::ExtendedKalmanFilter ekf_base(1, 1, f_s, h_s, Fj, Hj, Q1, R1, Ts_e);
+    // Constraint-free copy
+    ctrl::ExtendedKalmanFilter ekf_constrained(1, 1, f_s, h_s, Fj, Hj, Q1, R1, Ts_e);
+
+    REQUIRE_FALSE(ekf_constrained.hasAlgebraicConstraint());
+
+    Eigen::VectorXd y(1); y(0) = 0.5;
+    Eigen::VectorXd u(1); u(0) = 0.0;
+
+    ekf_base.step(y, u);
+    ekf_constrained.step(y, u);
+
+    // Without constraint, both EKFs must produce identical output
+    REQUIRE_THAT(ekf_base.state()(0),
+                 WithinRel(ekf_constrained.state()(0), 1e-10));
+    REQUIRE_THAT(ekf_base.covariance()(0, 0),
+                 WithinRel(ekf_constrained.covariance()(0, 0), 1e-10));
+}

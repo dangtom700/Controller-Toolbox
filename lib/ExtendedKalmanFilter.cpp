@@ -59,6 +59,78 @@ namespace ctrl
         // Joseph form: P = (I-KH).P.(I-KH)' + K.R.K'
         const Eigen::MatrixXd IKH = Eigen::MatrixXd::Identity(n_states_, n_states_) - K * H;
         P_ = IKH * P_ * IKH.transpose() + K * R_safe * K.transpose();
+
+        // P3: project algebraic states onto constraint manifold (if constraint attached)
+        if (alg_set_)
+            projectAlgebraicStates(u);
+    }
+
+    // ---------------------------------------------------------------------------
+    // setAlgebraicConstraint - P3: attach DAE algebraic projection
+    // ---------------------------------------------------------------------------
+    void ExtendedKalmanFilter::setAlgebraicConstraint(
+        AlgConstraintFn g_alg, int n_diff, int n_alg, double newton_tol)
+    {
+        if (n_diff + n_alg != n_states_)
+            throw std::invalid_argument(
+                "EKF::setAlgebraicConstraint: n_diff + n_alg must equal EKF state dimension.");
+        if (n_diff <= 0 || n_alg <= 0)
+            throw std::invalid_argument(
+                "EKF::setAlgebraicConstraint: both n_diff and n_alg must be > 0.");
+        alg_g_     = std::move(g_alg);
+        n_diff_alg_ = n_diff;
+        n_alg_     = n_alg;
+        alg_tol_   = newton_tol;
+        alg_set_   = true;
+    }
+
+    // ---------------------------------------------------------------------------
+    // projectAlgebraicStates - Newton-project x2 block, then project covariance.
+    //
+    // Newton iterations: x2 <- x2 - G2^{-1} * g(x1, x2, u)
+    // Covariance projection: P <- J_proj * P * J_proj'
+    //   where J_proj = [[I_{n1}, 0]; [-G2^{-1}*G1, 0_{n2}]]
+    // ---------------------------------------------------------------------------
+    void ExtendedKalmanFilter::projectAlgebraicStates(const Eigen::VectorXd &u)
+    {
+        const int  n1      = n_diff_alg_;
+        const int  n2      = n_alg_;
+        const double u_s   = u.size() > 0 ? u(0) : 0.0; // SISO scalar input
+
+        Eigen::VectorXd x1 = x_hat_.head(n1);
+        Eigen::VectorXd x2 = x_hat_.tail(n2);
+
+        // Newton-Raphson: solve g(x1, x2, u) = 0 for x2
+        for (int iter = 0; iter < 20; ++iter)
+        {
+            const Eigen::VectorXd g_val = alg_g_(x1, x2, u_s);
+            if (g_val.norm() < alg_tol_) break;
+
+            // Central-difference dg/dx2 (n2 x n2)
+            const Eigen::MatrixXd G2 = numericalJacobian(
+                [&](const Eigen::VectorXd &x2v) { return alg_g_(x1, x2v, u_s); }, x2);
+
+            const auto ldlt = G2.ldlt();
+            if (ldlt.info() != Eigen::Success) break;
+            x2 -= ldlt.solve(g_val);
+        }
+        x_hat_.tail(n2) = x2;
+
+        // Covariance projection: J_proj = [[I, 0]; [-G2^{-1}*G1, 0]]
+        // Numerically compute G1 = dg/dx1 and G2 = dg/dx2 at the projected point
+        const Eigen::MatrixXd G1 = numericalJacobian(
+            [&](const Eigen::VectorXd &x1v) { return alg_g_(x1v, x2, u_s); }, x1); // n2 x n1
+        const Eigen::MatrixXd G2 = numericalJacobian(
+            [&](const Eigen::VectorXd &x2v) { return alg_g_(x1, x2v, u_s); }, x2); // n2 x n2
+
+        Eigen::MatrixXd G2inv_G1 = G2.ldlt().solve(G1); // n2 x n1 (best-effort; not checked)
+
+        Eigen::MatrixXd J_proj = Eigen::MatrixXd::Zero(n1 + n2, n1 + n2);
+        J_proj.topLeftCorner(n1, n1)    = Eigen::MatrixXd::Identity(n1, n1);
+        J_proj.bottomLeftCorner(n2, n1) = -G2inv_G1;
+        // bottomRightCorner remains zero: x2 variance explained by x1 variance via constraint
+
+        P_ = J_proj * P_ * J_proj.transpose();
     }
 
     void ExtendedKalmanFilter::step(const Eigen::VectorXd &y,
