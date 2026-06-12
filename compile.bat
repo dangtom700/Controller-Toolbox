@@ -144,6 +144,10 @@ for %%T in (
     test_boiler_regression
     test_solar_regression
     test_humid_regression
+    test_susp_regression
+    test_buck_boost_regression
+    test_solar_cooker_regression
+    test_sotec_regression
     test_smismo_regression
 ) do (
     echo.

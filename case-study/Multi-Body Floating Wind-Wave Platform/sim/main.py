@@ -2,7 +2,7 @@
 main.py
 Multi-Body Floating Wind-Wave Platform + WEC Case Study - entry point.
 
-Runs all 8 controllers x 5 scenarios = 40 simulations.
+Runs all 16 controllers x 5 scenarios = 80 simulations.
 Writes CSV telemetry to ../logs/ and prints a summary table.
 
 Usage (from project root):

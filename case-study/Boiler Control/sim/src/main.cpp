@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
             boiler::getOperatingPoint(scenario.operating_point);
         ctrl::StateSpace ss = boiler::linearize(op, scenario.Ts);
 
-        // Build all 21 controllers for this operating point (18 original + 3 Wave 1)
+        // Build all 27 controllers for this operating point
         std::vector<std::unique_ptr<boiler::ControllerBase>> controllers;
         controllers.push_back(std::make_unique<boiler::PIDController>(ss, op));
         controllers.push_back(std::make_unique<boiler::LQRController>(ss, op));

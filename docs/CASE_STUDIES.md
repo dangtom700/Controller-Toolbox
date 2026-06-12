@@ -52,7 +52,7 @@ Run `conda run -n soft_robotics -- python run.py` for live pass/fail counts.
 
 ---
 
-### Solar-Driven Cooling System ✅ C++
+### Solar-Driven Cooling System with Photovoltaic Evaporative Chimney ✅ C++
 
 | Field | Value |
 |-------|-------|
@@ -62,7 +62,7 @@ Run `conda run -n soft_robotics -- python run.py` for live pass/fail counts.
 | **Scenarios** | 5 |
 | **Total runs** | 70 (14×5) |
 | **Build target** | `solar_cooling_sim` |
-| **Logs** | `case-study/Solar-Driven Cooling System .../logs/` |
+| **Logs** | `case-study/Solar-Driven Cooling System with Photovoltaic Evaporative Chimney/logs/` |
 
 **Controller roster:** PID, ADRC, SMC, LQR, MPC, MRAC, FuzzyPID, TubeMPC, GPC-RLS, ILC (two-phase N_trial=180), NeuralPID, L1Adaptive, DynaCtrl (PID+SINDy MBRL), CEM.
 
@@ -394,7 +394,7 @@ Discovered by `run.py` Phase 6 via `case-study/*/sim/main.py`. Not in `CMakeList
 
 ---
 
-## Spec-Only Stubs (5)
+## Spec-Only Stubs (8)
 
 `README.md` (or PDF) present; no `sim/`, not registered, not built. To promote a stub to a C++ study: add `sim/{include,src}/`, a per-study `CMakeLists.txt`, an `add_subdirectory` line in `case-study/CMakeLists.txt`, and the target in `compile.bat`. To promote to Python-only: add `sim/main.py` following the Drill String pattern.
 
@@ -494,10 +494,41 @@ Discovered by `run.py` Phase 6 via `case-study/*/sim/main.py`. Not in `CMakeList
 
 ---
 
+### Building Energy Management System 🔲 Stub
+
+| Field | Value |
+|-------|-------|
+| **Plant** | HVAC ODE + water heater ODE; demand-response power constraint |
+| **Readiness** | Medium — PDF + TXT present; no README yet |
+| **Target runs** | 12 controllers × 5 scenarios = 60 |
+| **Pattern** | Python-only study |
+
+- **Status:** Source PDF present (`case-study/Building Energy Management System/`). No `README.md` or `sim/` yet. Plant model (HVAC thermal zone ODE + hot water heater ODE, grid demand-response constraint) needs to be written into a README before implementation starts.
+- **Blocker:** None once README written — no complex plant-model design required.
+
+---
+
+### Control Theory in Intelligent Systems Era 2026 🔲 Stub
+
+| Field | Value |
+|-------|-------|
+| **Plant** | Undefined — paper is a review article, not a specific system |
+| **Readiness** | Very low — no folder, no README, plant and problem undefined |
+| **Target runs** | TBD |
+| **Pattern** | TBD |
+
+- **Status:** Mentioned in CLAUDE.md only. No folder in `case-study/`. The paper is a review/survey; a concrete control problem must be extracted from it before implementation is possible.
+- **Blocker:** Plant and control objective must be defined.
+
+---
+
 ## Implementation Notes (All Studies)
 
 - `DiscreteLQR` is **not** an `IController`. For `GainScheduledController` `design_fn`, use `makeLQRController(sys, lqr_params, state_fn)` which returns `shared_ptr<IController>`.
 - `LQRWeightTuner::brysonMethod` is in `lib/ControllerTuner.h` — include it explicitly in case-study TUs that do not use the umbrella `ControllerToolbox.h`.
 - `RecursiveLeastSquares`: accessor is `params()` (not `theta()`); `update(y, u)` is **output first, input second**.
-- `compile.bat` lists every C++ target explicitly. A missing target silently runs a stale `.exe`. Current C++ case-study targets: `boiler_sim, tug_sim, solar_cooling_sim, humidification_sim, susp_sim, buck_boost_sim, solar_cooker_sim, sotec_sim, smismo_sim`.
+- `compile.bat` lists every C++ target explicitly. A missing target silently runs a stale `.exe`.
+  - **Sim targets (9):** `boiler_sim, tug_sim, solar_cooling_sim, humidification_sim, susp_sim, buck_boost_sim, solar_cooker_sim, sotec_sim, smismo_sim`
+  - **Regression targets (9):** `test_tugsim_regression, test_boiler_regression, test_solar_regression, test_humid_regression, test_susp_regression, test_buck_boost_regression, test_solar_cooker_regression, test_sotec_regression, test_smismo_regression`
 - Each `main.cpp` hard-codes the controller count — bump it when adding a controller.
+- **Auto-generated count check:** `conda run -n soft_robotics -- python tools/gen_case_studies_md.py` verifies all count fields against source files. Run `--patch` to update in-place after adding controllers.

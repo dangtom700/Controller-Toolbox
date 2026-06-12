@@ -2,7 +2,7 @@
 main.py
 Drill String Torsional Control Case Study - entry point.
 
-Runs all 10 controllers x 5 scenarios = 50 simulations.
+Runs all 17 controllers x 5 scenarios = 85 simulations.
 Writes CSV telemetry to ../logs/ and prints a summary table.
 
 Usage (from project root):
