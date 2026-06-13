@@ -106,7 +106,7 @@ Namespaces</h2></td></tr>
 <p>BasicSMC&lt;Scalar&gt; implements first-order discrete SMC with boundary-layer saturation - the same algorithm as DiscreteSMC - without virtual dispatch, Eigen, or std::function overhead. Suitable for float usage on MCUs.</p>
 <p><b>Algorithm:</b> </p><div class="fragment"><div class="line">s[k]  = c_e * e[k] + c_de * (e[k] - e[k-1])    <span class="comment">// sliding surface</span></div>
 <div class="line">sat   = clamp(s[k] / phi, -1, 1)                <span class="comment">// boundary-layer saturation</span></div>
-<div class="line">u[k]  = clamp(-K * sat, uMin, uMax)             <span class="comment">// output</span></div>
+<div class="line">u[k]  = clamp(+K * sat, uMin, uMax)             <span class="comment">// output (+K: compute(r-y) convention)</span></div>
 </div><!-- fragment --><p><b>Convention:</b> compute(error) where error = r - y (error = r[k] - y[k]).</p>
 <p><b>Typical embedded usage (float):</b> </p><div class="fragment"><div class="line"><a class="code hl_struct" href="structctrl_1_1BasicSMCParams.html">ctrl::BasicSMCParams&lt;float&gt;</a> p;</div>
 <div class="line">p.<a class="code hl_variable" href="structctrl_1_1BasicSMCParams.html#a3f0618782b942d790dfe19d01b8d5478">c_e</a> = 1.0f; p.<a class="code hl_variable" href="structctrl_1_1BasicSMCParams.html#a16714f0e38ff0ad521b5dd3607220fba">c_de</a> = 0.05f; p.<a class="code hl_variable" href="structctrl_1_1BasicSMCParams.html#a4f21914373dd766a12ee60e9fcfdb809">K</a> = 3.0f; p.<a class="code hl_variable" href="structctrl_1_1BasicSMCParams.html#a53c2c62ed686d7b7ac4d2d98876c9e93">phi</a> = 0.2f;</div>
