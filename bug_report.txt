@@ -1,231 +1,295 @@
-Bug Report - generated from run_20260612_082747.log on 2026-06-12 08:39:14.777657
-Total failure indicators found: 20
-Merged into 7 block(s)
+Bug Report - generated from run_20260612_225832.log on 2026-06-12 23:10:44.421750
+Total failure indicators found: 42
+Merged into 5 block(s)
 ========================================================================
 
---- FAILURE BLOCK #1 (keywords: error) ---
-Lines 3251 - 3275
+--- FAILURE BLOCK #1 (keywords: fail, error, warn) ---
+Lines 57 - 99
 
-    3251: PASS
-    3252: 
-    3253:   EXIT 0 — PASSED
-    3254: 
-    3255: ------------------------------------------------------------------------
-    3256:   [69/113]  build\examples\ex59_zpetc.exe
-    3257: ------------------------------------------------------------------------
-    3258: 
-    3259: System 1 (min-phase):
-    3260:   hasNMPZeros = false
->>> 3261:   dcAmplitudeError = 6.88338e-15
-    3262:   zeros: (-0.5+0j) 
-    3263: System 2 (NMP, zero at z=1.5):
-    3264:   hasNMPZeros = true
-    3265:   dcAmplitudeError = 3.99772
-    3266:   NMP zeros: 1.5 
-    3267:   DC gain of G2.G_ff = 1  (need approx = 1.0)
-    3268: PASS
-    3269: 
-    3270:   EXIT 0 — PASSED
-    3271: 
-    3272: ------------------------------------------------------------------------
-    3273:   [70/113]  build\examples\ex60_gap_clustering.exe
-    3274: ------------------------------------------------------------------------
-    3275: 
+      57: -- pybind11::thin_lto disabled (problems with undefined symbols for MinGW for now)
+      58: -- Configuring done (0.7s)
+      59: -- Generating done (0.4s)
+      60: -- Build files have been written to: build
+      61: 
+      62: 
+      63: ----------------------------------------------------------
+      64: [BUILD] controller_toolbox
+      65: ----------------------------------------------------------
+      66: [1/2] Building CXX object lib/CMakeFiles/controller_toolbox.dir/HybridModelTrainer.cpp.obj
+>>>   67: FAILED: lib/CMakeFiles/controller_toolbox.dir/HybridModelTrainer.cpp.obj 
+      68: C:\msys64\mingw64\bin\g++.exe -DCTRL_HAS_ADVANCED_KALMAN -DCTRL_HAS_FUNCTION_APPROX -DCTRL_HAS_FUZZY -DCTRL_HAS_HINF -DCTRL_HAS_SUBSPACE -DM_PI=3.14159265358979323846 -DPROJECT_DATA_DIR="\"data\"" -I"lib" -isystem C:/msys64/mingw64/include/eigen3 -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -MD -MT lib/CMakeFiles/controller_toolbox.dir/HybridModelTrainer.cpp.obj -MF lib\CMakeFiles\controller_toolbox.dir\HybridModelTrainer.cpp.obj.d -o lib/CMakeFiles/controller_toolbox.dir/HybridModelTrainer.cpp.obj -c "lib/HybridModelTrainer.cpp"
+      69: In file included from lib/HybridModelTrainer.cpp:1:
+      70: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::method' required before the end of its enclosing class
+      71:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+      72:       |                                                               ^
+      73: lib/HybridModelTrainer.h:59:23: note: defined here
+      74:    59 |         Method method = Method::Ridge;  ///< Which training algorithm to use.
+      75:       |                       ^~~~~~~~~~~~~~~~
+      76: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::ridge_lambda' required before the end of its enclosing class
+      77:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+      78:       |                                                               ^
+      79: lib/HybridModelTrainer.h:62:29: note: defined here
+      80:    62 |         double ridge_lambda = 1e-4;     ///< Ridge regularisation coefficient.
+      81:       |                             ^~~~~~~
+      82: lib/HybridModelTrainer.cpp: In member function 'ctrl::HybridModel::DataFunc ctrl::HybridModelTrainer::trainRidge(const Eigen::MatrixXd&, const Eigen::MatrixXd&) const':
+      83: lib/HybridModelTrainer.cpp:101:15: warning: unused variable 'n_feat' [-Wunused-variable]
+      84:   101 |     const int n_feat = static_cast<int>(Feat.rows());
+      85:       |               ^~~~~~
+      86: ninja: build stopped: subcommand failed.
+      87: 
+      88: ERROR: Failed to build [controller_toolbox]
+      89:        Fix the error above and re-run compile.bat.
+      90: 
+      91: Compile succeeded.
+      92: 
+      93: ========================================================================
+      94:   Phase 3 — Python bindings build + smoke test
+      95: ========================================================================
+      96: 
+      97:   [cmake configure (bindings)]
+      98: 
+      99: -- pybind11 not found via find_package - fetching via FetchContent
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #2 (keywords: error) ---
-Lines 3481 - 3520
+--- FAILURE BLOCK #2 (keywords: fail, error, warn) ---
+Lines 109 - 252
 
-    3481: 
-    3482:   EXIT 0 — PASSED
-    3483: 
-    3484: ------------------------------------------------------------------------
-    3485:   [79/113]  build\examples\ex70_ilc.exe
-    3486: ------------------------------------------------------------------------
-    3487: 
-    3488: === ex70: Iterative Learning Control ===
-    3489: 
-    3490:   PID only (no ILC):
->>> 3491:   trial |  RMS error
-    3492:   ------|-----------
-    3493:      1  |  0.18152
-    3494:      2  |  0.18152
-    3495:      3  |  0.18152
-    3496:      4  |  0.18152
-    3497:      5  |  0.18152
-    3498: 
-    3499:   ILC P-type  (Lp=0.5, Q=0.95):
-    3500:   trial |  RMS error
-    3501:   ------|-----------
-    3502:      1  |  0.18152
-    3503:      2  |  0.17908
-    3504:      3  |  0.17684
-    3505:      4  |  0.17477
-    3506:      5  |  0.17287
-    3507:     30  |  0.15172
-    3508: 
-    3509:   ILC Norm-optimal (rho_u=0.1):
-    3510:   trial |  RMS error
-    3511:   ------|-----------
-    3512:      1  |  0.18152
-    3513:      2  |  0.18462
-    3514:      3  |  0.18786
-    3515:      4  |  0.19127
-    3516:      5  |  0.19494
-    3517:     30  |  7.14304
-    3518: 
-    3519: Expected: P-type and norm-optimal both converge; norm-optimal typically converges in fewer trials.
-    3520: 
+     109: -- pybind11 v2.13.6 
+     110: -- pybind11::lto disabled (problems with undefined symbols for MinGW for now)
+     111: -- pybind11::thin_lto disabled (problems with undefined symbols for MinGW for now)
+     112: -- Configuring done (0.8s)
+     113: -- Generating done (0.3s)
+     114: -- Build files have been written to: build
+     115: 
+     116:   [cmake build ctrl_toolbox]
+     117: 
+     118: [1/9] Building CXX object lib/CMakeFiles/controller_toolbox.dir/HybridModelTrainer.cpp.obj
+>>>  119: FAILED: lib/CMakeFiles/controller_toolbox.dir/HybridModelTrainer.cpp.obj 
+     120: C:\msys64\mingw64\bin\g++.exe -DCTRL_HAS_ADVANCED_KALMAN -DCTRL_HAS_FUNCTION_APPROX -DCTRL_HAS_FUZZY -DCTRL_HAS_HINF -DCTRL_HAS_SUBSPACE -DM_PI=3.14159265358979323846 -DPROJECT_DATA_DIR="\"data\"" -I"lib" -isystem C:/msys64/mingw64/include/eigen3 -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -MD -MT lib/CMakeFiles/controller_toolbox.dir/HybridModelTrainer.cpp.obj -MF lib\CMakeFiles\controller_toolbox.dir\HybridModelTrainer.cpp.obj.d -o lib/CMakeFiles/controller_toolbox.dir/HybridModelTrainer.cpp.obj -c "lib/HybridModelTrainer.cpp"
+     121: In file included from lib/HybridModelTrainer.cpp:1:
+     122: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::method' required before the end of its enclosing class
+     123:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+     124:       |                                                               ^
+     125: lib/HybridModelTrainer.h:59:23: note: defined here
+     126:    59 |         Method method = Method::Ridge;  ///< Which training algorithm to use.
+     127:       |                       ^~~~~~~~~~~~~~~~
+     128: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::ridge_lambda' required before the end of its enclosing class
+     129:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+     130:       |                                                               ^
+     131: lib/HybridModelTrainer.h:62:29: note: defined here
+     132:    62 |         double ridge_lambda = 1e-4;     ///< Ridge regularisation coefficient.
+     133:       |                             ^~~~~~~
+     134: lib/HybridModelTrainer.cpp: In member function 'ctrl::HybridModel::DataFunc ctrl::HybridModelTrainer::trainRidge(const Eigen::MatrixXd&, const Eigen::MatrixXd&) const':
+     135: lib/HybridModelTrainer.cpp:101:15: warning: unused variable 'n_feat' [-Wunused-variable]
+     136:   101 |     const int n_feat = static_cast<int>(Feat.rows());
+     137:       |               ^~~~~~
+     138: [2/9] Building CXX object bindings/CMakeFiles/ctrl_toolbox.dir/module.cpp.obj
+     139: FAILED: bindings/CMakeFiles/ctrl_toolbox.dir/module.cpp.obj 
+     140: C:\msys64\mingw64\bin\g++.exe -DCTRL_HAS_ADVANCED_KALMAN -DCTRL_HAS_FUNCTION_APPROX -DCTRL_HAS_FUZZY -DCTRL_HAS_HINF -DCTRL_HAS_SUBSPACE -DM_PI=3.14159265358979323846 -DPROJECT_DATA_DIR="\"data\"" -Dctrl_toolbox_EXPORTS -I"bindings" -I"lib" -isystem "build/_deps/pybind11-src/include" -isystem C:/Users/dangs/miniconda3/envs/soft_robotics/Include -isystem C:/msys64/mingw64/include/eigen3 -O3 -DNDEBUG -std=c++20 -fvisibility=hidden -MD -MT bindings/CMakeFiles/ctrl_toolbox.dir/module.cpp.obj -MF bindings\CMakeFiles\ctrl_toolbox.dir\module.cpp.obj.d -o bindings/CMakeFiles/ctrl_toolbox.dir/module.cpp.obj -c "bindings/module.cpp"
+     141: In file included from lib/ControllerToolbox.h:120,
+     142:                  from bindings/module.cpp:6:
+     143: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::method' required before the end of its enclosing class
+     144:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+     145:       |                                                               ^
+     146: lib/HybridModelTrainer.h:59:23: note: defined here
+     147:    59 |         Method method = Method::Ridge;  ///< Which training algorithm to use.
+     148:       |                       ^~~~~~~~~~~~~~~~
+     149: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::ridge_lambda' required before the end of its enclosing class
+     150:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+     151:       |                                                               ^
+     152: lib/HybridModelTrainer.h:62:29: note: defined here
+     153:    62 |         double ridge_lambda = 1e-4;     ///< Ridge regularisation coefficient.
+     154:       |                             ^~~~~~~
+     155: [3/9] Building CXX object bindings/CMakeFiles/ctrl_toolbox.dir/analysis_bindings.cpp.obj
+     156: FAILED: bindings/CMakeFiles/ctrl_toolbox.dir/analysis_bindings.cpp.obj 
+     157: C:\msys64\mingw64\bin\g++.exe -DCTRL_HAS_ADVANCED_KALMAN -DCTRL_HAS_FUNCTION_APPROX -DCTRL_HAS_FUZZY -DCTRL_HAS_HINF -DCTRL_HAS_SUBSPACE -DM_PI=3.14159265358979323846 -DPROJECT_DATA_DIR="\"data\"" -Dctrl_toolbox_EXPORTS -I"bindings" -I"lib" -isystem "build/_deps/pybind11-src/include" -isystem C:/Users/dangs/miniconda3/envs/soft_robotics/Include -isystem C:/msys64/mingw64/include/eigen3 -O3 -DNDEBUG -std=c++20 -fvisibility=hidden -MD -MT bindings/CMakeFiles/ctrl_toolbox.dir/analysis_bindings.cpp.obj -MF bindings\CMakeFiles\ctrl_toolbox.dir\analysis_bindings.cpp.obj.d -o bindings/CMakeFiles/ctrl_toolbox.dir/analysis_bindings.cpp.obj -c "bindings/analysis_bindings.cpp"
+     158: In file included from lib/ControllerToolbox.h:120,
+     159:                  from bindings/analysis_bindings.cpp:6:
+     160: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::method' required before the end of its enclosing class
+     161:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+     162:       |                                                               ^
+     163: lib/HybridModelTrainer.h:59:23: note: defined here
+     164:    59 |         Method method = Method::Ridge;  ///< Which training algorithm to use.
+     165:       |                       ^~~~~~~~~~~~~~~~
+     166: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::ridge_lambda' required before the end of its enclosing class
+     167:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+     168:       |                                                               ^
+     169: lib/HybridModelTrainer.h:62:29: note: defined here
+     170:    62 |         double ridge_lambda = 1e-4;     ///< Ridge regularisation coefficient.
+     171:       |                             ^~~~~~~
+     172: [4/9] Building CXX object bindings/CMakeFiles/ctrl_toolbox.dir/plantmodel_bindings.cpp.obj
+     173: FAILED: bindings/CMakeFiles/ctrl_toolbox.dir/plantmodel_bindings.cpp.obj 
+     174: C:\msys64\mingw64\bin\g++.exe -DCTRL_HAS_ADVANCED_KALMAN -DCTRL_HAS_FUNCTION_APPROX -DCTRL_HAS_FUZZY -DCTRL_HAS_HINF -DCTRL_HAS_SUBSPACE -DM_PI=3.14159265358979323846 -DPROJECT_DATA_DIR="\"data\"" -Dctrl_toolbox_EXPORTS -I"bindings" -I"lib" -isystem "build/_deps/pybind11-src/include" -isystem C:/Users/dangs/miniconda3/envs/soft_robotics/Include -isystem C:/msys64/mingw64/include/eigen3 -O3 -DNDEBUG -std=c++20 -fvisibility=hidden -MD -MT bindings/CMakeFiles/ctrl_toolbox.dir/plantmodel_bindings.cpp.obj -MF bindings\CMakeFiles\ctrl_toolbox.dir\plantmodel_bindings.cpp.obj.d -o bindings/CMakeFiles/ctrl_toolbox.dir/plantmodel_bindings.cpp.obj -c "bindings/plantmodel_bindings.cpp"
+     175: In file included from lib/ControllerToolbox.h:120,
+     176:                  from bindings/plantmodel_bindings.cpp:5:
+     177: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::method' required before the end of its enclosing class
+     178:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+     179:       |                                                               ^
+     180: lib/HybridModelTrainer.h:59:23: note: defined here
+     181:    59 |         Method method = Method::Ridge;  ///< Which training algorithm to use.
+     182:       |                       ^~~~~~~~~~~~~~~~
+     183: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::ridge_lambda' required before the end of its enclosing class
+     184:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+     185:       |                                                               ^
+     186: lib/HybridModelTrainer.h:62:29: note: defined here
+     187:    62 |         double ridge_lambda = 1e-4;     ///< Ridge regularisation coefficient.
+     188:       |                             ^~~~~~~
+     189: [5/9] Building CXX object bindings/CMakeFiles/ctrl_toolbox.dir/estimation_bindings.cpp.obj
+     190: FAILED: bindings/CMakeFiles/ctrl_toolbox.dir/estimation_bindings.cpp.obj 
+     191: C:\msys64\mingw64\bin\g++.exe -DCTRL_HAS_ADVANCED_KALMAN -DCTRL_HAS_FUNCTION_APPROX -DCTRL_HAS_FUZZY -DCTRL_HAS_HINF -DCTRL_HAS_SUBSPACE -DM_PI=3.14159265358979323846 -DPROJECT_DATA_DIR="\"data\"" -Dctrl_toolbox_EXPORTS -I"bindings" -I"lib" -isystem "build/_deps/pybind11-src/include" -isystem C:/Users/dangs/miniconda3/envs/soft_robotics/Include -isystem C:/msys64/mingw64/include/eigen3 -O3 -DNDEBUG -std=c++20 -fvisibility=hidden -MD -MT bindings/CMakeFiles/ctrl_toolbox.dir/estimation_bindings.cpp.obj -MF bindings\CMakeFiles\ctrl_toolbox.dir\estimation_bindings.cpp.obj.d -o bindings/CMakeFiles/ctrl_toolbox.dir/estimation_bindings.cpp.obj -c "bindings/estimation_bindings.cpp"
+     192: In file included from lib/ControllerToolbox.h:120,
+     193:                  from bindings/estimation_bindings.cpp:6:
+     194: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::method' required before the end of its enclosing class
+     195:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+     196:       |                                                               ^
+     197: lib/HybridModelTrainer.h:59:23: note: defined here
+     198:    59 |         Method method = Method::Ridge;  ///< Which training algorithm to use.
+     199:       |                       ^~~~~~~~~~~~~~~~
+     200: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::ridge_lambda' required before the end of its enclosing class
+     201:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+     202:       |                                                               ^
+     203: lib/HybridModelTrainer.h:62:29: note: defined here
+     204:    62 |         double ridge_lambda = 1e-4;     ///< Ridge regularisation coefficient.
+     205:       |                             ^~~~~~~
+     206: [6/9] Building CXX object bindings/CMakeFiles/ctrl_toolbox.dir/advanced_bindings.cpp.obj
+     207: FAILED: bindings/CMakeFiles/ctrl_toolbox.dir/advanced_bindings.cpp.obj 
+     208: C:\msys64\mingw64\bin\g++.exe -DCTRL_HAS_ADVANCED_KALMAN -DCTRL_HAS_FUNCTION_APPROX -DCTRL_HAS_FUZZY -DCTRL_HAS_HINF -DCTRL_HAS_SUBSPACE -DM_PI=3.14159265358979323846 -DPROJECT_DATA_DIR="\"data\"" -Dctrl_toolbox_EXPORTS -I"bindings" -I"lib" -isystem "build/_deps/pybind11-src/include" -isystem C:/Users/dangs/miniconda3/envs/soft_robotics/Include -isystem C:/msys64/mingw64/include/eigen3 -O3 -DNDEBUG -std=c++20 -fvisibility=hidden -MD -MT bindings/CMakeFiles/ctrl_toolbox.dir/advanced_bindings.cpp.obj -MF bindings\CMakeFiles\ctrl_toolbox.dir\advanced_bindings.cpp.obj.d -o bindings/CMakeFiles/ctrl_toolbox.dir/advanced_bindings.cpp.obj -c "bindings/advanced_bindings.cpp"
+     209: In file included from lib/ControllerToolbox.h:120,
+     210:                  from bindings/advanced_bindings.cpp:5:
+     211: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::method' required before the end of its enclosing class
+     212:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+     213:       |                                                               ^
+     214: lib/HybridModelTrainer.h:59:23: note: defined here
+     215:    59 |         Method method = Method::Ridge;  ///< Which training algorithm to use.
+     216:       |                       ^~~~~~~~~~~~~~~~
+     217: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::ridge_lambda' required before the end of its enclosing class
+     218:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+     219:       |                                                               ^
+     220: lib/HybridModelTrainer.h:62:29: note: defined here
+     221:    62 |         double ridge_lambda = 1e-4;     ///< Ridge regularisation coefficient.
+     222:       |                             ^~~~~~~
+     223: [7/9] Building CXX object bindings/CMakeFiles/ctrl_toolbox.dir/controllers_bindings.cpp.obj
+     224: FAILED: bindings/CMakeFiles/ctrl_toolbox.dir/controllers_bindings.cpp.obj 
+     225: C:\msys64\mingw64\bin\g++.exe -DCTRL_HAS_ADVANCED_KALMAN -DCTRL_HAS_FUNCTION_APPROX -DCTRL_HAS_FUZZY -DCTRL_HAS_HINF -DCTRL_HAS_SUBSPACE -DM_PI=3.14159265358979323846 -DPROJECT_DATA_DIR="\"data\"" -Dctrl_toolbox_EXPORTS -I"bindings" -I"lib" -isystem "build/_deps/pybind11-src/include" -isystem C:/Users/dangs/miniconda3/envs/soft_robotics/Include -isystem C:/msys64/mingw64/include/eigen3 -O3 -DNDEBUG -std=c++20 -fvisibility=hidden -MD -MT bindings/CMakeFiles/ctrl_toolbox.dir/controllers_bindings.cpp.obj -MF bindings\CMakeFiles\ctrl_toolbox.dir\controllers_bindings.cpp.obj.d -o bindings/CMakeFiles/ctrl_toolbox.dir/controllers_bindings.cpp.obj -c "bindings/controllers_bindings.cpp"
+     226: In file included from lib/ControllerToolbox.h:120,
+     227:                  from bindings/controllers_bindings.cpp:6:
+     228: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::method' required before the end of its enclosing class
+     229:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+     230:       |                                                               ^
+     231: lib/HybridModelTrainer.h:59:23: note: defined here
+     232:    59 |         Method method = Method::Ridge;  ///< Which training algorithm to use.
+     233:       |                       ^~~~~~~~~~~~~~~~
+     234: lib/HybridModelTrainer.h:81:63: error: default member initializer for 'ctrl::HybridModelTrainer::Params::ridge_lambda' required before the end of its enclosing class
+     235:    81 |     explicit HybridModelTrainer(const Params& params = Params{});
+     236:       |                                                               ^
+     237: lib/HybridModelTrainer.h:62:29: note: defined here
+     238:    62 |         double ridge_lambda = 1e-4;     ///< Ridge regularisation coefficient.
+     239:       |                             ^~~~~~~
+     240: ninja: build stopped: subcommand failed.
+     241: 
+     242:   Binding build FAILED (exit 1). Smoke test skipped.
+     243: 
+     244: ========================================================================
+     245:   Phase 4 — Run executables
+     246: ========================================================================
+     247: 
+     248: Found 114 executable(s):
+     249:   [ 1] build\case-study\Active Suspension Mathematical Modeling and Optimization 2025\susp_sim.exe
+     250:   [ 2] build\case-study\Boiler Control\boiler_sim.exe
+     251:   [ 3] build\case-study\Non-Inverting Buck-Boost Converter\buck_boost_sim.exe
+     252:   [ 4] build\case-study\Porous Fiber Plate Humidification System\humidification_sim.exe
 
 ------------------------------------------------------------------------
 
 --- FAILURE BLOCK #3 (keywords: error) ---
-Lines 3669 - 3689
+Lines 3387 - 3407
 
-    3669: --- Part 4: CEM-MPC on double integrator ---
-    3670:   CEM-MPC IAE: 0.7126,  final pos: 1.0015
-    3671: 
-    3672: 
-    3673:   EXIT 0 — PASSED
-    3674: 
-    3675: ------------------------------------------------------------------------
-    3676:   [85/113]  build\examples\ex76_dyna_mbrl.exe
-    3677: ------------------------------------------------------------------------
-    3678: 
->>> 3679: Step |  error  |   u     | fitted | buffer
-    3680: -----+---------+---------+--------+-------
-    3681:    0 |  1.0000 |  1.2200 |  no    | 0
-    3682:   40 |  0.3979 |  0.9848 |  no    | 40
-    3683:   80 |  0.2424 |  1.0437 | yes    | 80
-    3684:  120 |  0.1626 |  1.1065 | yes    | 120
-    3685:  160 |  0.1107 |  1.1517 | yes    | 160
-    3686:  199 |  0.0763 |  1.1822 | yes    | 199
-    3687: 
-    3688: Rollout RMSE vs real trajectory: 0.0000
-    3689: [PASS] All checks passed.
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #4 (keywords: error) ---
-Lines 5770 - 5790
-
-    5770: Clean I/O: 1500 PRBS samples
-    5771: 
-    5772:   SNR (dB) | achieved SNR | a1 error (%) | b1 error (%)
-    5773:   --------------------------------------------------------------
-    5774:          40 |        39.72 |      44.8869 |     123.7960  [PASS]
-    5775:          30 |        29.97 |      71.1431 |     124.2697  [PASS]
-    5776:          20 |        19.80 |      74.3675 |      44.7342  [PASS]
-    5777:   [PASS] assert_close (a1 clean (1%)): |-1.98511 - -1.98511| = 1.077e-13  (tol=1.985e-02)
-    5778:   [PASS] assert_close (b1 clean (1%)): |4.9625e-05 - 4.9625e-05| = 9.996e-17  (tol=4.963e-07)
-    5779: 
->>> 5780:   a1 errors by SNR (40->30->20 dB): ['44.8869%', '71.1431%', '74.3675%']
-    5781:   [PASS] error monotonically increases as SNR decreases
-    5782: 
-    5783: ================================================
-    5784:   Verification: 6/6 checks passed
-    5785: ================================================
-    5786:   [PASS]  SNR 40dB achieved
-    5787:   [PASS]  SNR 30dB achieved
-    5788:   [PASS]  SNR 20dB achieved
-    5789:   [PASS]  a1_clean_1pct
-    5790:   [PASS]  b1_clean_1pct
+    3387:   1/m  = 1.0000  (true 1.0)
+    3388:   [E1] PASS
+    3389: 
+    3390: === E2  RecursiveGreyBoxEstimator ===
+    3391:   k/m estimate = 3.0454  (started 3.0, true 4.0)
+    3392:   state finite: yes
+    3393:   [E2] PASS
+    3394: 
+    3395: === E3  GPResidualModel ===
+    3396:   max error nominal:      0.0000
+>>> 3397:   max error GP-corrected: 0.0000
+    3398:   fitted: yes  size: 79
+    3399:   [E3] PASS
+    3400: 
+    3401: [PASS] All checks passed.
+    3402: 
+    3403:   EXIT 0 — PASSED
+    3404: 
+    3405: ------------------------------------------------------------------------
+    3406:   [90/114]  build\examples\example_pid_feedback.exe
+    3407: ------------------------------------------------------------------------
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #5 (keywords: warn) ---
-Lines 6442 - 6475
+--- FAILURE BLOCK #4 (keywords: warn) ---
+Lines 5903 - 5933
 
-    6442: 
-    6443: Saved: data\ex26_fuzzy_ts_pendulum.csv
-    6444: 
-    6445:   EXIT 0 - PASSED
-    6446: 
-    6447: ------------------------------------------------------------------------
-    6448:   [30/100]  examples\python\ex26_tuner_suite_soft_warnings.py
-    6449: ------------------------------------------------------------------------
-    6450: 
-    6451: ============================================================
->>> 6452: ex26 - TunerSuite Soft-Warning Dispatch
-    6453: ============================================================
-    6454: 
-    6455:   Tuner     | CtrlKind | Expected          | warned | success
-    6456:   ------------------------------------------------------------------
-    6457:   RelayZN   | PID      | IDEAL - no warning |     No | PASS
-    6458:   RelayZN   | Smith    | SOFT  - 1 warning  |    Yes | PASS
-    6459:   RelayZN   | LeadLag  | SOFT  - 1 warning  |    Yes | PASS
-    6460:   RelayZN   | SMC      | FALLBACK - 1 warning|    Yes | PASS
-    6461:   IMC       | PID      | IDEAL - no warning |     No | PASS
-    6462:   IMC       | LQR      | FALLBACK - 1 warning|    Yes | PASS
-    6463:   Bryson    | LQR      | IDEAL - no warning |     No | PASS
-    6464:   Bryson    | MPC      | SOFT  - 1 warning  |    Yes | PASS
-    6465:   Bryson    | PID      | FALLBACK - 1 warning|    Yes | PASS
-    6466: 
-    6467: ================================================
-    6468:   Verification: 9/9 checks passed
-    6469: ================================================
-    6470:   [PASS]  RelayZN+PID
-    6471:   [PASS]  RelayZN+Smith
-    6472:   [PASS]  RelayZN+LeadLag
-    6473:   [PASS]  RelayZN+SMC
-    6474:   [PASS]  IMC+PID
-    6475:   [PASS]  IMC+LQR
+    5903:   EXIT 0 - PASSED
+    5904: 
+    5905: ------------------------------------------------------------------------
+    5906:   [32/105]  examples\python\ex26_tuner_suite_soft_warnings.py
+    5907: ------------------------------------------------------------------------
+    5908: 
+    5909: ============================================================
+    5910: ex26 - TunerSuite Soft-Warning Dispatch
+    5911: ============================================================
+    5912: 
+>>> 5913:   Tuner     | CtrlKind | Expected          | warned | success
+    5914:   ------------------------------------------------------------------
+    5915:   RelayZN   | PID      | IDEAL - no warning |     No | PASS
+    5916:   RelayZN   | Smith    | SOFT  - 1 warning  |    Yes | PASS
+    5917:   RelayZN   | LeadLag  | SOFT  - 1 warning  |    Yes | PASS
+    5918:   RelayZN   | SMC      | FALLBACK - 1 warning|    Yes | PASS
+    5919:   IMC       | PID      | IDEAL - no warning |     No | PASS
+    5920:   IMC       | LQR      | FALLBACK - 1 warning|    Yes | PASS
+    5921:   Bryson    | LQR      | IDEAL - no warning |     No | PASS
+    5922:   Bryson    | MPC      | SOFT  - 1 warning  |    Yes | PASS
+    5923:   Bryson    | PID      | FALLBACK - 1 warning|    Yes | PASS
+    5924: 
+    5925: ================================================
+    5926:   Verification: 9/9 checks passed
+    5927: ================================================
+    5928:   [PASS]  RelayZN+PID
+    5929:   [PASS]  RelayZN+Smith
+    5930:   [PASS]  RelayZN+LeadLag
+    5931:   [PASS]  RelayZN+SMC
+    5932:   [PASS]  IMC+PID
+    5933:   [PASS]  IMC+LQR
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #6 (keywords: error) ---
-Lines 7315 - 7336
+--- FAILURE BLOCK #5 (keywords: error) ---
+Lines 7195 - 7215
 
-    7315: Suggested order for 1% tol: 2
-    7316: DC gain - full: 1.0000  reduced: 0.9925
-    7317: PASS
-    7318: 
-    7319:   EXIT 0 - PASSED
-    7320: 
-    7321: ------------------------------------------------------------------------
-    7322:   [79/100]  examples\python\ex75_zpetc.py
-    7323: ------------------------------------------------------------------------
-    7324: 
->>> 7325: System 1 - hasNMPZeros: False,  dcAmplitudeError: 6.88e-15
-    7326: System 2 - hasNMPZeros: True,  dcAmplitudeError: 3.9977
-    7327:   NMP zeros: ['1.500+0.000j']
-    7328:   Composite DC gain: 1.0000  (need approx = 1.0)
-    7329:   Transmission zeros magnitudes: ['1.500']
-    7330: PASS
-    7331: 
-    7332:   EXIT 0 - PASSED
-    7333: 
-    7334: ------------------------------------------------------------------------
-    7335:   [80/100]  examples\python\ex76_auto_gain_scheduling_demo.py
-    7336: ------------------------------------------------------------------------
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #7 (keywords: error) ---
-Lines 7390 - 7410
-
-    7390: IAE improvement: 77.4%
-    7391: PASS
-    7392: 
-    7393:   EXIT 0 - PASSED
-    7394: 
-    7395: ------------------------------------------------------------------------
-    7396:   [85/100]  examples\python\ex81_lpv_crossval.py
-    7397: ------------------------------------------------------------------------
-    7398: 
-    7399: Coefficient errors: A0=4.44e-16  A1=8.88e-16  B0=1.11e-16  B1=1.39e-17
->>> 7400: Cross-validation state RMS error: 1.47e-16
-    7401: PASS
-    7402: 
-    7403:   EXIT 0 - PASSED
-    7404: 
-    7405: ------------------------------------------------------------------------
-    7406:   [86/100]  examples\python\ex82_antwindup_mpc.py
-    7407: ------------------------------------------------------------------------
-    7408: 
-    7409: Unwrapped y_final = 1.9996  (integral wound up)
-    7410: Wrapped   y_final = 0.0216  (conditioning bounded integral)
+    7195: [PASS] All checks passed.
+    7196: 
+    7197:   EXIT 0 - PASSED
+    7198: 
+    7199: ------------------------------------------------------------------------
+    7200:   [104/105]  examples\python\ex98_recursive_grey_box.py
+    7201: ------------------------------------------------------------------------
+    7202: 
+    7203: [PASS] Initialized correctly.
+    7204:   Initial p guess  : 0.2  (error 0.300)
+>>> 7205:   Final p estimate : 0.4746  (error 0.025)
+    7206: [PASS] Param estimate finite and improved after 100 steps.
+    7207:   True x = 1.8410   x_hat = 1.8440   |err| = 0.0031
+    7208: [PASS] State estimate close to true state.
+    7209: 
+    7210: [PASS] All checks passed.
+    7211: 
+    7212:   EXIT 0 - PASSED
+    7213: 
+    7214: ------------------------------------------------------------------------
+    7215:   [105/105]  examples\python\ex99_gp_residual_model.py
 
 ------------------------------------------------------------------------
 

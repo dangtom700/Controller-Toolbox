@@ -26,7 +26,7 @@ MRACController::MRACController(const MRACParams &params, double Ts)
 
 double MRACController::compute(double y_plant)
 {
-    if (!std::isfinite(y_plant)) return 0.0;
+    if (!std::isfinite(y_plant)) return u_prev_;
     // 1. Model tracking error: e_m[k] = y[k] - y_m[k]
     e_m_ = y_plant - y_m_;
 
@@ -51,6 +51,7 @@ double MRACController::compute(double y_plant)
     // 5. Advance reference model: y_m[k+1] = a_m * y_m[k] + b_m * r[k]
     y_m_ = params_.a_m * y_m_ + params_.b_m * r_;
 
+    u_prev_ = u;
     return u;
 }
 
@@ -61,6 +62,7 @@ void MRACController::reset()
     y_m_     = 0.0;
     r_       = 0.0;
     e_m_     = 0.0;
+    u_prev_  = 0.0;
 }
 
 void MRACController::setParams(const MRACParams &p)

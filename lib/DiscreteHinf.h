@@ -158,7 +158,16 @@ struct MuSynParams
     double muTol         = 0.02;  ///< Stop when relative change in mu_upper < this.
     int    nFreqPoints   = 80;    ///< Frequency grid size for D-step (log-spaced, Nyquist).
     int    dScaleMaxIter = 30;    ///< Inner Sinkhorn-Knopp iterations per D-step.
-    bool   useRationalD  = false; ///< When true, fit first-order rational D_j(z) per channel.
+    bool   useRationalD  = false; ///< When true, fit rational D_j(z) per channel.
+    /**
+     * @brief Order of the rational D-scaling filters (number of poles per channel).
+     *
+     * - 1 (default): first-order heuristic (fitFirstOrderDFilter) - fast, two data points.
+     * - >= 2: full vector-fitting (VectorFitting::fitMagnitude) - accurate multi-peak profile.
+     *
+     * Only used when useRationalD is true.
+     */
+    int    dFitOrder     = 1;
     HinfParams hinfParams;        ///< H-inf sub-problem parameters for each K-step.
 };
 
@@ -290,6 +299,7 @@ private:
     Eigen::VectorXd xk_;
     double Ts_;
     double gamma_;
+    double u_prev_ = 0.0; ///< Last finite compute() scalar (hold-last NaN contract).
 
     // DareResult is shared with DiscreteLQR (defined in PlantModel.h).
     static DareResult solveHinfDARE(const Eigen::MatrixXd &A,

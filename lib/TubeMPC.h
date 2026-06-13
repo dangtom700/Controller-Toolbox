@@ -277,6 +277,7 @@ private:
     bool first_step_{true};     ///< True before first setState() call.
     bool state_set_{false};     ///< True after setState() in current step.
     bool qp_converged_{true};
+    double u_prev_ = 0.0;      ///< Last finite compute(error) scalar (hold-last NaN contract).
 
     // QP scratch vectors (pre-allocated)
     Eigen::VectorXd g_;    ///< Linear cost vector (Nu*m).

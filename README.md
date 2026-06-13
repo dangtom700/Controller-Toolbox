@@ -151,7 +151,7 @@ see [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md).
 | **Composition** | ControllerStack (Supervisory, Additive, Weighted) - cascade, observer+SF, bumpless transfer; ComputationalDelayWrapper, AntiWindupWrapper, CBFSafetyFilter |
 | **Estimators** | KalmanFilter, EKF (analytical/numerical Jacobians + DAE algebraic projection), UKF (sigma-point), MovingHorizonEstimator (condensed QP + state box constraints) |
 | **Identification** | FOPDTIdentifier, SOPDTIdentifier + Rivera 1986 IMC, RecursiveLeastSquares, SubspaceID (N4SID), SINDy (STLS sparse regression), KoopmanEDMD (PolyDeg/RBF dictionary) |
-| **ML / Data-driven** | GaussianProcess (SE kernel, Cholesky, fixed-budget), EchoStateNetwork (spectral-radius reservoir), NeuralPID (3→n_h→3 online backprop), CEMController (elite-sample stochastic MPC), DynaController (Sutton Dyna MBRL + SINDy model), ILC (P-type / D-type / norm-optimal), DeePC (ADMM data-enabled predictive control), ScenarioMPC, BayesianOptimizer |
+| **ML / Data-driven** | GaussianProcess (SE kernel, Cholesky, fixed-budget), EchoStateNetwork (spectral-radius reservoir), NeuralPID (3->n_h->3 online backprop), CEMController (elite-sample stochastic MPC), DynaController (Sutton Dyna MBRL + SINDy model), ILC (P-type / D-type / norm-optimal), DeePC (ADMM data-enabled predictive control), ScenarioMPC, BayesianOptimizer |
 | **Model utilities** | LinearisationHelper (jacobianX/U, lineariseAtPoint ZOH), BalancedTruncation (Hinf bound), ZeroPhaseTrackingFilter (ZPETC + transmissionZeros), GapMetric (chordal SISO + subspace MIMO) |
 | **DAE utilities** | `DAESystem` (Index-1 semi-explicit, `f`/`g`/`h` functors), `consistentInit` (Newton-Raphson), `dae2ode` (Euler+Newton discrete step function), `c2d(DAESystem)` (algebraic elimination + ZOH/Tustin) |
 
@@ -221,33 +221,33 @@ Python-only (Phase 6): DrillString 85/85 . WindWave 80/80 . EHFS 60/60 .
 Firefighting 60/60 . BTMS 60/60 . SurfaceShip 60/60.
 `bug_report.txt`: 0 blocks expected after a clean run (`safe_phrases` list in `run.py` suppresses all known benign messages).
 
-**Part 51 (2026-06-12) — DAE architecture (P1/P2/P3):**
+**Part 51 (2026-06-12) - DAE architecture (P1/P2/P3):**
 - `DAESystem` struct (`lib/PlantModel.h/.cpp`): Index-1 semi-explicit DAE with `f` (differential), `g` (algebraic), `h` (output) functors; `n_diff`/`n_alg`/`Ts` fields.
 - `consistentInit`: Newton-Raphson (LDLT) solving `g(x1,x2,u)=0` for `x2`.
 - `dae2ode`: discrete step function via forward Euler on `x1` + Newton projection on `x2`.
-- `c2d(DAESystem, x1_op, x2_op, u_op, Ts, method)`: Index-1 algebraic elimination (`A_red = A11 - A12*G2⁻¹*G1`), then ZOH/Tustin. Throws `runtime_error` if G2 singular.
+- `c2d(DAESystem, x1_op, x2_op, u_op, Ts, method)`: Index-1 algebraic elimination (`A_red = A11 - A12*G2^-^1*G1`), then ZOH/Tustin. Throws `runtime_error` if G2 singular.
 - DAE-aware EKF (`lib/ExtendedKalmanFilter.h/.cpp`): `setAlgebraicConstraint(g, n_diff, n_alg)` projects `x2` block via Newton after each `update()`; covariance projected as `P = J_proj*P*J_proj'`.
 - pybind11 bindings: `DAESystem`, `consistent_init`, `dae2ode`, `dae_c2d`, `set_algebraic_constraint` on EKF.
-- 7 Catch2 tests: `[dae_system]` ×3, `[dae_c2d]` ×2, `[dae_ekf]` ×2.
+- 7 Catch2 tests: `[dae_system]` *3, `[dae_c2d]` *2, `[dae_ekf]` *2.
 
-**Part 49 (2026-06-11) — Nonlinear Surface Ship Manoeuvring Control (Python-only):**
+**Part 49 (2026-06-11) - Nonlinear Surface Ship Manoeuvring Control (Python-only):**
 - 3-DOF MMG model, 19 SRUKF-identified parameters (Meng 2025 Table 5), [u,v,r,ψ,x,y], RK4 Ts=0.08s.
-- 12 controllers × 5 scenarios = 60 runs. Includes ASMC (paper cascade + disturbance FF), MPC (ZOH [ψ,r] linearisation), LQR (Bryson DARE), MRAC, L1Adaptive, ADRC, GainScheduled, NeuralPID, ILC.
+- 12 controllers * 5 scenarios = 60 runs. Includes ASMC (paper cascade + disturbance FF), MPC (ZOH [ψ,r] linearisation), LQR (Bryson DARE), MRAC, L1Adaptive, ADRC, GainScheduled, NeuralPID, ILC.
 
-**Part 48 (2026-06-11) — Air-Cooled Battery Thermal Management System (Python-only):**
+**Part 48 (2026-06-11) - Air-Cooled Battery Thermal Management System (Python-only):**
 - 1-D transient HX model: N=9 cells, 10 channels, J/U/L flow-pattern switching, Forward Euler Ts=1s.
-- 12 controllers × 5 scenarios = 60 runs.
+- 12 controllers * 5 scenarios = 60 runs.
 
-**Part 46 (2026-06-10) — High-Altitude Aerial Firefighting Bag Drop (Python-only):**
+**Part 46 (2026-06-10) - High-Altitude Aerial Firefighting Bag Drop (Python-only):**
 - 3D trajectory [x,y,z,vx,vy,vz], drag+gravity+wind, RK4 Ts=0.05s. Primary metric: CEP (50th-percentile radial error). N_mc=30 Monte-Carlo trajectories per planner/scenario.
-- 12 planners × 5 scenarios = 60 runs.
+- 12 planners * 5 scenarios = 60 runs.
 
-**Part 45 (2026-06-10) — Electro-Hydraulic Force Servo Systems (Python-only):**
+**Part 45 (2026-06-10) - Electro-Hydraulic Force Servo Systems (Python-only):**
 - 5-state EHFS [P_A, P_B, x_v, v_p, x_p], servo valve + cylinder, RK4 Ts=0.5ms.
-- 12 controllers × 5 scenarios = 60 runs. Includes FeedbackLinearisation, LQR, ADRC (omega_o=800, omega_o*Ts=0.40<0.5), GainScheduled.
+- 12 controllers * 5 scenarios = 60 runs. Includes FeedbackLinearisation, LQR, ADRC (omega_o=800, omega_o*Ts=0.40<0.5), GainScheduled.
 
-**Part 44 (2026-06-10) — SMISMO C++ case study reimplemented:**
+**Part 44 (2026-06-10) - SMISMO C++ case study reimplemented:**
 - Separate Meter In Separate Meter Out hydraulic cylinder (Chen 2018 + Liu 2009). 8-state RK4, dual PDCV spool dynamics, Stribeck friction, 20 bar backpressure regulation.
-- 12 controllers × 5 scenarios = 60 runs, target `smismo_sim`. Recreated `test_smismo_regression.cpp`.
+- 12 controllers * 5 scenarios = 60 runs, target `smismo_sim`. Recreated `test_smismo_regression.cpp`.
 
 Details in [docs/cumulative_bug_report.md](docs/cumulative_bug_report.md). Real-time deployment guidance in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).

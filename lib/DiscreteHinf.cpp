@@ -1,4 +1,5 @@
 #include "DiscreteHinf.h"
+#include "VectorFitting.h"
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 #include <cmath>
@@ -36,10 +37,12 @@ DiscreteHinf::DiscreteHinf(const HinfResult &result)
 
 double DiscreteHinf::compute(double signal)
 {
+    if (!std::isfinite(signal)) return u_prev_;
     // signal = y[k], the measurement (NOT tracking error - H-inf is output-feedback)
     Eigen::VectorXd y(1);
     y(0) = signal;
-    return computeVec(y)(0);
+    u_prev_ = computeVec(y)(0);
+    return u_prev_;
 }
 
 Eigen::VectorXd DiscreteHinf::computeVec(const Eigen::VectorXd &y)
@@ -1173,21 +1176,40 @@ MuSynResult DiscreteHinf::solveMuSyn(const GeneralisedPlant &P,
         Eigen::MatrixXd M_hi    = Eigen::MatrixXd::Zero(nz, nw);
         double mu_upper         = 0.0;
 
+        // For vector-fitting D-step: store per-frequency magnitude profiles.
+        // row_mag_L[j][fi] = geometric mean of M_abs(j, :) at frequency fi.
+        // col_mag_R[j][fi] = geometric mean of M_abs(:, j) at frequency fi.
+        const bool use_vfit = params.useRationalD && (params.dFitOrder > 1);
+        std::vector<std::vector<double>> row_mag_L(nz, std::vector<double>(nf, 0.0));
+        std::vector<std::vector<double>> col_mag_R(nw, std::vector<double>(nf, 0.0));
+        std::vector<double> omega_buf(nf, 0.0);
+
         for (int fi = 0; fi < nf; ++fi) {
             const double w = (pi / Ts)
                            * std::pow(0.01, 1.0 - static_cast<double>(fi) / (nf - 1));
+            omega_buf[fi] = w;
 
             const Eigen::MatrixXcd Mw = evalFreqResponse(A_cl, B_cl, C_cl, D_cl, w, Ts);
 
             for (int i = 0; i < nz; ++i) {
+                double row_geo = 0.0;
                 for (int j = 0; j < nw; ++j) {
                     const double abs_ij = std::abs(Mw(i, j));
                     M_peak(i, j) = std::max(M_peak(i, j), abs_ij);
-                    // accumulate log for geometric mean in each half
                     if (fi < half_nf)
                         M_lo(i, j) += std::log(std::max(abs_ij, 1e-30));
                     else
                         M_hi(i, j) += std::log(std::max(abs_ij, 1e-30));
+                    row_geo += std::log(std::max(abs_ij, 1e-30));
+                }
+                if (use_vfit) row_mag_L[i][fi] = std::exp(row_geo / std::max(nw, 1));
+            }
+            if (use_vfit) {
+                for (int j = 0; j < nw; ++j) {
+                    double col_geo = 0.0;
+                    for (int i = 0; i < nz; ++i)
+                        col_geo += std::log(std::max(std::abs(Mw(i, j)), 1e-30));
+                    col_mag_R[j][fi] = std::exp(col_geo / std::max(nz, 1));
                 }
             }
 
@@ -1230,43 +1252,52 @@ MuSynResult DiscreteHinf::solveMuSyn(const GeneralisedPlant &P,
         amplitudeBalance(M_peak, params.dScaleMaxIter, d_L, d_R);
 
         // ----------------------------------------------------------------
-        // Rational D-step: fit first-order D_j(z) per channel
+        // Rational D-step: fit D_j(z) per channel.
+        //   dFitOrder == 1  ->  first-order heuristic (fitFirstOrderDFilter)
+        //   dFitOrder >= 2  ->  full VectorFitting over nFreqPoints grid
         // ----------------------------------------------------------------
         if (params.useRationalD) {
-            const int nlo = std::max(1, half_nf);
-            const int nhi = std::max(1, nf - half_nf);
-
-            // Left D-scaling filters (for performance outputs)
-            // Each filter j is driven by the j-th performance output z_j.
-            // Use row-wise geometric mean of M_lo / M_hi for each output j.
-            cur_dL.clear();
-            for (int j = 0; j < nz; ++j) {
-                // DC and Nyquist magnitudes for row j (max over nw input channels)
-                double lo_j = 0.0, hi_j = 0.0;
-                for (int k = 0; k < nw; ++k) {
-                    lo_j += M_lo(j, k);
-                    hi_j += M_hi(j, k);
+            if (!use_vfit) {
+                // First-order path (original)
+                const int nlo = std::max(1, half_nf);
+                const int nhi = std::max(1, nf - half_nf);
+                cur_dL.clear();
+                for (int j = 0; j < nz; ++j) {
+                    double lo_j = 0.0, hi_j = 0.0;
+                    for (int k = 0; k < nw; ++k) { lo_j += M_lo(j, k); hi_j += M_hi(j, k); }
+                    const double d_lo_j = std::exp(lo_j / (nlo * nw));
+                    const double d_hi_j = std::exp(hi_j / (nhi * nw));
+                    cur_dL.push_back(fitFirstOrderDFilter(d_lo_j, d_hi_j, Ts));
+                    d_lo_L(j) = d_lo_j;
+                    d_hi_L(j) = d_hi_j;
                 }
-                const double d_lo_j = std::exp(lo_j / (nlo * nw));
-                const double d_hi_j = std::exp(hi_j / (nhi * nw));
-                cur_dL.push_back(fitFirstOrderDFilter(d_lo_j, d_hi_j, Ts));
-                d_lo_L(j) = d_lo_j;
-                d_hi_L(j) = d_hi_j;
-            }
-
-            // Right D-scaling filters (for exogenous inputs)
-            cur_dR.clear();
-            for (int j = 0; j < nw; ++j) {
-                double lo_j = 0.0, hi_j = 0.0;
-                for (int k = 0; k < nz; ++k) {
-                    lo_j += M_lo(k, j);
-                    hi_j += M_hi(k, j);
+                cur_dR.clear();
+                for (int j = 0; j < nw; ++j) {
+                    double lo_j = 0.0, hi_j = 0.0;
+                    for (int k = 0; k < nz; ++k) { lo_j += M_lo(k, j); hi_j += M_hi(k, j); }
+                    const double d_lo_j = std::exp(lo_j / (nlo * nz));
+                    const double d_hi_j = std::exp(hi_j / (nhi * nz));
+                    cur_dR.push_back(fitFirstOrderDFilter(d_lo_j, d_hi_j, Ts));
+                    d_lo_R(j) = d_lo_j;
+                    d_hi_R(j) = d_hi_j;
                 }
-                const double d_lo_j = std::exp(lo_j / (nlo * nz));
-                const double d_hi_j = std::exp(hi_j / (nhi * nz));
-                cur_dR.push_back(fitFirstOrderDFilter(d_lo_j, d_hi_j, Ts));
-                d_lo_R(j) = d_lo_j;
-                d_hi_R(j) = d_hi_j;
+            } else {
+                // Vector-fitting path: fit dFitOrder-pole rational filter per channel
+                ctrl::VectorFittingParams vfp;
+                vfp.max_iter = 10;
+                vfp.tol      = 1e-4;
+                cur_dL.clear();
+                for (int j = 0; j < nz; ++j) {
+                    ctrl::VectorFittingResult vfr;
+                    cur_dL.push_back(ctrl::VectorFitting::fitMagnitude(
+                        omega_buf, row_mag_L[j], params.dFitOrder, Ts, vfr, vfp));
+                }
+                cur_dR.clear();
+                for (int j = 0; j < nw; ++j) {
+                    ctrl::VectorFittingResult vfr;
+                    cur_dR.push_back(ctrl::VectorFitting::fitMagnitude(
+                        omega_buf, col_mag_R[j], params.dFitOrder, Ts, vfr, vfp));
+                }
             }
         }
     }

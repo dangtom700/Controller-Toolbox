@@ -205,13 +205,14 @@ Eigen::VectorXd ScenarioMPC::computeControl()
 // ---------------------------------------------------------------------------
 double ScenarioMPC::compute(double error)
 {
-    if (!std::isfinite(error)) return 0.0;
+    if (!std::isfinite(error)) return u_prev_;
     // SISO shortcut: reconstruct reference from nominal output + error
     const double y_est = (sys_.C * x_nom_)(0);
     Eigen::VectorXd yref(1);
     yref(0) = y_est + error;
     setReference(yref);
-    return computeControl()(0);
+    u_prev_ = computeControl()(0);
+    return u_prev_;
 }
 
 // ---------------------------------------------------------------------------

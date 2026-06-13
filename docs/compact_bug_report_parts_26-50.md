@@ -165,9 +165,9 @@ Phase 2 algorithm roadmap (E1-E4, H1-H4, D1-D2) is the primary active work. See 
 
 | ID | Description | Priority |
 |----|-------------|----------|
-| **E1** | `GreyBoxEstimator` — non-linear param estimation via Levenberg-Marquardt | HIGH |
-| **E2** | `RecursiveGreyBoxEstimator` — augmented-state UKF for online param tracking | HIGH |
-| **E3** | GP Residual Model — extend `GaussianProcess` with `residualFit()` + uncertainty output | MED |
+| ~~**E1**~~ | ~~`GreyBoxEstimator`~~ — **Done Part 52** | HIGH |
+| ~~**E2**~~ | ~~`RecursiveGreyBoxEstimator`~~ — **Done Part 52** | HIGH |
+| ~~**E3**~~ | ~~GP Residual Model~~ — **Done Part 52** | MED |
 | **E4** | MHE Polytopic Constraints — extend MHE with `C_ineq`/`d_ineq` beyond current box constraints | MED |
 | **H1** | `HybridModel` base class — `IPlantModel` with `f_phys + f_data` | MED |
 | **H2** | `HybridMPC` — `NonlinearMPC` variant using `HybridModel` for prediction | MED |

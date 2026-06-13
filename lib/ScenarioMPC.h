@@ -220,6 +220,7 @@ private:
     Eigen::VectorXd tmp2_;       ///< FISTA scratch.
     bool            first_step_  = true;
     bool            qp_converged_ = true;
+    double          u_prev_       = 0.0; ///< Last finite compute(error) scalar (hold-last NaN contract).
 
     // RNG
     mutable std::mt19937                     rng_;

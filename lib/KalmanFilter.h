@@ -1,5 +1,6 @@
 #pragma once
 #include "PlantModel.h"
+#include "MismatchDetector.h"
 #include <Eigen/Dense>
 #include <optional>
 
@@ -120,12 +121,60 @@ public:
     /** @brief Sample time Ts [s]. */
     double sampleTime() const { return Ts_; }
 
+    /**
+     * @brief Enable real-time model-plant mismatch detection on the innovation sequence (D1).
+     *
+     * After enabling, every @c update() / @c step() call feeds the current innovation
+     * `y - C*x_pred - D*u` into a CUSUM chart.  Tune @p params.sigma to the expected
+     * innovation RMS when the model is correct (see MismatchDetector.h for guidance).
+     *
+     * @param params  CUSUM parameters (sigma, k_cusum, h_threshold).
+     */
+    void enableMismatchDetection(const MismatchDetectorParams& params = {})
+    {
+        mismatch_det_.emplace(params);
+    }
+
+    /**
+     * @brief @c true if the CUSUM statistic has exceeded the detection threshold.
+     *
+     * Always @c false when @c enableMismatchDetection() has not been called.
+     * Remains @c true until the detector is reset or re-enabled.
+     */
+    bool mismatchDetected() const
+    {
+        return mismatch_det_.has_value() && mismatch_det_->detected();
+    }
+
+    /**
+     * @brief Current CUSUM score: max(C+, C-) from the innovation CUSUM chart.
+     *
+     * Returns 0.0 when detection is not enabled.  Compare against
+     * `params.h_threshold * params.sigma` for a threshold-relative reading.
+     */
+    double mismatchScore() const
+    {
+        return mismatch_det_.has_value() ? mismatch_det_->score() : 0.0;
+    }
+
+    /**
+     * @brief Reset mismatch detector accumulators (does not disable detection).
+     *
+     * Useful after a parameter re-estimation event to clear false-alarm history.
+     */
+    void resetMismatchDetector()
+    {
+        if (mismatch_det_) mismatch_det_->reset();
+    }
+
 private:
     StateSpace plant_;
     Eigen::MatrixXd Q_, R_;
     Eigen::VectorXd x_hat_; ///< State estimate x^[k|k].
     Eigen::MatrixXd P_;     ///< Error covariance P[k|k].
     double Ts_;
+
+    std::optional<MismatchDetector> mismatch_det_;  ///< D1: optional innovation CUSUM.
 };
 
 } // namespace ctrl

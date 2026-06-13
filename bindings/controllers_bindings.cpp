@@ -10,12 +10,16 @@
 #include "L1AdaptiveController.h"
 #include "CBFSafetyFilter.h"
 #include "GaussianProcess.h"
+#include "GPResidualModel.h"
 #include "EchoStateNetwork.h"
 #include "NeuralPID.h"
 #include "CEMController.h"
 #include "DynaController.h"
 #include "ScenarioMPC.h"
 #include "BayesianOptimizer.h"
+#include "HybridModel.h"
+#include "HybridMPC.h"
+#include "HybridModelTrainer.h"
 
 namespace py = pybind11;
 
@@ -1342,6 +1346,76 @@ Example
         .def("reset",     &ctrl::GaussianProcess::reset);
 
     // -----------------------------------------------------------------------
+    // GPResidualModel (E3) - GP mismatch correction for risk-aware MPC
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::GPResidualModel::Params>(m, "GPResidualParams",
+        "Parameters for GPResidualModel (E3).")
+        .def(py::init<>())
+        .def_readwrite("gp", &ctrl::GPResidualModel::Params::gp,
+                       "GP hyperparameters (GPParams).");
+
+    py::class_<ctrl::GPResidualModel::Prediction>(m, "GPResidualPrediction",
+        "Prediction from GPResidualModel.predict_with_uncertainty().")
+        .def_readonly("mean_total", &ctrl::GPResidualModel::Prediction::mean_total,
+                      "model_pred + GP correction mean (bias-corrected estimate).")
+        .def_readonly("gp_mean",    &ctrl::GPResidualModel::Prediction::gp_mean,
+                      "GP correction mean only (the learned residual).")
+        .def_readonly("variance",   &ctrl::GPResidualModel::Prediction::variance,
+                      "GP posterior variance (>= 0). sqrt gives 1-sigma bound.");
+
+    py::class_<ctrl::GPResidualModel>(m, "GPResidualModel", R"doc(
+GP Residual Model - learn model-plant mismatch for risk-aware MPC (E3).
+
+Fits a GP to residuals epsilon = y_true - y_model.  At prediction time:
+  mean_total = model_pred + GP_mean(x_feat)   -- bias-corrected output
+  variance   = GP_variance(x_feat)            -- for constraint tightening
+
+Example
+-------
+>>> p = ctrl.GPResidualParams(); p.gp.length_scale = 0.5
+>>> grm = ctrl.GPResidualModel(x_dim=1, params=p)
+>>> grm.add_residual_point(x_feat, y_true, y_model)
+>>> grm.fit()
+>>> pred = grm.predict_with_uncertainty(x_feat, model_output)
+>>> print(pred.mean_total, pred.variance)
+
+Or batch fit:
+>>> grm.residual_fit(X_feat, Y_true, model_fn=lambda x: linear_model(x))
+)doc")
+        .def(py::init<int, const ctrl::GPResidualModel::Params&>(),
+             py::arg("x_dim"), py::arg("params"),
+             "Construct with feature dimension and GPResidualParams.")
+        .def("add_residual_point",
+             &ctrl::GPResidualModel::addResidualPoint,
+             py::arg("x_feat"), py::arg("y_true"), py::arg("y_model"),
+             "Add one (feature, y_true, y_model) sample online.")
+        .def("residual_fit",
+             [](ctrl::GPResidualModel& self,
+                const Eigen::MatrixXd& X_feat,
+                const Eigen::VectorXd& Y_true,
+                py::object model_fn_py) {
+                 self.residualFit(X_feat, Y_true,
+                     [model_fn_py](const Eigen::VectorXd& x) -> double {
+                         return model_fn_py(x).cast<double>();
+                     });
+             },
+             py::arg("X_feat"), py::arg("Y_true"), py::arg("model_fn"),
+             "Batch: compute residuals from model_fn and fit GP in one call.\n"
+             "model_fn(x_feat: np.ndarray) -> float.")
+        .def("fit",     &ctrl::GPResidualModel::fit,
+             "(Re-)fit the GP on all accumulated residual data.")
+        .def("predict_with_uncertainty",
+             &ctrl::GPResidualModel::predictWithUncertainty,
+             py::arg("x_feat"), py::arg("model_pred"),
+             "Predict total output and GP uncertainty. Returns GPResidualPrediction.")
+        .def("size",      &ctrl::GPResidualModel::size,
+             "Number of residual data points stored.")
+        .def("is_fitted", &ctrl::GPResidualModel::isFitted,
+             "True if fit() has been called with at least one data point.")
+        .def("reset",     &ctrl::GPResidualModel::reset,
+             "Clear all stored data and reset the GP.");
+
+    // -----------------------------------------------------------------------
     // EchoStateNetwork
     // -----------------------------------------------------------------------
     py::class_<ctrl::EchoStateNetwork::Params>(m, "ESNParams")
@@ -1481,6 +1555,198 @@ Usage
         .def("new_since_last_fit", &ctrl::DynaController::newSinceLastFit)
         .def("inner_controller", &ctrl::DynaController::innerController,
              py::return_value_policy::reference_internal);
+
+    // -----------------------------------------------------------------------
+    // HybridModel (H1) - physics + data-driven plant model
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::HybridModelParams>(m, "HybridModelParams",
+        "Configuration for HybridModel (H1).")
+        .def(py::init<>())
+        .def_readwrite("n_states",  &ctrl::HybridModelParams::n_states,
+                       "State dimension (must match f_phys output size).")
+        .def_readwrite("n_inputs",  &ctrl::HybridModelParams::n_inputs,
+                       "Input dimension.")
+        .def_readwrite("n_outputs", &ctrl::HybridModelParams::n_outputs,
+                       "Output dimension.")
+        .def_readwrite("Ts",        &ctrl::HybridModelParams::Ts,
+                       "Sample time [s].")
+        .def_readwrite("rk4_steps", &ctrl::HybridModelParams::rk4_steps,
+                       "RK4 substeps per Ts for physical integration.");
+
+    py::class_<ctrl::HybridModel, std::shared_ptr<ctrl::HybridModel>>(m, "HybridModel", R"doc(
+Hybrid plant model: x[k+1] = RK4(f_phys, x, u, p) + f_data(x, u)  (H1).
+
+Combines a known physical ODE (integrated by RK4) with an optional
+data-driven additive state correction f_data(x, u) -> delta_x.
+
+f_phys  signature: (x: np.ndarray, u: np.ndarray, p: np.ndarray) -> np.ndarray
+f_data  signature: (x: np.ndarray, u: np.ndarray) -> np.ndarray
+
+Example
+-------
+>>> def f_phys(x, u, p):
+...     return np.array([x[1], -p[0]*x[0] - p[1]*x[1] + u[0]])
+>>> hmp = ctrl.HybridModelParams()
+>>> hmp.n_states = 2; hmp.n_inputs = 1; hmp.Ts = 0.01
+>>> model = ctrl.HybridModel(f_phys, hmp, p_phys=np.array([4.0, 0.8]))
+>>> x_next = model.predict(np.zeros(2), np.array([1.0]))
+)doc")
+        .def(py::init([](py::object f_py,
+                          const ctrl::HybridModelParams& params,
+                          const Eigen::VectorXd& p_phys) {
+                auto f = [f_py](const Eigen::VectorXd& x,
+                                const Eigen::VectorXd& u,
+                                const Eigen::VectorXd& p) -> Eigen::VectorXd {
+                    return f_py(x, u, p).cast<Eigen::VectorXd>();
+                };
+                return std::make_shared<ctrl::HybridModel>(std::move(f), params, p_phys);
+            }),
+            py::arg("f_phys"), py::arg("params"),
+            py::arg("p_phys") = Eigen::VectorXd{},
+            "Construct with physical ODE, params, and optional physical parameters.")
+        .def("set_data_model",
+             [](ctrl::HybridModel& m, py::object f_py) {
+                 m.setDataModel(
+                     [f_py](const Eigen::VectorXd& x,
+                            const Eigen::VectorXd& u) -> Eigen::VectorXd {
+                         return f_py(x, u).cast<Eigen::VectorXd>();
+                     });
+             },
+             py::arg("f_data"),
+             "Attach a Python data model f_data(x, u) -> delta_x.")
+        .def("clear_data_model",   &ctrl::HybridModel::clearDataModel,
+             "Remove the data-driven correction (physical model only).")
+        .def("has_data_model",     &ctrl::HybridModel::hasDataModel)
+        .def("set_phys_params",    &ctrl::HybridModel::setPhysParams, py::arg("p"),
+             "Update physical model parameters p passed to f_phys.")
+        .def("phys_params",        &ctrl::HybridModel::physParams,
+             py::return_value_policy::copy,
+             "Current physical model parameters (n_p,).")
+        .def("predict",            &ctrl::HybridModel::predict,
+             py::arg("x"), py::arg("u"),
+             py::return_value_policy::copy,
+             "Combined discrete-time prediction x[k+1] (n_states,).")
+        .def("predict_phys",       &ctrl::HybridModel::predictPhys,
+             py::arg("x"), py::arg("u"),
+             py::return_value_policy::copy,
+             "Physical-only prediction (no data correction) (n_states,).")
+        .def("state_size",         &ctrl::HybridModel::stateSize)
+        .def("input_size",         &ctrl::HybridModel::inputSize)
+        .def("output_size",        &ctrl::HybridModel::outputSize)
+        .def("sample_time",        &ctrl::HybridModel::sampleTime);
+
+    // -----------------------------------------------------------------------
+    // HybridMPCParams
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::HybridMPCParams>(m, "HybridMPCParams",
+        "Parameters for HybridMPC (H2).")
+        .def(py::init<>())
+        .def_readwrite("nmpc",                 &ctrl::HybridMPCParams::nmpc,
+                       "Base NMPCParams (Np, Nu, rho_y, rho_u, uMin, uMax, Ts, n_states, n_inputs, n_outputs).")
+        .def_readwrite("data_update_interval", &ctrl::HybridMPCParams::data_update_interval,
+                       "Auto-refit data model every N addStateObservation() calls (0 = manual).")
+        .def_readwrite("min_observations",     &ctrl::HybridMPCParams::min_observations,
+                       "Minimum observations before first refit.")
+        .def_readwrite("ridge_lambda",         &ctrl::HybridMPCParams::ridge_lambda,
+                       "Ridge regression regularisation for online linear data model.");
+
+    // -----------------------------------------------------------------------
+    // HybridMPC (H2) - inherits NonlinearMPC
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::HybridMPC, ctrl::NonlinearMPC,
+               std::shared_ptr<ctrl::HybridMPC>>(m, "HybridMPC", R"doc(
+Hybrid Model Predictive Controller (H2).
+
+Inherits NonlinearMPC. Uses a shared HybridModel for prediction and supports
+online data accumulation with periodic ridge-regression refitting of f_data.
+
+Example
+-------
+>>> model = ctrl.HybridModel(f_phys, hmp, p_phys)
+>>> hp = ctrl.HybridMPCParams()
+>>> hp.nmpc.Np = 10; hp.nmpc.Ts = 0.01
+>>> hp.nmpc.n_states = 2; hp.nmpc.n_inputs = 1
+>>> hp.data_update_interval = 30
+>>> hmpc = ctrl.HybridMPC(hp, model)
+>>> hmpc.set_state(x_k)
+>>> u = hmpc.compute(error)
+>>> hmpc.add_state_observation(x_k, u_vec, x_next_true)
+)doc")
+        .def(py::init<const ctrl::HybridMPCParams&, std::shared_ptr<ctrl::HybridModel>>(),
+             py::arg("params"), py::arg("model"),
+             "Construct HybridMPC with params and shared HybridModel.")
+        .def("add_state_observation", &ctrl::HybridMPC::addStateObservation,
+             py::arg("x"), py::arg("u"), py::arg("x_next_true"),
+             "Record a state transition (x, u) -> x_next_true for online learning.")
+        .def("refit_data_model",      &ctrl::HybridMPC::refitDataModel,
+             "Manually trigger ridge-regression refit. Returns True if successful.")
+        .def("observation_count",     &ctrl::HybridMPC::observationCount,
+             "Number of state observations accumulated.")
+        .def("is_data_model_fitted",  &ctrl::HybridMPC::isDataModelFitted,
+             "True if the data model has been fitted at least once.")
+        .def("hybrid_model",          &ctrl::HybridMPC::hybridModel,
+             "Return the shared HybridModel.");
+
+    // -----------------------------------------------------------------------
+    // HybridModelTrainer (H4) - off-line trainer (Ridge / GP / ESN)
+    // -----------------------------------------------------------------------
+    py::enum_<ctrl::HybridModelTrainer::Method>(m, "HybridTrainerMethod",
+        "Training algorithm for HybridModelTrainer.")
+        .value("Ridge", ctrl::HybridModelTrainer::Method::Ridge,
+               "Ridge regression (linear, fast, always converges).")
+        .value("GP",    ctrl::HybridModelTrainer::Method::GP,
+               "Independent GPs per state dimension (nonlinear + uncertainty).")
+        .value("ESN",   ctrl::HybridModelTrainer::Method::ESN,
+               "Echo State Network with zero-state stateless evaluation.");
+
+    py::class_<ctrl::HybridModelTrainer::Params>(m, "HybridTrainerParams",
+        "Parameters for HybridModelTrainer (H4).")
+        .def(py::init<>())
+        .def_readwrite("method",       &ctrl::HybridModelTrainer::Params::method,
+                       "Training method (HybridTrainerMethod.Ridge / GP / ESN).")
+        .def_readwrite("ridge_lambda", &ctrl::HybridModelTrainer::Params::ridge_lambda,
+                       "Ridge regularisation coefficient.")
+        .def_readwrite("gp",           &ctrl::HybridModelTrainer::Params::gp,
+                       "GP hyperparameters (GPParams): length_scale, signal_var, noise_var, n_max.")
+        .def_readwrite("esn",          &ctrl::HybridModelTrainer::Params::esn,
+                       "ESN hyperparameters (EchoStateNetworkParams): n_res, spectral_radius, etc.");
+
+    py::class_<ctrl::HybridModelTrainer::Result>(m, "HybridTrainerResult",
+        "Result from HybridModelTrainer.train_hybrid_model().")
+        .def_readonly("success",     &ctrl::HybridModelTrainer::Result::success)
+        .def_readonly("train_rmse",  &ctrl::HybridModelTrainer::Result::train_rmse,
+                      "Root-mean-square residual prediction error on training data.")
+        .def_readonly("method",      &ctrl::HybridModelTrainer::Result::method,
+                      "Method name string ('Ridge', 'GP', 'ESN').")
+        .def_readonly("n_samples",   &ctrl::HybridModelTrainer::Result::n_samples);
+
+    py::class_<ctrl::HybridModelTrainer>(m, "HybridModelTrainer", R"doc(
+Off-line trainer for the data component of a HybridModel (H4).
+
+Computes state residuals delta_x = x_next_true - predictPhys(x, u) for each
+observation and fits a data model (Ridge / GP / ESN) on feature [x; u] -> delta_x.
+
+Example
+-------
+>>> tp = ctrl.HybridTrainerParams()
+>>> tp.method = ctrl.HybridTrainerMethod.GP
+>>> tp.gp.length_scale = 0.5
+>>> trainer = ctrl.HybridModelTrainer(tp)
+>>> result = trainer.train_hybrid_model(model, X_obs, U_obs, X_next_obs)
+>>> print(f"RMSE={result.train_rmse:.4f}  samples={result.n_samples}")
+>>> rmse_val = trainer.validate(model, X_val, U_val, X_next_val)
+)doc")
+        .def(py::init<const ctrl::HybridModelTrainer::Params&>(),
+             py::arg("params") = ctrl::HybridModelTrainer::Params{},
+             "Construct trainer. params defaults to Ridge method.")
+        .def("train_hybrid_model",
+             &ctrl::HybridModelTrainer::trainHybridModel,
+             py::arg("model"), py::arg("X_obs"), py::arg("U_obs"), py::arg("X_next_obs"),
+             "Train data model and install in model via setDataModel(). Returns HybridTrainerResult.")
+        .def("validate",
+             &ctrl::HybridModelTrainer::validate,
+             py::arg("model"), py::arg("X_obs"), py::arg("U_obs"), py::arg("X_next_obs"),
+             "Evaluate prediction RMSE of model against observed transitions.");
 
     // -----------------------------------------------------------------------
     // Fuzzy module (optional - guarded by CTRL_HAS_FUZZY)

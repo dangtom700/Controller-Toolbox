@@ -29,6 +29,12 @@ MovingHorizonEstimator::MovingHorizonEstimator(const StateSpace      &plant,
         throw std::invalid_argument("MHE: R_meas must be p x p.");
     if (params_.N < 1)
         throw std::invalid_argument("MHE: horizon N must be >= 1.");
+    if (params_.C_ineq.rows() > 0) {
+        if (params_.C_ineq.cols() != n_)
+            throw std::invalid_argument("MHE: C_ineq must have n columns.");
+        if (params_.d_ineq.size() != params_.C_ineq.rows())
+            throw std::invalid_argument("MHE: d_ineq size must match C_ineq rows.");
+    }
 
     P0inv_ = Eigen::MatrixXd::Identity(n_, n_);
     x_bar_ = Eigen::VectorXd::Zero(n_);
@@ -221,8 +227,8 @@ Eigen::VectorXd MovingHorizonEstimator::estimate(const Eigen::VectorXd &y,
     last_converged_ = result.converged;
     last_qp_iters_  = result.iters;
 
-    // Extract x_0 from solution, propagate to get current x estimate
-    const Eigen::VectorXd x0_opt = z_sol_eff.head(n_);
+    // Extract x_0 from solution; apply polytopic projection (E4) if constraints are set.
+    Eigen::VectorXd x0_opt = projectX0Polytope(z_sol_eff.head(n_));
 
     // Propagate x_0_opt through the horizon using stored inputs and estimated w
     Eigen::VectorXd x_cur = x0_opt;
@@ -233,6 +239,12 @@ Eigen::VectorXd MovingHorizonEstimator::estimate(const Eigen::VectorXd &y,
     }
 
     x_est_ = x_cur;
+
+    // D1: feed one-step-ahead residual into CUSUM mismatch detector (if enabled).
+    if (mismatch_det_) {
+        const Eigen::VectorXd resid = y_hist_[N] - plant_.C * x_est_;
+        mismatch_det_->update(resid);
+    }
 
     // Update arrival state: x_bar_ for the next step is x_0 shifted by one
     // (the oldest state in the window advances by one step)
@@ -352,6 +364,54 @@ void MovingHorizonEstimator::buildCondensedMatrices()
     ub_z_ .resize(dz); ub_z_ .fill( 1e30);
     tmp1_  .resize(dz); tmp1_ .setZero();
     tmp2_  .resize(dz); tmp2_ .setZero();
+}
+
+// =============================================================================
+// projectX0Polytope  (E4 - polytopic inequality constraints on arrival state)
+// =============================================================================
+
+Eigen::VectorXd MovingHorizonEstimator::projectX0Polytope(
+        const Eigen::VectorXd &x0) const
+{
+    const auto &C = params_.C_ineq;
+    const auto &d = params_.d_ineq;
+
+    // No polytopic constraint: just apply box, which mirrors what FISTA already did.
+    if (C.rows() == 0 || d.size() == 0) {
+        Eigen::VectorXd x = x0;
+        if (params_.xMin.size() == n_) x = x.cwiseMax(params_.xMin);
+        if (params_.xMax.size() == n_) x = x.cwiseMin(params_.xMax);
+        return x;
+    }
+
+    Eigen::VectorXd x = x0;
+    const int m_c = static_cast<int>(C.rows());
+
+    // Pre-compute squared row norms (constant across iterations).
+    Eigen::VectorXd row_sq(m_c);
+    for (int i = 0; i < m_c; ++i)
+        row_sq(i) = C.row(i).squaredNorm();
+
+    // Hildreth's cyclic half-space projections:
+    //   if c_i' * x > d_i, project x onto the half-space {x : c_i' * x = d_i}.
+    for (int iter = 0; iter < params_.ineq_proj_iters; ++iter) {
+        bool all_satisfied = true;
+        for (int i = 0; i < m_c; ++i) {
+            if (row_sq(i) < 1e-14) continue;
+            const double viol = C.row(i).dot(x) - d(i);
+            if (viol > 0.0) {
+                x -= (viol / row_sq(i)) * C.row(i).transpose();
+                all_satisfied = false;
+            }
+        }
+        if (all_satisfied) break;
+    }
+
+    // Re-apply box constraints so both are simultaneously satisfied.
+    if (params_.xMin.size() == n_) x = x.cwiseMax(params_.xMin);
+    if (params_.xMax.size() == n_) x = x.cwiseMin(params_.xMax);
+
+    return x;
 }
 
 } // namespace ctrl

@@ -1,6 +1,7 @@
 #pragma once
 #include "PlantModel.h"
 #include "GradientProjectionQP.h"
+#include "MismatchDetector.h"
 #include <Eigen/Dense>
 
 /**
@@ -77,6 +78,27 @@ struct MHEParams
      */
     Eigen::VectorXd xMin; ///< Lower box bound on x_0 (size n), empty = no constraint.
     Eigen::VectorXd xMax; ///< Upper box bound on x_0 (size n), empty = no constraint.
+
+    /**
+     * @brief General linear inequality constraints on the arrival state x_0 (E4).
+     *
+     * Enforces  C_ineq * x_0 <= d_ineq  after the FISTA solve via Hildreth's cyclic
+     * half-space projections.  Useful for:
+     *  - Simplex constraints: mole fractions sum to 1, all non-negative.
+     *  - Coupled bounds: e.g. x_1 + x_2 <= 1.
+     *  - Any polytope expressible as a set of linear inequalities.
+     *
+     * Set @p C_ineq (m_c x n) and @p d_ineq (m_c) together; both must be non-empty
+     * for the constraint to be active.  Box constraints @p xMin / @p xMax are
+     * re-applied after the polytope projection so both are simultaneously satisfied.
+     *
+     * @param C_ineq Constraint matrix (m_c x n), empty = no polytopic constraint.
+     * @param d_ineq Constraint RHS (m_c x 1).
+     * @param ineq_proj_iters Hildreth iterations (default 20, usually sufficient).
+     */
+    Eigen::MatrixXd C_ineq;         ///< Polytope constraint LHS (m_c x n), empty = off.
+    Eigen::VectorXd d_ineq;         ///< Polytope constraint RHS (m_c x 1).
+    int ineq_proj_iters = 20;       ///< Hildreth cyclic-projection iterations for C_ineq.
 };
 
 /**
@@ -156,6 +178,46 @@ public:
     /** @brief Sample time Ts [s]. */
     double sampleTime() const { return Ts_; }
 
+    /**
+     * @brief Enable real-time model-plant mismatch detection on the MHE residual (D1).
+     *
+     * After enabling, every @c estimate() call feeds the one-step-ahead prediction
+     * residual `y[k] - C*x_est_[k]` into a CUSUM chart.  Tune @p params.sigma to
+     * the expected residual RMS under a consistent model.
+     *
+     * @param params  CUSUM parameters (sigma, k_cusum, h_threshold).
+     */
+    void enableMismatchDetection(const MismatchDetectorParams& params = {})
+    {
+        mismatch_det_.emplace(params);
+    }
+
+    /**
+     * @brief @c true if the CUSUM statistic has exceeded the detection threshold.
+     *
+     * Always @c false when @c enableMismatchDetection() has not been called.
+     */
+    bool mismatchDetected() const
+    {
+        return mismatch_det_.has_value() && mismatch_det_->detected();
+    }
+
+    /**
+     * @brief Current CUSUM score from the MHE residual chart.
+     *
+     * Returns 0.0 when detection is not enabled.
+     */
+    double mismatchScore() const
+    {
+        return mismatch_det_.has_value() ? mismatch_det_->score() : 0.0;
+    }
+
+    /** @brief Reset mismatch detector accumulators without disabling. */
+    void resetMismatchDetector()
+    {
+        if (mismatch_det_) mismatch_det_->reset();
+    }
+
 private:
     StateSpace       plant_;
     MHEParams        params_;
@@ -188,11 +250,17 @@ private:
     bool last_converged_ = true;
     int  last_qp_iters_  = 0;
 
+    std::optional<MismatchDetector> mismatch_det_;  ///< D1: optional residual CUSUM.
+
     void buildCondensedMatrices();
 
     /// Propagate x_0 through the horizon using stored u/w history.
     Eigen::VectorXd propagateState(const Eigen::VectorXd &x0,
                                    const Eigen::VectorXd &z) const;
+
+    /// Project x0 onto {x : C_ineq * x <= d_ineq} ∩ [xMin, xMax] via Hildreth's algorithm.
+    /// Returns x unchanged when C_ineq is empty.
+    Eigen::VectorXd projectX0Polytope(const Eigen::VectorXd &x0) const;
 };
 
 } // namespace ctrl

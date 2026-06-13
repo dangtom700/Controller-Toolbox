@@ -85,7 +85,7 @@ SmithPredictor::SmithPredictor(std::shared_ptr<IController> inner,
 
 double SmithPredictor::compute(double error)
 {
-    if (!std::isfinite(error)) return 0.0;
+    if (!std::isfinite(error)) return u_prev_.rows() > 0 ? u_prev_(0) : 0.0;
     // Step 1: delay-free model output (uses u[k-1] for D term)
     const double y_model = (model_.C * x_model_ + model_.D * u_prev_)(0);
 

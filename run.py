@@ -715,15 +715,18 @@ def phase_bug_report(log_path):
         'zero error after reset',         # NeuralPID reset test section header
         'leadlag',                        # LeadLag row in perf. dashboard (NaN rise_time is expected)
         'retain residual periodic error', # Scenario: s08_periodic_load
-        'dcAmplitudeError',               # ex60_gap_clustering.exe and 
-        'trial |  RMS error',
+        'dcamplitudeerror',               # ex59/ex60/ex75: dcAmplitudeError metric (lowercased match)
+        'trial |  rms error',             # ILC C++ table header "trial |  RMS error"
         'model - mean position error:',
-        'a1 errors by SNR',
-        'Step |  error  |',
-        'ex26 - TunerSuite Soft-Warning Dispatch',
+        'a1 errors by snr',               # ex05 SNR table row (was uppercase SNR — broken)
+        'step |  error  |',               # DynaCtrl table header (was uppercase S — broken)
+        'ex26 - tunersuite soft-warning dispatch',   # ex26 soft-warning title line
         'zero error',
         'radial impact error [m]',
-        'Cross-validation state RMS error',
+        'cross-validation state rms error',          # ex81 LPV cross-val metric
+        'max error nominal:',             # ex80 GPResidual "max error nominal:" metric
+        'dominant_rho_y',                 # ex101 RL-MPC: "dominant" contains "nan" substring
+        'initial p guess',                # ex98 RecursiveGreyBox "(error 0.300)" line
     ]
 
     # Try to read the log - fall back to latin‑1 if UTF‑8 fails

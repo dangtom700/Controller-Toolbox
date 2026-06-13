@@ -106,6 +106,12 @@ add_example(ex77_scenario_mpc)
 add_example(ex78_bayesian_tuner)
 add_example(ex79_registry_monitor)
 
+# Phase 2: Model Estimation (E1/E2/E3)
+add_example(ex80_grey_box_estimator)
+
+# Phase 2: Hybrid Models (H1/H2/H4)
+add_example(ex81_hybrid_model_mpc)
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)

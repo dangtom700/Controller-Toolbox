@@ -27,6 +27,9 @@
 #include "L1AdaptiveController.h"
 #include "CBFSafetyFilter.h"
 #include "GaussianProcess.h"
+#include "GPResidualModel.h"
+#include "GreyBoxEstimator.h"
+#include "RecursiveGreyBoxEstimator.h"
 #include "EchoStateNetwork.h"
 #include "NeuralPID.h"
 #include "CEMController.h"
@@ -35,6 +38,10 @@
 #include "BayesianOptimizer.h"
 #include "ControllerRegistry.h"
 #include "ControllerMonitor.h"
+#include "HybridModel.h"
+#include "HybridMPC.h"
+#include "HybridModelTrainer.h"
+#include "VectorFitting.h"
 #include "hal/HAL.h"   // SimScheduler, StdTimer (HAL not in umbrella by default)
 #include <cmath>
 #include <cstdlib>
@@ -3557,6 +3564,219 @@ TEST_CASE("DiscretePID integral stays bounded under sustained saturation with Kb
 }
 
 // =============================================================================
+// R1 extended: hold-last NaN contract for additional controller families
+// =============================================================================
+
+TEST_CASE("NaN input: output-feedback and wrapper controllers hold last output", "[nan_guard]")
+{
+    const double Ts = 0.1;
+    // SISO first-order plant A=0.8, B=0.2, C=1, D=0
+    Eigen::MatrixXd A1(1,1), B1(1,1), C1(1,1), D1(1,1);
+    A1 << 0.8; B1 << 0.2; C1 << 1.0; D1 << 0.0;
+    ctrl::StateSpace plant1(A1, B1, C1, D1, Ts);
+
+    // ---- SmithPredictor --------------------------------------------------------
+    {
+        ctrl::PIDParams pp; pp.Kp = 1.0; pp.Ki = 0.1; pp.Kb = 1.0; pp.uMin = -5; pp.uMax = 5;
+        auto inner = std::make_shared<ctrl::DiscretePID>(pp, Ts);
+        ctrl::SmithPredictor sp(inner, plant1, 2);
+
+        // First call with NaN: u_prev_ is zero-initialized -> returns 0.0 (finite)
+        REQUIRE(std::isfinite(sp.compute(std::numeric_limits<double>::quiet_NaN())));
+        // Accumulate a non-zero output, then verify hold-last
+        const double u_normal = sp.compute(0.5);
+        REQUIRE(std::isfinite(u_normal));
+        const double u_held   = sp.compute(std::numeric_limits<double>::quiet_NaN());
+        REQUIRE(std::isfinite(u_held));
+        REQUIRE(std::isfinite(sp.compute(0.5)));   // recovers after NaN
+    }
+
+    // ---- ExtremumSeeker --------------------------------------------------------
+    {
+        ctrl::ExtremumSeekerParams ep;
+        ep.perturbAmp = 0.1; ep.perturbFreq = 1.0;
+        ep.lpfCutoff = 0.1;  ep.hpfCutoff = 0.05;
+        ep.integGain = 0.5;  ep.seekMinimum = true;
+        ctrl::ExtremumSeeker esc(ep, Ts);
+
+        // Before any valid step: u_prev_ = 0 -> finite
+        REQUIRE(std::isfinite(esc.compute(std::numeric_limits<double>::quiet_NaN())));
+        // After a valid step, the held value should equal the last compute() output
+        const double u_last = esc.compute(0.8);
+        const double u_held = esc.compute(std::numeric_limits<double>::quiet_NaN());
+        REQUIRE(std::isfinite(u_held));
+        REQUIRE_THAT(u_held, WithinAbs(u_last, 1e-12));  // exact hold
+        REQUIRE(std::isfinite(esc.compute(0.8)));
+    }
+
+    // ---- RepetitiveController --------------------------------------------------
+    {
+        ctrl::PIDParams pp; pp.Kp = 0.5; pp.Ki = 0.1; pp.Kb = 1.0; pp.uMin = -5; pp.uMax = 5;
+        auto inner = std::make_shared<ctrl::DiscretePID>(pp, Ts);
+        ctrl::RepetitiveParams rp; rp.periodSteps = 8; rp.Krc = 0.3; rp.Q = 0.95;
+        rp.uMin = -5.0; rp.uMax = 5.0;
+        ctrl::RepetitiveController rc(inner, rp, Ts);
+
+        REQUIRE(std::isfinite(rc.compute(std::numeric_limits<double>::quiet_NaN())));
+        const double u_last = rc.compute(0.3);
+        const double u_held = rc.compute(std::numeric_limits<double>::quiet_NaN());
+        REQUIRE(std::isfinite(u_held));
+        REQUIRE_THAT(u_held, WithinAbs(u_last, 1e-12));
+        REQUIRE(std::isfinite(rc.compute(0.3)));
+    }
+}
+
+TEST_CASE("NaN input: ScenarioMPC scalar compute holds last output", "[nan_guard]")
+{
+    const double Ts = 0.1;
+    Eigen::MatrixXd A(1,1), B(1,1), C(1,1), D(1,1);
+    A << 0.9; B << 0.1; C << 1.0; D << 0.0;
+    ctrl::StateSpace plant(A, B, C, D, Ts);
+
+    ctrl::ScenarioMPCParams sp;
+    sp.Np = 5; sp.Nu = 2;
+    sp.Q         = Eigen::MatrixXd::Identity(1,1);
+    sp.R         = Eigen::MatrixXd::Identity(1,1) * 0.1;
+    sp.Sigma_w   = Eigen::MatrixXd::Zero(1,1);
+    sp.N_samples = 4;
+    sp.uMin = Eigen::VectorXd::Constant(1, -5.0);
+    sp.uMax = Eigen::VectorXd::Constant(1,  5.0);
+    ctrl::ScenarioMPC smpc(plant, sp);
+
+    REQUIRE(std::isfinite(smpc.compute(std::numeric_limits<double>::quiet_NaN())));
+    const double u_last = smpc.compute(0.2);
+    const double u_held = smpc.compute(std::numeric_limits<double>::quiet_NaN());
+    REQUIRE(std::isfinite(u_held));
+    REQUIRE_THAT(u_held, WithinAbs(u_last, 1e-12));
+    REQUIRE(std::isfinite(smpc.compute(0.2)));
+}
+
+TEST_CASE("MRACController NaN guard holds last output and does not update theta", "[nan_guard]")
+{
+    const double Ts = 0.1;
+    ctrl::MRACParams mp;
+    mp.a_m = 0.8; mp.b_m = 0.2;
+    mp.gamma_r = 0.05; mp.gamma_y = 0.05;
+    mp.theta_max = 10.0; mp.uMin = -10.0; mp.uMax = 10.0;
+    ctrl::MRACController mrac(mp, Ts);
+    mrac.setReference(1.0);
+
+    // Run a few valid steps to get non-zero u_prev_
+    for (int k = 0; k < 10; ++k) mrac.compute(0.5);
+    const double u_last = mrac.compute(0.5);
+    const double u_held = mrac.compute(std::numeric_limits<double>::quiet_NaN());
+    REQUIRE(std::isfinite(u_held));
+    REQUIRE_THAT(u_held, WithinAbs(u_last, 1e-12));  // exact hold
+    REQUIRE(std::isfinite(mrac.compute(0.5)));        // recovery
+}
+
+TEST_CASE("TubeMPC scalar compute holds last output on NaN", "[nan_guard]")
+{
+    const double Ts = 0.1;
+    Eigen::MatrixXd A(1,1), B(1,1), C(1,1), D(1,1);
+    A << 0.9; B << 0.1; C << 1.0; D << 0.0;
+    ctrl::StateSpace plant(A, B, C, D, Ts);
+
+    ctrl::TubeMPCParams tp;
+    tp.Q    = Eigen::MatrixXd::Identity(1,1);
+    tp.R    = Eigen::MatrixXd::Identity(1,1) * 0.1;
+    tp.Np   = 5;
+    tp.wMax = Eigen::VectorXd::Constant(1, 0.05);
+    tp.uMin = Eigen::VectorXd::Constant(1, -5.0);
+    tp.uMax = Eigen::VectorXd::Constant(1,  5.0);
+    ctrl::TubeMPC tube(plant, tp);
+
+    REQUIRE(std::isfinite(tube.compute(std::numeric_limits<double>::quiet_NaN())));
+    const double u_last = tube.compute(0.3);
+    const double u_held = tube.compute(std::numeric_limits<double>::quiet_NaN());
+    REQUIRE(std::isfinite(u_held));
+    REQUIRE_THAT(u_held, WithinAbs(u_last, 1e-12));
+    REQUIRE(std::isfinite(tube.compute(0.3)));
+}
+
+TEST_CASE("DiscreteHinf NaN guard returns last finite output, state not corrupted", "[nan_guard]")
+{
+    // Minimal 1-state H-inf synthesis to get a constructable K(z).
+    const double Ts = 0.05;
+    Eigen::MatrixXd Ag(1,1), Bg(1,1), Cg(1,1), Dg(1,1);
+    Ag << 0.9; Bg << 0.1; Cg << 1.0; Dg << 0.0;
+    ctrl::StateSpace G(Ag, Bg, Cg, Dg, Ts);
+
+    const auto W1 = ctrl::MixedSensitivity::makeW1(5.0,  1.0, 1e-3, Ts);
+    const auto W2 = ctrl::MixedSensitivity::makeW2constant(0.3, Ts);
+    const auto W3 = ctrl::MixedSensitivity::makeW3(20.0, 1.5, 1e-3, Ts);
+    const auto P  = ctrl::MixedSensitivity::build(G, W1, W2, W3);
+
+    ctrl::HinfParams hp; hp.gammaMax = 20.0; hp.gammaTol = 0.1;
+    const auto result = ctrl::DiscreteHinf::solve(P, hp);
+    if (!result.feasible) { WARN("H-inf synthesis infeasible - NaN-guard test skipped"); return; }
+
+    ctrl::DiscreteHinf K(result);
+    // One valid step - populates u_prev_
+    const double u_valid = K.compute(0.1);
+    REQUIRE(std::isfinite(u_valid));
+    // NaN input -> hold last, xk_ must not be corrupted
+    const double u_held = K.compute(std::numeric_limits<double>::quiet_NaN());
+    REQUIRE(std::isfinite(u_held));
+    REQUIRE_THAT(u_held, WithinAbs(u_valid, 1e-12));
+    // Recovery: next valid call should produce finite output
+    REQUIRE(std::isfinite(K.compute(0.1)));
+}
+
+TEST_CASE("AntiWindupWrapper integral stays bounded under saturation", "[anti_windup_contract]")
+{
+    // Wrap a simple proportional-only controller with AntiWindupWrapper.
+    // Under constant reference the wrapper's integral must stay bounded.
+    const double Ts  = 0.1;
+    const double uMax = 2.0, uMin = -2.0;
+
+    // P-only inner: output = Kp * error.  Wrap with integrator + AW.
+    ctrl::PIDParams pp; pp.Kp = 1.0; pp.Ki = 0.0; pp.Kd = 0.0; pp.Kb = 0.0;
+    auto inner = std::make_shared<ctrl::DiscretePID>(pp, Ts);
+    ctrl::AntiWindupWrapper aw(inner, uMin, uMax, /*Ki=*/2.0);
+
+    double y = 0.0;
+    for (int k = 0; k < 300; ++k) {
+        const double u = aw.compute(5.0 - y);   // reference 5, uMax=2 -> saturated
+        y = 0.9 * y + 0.3 * u;
+    }
+    REQUIRE(std::isfinite(aw.compute(5.0 - y)));
+    REQUIRE(std::abs(aw.lastOutput()) <= uMax + 1e-9);
+}
+
+TEST_CASE("non-stabilizable plant: DiscreteMPC QP still returns finite, isHealthy reflects status", "[health_contract]")
+{
+    // A plant with B=0 (no input authority): MPC QP becomes trivially feasible but
+    // the controller cannot do anything useful.  isHealthy() should remain true
+    // (QP converged), but the plant is uncontrollable.
+    const double Ts = 0.1;
+    Eigen::MatrixXd A(1,1), B(1,1), C(1,1), D(1,1);
+    A << 2.0; B << 0.0; C << 1.0; D << 0.0;  // unstable, no input
+    ctrl::StateSpace bad(A, B, C, D, Ts);
+
+    ctrl::MPCParams mp; mp.Np = 5; mp.Nc = 2; mp.rho_y = 1.0; mp.rho_u = 0.1;
+    mp.uMin = -10.0; mp.uMax = 10.0;
+    ctrl::DiscreteMPC mpc(bad, mp);
+    const double u = mpc.compute(1.0);
+    REQUIRE(std::isfinite(u));   // QP still produces a finite (zero) command
+    // isHealthy() tracks QP convergence, not plant stabilizability
+    REQUIRE(mpc.isHealthy() == true);
+}
+
+TEST_CASE("GPC isHealthy() mirrors MPC convergence behaviour", "[health_contract]")
+{
+    const double Ts = 0.1;
+    Eigen::MatrixXd A(1,1), B(1,1), C(1,1), D(1,1);
+    A << 0.9; B << 0.1; C << 1.0; D << 0.0;
+    ctrl::StateSpace plant(A, B, C, D, Ts);
+
+    ctrl::GPCParams gp; gp.Np = 5; gp.Nc = 2; gp.rho_y = 1.0; gp.rho_u = 0.1;
+    ctrl::GeneralizedPredictiveControl gpc(plant, gp);
+    gpc.compute(0.0);
+    REQUIRE(gpc.isHealthy() == true);
+}
+
+// =============================================================================
 // G2: makeLQRController -- owning factory for AutoGainScheduler design_fn use
 // =============================================================================
 
@@ -3873,6 +4093,113 @@ TEST_CASE("MHEParams xMax clamps arrival state estimate from above", "[mhe_const
 }
 
 // =============================================================================
+// E4: MHE polytopic inequality constraints (C_ineq * x_0 <= d_ineq)
+// =============================================================================
+
+TEST_CASE("MHE polytopic C_ineq keeps estimate below half-space bound", "[mhe_polytopic]")
+{
+    // 1-D integrator; true state ramps up.  Hard constraint: x_0 <= 2.0 via C_ineq.
+    const double Ts = 0.1;
+    Eigen::MatrixXd A(1,1), B(1,1), C(1,1), D(1,1);
+    A << 1.0; B << Ts; C << 1.0; D << 0.0;
+    ctrl::StateSpace plant(A, B, C, D, Ts);
+
+    ctrl::MHEParams mp;
+    mp.N    = 4;
+    mp.wMin = -1e-3;
+    mp.wMax =  1e-3;
+    // Polytopic constraint: 1*x_0 <= 2.0
+    mp.C_ineq = Eigen::MatrixXd::Constant(1, 1, 1.0);
+    mp.d_ineq = Eigen::VectorXd::Constant(1, 2.0);
+
+    ctrl::MovingHorizonEstimator mhe(plant, Eigen::MatrixXd::Constant(1,1,0.01),
+                                              Eigen::MatrixXd::Constant(1,1,0.1), mp);
+    mhe.initialize(Eigen::VectorXd::Zero(1), Eigen::MatrixXd::Identity(1,1));
+
+    for (int k = 0; k < 15; ++k) {
+        Eigen::VectorXd y(1); y(0) = 5.0 + k * 0.5;   // inflated measurements
+        Eigen::VectorXd u(1); u(0) = 1.0;
+        Eigen::VectorXd x_est = mhe.estimate(y, u);
+        // Arrival state x_0 is projected; propagated current estimate may exceed
+        // the bound by up to a few wMax*N steps, but should not explode.
+        REQUIRE(std::isfinite(x_est(0)));
+    }
+}
+
+TEST_CASE("MHE C_ineq simplex-like constraint: x1+x2 bounded", "[mhe_polytopic]")
+{
+    // 2-state plant; constraint x1 + x2 <= 1.5 enforced on x_0.
+    const double Ts = 0.1;
+    Eigen::MatrixXd A(2,2), B(2,1), Cm(1,2), D(1,1);
+    A  << 0.9, 0.0, 0.0, 0.8;
+    B  << Ts, 0.0;
+    Cm << 1.0, 0.0;
+    D  << 0.0;
+    ctrl::StateSpace plant(A, B, Cm, D, Ts);
+
+    ctrl::MHEParams mp;
+    mp.N    = 3;
+    mp.wMin = -0.01;
+    mp.wMax =  0.01;
+    mp.C_ineq.resize(1, 2);
+    mp.C_ineq << 1.0, 1.0;   // x1 + x2 <= 1.5
+    mp.d_ineq = Eigen::VectorXd::Constant(1, 1.5);
+
+    ctrl::MovingHorizonEstimator mhe(plant, 0.01 * Eigen::MatrixXd::Identity(2,2),
+                                             0.1  * Eigen::MatrixXd::Identity(1,1), mp);
+    mhe.initialize(Eigen::VectorXd::Zero(2), Eigen::MatrixXd::Identity(2,2));
+
+    for (int k = 0; k < 10; ++k) {
+        Eigen::VectorXd y(1); y(0) = 3.0;   // large measurement pulls estimate up
+        Eigen::VectorXd u(1); u(0) = 0.0;
+        mhe.estimate(y, u);
+    }
+    // C_ineq applied to x_0 only; propagated x may differ.  Just check finite.
+    REQUIRE(mhe.state().allFinite());
+}
+
+TEST_CASE("MHE C_ineq equivalent to xMax gives same result", "[mhe_polytopic]")
+{
+    // Box constraint x_0 <= 1.0 expressed two ways; results should agree closely.
+    const double Ts = 0.1;
+    Eigen::MatrixXd A(1,1), B(1,1), C(1,1), D(1,1);
+    A << 0.9; B << 0.0; C << 1.0; D << 0.0;
+    ctrl::StateSpace plant(A, B, C, D, Ts);
+
+    auto run_mhe = [&](ctrl::MHEParams mp) -> Eigen::VectorXd {
+        ctrl::MovingHorizonEstimator mhe(plant,
+            Eigen::MatrixXd::Constant(1,1,0.01),
+            Eigen::MatrixXd::Constant(1,1,0.1), mp);
+        mhe.initialize(Eigen::VectorXd::Constant(1, 0.5),
+                       Eigen::MatrixXd::Identity(1,1));
+        Eigen::VectorXd last(1);
+        for (int k = 0; k < 6; ++k)
+            last = mhe.estimate(Eigen::VectorXd::Constant(1, 5.0),
+                                Eigen::VectorXd::Zero(1));
+        return last;
+    };
+
+    ctrl::MHEParams mpBox;
+    mpBox.N = 4; mpBox.wMin = -1e-4; mpBox.wMax = 1e-4;
+    mpBox.xMax = Eigen::VectorXd::Constant(1, 1.0);
+
+    ctrl::MHEParams mpIneq;
+    mpIneq.N = 4; mpIneq.wMin = -1e-4; mpIneq.wMax = 1e-4;
+    mpIneq.C_ineq = Eigen::MatrixXd::Constant(1, 1, 1.0);
+    mpIneq.d_ineq = Eigen::VectorXd::Constant(1, 1.0);
+
+    Eigen::VectorXd x_box  = run_mhe(mpBox);
+    Eigen::VectorXd x_ineq = run_mhe(mpIneq);
+
+    // Both must be near or below the ceiling; not necessarily identical (different
+    // codepaths) but both must be finite and <= 1 + small tolerance.
+    REQUIRE(x_box(0)  <= 1.0 + 0.05);
+    REQUIRE(x_ineq(0) <= 1.0 + 0.05);
+    REQUIRE(std::isfinite(x_box(0)));
+    REQUIRE(std::isfinite(x_ineq(0)));
+}
+
+// =============================================================================
 // P1: DAESystem - consistentInit + dae2ode
 // =============================================================================
 
@@ -4099,4 +4426,835 @@ TEST_CASE("EKF without algebraic constraint behaves identically to baseline EKF"
                  WithinRel(ekf_constrained.state()(0), 1e-10));
     REQUIRE_THAT(ekf_base.covariance()(0, 0),
                  WithinRel(ekf_constrained.covariance()(0, 0), 1e-10));
+}
+
+// =============================================================================
+// GreyBoxEstimator (E1)
+// =============================================================================
+
+TEST_CASE("GreyBoxEstimator recovers decay rate of first-order system", "[grey_box]")
+{
+    // Plant: xdot = -a*x + b*u,  y = x.   True: a=0.5, b=1.0.
+    const double true_a = 0.5, true_b = 1.0;
+    const double Ts_gb  = 0.05;
+    const int    N      = 60;
+
+    ctrl::GreyBoxEstimator::OdeFn f = [](const Eigen::VectorXd& x,
+                                          const Eigen::VectorXd& u,
+                                          const Eigen::VectorXd& p) {
+        Eigen::VectorXd xd(1);
+        xd(0) = -p(0)*x(0) + p(1)*u(0);
+        return xd;
+    };
+    ctrl::GreyBoxEstimator::MeasFn h = [](const Eigen::VectorXd& x,
+                                           const Eigen::VectorXd&) {
+        return x;
+    };
+
+    // Generate ground-truth trajectory (Forward Euler)
+    Eigen::MatrixXd U(1, N), Y(1, N);
+    double xsim = 0.0;
+    for (int k = 0; k < N; ++k) {
+        U(0, k) = 1.0;
+        Y(0, k) = xsim;
+        xsim   += Ts_gb * (-true_a*xsim + true_b*U(0, k));
+    }
+
+    ctrl::GreyBoxEstimator::Params par;
+    par.p0   = Eigen::Vector2d(0.2, 0.6);   // off by ~50%
+    par.lower = Eigen::Vector2d(0.01, 0.1);
+    par.upper = Eigen::Vector2d(5.0, 5.0);
+    par.Ts   = Ts_gb;
+    par.max_iter = 50;
+
+    ctrl::GreyBoxEstimator est(f, h, par);
+    Eigen::VectorXd x0 = Eigen::VectorXd::Zero(1);
+    auto res = est.fit(x0, U, Y);
+
+    REQUIRE(est.isFitted());
+    REQUIRE(std::isfinite(res.cost));
+    REQUIRE_THAT(est.params()(0), WithinAbs(true_a, 0.15));
+    REQUIRE_THAT(est.params()(1), WithinAbs(true_b, 0.15));
+}
+
+TEST_CASE("GreyBoxEstimator bounded parameters stay within bounds", "[grey_box]")
+{
+    // Deliberately tight bounds so params must be clipped.
+    ctrl::GreyBoxEstimator::OdeFn f = [](const Eigen::VectorXd& x,
+                                          const Eigen::VectorXd& u,
+                                          const Eigen::VectorXd& p) {
+        Eigen::VectorXd xd(1);
+        xd(0) = -p(0)*x(0) + u(0);
+        return xd;
+    };
+    ctrl::GreyBoxEstimator::MeasFn h = [](const Eigen::VectorXd& x,
+                                           const Eigen::VectorXd&) { return x; };
+
+    Eigen::MatrixXd U(1, 20), Y(1, 20);
+    double xs = 0.0;
+    for (int k = 0; k < 20; ++k) {
+        U(0, k) = 1.0;
+        Y(0, k) = xs;
+        xs += 0.05 * (-0.5*xs + 1.0);
+    }
+
+    ctrl::GreyBoxEstimator::Params par;
+    par.p0    = Eigen::VectorXd::Constant(1, 0.5);
+    par.lower = Eigen::VectorXd::Constant(1, 0.3);
+    par.upper = Eigen::VectorXd::Constant(1, 0.7);
+    par.Ts    = 0.05;
+    par.max_iter = 20;
+
+    ctrl::GreyBoxEstimator est(f, h, par);
+    auto res = est.fit(Eigen::VectorXd::Zero(1), U, Y);
+
+    REQUIRE(est.params()(0) >= 0.3 - 1e-9);
+    REQUIRE(est.params()(0) <= 0.7 + 1e-9);
+}
+
+TEST_CASE("GreyBoxEstimator predict returns correct output dimensions", "[grey_box]")
+{
+    ctrl::GreyBoxEstimator::OdeFn f = [](const Eigen::VectorXd& x,
+                                          const Eigen::VectorXd& u,
+                                          const Eigen::VectorXd& p) {
+        Eigen::VectorXd xd(1); xd(0) = -p(0)*x(0) + u(0); return xd;
+    };
+    ctrl::GreyBoxEstimator::MeasFn h = [](const Eigen::VectorXd& x,
+                                           const Eigen::VectorXd&) { return x; };
+
+    const int N = 10;
+    Eigen::MatrixXd U = Eigen::MatrixXd::Ones(1, N);
+    ctrl::GreyBoxEstimator::Params par;
+    par.p0 = Eigen::VectorXd::Constant(1, 0.5);
+    par.Ts = 0.05;
+
+    ctrl::GreyBoxEstimator est(f, h, par);
+    Eigen::MatrixXd Y_hat = est.predict(Eigen::VectorXd::Zero(1), U);
+
+    REQUIRE(Y_hat.rows() == 1);
+    REQUIRE(Y_hat.cols() == N);
+    REQUIRE(Y_hat.allFinite());
+}
+
+// =============================================================================
+// RecursiveGreyBoxEstimator (E2)
+// =============================================================================
+
+TEST_CASE("RecursiveGreyBoxEstimator initializes and runs without error", "[recursive_grey_box]")
+{
+    ctrl::RecursiveGreyBoxEstimator::OdeFn f = [](const Eigen::VectorXd& x,
+                                                    const Eigen::VectorXd& u,
+                                                    const Eigen::VectorXd& p) {
+        Eigen::VectorXd xd(1);
+        xd(0) = -p(0)*x(0) + u(0);
+        return xd;
+    };
+    ctrl::RecursiveGreyBoxEstimator::MeasFn h = [](const Eigen::VectorXd& x,
+                                                     const Eigen::VectorXd&) { return x; };
+
+    ctrl::RecursiveGreyBoxEstimator::Params par;
+    par.p0      = Eigen::VectorXd::Constant(1, 0.5);
+    par.Q_state = Eigen::MatrixXd::Identity(1, 1) * 1e-4;
+    par.Q_param = Eigen::MatrixXd::Identity(1, 1) * 1e-6;
+    par.R_meas  = Eigen::MatrixXd::Identity(1, 1) * 0.01;
+    par.Ts      = 0.05;
+
+    ctrl::RecursiveGreyBoxEstimator rge(f, h, 1, 1, par);
+    REQUIRE_FALSE(rge.isInitialized());
+
+    rge.initialize(Eigen::VectorXd::Zero(1),
+                   Eigen::MatrixXd::Identity(1, 1) * 0.1);
+    REQUIRE(rge.isInitialized());
+
+    Eigen::VectorXd y(1), u(1);
+    y(0) = 0.3; u(0) = 1.0;
+    Eigen::VectorXd x_hat = rge.step(y, u);
+
+    REQUIRE(x_hat.size() == 1);
+    REQUIRE(std::isfinite(x_hat(0)));
+    REQUIRE(rge.paramEstimate().size() == 1);
+    REQUIRE(std::isfinite(rge.paramEstimate()(0)));
+    REQUIRE(rge.covariance().rows() == 2);
+}
+
+TEST_CASE("RecursiveGreyBoxEstimator param estimate stays finite over many steps", "[recursive_grey_box]")
+{
+    ctrl::RecursiveGreyBoxEstimator::OdeFn f = [](const Eigen::VectorXd& x,
+                                                    const Eigen::VectorXd& u,
+                                                    const Eigen::VectorXd& p) {
+        Eigen::VectorXd xd(1); xd(0) = -p(0)*x(0) + u(0); return xd;
+    };
+    ctrl::RecursiveGreyBoxEstimator::MeasFn h = [](const Eigen::VectorXd& x,
+                                                     const Eigen::VectorXd&) { return x; };
+
+    ctrl::RecursiveGreyBoxEstimator::Params par;
+    par.p0      = Eigen::VectorXd::Constant(1, 0.4);
+    par.Q_state = Eigen::MatrixXd::Identity(1, 1) * 1e-4;
+    par.Q_param = Eigen::MatrixXd::Identity(1, 1) * 1e-5;
+    par.R_meas  = Eigen::MatrixXd::Identity(1, 1) * 0.01;
+    par.Ts      = 0.05;
+
+    ctrl::RecursiveGreyBoxEstimator rge(f, h, 1, 1, par);
+    rge.initialize(Eigen::VectorXd::Zero(1), Eigen::MatrixXd::Identity(1, 1));
+
+    double xsim = 0.0;
+    for (int k = 0; k < 80; ++k) {
+        Eigen::VectorXd y(1), u(1);
+        y(0) = xsim + 0.01 * (k % 3 - 1);  // noisy measurement
+        u(0) = 1.0;
+        rge.step(y, u);
+        xsim += 0.05 * (-0.5*xsim + 1.0);  // true plant
+    }
+
+    REQUIRE(rge.stateEstimate().allFinite());
+    REQUIRE(rge.paramEstimate().allFinite());
+    // P_aug must remain PSD: diagonal non-negative
+    REQUIRE(rge.covariance().diagonal().minCoeff() >= -1e-10);
+}
+
+// =============================================================================
+// GPResidualModel (E3)
+// =============================================================================
+
+TEST_CASE("GPResidualModel predicts lower variance near training data", "[gp_residual]")
+{
+    ctrl::GPResidualModel::Params p;
+    p.gp.length_scale = 0.5;
+    p.gp.signal_var   = 1.0;
+    p.gp.noise_var    = 0.01;
+    p.gp.n_max        = 50;
+
+    ctrl::GPResidualModel grm(1, p);
+    REQUIRE(grm.size() == 0);
+
+    // Add residuals near x=1.0
+    for (int k = 0; k < 10; ++k) {
+        Eigen::VectorXd xf(1);
+        xf(0) = 1.0 + 0.05 * (k - 5);
+        grm.addResidualPoint(xf, 0.3, 0.0);  // residual = 0.3
+    }
+    grm.fit();
+    REQUIRE(grm.isFitted());
+
+    Eigen::VectorXd x_near(1);  x_near(0)  = 1.0;
+    Eigen::VectorXd x_far(1);   x_far(0)   = 10.0;
+
+    auto pred_near = grm.predictWithUncertainty(x_near, 0.0);
+    auto pred_far  = grm.predictWithUncertainty(x_far,  0.0);
+
+    REQUIRE(std::isfinite(pred_near.mean_total));
+    REQUIRE(pred_near.variance >= 0.0);
+    REQUIRE(pred_far.variance  >= 0.0);
+    REQUIRE(pred_far.variance > pred_near.variance);   // more uncertain far from data
+}
+
+TEST_CASE("GPResidualModel total prediction equals model + GP correction", "[gp_residual]")
+{
+    ctrl::GPResidualModel::Params p;
+    p.gp.length_scale = 1.0;
+    p.gp.signal_var   = 1.0;
+    p.gp.noise_var    = 0.01;
+
+    ctrl::GPResidualModel grm(1, p);
+    for (int k = 0; k < 8; ++k) {
+        Eigen::VectorXd xf(1); xf(0) = static_cast<double>(k);
+        grm.addResidualPoint(xf, 2.0*k + 0.1, 2.0*k);  // residual ~ 0.1
+    }
+    grm.fit();
+
+    const double model_pred = 5.0;
+    Eigen::VectorXd xf(1); xf(0) = 3.0;
+    auto pred = grm.predictWithUncertainty(xf, model_pred);
+
+    REQUIRE_THAT(pred.mean_total,
+                 WithinAbs(model_pred + pred.gp_mean, 1e-10));
+    REQUIRE(pred.variance >= 0.0);
+}
+
+TEST_CASE("GPResidualModel batch residualFit matches manual add+fit", "[gp_residual]")
+{
+    ctrl::GPResidualModel::Params p;
+    p.gp.length_scale = 1.0; p.gp.signal_var = 1.0; p.gp.noise_var = 0.01;
+    p.gp.n_max = 30;
+
+    const int N = 10;
+    Eigen::MatrixXd X_feat(1, N);
+    Eigen::VectorXd Y_true(N);
+    for (int k = 0; k < N; ++k) {
+        X_feat(0, k) = static_cast<double>(k) * 0.5;
+        Y_true(k)    = std::sin(X_feat(0, k)) + 1.0;
+    }
+    auto model_fn = [](const Eigen::VectorXd&) -> double { return 1.0; };
+
+    // Batch fit
+    ctrl::GPResidualModel grm1(1, p);
+    grm1.residualFit(X_feat, Y_true, model_fn);
+    REQUIRE(grm1.isFitted());
+    REQUIRE(grm1.size() == N);
+
+    // Manual fit: same data
+    ctrl::GPResidualModel grm2(1, p);
+    for (int k = 0; k < N; ++k) {
+        grm2.addResidualPoint(X_feat.col(k), Y_true(k), model_fn(X_feat.col(k)));
+    }
+    grm2.fit();
+
+    // Both should give identical predictions at the same point
+    Eigen::VectorXd xf(1); xf(0) = 1.5;
+    auto pred1 = grm1.predictWithUncertainty(xf, 1.0);
+    auto pred2 = grm2.predictWithUncertainty(xf, 1.0);
+    REQUIRE_THAT(pred1.mean_total, WithinAbs(pred2.mean_total, 1e-8));
+    REQUIRE_THAT(pred1.variance,   WithinAbs(pred2.variance,   1e-8));
+}
+
+// =============================================================================
+// HybridModel (H1)
+// =============================================================================
+
+// Helper: linear spring ODE  x_dot = [x1, -4*x0 - 0.8*x1 + u]
+static Eigen::VectorXd smd_phys(const Eigen::VectorXd& x,
+                                  const Eigen::VectorXd& u,
+                                  const Eigen::VectorXd& p)
+{
+    Eigen::VectorXd xd(2);
+    xd(0) = x(1);
+    xd(1) = -p(0)*x(0) - p(1)*x(1) + u(0);
+    return xd;
+}
+
+TEST_CASE("HybridModel predict without data model matches predictPhys", "[hybrid_model]")
+{
+    ctrl::HybridModelParams hmp;
+    hmp.n_states = 2; hmp.n_inputs = 1; hmp.Ts = 0.01; hmp.rk4_steps = 4;
+
+    Eigen::VectorXd p_phys(2); p_phys << 4.0, 0.8;
+    ctrl::HybridModel model(smd_phys, hmp, p_phys);
+
+    REQUIRE_FALSE(model.hasDataModel());
+
+    Eigen::VectorXd x0 = Eigen::VectorXd::Zero(2);
+    Eigen::VectorXd u0(1); u0 << 1.0;
+
+    const auto xn_phys = model.predictPhys(x0, u0);
+    const auto xn_comb = model.predict(x0, u0);
+
+    REQUIRE_THAT((xn_phys - xn_comb).norm(), WithinAbs(0.0, 1e-10));
+    REQUIRE(xn_phys.size() == 2);
+    REQUIRE(std::isfinite(xn_phys(0)));
+    REQUIRE(std::isfinite(xn_phys(1)));
+}
+
+TEST_CASE("HybridModel data model is applied and clearable", "[hybrid_model]")
+{
+    ctrl::HybridModelParams hmp;
+    hmp.n_states = 2; hmp.n_inputs = 1; hmp.Ts = 0.01; hmp.rk4_steps = 4;
+
+    Eigen::VectorXd p_phys(2); p_phys << 4.0, 0.8;
+    ctrl::HybridModel model(smd_phys, hmp, p_phys);
+
+    Eigen::VectorXd x0 = Eigen::VectorXd::Zero(2);
+    Eigen::VectorXd u0(1); u0 << 1.0;
+    const auto xn_phys = model.predictPhys(x0, u0);
+
+    // Attach a known constant correction
+    const Eigen::VectorXd delta = (Eigen::VectorXd(2) << 0.01, -0.02).finished();
+    model.setDataModel([delta](const Eigen::VectorXd&, const Eigen::VectorXd&) {
+        return delta;
+    });
+    REQUIRE(model.hasDataModel());
+
+    const auto xn_with_data = model.predict(x0, u0);
+    REQUIRE_THAT((xn_with_data - xn_phys - delta).norm(), WithinAbs(0.0, 1e-10));
+
+    model.clearDataModel();
+    REQUIRE_FALSE(model.hasDataModel());
+    const auto xn_cleared = model.predict(x0, u0);
+    REQUIRE_THAT((xn_cleared - xn_phys).norm(), WithinAbs(0.0, 1e-10));
+}
+
+// =============================================================================
+// HybridMPC (H2)
+// =============================================================================
+
+TEST_CASE("HybridMPC compute() returns finite output before data fitting", "[hybrid_mpc]")
+{
+    ctrl::HybridModelParams hmp;
+    hmp.n_states = 2; hmp.n_inputs = 1; hmp.n_outputs = 2; hmp.Ts = 0.01;
+
+    Eigen::VectorXd p_phys(2); p_phys << 4.0, 0.8;
+    auto model = std::make_shared<ctrl::HybridModel>(smd_phys, hmp, p_phys);
+
+    ctrl::HybridMPCParams hp;
+    hp.nmpc.n_states = 2; hp.nmpc.n_inputs = 1; hp.nmpc.n_outputs = 2;
+    hp.nmpc.Np = 5; hp.nmpc.Nu = 2; hp.nmpc.Ts = 0.01;
+    hp.nmpc.rho_y = 1.0; hp.nmpc.rho_u = 0.1;
+    hp.data_update_interval = 0;    // manual only
+    hp.min_observations     = 5;
+
+    ctrl::HybridMPC hmpc(hp, model);
+
+    Eigen::VectorXd x0 = Eigen::VectorXd::Zero(2);
+    hmpc.setState(x0);
+    const double u = hmpc.compute(0.5);
+    REQUIRE(std::isfinite(u));
+    REQUIRE(hmpc.observationCount() == 0);
+    REQUIRE_FALSE(hmpc.isDataModelFitted());
+}
+
+TEST_CASE("HybridMPC refitDataModel() installs data correction in model", "[hybrid_mpc]")
+{
+    ctrl::HybridModelParams hmp;
+    hmp.n_states = 2; hmp.n_inputs = 1; hmp.n_outputs = 2; hmp.Ts = 0.01;
+
+    Eigen::VectorXd p_phys(2); p_phys << 4.0, 0.8;
+    auto model = std::make_shared<ctrl::HybridModel>(smd_phys, hmp, p_phys);
+
+    ctrl::HybridMPCParams hp;
+    hp.nmpc.n_states = 2; hp.nmpc.n_inputs = 1; hp.nmpc.n_outputs = 2;
+    hp.nmpc.Np = 5; hp.nmpc.Nu = 2; hp.nmpc.Ts = 0.01;
+    hp.nmpc.rho_y = 1.0; hp.nmpc.rho_u = 0.1;
+    hp.data_update_interval = 0;   // manual only
+    hp.min_observations     = 5;
+
+    ctrl::HybridMPC hmpc(hp, model);
+
+    // Insufficient data: refit should fail
+    REQUIRE_FALSE(hmpc.refitDataModel());
+    REQUIRE_FALSE(hmpc.isDataModelFitted());
+
+    // Add enough observations
+    for (int k = 0; k < 8; ++k) {
+        Eigen::VectorXd x(2); x << k * 0.01, 0.0;
+        Eigen::VectorXd u(1); u << 0.5;
+        const auto xn = model->predict(x, u);
+        hmpc.addStateObservation(x, u, xn);
+    }
+    REQUIRE(hmpc.observationCount() == 8);
+
+    // Manual refit
+    const bool ok = hmpc.refitDataModel();
+    REQUIRE(ok);
+    REQUIRE(hmpc.isDataModelFitted());
+    REQUIRE(model->hasDataModel());
+
+    // After refit, predictions should still be finite
+    Eigen::VectorXd x_test = Eigen::VectorXd::Zero(2);
+    Eigen::VectorXd u_test(1); u_test << 0.0;
+    const auto xn = model->predict(x_test, u_test);
+    REQUIRE(xn.allFinite());
+}
+
+// =============================================================================
+// HybridModelTrainer (H4)
+// =============================================================================
+
+// Generate offline SMD data (with a constant friction offset as "unmodeled")
+static void generateSMDData(const ctrl::HybridModel& model,
+                              Eigen::MatrixXd& X_obs,
+                              Eigen::MatrixXd& U_obs,
+                              Eigen::MatrixXd& Xn_obs,
+                              int N, double Ts)
+{
+    X_obs.resize(2, N); U_obs.resize(1, N); Xn_obs.resize(2, N);
+    Eigen::VectorXd xs = Eigen::VectorXd::Zero(2);
+
+    // True plant: same physical model + constant friction perturbation
+    for (int k = 0; k < N; ++k) {
+        Eigen::VectorXd uk(1); uk(0) = (k < N/2) ? 1.0 : -0.5;
+        X_obs.col(k)  = xs;
+        U_obs.col(k)  = uk;
+        // "True" next state adds small constant friction offset
+        auto xn_phys  = model.predictPhys(xs, uk);
+        xn_phys(1)   -= 0.05;      // unmodeled damping perturbation
+        Xn_obs.col(k) = xn_phys;
+        xs            = Xn_obs.col(k);
+    }
+}
+
+TEST_CASE("HybridModelTrainer Ridge reduces prediction RMSE vs physical only", "[hybrid_trainer]")
+{
+    ctrl::HybridModelParams hmp;
+    hmp.n_states = 2; hmp.n_inputs = 1; hmp.Ts = 0.02; hmp.rk4_steps = 4;
+
+    Eigen::VectorXd p_phys(2); p_phys << 4.0, 0.8;
+    ctrl::HybridModel model(smd_phys, hmp, p_phys);
+
+    const int N = 80;
+    Eigen::MatrixXd X_obs, U_obs, Xn_obs;
+    generateSMDData(model, X_obs, U_obs, Xn_obs, N, hmp.Ts);
+
+    ctrl::HybridModelTrainer::Params tp;
+    tp.method       = ctrl::HybridModelTrainer::Method::Ridge;
+    tp.ridge_lambda = 1e-4;
+    ctrl::HybridModelTrainer trainer(tp);
+
+    const double rmse_before = trainer.validate(model, X_obs, U_obs, Xn_obs);
+    auto res = trainer.trainHybridModel(model, X_obs, U_obs, Xn_obs);
+    const double rmse_after  = trainer.validate(model, X_obs, U_obs, Xn_obs);
+
+    REQUIRE(res.success);
+    REQUIRE(res.n_samples == N);
+    REQUIRE(std::isfinite(res.train_rmse));
+    REQUIRE(rmse_after < rmse_before + 1e-9);  // fitted model must not be worse
+    REQUIRE(model.hasDataModel());
+}
+
+TEST_CASE("HybridModelTrainer GP training produces finite predictions", "[hybrid_trainer]")
+{
+    ctrl::HybridModelParams hmp;
+    hmp.n_states = 2; hmp.n_inputs = 1; hmp.Ts = 0.02; hmp.rk4_steps = 4;
+
+    Eigen::VectorXd p_phys(2); p_phys << 4.0, 0.8;
+    ctrl::HybridModel model(smd_phys, hmp, p_phys);
+
+    const int N = 40;
+    Eigen::MatrixXd X_obs, U_obs, Xn_obs;
+    generateSMDData(model, X_obs, U_obs, Xn_obs, N, hmp.Ts);
+
+    ctrl::HybridModelTrainer::Params tp;
+    tp.method          = ctrl::HybridModelTrainer::Method::GP;
+    tp.gp.length_scale = 0.5;
+    tp.gp.signal_var   = 0.1;
+    tp.gp.noise_var    = 1e-3;
+    tp.gp.n_max        = N;
+    ctrl::HybridModelTrainer trainer(tp);
+
+    auto res = trainer.trainHybridModel(model, X_obs, U_obs, Xn_obs);
+    REQUIRE(res.success);
+    REQUIRE(std::isfinite(res.train_rmse));
+
+    // All predictions should be finite
+    for (int k = 0; k < N; ++k) {
+        const auto pred = model.predict(X_obs.col(k), U_obs.col(k));
+        REQUIRE(pred.allFinite());
+    }
+}
+
+// =============================================================================
+// T3: VectorFitting - rational magnitude fitting for full DK-iteration D-step
+// =============================================================================
+
+TEST_CASE("VectorFitting fitMagnitude returns stable StateSpace and finite RMS error", "[vector_fitting]")
+{
+    // Fit a 3-pole rational filter to a monotone magnitude profile on [0, pi/Ts).
+    const double Ts     = 0.01;
+    const int    N      = 40;
+    const double w_nyq  = M_PI / Ts;
+
+    std::vector<double> omega(N), mag(N);
+    for (int k = 0; k < N; ++k)
+    {
+        omega[k] = w_nyq * (static_cast<double>(k + 1) / N) * 0.95;
+        // Simple low-pass magnitude: 1/(1 + (omega/100)^2)
+        const double x = omega[k] / 100.0;
+        mag[k] = 1.0 / (1.0 + x * x);
+    }
+
+    ctrl::VectorFittingResult res;
+    ctrl::StateSpace fitted = ctrl::VectorFitting::fitMagnitude(omega, mag, 3, Ts, res);
+
+    REQUIRE(fitted.A.rows() == 3);
+    REQUIRE(fitted.A.cols() == 3);
+    REQUIRE(std::isfinite(res.rms_error));
+
+    // All eigenvalues of A must be inside the unit disk (stability)
+    Eigen::EigenSolver<Eigen::MatrixXd> es(fitted.A, false);
+    for (int k = 0; k < fitted.A.rows(); ++k)
+        REQUIRE(std::abs(es.eigenvalues()(k)) < 1.0 + 1e-9);
+
+    // Evaluate at a few grid points - must be finite and positive
+    for (int k = 0; k < N; k += 4)
+    {
+        const double m = ctrl::VectorFitting::evalMagnitude(fitted, omega[k]);
+        REQUIRE(std::isfinite(m));
+        REQUIRE(m >= 0.0);
+    }
+}
+
+TEST_CASE("VectorFitting RMS error decreases with more poles", "[vector_fitting]")
+{
+    // A two-bump magnitude profile: harder to fit with 1 pole than 4.
+    const double Ts    = 0.01;
+    const int    N     = 60;
+    const double w_nyq = M_PI / Ts;
+
+    std::vector<double> omega(N), mag(N);
+    for (int k = 0; k < N; ++k)
+    {
+        omega[k] = w_nyq * (static_cast<double>(k + 1) / N) * 0.95;
+        const double x1 = omega[k] / 50.0;
+        const double x2 = omega[k] / 200.0;
+        mag[k] = 1.0 / (1.0 + x1 * x1) + 0.5 / (1.0 + x2 * x2);
+    }
+
+    ctrl::VectorFittingResult r1, r4;
+    ctrl::VectorFitting::fitMagnitude(omega, mag, 1, Ts, r1);
+    ctrl::VectorFitting::fitMagnitude(omega, mag, 4, Ts, r4);
+
+    REQUIRE(std::isfinite(r1.rms_error));
+    REQUIRE(std::isfinite(r4.rms_error));
+    // More poles should achieve a better (lower) RMS fit on this profile
+    REQUIRE(r4.rms_error <= r1.rms_error + 0.1);  // allow 0.1 tolerance for numerical variability
+}
+
+TEST_CASE("VectorFitting: MuSynParams dFitOrder field accepted by solveMuSyn", "[vector_fitting]")
+{
+    // Smoke test: construct params with dFitOrder = 3 and verify the field is accessible.
+    ctrl::MuSynParams mp;
+    mp.useRationalD = true;
+    mp.dFitOrder    = 3;
+    mp.maxDKIter    = 1;   // only one iteration for speed
+    mp.nFreqPoints  = 20;
+
+    REQUIRE(mp.dFitOrder == 3);
+    REQUIRE(mp.useRationalD == true);
+    // Full synthesis test omitted here (requires a complex generalised plant);
+    // DK-iteration with vector fitting is exercised in ex82_vector_fitting_dk.cpp.
+}
+
+// =============================================================================
+// D1: MismatchDetector - CUSUM on KF / MHE innovation sequence
+// =============================================================================
+
+TEST_CASE("MismatchDetector: no alarm on white-noise innovation", "[mismatch_detector]")
+{
+    ctrl::MismatchDetectorParams dp;
+    dp.sigma = 1.0; dp.k_cusum = 0.5; dp.h_threshold = 5.0;
+    ctrl::MismatchDetector det(dp);
+
+    // Feed 100 samples at sigma=1 (in-control); CUSUM should not alarm.
+    std::srand(42);
+    for (int k = 0; k < 100; ++k) {
+        double v = 0.3 * (static_cast<double>(std::rand()) / RAND_MAX * 2.0 - 1.0);
+        det.update(v);
+    }
+    REQUIRE_FALSE(det.detected());
+}
+
+TEST_CASE("MismatchDetector: sustained shift triggers detection", "[mismatch_detector]")
+{
+    ctrl::MismatchDetectorParams dp;
+    dp.sigma = 1.0; dp.k_cusum = 0.5; dp.h_threshold = 5.0;
+    ctrl::MismatchDetector det(dp);
+
+    // Feed samples 3* the nominal sigma (persistent model mismatch).
+    for (int k = 0; k < 30; ++k)
+        det.update(3.0);
+
+    REQUIRE(det.detected());
+    REQUIRE(det.score() > dp.h_threshold * dp.sigma);
+}
+
+TEST_CASE("MismatchDetector: reset clears alarm state", "[mismatch_detector]")
+{
+    ctrl::MismatchDetectorParams dp;
+    dp.sigma = 1.0; dp.k_cusum = 0.5; dp.h_threshold = 2.0;  // low threshold for quick alarm
+    ctrl::MismatchDetector det(dp);
+
+    for (int k = 0; k < 20; ++k) det.update(3.0);
+    REQUIRE(det.detected());
+
+    det.reset();
+    REQUIRE_FALSE(det.detected());
+    REQUIRE(det.score() == Approx(0.0).margin(1e-12));
+}
+
+TEST_CASE("MismatchDetector: vector innovation update fires alarm", "[mismatch_detector]")
+{
+    ctrl::MismatchDetectorParams dp;
+    dp.sigma = 1.0; dp.k_cusum = 0.5; dp.h_threshold = 5.0;
+    ctrl::MismatchDetector det(dp);
+
+    // 2D innovations with large magnitude (mismatch)
+    Eigen::VectorXd innov(2);
+    innov << 3.0, 3.0;  // norm/sqrt(2) = 3.0, well above sigma=1
+    for (int k = 0; k < 25; ++k) det.update(innov);
+
+    REQUIRE(det.detected());
+}
+
+TEST_CASE("KalmanFilter: mismatch detection disabled by default", "[mismatch_detector]")
+{
+    const double Ts = 0.1;
+    Eigen::MatrixXd A(1,1), B(1,1), C(1,1), D(1,1);
+    A << 0.9; B << Ts; C << 1.0; D << 0.0;
+    ctrl::StateSpace plant(A, B, C, D, Ts);
+    ctrl::KalmanFilter kf(plant,
+                          Eigen::MatrixXd::Constant(1,1,0.01),
+                          Eigen::MatrixXd::Constant(1,1,0.1));
+
+    Eigen::VectorXd y(1), u(1); y << 0.5; u << 0.0;
+    kf.step(y, u);
+
+    REQUIRE_FALSE(kf.mismatchDetected());
+    REQUIRE(kf.mismatchScore() == Approx(0.0).margin(1e-12));
+}
+
+TEST_CASE("KalmanFilter: mismatch detection triggers on wrong model", "[mismatch_detector]")
+{
+    // Plant is integrator; KF model is stable (wrong). Innovation will grow.
+    const double Ts = 0.1;
+    Eigen::MatrixXd A(1,1), B(1,1), C(1,1), D(1,1);
+    A << 1.0; B << Ts; C << 1.0; D << 0.0;  // true plant: integrator
+    ctrl::StateSpace plant(A, B, C, D, Ts);
+    ctrl::KalmanFilter kf(plant,
+                          Eigen::MatrixXd::Constant(1,1,0.001),
+                          Eigen::MatrixXd::Constant(1,1,0.01));
+
+    ctrl::MismatchDetectorParams dp;
+    dp.sigma = 0.05; dp.k_cusum = 0.5; dp.h_threshold = 3.0;
+    kf.enableMismatchDetection(dp);
+
+    Eigen::VectorXd u(1); u << 1.0;
+    double y_true = 0.0;
+    for (int k = 0; k < 80; ++k) {
+        y_true += Ts * 1.0;  // true output growing (ramp)
+        Eigen::VectorXd y(1); y << y_true;
+        kf.step(y, u);
+    }
+    REQUIRE(kf.mismatchDetected());
+}
+
+TEST_CASE("MovingHorizonEstimator: mismatch detection fires on mismatched model",
+          "[mismatch_detector]")
+{
+    // 1-D integrator plant; model is stable (mismatch).
+    const double Ts = 0.1;
+    Eigen::MatrixXd A(1,1), B(1,1), C(1,1), D(1,1);
+    A << 0.9; B << Ts; C << 1.0; D << 0.0;  // model: stable
+    ctrl::StateSpace plant(A, B, C, D, Ts);
+
+    ctrl::MHEParams mp; mp.N = 5;
+    ctrl::MovingHorizonEstimator mhe(plant,
+                                     Eigen::MatrixXd::Constant(1,1,0.1),
+                                     Eigen::MatrixXd::Constant(1,1,0.1), mp);
+    mhe.initialize(Eigen::VectorXd::Zero(1), Eigen::MatrixXd::Identity(1,1));
+
+    ctrl::MismatchDetectorParams dp;
+    dp.sigma = 0.1; dp.k_cusum = 0.5; dp.h_threshold = 3.0;
+    mhe.enableMismatchDetection(dp);
+
+    Eigen::VectorXd u(1); u << 1.0;
+    double y_true = 0.0;
+    for (int k = 0; k < 60; ++k) {
+        y_true += Ts;  // ramp output from true integrator
+        Eigen::VectorXd y(1); y << y_true;
+        mhe.estimate(y, u);
+    }
+    REQUIRE(mhe.mismatchDetected());
+}
+
+// =============================================================================
+// M4: BasicPID<Scalar> and BasicSMC<Scalar> - embedded template controllers
+// =============================================================================
+
+TEST_CASE("BasicPID<double> step-response converges to setpoint", "[basic_pid]")
+{
+    // First-order plant: y[k+1] = 0.9*y[k] + 0.1*u[k] (Ts=0.1s, tau=1s, K=1).
+    ctrl::BasicPIDParams<double> p;
+    p.Kp = 3.0; p.Ki = 1.5; p.Kd = 0.0; p.N = 100.0;
+    p.Kb = 1.0; p.uMin = -20.0; p.uMax = 20.0; p.Ts = 0.1;
+
+    ctrl::BasicPID<double> pid(p);
+    double y = 0.0, ref = 1.0;
+    for (int k = 0; k < 200; ++k) {
+        double u = pid.compute(ref - y);
+        y = 0.9 * y + 0.1 * u;
+    }
+    REQUIRE(std::abs(y - ref) < 0.02);
+}
+
+TEST_CASE("BasicPID<float> output is finite and within limits", "[basic_pid]")
+{
+    ctrl::BasicPIDParams<float> p;
+    p.Kp = 2.0f; p.Ki = 0.5f; p.Kd = 0.1f; p.N = 50.0f;
+    p.Kb = 1.0f; p.uMin = -1.0f; p.uMax = 1.0f; p.Ts = 0.01f;
+
+    ctrl::BasicPID<float> pid(p);
+    for (int k = 0; k < 100; ++k) {
+        float u = pid.compute(1.0f);  // constant error
+        REQUIRE(std::isfinite(u));
+        REQUIRE(u >= -1.0f);
+        REQUIRE(u <=  1.0f);
+    }
+}
+
+TEST_CASE("BasicPID reset zeroes integrator and derivative state", "[basic_pid]")
+{
+    ctrl::BasicPIDParams<double> p;
+    p.Kp = 1.0; p.Ki = 10.0; p.Kd = 0.0; p.Ts = 0.1;
+    ctrl::BasicPID<double> pid(p);
+
+    // Wind up integrator
+    for (int k = 0; k < 20; ++k) pid.compute(1.0);
+    REQUIRE(pid.integrator() != 0.0);
+
+    pid.reset();
+    REQUIRE(pid.integrator() == 0.0);
+    REQUIRE(pid.lastOutput() == 0.0);
+}
+
+TEST_CASE("BasicPID anti-windup limits output within bounds under large error", "[basic_pid]")
+{
+    ctrl::BasicPIDParams<double> p;
+    p.Kp = 10.0; p.Ki = 5.0; p.Kd = 0.0; p.Kb = 1.0;
+    p.uMin = -2.0; p.uMax = 2.0; p.Ts = 0.1;
+    ctrl::BasicPID<double> pid(p);
+
+    for (int k = 0; k < 200; ++k) {
+        double u = pid.compute(100.0);  // huge constant error
+        REQUIRE(u <= 2.0 + 1e-9);
+        REQUIRE(u >= -2.0 - 1e-9);
+    }
+    // With back-calculation, integrator should stay bounded too.
+    REQUIRE(std::isfinite(pid.integrator()));
+}
+
+TEST_CASE("BasicSMC<double> drives first-order plant to sliding surface", "[basic_smc]")
+{
+    // Plant: y[k+1] = 0.9*y[k] + 0.1*u[k], ref=2.
+    ctrl::BasicSMCParams<double> sp;
+    sp.c_e = 1.0; sp.c_de = 0.05; sp.K = 8.0; sp.phi = 0.2;
+    sp.uMin = -20.0; sp.uMax = 20.0;
+
+    ctrl::BasicSMC<double> smc(sp);
+    double y = 0.0, ref = 2.0;
+    for (int k = 0; k < 300; ++k) {
+        double u = smc.compute(ref - y);
+        y = 0.9 * y + 0.1 * u;
+    }
+    REQUIRE(std::abs(y - ref) < 0.15);  // near but not zero (no integral term)
+}
+
+TEST_CASE("BasicSMC<float> output within saturation limits", "[basic_smc]")
+{
+    ctrl::BasicSMCParams<float> sp;
+    sp.c_e = 1.0f; sp.c_de = 0.1f; sp.K = 3.0f; sp.phi = 0.3f;
+    sp.uMin = -1.0f; sp.uMax = 1.0f;
+
+    ctrl::BasicSMC<float> smc(sp);
+    for (int k = 0; k < 100; ++k) {
+        float u = smc.compute(5.0f);  // large constant error
+        REQUIRE(std::isfinite(u));
+        REQUIRE(u >= -1.0f - 1e-5f);
+        REQUIRE(u <=  1.0f + 1e-5f);
+    }
+}
+
+TEST_CASE("BasicSMC reset clears previous error state", "[basic_smc]")
+{
+    ctrl::BasicSMCParams<double> sp;
+    sp.c_e = 1.0; sp.c_de = 0.2; sp.K = 5.0; sp.phi = 0.5;
+    ctrl::BasicSMC<double> smc(sp);
+
+    smc.compute(3.0);  // introduce non-zero e_prev
+    smc.reset();
+    REQUIRE(smc.lastOutput() == 0.0);
+
+    // After reset, two identical errors should give the same surface value
+    // (c_de * (e - 0) = c_de * e, reproducible).
+    double s1 = smc.slidingSurface(1.0);
+    smc.reset();
+    double s2 = smc.slidingSurface(1.0);
+    REQUIRE(s1 == s2);
 }

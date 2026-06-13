@@ -64,6 +64,11 @@ set(CTRL_CORE_SOURCES
     CEMController.cpp
     DynaController.cpp
     ScenarioMPC.cpp
+    GreyBoxEstimator.cpp
+    GPResidualModel.cpp
+    HybridMPC.cpp
+    HybridModelTrainer.cpp
+    VectorFitting.cpp
 )
 
 # --- Optional sources --------------------------------------------------------
@@ -71,6 +76,7 @@ if(CTRL_ENABLE_ADVANCED_KALMAN)
     list(APPEND CTRL_CORE_SOURCES
         ExtendedKalmanFilter.cpp
         UnscentedKalmanFilter.cpp
+        RecursiveGreyBoxEstimator.cpp
     )
 endif()
 

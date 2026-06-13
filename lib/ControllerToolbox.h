@@ -113,14 +113,24 @@
 #include "BayesianOptimizer.h"          ///< BayesianOptimizer - GP surrogate + UCB/EI acquisition for expensive controller tuning (Srinivas 2010).
 #include "ControllerMonitor.h"          ///< ControllerMonitor - CUSUM + EWMA SPC charts on live controller output or onState channels (M3/SPC).
 #include "ComputationalDelayWrapper.h"  ///< ComputationalDelayWrapper - one-sample actuator delay decorator for realistic digital loop simulation (G3).
+#include "GreyBoxEstimator.h"           ///< GreyBoxEstimator - nonlinear param estimation via Levenberg-Marquardt for user-supplied ODE f(x,u,p) (E1).
+#include "GPResidualModel.h"            ///< GPResidualModel - learn model-plant mismatch epsilon=y_true-y_model as GP; risk-aware MPC correction (E3).
+#include "HybridModel.h"               ///< HybridModel - plant combining physical ODE (RK4) + data-driven state correction f_data(x,u) (H1).
+#include "HybridMPC.h"                 ///< HybridMPC - NonlinearMPC variant using HybridModel; online ridge-regression data update every N steps (H2).
+#include "HybridModelTrainer.h"        ///< HybridModelTrainer - off-line trainer for f_data: Ridge / GP marginal / ESN cross-validation (H4).
+#include "VectorFitting.h"             ///< VectorFitting - SK iterative rational magnitude fitting; used by DiscreteHinf::solveMuSyn (T3 full DK-iteration).
+#include "BasicPID.h"                  ///< BasicPID<Scalar> - header-only template PID for embedded/float targets; no virtual dispatch, no Eigen (M4).
+#include "BasicSMC.h"                  ///< BasicSMC<Scalar> - header-only template SMC for embedded/float targets; no virtual dispatch, no Eigen (M4).
+#include "MismatchDetector.h"          ///< MismatchDetector - CUSUM on KF/MHE innovation for real-time model-plant mismatch detection (D1).
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,
 // or define CTRL_DISABLE_* (legacy) to suppress them.
 
 #if defined(CTRL_HAS_ADVANCED_KALMAN) || (!defined(CTRL_DISABLE_ADVANCED_KALMAN))
-#include "ExtendedKalmanFilter.h"  ///< EKF - nonlinear state estimation (analytical/numerical Jacobians).
-#include "UnscentedKalmanFilter.h" ///< UKF - sigma-point nonlinear estimation (no Jacobians).
+#include "ExtendedKalmanFilter.h"          ///< EKF - nonlinear state estimation (analytical/numerical Jacobians).
+#include "UnscentedKalmanFilter.h"         ///< UKF - sigma-point nonlinear estimation (no Jacobians).
+#include "RecursiveGreyBoxEstimator.h"     ///< RecursiveGreyBoxEstimator - online param tracking via augmented-state UKF (E2).
 #endif
 
 #if defined(CTRL_HAS_SUBSPACE) || (!defined(CTRL_DISABLE_SUBSPACE))

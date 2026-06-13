@@ -17,7 +17,7 @@ namespace ctrl
 
     double RepetitiveController::compute(double error)
     {
-        if (!std::isfinite(error)) return 0.0;
+        if (!std::isfinite(error)) return u_prev_;
         const int N = p_.periodSteps;
 
         // v_buf_ is a circular buffer of length N holding one full period of corrections.
@@ -39,7 +39,8 @@ namespace ctrl
         // Base controller output (stabilises the loop independently of the repetitive term)
         const double u_base = inner_->compute(error);
 
-        return std::max(p_.uMin, std::min(p_.uMax, u_base + v_now_));
+        u_prev_ = std::max(p_.uMin, std::min(p_.uMax, u_base + v_now_));
+        return u_prev_;
     }
 
     void RepetitiveController::reset()

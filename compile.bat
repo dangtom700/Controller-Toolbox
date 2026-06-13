@@ -117,6 +117,8 @@ for %%T in (
     ex77_scenario_mpc
     ex78_bayesian_tuner
     ex79_registry_monitor
+    ex80_grey_box_estimator
+    ex81_hybrid_model_mpc
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

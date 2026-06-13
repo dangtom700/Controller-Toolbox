@@ -385,6 +385,16 @@ print(f'MHE state after 10 steps: {x_mhe}')
 assert x_mhe.shape == (1,),           "MHE state wrong shape"
 assert np.isfinite(x_mhe[0]),         "MHE state not finite"
 assert mhe.last_converged(),           "MHE QP did not converge"
+
+# E4: polytopic constraint fields accessible
+mhe_params2 = ctrl.MHEParams()
+mhe_params2.C_ineq = np.array([[1.0]])   # x_0 <= 0.8
+mhe_params2.d_ineq = np.array([0.8])
+mhe_params2.ineq_proj_iters = 10
+assert mhe_params2.C_ineq.shape == (1, 1), "MHEParams.C_ineq shape wrong"
+assert mhe_params2.d_ineq.shape == (1,),   "MHEParams.d_ineq shape wrong"
+assert mhe_params2.ineq_proj_iters == 10,  "MHEParams.ineq_proj_iters wrong"
+
 print('MovingHorizonEstimator smoke test passed.')
 
 # ---- GainScheduledController + nu_gap + LPVModel (Part 20) ----------------
@@ -752,5 +762,216 @@ print(f'DAE dae_c2d: A={_ss_dae.A[0,0]:.4f} (expected ~{_npdae.exp(-_dae.Ts):.4f
 
 assert ctrl.registry_has('dae_system'), "dae_system should be registered"
 print('DAESystem smoke tests passed.')
+
+# ---- GreyBoxEstimator (E1) --------------------------------------------------
+import numpy as _npgb
+# First-order linear ODE: xdot = -a*x + b*u, y = x.  True: a=0.5, b=1.0.
+def _f_gb(x, u, p): return _npgb.array([-p[0]*x[0] + p[1]*u[0]])
+def _h_gb(x, p):    return _npgb.array([x[0]])
+
+_Ts_gb = 0.05
+_N_gb  = 40
+_x_gb  = _npgb.zeros(1)
+_U_gb  = _npgb.zeros((1, _N_gb))
+_Y_gb  = _npgb.zeros((1, _N_gb))
+_true_a, _true_b = 0.5, 1.0
+for _k in range(_N_gb):
+    _U_gb[0, _k] = 1.0
+    _Y_gb[0, _k] = _x_gb[0]
+    _x_gb[0]    += _Ts_gb * (-_true_a*_x_gb[0] + _true_b*_U_gb[0, _k])
+
+_gbpar = ctrl.GreyBoxParams()
+_gbpar.p0     = _npgb.array([0.3, 0.7])  # wrong initial guess
+_gbpar.lower  = _npgb.array([0.01, 0.1])
+_gbpar.upper  = _npgb.array([5.0, 5.0])
+_gbpar.Ts     = _Ts_gb
+_gbpar.max_iter = 30
+
+_gbe    = ctrl.GreyBoxEstimator(_f_gb, _h_gb, _gbpar)
+_gb_res = _gbe.fit(_npgb.zeros(1), _U_gb, _Y_gb)
+assert _gb_res.iterations >= 0, "GreyBoxEstimator iterations should be >= 0"
+assert _npgb.isfinite(_gb_res.cost), "GreyBoxEstimator cost not finite"
+_p_hat = _gbe.params()
+assert _p_hat.shape == (2,), "GreyBoxEstimator params wrong shape"
+# Parameters should move toward ground truth
+assert abs(_p_hat[0] - _true_a) < 0.3, f"GreyBoxEstimator a estimate off: {_p_hat[0]:.3f}"
+assert abs(_p_hat[1] - _true_b) < 0.3, f"GreyBoxEstimator b estimate off: {_p_hat[1]:.3f}"
+_Y_hat = _gbe.predict(_npgb.zeros(1), _U_gb)
+assert _Y_hat.shape == (1, _N_gb), "GreyBoxEstimator predict wrong shape"
+assert ctrl.registry_has('grey_box_estimator'), "grey_box_estimator not registered"
+print('GreyBoxEstimator (E1) smoke test passed.')
+
+# ---- RecursiveGreyBoxEstimator (E2) ----------------------------------------
+if feats.get('advanced_kalman', True):
+    import numpy as _nprgb
+    # Same first-order ODE, track parameter online
+    def _f_rgb(x, u, p): return _nprgb.array([-p[0]*x[0] + u[0]])
+    def _h_rgb(x, p):    return _nprgb.array([x[0]])
+    _Ts_rgb = 0.05
+    _rgbpar = ctrl.RecursiveGreyBoxParams()
+    _rgbpar.p0      = _nprgb.array([0.3])
+    _rgbpar.Q_state = 1e-4 * _nprgb.eye(1)
+    _rgbpar.Q_param = 1e-6 * _nprgb.eye(1)
+    _rgbpar.R_meas  = 0.01 * _nprgb.eye(1)
+    _rgbpar.Ts      = _Ts_rgb
+    _rge = ctrl.RecursiveGreyBoxEstimator(_f_rgb, _h_rgb,
+                                           n_state=1, n_meas=1, params=_rgbpar)
+    _rge.initialize(_nprgb.zeros(1), 0.1 * _nprgb.eye(1))
+    assert _rge.is_initialized(), "RecursiveGreyBoxEstimator not initialized"
+    _x_rgb = 0.0
+    for _k in range(30):
+        _u_rgb = _nprgb.array([1.0])
+        _y_rgb = _nprgb.array([_x_rgb])
+        _x_hat_rgb = _rge.step(_y_rgb, _u_rgb)
+        _x_rgb += _Ts_rgb * (-_true_a*_x_rgb + _u_rgb[0])
+    assert _x_hat_rgb.shape == (1,), "RecursiveGreyBoxEstimator state shape wrong"
+    assert _nprgb.isfinite(_x_hat_rgb[0]), "RecursiveGreyBoxEstimator state not finite"
+    _p_rgb = _rge.param_estimate()
+    assert _p_rgb.shape == (1,), "RecursiveGreyBoxEstimator param shape wrong"
+    assert _nprgb.isfinite(_p_rgb[0]), "RecursiveGreyBoxEstimator param not finite"
+    assert ctrl.registry_has('recursive_grey_box'), "recursive_grey_box not registered"
+    print('RecursiveGreyBoxEstimator (E2) smoke test passed.')
+
+# ---- GPResidualModel (E3) --------------------------------------------------
+import numpy as _npgrm
+_grmp = ctrl.GPResidualParams()
+_grmp.gp.length_scale = 1.0; _grmp.gp.signal_var = 0.5; _grmp.gp.noise_var = 0.01
+_grm = ctrl.GPResidualModel(x_dim=1, params=_grmp)
+assert _grm.size() == 0, "GPResidualModel should start empty"
+for _k in range(12):
+    _xf = _npgrm.array([float(_k) * 0.5])
+    _grm.add_residual_point(_xf, float(2*_k)*0.1 + 0.3, float(2*_k)*0.1)
+_grm.fit()
+assert _grm.is_fitted(), "GPResidualModel should be fitted"
+_grm_pred = _grm.predict_with_uncertainty(_npgrm.array([1.0]), model_pred=1.0)
+assert _npgrm.isfinite(_grm_pred.mean_total),  "GPResidualModel mean_total not finite"
+assert _npgrm.isfinite(_grm_pred.variance),    "GPResidualModel variance not finite"
+assert _grm_pred.variance >= 0.0,              "GPResidualModel variance must be >= 0"
+# Batch residualFit
+_grm2 = ctrl.GPResidualModel(x_dim=1, params=_grmp)
+_Xf   = _npgrm.array([[float(_k)*0.3 for _k in range(15)]])
+_Yt   = _npgrm.array([float(_k)*0.2 + 0.1 for _k in range(15)])
+_grm2.residual_fit(_Xf, _Yt, model_fn=lambda xf: float(xf[0])*0.2)
+assert _grm2.is_fitted(), "GPResidualModel batch fit failed"
+assert ctrl.registry_has('gp_residual_model'), "gp_residual_model not registered"
+print('GPResidualModel (E3) smoke test passed.')
+
+# ---- HybridModel (H1) -------------------------------------------------------
+import numpy as _npmhm
+def _f_phys_hm(x, u, p):
+    return _npmhm.array([x[1], -p[0]*x[0] - p[1]*x[1] + u[0]])
+_hmp = ctrl.HybridModelParams()
+_hmp.n_states = 2; _hmp.n_inputs = 1; _hmp.n_outputs = 1; _hmp.Ts = 0.01; _hmp.rk4_steps = 4
+_p_phys = _npmhm.array([4.0, 0.8])
+_hmodel = ctrl.HybridModel(_f_phys_hm, _hmp, p_phys=_p_phys)
+assert _hmodel.state_size()  == 2,    "HybridModel state_size wrong"
+assert _hmodel.input_size()  == 1,    "HybridModel input_size wrong"
+assert not _hmodel.has_data_model(),   "HybridModel should start without data model"
+_x0_hm = _npmhm.zeros(2)
+_u0_hm = _npmhm.array([1.0])
+_xn_hm = _hmodel.predict(_x0_hm, _u0_hm)
+assert _xn_hm.shape == (2,), "HybridModel predict shape wrong"
+assert _npmhm.all(_npmhm.isfinite(_xn_hm)), "HybridModel predict not finite"
+_xn_phys = _hmodel.predict_phys(_x0_hm, _u0_hm)
+assert _npmhm.allclose(_xn_hm, _xn_phys), "predict and predict_phys should match without data model"
+_hmodel.set_data_model(lambda x, u: _npmhm.zeros(len(x)))
+assert _hmodel.has_data_model(), "HybridModel should have data model after set"
+_hmodel.clear_data_model()
+assert not _hmodel.has_data_model(), "HybridModel should not have data model after clear"
+assert ctrl.registry_has('hybrid_model'), "hybrid_model not registered"
+print('HybridModel (H1) smoke test passed.')
+
+# ---- HybridMPC (H2) ---------------------------------------------------------
+import numpy as _npmhc
+def _f_phys_hc(x, u, p):
+    return _npmhc.array([x[1], -p[0]*x[0] - p[1]*x[1] + u[0]])
+_hmp2 = ctrl.HybridModelParams()
+_hmp2.n_states = 2; _hmp2.n_inputs = 1; _hmp2.Ts = 0.01
+_hmodel2 = ctrl.HybridModel(_f_phys_hc, _hmp2, _npmhc.array([4.0, 0.8]))
+_hpars = ctrl.HybridMPCParams()
+_hpars.nmpc.n_states = 2; _hpars.nmpc.n_inputs = 1; _hpars.nmpc.n_outputs = 2
+_hpars.nmpc.Np = 5; _hpars.nmpc.Nu = 2; _hpars.nmpc.Ts = 0.01
+_hpars.nmpc.rho_y = 1.0; _hpars.nmpc.rho_u = 0.1
+_hpars.data_update_interval = 0   # manual only for smoke test
+_hpars.min_observations = 5
+_hmpc = ctrl.HybridMPC(_hpars, _hmodel2)
+_x0_hc = _npmhc.zeros(2)
+_hmpc.set_state(_x0_hc)
+_u_hc = _hmpc.compute(0.5)
+assert _npmhc.isfinite(_u_hc), "HybridMPC compute not finite"
+assert _hmpc.observation_count() == 0, "Observation count should start at 0"
+# add observations and trigger manual refit
+for _ki in range(8):
+    _xi = _npmhc.array([float(_ki)*0.01, 0.0])
+    _ui = _npmhc.array([0.5])
+    _xn = _hmodel2.predict(_xi, _ui) + _npmhc.random.randn(2)*0.001
+    _hmpc.add_state_observation(_xi, _ui, _xn)
+assert _hmpc.observation_count() == 8, "Observation count wrong"
+ok = _hmpc.refit_data_model()
+assert ok, "refit_data_model should succeed with 8 >= 5 observations"
+assert _hmpc.is_data_model_fitted(), "HybridMPC should be fitted after refit"
+assert ctrl.registry_has('hybrid_mpc'), "hybrid_mpc not registered"
+print('HybridMPC (H2) smoke test passed.')
+
+# ---- HybridModelTrainer (H4) ------------------------------------------------
+import numpy as _npmht
+def _f_phys_ht(x, u, p):
+    return _npmht.array([x[1], -p[0]*x[0] - p[1]*x[1] + u[0]])
+_hmp3 = ctrl.HybridModelParams()
+_hmp3.n_states = 2; _hmp3.n_inputs = 1; _hmp3.Ts = 0.01
+_hmodel3 = ctrl.HybridModel(_f_phys_ht, _hmp3, _npmht.array([4.0, 0.8]))
+_Ts3 = 0.01
+N3   = 40
+_xs3 = _npmht.zeros(2)
+_X3_obs = _npmht.zeros((2, N3)); _U3_obs = _npmht.zeros((1, N3)); _Xn3_obs = _npmht.zeros((2, N3))
+for _ki3 in range(N3):
+    _u3 = _npmht.array([1.0 if _ki3 < N3//2 else -0.5])
+    _x3_next = _hmodel3.predict(_xs3, _u3)
+    _X3_obs[:,_ki3] = _xs3; _U3_obs[:,_ki3] = _u3; _Xn3_obs[:,_ki3] = _x3_next
+    _xs3 = _x3_next
+_htp = ctrl.HybridTrainerParams()
+_htp.method = ctrl.HybridTrainerMethod.Ridge
+_ht = ctrl.HybridModelTrainer(_htp)
+_ht_res = _ht.train_hybrid_model(_hmodel3, _X3_obs, _U3_obs, _Xn3_obs)
+assert _ht_res.success, "HybridModelTrainer training failed"
+assert _npmht.isfinite(_ht_res.train_rmse), "train_rmse not finite"
+assert _ht_res.method == 'Ridge', "method name wrong"
+_rmse_val = _ht.validate(_hmodel3, _X3_obs, _U3_obs, _Xn3_obs)
+assert _npmht.isfinite(_rmse_val), "validate RMSE not finite"
+assert ctrl.registry_has('hybrid_model_trainer'), "hybrid_model_trainer not registered"
+print('HybridModelTrainer (H4) smoke test passed.')
+
+# -- T3: VectorFitting --------------------------------------------------------
+import numpy as _np_vf
+import math as _math_vf
+_Ts_vf = 0.01
+_N_vf  = 30
+_w_nyq = _math_vf.pi / _Ts_vf
+_omega_vf = [_w_nyq * (k + 1) / _N_vf * 0.95 for k in range(_N_vf)]
+_mag_vf   = [1.0 / (1.0 + (w / 80.0) ** 2) for w in _omega_vf]
+_vfp = ctrl.VectorFittingParams()
+_vfp.max_iter = 8
+_vfr, _vf_ss = ctrl.VectorFitting.fit_magnitude(_omega_vf, _mag_vf, 3, _Ts_vf, _vfp)
+assert _vf_ss.state_size() == 3,           "VectorFitting: wrong state size"
+assert _math_vf.isfinite(_vfr.rms_error),  "VectorFitting: rms_error not finite"
+_m_check = ctrl.VectorFitting.eval_magnitude(_vf_ss, _omega_vf[_N_vf // 2])
+assert _math_vf.isfinite(_m_check) and _m_check >= 0.0, "VectorFitting: eval_magnitude not finite/positive"
+assert ctrl.registry_has('vector_fitting'), "vector_fitting not registered"
+print('VectorFitting (T3) smoke test passed.')
+
+# M4: BasicPID / BasicSMC feature flags (header-only templates, no Python class)
+assert ctrl.registry_has('basic_pid'), "basic_pid not registered"
+assert ctrl.registry_has('basic_smc'), "basic_smc not registered"
+print('BasicPID/BasicSMC (M4) feature flags smoke test passed.')
+
+# D1: MismatchDetector on KalmanFilter
+_d1_A = np.array([[0.9]]); _d1_B = np.array([[0.1]]); _d1_C = np.array([[1.0]]); _d1_D = np.array([[0.0]])
+_d1_sys = ctrl.StateSpace(_d1_A, _d1_B, _d1_C, _d1_D, 0.1)
+_d1_kf  = ctrl.KalmanFilter(_d1_sys, 0.01 * np.eye(1), 0.1 * np.eye(1))
+_d1_kf.enable_mismatch_detection(sigma=1.0, k_cusum=0.5, h_threshold=5.0)
+assert not _d1_kf.mismatch_detected(), "KF mismatch should not fire on zero steps"
+assert isinstance(_d1_kf.mismatch_score(), float), "mismatch_score should be float"
+assert ctrl.registry_has('mismatch_detector'), "mismatch_detector not registered"
+print('MismatchDetector (D1) smoke test passed.')
 
 print('\nAll smoke tests passed.')

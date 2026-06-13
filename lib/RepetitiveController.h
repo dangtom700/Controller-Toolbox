@@ -111,6 +111,7 @@ private:
     std::vector<double> v_buf_; ///< Circular learning buffer (length N).
     int buf_idx_;               ///< Write pointer (wraps mod N).
     double v_now_;              ///< Most recent correction (for diagnostics).
+    double u_prev_ = 0.0;      ///< Last finite compute() return value (hold-last NaN contract).
 };
 
 } // namespace ctrl

@@ -48,6 +48,7 @@ namespace ctrl
 
         // State update
         const Eigen::VectorXd innov = y - C * x_hat_ - D * u_current;
+        if (mismatch_det_) mismatch_det_->update(innov);
         x_hat_.noalias() += Kf * innov;
 
         // Covariance update - Joseph form: P = (I-KC).P.(I-KC)' + K.R.K'

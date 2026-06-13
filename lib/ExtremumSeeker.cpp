@@ -29,7 +29,7 @@ namespace ctrl
     // ---------------------------------------------------------------------------
     double ExtremumSeeker::compute(double y)
     {
-        if (!std::isfinite(y)) return 0.0;
+        if (!std::isfinite(y)) return u_prev_;
         // Advance phase accumulator - stays bounded in [0, 2pi) for arbitrarily long runs,
         // avoiding the floating-point precision loss of step_ * Ts_ at large step counts
         // and the 32-bit overflow of a long counter on embedded targets.
@@ -55,7 +55,8 @@ namespace ctrl
         theta_ += sign * p_.integGain * lpf_state_ * Ts_;
 
         // Return operating point plus dither signal
-        return theta_ + p_.perturbAmp * std::sin(phase_);
+        u_prev_ = theta_ + p_.perturbAmp * std::sin(phase_);
+        return u_prev_;
     }
 
     void ExtremumSeeker::reset()
@@ -65,6 +66,7 @@ namespace ctrl
         hpf_state_ = 0.0;
         lpf_state_ = 0.0;
         y_prev_ = 0.0;
+        u_prev_ = 0.0;
     }
 
 } // namespace ctrl

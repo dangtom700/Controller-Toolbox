@@ -109,6 +109,7 @@ private:
     double hpf_state_;  ///< HPF IIR state (backward Euler, first order).
     double lpf_state_;  ///< LPF IIR state (backward Euler, first order).
     double y_prev_;     ///< y[k-1] for the HPF difference term.
+    double u_prev_ = 0.0; ///< Last finite compute() return value (hold-last NaN contract).
 };
 
 } // namespace ctrl

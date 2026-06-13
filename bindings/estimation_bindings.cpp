@@ -4,6 +4,8 @@
 #include <pybind11/functional.h>
 
 #include "ControllerToolbox.h"
+#include "GreyBoxEstimator.h"
+#include "RecursiveGreyBoxEstimator.h"
 
 namespace py = pybind11;
 
@@ -68,7 +70,24 @@ Example
              py::return_value_policy::copy,
              "Current error covariance P[k|k] as a NumPy array (n, n).")
         .def("sample_time", &ctrl::KalmanFilter::sampleTime,
-             "Sample time Ts [s].");
+             "Sample time Ts [s].")
+        // D1: mismatch detection
+        .def("enable_mismatch_detection",
+             [](ctrl::KalmanFilter& kf,
+                double sigma, double k_cusum, double h_threshold) {
+                 ctrl::MismatchDetectorParams p;
+                 p.sigma = sigma; p.k_cusum = k_cusum; p.h_threshold = h_threshold;
+                 kf.enableMismatchDetection(p);
+             },
+             py::arg("sigma") = 1.0, py::arg("k_cusum") = 0.5, py::arg("h_threshold") = 5.0,
+             "Enable CUSUM mismatch detection on the KF innovation sequence (D1). "
+             "sigma: expected in-control innovation RMS; k/h_threshold: CUSUM parameters.")
+        .def("mismatch_detected",        &ctrl::KalmanFilter::mismatchDetected,
+             "True if CUSUM has exceeded h_threshold*sigma since last reset.")
+        .def("mismatch_score",           &ctrl::KalmanFilter::mismatchScore,
+             "Current CUSUM statistic max(C+, C-).")
+        .def("reset_mismatch_detector",  &ctrl::KalmanFilter::resetMismatchDetector,
+             "Reset CUSUM accumulators without disabling detection.");
 
     // -----------------------------------------------------------------------
     // RecursiveLeastSquares
@@ -332,7 +351,18 @@ Example
         .def_readwrite("qpMaxIter",  &ctrl::MHEParams::qpMaxIter,
                        "Gradient-projection iteration limit.")
         .def_readwrite("qpTol",      &ctrl::MHEParams::qpTol,
-                       "QP convergence tolerance.");
+                       "QP convergence tolerance.")
+        .def_readwrite("xMin",       &ctrl::MHEParams::xMin,
+                       "Per-element lower box bound on x_0 (n,), empty = unconstrained.")
+        .def_readwrite("xMax",       &ctrl::MHEParams::xMax,
+                       "Per-element upper box bound on x_0 (n,), empty = unconstrained.")
+        .def_readwrite("C_ineq",     &ctrl::MHEParams::C_ineq,
+                       "Polytopic constraint LHS (m_c x n): C_ineq * x_0 <= d_ineq. "
+                       "Empty = no polytopic constraint (E4).")
+        .def_readwrite("d_ineq",     &ctrl::MHEParams::d_ineq,
+                       "Polytopic constraint RHS (m_c,). Must be set with C_ineq (E4).")
+        .def_readwrite("ineq_proj_iters", &ctrl::MHEParams::ineq_proj_iters,
+                       "Hildreth iterations for polytope projection (default 20).");
 
     py::class_<ctrl::MovingHorizonEstimator>(m, "MovingHorizonEstimator", R"doc(
 Moving Horizon Estimator (MHE) - batch state estimator via condensed QP.
@@ -382,7 +412,23 @@ Example
         .def("last_qp_iters", &ctrl::MovingHorizonEstimator::lastQPIters,
              "Gradient-projection iterations used in the most recent solve.")
         .def("sample_time",   &ctrl::MovingHorizonEstimator::sampleTime,
-             "Sample time Ts [s].");
+             "Sample time Ts [s].")
+        // D1: mismatch detection
+        .def("enable_mismatch_detection",
+             [](ctrl::MovingHorizonEstimator& mhe,
+                double sigma, double k_cusum, double h_threshold) {
+                 ctrl::MismatchDetectorParams p;
+                 p.sigma = sigma; p.k_cusum = k_cusum; p.h_threshold = h_threshold;
+                 mhe.enableMismatchDetection(p);
+             },
+             py::arg("sigma") = 1.0, py::arg("k_cusum") = 0.5, py::arg("h_threshold") = 5.0,
+             "Enable CUSUM mismatch detection on the MHE residual sequence (D1).")
+        .def("mismatch_detected",        &ctrl::MovingHorizonEstimator::mismatchDetected,
+             "True if CUSUM has exceeded h_threshold*sigma since last reset.")
+        .def("mismatch_score",           &ctrl::MovingHorizonEstimator::mismatchScore,
+             "Current CUSUM statistic max(C+, C-).")
+        .def("reset_mismatch_detector",  &ctrl::MovingHorizonEstimator::resetMismatchDetector,
+             "Reset CUSUM accumulators without disabling detection.");
 
     // -----------------------------------------------------------------------
     // SubspaceID  (optional - CTRL_HAS_SUBSPACE)
@@ -461,4 +507,176 @@ Usage
              "Sample time Ts [s] from parameters.")
         .def("reset",          &ctrl::ParticleFilter::reset,
              "Reset particles and weights; requires re-initialisation.");
+
+    // -----------------------------------------------------------------------
+    // GreyBoxEstimator (E1) - LM parameter estimation for ODE f(x,u,p)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::GreyBoxEstimator::Params>(m, "GreyBoxParams",
+        "Parameters for GreyBoxEstimator (E1).")
+        .def(py::init<>())
+        .def_readwrite("p0",         &ctrl::GreyBoxEstimator::Params::p0,
+                       "Initial parameter guess (n_p x 1).")
+        .def_readwrite("lower",      &ctrl::GreyBoxEstimator::Params::lower,
+                       "Per-element lower bounds (empty = unconstrained).")
+        .def_readwrite("upper",      &ctrl::GreyBoxEstimator::Params::upper,
+                       "Per-element upper bounds (empty = unconstrained).")
+        .def_readwrite("Ts",         &ctrl::GreyBoxEstimator::Params::Ts,
+                       "Sample / integration time [s].")
+        .def_readwrite("rk4_steps",  &ctrl::GreyBoxEstimator::Params::rk4_steps,
+                       "RK4 substeps per Ts.")
+        .def_readwrite("lm_lambda0", &ctrl::GreyBoxEstimator::Params::lm_lambda0,
+                       "Initial LM damping factor.")
+        .def_readwrite("lm_nu",      &ctrl::GreyBoxEstimator::Params::lm_nu,
+                       "LM damping scale factor (> 1).")
+        .def_readwrite("max_iter",   &ctrl::GreyBoxEstimator::Params::max_iter,
+                       "Maximum LM iterations.")
+        .def_readwrite("tol_grad",   &ctrl::GreyBoxEstimator::Params::tol_grad,
+                       "Convergence: stop when max|J'r| < tol_grad.")
+        .def_readwrite("eps_jac",    &ctrl::GreyBoxEstimator::Params::eps_jac,
+                       "FD step scale for parameter Jacobian.");
+
+    py::class_<ctrl::GreyBoxEstimator::Result>(m, "GreyBoxResult",
+        "Result from GreyBoxEstimator.fit().")
+        .def_readonly("params",     &ctrl::GreyBoxEstimator::Result::params,
+                      "Best-fit parameter vector (n_p x 1).")
+        .def_readonly("cost",       &ctrl::GreyBoxEstimator::Result::cost,
+                      "Final cost 0.5 * ||r||^2.")
+        .def_readonly("iterations", &ctrl::GreyBoxEstimator::Result::iterations,
+                      "LM iterations used.")
+        .def_readonly("converged",  &ctrl::GreyBoxEstimator::Result::converged,
+                      "True if gradient convergence criterion met.");
+
+    py::class_<ctrl::GreyBoxEstimator>(m, "GreyBoxEstimator", R"doc(
+Grey-box nonlinear parameter estimator (E1).
+
+Minimises sum_k ||y_k - h(x_k(p), p)||^2 w.r.t. p via Levenberg-Marquardt.
+
+ODE: x_dot = f(x, u, p)  [continuous-time, integrated with RK4]
+Measurement: y = h(x, p)
+
+f, h are Python callables with signatures:
+  f(x: np.ndarray, u: np.ndarray, p: np.ndarray) -> np.ndarray  (xdot)
+  h(x: np.ndarray, p: np.ndarray) -> np.ndarray                  (y)
+
+Example
+-------
+>>> par = ctrl.GreyBoxParams()
+>>> par.p0 = np.array([1.0, 0.5])   # initial [k, c] guess
+>>> par.lower = np.array([0.1, 0.01]); par.upper = np.array([10.0, 5.0])
+>>> par.Ts = 0.01
+>>> est = ctrl.GreyBoxEstimator(f, h, par)
+>>> res = est.fit(x0, U, Y)
+>>> print(res.params, res.converged)
+)doc")
+        .def(py::init([](py::object f_py, py::object h_py,
+                         const ctrl::GreyBoxEstimator::Params& par) {
+                auto f = [f_py](const Eigen::VectorXd& x,
+                                const Eigen::VectorXd& u,
+                                const Eigen::VectorXd& p) -> Eigen::VectorXd {
+                    return f_py(x, u, p).cast<Eigen::VectorXd>();
+                };
+                auto h = [h_py](const Eigen::VectorXd& x,
+                                const Eigen::VectorXd& p) -> Eigen::VectorXd {
+                    return h_py(x, p).cast<Eigen::VectorXd>();
+                };
+                return std::make_unique<ctrl::GreyBoxEstimator>(
+                    std::move(f), std::move(h), par);
+             }),
+             py::arg("f"), py::arg("h"), py::arg("params"),
+             "Construct with ODE f, measurement h, and GreyBoxParams.")
+        .def("fit", &ctrl::GreyBoxEstimator::fit,
+             py::arg("x0"), py::arg("U"), py::arg("Y"),
+             "Run LM estimation. Returns GreyBoxResult.")
+        .def("predict", &ctrl::GreyBoxEstimator::predict,
+             py::arg("x0"), py::arg("U"),
+             py::return_value_policy::copy,
+             "Simulate and return predicted output trajectory Y_hat (n_y x N).")
+        .def("params",    &ctrl::GreyBoxEstimator::params,
+             py::return_value_policy::copy,
+             "Current estimated parameter vector (n_p x 1).")
+        .def("is_fitted", &ctrl::GreyBoxEstimator::isFitted,
+             "True after a successful fit() call.");
+
+    // -----------------------------------------------------------------------
+    // RecursiveGreyBoxEstimator (E2) - online param tracking via augmented UKF
+    // -----------------------------------------------------------------------
+#if defined(CTRL_HAS_ADVANCED_KALMAN) || (!defined(CTRL_DISABLE_ADVANCED_KALMAN))
+    py::class_<ctrl::RecursiveGreyBoxEstimator::Params>(m, "RecursiveGreyBoxParams",
+        "Parameters for RecursiveGreyBoxEstimator (E2).")
+        .def(py::init<>())
+        .def_readwrite("p0",        &ctrl::RecursiveGreyBoxEstimator::Params::p0,
+                       "Initial parameter estimate (n_p x 1).")
+        .def_readwrite("Q_state",   &ctrl::RecursiveGreyBoxEstimator::Params::Q_state,
+                       "Process noise for state (n_x x n_x).")
+        .def_readwrite("Q_param",   &ctrl::RecursiveGreyBoxEstimator::Params::Q_param,
+                       "Process noise for params (n_p x n_p). Small = slow tracking.")
+        .def_readwrite("R_meas",    &ctrl::RecursiveGreyBoxEstimator::Params::R_meas,
+                       "Measurement noise covariance (n_y x n_y).")
+        .def_readwrite("P0_param",  &ctrl::RecursiveGreyBoxEstimator::Params::P0_param,
+                       "Initial param covariance (n_p x n_p). Empty -> 100 * Q_param.")
+        .def_readwrite("Ts",        &ctrl::RecursiveGreyBoxEstimator::Params::Ts)
+        .def_readwrite("rk4_steps", &ctrl::RecursiveGreyBoxEstimator::Params::rk4_steps)
+        .def_readwrite("alpha",     &ctrl::RecursiveGreyBoxEstimator::Params::alpha,
+                       "UKF sigma-point spread (0.1 recommended for n_aug >= 4).")
+        .def_readwrite("beta",      &ctrl::RecursiveGreyBoxEstimator::Params::beta)
+        .def_readwrite("kappa",     &ctrl::RecursiveGreyBoxEstimator::Params::kappa);
+
+    py::class_<ctrl::RecursiveGreyBoxEstimator>(m, "RecursiveGreyBoxEstimator", R"doc(
+Online parameter tracking via augmented-state UKF (E2).
+
+Augments state x with parameter vector p: z = [x; p].
+UKF process model integrates the ODE for x and holds p constant (+ diffusion Q_param).
+
+f, h are Python callables (same signature as GreyBoxEstimator).
+
+Example
+-------
+>>> par = ctrl.RecursiveGreyBoxParams()
+>>> par.p0 = np.array([1.0])
+>>> par.Q_state = 1e-4 * np.eye(2); par.Q_param = 1e-6 * np.eye(1)
+>>> par.R_meas  = 0.01 * np.eye(1); par.Ts = 0.01
+>>> rge = ctrl.RecursiveGreyBoxEstimator(f, h, n_state=2, n_meas=1, params=par)
+>>> rge.initialize(x0, 0.1 * np.eye(2))
+>>> for k in range(N):
+...     x_hat = rge.step(y[k], u[k])
+...     p_hat = rge.param_estimate()
+)doc")
+        .def(py::init([](py::object f_py, py::object h_py,
+                         int n_state, int n_meas,
+                         const ctrl::RecursiveGreyBoxEstimator::Params& par) {
+                auto f = [f_py](const Eigen::VectorXd& x,
+                                const Eigen::VectorXd& u,
+                                const Eigen::VectorXd& p) -> Eigen::VectorXd {
+                    return f_py(x, u, p).cast<Eigen::VectorXd>();
+                };
+                auto h = [h_py](const Eigen::VectorXd& x,
+                                const Eigen::VectorXd& p) -> Eigen::VectorXd {
+                    return h_py(x, p).cast<Eigen::VectorXd>();
+                };
+                return std::make_unique<ctrl::RecursiveGreyBoxEstimator>(
+                    std::move(f), std::move(h), n_state, n_meas, par);
+             }),
+             py::arg("f"), py::arg("h"),
+             py::arg("n_state"), py::arg("n_meas"),
+             py::arg("params"),
+             "Construct with ODE f, measurement h, dimensions, and RecursiveGreyBoxParams.")
+        .def("initialize", &ctrl::RecursiveGreyBoxEstimator::initialize,
+             py::arg("x0"), py::arg("P0_state"),
+             "Set initial state and build augmented UKF. Call before step().")
+        .def("step", &ctrl::RecursiveGreyBoxEstimator::step,
+             py::arg("y"), py::arg("u"),
+             py::return_value_policy::copy,
+             "Run one UKF predict+update. Returns state estimate x^[k|k] (n_x,).")
+        .def("state_estimate",  &ctrl::RecursiveGreyBoxEstimator::stateEstimate,
+             py::return_value_policy::copy,
+             "Current state estimate x^[k|k] (n_x,).")
+        .def("param_estimate",  &ctrl::RecursiveGreyBoxEstimator::paramEstimate,
+             py::return_value_policy::copy,
+             "Current parameter estimate p^[k|k] (n_p,).")
+        .def("covariance", &ctrl::RecursiveGreyBoxEstimator::covariance,
+             py::return_value_policy::copy,
+             "Full augmented covariance P_aug[k|k] (n_aug x n_aug).")
+        .def("is_initialized", &ctrl::RecursiveGreyBoxEstimator::isInitialized,
+             "True after initialize() has been called.");
+#endif
 }

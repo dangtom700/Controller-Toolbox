@@ -153,6 +153,7 @@ private:
     double     y_m_;      ///< Reference model state y_m[k].
     double     r_;        ///< Current reference (set by setReference).
     double     e_m_;      ///< Last tracking error y - y_m.
+    double     u_prev_ = 0.0; ///< Last finite compute() return value (hold-last NaN contract).
 };
 
 } // namespace ctrl

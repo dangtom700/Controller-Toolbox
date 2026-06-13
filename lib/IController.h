@@ -10,22 +10,14 @@ namespace ctrl
 {
 
 /**
- * @brief Return @p v if finite, otherwise @p fallback (default 0.0).
- *
- * Apply at every compute() entry point to prevent NaN/Inf from corrupting
- * integrator and observer states downstream. Input sanitisation is the
- * library's responsibility - callers must not be required to pre-filter sensor
- * readings before calling compute().
- *
- * @throws nothing - noexcept by design.
- */
-inline double sanitize(double v, double fallback = 0.0) noexcept
-{
-    return std::isfinite(v) ? v : fallback;
-}
-
-/**
  * @brief Abstract interface for all discrete-time controllers.
+ *
+ * **NaN-guard fleet contract (hold-last):** Every compute() override that receives a
+ * non-finite input *must* return the last finite output (u_prev_) and leave all internal
+ * states (integrators, ESO, estimators) unchanged.  Returning 0.0 or an unguarded NaN on
+ * bad sensor data is a safety violation - a sudden zero can be more dangerous than holding
+ * the previous command.  The one exception is MRAC/L1Adaptive which take y_plant directly;
+ * they also hold the last output on a non-finite measurement.
  *
  * All implementations operate at a fixed sample time Ts and are called once per step.
  * The interface covers both SISO (compute()) and MIMO (computeVec()) controllers,
