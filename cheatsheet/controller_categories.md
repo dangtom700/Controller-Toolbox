@@ -152,51 +152,80 @@ Controller structure is fixed, but parameters evolve online.
 
 | Tier | Description | Controllers |
 |---|---|---|
-| **Tier 1 - Core** | Closed-form, real-time, no external libraries | PID (all variants), LQR, LQI, Pole Placement, Observer, Lead-Lag, Smith Predictor, Cascade, Feedforward, SMC (basic), ADRC, DOBC, ESC, Repetitive Control |
-| **Tier 2 - Optimisation** | Requires embedded QP solver (built-in `GradientProjectionQP`) | Linear MPC, GPC, MHE, LQG |
-| **Tier 3 - Advanced Adaptive** | Requires RLS / EKF / gradient update | MRAC, STR, Adaptive GPC (RLS+setPlant), ILC, L1 Adaptive, MFAC |
-| **Tier 4 - Intelligent** | Requires inference engine (native fuzzy implemented) | FuzzyPD, FuzzyPID, FuzzySupervisor (Mamdani/TS - implemented), ANFIS, NN Control (external) |
-| **Tier 5 - Offline / External Tool** | Controller synthesised offline; gain matrix runs online | H-infinity (implemented with gamma-bisection), mu-Synthesis DK-iteration (implemented), H2, LMI-Based, NMPC, Economic MPC |
+| **Tier 0 - Embedded** | Header-only templates, no Eigen, no virtual dispatch, `float`-safe | `BasicPID<Scalar>`, `BasicSMC<Scalar>` |
+| **Tier 1 - Core** | Closed-form, real-time, no external libraries | `DiscretePID` (all variants), `DiscreteLQR`, LQI, Pole Placement, Observer, `DiscreteLeadLag`, `SmithPredictor`, `AdaptiveSmithPredictor`, Cascade, `FeedforwardController`, `DiscreteSMC`, `DiscreteADRC`, DOBC, `ExtremumSeeker`, `RepetitiveController`, `ComputationalDelayWrapper`, `CBFSafetyFilter` |
+| **Tier 2 - Optimisation** | Requires embedded QP solver (built-in `GradientProjectionQP`) | `DiscreteMPC`, `GeneralizedPredictiveController` (GPC), `MovingHorizonEstimator` (MHE), `DiscreteLQG`, `TubeMPC`, `NonlinearMPC`, `ScenarioMPC`, `HybridMPC`, `DeePC` (ADMM) |
+| **Tier 3 - Advanced Adaptive** | Requires RLS / EKF / gradient update or episode memory | `MRACController`, Adaptive GPC (RLS+setPlant), `IterativeLearningControl` (ILC), `L1AdaptiveController`, `GainScheduledController`, `AutoGainScheduler`, `RecursiveLeastSquares`, `RecursiveGreyBoxEstimator` |
+| **Tier 4 - Intelligent / Probabilistic** | Requires inference engine, GP inference, or reservoir | `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor` (Mamdani/TS), `GaussianProcess`, `EchoStateNetwork`, `NeuralPID`, `SIRParticleFilter`, `GPResidualModel`, `BayesianOptimizer` |
+| **Tier 5 - Offline / External Tool** | Controller synthesised offline; gain matrix or model used online | `DiscreteHinf` (gamma-bisection), mu-Synthesis DK-iteration, `SINDy`, `KoopmanEDMD`, `GreyBoxEstimator`, `HybridModelTrainer`, `CEMController`, `DynaController`, Economic MPC |
+| **Tier 6 - Runtime Diagnostics** | Observers / decorators that monitor or protect running controllers | `ControllerMonitor` (CUSUM+EWMA), `MismatchDetector` (on KF/MHE), `AntiWindupWrapper` |
 
 ---
 
 ## Toolbox Implementation Mapping
 
-The files in this repository implement the highlighted **Tier 1** controllers plus
-key **Tier 2**, **Tier 3**, **Tier 4**, and **Tier 5** controllers:
+The files in this repository implement the highlighted **Tier 0-1** controllers plus
+key **Tier 2**, **Tier 3**, **Tier 4**, **Tier 5**, and **Tier 6** controllers:
 
-| File | Controllers / Components Covered |
-|---|---|
-| `DiscretePID.h/.cpp` | P, PI, PD, PID, 2-DOF (via b_weight), DoM derivative, anti-windup |
-| `DiscreteLQR.h/.cpp` | Discrete LQR (DARE), LQI (augment state externally), LQRAdapter |
-| `DiscreteMPC.h/.cpp` | Linear MPC (condensed QP, box constraints on u and Delta u) |
-| `DiscreteLQG.h/.cpp` | LQG = LQR + Kalman output-feedback (separation principle) |
-| `DiscreteSMC.h/.cpp` | First-order SMC with saturation boundary layer (Tier 1) |
-| `DiscreteADRC.h/.cpp` | 2nd-order LADRC: ESO (3-state) + PD law; ADRC bandwidth parameterisation |
-| `DiscreteLeadLag.h/.cpp` | Tustin-discretised lead / lag / lead-lag compensator |
-| `SmithPredictor.h/.cpp` | Dead-time compensator (integer + fractional Pade delay) |
-| `RepetitiveController.h/.cpp` | Internal-model repetitive control with Q-filter (Tier 3 adaptive) |
-| `FeedforwardController.h/.cpp` | Static and dynamic feedforward (reference model-based) |
-| `GeneralizedPredictiveControl.h/.cpp` | GPC (CARIMA predictor + RLS adaptive update, Tier 2) |
-| `DiscreteHinf.h/.cpp` | H-infinity (gamma bisection), mixed sensitivity, mu-synthesis DK-iteration (Tier 5) |
-| `MRACController.h/.cpp` | MRAC - Lyapunov adaptation + sigma-modification + projection; SISO reference model tracking (Tier 3 adaptive) |
-| `FeedbackLinearisation.h/.cpp` | Exact FL - DriftFn+GainFn algebraic inversion + inner IController; SISO relative degree 1 (Tier 1 nonlinear) |
-| `LinearisationHelper.h/.cpp` | Numerical Jacobians (jacobianX/U) + lineariseAtPoint (ZOH); scaled-epsilon central difference |
-| `BalancedTruncation.h/.cpp` | Model order reduction - balanced realisation, Hinf error bound, suggestOrder; O(n⁶) Lyapunov |
-| `ZeroPhaseTrackingFilter.h/.cpp` | ZPETC prefilter + transmissionZeros via GeneralizedEigenSolver pencil |
-| `ExtremumSeeker.h/.cpp` | Perturbation-based ESC (Tier 1 / Tier 3 adaptive) |
-| `FuzzyLogic.h/.cpp` | Mamdani/TS inference engine; `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor` (Tier 4) |
-| `KalmanFilter.h/.cpp` | Standalone linear KF (predict / update / step) |
-| `ExtendedKalmanFilter.h/.cpp` | EKF with user Jacobians or numerical differentiation |
-| `UnscentedKalmanFilter.h/.cpp` | UKF with scaled sigma-point parametrisation |
-| `MovingHorizonEstimator.h/.cpp` | MHE via condensed QP; box constraints on process noise |
-| `FOPDTIdentifier.h/.cpp` | FOPDT step-response identification (graphical + golden-section) |
-| `SOPDTIdentifier.h/.cpp` | SOPDT identification + Rivera 1986 IMC-PID tuning |
-| `RecursiveLeastSquares.h/.cpp` | Online ARX identification with forgetting factor |
-| `SubspaceID.h/.cpp` | N4SID subspace identification, `suggestOrder` |
-| `FunctionApproximator.h/.cpp` | Pade delay filter, polynomial approximation |
-| `GradientProjectionQP.h` | Shared projected gradient QP solver (MPC / GPC / MHE backend) |
-| `ControllerTuner.h/.cpp` | Relay auto-tune, FOPDT step-response, Bryson LQR weights, MPC horizon |
-| `TunerSuite.h/.cpp` | Unified tuner dispatcher (8 strategies, soft warnings) |
-| `ControllerStack.h/.cpp` | Supervisory, Additive, Weighted stacks - cascade, observer+SF, bumpless |
-| `PlantModel.h/.cpp` | TransferFunction, StateSpace, tf2ss, c2d (ZOH / Tustin), ssStep |
+| File | Controllers / Components Covered | Tier |
+|---|---|---|
+| `BasicPID.h` | `BasicPID<Scalar>` - header-only embedded PID, no Eigen, `float`-safe | 0 |
+| `BasicSMC.h` | `BasicSMC<Scalar>` - header-only embedded SMC, no Eigen, `float`-safe | 0 |
+| `DiscretePID.h/.cpp` | P, PI, PD, PID, 2-DOF (via b_weight), DoM derivative, anti-windup | 1 |
+| `DiscreteLQR.h/.cpp` | Discrete LQR (DARE), LQI (augment state externally), LQRAdapter, `makeLQRController()` | 1 |
+| `DiscreteSMC.h/.cpp` | First-order SMC with saturation boundary layer | 1 |
+| `DiscreteADRC.h/.cpp` | 2nd-order LADRC: ESO (3-state) + PD law; ADRC bandwidth parameterisation | 1 |
+| `DiscreteLeadLag.h/.cpp` | Tustin-discretised lead / lag / lead-lag compensator | 1 |
+| `SmithPredictor.h/.cpp` | Dead-time compensator (integer + fractional Pade delay) | 1 |
+| `AdaptiveSmithPredictor.h/.cpp` | Online cross-correlation delay estimator + Smith Predictor | 1 |
+| `RepetitiveController.h/.cpp` | Internal-model repetitive control with Q-filter | 1 |
+| `FeedforwardController.h/.cpp` | Static and dynamic feedforward (reference model-based) | 1 |
+| `FeedbackLinearisation.h/.cpp` | Exact FL - DriftFn+GainFn algebraic inversion; SISO relative degree 1 | 1 |
+| `ExtremumSeeker.h/.cpp` | Perturbation-based ESC | 1 |
+| `CBFSafetyFilter.h/.cpp` | Control Barrier Function 1-D analytical QP; wraps any IController | 1 |
+| `ComputationalDelayWrapper.h` | One-sample actuator delay decorator; header-only | 1 |
+| `DiscreteMPC.h/.cpp` | Linear MPC (condensed QP, box constraints on u and Deltau) | 2 |
+| `DiscreteLQG.h/.cpp` | LQG = LQR + Kalman output-feedback | 2 |
+| `GeneralizedPredictiveControl.h/.cpp` | GPC (CARIMA predictor + RLS adaptive update) | 2 |
+| `TubeMPC.h/.cpp` | Tube MPC (nominal + tube; DARE-based K; constraint tightening) | 2 |
+| `NonlinearMPC.h/.cpp` | Nonlinear MPC (RTI sequential QP; internal integrator model) | 2 |
+| `ScenarioMPC.h/.cpp` | Scenario MPC (N_s Gaussian scenario rollouts; avg_W QP update) | 2 |
+| `HybridMPC.h/.cpp` | Hybrid MPC (HybridModel prediction + online Ridge correction) | 2 |
+| `DeePC.h/.cpp` | DeePC (Hankel matrix data-enabled MPC; ADMM solver) | 2 |
+| `MovingHorizonEstimator.h/.cpp` | MHE via condensed QP; box + polytopic inequality constraints | 2 |
+| `MRACController.h/.cpp` | MRAC - Lyapunov adaptation + sigma-modification + projection | 3 |
+| `IterativeLearningControl.h/.cpp` | ILC - P-type, D-type, norm-optimal; episode Q-filter update | 3 |
+| `L1AdaptiveController.h/.cpp` | L1 Adaptive - state predictor + LP-filtered adaptation law | 3 |
+| `GainScheduledController.h/.cpp` | Gain-scheduled linear blend; bumpless transfer on bracket change | 3 |
+| `AutoGainScheduler.h/.cpp` | Automated gain schedule design via `design_fn` callbacks | 3 |
+| `RecursiveLeastSquares.h/.cpp` | Online ARX identification with forgetting factor | 3 |
+| `RecursiveGreyBoxEstimator.h/.cpp` | Augmented-state UKF for online ODE parameter tracking (E2) | 3 |
+| `FuzzyLogic.h/.cpp` | Mamdani/TS inference engine; `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor` | 4 |
+| `GaussianProcess.h/.cpp` | SE kernel GP; Cholesky inference; fixed-budget eviction | 4 |
+| `EchoStateNetwork.h/.cpp` | Reservoir computing; spectral-radius-scaled W_res; ridge readout | 4 |
+| `NeuralPID.h/.cpp` | 3->nh->3 network; softplus gains; online backprop | 4 |
+| `SIRParticleFilter.h/.cpp` | Sequential Importance Resampling particle filter (Kitagawa 1996) | 4 |
+| `GPResidualModel.h/.cpp` | GP model-plant mismatch correction; `predictWithUncertainty()` (E3) | 4 |
+| `BayesianOptimizer.h` | GP surrogate + UCB/EI acquisition; header-only | 4 |
+| `DiscreteHinf.h/.cpp` | H-infinity (gamma bisection), mixed sensitivity, mu-synthesis DK-iteration | 5 |
+| `SINDy.h/.cpp` | Sparse Identification of Nonlinear Dynamics (STLS) | 5 |
+| `KoopmanEDMD.h/.cpp` | Koopman EDMD; PolyDeg1/2+RBF dictionary -> `StateSpace` | 5 |
+| `GreyBoxEstimator.h/.cpp` | Levenberg-Marquardt ODE parameter fitting (E1) | 5 |
+| `HybridModel.h/.cpp` | Physical ODE + `DataFunc` correction; `predictPhys()` / `predict()` | 5 |
+| `HybridModelTrainer.h/.cpp` | Offline Ridge/GP/ESN trainer for `HybridModel::DataFunc` (H4) | 5 |
+| `CEMController.h/.cpp` | Cross-Entropy Method stochastic rollout MPC; warm-start mu | 5 |
+| `DynaController.h/.cpp` | Dyna MBRL (Sutton 1991); SINDy error-dynamics fit; wraps any IController | 5 |
+| `ControllerMonitor.h` | CUSUM + EWMA SPC charts; `IControllerObserver`; header-only | 6 |
+| `MismatchDetector.h` | CUSUM on KF/MHE innovation norm; `enableMismatchDetection()`; header-only | 6 |
+| `LinearisationHelper.h/.cpp` | Numerical Jacobians (jacobianX/U) + `lineariseAtPoint` (ZOH) | util |
+| `BalancedTruncation.h/.cpp` | Model order reduction; Hinf error bound; `suggestOrder` | util |
+| `ZeroPhaseTrackingFilter.h/.cpp` | ZPETC prefilter + `transmissionZeros` via generalised eigenvalue | util |
+| `VectorFitting.h/.cpp` | Rational approximation of frequency-response data (used by `DiscreteHinf`) | util |
+| `FOPDTIdentifier.h/.cpp` | FOPDT step-response identification (graphical + golden-section) | util |
+| `SOPDTIdentifier.h/.cpp` | SOPDT identification + Rivera 1986 IMC-PID tuning | util |
+| `SubspaceID.h/.cpp` | N4SID subspace identification; `suggestOrder` | util |
+| `GradientProjectionQP.h` | Shared projected-gradient QP solver (MPC / GPC / MHE / TubeMPC backend) | util |
+| `ControllerTuner.h/.cpp` | Relay auto-tune, FOPDT step-response, Bryson LQR weights, MPC horizon | util |
+| `TunerSuite.h/.cpp` | Unified tuner dispatcher (8 strategies, soft warnings) | util |
+| `ControllerStack.h/.cpp` | Supervisory, Additive, Weighted stacks - cascade, bumpless transfer | util |
+| `PlantModel.h/.cpp` | `TransferFunction`, `StateSpace`, `DAESystem`, `tf2ss`, `c2d` (ZOH/Tustin), `dae_c2d`, `ssStep` | util |

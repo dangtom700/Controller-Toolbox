@@ -727,6 +727,11 @@ def phase_bug_report(log_path):
         'max error nominal:',             # ex80 GPResidual "max error nominal:" metric
         'dominant_rho_y',                 # ex101 RL-MPC: "dominant" contains "nan" substring
         'initial p guess',                # ex98 RecursiveGreyBox "(error 0.300)" line
+        'max error gp-corrected:',        # ex80 GPResidual "max error GP-corrected:" metric
+        '| warned |',                     # ex26 soft-warning table column header ("warned")
+        'warning |',                      # ex26 table data rows: "no warning |"
+        '1 warning',                      # ex26 table data rows: "1 warning  |" / "1 warning|"
+        'final p estimate',               # ex98 RecursiveGreyBox "Final p estimate : ... (error ...)" line
     ]
 
     # Try to read the log - fall back to latin‑1 if UTF‑8 fails

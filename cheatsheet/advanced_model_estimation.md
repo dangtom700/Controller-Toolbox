@@ -396,4 +396,100 @@ For control-oriented identification specifically, prefer models that generalise 
 
 ---
 
-*See also:* `system_identification.md` (classical parametric structures), `tuning_methods.md` (using identified models for controller design).
+---
+
+## Part VII - Grey-Box and Hybrid Estimation (Toolbox-Native Methods)
+
+The methods in Parts I-VI are general-purpose and largely external (scikit-learn, MATLAB, custom implementations). The toolbox provides three native classes that specifically target the grey-box and hybrid modelling workflow: batch ODE parameter fitting (E1), online parameter tracking (E2), GP residual correction (E3), and their downstream consumers `HybridModel` / `HybridModelTrainer` / `HybridMPC` (H1/H4/H2). These are documented in full in `phase2_hybrid_modeling.md`; this section positions them relative to the methods above.
+
+---
+
+## 16. GreyBoxEstimator (E1) - Levenberg-Marquardt ODE Fitting
+
+**Mechanism.** Given a user-supplied ODE $\dot{x} = f(x, u, p)$ and measurement function $h(x, p)$, `GreyBoxEstimator` minimises the simulation residual
+$$J(p) = \|Y_\text{sim}(p) - Y_\text{meas}\|_F^2$$
+via Levenberg-Marquardt (LM). The Jacobian $\partial Y_\text{sim} / \partial p$ is approximated by central finite differences; integration uses RK4 with configurable sub-steps; box constraints on $p$ are enforced by projection.
+
+**Position in the landscape.** `GreyBoxEstimator` sits between ARX/OE (fully black-box, no ODE) and full Bayesian parameter estimation (expensive, requires prior). It is analogous to MATLAB `grey` + `greyest`, but operates in discrete time with RK4 integration.
+
+| Property | ARX/OE (classical) | GreyBoxEstimator | GPR (black-box) |
+|---|---|---|---|
+| Requires ODE? | No | **Yes** | No |
+| Parameter interpretability | Low | **High** | None |
+| Data efficiency | Moderate | **High** | Low-Moderate |
+| Handles nonlinear dynamics? | No | **Yes** | Yes (NARX setup) |
+| Provides uncertainty? | No (point) | No (point) | **Yes** |
+
+**When to prefer GreyBoxEstimator over GPR.** When the ODE structure is known (from physics or first-principles), `GreyBoxEstimator` is 10-100* more data-efficient than GPR-NARX and produces physically interpretable parameters. Use GPR when the structure is unknown and you have hundreds or more samples.
+
+---
+
+## 17. RecursiveGreyBoxEstimator (E2) - Augmented-State UKF
+
+**Mechanism.** Augments the state $x$ with the parameter vector $p$ to form $z = [x; p]$, then applies the Unscented Kalman Filter. The sigma-point process model integrates the ODE for $x$ (RK4) and applies Gaussian diffusion to $p$ (random walk). This allows online tracking of slowly time-varying parameters without a fixed-size data window.
+
+**Position in the landscape.** Analogous to the dual-EKF or joint-state-and-parameter UKF in the literature, but with RK4 integration of the physical ODE as the process model (rather than a linear SSM). More data-efficient than a sliding-window batch re-identification approach; less flexible than a full Bayesian filter with informative priors.
+
+| Property | Batch GreyBoxEstimator | RecursiveGreyBoxEstimator | Standard UKF |
+|---|---|---|---|
+| Tracks time-varying params? | No | **Yes** | If state-augmented |
+| Requires fixed dataset? | **Yes** | No | No |
+| Computational cost per step | $O(N_\text{batch} \times n_p)$ | $O(n_z^3)$ per step | $O(n^3)$ |
+| Physical ODE integration? | **Yes (RK4)** | **Yes (RK4)** | Only if user provides it |
+
+---
+
+## 18. GPResidualModel (E3) - Residual Learning
+
+**Mechanism.** After fitting a physics model (via `GreyBoxEstimator` or analytically), compute the residual:
+$$\epsilon_k = y_k^\text{true} - y_k^\text{model}(x_k^\text{feat})$$
+and fit a GP to the map $x_k^\text{feat} \to \epsilon_k$. At prediction time, correct the physics model:
+$$\hat{y} = y_\text{model}(x_\text{feat}) + \mu_\text{GP}(x_\text{feat})$$
+with posterior variance $\sigma_\text{GP}^2$ available for constraint tightening.
+
+**Position in the landscape.** `GPResidualModel` is a Gaussian-Process Delta Model - it learns only the *error* of a physics model, not the full dynamics. This has two advantages over full-GP identification: (1) the GP input dimensionality is smaller because the physics already captures the dominant dynamics; (2) the GP only needs to be expressive in regions where the physics model fails, reducing the budget required.
+
+| Property | Full GPR (from scratch) | GPResidualModel | Ridge correction (HybridModelTrainer) |
+|---|---|---|---|
+| Physics knowledge used? | No | **Yes** | **Yes** |
+| Provides posterior variance? | **Yes** | **Yes** | No |
+| Training cost | $O(N^3)$ | $O(N^3)$ | $O(N \cdot n_\text{feat}^2)$ |
+| Extrapolation: physics domain | GP mean | **Physics baseline** | **Physics baseline** |
+| Suitable for MPC constraint tightening | Yes (full GP) | **Yes (variance)** | No |
+
+---
+
+## Updated Comparison Table (including Toolbox-Native Methods)
+
+| Method | Data need | Uncertainty | Structure | Dynamics | Interpretability |
+|---|---|---|---|---|---|
+| Ridge / LASSO | Low | No | Linear | Via lagged regressors | High |
+| IV | Low | No | Linear | Yes | High |
+| SVR | Low-Med | No | Kernel | Via NARX setup | Low |
+| GPR | Low-Med | **Yes** | Kernel | Via NARX setup | Low |
+| RVM | Low-Med | **Yes** | Sparse kernel | Via NARX setup | Low |
+| MLP | Med-High | No | NN | Via NARX setup | Low |
+| NARX-NN | Med-High | No | NN | **Native** | Low |
+| ESN | High | No | Random reservoir | **Native** | Low |
+| ELM | Med | No | Random hidden | Via NARX setup | Low |
+| TS Fuzzy | Med | No | Blended linear | Via TS-NARX | **High** |
+| ANFIS | Med | No | TS + gradient | Via NARX setup | **Medium** |
+| Random Forest | Med-High | Partial (QRF) | Ensemble tree | Via NARX setup | Medium |
+| GBT / XGBoost | Med-High | Partial | Ensemble tree | Via NARX setup | Medium |
+| Evolutionary | Any | No | Any | Any | Variable |
+| LWR / LWPR | High | Partial | Local linear | Via local NARX | **High** |
+| **GreyBoxEstimator (E1)** | **Low** | No | **ODE (physics)** | **Native (RK4)** | **Very High** |
+| **RecursiveGreyBoxEst (E2)** | **Low (online)** | No | **ODE + UKF** | **Native (RK4)** | **Very High** |
+| **GPResidualModel (E3)** | Low-Med | **Yes** | Physics + GP | **Native** | **High** |
+
+**Decision heuristic for toolbox-native methods:**
+
+7. **Use GreyBoxEstimator (E1) when you have a physics ODE.** If you know the ODE structure and have even 50-200 data points, `GreyBoxEstimator` will outperform GPR and NARX-NN on parameter accuracy and will produce interpretable parameters.
+
+8. **Use RecursiveGreyBoxEstimator (E2) for online tracking.** If parameters drift slowly (thermal wear, fouling, batch variation), run E2 in parallel with the controller. Couple it with `MismatchDetector` (see `mismatch_detection.md`) to trigger re-initialisation after abrupt changes.
+
+9. **Use GPResidualModel (E3) for risk-aware MPC.** When a physics model exists but has known structural gaps (unmodelled friction, heat loss, flexible modes), `GPResidualModel` corrects it and provides posterior variance for MPC constraint tightening without requiring a full GP over all states.
+
+---
+
+*See also:* `phase2_hybrid_modeling.md` (full API and workflow for E1/E2/E3/H1/H2/H4), `system_identification.md` (classical parametric structures), `tuning_methods.md` (using identified models for controller design).

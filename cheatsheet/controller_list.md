@@ -33,10 +33,13 @@
 - **Model Algorithmic Control (MAC)**
 - **Generalized Predictive Control (GPC)** - **implemented: `GeneralizedPredictiveController`** (CARIMA + RLS adaptive)
 - **Explicit MPC** (pre-computed PWA control law)
-- **Nonlinear MPC (NMPC)**
+- **Nonlinear MPC (NMPC)** - **implemented: `NonlinearMPC`** (RTI sequential quadratic programming, internal integrator)
+- **Tube MPC** (robust MPC with constraint tightening) - **implemented: `TubeMPC`** (nominal + tube controller, DARE-based K)
+- **Scenario MPC** (stochastic, sample-average approximation) - **implemented: `ScenarioMPC`** (N_s Gaussian scenario rollouts, Calafiore & Campi 2006)
+- **CEM-MPC** (cross-entropy method, sampling-based NMPC) - **implemented: `CEMController`** (elite-sample stochastic rollout, warm-start mu)
+- **Data-Enabled Predictive Control (DeePC)** - **implemented: `DeePC`** (Hankel matrix, ADMM solver, Coulson 2019)
+- **Hybrid MPC with Data Correction** - **implemented: `HybridMPC`** (physical ODE + online Ridge correction, see `phase2_hybrid_modeling.md`)
 - **Economic MPC** (non-quadratic cost)
-- **Robust MPC** (min-max, tube-based, constraint tightening)
-- **Stochastic MPC** (chance constraints)
 - **Distributed / Decentralized MPC**
 - **Hybrid MPC** (mixed logical dynamical systems)
 
@@ -47,9 +50,10 @@
 - **H2 Control**
 - **mu-Synthesis** (structured singular value) - **implemented: `DiscreteHinf::solveMuSyn`** (DK-iteration with rational D-scaling)
 - **Quantitative Feedback Theory (QFT)**
-- **Sliding Mode Control (SMC)** - classical first-order - **implemented: `DiscreteSMC`** (saturation boundary layer)
+- **Sliding Mode Control (SMC)** - classical first-order - **implemented: `DiscreteSMC`** (saturation boundary layer); embedded: **`BasicSMC<Scalar>`** (header-only, no Eigen)
 - **Integral Sliding Mode Control**
 - **Higher-Order Sliding Mode** (Super-Twisting, Twisting, Prescribed-time)
+- **Control Barrier Function Safety Filter** - **implemented: `CBFSafetyFilter`** (1-D analytical QP wrapping any IController, Ames 2017)
 - **Kharitonov-Based Robust Design**
 - **Lyapunov's Direct Method Redesign**
 - **LMI-Based Robust Control** (Hinf, H2, pole clustering)
@@ -59,12 +63,13 @@
 ### 5. Adaptive Control
 - **Model Reference Adaptive Control (MRAC)** - direct & indirect - **implemented: `MRACController`** (Lyapunov adaptation, sigma-modification, parameter projection)
 - **Self-Tuning Regulator (STR)**
-- **Gain Scheduling** (classical, parameter-dependent) - **implemented via `ControllerStack::Weighted`** + blended gains (see ex41)
+- **Gain Scheduling** (classical, parameter-dependent) - **implemented: `GainScheduledController`** (linear blend across brackets, bumpless transfer); automated design: **`AutoGainScheduler`**
 - **Adaptive PID**
-- **L1 Adaptive Control**
-- **Iterative Learning Control (ILC)**
+- **L1 Adaptive Control** - **implemented: `L1AdaptiveController`** (state predictor + LP-filtered adaptation, Hovakimyan 2010)
+- **Iterative Learning Control (ILC)** - **implemented: `IterativeLearningControl`** (P-type, D-type, norm-optimal modes; episode Q-filter update)
 - **Repetitive Control (RC)** - **implemented: `RepetitiveController`** (IMP Q-filter)
 - **Extremum Seeking Control** (model-free adaptive) - **implemented: `ExtremumSeeker`**
+- **Dyna Model-Based RL** - **implemented: `DynaController`** (Sutton 1991 Dyna MBRL; SINDy error-dynamics fit; wraps any IController)
 - **Multiple-Model Adaptive Control (MMAC)**
 - **Adaptive Sliding Mode Control**
 
@@ -88,8 +93,14 @@
 - **Fuzzy Logic Control** (Mamdani, Takagi-Sugeno) - **implemented: `FuzzyLogic.h`** (`FuzzySystem`, `FuzzyPD`, `FuzzyPID`, `FuzzySupervisor`)
 - **Neuro-Fuzzy Control (ANFIS)**
 - **Neural Network Control** (off-line trained, model-inverse)
+- **NeuralPID** (online backprop-tuned gain network) - **implemented: `NeuralPID`** (3->nh->3 network, softplus gains, online backprop)
+- **Echo State Network (Reservoir Computing)** - **implemented: `EchoStateNetwork`** (spectral-radius-scaled W_res, ridge-regression readout; used as `HybridModelTrainer` ESN backend)
+- **Gaussian Process Regression** (probabilistic, calibrated uncertainty) - **implemented: `GaussianProcess`** (SE kernel, Cholesky inference, fixed-budget eviction)
+- **SINDy** (Sparse Identification of Nonlinear Dynamics) - **implemented: `SINDy`** (STLS sparse regression, Poly/Trig library; `SINDyModel::stateFunc()`)
+- **Koopman EDMD** (data-driven linearisation) - **implemented: `KoopmanEDMD`** (PolyDeg1/2+RBF dictionary; `fit()` -> `ctrl::StateSpace`)
 - **Adaptive Neural Network Control** (online learning)
 - **Reinforcement Learning Control** (Q-learning, DDPG, SAC, PPO)
+- **Bayesian Optimization** (GP surrogate + UCB/EI acquisition) - **implemented: `BayesianOptimizer`** (header-only; shares `TunerResult`/`CostFn` with `AutoTuner`)
 - **Genetic Algorithm (GA) Tuned Controllers**
 - **Particle Swarm Optimization (PSO) Tuned Controllers**
 - **Ant Colony / Differential Evolution Based Tuning**
@@ -100,11 +111,11 @@
 - **LQG** (already optimal + estimation) - **implemented: `DiscreteLQG`**
 - **Kalman-Filter Based State Feedback** - **implemented: `KalmanFilter`, `ExtendedKalmanFilter`, `UnscentedKalmanFilter`**
 - **Certainty-Equivalence Control** - **implemented pattern** (EKF/UKF/MHE state -> MPC/LQR, see ex50-ex53)
-- **Moving Horizon Estimation (MHE)** - **implemented: `MovingHorizonEstimator`** (condensed QP dual of MPC)
+- **Moving Horizon Estimation (MHE)** - **implemented: `MovingHorizonEstimator`** (condensed QP dual of MPC; box constraints on x_0; inequality constraints via C_ineq/d_ineq)
+- **Particle Filter / SIR Filter** - **implemented: `SIRParticleFilter`** (sequential importance resampling, Kitagawa 1996)
 - **Risk-Sensitive Control (LEQG)**
 - **Dual Control** (probing + regulating)
 - **Stochastic Optimal Control** (HJB equation)
-- **Particle Filter-Based Control**
 
 ---
 
@@ -150,6 +161,7 @@
 - **Discrete Sliding Mode Control**
 - **Delta-Operator Control**
 - **Ragazzini-Franklin Design** (direct digital)
+- **Computational Delay Simulation** - **implemented: `ComputationalDelayWrapper`** (one-sample actuator delay decorator wrapping any IController; see `embedded_and_realtime.md`)
 
 ---
 
@@ -161,7 +173,26 @@
 - **Extremum Seeking** (model-free)
 - **Reinforcement Learning (model-free)**
 - **Unfalsified Control**
-- **PID with auto-tuning** (relay, Ziegler-Nichols)
+- **PID with auto-tuning** (relay, Ziegler-Nichols) - **implemented: `ControllerTuner`** (relay auto-tune, FOPDT step-response, Bryson LQR, MPC horizon; unified: `TunerSuite`)
+- **Online ARX Identification** - **implemented: `RecursiveLeastSquares`** (online ARX with forgetting factor; accessor `params()`, update order: `update(y, u)`)
+
+---
+
+### 13. Embedded and Real-Time Implementations
+- **Embedded PID** (header-only, no Eigen, no virtual dispatch) - **implemented: `BasicPID<Scalar>`** (`float` or `double`; MCU-safe, anti-windup built-in; see `embedded_and_realtime.md`)
+- **Embedded SMC** (header-only, no Eigen) - **implemented: `BasicSMC<Scalar>`** (saturation boundary layer; sign convention: `compute(r - y)`)
+
+---
+
+### 14. Runtime Monitoring and Diagnostics
+- **Statistical Process Control** (CUSUM + EWMA on control output) - **implemented: `ControllerMonitor`** (attaches as `IControllerObserver`; DiscreteADRC emits ESO state, DiscreteSMC emits surface)
+- **Model Mismatch Detection** (CUSUM on KF/MHE innovation) - **implemented: `MismatchDetector`** via `KalmanFilter::enableMismatchDetection()` and `MovingHorizonEstimator::enableMismatchDetection()`; see `mismatch_detection.md`
+
+---
+
+### 15. Plant Model Utilities
+- **DAE System** (differential-algebraic equations) - **implemented: `DAESystem`** (`PlantModel.h`); consistent init via Newton-Raphson; `dae_c2d()` algebraic elimination -> `StateSpace`; EKF projection via `setAlgebraicConstraint()` (see `mismatch_detection.md`)
+- **Hybrid Model** (physical ODE + data-driven correction) - **implemented: `HybridModel`** + **`HybridModelTrainer`** (Ridge/GP/ESN backends) + **`HybridMPC`** (see `phase2_hybrid_modeling.md`)
 
 ---
 

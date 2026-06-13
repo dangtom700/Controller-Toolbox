@@ -4,6 +4,10 @@
 
 namespace ctrl {
 
+HybridModelTrainer::HybridModelTrainer()
+    : p_(Params{})
+{}
+
 HybridModelTrainer::HybridModelTrainer(const Params& params)
     : p_(params)
 {}
@@ -98,7 +102,6 @@ HybridModelTrainer::trainRidge(const Eigen::MatrixXd& Feat,
     // We want W (n_feat x n_out) such that W' * feat approx = resid
     // via min ||Feat' W - Resid'||_F  + lambda * ||W||_F
     // Normal equations: (Feat Feat' + lambda*I) W = Feat Resid'
-    const int n_feat = static_cast<int>(Feat.rows());
     Eigen::MatrixXd FtF = Feat * Feat.transpose();
     FtF.diagonal().array() += p_.ridge_lambda;
     const Eigen::MatrixXd W = FtF.ldlt().solve(Feat * Resid.transpose());  // n_feat x n_out

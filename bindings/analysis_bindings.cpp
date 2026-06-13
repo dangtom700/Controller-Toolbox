@@ -547,4 +547,44 @@ u = sched.compute(error)
         .def("reset",            &ctrl::GainScheduledController::reset)
         .def("sample_time",      &ctrl::GainScheduledController::sampleTime)
         .def("last_output",      &ctrl::GainScheduledController::lastOutput);
+
+    // -----------------------------------------------------------------------
+    // VectorFitting (T3)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::VectorFittingParams>(m, "VectorFittingParams",
+        "Tuning parameters for VectorFitting::fit_magnitude().")
+        .def(py::init<>())
+        .def_readwrite("max_iter", &ctrl::VectorFittingParams::max_iter,
+                       "SK iteration limit.")
+        .def_readwrite("tol",      &ctrl::VectorFittingParams::tol,
+                       "Stop when max pole displacement < tol.")
+        .def_readwrite("eps_mag",  &ctrl::VectorFittingParams::eps_mag,
+                       "Regularisation floor for near-zero magnitudes.");
+
+    py::class_<ctrl::VectorFittingResult>(m, "VectorFittingResult",
+        "Result of VectorFitting::fit_magnitude().")
+        .def_readonly("converged",   &ctrl::VectorFittingResult::converged)
+        .def_readonly("iterations",  &ctrl::VectorFittingResult::iterations)
+        .def_readonly("rms_error",   &ctrl::VectorFittingResult::rms_error);
+
+    py::class_<ctrl::VectorFitting>(m, "VectorFitting",
+        "Rational approximation of frequency-domain magnitude data (Sanathanan-Koerner).")
+        .def_static("fit_magnitude",
+            [](const std::vector<double>& omega,
+               const std::vector<double>& magnitude,
+               int n_poles, double Ts,
+               const ctrl::VectorFittingParams& params) {
+                ctrl::VectorFittingResult res;
+                ctrl::StateSpace ss = ctrl::VectorFitting::fitMagnitude(
+                    omega, magnitude, n_poles, Ts, res, params);
+                return std::make_pair(res, ss);
+            },
+            py::arg("omega_grid"), py::arg("magnitude"),
+            py::arg("n_poles"), py::arg("Ts"),
+            py::arg("params") = ctrl::VectorFittingParams{},
+            "Fit a stable rational filter to the magnitude profile. Returns (VectorFittingResult, StateSpace).")
+        .def_static("eval_magnitude",
+            &ctrl::VectorFitting::evalMagnitude,
+            py::arg("sys"), py::arg("omega"),
+            "Evaluate |H(e^{j*omega*Ts})| for a StateSpace at a given frequency.");
 }

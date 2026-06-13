@@ -13,7 +13,7 @@
  * @code
  *   s[k]  = c_e * e[k] + c_de * (e[k] - e[k-1])    // sliding surface
  *   sat   = clamp(s[k] / phi, -1, 1)                // boundary-layer saturation
- *   u[k]  = clamp(-K * sat, uMin, uMax)             // output
+ *   u[k]  = clamp(+K * sat, uMin, uMax)             // output (+K: compute(r-y) convention)
  * @endcode
  *
  * **Convention:** compute(error) where error = r - y (error = r[k] - y[k]).
@@ -72,7 +72,8 @@ public:
     {
         const Scalar s    = p_.c_e * error + p_.c_de * (error - e_prev_);
         const Scalar sat  = clamp(s / p_.phi, Scalar(-1), Scalar(1));
-        const Scalar u    = clamp(-p_.K * sat, p_.uMin, p_.uMax);
+        // +K (not -K): compute(r-y) convention means positive error -> positive u
+        const Scalar u    = clamp(p_.K * sat, p_.uMin, p_.uMax);
 
         e_prev_ = error;
         u_prev_ = u;

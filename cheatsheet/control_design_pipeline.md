@@ -37,6 +37,9 @@ The identified model is rarely in the exact form your control method needs:
 - Convert continuous \leftrightarrow discrete with proper sampling time selection: `ctrl::c2d(sys_c, Ts, ZOH)`.
 - **Model reduction (balanced truncation)** to get a low-order design model: `ctrl::balancedTruncate(sys, r)` - returns Hinf error bound and HSVs. Call `ctrl::suggestOrder(res, tol)` to find the minimum r meeting a tolerance. Suitable for n <= 10 (O(n⁶) solver).
 - **Linearisation at operating points** for gain-scheduled or adaptive designs: `ctrl::lineariseAtPoint(f, x0, u0, Ts)`.
+- **DAE systems** (differential-algebraic equations): use `ctrl::DAESystem` in `PlantModel.h` when the plant has algebraic constraints (network power balance, kinematic constraints, chemical equilibrium). Call `ctrl::consistentInit()` to initialise the algebraic variables, then `ctrl::dae_c2d(dae, Ts)` to eliminate the algebraic part and produce a `StateSpace` for LQR/MPC design. See `mismatch_detection.md`.
+- **Hybrid model** (physics + data correction): when the physics ODE underfits due to unmodelled dynamics, use `HybridModel` + `HybridModelTrainer` (offline Ridge/GP/ESN correction) or `HybridMPC` (online correction). See `phase2_hybrid_modeling.md`.
+- **Grey-box parameter fitting**: if the ODE structure is known but parameters are uncertain, run `GreyBoxEstimator` before controller design. For online parameter tracking during operation, use `RecursiveGreyBoxEstimator` in parallel. See `phase2_hybrid_modeling.md`.
 - Augmentation with disturbance models (integrators for offset-free tracking, ARIMA for MPC).
 - Delay approximation: `ctrl::padeDelayFilter(theta_frac, Ts)` from `FunctionApproximator.h`.
 - Uncertainty representation for Hinf design: use `MixedSensitivity::build(G, W1, W2, W3)`.
@@ -103,6 +106,8 @@ Your 3-step pipeline is essentially a single pass with evaluation at the end. Re
 After commissioning, the system should be monitored:
 - Detect performance degradation (increased variance, sluggish response) and trigger re-identification or adaptive tuning.
 - Auto-tuning routines to compensate for slow plant changes (wear, fouling, seasonal).
+- **Real-time mismatch detection**: enable `MismatchDetector` on your `KalmanFilter` or `MovingHorizonEstimator` to detect model-plant drift via CUSUM on the innovation norm. On alarm, trigger `GreyBoxEstimator` re-fit or `RecursiveGreyBoxEstimator` reinitialisation. See `mismatch_detection.md`.
+- **SPC on control output**: attach `ControllerMonitor` (CUSUM + EWMA) to any `IController` to detect sustained output bias or variance increase - an early indicator of actuator degradation or setpoint drift. See `mismatch_detection.md`.
 
 This "closes the loop" across the plant's entire lifecycle.
 

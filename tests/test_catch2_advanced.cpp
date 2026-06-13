@@ -3707,7 +3707,7 @@ TEST_CASE("DiscreteHinf NaN guard returns last finite output, state not corrupte
     const auto W3 = ctrl::MixedSensitivity::makeW3(20.0, 1.5, 1e-3, Ts);
     const auto P  = ctrl::MixedSensitivity::build(G, W1, W2, W3);
 
-    ctrl::HinfParams hp; hp.gammaMax = 20.0; hp.gammaTol = 0.1;
+    ctrl::HinfParams hp; hp.gammaInit = 20.0; hp.gammaTol = 0.1;
     const auto result = ctrl::DiscreteHinf::solve(P, hp);
     if (!result.feasible) { WARN("H-inf synthesis infeasible - NaN-guard test skipped"); return; }
 
@@ -3770,8 +3770,8 @@ TEST_CASE("GPC isHealthy() mirrors MPC convergence behaviour", "[health_contract
     A << 0.9; B << 0.1; C << 1.0; D << 0.0;
     ctrl::StateSpace plant(A, B, C, D, Ts);
 
-    ctrl::GPCParams gp; gp.Np = 5; gp.Nc = 2; gp.rho_y = 1.0; gp.rho_u = 0.1;
-    ctrl::GeneralizedPredictiveControl gpc(plant, gp);
+    ctrl::GPCParams gp; gp.Np = 5; gp.Nu = 2; gp.rho_y = 1.0; gp.rho_u = 0.1;
+    ctrl::GeneralizedPredictiveController gpc(plant, gp);
     gpc.compute(0.0);
     REQUIRE(gpc.isHealthy() == true);
 }
@@ -5056,7 +5056,7 @@ TEST_CASE("MismatchDetector: reset clears alarm state", "[mismatch_detector]")
 
     det.reset();
     REQUIRE_FALSE(det.detected());
-    REQUIRE(det.score() == Approx(0.0).margin(1e-12));
+    REQUIRE_THAT(det.score(), WithinAbs(0.0, 1e-12));
 }
 
 TEST_CASE("MismatchDetector: vector innovation update fires alarm", "[mismatch_detector]")
@@ -5087,17 +5087,21 @@ TEST_CASE("KalmanFilter: mismatch detection disabled by default", "[mismatch_det
     kf.step(y, u);
 
     REQUIRE_FALSE(kf.mismatchDetected());
-    REQUIRE(kf.mismatchScore() == Approx(0.0).margin(1e-12));
+    REQUIRE_THAT(kf.mismatchScore(), WithinAbs(0.0, 1e-12));
 }
 
 TEST_CASE("KalmanFilter: mismatch detection triggers on wrong model", "[mismatch_detector]")
 {
-    // Plant is integrator; KF model is stable (wrong). Innovation will grow.
+    // Plant is integrator (A=1); KF model is stable (A=0.9) - deliberate mismatch.
+    // Innovation grows as KF prediction diverges from ramp truth.
     const double Ts = 0.1;
-    Eigen::MatrixXd A(1,1), B(1,1), C(1,1), D(1,1);
-    A << 1.0; B << Ts; C << 1.0; D << 0.0;  // true plant: integrator
-    ctrl::StateSpace plant(A, B, C, D, Ts);
-    ctrl::KalmanFilter kf(plant,
+    Eigen::MatrixXd B(1,1), C(1,1), D(1,1);
+    B << Ts; C << 1.0; D << 0.0;
+
+    // KF model: stable first-order (wrong model)
+    Eigen::MatrixXd A_model(1,1); A_model << 0.9;
+    ctrl::StateSpace kf_model(A_model, B, C, D, Ts);
+    ctrl::KalmanFilter kf(kf_model,
                           Eigen::MatrixXd::Constant(1,1,0.001),
                           Eigen::MatrixXd::Constant(1,1,0.01));
 

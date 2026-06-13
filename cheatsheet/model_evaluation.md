@@ -77,3 +77,94 @@ def evaluate_model_fit(y_true, y_pred):
     
     return {'rmse': rmse, 'fit': fit_percent, 'mape': mape}
 ```
+
+---
+
+## 3. Kalman Innovation Whiteness Test
+
+When the estimator is a Kalman Filter (KF, EKF, or UKF), the innovation sequence
+$$\nu_k = y_k - C\hat{x}_{k|k-1}$$
+should be zero-mean white noise with covariance $S_k = CP_{k|k-1}C^T + R$ if the model is correct. Deviations from this indicate model mismatch, unmodelled dynamics, or wrong noise statistics.
+
+**Tests to apply:**
+
+- **Normalised innovation squared (NIS):** $\epsilon_k = \nu_k^T S_k^{-1} \nu_k$ should follow a $\chi^2(p)$ distribution, where $p$ is the output dimension. Mean NIS should be near 1.0; sustained values above 1.5 indicate overconfidence in the model.
+- **ANEES (Average Normalised Estimation Error Squared):** applies to state estimation benchmarks where the true state is known.
+- **ACF of innovations:** same test as residual ACF in Section 1 - the innovations should be uncorrelated across time.
+
+```python
+import numpy as np
+from scipy import stats
+
+def nis_test(innovations, S_matrices, p_output):
+    """
+    innovations: list of numpy arrays (p,) - one per step
+    S_matrices:  list of numpy arrays (p, p) - innovation covariance per step
+    """
+    N = len(innovations)
+    nis_vals = np.array([
+        innovations[k] @ np.linalg.solve(S_matrices[k], innovations[k])
+        for k in range(N)
+    ])
+    
+    mean_nis = np.mean(nis_vals)
+    # 95% confidence interval for mean NIS under chi2(p)
+    ci_lo = stats.chi2.ppf(0.025, df=p_output) / p_output
+    ci_hi = stats.chi2.ppf(0.975, df=p_output) / p_output
+    
+    consistent = ci_lo <= mean_nis <= ci_hi
+    print(f"Mean NIS: {mean_nis:.3f}  (95% CI: [{ci_lo:.3f}, {ci_hi:.3f}])")
+    print(f"Filter consistent: {consistent}")
+    return mean_nis, consistent
+```
+
+---
+
+## 4. Real-Time Mismatch Detection (Toolbox-Native)
+
+The tests in Sections 1-3 are applied **offline** to a batch of data. For closed-loop systems that must detect model drift **online**, the toolbox provides `MismatchDetector` (D1) - a CUSUM chart on the normalised innovation norm that raises a sticky alarm when the model and plant diverge.
+
+### Enabling on KalmanFilter
+
+```python
+import ctrl_toolbox as ctrl
+
+kf = ctrl.KalmanFilter(A, B, C, Q, R, P0, x0)
+
+# Calibrate sigma from a nominal run: std(||innov||/sqrt(p)) over 200+ steps
+kf.enable_mismatch_detection(
+    sigma=1.0,        # expected std of ||innov||/sqrt(p) under nominal model
+    k_cusum=0.5,      # CUSUM reference value (half expected shift)
+    h_threshold=5.0   # alarm threshold
+)
+
+for k in range(N):
+    kf.predict(u[k])
+    kf.update(y[k])
+    
+    if kf.mismatch_detected():
+        score = kf.mismatch_score()
+        print(f"Mismatch at step {k}, CUSUM score={score:.2f}")
+        kf.reset_mismatch_detector()
+        # trigger GreyBoxEstimator re-fit or HybridModelTrainer update
+```
+
+### Enabling on MovingHorizonEstimator
+
+```python
+mhe = ctrl.MovingHorizonEstimator(...)
+mhe.enable_mismatch_detection(sigma=1.0, k_cusum=0.5, h_threshold=5.0)
+# identical API: mismatch_detected(), mismatch_score(), reset_mismatch_detector()
+```
+
+### Threshold calibration
+
+| Context | `sigma` | `k_cusum` | `h_threshold` | Expected ARL0 |
+|---|---|---|---|---|
+| Standard (moderate sensitivity) | from data | 0.5 * sigma | 5 * sigma | ~500 steps |
+| Sensitive (catch slow drift early) | from data | 0.25 * sigma | 3 * sigma | ~150 steps |
+| Conservative (only catch large jumps) | from data | 0.75 * sigma | 8 * sigma | ~2000 steps |
+
+ARL0 = Average Run Length under null (no mismatch) - the expected number of steps before a false alarm.
+
+*See also:* `mismatch_detection.md` for full API, CUSUM tuning, integration with DAE-EKF, and the monitoring + re-identification loop.

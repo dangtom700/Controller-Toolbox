@@ -77,8 +77,10 @@ public:
         int    n_samples;    ///< Number of training samples used.
     };
 
+    /** @brief Construct trainer with default parameters. */
+    HybridModelTrainer();
     /** @brief Construct trainer with given parameters. */
-    explicit HybridModelTrainer(const Params& params = Params{});
+    explicit HybridModelTrainer(const Params& params);
 
     /**
      * @brief Train the data component and install it in model.
