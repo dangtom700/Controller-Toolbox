@@ -6,9 +6,11 @@ var searchData=
   ['ld_3',['Ld',['../structctrl_1_1ILC_1_1Params.html#afac21fe7f1da303cd6ddec7863ea1bd9',1,'ctrl::ILC::Params']]],
   ['length_5fscale_4',['length_scale',['../structctrl_1_1GaussianProcess_1_1Params.html#abbf7e5b08091a679124a1186245c00e9',1,'ctrl::GaussianProcess::Params']]],
   ['library_5',['library',['../structctrl_1_1SINDy_1_1Params.html#ad2e0e1883446ca02313b4bb9275b4188',1,'ctrl::SINDy::Params']]],
-  ['lo_6',['lo',['../structctrl_1_1LinguisticVariable.html#aee24abd6bc5fe725390a8205365cecfc',1,'ctrl::LinguisticVariable']]],
-  ['lower_7',['lower',['../structctrl_1_1AutoTunerParams.html#a1b42cdf42baa9aa3b98956c4a7949169',1,'ctrl::AutoTunerParams::lower'],['../structctrl_1_1BayesOptParams.html#a99b33e25930ec2102792b09f85d6bd53',1,'ctrl::BayesOptParams::lower']]],
-  ['lp_8',['Lp',['../structctrl_1_1ILC_1_1Params.html#a42152ceb1534a0dec9f186ac6ac9579b',1,'ctrl::ILC::Params']]],
-  ['lpfcutoff_9',['lpfCutoff',['../structctrl_1_1ExtremumSeekerParams.html#a48488068e06ea9a3555f45bf13a52cc1',1,'ctrl::ExtremumSeekerParams']]],
-  ['lr_10',['lr',['../structctrl_1_1NeuralPID_1_1Params.html#a7a0e49c24fe9592e24e2b19432cf7b4d',1,'ctrl::NeuralPID::Params']]]
+  ['lm_5flambda0_6',['lm_lambda0',['../structctrl_1_1GreyBoxEstimator_1_1Params.html#a7a9fd9042a87a5dad8970837783dcf2f',1,'ctrl::GreyBoxEstimator::Params']]],
+  ['lm_5fnu_7',['lm_nu',['../structctrl_1_1GreyBoxEstimator_1_1Params.html#acd37a0b0a7699975766909ac8790f416',1,'ctrl::GreyBoxEstimator::Params']]],
+  ['lo_8',['lo',['../structctrl_1_1LinguisticVariable.html#aee24abd6bc5fe725390a8205365cecfc',1,'ctrl::LinguisticVariable']]],
+  ['lower_9',['lower',['../structctrl_1_1AutoTunerParams.html#a1b42cdf42baa9aa3b98956c4a7949169',1,'ctrl::AutoTunerParams::lower'],['../structctrl_1_1BayesOptParams.html#a99b33e25930ec2102792b09f85d6bd53',1,'ctrl::BayesOptParams::lower'],['../structctrl_1_1GreyBoxEstimator_1_1Params.html#a08cd8015af427e9c6030d6f51a9f2312',1,'ctrl::GreyBoxEstimator::Params::lower']]],
+  ['lp_10',['Lp',['../structctrl_1_1ILC_1_1Params.html#a42152ceb1534a0dec9f186ac6ac9579b',1,'ctrl::ILC::Params']]],
+  ['lpfcutoff_11',['lpfCutoff',['../structctrl_1_1ExtremumSeekerParams.html#a48488068e06ea9a3555f45bf13a52cc1',1,'ctrl::ExtremumSeekerParams']]],
+  ['lr_12',['lr',['../structctrl_1_1NeuralPID_1_1Params.html#a7a0e49c24fe9592e24e2b19432cf7b4d',1,'ctrl::NeuralPID::Params']]]
 ];

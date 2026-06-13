@@ -178,7 +178,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00086" data-start="{" data-end="}">
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classctrl_1_1SmithPredictor.html#a8644acd3ee741f207e3785b4c47a30ef">   86</a></span><span class="keywordtype">double</span> SmithPredictor::compute(<span class="keywordtype">double</span> error)</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>{</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordflow">if</span> (!std::isfinite(error)) <span class="keywordflow">return</span> 0.0;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordflow">if</span> (!std::isfinite(error)) <span class="keywordflow">return</span> u_prev_.rows() &gt; 0 ? u_prev_(0) : 0.0;</div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="comment">// Step 1: delay-free model output (uses u[k-1] for D term)</span></div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> y_model = (model_.C * x_model_ + model_.D * u_prev_)(0);</div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>

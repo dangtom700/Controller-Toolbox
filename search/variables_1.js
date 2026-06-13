@@ -9,6 +9,7 @@ var searchData=
   ['b_5fweight_6',['b_weight',['../structctrl_1_1PIDParams.html#aa0cffc00a3934a9687f65bee5c56e97e',1,'ctrl::PIDParams']]],
   ['bestcost_7',['bestCost',['../structctrl_1_1OptimTuneResult.html#ab1a576498055639839b0056dfc7bdd58',1,'ctrl::OptimTuneResult']]],
   ['bestparams_8',['bestParams',['../structctrl_1_1OptimTuneResult.html#a40cce9397c06a210f8ded80bb22e13eb',1,'ctrl::OptimTuneResult']]],
-  ['bk_9',['Bk',['../structctrl_1_1HinfResult.html#a3ff250afb69519206a4fee0bf5e50e9b',1,'ctrl::HinfResult']]],
-  ['bufferlen_10',['bufferLen',['../structctrl_1_1AdaptiveSPParams.html#a0adf65f61c0becc397d781a74474932c',1,'ctrl::AdaptiveSPParams']]]
+  ['beta_9',['beta',['../structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#abe7eab83bee2bc85709f043e84ecd210',1,'ctrl::RecursiveGreyBoxEstimator::Params']]],
+  ['bk_10',['Bk',['../structctrl_1_1HinfResult.html#a3ff250afb69519206a4fee0bf5e50e9b',1,'ctrl::HinfResult']]],
+  ['bufferlen_11',['bufferLen',['../structctrl_1_1AdaptiveSPParams.html#a0adf65f61c0becc397d781a74474932c',1,'ctrl::AdaptiveSPParams']]]
 ];

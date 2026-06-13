@@ -183,10 +183,11 @@ Protected Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Abstract interface for all discrete-time controllers. </p>
+<p><b>NaN-guard fleet contract (hold-last):</b> Every <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step - scalar SISO interface.">compute()</a> override that receives a non-finite input <em>must</em> return the last finite output (u_prev_) and leave all internal states (integrators, ESO, estimators) unchanged. Returning 0.0 or an unguarded NaN on bad sensor data is a safety violation - a sudden zero can be more dangerous than holding the previous command. The one exception is MRAC/L1Adaptive which take y_plant directly; they also hold the last output on a non-finite measurement.</p>
 <p>All implementations operate at a fixed sample time Ts and are called once per step. The interface covers both SISO (<a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8" title="Advance one sample step - scalar SISO interface.">compute()</a>) and MIMO (<a class="el" href="classctrl_1_1IController.html#a9d81dd5427e094d72906d54dd5e6548e" title="Advance one sample step - vector MIMO interface.">computeVec()</a>) controllers, bumpless initialisation for supervisory switching, and a runtime health query used by <a class="el" href="classctrl_1_1ControllerStack.html" title="Composite controller that dispatches to multiple IController entries.">ControllerStack</a> to implement automatic fallback chains.</p>
 <dl class="section see"><dt>See also</dt><dd>MATLAB Control System Toolbox discrete controller pattern. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00037">37</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00029">29</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a209dd6532b22278f93430a0757aae4c7" name="a209dd6532b22278f93430a0757aae4c7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a209dd6532b22278f93430a0757aae4c7">&#9670;&#160;</a></span>~IController()</h2>
@@ -248,7 +249,7 @@ Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00153">153</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00145">145</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
 
 </div>
 </div>
@@ -279,7 +280,7 @@ Protected Member Functions</h2></td></tr>
 <p>Lifetime-safe overload - controller co-owns the observer via shared_ptr. </p>
 <p>Prevents dangling-pointer UB when the observer is held only from Python (where the C++ raw pointer has no reference from the caller's side). Replaces any previously attached raw-pointer observer. </p>
 
-<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00162">162</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00154">154</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
 
 </div>
 </div>
@@ -331,7 +332,7 @@ Protected Member Functions</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classctrl_1_1AntiWindupWrapper.html#a60e4dbec760f966b3c255097e9bf44bc">ctrl::AntiWindupWrapper</a>, <a class="el" href="classctrl_1_1DiscretePID.html#affdf4f330e63da4691d4b462b02d197e">ctrl::DiscretePID</a>, and <a class="el" href="classctrl_1_1FuzzyPID.html#a6159b3bfa98769ce9415ea34da9adeb8">ctrl::FuzzyPID</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00100">100</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00092">92</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
 
 </div>
 </div>
@@ -374,7 +375,7 @@ Protected Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classctrl_1_1AdaptiveSmithPredictor.html#a5fffbe47d543847b9b962705981de929">ctrl::AdaptiveSmithPredictor</a>, <a class="el" href="classctrl_1_1AntiWindupWrapper.html#a898ccbdcb7f81cff249be6ae9c7278c5">ctrl::AntiWindupWrapper</a>, <a class="el" href="classctrl_1_1CBFSafetyFilter.html#a31f31a73117985ba0a49af44378bd57d">ctrl::CBFSafetyFilter</a>, <a class="el" href="classctrl_1_1CEMController.html#a1b2806a819fb062c8d64323ab9122898">ctrl::CEMController</a>, <a class="el" href="classctrl_1_1ControllerStack.html#aa00ac88e91ad03fd85c302f9a8171048">ctrl::ControllerStack</a>, <a class="el" href="classctrl_1_1DiscreteADRC.html#ad8f9b7506b5f24a47e9c4eb10acabed1">ctrl::DiscreteADRC</a>, <a class="el" href="classctrl_1_1DiscreteMPC.html#a934980cf4c18a14707cb4392feafc63c">ctrl::DiscreteMPC</a>, <a class="el" href="classctrl_1_1DiscretePID.html#aaadf5f19b1d5282ad380d56435b666b2">ctrl::DiscretePID</a>, <a class="el" href="classctrl_1_1DiscreteSMC.html#a7a2d1fb5f0d6a93ac17a4374c2a442e0">ctrl::DiscreteSMC</a>, <a class="el" href="classctrl_1_1SuperTwistingSMC.html#a8d37fd835fc00be3b448042372a5c90c">ctrl::SuperTwistingSMC</a>, <a class="el" href="classctrl_1_1DynaController.html#af57cc19b9b1322721a58c5452bde0a27">ctrl::DynaController</a>, <a class="el" href="classctrl_1_1FeedbackLinearisationController.html#a47fe6716adb2ba790a5640199d5a1667">ctrl::FeedbackLinearisationController</a>, <a class="el" href="classctrl_1_1FuzzyPD.html#ac90e354959be8429c3a2164e7b0dbaef">ctrl::FuzzyPD</a>, <a class="el" href="classctrl_1_1FuzzyPID.html#a233ae6b5435670b4f9c31da76e955739">ctrl::FuzzyPID</a>, <a class="el" href="classctrl_1_1GainScheduledController.html#a2472070a399f513819c88b5e21fda8ea">ctrl::GainScheduledController</a>, <a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#a78b29e051e0d1bade4f3c8106da8e491">ctrl::GeneralizedPredictiveController</a>, <a class="el" href="classctrl_1_1NeuralPID.html#ad27be20c67fa0b2d769b81723f95fe08">ctrl::NeuralPID</a>, <a class="el" href="classctrl_1_1NonlinearMPC.html#ab6d66a825136f14951ae0592cf382014">ctrl::NonlinearMPC</a>, <a class="el" href="classctrl_1_1RepetitiveController.html#a8984d8d408e6c3bd1b49da0771598920">ctrl::RepetitiveController</a>, <a class="el" href="classctrl_1_1ScenarioMPC.html#a43570373d1262856e3731ac5166a769f">ctrl::ScenarioMPC</a>, <a class="el" href="classctrl_1_1SmithPredictor.html#a8644acd3ee741f207e3785b4c47a30ef">ctrl::SmithPredictor</a>, <a class="el" href="classctrl_1_1TubeMPC.html#acd0f4ccfdcd7351c76061fea104554b1">ctrl::TubeMPC</a>, <a class="el" href="classctrl_1_1FeedforwardController.html#a8423004a3b54eedf74b573510cdd4466">ctrl::FeedforwardController</a>, <a class="el" href="classctrl_1_1ComputationalDelayWrapper.html#a26e6df59e4eb123c15e791c5e39f20fe">ctrl::ComputationalDelayWrapper</a>, <a class="el" href="classctrl_1_1DiscreteHinf.html#a69fd61f01e7282265cda542324062d7a">ctrl::DiscreteHinf</a>, <a class="el" href="classctrl_1_1ExtremumSeeker.html#abfb8c777f50e3db25fd6b12d262026d1">ctrl::ExtremumSeeker</a>, <a class="el" href="classctrl_1_1DiscreteLeadLag.html#a88ef9af7288d23f7deddfc82edd610fc">ctrl::DiscreteLeadLag</a>, <a class="el" href="classctrl_1_1L1AdaptiveController.html#a1a8bb49ec17c5f92f7534fd27914dcd2">ctrl::L1AdaptiveController</a>, <a class="el" href="classctrl_1_1MRACController.html#ab71bd7a2d3e05ae0722fe9169e8df813">ctrl::MRACController</a>, and <a class="el" href="classctrl_1_1LQRAdapter.html#aa98cd8c81bd08aa25a099ea9c7c25cf9">ctrl::LQRAdapter</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="IController_8h_source.html#l00064">computeVec()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="IController_8h_source.html#l00056">computeVec()</a>.</p>
 
 </div>
 </div>
@@ -420,7 +421,7 @@ Protected Member Functions</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classctrl_1_1LQRAdapter.html#a039bebf87ac2169e9a6ab1bd42ce3da6">ctrl::LQRAdapter</a>, <a class="el" href="classctrl_1_1FeedforwardController.html#adf044219b7e877b7a63f674a02c98fe5">ctrl::FeedforwardController</a>, and <a class="el" href="classctrl_1_1DiscreteHinf.html#a99c9c3b562b2f2a2c03c8dfbc63b5964">ctrl::DiscreteHinf</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00064">64</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00056">56</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
 
 <p class="reference">References <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8">compute()</a>.</p>
 
@@ -451,7 +452,7 @@ Protected Member Functions</h2></td></tr>
 
 <p>Detach the current observer (if any). </p>
 
-<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00169">169</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00161">161</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
 
 </div>
 </div>
@@ -485,7 +486,7 @@ Protected Member Functions</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classctrl_1_1DiscretePID.html#a84d600b24d5cdfb545ca5a1204c9a9b4">ctrl::DiscretePID</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00134">134</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00126">126</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
 
 </div>
 </div>
@@ -514,7 +515,7 @@ Protected Member Functions</h2></td></tr>
 
 <p><code>true</code> if an observer is currently attached. </p>
 
-<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00172">172</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00164">164</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
 
 </div>
 </div>
@@ -553,7 +554,7 @@ Protected Member Functions</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classctrl_1_1AntiWindupWrapper.html#a14293d537fa51a488e181d78ac42c4d8">ctrl::AntiWindupWrapper</a>, <a class="el" href="classctrl_1_1LQRAdapter.html#a9825d348f0818b3c4e850596c13beb3b">ctrl::LQRAdapter</a>, <a class="el" href="classctrl_1_1DiscreteMPC.html#aa5db42f01b9bf5a603608c37964085e0">ctrl::DiscreteMPC</a>, <a class="el" href="classctrl_1_1GeneralizedPredictiveController.html#a6f4220ef0b13ee07e868518c3c607a33">ctrl::GeneralizedPredictiveController</a>, <a class="el" href="classctrl_1_1ScenarioMPC.html#ab27cf0a38c2754e29e46f69c1b3c9f8b">ctrl::ScenarioMPC</a>, and <a class="el" href="classctrl_1_1TubeMPC.html#a4d9bf2383a1fddc1f8cd6a142721e2ca">ctrl::TubeMPC</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00120">120</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00112">112</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
 
 </div>
 </div>
@@ -583,9 +584,9 @@ Protected Member Functions</h2></td></tr>
 <p>Human-readable controller identifier. </p>
 <p>Override in each subclass. </p>
 
-<p>Reimplemented in <a class="el" href="classctrl_1_1CBFSafetyFilter.html#ad9c458fad3025001c98367a4744ec6c0">ctrl::CBFSafetyFilter</a>, <a class="el" href="classctrl_1_1CEMController.html#a75a572885133fb0d4465255739d1e927">ctrl::CEMController</a>, <a class="el" href="classctrl_1_1DynaController.html#ab28fc183fc80997be1a834c5917dc34f">ctrl::DynaController</a>, <a class="el" href="classctrl_1_1L1AdaptiveController.html#aecb75e7d6d109d1981c702b80a6a33cb">ctrl::L1AdaptiveController</a>, <a class="el" href="classctrl_1_1NeuralPID.html#a3c2132d39bb4f6533453c45b8b35a869">ctrl::NeuralPID</a>, and <a class="el" href="classctrl_1_1ScenarioMPC.html#a4e61e9d6c64d02993132b79c7e3e347c">ctrl::ScenarioMPC</a>.</p>
+<p>Reimplemented in <a class="el" href="classctrl_1_1CBFSafetyFilter.html#ad9c458fad3025001c98367a4744ec6c0">ctrl::CBFSafetyFilter</a>, <a class="el" href="classctrl_1_1CEMController.html#a75a572885133fb0d4465255739d1e927">ctrl::CEMController</a>, <a class="el" href="classctrl_1_1DynaController.html#ab28fc183fc80997be1a834c5917dc34f">ctrl::DynaController</a>, <a class="el" href="classctrl_1_1HybridMPC.html#a4d2a5551ae2312668ea82ed56bd2de22">ctrl::HybridMPC</a>, <a class="el" href="classctrl_1_1L1AdaptiveController.html#aecb75e7d6d109d1981c702b80a6a33cb">ctrl::L1AdaptiveController</a>, <a class="el" href="classctrl_1_1NeuralPID.html#a3c2132d39bb4f6533453c45b8b35a869">ctrl::NeuralPID</a>, and <a class="el" href="classctrl_1_1ScenarioMPC.html#a4e61e9d6c64d02993132b79c7e3e347c">ctrl::ScenarioMPC</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00137">137</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00129">129</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="ControllerStack_8cpp_source.html#l00015">ctrl::ControllerStack::addController()</a>, <a class="el" href="ControllerStack_8cpp_source.html#l00040">ctrl::ControllerStack::setActive()</a>, and <a class="el" href="ControllerStack_8cpp_source.html#l00046">ctrl::ControllerStack::setWeight()</a>.</p>
 
@@ -635,7 +636,7 @@ Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00185">185</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00177">177</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
 
 <p class="reference">References <a class="el" href="IControllerObserver_8h_source.html#l00054">ctrl::IControllerObserver::onCompute()</a>.</p>
 
@@ -669,11 +670,11 @@ Protected Member Functions</h2></td></tr>
 <p>Fire the observer's onReset() callback (if attached). </p>
 <p>Call this at the end of every <a class="el" href="classctrl_1_1IController.html#ac69ef6691d5831cda3adcdc59971fcac" title="Reset all internal states (integrators, delay buffers, estimators).">reset()</a> override. </p>
 
-<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00205">205</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00197">197</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
 
 <p class="reference">References <a class="el" href="IControllerObserver_8h_source.html#l00077">ctrl::IControllerObserver::onReset()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="AdaptiveSmithPredictor_8cpp_source.html#l00121">ctrl::AdaptiveSmithPredictor::reset()</a>, <a class="el" href="AntiWindupWrapper_8h_source.html#l00135">ctrl::AntiWindupWrapper::reset()</a>, <a class="el" href="ComputationalDelayWrapper_8h_source.html#l00087">ctrl::ComputationalDelayWrapper::reset()</a>, <a class="el" href="ControllerStack_8cpp_source.html#l00166">ctrl::ControllerStack::reset()</a>, <a class="el" href="DiscretePID_8cpp_source.html#l00053">ctrl::DiscretePID::reset()</a>, <a class="el" href="DynaController_8cpp_source.html#l00060">ctrl::DynaController::reset()</a>, <a class="el" href="FeedforwardController_8h_source.html#l00096">ctrl::FeedforwardController::reset()</a>, <a class="el" href="GainScheduledController_8h_source.html#l00203">ctrl::GainScheduledController::reset()</a>, <a class="el" href="NonlinearMPC_8cpp_source.html#l00230">ctrl::NonlinearMPC::reset()</a>, <a class="el" href="ScenarioMPC_8cpp_source.html#l00218">ctrl::ScenarioMPC::reset()</a>, and <a class="el" href="TubeMPC_8cpp_source.html#l00301">ctrl::TubeMPC::reset()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="AdaptiveSmithPredictor_8cpp_source.html#l00121">ctrl::AdaptiveSmithPredictor::reset()</a>, <a class="el" href="AntiWindupWrapper_8h_source.html#l00135">ctrl::AntiWindupWrapper::reset()</a>, <a class="el" href="ComputationalDelayWrapper_8h_source.html#l00087">ctrl::ComputationalDelayWrapper::reset()</a>, <a class="el" href="ControllerStack_8cpp_source.html#l00166">ctrl::ControllerStack::reset()</a>, <a class="el" href="DiscretePID_8cpp_source.html#l00053">ctrl::DiscretePID::reset()</a>, <a class="el" href="DynaController_8cpp_source.html#l00060">ctrl::DynaController::reset()</a>, <a class="el" href="FeedforwardController_8h_source.html#l00096">ctrl::FeedforwardController::reset()</a>, <a class="el" href="GainScheduledController_8h_source.html#l00203">ctrl::GainScheduledController::reset()</a>, <a class="el" href="NonlinearMPC_8cpp_source.html#l00230">ctrl::NonlinearMPC::reset()</a>, <a class="el" href="ScenarioMPC_8cpp_source.html#l00219">ctrl::ScenarioMPC::reset()</a>, and <a class="el" href="TubeMPC_8cpp_source.html#l00302">ctrl::TubeMPC::reset()</a>.</p>
 
 </div>
 </div>
@@ -721,7 +722,7 @@ Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00219">219</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00211">211</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
 
 <p class="reference">References <a class="el" href="IControllerObserver_8h_source.html#l00093">ctrl::IControllerObserver::onState()</a>.</p>
 
@@ -772,7 +773,7 @@ Protected Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00195">195</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="IController_8h_source.html#l00187">187</a> of file <a class="el" href="IController_8h_source.html">IController.h</a>.</p>
 
 <p class="reference">References <a class="el" href="IControllerObserver_8h_source.html#l00065">ctrl::IControllerObserver::onComputeVec()</a>.</p>
 

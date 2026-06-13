@@ -7,5 +7,9 @@ var searchData=
   ['gaussianprocess_2eh_4',['GaussianProcess.h',['../GaussianProcess_8h.html',1,'']]],
   ['generalizedpredictivecontrol_2ecpp_5',['GeneralizedPredictiveControl.cpp',['../GeneralizedPredictiveControl_8cpp.html',1,'']]],
   ['generalizedpredictivecontrol_2eh_6',['GeneralizedPredictiveControl.h',['../GeneralizedPredictiveControl_8h.html',1,'']]],
-  ['gradientprojectionqp_2eh_7',['GradientProjectionQP.h',['../GradientProjectionQP_8h.html',1,'']]]
+  ['gpresidualmodel_2ecpp_7',['GPResidualModel.cpp',['../GPResidualModel_8cpp.html',1,'']]],
+  ['gpresidualmodel_2eh_8',['GPResidualModel.h',['../GPResidualModel_8h.html',1,'']]],
+  ['gradientprojectionqp_2eh_9',['GradientProjectionQP.h',['../GradientProjectionQP_8h.html',1,'']]],
+  ['greyboxestimator_2ecpp_10',['GreyBoxEstimator.cpp',['../GreyBoxEstimator_8cpp.html',1,'']]],
+  ['greyboxestimator_2eh_11',['GreyBoxEstimator.h',['../GreyBoxEstimator_8h.html',1,'']]]
 ];

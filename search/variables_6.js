@@ -9,5 +9,6 @@ var searchData=
   ['gamma_5fy_6',['gamma_y',['../structctrl_1_1MRACParams.html#a7a9b1586a85969cc3d0bcb9a470037b9',1,'ctrl::MRACParams']]],
   ['gammainit_7',['gammaInit',['../structctrl_1_1HinfParams.html#aee414c159172c24578519d41446add33',1,'ctrl::HinfParams']]],
   ['gammatol_8',['gammaTol',['../structctrl_1_1HinfParams.html#a9f5007efff143b693325cc647e3eb976',1,'ctrl::HinfParams']]],
-  ['gp_9',['gp',['../structctrl_1_1BayesOptParams.html#aaf769937a54ce6796880822ab65890c7',1,'ctrl::BayesOptParams']]]
+  ['gp_9',['gp',['../structctrl_1_1BayesOptParams.html#aaf769937a54ce6796880822ab65890c7',1,'ctrl::BayesOptParams::gp'],['../structctrl_1_1GPResidualModel_1_1Params.html#a7917f907ee4292bfac23bc3526f7fac2',1,'ctrl::GPResidualModel::Params::gp'],['../structctrl_1_1HybridModelTrainer_1_1Params.html#a2d5d9246f15fef08c1bef711534df62a',1,'ctrl::HybridModelTrainer::Params::gp']]],
+  ['gp_5fmean_10',['gp_mean',['../structctrl_1_1GPResidualModel_1_1Prediction.html#acc96836ac31c3a513f286fac76561619',1,'ctrl::GPResidualModel::Prediction']]]
 ];

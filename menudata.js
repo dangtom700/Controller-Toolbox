@@ -146,7 +146,15 @@ var menudata={children:[
 {text:"x",url:"functions_vars_x.html#index_x"},
 {text:"y",url:"functions_vars_y.html#index_y"},
 {text:"z",url:"functions_vars_z.html#index_z"}]},
-{text:"Typedefs",url:"functions_type.html"},
+{text:"Typedefs",url:"functions_type.html",children:[
+{text:"a",url:"functions_type.html#index_a"},
+{text:"c",url:"functions_type.html#index_c"},
+{text:"d",url:"functions_type.html#index_d"},
+{text:"g",url:"functions_type.html#index_g"},
+{text:"m",url:"functions_type.html#index_m"},
+{text:"o",url:"functions_type.html#index_o"},
+{text:"p",url:"functions_type.html#index_p"},
+{text:"s",url:"functions_type.html#index_s"}]},
 {text:"Enumerations",url:"functions_enum.html"},
 {text:"Related Symbols",url:"functions_rela.html"}]}]},
 {text:"Files",url:"files.html",children:[

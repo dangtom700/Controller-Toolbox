@@ -229,7 +229,7 @@ Controller Inventory</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>Identification</b>   </td><td class="markdownTableBodyNone">FOPDTIdentifier, SOPDTIdentifier + Rivera 1986 IMC, RecursiveLeastSquares, SubspaceID (N4SID), SINDy (STLS sparse regression), KoopmanEDMD (PolyDeg/RBF dictionary)    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>ML / Data-driven</b>   </td><td class="markdownTableBodyNone">GaussianProcess (SE kernel, Cholesky, fixed-budget), EchoStateNetwork (spectral-radius reservoir), NeuralPID (3→n_h→3 online backprop), CEMController (elite-sample stochastic MPC), DynaController (Sutton Dyna MBRL + SINDy model), ILC (P-type / D-type / norm-optimal), DeePC (ADMM data-enabled predictive control), ScenarioMPC, BayesianOptimizer    </td></tr>
+<td class="markdownTableBodyNone"><b>ML / Data-driven</b>   </td><td class="markdownTableBodyNone">GaussianProcess (SE kernel, Cholesky, fixed-budget), EchoStateNetwork (spectral-radius reservoir), NeuralPID (3-&gt;n_h-&gt;3 online backprop), CEMController (elite-sample stochastic MPC), DynaController (Sutton Dyna MBRL + SINDy model), ILC (P-type / D-type / norm-optimal), DeePC (ADMM data-enabled predictive control), ScenarioMPC, BayesianOptimizer    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>Model utilities</b>   </td><td class="markdownTableBodyNone">LinearisationHelper (jacobianX/U, lineariseAtPoint ZOH), BalancedTruncation (Hinf bound), ZeroPhaseTrackingFilter (ZPETC + transmissionZeros), GapMetric (chordal SISO + subspace MIMO)    </td></tr>
 <tr class="markdownTableRowEven">
@@ -280,34 +280,34 @@ Tested Compilers</h1>
 <h1><a class="anchor" id="autotoc_md26"></a>
 Project Status</h1>
 <p><b>Baseline (Part 51 - 2026-06-12, UNVERIFIED until next clean <code>run.py</code>):</b> C++ case studies: Boiler 216/216 . Tug 72/72 . Solar 70/70 . Humidification 75/75 . ActiveSuspension 75/75 . BuckBoost 60/60 . SolarCooker 60/60 . SOTEC 60/60 . SMISMO 60/60. Python-only (Phase 6): DrillString 85/85 . WindWave 80/80 . EHFS 60/60 . Firefighting 60/60 . BTMS 60/60 . SurfaceShip 60/60. <code>bug_report.txt</code>: 0 blocks expected after a clean run (<code>safe_phrases</code> list in <code>run.py</code> suppresses all known benign messages).</p>
-<p><b>Part 51 (2026-06-12) — DAE architecture (P1/P2/P3):</b></p><ul>
+<p><b>Part 51 (2026-06-12) - DAE architecture (P1/P2/P3):</b></p><ul>
 <li><code>DAESystem</code> struct (<code><a class="el" href="PlantModel_8h.html" title="Discrete-time plant model representations and utilities.">lib/PlantModel.h</a>/.cpp</code>): Index-1 semi-explicit DAE with <code>f</code> (differential), <code>g</code> (algebraic), <code>h</code> (output) functors; <code>n_diff</code>/<code>n_alg</code>/<code>Ts</code> fields.</li>
 <li><code>consistentInit</code>: Newton-Raphson (LDLT) solving <code>g(x1,x2,u)=0</code> for <code>x2</code>.</li>
 <li><code>dae2ode</code>: discrete step function via forward Euler on <code>x1</code> + Newton projection on <code>x2</code>.</li>
-<li><code>c2d(DAESystem, x1_op, x2_op, u_op, Ts, method)</code>: Index-1 algebraic elimination (<code>A_red = A11 - A12*G2⁻¹*G1</code>), then ZOH/Tustin. Throws <code>runtime_error</code> if G2 singular.</li>
+<li><code>c2d(DAESystem, x1_op, x2_op, u_op, Ts, method)</code>: Index-1 algebraic elimination (<code>A_red = A11 - A12*G2^-^1*G1</code>), then ZOH/Tustin. Throws <code>runtime_error</code> if G2 singular.</li>
 <li>DAE-aware EKF (<code><a class="el" href="ExtendedKalmanFilter_8h.html" title="Discrete-time Extended Kalman Filter (EKF) for nonlinear systems.">lib/ExtendedKalmanFilter.h</a>/.cpp</code>): <code>setAlgebraicConstraint(g, n_diff, n_alg)</code> projects <code>x2</code> block via Newton after each <code>update()</code>; covariance projected as &lsquo;P = J_proj*P*J_proj&rsquo;<code>.</code></li>
 <li><code>pybind11 bindings:</code>DAESystem<code>,</code>consistent_init<code>,</code>dae2ode<code>,</code>dae_c2d<code>,</code>set_algebraic_constraint<code>on EKF.</code></li>
-<li><code>7 Catch2 tests:</code>[dae_system]<code>×3,</code>[dae_c2d]<code>×2,</code>[dae_ekf]` ×2.</li>
+<li><code>7 Catch2 tests:</code>[dae_system]<code>*3,</code>[dae_c2d]<code>*2,</code>[dae_ekf]` *2.</li>
 </ul>
-<p><b>Part 49 (2026-06-11) — Nonlinear Surface Ship Manoeuvring Control (Python-only):</b></p><ul>
+<p><b>Part 49 (2026-06-11) - Nonlinear Surface Ship Manoeuvring Control (Python-only):</b></p><ul>
 <li>3-DOF MMG model, 19 SRUKF-identified parameters (Meng 2025 Table 5), [u,v,r,ψ,x,y], RK4 Ts=0.08s.</li>
-<li>12 controllers × 5 scenarios = 60 runs. Includes ASMC (paper cascade + disturbance FF), MPC (ZOH [ψ,r] linearisation), LQR (Bryson DARE), MRAC, L1Adaptive, ADRC, GainScheduled, NeuralPID, ILC.</li>
+<li>12 controllers * 5 scenarios = 60 runs. Includes ASMC (paper cascade + disturbance FF), MPC (ZOH [ψ,r] linearisation), LQR (Bryson DARE), MRAC, L1Adaptive, ADRC, GainScheduled, NeuralPID, ILC.</li>
 </ul>
-<p><b>Part 48 (2026-06-11) — Air-Cooled Battery Thermal Management System (Python-only):</b></p><ul>
+<p><b>Part 48 (2026-06-11) - Air-Cooled Battery Thermal Management System (Python-only):</b></p><ul>
 <li>1-D transient HX model: N=9 cells, 10 channels, J/U/L flow-pattern switching, Forward Euler Ts=1s.</li>
-<li>12 controllers × 5 scenarios = 60 runs.</li>
+<li>12 controllers * 5 scenarios = 60 runs.</li>
 </ul>
-<p><b>Part 46 (2026-06-10) — High-Altitude Aerial Firefighting Bag Drop (Python-only):</b></p><ul>
+<p><b>Part 46 (2026-06-10) - High-Altitude Aerial Firefighting Bag Drop (Python-only):</b></p><ul>
 <li>3D trajectory [x,y,z,vx,vy,vz], drag+gravity+wind, RK4 Ts=0.05s. Primary metric: CEP (50th-percentile radial error). N_mc=30 Monte-Carlo trajectories per planner/scenario.</li>
-<li>12 planners × 5 scenarios = 60 runs.</li>
+<li>12 planners * 5 scenarios = 60 runs.</li>
 </ul>
-<p><b>Part 45 (2026-06-10) — Electro-Hydraulic Force Servo Systems (Python-only):</b></p><ul>
+<p><b>Part 45 (2026-06-10) - Electro-Hydraulic Force Servo Systems (Python-only):</b></p><ul>
 <li>5-state EHFS [P_A, P_B, x_v, v_p, x_p], servo valve + cylinder, RK4 Ts=0.5ms.</li>
-<li>12 controllers × 5 scenarios = 60 runs. Includes FeedbackLinearisation, LQR, ADRC (omega_o=800, omega_o*Ts=0.40&lt;0.5), GainScheduled.</li>
+<li>12 controllers * 5 scenarios = 60 runs. Includes FeedbackLinearisation, LQR, ADRC (omega_o=800, omega_o*Ts=0.40&lt;0.5), GainScheduled.</li>
 </ul>
-<p><b>Part 44 (2026-06-10) — SMISMO C++ case study reimplemented:</b></p><ul>
+<p><b>Part 44 (2026-06-10) - SMISMO C++ case study reimplemented:</b></p><ul>
 <li>Separate Meter In Separate Meter Out hydraulic cylinder (Chen 2018 + Liu 2009). 8-state RK4, dual PDCV spool dynamics, Stribeck friction, 20 bar backpressure regulation.</li>
-<li>12 controllers × 5 scenarios = 60 runs, target <code>smismo_sim</code>. Recreated <code>test_smismo_regression.cpp</code>.</li>
+<li>12 controllers * 5 scenarios = 60 runs, target <code>smismo_sim</code>. Recreated <code>test_smismo_regression.cpp</code>.</li>
 </ul>
 <p>Details in docs/cumulative_bug_report.md. Real-time deployment guidance in <a class="el" href="md_docs_2DEPLOYMENT.html">docs/DEPLOYMENT.md</a>. </p>
 </div></div><!-- PageDoc -->

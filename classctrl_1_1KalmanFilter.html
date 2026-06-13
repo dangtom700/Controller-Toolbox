@@ -115,11 +115,23 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab2f7253fb0abf98aa9cdaa8fc5ee1b1b" id="r_ab2f7253fb0abf98aa9cdaa8fc5ee1b1b"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#ab2f7253fb0abf98aa9cdaa8fc5ee1b1b">sampleTime</a> () const</td></tr>
 <tr class="memdesc:ab2f7253fb0abf98aa9cdaa8fc5ee1b1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
 <tr class="separator:ab2f7253fb0abf98aa9cdaa8fc5ee1b1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb1d5439c1a77c5184565c49d2052c6e" id="r_afb1d5439c1a77c5184565c49d2052c6e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#afb1d5439c1a77c5184565c49d2052c6e">enableMismatchDetection</a> (const <a class="el" href="structctrl_1_1MismatchDetectorParams.html">MismatchDetectorParams</a> &amp;params={})</td></tr>
+<tr class="memdesc:afb1d5439c1a77c5184565c49d2052c6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable real-time model-plant mismatch detection on the innovation sequence (D1).  <br /></td></tr>
+<tr class="separator:afb1d5439c1a77c5184565c49d2052c6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73fd4b84b7a623d79923d2b28297f504" id="r_a73fd4b84b7a623d79923d2b28297f504"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#a73fd4b84b7a623d79923d2b28297f504">mismatchDetected</a> () const</td></tr>
+<tr class="memdesc:a73fd4b84b7a623d79923d2b28297f504"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>true</code> if the CUSUM statistic has exceeded the detection threshold.  <br /></td></tr>
+<tr class="separator:a73fd4b84b7a623d79923d2b28297f504"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a085be1933d58f28d519a208a4da798ea" id="r_a085be1933d58f28d519a208a4da798ea"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#a085be1933d58f28d519a208a4da798ea">mismatchScore</a> () const</td></tr>
+<tr class="memdesc:a085be1933d58f28d519a208a4da798ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current CUSUM score: max(C+, C-) from the innovation CUSUM chart.  <br /></td></tr>
+<tr class="separator:a085be1933d58f28d519a208a4da798ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a843f0ce542ac5327dcd776c0411e388a" id="r_a843f0ce542ac5327dcd776c0411e388a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KalmanFilter.html#a843f0ce542ac5327dcd776c0411e388a">resetMismatchDetector</a> ()</td></tr>
+<tr class="memdesc:a843f0ce542ac5327dcd776c0411e388a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset mismatch detector accumulators (does not disable detection).  <br /></td></tr>
+<tr class="separator:a843f0ce542ac5327dcd776c0411e388a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Discrete-time Linear Kalman Filter. </p>
 
-<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00054">54</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00055">55</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a226052d8a01efa2589f81e7c52964d0c" name="a226052d8a01efa2589f81e7c52964d0c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a226052d8a01efa2589f81e7c52964d0c">&#9670;&#160;</a></span>KalmanFilter()</h2>
@@ -202,7 +214,104 @@ Public Member Functions</h2></td></tr>
 
 <p>Current error covariance P[k|k] (n * n). </p>
 
-<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00118">118</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00119">119</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
+
+</div>
+</div>
+<a id="afb1d5439c1a77c5184565c49d2052c6e" name="afb1d5439c1a77c5184565c49d2052c6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb1d5439c1a77c5184565c49d2052c6e">&#9670;&#160;</a></span>enableMismatchDetection()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ctrl::KalmanFilter::enableMismatchDetection </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structctrl_1_1MismatchDetectorParams.html">MismatchDetectorParams</a> &amp;&#160;</td>
+          <td class="paramname"><em>params</em> = <code>{}</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Enable real-time model-plant mismatch detection on the innovation sequence (D1). </p>
+<p>After enabling, every <code><a class="el" href="classctrl_1_1KalmanFilter.html#a555b459680345323b9670665dfa9417c" title="Update step - incorporate a new measurement.">update()</a></code> / <code><a class="el" href="classctrl_1_1KalmanFilter.html#a3ef0abd00aa2240bc3c065f19ea34b52" title="Combined predict + update - most common usage pattern.">step()</a></code> call feeds the current innovation <code>y - C*x_pred - D*u</code> into a CUSUM chart. Tune <code>params.sigma</code> to the expected innovation RMS when the model is correct (see <a class="el" href="MismatchDetector_8h.html" title="Real-time model-plant mismatch detection via CUSUM on innovation sequence (D1).">MismatchDetector.h</a> for guidance).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">params</td><td>CUSUM parameters (sigma, k_cusum, h_threshold). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00133">133</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
+
+</div>
+</div>
+<a id="a73fd4b84b7a623d79923d2b28297f504" name="a73fd4b84b7a623d79923d2b28297f504"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73fd4b84b7a623d79923d2b28297f504">&#9670;&#160;</a></span>mismatchDetected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ctrl::KalmanFilter::mismatchDetected </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><code>true</code> if the CUSUM statistic has exceeded the detection threshold. </p>
+<p>Always <code>false</code> when <code><a class="el" href="classctrl_1_1KalmanFilter.html#afb1d5439c1a77c5184565c49d2052c6e" title="Enable real-time model-plant mismatch detection on the innovation sequence (D1).">enableMismatchDetection()</a></code> has not been called. Remains <code>true</code> until the detector is reset or re-enabled. </p>
+
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00144">144</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
+
+</div>
+</div>
+<a id="a085be1933d58f28d519a208a4da798ea" name="a085be1933d58f28d519a208a4da798ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a085be1933d58f28d519a208a4da798ea">&#9670;&#160;</a></span>mismatchScore()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ctrl::KalmanFilter::mismatchScore </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Current CUSUM score: max(C+, C-) from the innovation CUSUM chart. </p>
+<p>Returns 0.0 when detection is not enabled. Compare against <code>params.h_threshold * params.sigma</code> for a threshold-relative reading. </p>
+
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00155">155</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -234,7 +343,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::A</a>, and <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::B</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="KalmanFilter_8cpp_source.html#l00068">step()</a>, and <a class="el" href="KalmanFilter_8cpp_source.html#l00058">step()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="KalmanFilter_8cpp_source.html#l00069">step()</a>, and <a class="el" href="KalmanFilter_8cpp_source.html#l00059">step()</a>.</p>
 
 </div>
 </div>
@@ -255,9 +364,39 @@ Public Member Functions</h2></td></tr>
 
 <p>Reset state estimate to zero and covariance to P0 (or identity). </p>
 
-<p class="definition">Definition at line <a class="el" href="KalmanFilter_8cpp_source.html#l00076">76</a> of file <a class="el" href="KalmanFilter_8cpp_source.html">KalmanFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8cpp_source.html#l00077">77</a> of file <a class="el" href="KalmanFilter_8cpp_source.html">KalmanFilter.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::stateSize()</a>.</p>
+
+</div>
+</div>
+<a id="a843f0ce542ac5327dcd776c0411e388a" name="a843f0ce542ac5327dcd776c0411e388a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a843f0ce542ac5327dcd776c0411e388a">&#9670;&#160;</a></span>resetMismatchDetector()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ctrl::KalmanFilter::resetMismatchDetector </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reset mismatch detector accumulators (does not disable detection). </p>
+<p>Useful after a parameter re-estimation event to clear false-alarm history. </p>
+
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00165">165</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -286,7 +425,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Sample time Ts [s]. </p>
 
-<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00121">121</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00122">122</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -315,7 +454,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Current state estimate x^[k|k] (n * 1). </p>
 
-<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00115">115</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8h_source.html#l00116">116</a> of file <a class="el" href="KalmanFilter_8h_source.html">KalmanFilter.h</a>.</p>
 
 </div>
 </div>
@@ -362,7 +501,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="KalmanFilter_8cpp_source.html#l00068">68</a> of file <a class="el" href="KalmanFilter_8cpp_source.html">KalmanFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8cpp_source.html#l00069">69</a> of file <a class="el" href="KalmanFilter_8cpp_source.html">KalmanFilter.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="KalmanFilter_8cpp_source.html#l00019">predict()</a>, and <a class="el" href="KalmanFilter_8cpp_source.html#l00027">update()</a>.</p>
 
@@ -411,7 +550,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="KalmanFilter_8cpp_source.html#l00058">58</a> of file <a class="el" href="KalmanFilter_8cpp_source.html">KalmanFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KalmanFilter_8cpp_source.html#l00059">59</a> of file <a class="el" href="KalmanFilter_8cpp_source.html">KalmanFilter.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="KalmanFilter_8cpp_source.html#l00019">predict()</a>, and <a class="el" href="KalmanFilter_8cpp_source.html#l00027">update()</a>.</p>
 
@@ -456,7 +595,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00097">ctrl::StateSpace::outputSize()</a>, and <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::stateSize()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="KalmanFilter_8cpp_source.html#l00068">step()</a>, and <a class="el" href="KalmanFilter_8cpp_source.html#l00058">step()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="KalmanFilter_8cpp_source.html#l00069">step()</a>, and <a class="el" href="KalmanFilter_8cpp_source.html#l00059">step()</a>.</p>
 
 </div>
 </div>

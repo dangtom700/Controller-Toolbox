@@ -382,37 +382,38 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00288" data-start="{" data-end="}">
 <div class="line"><a id="l00288" name="l00288"></a><span class="lineno"><a class="line" href="classctrl_1_1TubeMPC.html#acd0f4ccfdcd7351c76061fea104554b1">  288</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1TubeMPC.html#acd0f4ccfdcd7351c76061fea104554b1">TubeMPC::compute</a>(<span class="keywordtype">double</span> error)</div>
 <div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>{</div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>    <span class="keywordflow">if</span> (!std::isfinite(error)) <span class="keywordflow">return</span> 0.0;</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>    <span class="keywordflow">if</span> (!std::isfinite(error)) <span class="keywordflow">return</span> u_prev_;</div>
 <div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>    <span class="comment">// Reconstruct scalar reference from current y (= C*x_nom approx) + error</span></div>
 <div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> y_approx = (sys_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a102ebd15fc174335e7be995a37afdcd4">C</a> * x_nom_)(0);</div>
 <div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>    <span class="keyword">const</span> <span class="keywordtype">double</span> r = y_approx + error;</div>
 <div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>    Eigen::VectorXd yref(1);</div>
 <div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>    yref(0) = r;</div>
 <div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>    <a class="code hl_function" href="classctrl_1_1TubeMPC.html#a3a2dc83d7b01f22e94527513db4f8a99">setReference</a>(yref);</div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="classctrl_1_1TubeMPC.html#a7ce74ca036a1d75e83d752e6b4b3cf0f">computeControl</a>()(0);</div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>}</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>    u_prev_ = <a class="code hl_function" href="classctrl_1_1TubeMPC.html#a7ce74ca036a1d75e83d752e6b4b3cf0f">computeControl</a>()(0);</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>    <span class="keywordflow">return</span> u_prev_;</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>}</div>
 </div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span> </div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
-<div class="foldopen" id="foldopen00301" data-start="{" data-end="}">
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno"><a class="line" href="classctrl_1_1TubeMPC.html#a018d476796532812b25cad941a5d8811">  301</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1TubeMPC.html#a018d476796532812b25cad941a5d8811">TubeMPC::reset</a>()</div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>{</div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>    x_nom_     = Eigen::VectorXd::Zero(n_);</div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    x_actual_  = Eigen::VectorXd::Zero(n_);</div>
-<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>    y_ref_     = Eigen::VectorXd::Zero(pp_);</div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>    V_warm_.setZero();</div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    first_step_ = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>    state_set_  = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>    qp_converged_ = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>    <a class="code hl_function" href="classctrl_1_1IController.html#add3b2b28b1048f8cd5c1130b80676138">notifyObserverReset</a>();</div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>}</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span> </div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span><span class="comment">// ---------------------------------------------------------------------------</span></div>
+<div class="foldopen" id="foldopen00302" data-start="{" data-end="}">
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno"><a class="line" href="classctrl_1_1TubeMPC.html#a018d476796532812b25cad941a5d8811">  302</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1TubeMPC.html#a018d476796532812b25cad941a5d8811">TubeMPC::reset</a>()</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>{</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    x_nom_     = Eigen::VectorXd::Zero(n_);</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>    x_actual_  = Eigen::VectorXd::Zero(n_);</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>    y_ref_     = Eigen::VectorXd::Zero(pp_);</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    V_warm_.setZero();</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>    first_step_ = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>    state_set_  = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>    qp_converged_ = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>    <a class="code hl_function" href="classctrl_1_1IController.html#add3b2b28b1048f8cd5c1130b80676138">notifyObserverReset</a>();</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>}</div>
 </div>
-<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span> </div>
-<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span> </div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aTubeMPC_8h_html"><div class="ttname"><a href="TubeMPC_8h.html">TubeMPC.h</a></div><div class="ttdoc">Tube Model Predictive Controller - robust MPC for bounded additive disturbances.</div></div>
-<div class="ttc" id="aclassctrl_1_1IController_html_add3b2b28b1048f8cd5c1130b80676138"><div class="ttname"><a href="classctrl_1_1IController.html#add3b2b28b1048f8cd5c1130b80676138">ctrl::IController::notifyObserverReset</a></div><div class="ttdeci">void notifyObserverReset() const</div><div class="ttdoc">Fire the observer's onReset() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00205">IController.h:205</a></div></div>
-<div class="ttc" id="aclassctrl_1_1IController_html_aff795d6bd36f8a8d20796d0670fef301"><div class="ttname"><a href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">ctrl::IController::notifyObserver</a></div><div class="ttdeci">void notifyObserver(double u, double signal) const</div><div class="ttdoc">Fire the observer's onCompute() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00185">IController.h:185</a></div></div>
-<div class="ttc" id="aclassctrl_1_1TubeMPC_html_a018d476796532812b25cad941a5d8811"><div class="ttname"><a href="classctrl_1_1TubeMPC.html#a018d476796532812b25cad941a5d8811">ctrl::TubeMPC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset nominal state, warm-start, and health flag.</div><div class="ttdef"><b>Definition</b> <a href="TubeMPC_8cpp_source.html#l00301">TubeMPC.cpp:301</a></div></div>
+<div class="ttc" id="aclassctrl_1_1IController_html_add3b2b28b1048f8cd5c1130b80676138"><div class="ttname"><a href="classctrl_1_1IController.html#add3b2b28b1048f8cd5c1130b80676138">ctrl::IController::notifyObserverReset</a></div><div class="ttdeci">void notifyObserverReset() const</div><div class="ttdoc">Fire the observer's onReset() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00197">IController.h:197</a></div></div>
+<div class="ttc" id="aclassctrl_1_1IController_html_aff795d6bd36f8a8d20796d0670fef301"><div class="ttname"><a href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">ctrl::IController::notifyObserver</a></div><div class="ttdeci">void notifyObserver(double u, double signal) const</div><div class="ttdoc">Fire the observer's onCompute() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00177">IController.h:177</a></div></div>
+<div class="ttc" id="aclassctrl_1_1TubeMPC_html_a018d476796532812b25cad941a5d8811"><div class="ttname"><a href="classctrl_1_1TubeMPC.html#a018d476796532812b25cad941a5d8811">ctrl::TubeMPC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset nominal state, warm-start, and health flag.</div><div class="ttdef"><b>Definition</b> <a href="TubeMPC_8cpp_source.html#l00302">TubeMPC.cpp:302</a></div></div>
 <div class="ttc" id="aclassctrl_1_1TubeMPC_html_a0df6a572acd0608ca908dfe6b204aec5"><div class="ttname"><a href="classctrl_1_1TubeMPC.html#a0df6a572acd0608ca908dfe6b204aec5">ctrl::TubeMPC::TubeMPC</a></div><div class="ttdeci">TubeMPC(const StateSpace &amp;sys, const TubeMPCParams &amp;p)</div><div class="ttdoc">Construct Tube MPC for a linear discrete-time plant.</div><div class="ttdef"><b>Definition</b> <a href="TubeMPC_8cpp_source.html#l00009">TubeMPC.cpp:9</a></div></div>
 <div class="ttc" id="aclassctrl_1_1TubeMPC_html_a37d84d6c794451510779f2a2a1e7041d"><div class="ttname"><a href="classctrl_1_1TubeMPC.html#a37d84d6c794451510779f2a2a1e7041d">ctrl::TubeMPC::computeRef</a></div><div class="ttdeci">Eigen::VectorXd computeRef(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;y_ref)</div><div class="ttdoc">Solve the tube-MPC QP and return the composite control input.</div><div class="ttdef"><b>Definition</b> <a href="TubeMPC_8cpp_source.html#l00226">TubeMPC.cpp:226</a></div></div>
 <div class="ttc" id="aclassctrl_1_1TubeMPC_html_a3a2dc83d7b01f22e94527513db4f8a99"><div class="ttname"><a href="classctrl_1_1TubeMPC.html#a3a2dc83d7b01f22e94527513db4f8a99">ctrl::TubeMPC::setReference</a></div><div class="ttdeci">void setReference(const Eigen::VectorXd &amp;y_ref)</div><div class="ttdoc">Set the output reference for the next solve.</div><div class="ttdef"><b>Definition</b> <a href="TubeMPC_8cpp_source.html#l00220">TubeMPC.cpp:220</a></div></div>

@@ -116,7 +116,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00030" data-start="{" data-end="}">
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="classctrl_1_1ExtremumSeeker.html#abfb8c777f50e3db25fd6b12d262026d1">   30</a></span>    <span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1ExtremumSeeker.html#abfb8c777f50e3db25fd6b12d262026d1">ExtremumSeeker::compute</a>(<span class="keywordtype">double</span> y)</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    {</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="keywordflow">if</span> (!std::isfinite(y)) <span class="keywordflow">return</span> 0.0;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="keywordflow">if</span> (!std::isfinite(y)) <span class="keywordflow">return</span> u_prev_;</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="comment">// Advance phase accumulator - stays bounded in [0, 2pi) for arbitrarily long runs,</span></div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <span class="comment">// avoiding the floating-point precision loss of step_ * Ts_ at large step counts</span></div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        <span class="comment">// and the 32-bit overflow of a long counter on embedded targets.</span></div>
@@ -142,24 +142,26 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        theta_ += sign * p_.<a class="code hl_variable" href="structctrl_1_1ExtremumSeekerParams.html#a54322f8d5cbeb75719896ecafcddeb26">integGain</a> * lpf_state_ * Ts_;</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        <span class="comment">// Return operating point plus dither signal</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        <span class="keywordflow">return</span> theta_ + p_.<a class="code hl_variable" href="structctrl_1_1ExtremumSeekerParams.html#aeb0dcdf9b480e273010906f7b45dd1c6">perturbAmp</a> * std::sin(phase_);</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    }</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        u_prev_ = theta_ + p_.<a class="code hl_variable" href="structctrl_1_1ExtremumSeekerParams.html#aeb0dcdf9b480e273010906f7b45dd1c6">perturbAmp</a> * std::sin(phase_);</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <span class="keywordflow">return</span> u_prev_;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    }</div>
 </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
-<div class="foldopen" id="foldopen00061" data-start="{" data-end="}">
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classctrl_1_1ExtremumSeeker.html#a8778a2390ea77fe4688c54d4659e40e8">   61</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1ExtremumSeeker.html#a8778a2390ea77fe4688c54d4659e40e8">ExtremumSeeker::reset</a>()</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    {</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        phase_ = 0.0;</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        theta_ = 0.0;</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        hpf_state_ = 0.0;</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        lpf_state_ = 0.0;</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        y_prev_ = 0.0;</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    }</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="foldopen" id="foldopen00062" data-start="{" data-end="}">
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="classctrl_1_1ExtremumSeeker.html#a8778a2390ea77fe4688c54d4659e40e8">   62</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1ExtremumSeeker.html#a8778a2390ea77fe4688c54d4659e40e8">ExtremumSeeker::reset</a>()</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    {</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        phase_ = 0.0;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        theta_ = 0.0;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        hpf_state_ = 0.0;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        lpf_state_ = 0.0;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        y_prev_ = 0.0;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        u_prev_ = 0.0;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    }</div>
 </div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aExtremumSeeker_8h_html"><div class="ttname"><a href="ExtremumSeeker_8h.html">ExtremumSeeker.h</a></div><div class="ttdoc">Perturbation-based Extremum Seeking Controller (ESC).</div></div>
-<div class="ttc" id="aclassctrl_1_1ExtremumSeeker_html_a8778a2390ea77fe4688c54d4659e40e8"><div class="ttname"><a href="classctrl_1_1ExtremumSeeker.html#a8778a2390ea77fe4688c54d4659e40e8">ctrl::ExtremumSeeker::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset phase, integrator, filter states, and previous output.</div><div class="ttdef"><b>Definition</b> <a href="ExtremumSeeker_8cpp_source.html#l00061">ExtremumSeeker.cpp:61</a></div></div>
+<div class="ttc" id="aclassctrl_1_1ExtremumSeeker_html_a8778a2390ea77fe4688c54d4659e40e8"><div class="ttname"><a href="classctrl_1_1ExtremumSeeker.html#a8778a2390ea77fe4688c54d4659e40e8">ctrl::ExtremumSeeker::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset phase, integrator, filter states, and previous output.</div><div class="ttdef"><b>Definition</b> <a href="ExtremumSeeker_8cpp_source.html#l00062">ExtremumSeeker.cpp:62</a></div></div>
 <div class="ttc" id="aclassctrl_1_1ExtremumSeeker_html_a895d8b270843de817861413166b5d516"><div class="ttname"><a href="classctrl_1_1ExtremumSeeker.html#a895d8b270843de817861413166b5d516">ctrl::ExtremumSeeker::ExtremumSeeker</a></div><div class="ttdeci">ExtremumSeeker(const ExtremumSeekerParams &amp;params, double sampleTime)</div><div class="ttdoc">Construct with tuning parameters and fixed sample time.</div><div class="ttdef"><b>Definition</b> <a href="ExtremumSeeker_8cpp_source.html#l00006">ExtremumSeeker.cpp:6</a></div></div>
 <div class="ttc" id="aclassctrl_1_1ExtremumSeeker_html_abfb8c777f50e3db25fd6b12d262026d1"><div class="ttname"><a href="classctrl_1_1ExtremumSeeker.html#abfb8c777f50e3db25fd6b12d262026d1">ctrl::ExtremumSeeker::compute</a></div><div class="ttdeci">double compute(double signal) override</div><div class="ttdoc">Advance one step of the ESC algorithm.</div><div class="ttdef"><b>Definition</b> <a href="ExtremumSeeker_8cpp_source.html#l00030">ExtremumSeeker.cpp:30</a></div></div>
 <div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AdaptiveSmithPredictor_8cpp_source.html#l00005">AdaptiveSmithPredictor.cpp:6</a></div></div>

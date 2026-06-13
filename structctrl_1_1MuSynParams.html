@@ -101,8 +101,11 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:aa97638ab1a133ed16ec61e61d723245e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inner Sinkhorn-Knopp iterations per D-step.  <br /></td></tr>
 <tr class="separator:aa97638ab1a133ed16ec61e61d723245e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a740af5a43c4d49461244b41ad408359e" id="r_a740af5a43c4d49461244b41ad408359e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MuSynParams.html#a740af5a43c4d49461244b41ad408359e">useRationalD</a> = false</td></tr>
-<tr class="memdesc:a740af5a43c4d49461244b41ad408359e"><td class="mdescLeft">&#160;</td><td class="mdescRight">When true, fit first-order rational D_j(z) per channel.  <br /></td></tr>
+<tr class="memdesc:a740af5a43c4d49461244b41ad408359e"><td class="mdescLeft">&#160;</td><td class="mdescRight">When true, fit rational D_j(z) per channel.  <br /></td></tr>
 <tr class="separator:a740af5a43c4d49461244b41ad408359e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76439525f99e8808ee7ec0c6630f38ff" id="r_a76439525f99e8808ee7ec0c6630f38ff"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MuSynParams.html#a76439525f99e8808ee7ec0c6630f38ff">dFitOrder</a> = 1</td></tr>
+<tr class="memdesc:a76439525f99e8808ee7ec0c6630f38ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Order of the rational D-scaling filters (number of poles per channel).  <br /></td></tr>
+<tr class="separator:a76439525f99e8808ee7ec0c6630f38ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a73f1f71c7f69b3fc1fa3ec6725d85b" id="r_a7a73f1f71c7f69b3fc1fa3ec6725d85b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1HinfParams.html">HinfParams</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1MuSynParams.html#a7a73f1f71c7f69b3fc1fa3ec6725d85b">hinfParams</a></td></tr>
 <tr class="memdesc:a7a73f1f71c7f69b3fc1fa3ec6725d85b"><td class="mdescLeft">&#160;</td><td class="mdescRight">H-inf sub-problem parameters for each K-step.  <br /></td></tr>
 <tr class="separator:a7a73f1f71c7f69b3fc1fa3ec6725d85b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -122,6 +125,31 @@ MATLAB dksyn() for the reference algorithm with vector-fitting D(jw). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00155">155</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a76439525f99e8808ee7ec0c6630f38ff" name="a76439525f99e8808ee7ec0c6630f38ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76439525f99e8808ee7ec0c6630f38ff">&#9670;&#160;</a></span>dFitOrder</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ctrl::MuSynParams::dFitOrder = 1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Order of the rational D-scaling filters (number of poles per channel). </p>
+<ul>
+<li>1 (default): first-order heuristic (fitFirstOrderDFilter) - fast, two data points.</li>
+<li>&gt;= 2: full vector-fitting (<a class="el" href="classctrl_1_1VectorFitting.html#a5ee2586339836b79f3ffb1525dd8a51c" title="Fit a stable rational filter H(z) to the given magnitude profile.">VectorFitting::fitMagnitude</a>) - accurate multi-peak profile.</li>
+</ul>
+<p>Only used when useRationalD is true. </p>
+
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00170">170</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01113">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
+
+</div>
+</div>
 <a id="aa97638ab1a133ed16ec61e61d723245e" name="aa97638ab1a133ed16ec61e61d723245e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa97638ab1a133ed16ec61e61d723245e">&#9670;&#160;</a></span>dScaleMaxIter</h2>
 
@@ -138,7 +166,7 @@ MATLAB dksyn() for the reference algorithm with vector-fitting D(jw). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00160">160</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01110">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01113">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
 
 </div>
 </div>
@@ -156,9 +184,9 @@ MATLAB dksyn() for the reference algorithm with vector-fitting D(jw). </dd></dl>
 
 <p>H-inf sub-problem parameters for each K-step. </p>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00162">162</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00171">171</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01110">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01113">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
 
 </div>
 </div>
@@ -178,7 +206,7 @@ MATLAB dksyn() for the reference algorithm with vector-fitting D(jw). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00157">157</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01110">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01113">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
 
 </div>
 </div>
@@ -198,7 +226,7 @@ MATLAB dksyn() for the reference algorithm with vector-fitting D(jw). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00158">158</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01110">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01113">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
 
 </div>
 </div>
@@ -218,7 +246,7 @@ MATLAB dksyn() for the reference algorithm with vector-fitting D(jw). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00159">159</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01110">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01113">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
 
 </div>
 </div>
@@ -234,11 +262,11 @@ MATLAB dksyn() for the reference algorithm with vector-fitting D(jw). </dd></dl>
       </table>
 </div><div class="memdoc">
 
-<p>When true, fit first-order rational D_j(z) per channel. </p>
+<p>When true, fit rational D_j(z) per channel. </p>
 
 <p class="definition">Definition at line <a class="el" href="DiscreteHinf_8h_source.html#l00161">161</a> of file <a class="el" href="DiscreteHinf_8h_source.html">DiscreteHinf.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01110">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l01113">ctrl::DiscreteHinf::solveMuSyn()</a>.</p>
 
 </div>
 </div>

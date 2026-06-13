@@ -118,12 +118,24 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2316bf99e532fb41c6e798decbbac4c5" id="r_a2316bf99e532fb41c6e798decbbac4c5"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1MovingHorizonEstimator.html#a2316bf99e532fb41c6e798decbbac4c5">sampleTime</a> () const</td></tr>
 <tr class="memdesc:a2316bf99e532fb41c6e798decbbac4c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sample time Ts [s].  <br /></td></tr>
 <tr class="separator:a2316bf99e532fb41c6e798decbbac4c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2fc3269a3dcdd91d163f95cda428acc4" id="r_a2fc3269a3dcdd91d163f95cda428acc4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1MovingHorizonEstimator.html#a2fc3269a3dcdd91d163f95cda428acc4">enableMismatchDetection</a> (const <a class="el" href="structctrl_1_1MismatchDetectorParams.html">MismatchDetectorParams</a> &amp;params={})</td></tr>
+<tr class="memdesc:a2fc3269a3dcdd91d163f95cda428acc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable real-time model-plant mismatch detection on the MHE residual (D1).  <br /></td></tr>
+<tr class="separator:a2fc3269a3dcdd91d163f95cda428acc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27edfd7268ef10f39d6ac7e5f2c56314" id="r_a27edfd7268ef10f39d6ac7e5f2c56314"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1MovingHorizonEstimator.html#a27edfd7268ef10f39d6ac7e5f2c56314">mismatchDetected</a> () const</td></tr>
+<tr class="memdesc:a27edfd7268ef10f39d6ac7e5f2c56314"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>true</code> if the CUSUM statistic has exceeded the detection threshold.  <br /></td></tr>
+<tr class="separator:a27edfd7268ef10f39d6ac7e5f2c56314"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a170ab1d0a6bcc75fc2a3819c25b9a09f" id="r_a170ab1d0a6bcc75fc2a3819c25b9a09f"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1MovingHorizonEstimator.html#a170ab1d0a6bcc75fc2a3819c25b9a09f">mismatchScore</a> () const</td></tr>
+<tr class="memdesc:a170ab1d0a6bcc75fc2a3819c25b9a09f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current CUSUM score from the MHE residual chart.  <br /></td></tr>
+<tr class="separator:a170ab1d0a6bcc75fc2a3819c25b9a09f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a865a241ce47124c4b593237b5f3db418" id="r_a865a241ce47124c4b593237b5f3db418"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1MovingHorizonEstimator.html#a865a241ce47124c4b593237b5f3db418">resetMismatchDetector</a> ()</td></tr>
+<tr class="memdesc:a865a241ce47124c4b593237b5f3db418"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset mismatch detector accumulators without disabling.  <br /></td></tr>
+<tr class="separator:a865a241ce47124c4b593237b5f3db418"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Moving Horizon Estimator. </p>
 <p>Call <code><a class="el" href="classctrl_1_1MovingHorizonEstimator.html#a42277bfca145640558c59eca6b249b5d" title="Set initial state estimate and arrival-cost covariance.">initialize()</a></code> once, then <code>estimate(y, u)</code> at each sample step. The returned state estimate is x^[k|k] (post-measurement update). </p>
 
-<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00088">88</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00110">110</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a513ae3f01545e2e4148774117b066142" name="a513ae3f01545e2e4148774117b066142"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a513ae3f01545e2e4148774117b066142">&#9670;&#160;</a></span>MovingHorizonEstimator()</h2>
@@ -176,11 +188,48 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00012">12</a> of file <a class="el" href="MovingHorizonEstimator_8cpp_source.html">MovingHorizonEstimator.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="MovingHorizonEstimator_8h_source.html#l00061">ctrl::MHEParams::N</a>.</p>
+<p class="reference">References <a class="el" href="MovingHorizonEstimator_8h_source.html#l00099">ctrl::MHEParams::C_ineq</a>, <a class="el" href="MovingHorizonEstimator_8h_source.html#l00100">ctrl::MHEParams::d_ineq</a>, and <a class="el" href="MovingHorizonEstimator_8h_source.html#l00062">ctrl::MHEParams::N</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a2fc3269a3dcdd91d163f95cda428acc4" name="a2fc3269a3dcdd91d163f95cda428acc4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2fc3269a3dcdd91d163f95cda428acc4">&#9670;&#160;</a></span>enableMismatchDetection()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ctrl::MovingHorizonEstimator::enableMismatchDetection </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structctrl_1_1MismatchDetectorParams.html">MismatchDetectorParams</a> &amp;&#160;</td>
+          <td class="paramname"><em>params</em> = <code>{}</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Enable real-time model-plant mismatch detection on the MHE residual (D1). </p>
+<p>After enabling, every <code><a class="el" href="classctrl_1_1MovingHorizonEstimator.html#aca478abc3185eaabcc8679d76d8b6c1f" title="Run one MHE step: update history buffers and solve the QP.">estimate()</a></code> call feeds the one-step-ahead prediction residual <code>y[k] - C*x_est_[k]</code> into a CUSUM chart. Tune <code>params.sigma</code> to the expected residual RMS under a consistent model.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">params</td><td>CUSUM parameters (sigma, k_cusum, h_threshold). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00190">190</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
+
+</div>
+</div>
 <a id="aca478abc3185eaabcc8679d76d8b6c1f" name="aca478abc3185eaabcc8679d76d8b6c1f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aca478abc3185eaabcc8679d76d8b6c1f">&#9670;&#160;</a></span>estimate()</h2>
 
@@ -217,9 +266,9 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>State estimate x^[k|k] (n x 1). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00076">76</a> of file <a class="el" href="MovingHorizonEstimator_8cpp_source.html">MovingHorizonEstimator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00082">82</a> of file <a class="el" href="MovingHorizonEstimator_8cpp_source.html">MovingHorizonEstimator.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::C</a>, <a class="el" href="MovingHorizonEstimator_8h_source.html#l00061">ctrl::MHEParams::N</a>, <a class="el" href="MovingHorizonEstimator_8h_source.html#l00064">ctrl::MHEParams::qpMaxIter</a>, <a class="el" href="MovingHorizonEstimator_8h_source.html#l00065">ctrl::MHEParams::qpTol</a>, <a class="el" href="GradientProjectionQP_8h_source.html#l00080">ctrl::solveGradientProjectionQP()</a>, <a class="el" href="MovingHorizonEstimator_8h_source.html#l00063">ctrl::MHEParams::wMax</a>, <a class="el" href="MovingHorizonEstimator_8h_source.html#l00062">ctrl::MHEParams::wMin</a>, <a class="el" href="MovingHorizonEstimator_8h_source.html#l00079">ctrl::MHEParams::xMax</a>, and <a class="el" href="MovingHorizonEstimator_8h_source.html#l00078">ctrl::MHEParams::xMin</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::C</a>, <a class="el" href="MovingHorizonEstimator_8h_source.html#l00062">ctrl::MHEParams::N</a>, <a class="el" href="MovingHorizonEstimator_8h_source.html#l00065">ctrl::MHEParams::qpMaxIter</a>, <a class="el" href="MovingHorizonEstimator_8h_source.html#l00066">ctrl::MHEParams::qpTol</a>, <a class="el" href="GradientProjectionQP_8h_source.html#l00080">ctrl::solveGradientProjectionQP()</a>, <a class="el" href="MovingHorizonEstimator_8h_source.html#l00064">ctrl::MHEParams::wMax</a>, <a class="el" href="MovingHorizonEstimator_8h_source.html#l00063">ctrl::MHEParams::wMin</a>, <a class="el" href="MovingHorizonEstimator_8h_source.html#l00080">ctrl::MHEParams::xMax</a>, and <a class="el" href="MovingHorizonEstimator_8h_source.html#l00079">ctrl::MHEParams::xMin</a>.</p>
 
 </div>
 </div>
@@ -259,7 +308,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00049">49</a> of file <a class="el" href="MovingHorizonEstimator_8cpp_source.html">MovingHorizonEstimator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00055">55</a> of file <a class="el" href="MovingHorizonEstimator_8cpp_source.html">MovingHorizonEstimator.cpp</a>.</p>
 
 </div>
 </div>
@@ -288,7 +337,7 @@ Public Member Functions</h2></td></tr>
 
 <p><code>true</code> if the most recent QP converged. </p>
 
-<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00151">151</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00173">173</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
 
 </div>
 </div>
@@ -317,7 +366,67 @@ Public Member Functions</h2></td></tr>
 
 <p>Iterations used in the most recent QP solve. </p>
 
-<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00154">154</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00176">176</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
+
+</div>
+</div>
+<a id="a27edfd7268ef10f39d6ac7e5f2c56314" name="a27edfd7268ef10f39d6ac7e5f2c56314"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27edfd7268ef10f39d6ac7e5f2c56314">&#9670;&#160;</a></span>mismatchDetected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ctrl::MovingHorizonEstimator::mismatchDetected </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p><code>true</code> if the CUSUM statistic has exceeded the detection threshold. </p>
+<p>Always <code>false</code> when <code><a class="el" href="classctrl_1_1MovingHorizonEstimator.html#a2fc3269a3dcdd91d163f95cda428acc4" title="Enable real-time model-plant mismatch detection on the MHE residual (D1).">enableMismatchDetection()</a></code> has not been called. </p>
+
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00200">200</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
+
+</div>
+</div>
+<a id="a170ab1d0a6bcc75fc2a3819c25b9a09f" name="a170ab1d0a6bcc75fc2a3819c25b9a09f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a170ab1d0a6bcc75fc2a3819c25b9a09f">&#9670;&#160;</a></span>mismatchScore()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double ctrl::MovingHorizonEstimator::mismatchScore </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Current CUSUM score from the MHE residual chart. </p>
+<p>Returns 0.0 when detection is not enabled. </p>
+
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00210">210</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
 
 </div>
 </div>
@@ -338,7 +447,36 @@ Public Member Functions</h2></td></tr>
 
 <p>Reset history and state estimate to zero without changing Q, R, or P0. </p>
 
-<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00283">283</a> of file <a class="el" href="MovingHorizonEstimator_8cpp_source.html">MovingHorizonEstimator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00295">295</a> of file <a class="el" href="MovingHorizonEstimator_8cpp_source.html">MovingHorizonEstimator.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a865a241ce47124c4b593237b5f3db418" name="a865a241ce47124c4b593237b5f3db418"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a865a241ce47124c4b593237b5f3db418">&#9670;&#160;</a></span>resetMismatchDetector()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ctrl::MovingHorizonEstimator::resetMismatchDetector </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reset mismatch detector accumulators without disabling. </p>
+
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00216">216</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
 
 </div>
 </div>
@@ -367,7 +505,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Sample time Ts [s]. </p>
 
-<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00157">157</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00179">179</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
 
 </div>
 </div>
@@ -396,9 +534,9 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00255">255</a> of file <a class="el" href="MovingHorizonEstimator_8cpp_source.html">MovingHorizonEstimator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00267">267</a> of file <a class="el" href="MovingHorizonEstimator_8cpp_source.html">MovingHorizonEstimator.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="MovingHorizonEstimator_8h_source.html#l00061">ctrl::MHEParams::N</a>.</p>
+<p class="reference">References <a class="el" href="MovingHorizonEstimator_8h_source.html#l00062">ctrl::MHEParams::N</a>.</p>
 
 </div>
 </div>
@@ -437,7 +575,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00271">271</a> of file <a class="el" href="MovingHorizonEstimator_8cpp_source.html">MovingHorizonEstimator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00283">283</a> of file <a class="el" href="MovingHorizonEstimator_8cpp_source.html">MovingHorizonEstimator.cpp</a>.</p>
 
 </div>
 </div>
@@ -466,7 +604,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Current state estimate (available after first <a class="el" href="classctrl_1_1MovingHorizonEstimator.html#aca478abc3185eaabcc8679d76d8b6c1f" title="Run one MHE step: update history buffers and solve the QP.">estimate()</a> call). </p>
 
-<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00148">148</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="MovingHorizonEstimator_8h_source.html#l00170">170</a> of file <a class="el" href="MovingHorizonEstimator_8h_source.html">MovingHorizonEstimator.h</a>.</p>
 
 </div>
 </div>
