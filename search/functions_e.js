@@ -7,9 +7,10 @@ var searchData=
   ['onstate_4',['onstate',['../classctrl_1_1ControllerMonitor.html#a66646f7c4e40c54f0c3dceb73d5a9acc',1,'ctrl::ControllerMonitor::onState()'],['../classctrl_1_1IControllerObserver.html#a2e2d4e1a237d1c6ddafdce9b8c45ead4',1,'ctrl::IControllerObserver::onState()']]],
   ['operator_28_29_5',['operator()',['../structctrl_1_1MF.html#aea9e4bb7700c6ba5d5ba05004ac68edd',1,'ctrl::MF']]],
   ['optimise_6',['optimise',['../classctrl_1_1TunerSuite.html#a9c32b9bf224d2b1fe4ff2c40e334b41e',1,'ctrl::TunerSuite']]],
-  ['order_7',['order',['../structctrl_1_1TransferFunction.html#a4ceaf021d217e8bafd64c2bd5c172d73',1,'ctrl::TransferFunction']]],
-  ['output_8',['output',['../classctrl_1_1SimPlant.html#a53edf7706f7e6e6a1abdfb0df7dbdd7f',1,'ctrl::SimPlant']]],
-  ['outputsize_9',['outputsize',['../classctrl_1_1HybridModel.html#a5596d8710aec7e0421659009e1092315',1,'ctrl::HybridModel::outputSize()'],['../structctrl_1_1StateSpace.html#ae4ad7c88e0250e0c5648204a56365d2e',1,'ctrl::StateSpace::outputSize()']]],
-  ['outputvar_10',['outputVar',['../classctrl_1_1FuzzySystem.html#aba2bbae46a0ab2d642f1da28c592385a',1,'ctrl::FuzzySystem']]],
-  ['overruncount_11',['overruncount',['../classctrl_1_1IScheduler.html#af311374b124ab032bcbe401849c74cd1',1,'ctrl::IScheduler::overrunCount()'],['../classctrl_1_1SimScheduler.html#a7d312095c089b7606019ed1f526de4ae',1,'ctrl::SimScheduler::overrunCount()']]]
+  ['optimize_7',['optimize',['../classctrl_1_1DifferentialEvolution.html#acb3907e7dfbd87457b27913871a38395',1,'ctrl::DifferentialEvolution::optimize()'],['../classctrl_1_1ParticleSwarmOptimizer.html#ae175904d807687c68bf9b5d8303dfa91',1,'ctrl::ParticleSwarmOptimizer::optimize()'],['../classctrl_1_1GeneticAlgorithm.html#a2273a0f911b3ab7227bb7564644ebb3b',1,'ctrl::GeneticAlgorithm::optimize()']]],
+  ['order_8',['order',['../structctrl_1_1TransferFunction.html#a4ceaf021d217e8bafd64c2bd5c172d73',1,'ctrl::TransferFunction']]],
+  ['output_9',['output',['../classctrl_1_1SimPlant.html#a53edf7706f7e6e6a1abdfb0df7dbdd7f',1,'ctrl::SimPlant']]],
+  ['outputsize_10',['outputsize',['../classctrl_1_1HybridModel.html#a5596d8710aec7e0421659009e1092315',1,'ctrl::HybridModel::outputSize()'],['../structctrl_1_1StateSpace.html#ae4ad7c88e0250e0c5648204a56365d2e',1,'ctrl::StateSpace::outputSize()']]],
+  ['outputvar_11',['outputVar',['../classctrl_1_1FuzzySystem.html#aba2bbae46a0ab2d642f1da28c592385a',1,'ctrl::FuzzySystem']]],
+  ['overruncount_12',['overruncount',['../classctrl_1_1IScheduler.html#af311374b124ab032bcbe401849c74cd1',1,'ctrl::IScheduler::overrunCount()'],['../classctrl_1_1SimScheduler.html#a7d312095c089b7606019ed1f526de4ae',1,'ctrl::SimScheduler::overrunCount()']]]
 ];

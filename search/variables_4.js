@@ -2,7 +2,7 @@ var searchData=
 [
   ['e_5fscale_0',['e_scale',['../structctrl_1_1FuzzyPDParams.html#ace9cef10a1985785ab9cfa686a88a777',1,'ctrl::FuzzyPDParams']]],
   ['e_5fthreshold_1',['e_threshold',['../structctrl_1_1SupervisorParams.html#a420f60f781eb3614cb24572f4e4c842d',1,'ctrl::SupervisorParams']]],
-  ['elite_5ffrac_2',['elite_frac',['../structctrl_1_1CEMController_1_1Params.html#aff1f54dd2410a2d7f935d71a38fb82ab',1,'ctrl::CEMController::Params']]],
+  ['elite_5ffrac_2',['elite_frac',['../structctrl_1_1CEMController_1_1Params.html#aff1f54dd2410a2d7f935d71a38fb82ab',1,'ctrl::CEMController::Params::elite_frac'],['../structctrl_1_1GAParams.html#a1558bb60abdd8a9c530ed2e9285bbdbb',1,'ctrl::GAParams::elite_frac']]],
   ['eps_5fjac_3',['eps_jac',['../structctrl_1_1GreyBoxEstimator_1_1Params.html#a06cf26b53fac27946ae911bf1df7f5fd',1,'ctrl::GreyBoxEstimator::Params']]],
   ['eps_5fmag_4',['eps_mag',['../structctrl_1_1VectorFittingParams.html#ad73d27d164e10c26a2d8d3a697d7982d',1,'ctrl::VectorFittingParams']]],
   ['error_5fnorm_5',['error_norm',['../structctrl_1_1SupervisorDecision.html#af706e539fc0660eb74f811b7014653f4',1,'ctrl::SupervisorDecision']]],

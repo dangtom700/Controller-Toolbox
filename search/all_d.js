@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['f_0',['f',['../structctrl_1_1DAESystem.html#a462d4538310f442476c400112debeeb7',1,'ctrl::DAESystem']]],
+  ['f_0',['f',['../structctrl_1_1DAESystem.html#a462d4538310f442476c400112debeeb7',1,'ctrl::DAESystem::f'],['../structctrl_1_1DEParams.html#ac35d8f019dbcd7dc7c66647fe6467abc',1,'ctrl::DEParams::F']]],
   ['factories_1',['Membership function factories',['../md_docs_2DOCUMENTATION.html#autotoc_md88',1,'']]],
   ['failure_2',['MPC Infeasibility / LDLT Failure',['../md_docs_2DEPLOYMENT.html#autotoc_md198',1,'']]],
   ['fallback_3',['FALLBACK',['../namespacectrl.html#a9752729b6a670d0a30adcdfee0c3d0b0af35b388d8d4adeab05bce916c73d7a72',1,'ctrl']]],
@@ -21,7 +21,7 @@ var searchData=
   ['filter_18',['filter',['../structctrl_1_1ZPETCResult.html#a072d76329ff8df88bd2761dce5a3292d',1,'ctrl::ZPETCResult']]],
   ['filter_20divergence_19',['Kalman Filter Divergence',['../md_docs_2DEPLOYMENT.html#autotoc_md200',1,'']]],
   ['findequilibrium_20',['findEquilibrium',['../namespacectrl.html#a93abf2dfe441e2b3a2e80623e9ee68f3',1,'ctrl']]],
-  ['fit_21',['fit',['../classctrl_1_1SINDy.html#a3bdae4694ed9c3648a5bc38968fb3395',1,'ctrl::SINDy::fit()'],['../classctrl_1_1KoopmanEDMD.html#a02d1a26e01b6a775b190755e29ea46a0',1,'ctrl::KoopmanEDMD::fit()'],['../classctrl_1_1GreyBoxEstimator.html#a1b049460dff3cfcb782616e3bd40a060',1,'ctrl::GreyBoxEstimator::fit()'],['../classctrl_1_1GPResidualModel.html#a17a25ea66756b2736a5720e24df90087',1,'ctrl::GPResidualModel::fit()'],['../classctrl_1_1GaussianProcess.html#a7e7f7e672613811c19a7dc60509e195d',1,'ctrl::GaussianProcess::fit()']]],
+  ['fit_21',['fit',['../classctrl_1_1KoopmanEDMD.html#a02d1a26e01b6a775b190755e29ea46a0',1,'ctrl::KoopmanEDMD::fit()'],['../classctrl_1_1SINDy.html#a3bdae4694ed9c3648a5bc38968fb3395',1,'ctrl::SINDy::fit()'],['../classctrl_1_1GreyBoxEstimator.html#a1b049460dff3cfcb782616e3bd40a060',1,'ctrl::GreyBoxEstimator::fit()'],['../classctrl_1_1GPResidualModel.html#a17a25ea66756b2736a5720e24df90087',1,'ctrl::GPResidualModel::fit()'],['../classctrl_1_1GaussianProcess.html#a7e7f7e672613811c19a7dc60509e195d',1,'ctrl::GaussianProcess::fit()']]],
   ['fitmagnitude_22',['fitMagnitude',['../classctrl_1_1VectorFitting.html#a5ee2586339836b79f3ffb1525dd8a51c',1,'ctrl::VectorFitting']]],
   ['fitmodel_23',['fitModel',['../classctrl_1_1DynaController.html#a0773d51f5eecd5438e6bb3ae37e3a1ab',1,'ctrl::DynaController']]],
   ['fitprojected_24',['fitProjected',['../classctrl_1_1KoopmanEDMD.html#a1013960d9e35490e8aa04c8b9fa81342',1,'ctrl::KoopmanEDMD']]],

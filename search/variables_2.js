@@ -1,8 +1,8 @@
 var searchData=
 [
   ['c_0',['C',['../structctrl_1_1StateSpace.html#a102ebd15fc174335e7be995a37afdcd4',1,'ctrl::StateSpace']]],
-  ['c1_1',['C1',['../structctrl_1_1GeneralisedPlant.html#acc888810f6315566a7ef3b53b6528c17',1,'ctrl::GeneralisedPlant']]],
-  ['c2_2',['C2',['../structctrl_1_1GeneralisedPlant.html#ad7546293998aa6f781c2f63c5f3ff61b',1,'ctrl::GeneralisedPlant']]],
+  ['c1_1',['c1',['../structctrl_1_1GeneralisedPlant.html#acc888810f6315566a7ef3b53b6528c17',1,'ctrl::GeneralisedPlant::C1'],['../structctrl_1_1PSOParams.html#ae0ae79114d004c4f611071a4fe9fb6b3',1,'ctrl::PSOParams::c1']]],
+  ['c2_2',['c2',['../structctrl_1_1GeneralisedPlant.html#ad7546293998aa6f781c2f63c5f3ff61b',1,'ctrl::GeneralisedPlant::C2'],['../structctrl_1_1PSOParams.html#ab29340a3fbb00dcb750b3fed381f8a04',1,'ctrl::PSOParams::c2']]],
   ['c_5fcoeffs_3',['C_coeffs',['../structctrl_1_1LPVModel.html#ad3e72dc6bb545d279e46dcc09ee9b8c3',1,'ctrl::LPVModel']]],
   ['c_5fde_4',['c_de',['../structctrl_1_1BasicSMCParams.html#a16714f0e38ff0ad521b5dd3607220fba',1,'ctrl::BasicSMCParams::c_de'],['../structctrl_1_1SMCParams.html#a3c1885b64dc2c56ec81a203d812b7f3c',1,'ctrl::SMCParams::c_de'],['../structctrl_1_1SuperTwistingParams.html#a62ce8285bffab84b6a9761bb17e4dc57',1,'ctrl::SuperTwistingParams::c_de']]],
   ['c_5fe_5',['c_e',['../structctrl_1_1BasicSMCParams.html#a3f0618782b942d790dfe19d01b8d5478',1,'ctrl::BasicSMCParams::c_e'],['../structctrl_1_1SMCParams.html#a1d249bc5108b6f21e2c252ff4b99647a',1,'ctrl::SMCParams::c_e'],['../structctrl_1_1SuperTwistingParams.html#afd3504ce1d4ae3532f0e2bb032894b66',1,'ctrl::SuperTwistingParams::c_e']]],
@@ -18,5 +18,7 @@ var searchData=
   ['converged_15',['converged',['../structctrl_1_1TunerResult.html#ac468903fc5a8091f9a2d9a88ce29c309',1,'ctrl::TunerResult::converged'],['../structctrl_1_1MuSynResult.html#ac6cecd5f23ed9121d795b3372846f5ee',1,'ctrl::MuSynResult::converged'],['../structctrl_1_1QPSolveResult.html#af18b6a8679e6a94dcae27b0e18bb26e6',1,'ctrl::QPSolveResult::converged'],['../structctrl_1_1GreyBoxEstimator_1_1Result.html#a6401187eebdc99c454ddb101a60ed7e8',1,'ctrl::GreyBoxEstimator::Result::converged'],['../structctrl_1_1DareResult.html#a147e98f76a3426f3db037b034853666e',1,'ctrl::DareResult::converged'],['../structctrl_1_1VectorFittingResult.html#a8b2545379d29bb49b64fd946db1a242f',1,'ctrl::VectorFittingResult::converged']]],
   ['cooldown_5fsteps_16',['cooldown_steps',['../structctrl_1_1SupervisorParams.html#ada70cb220190389accdbb8bf8f758b48',1,'ctrl::SupervisorParams']]],
   ['cost_17',['cost',['../structctrl_1_1TunerResult.html#a5a33b962741e7c8e3a3c4719f8dd7f0c',1,'ctrl::TunerResult::cost'],['../structctrl_1_1GreyBoxEstimator_1_1Result.html#ab057137a542fe563ef171eaa969264a5',1,'ctrl::GreyBoxEstimator::Result::cost']]],
-  ['cyclesrequired_18',['cyclesRequired',['../structctrl_1_1RelayTunerConfig.html#ac6cae77f414d8d71797db566d10e9881',1,'ctrl::RelayTunerConfig']]]
+  ['cr_18',['CR',['../structctrl_1_1DEParams.html#ae722c9f109bbeaa206c8671f0dcf5dfc',1,'ctrl::DEParams']]],
+  ['crossover_19',['crossover',['../structctrl_1_1GAParams.html#a42af71fcae16a179c8e6c143fb4a457b',1,'ctrl::GAParams']]],
+  ['cyclesrequired_20',['cyclesRequired',['../structctrl_1_1RelayTunerConfig.html#ac6cae77f414d8d71797db566d10e9881',1,'ctrl::RelayTunerConfig']]]
 ];
