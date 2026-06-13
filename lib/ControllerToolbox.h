@@ -111,6 +111,9 @@
 #include "DynaController.h"             ///< Dyna - model-based RL; SINDy error-dynamics fit + synthetic rollout planning (Sutton 1991).
 #include "ScenarioMPC.h"                ///< ScenarioMPC - stochastic MPC; N_s noise-trajectory average cost QP (Calafiore & Campi 2006).
 #include "BayesianOptimizer.h"          ///< BayesianOptimizer - GP surrogate + UCB/EI acquisition for expensive controller tuning (Srinivas 2010).
+#include "GeneticAlgorithm.h"           ///< GeneticAlgorithm - real-valued GA: BLX-alpha crossover, tournament selection, elitism (Storn & Price 1997).
+#include "ParticleSwarmOptimizer.h"     ///< ParticleSwarmOptimizer - Clerc-Kennedy PSO with velocity clamping (Clerc & Kennedy 2002).
+#include "DifferentialEvolution.h"      ///< DifferentialEvolution - DE/rand/1/bin with boundary reflection (Storn & Price 1997).
 #include "ControllerMonitor.h"          ///< ControllerMonitor - CUSUM + EWMA SPC charts on live controller output or onState channels (M3/SPC).
 #include "ComputationalDelayWrapper.h"  ///< ComputationalDelayWrapper - one-sample actuator delay decorator for realistic digital loop simulation (G3).
 #include "GreyBoxEstimator.h"           ///< GreyBoxEstimator - nonlinear param estimation via Levenberg-Marquardt for user-supplied ODE f(x,u,p) (E1).

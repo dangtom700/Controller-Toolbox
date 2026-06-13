@@ -36,6 +36,9 @@
 #include "DynaController.h"
 #include "ScenarioMPC.h"
 #include "BayesianOptimizer.h"
+#include "GeneticAlgorithm.h"
+#include "ParticleSwarmOptimizer.h"
+#include "DifferentialEvolution.h"
 #include "ControllerRegistry.h"
 #include "ControllerMonitor.h"
 #include "HybridModel.h"
@@ -3276,6 +3279,9 @@ TEST_CASE("ControllerRegistry: addFeature and has work", "[registry]")
     REQUIRE(ctrl::ControllerRegistry::has("dyna"));            // self-registered
     REQUIRE(ctrl::ControllerRegistry::has("scenario_mpc"));    // self-registered
     REQUIRE(ctrl::ControllerRegistry::has("bayesian_optimizer")); // self-registered
+    REQUIRE(ctrl::ControllerRegistry::has("genetic_algorithm")); // self-registered
+    REQUIRE(ctrl::ControllerRegistry::has("particle_swarm"));    // self-registered
+    REQUIRE(ctrl::ControllerRegistry::has("differential_evolution")); // self-registered
     REQUIRE(ctrl::ControllerRegistry::has("controller_monitor")); // self-registered
     REQUIRE(ctrl::ControllerRegistry::has("pid"));             // from ControllerRegistrations.h
     REQUIRE_FALSE(ctrl::ControllerRegistry::has("nonexistent_xyz"));
@@ -5261,4 +5267,161 @@ TEST_CASE("BasicSMC reset clears previous error state", "[basic_smc]")
     smc.reset();
     double s2 = smc.slidingSurface(1.0);
     REQUIRE(s1 == s2);
+}
+
+// =============================================================================
+// GeneticAlgorithm
+// =============================================================================
+
+static ctrl::GAParams makeGAParams(int n, int pop = 30, int gen = 60)
+{
+    ctrl::GAParams p;
+    p.n_dim      = n;
+    p.population = pop;
+    p.max_gen    = gen;
+    p.lower = Eigen::VectorXd::Constant(n, 0.0);
+    p.upper = Eigen::VectorXd::Constant(n, 5.0);
+    p.seed  = 99;
+    return p;
+}
+
+TEST_CASE("GeneticAlgorithm minimises 1D parabola", "[genetic_algorithm]")
+{
+    // f(x) = (x-2)^2, minimum at x=2, cost=0
+    ctrl::GeneticAlgorithm ga(makeGAParams(1));
+    auto result = ga.optimize([](const Eigen::VectorXd& x){ return (x(0)-2.0)*(x(0)-2.0); });
+
+    REQUIRE(result.cost < 0.1);
+    REQUIRE(result.params(0) >= 0.0);
+    REQUIRE(result.params(0) <= 5.0);
+    REQUIRE(result.nEvals > 0);
+}
+
+TEST_CASE("GeneticAlgorithm minimises 2D sphere", "[genetic_algorithm]")
+{
+    Eigen::Vector2d centre(1.5, 3.0);
+    ctrl::GeneticAlgorithm ga(makeGAParams(2, 40, 80));
+    auto result = ga.optimize([&](const Eigen::VectorXd& x){
+        return (x - centre).squaredNorm();
+    });
+
+    REQUIRE(result.cost < 0.5);
+    REQUIRE((result.params - centre).norm() < 1.0);
+}
+
+TEST_CASE("GeneticAlgorithm result always within bounds", "[genetic_algorithm]")
+{
+    ctrl::GAParams p = makeGAParams(3, 20, 40);
+    ctrl::GeneticAlgorithm ga(p);
+    auto result = ga.optimize([](const Eigen::VectorXd& x){ return x.sum(); }); // min at lower bound
+
+    for (int i = 0; i < 3; ++i) {
+        REQUIRE(result.params(i) >= p.lower(i) - 1e-9);
+        REQUIRE(result.params(i) <= p.upper(i) + 1e-9);
+    }
+    REQUIRE(std::isfinite(result.cost));
+}
+
+// =============================================================================
+// ParticleSwarmOptimizer
+// =============================================================================
+
+static ctrl::PSOParams makePSOParams(int n, int particles = 20, int iters = 60)
+{
+    ctrl::PSOParams p;
+    p.n_dim       = n;
+    p.n_particles = particles;
+    p.max_iter    = iters;
+    p.lower = Eigen::VectorXd::Constant(n, 0.0);
+    p.upper = Eigen::VectorXd::Constant(n, 5.0);
+    p.seed  = 77;
+    return p;
+}
+
+TEST_CASE("ParticleSwarmOptimizer minimises 1D parabola", "[pso]")
+{
+    ctrl::ParticleSwarmOptimizer pso(makePSOParams(1));
+    auto result = pso.optimize([](const Eigen::VectorXd& x){ return (x(0)-2.0)*(x(0)-2.0); });
+
+    REQUIRE(result.cost < 0.1);
+    REQUIRE(result.params(0) >= 0.0);
+    REQUIRE(result.params(0) <= 5.0);
+    REQUIRE(result.nEvals > 0);
+}
+
+TEST_CASE("ParticleSwarmOptimizer minimises 2D sphere", "[pso]")
+{
+    Eigen::Vector2d centre(2.0, 4.0);
+    ctrl::ParticleSwarmOptimizer pso(makePSOParams(2, 25, 80));
+    auto result = pso.optimize([&](const Eigen::VectorXd& x){
+        return (x - centre).squaredNorm();
+    });
+
+    REQUIRE(result.cost < 0.5);
+    REQUIRE((result.params - centre).norm() < 1.0);
+}
+
+TEST_CASE("ParticleSwarmOptimizer result always within bounds", "[pso]")
+{
+    ctrl::PSOParams p = makePSOParams(3, 15, 30);
+    ctrl::ParticleSwarmOptimizer pso(p);
+    auto result = pso.optimize([](const Eigen::VectorXd& x){ return -x.sum(); }); // max at upper
+
+    for (int i = 0; i < 3; ++i) {
+        REQUIRE(result.params(i) >= p.lower(i) - 1e-9);
+        REQUIRE(result.params(i) <= p.upper(i) + 1e-9);
+    }
+    REQUIRE(std::isfinite(result.cost));
+}
+
+// =============================================================================
+// DifferentialEvolution
+// =============================================================================
+
+static ctrl::DEParams makeDEParams(int n, int pop = 20, int gen = 60)
+{
+    ctrl::DEParams p;
+    p.n_dim      = n;
+    p.population = pop;
+    p.max_gen    = gen;
+    p.lower = Eigen::VectorXd::Constant(n, 0.0);
+    p.upper = Eigen::VectorXd::Constant(n, 5.0);
+    p.seed  = 55;
+    return p;
+}
+
+TEST_CASE("DifferentialEvolution minimises 1D parabola", "[de]")
+{
+    ctrl::DifferentialEvolution de(makeDEParams(1));
+    auto result = de.optimize([](const Eigen::VectorXd& x){ return (x(0)-2.0)*(x(0)-2.0); });
+
+    REQUIRE(result.cost < 0.05);
+    REQUIRE(result.params(0) >= 0.0);
+    REQUIRE(result.params(0) <= 5.0);
+    REQUIRE(result.nEvals > 0);
+}
+
+TEST_CASE("DifferentialEvolution minimises 2D sphere", "[de]")
+{
+    Eigen::Vector2d centre(1.0, 4.5);
+    ctrl::DifferentialEvolution de(makeDEParams(2, 25, 80));
+    auto result = de.optimize([&](const Eigen::VectorXd& x){
+        return (x - centre).squaredNorm();
+    });
+
+    REQUIRE(result.cost < 0.5);
+    REQUIRE((result.params - centre).norm() < 1.0);
+}
+
+TEST_CASE("DifferentialEvolution result always within bounds", "[de]")
+{
+    ctrl::DEParams p = makeDEParams(3, 15, 30);
+    ctrl::DifferentialEvolution de(p);
+    auto result = de.optimize([](const Eigen::VectorXd& x){ return x.sum(); }); // min at lower
+
+    for (int i = 0; i < 3; ++i) {
+        REQUIRE(result.params(i) >= p.lower(i) - 1e-9);
+        REQUIRE(result.params(i) <= p.upper(i) + 1e-9);
+    }
+    REQUIRE(std::isfinite(result.cost));
 }

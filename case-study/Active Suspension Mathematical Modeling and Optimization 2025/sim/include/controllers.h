@@ -243,4 +243,43 @@ private:
     ctrl::DynaController dyna_;
 };
 
+// ---------------------------------------------------------------------------
+// 16. GAOptPIDCtrl - GA-tuned PID (Kp, Ki, Kd optimised offline via GA)
+// ---------------------------------------------------------------------------
+class GAOptPIDCtrl : public ControllerBase {
+public:
+    explicit GAOptPIDCtrl(const PlantParams& p);
+    double  compute(const Eigen::Vector4d& state, double z_r) override;
+    void    reset() override;
+    std::string name() const override { return "GAOptPID"; }
+private:
+    ctrl::DiscretePID pid_;
+};
+
+// ---------------------------------------------------------------------------
+// 17. PSOOptPIDCtrl - PSO-tuned PID (Kp, Ki, Kd optimised offline via PSO)
+// ---------------------------------------------------------------------------
+class PSOOptPIDCtrl : public ControllerBase {
+public:
+    explicit PSOOptPIDCtrl(const PlantParams& p);
+    double  compute(const Eigen::Vector4d& state, double z_r) override;
+    void    reset() override;
+    std::string name() const override { return "PSOOptPID"; }
+private:
+    ctrl::DiscretePID pid_;
+};
+
+// ---------------------------------------------------------------------------
+// 18. DEOptPIDCtrl - DE-tuned PID (Kp, Ki, Kd optimised offline via DE)
+// ---------------------------------------------------------------------------
+class DEOptPIDCtrl : public ControllerBase {
+public:
+    explicit DEOptPIDCtrl(const PlantParams& p);
+    double  compute(const Eigen::Vector4d& state, double z_r) override;
+    void    reset() override;
+    std::string name() const override { return "DEOptPID"; }
+private:
+    ctrl::DiscretePID pid_;
+};
+
 } // namespace susp

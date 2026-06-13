@@ -28,6 +28,10 @@ Read both compact files for tribal knowledge before making any changes to contro
 | **D1** | Mismatch Detector — CUSUM on KF/MHE innovation | LOW | **Done (Part 54)** |
 | **D2** | Digital Twin Lite Python app | LOW | Open |
 | **C2** | 8 spec-only stubs (BEMS + MEMS no blocker; others need plant design) | MED | Open |
+| **C3** | Active Suspension 2-DOF: add `GAOptPIDCtrl` / `PSOOptPIDCtrl` / `DEOptPIDCtrl` using new lib/ GA/PSO/DE optimisers; 15→18 controllers, 75→90 runs | MED | **Done (Part 55)** |
+| **C4** | SMISMO: modify plant for variable P_s; add `DOBEnergyCtrl` (Chen 2018 Eq. 29-30 DOB + adaptive supply pressure); 12→13 controllers, 60→65 runs | MED | **Done (Part 55)** |
+| **C5** | EHFS: add `HinfODFCCtrl` + `HinfCascadeCtrl` (DiscreteHinf ODFC + local nLMS); 12→14 controllers, 60→70 runs | MED | **Done (Part 55)** |
+| **C6** | Active Suspension 6×6 EV Full Model: NEW Python-only case study; 40-state plant (15-DOF vehicle + 5-DOF human biodynamic model), road time delays, 18 controllers, 90 runs | MED | **Done (Part 55)** |
 | **B36-3** | Unify NaN-guard across controller fleet | MED | **Done (Part 53)** |
 | R1 | Edge-case contract matrix tests for every controller family | MED | **Done (Part 53)** |
 | T3 | Full DK-iteration with vector-fitting rational D(jω) | LOW | **Done (Part 53)** |
@@ -254,3 +258,95 @@ header-only)
   `[gp_residual]` ×3. Bug fix: `Eigen::Vector1d` does not exist — replaced with explicit `VectorXd(1)`.
 - `examples/ex80_grey_box_estimator.cpp`; `ex97_grey_box_estimator.py`, `ex98_recursive_grey_box.py`,
   `ex99_gp_residual_model.py`.
+
+---
+
+## Part 55 — Controller Gap Audit + C3–C6 (2026-06-13)
+
+**Audit methodology:** All 15 case studies were cross-checked: each study's README was read to
+identify the paper's proposed controller, then the actual `sim/` source was inspected to verify
+presence. Studies that are pure plant-characterisation papers or literature reviews (no novel
+controller proposed) were marked N/A. Three genuine gaps were identified (C3–C5) plus one new
+study requested (C6).
+
+---
+
+**C3 — Active Suspension 2-DOF: metaheuristic-tuned PID controllers**
+
+- Paper: Aydogan & Yildiz 2025 (*Alexandria Eng. J.* 127, 989-1003).
+  Core contribution: GA/PSO/DE optimisation of suspension controller gains on a 15-DOF full vehicle.
+- Gap: The 2-DOF sim (`susp_sim`, 15 controllers) has no parameter optimisation loop at all.
+- Fix: Add `lib/GeneticAlgorithm.h`, `lib/ParticleSwarmOptimizer.h`, `lib/DifferentialEvolution.h`
+  (header-only; reuse `TunerResult`/`CostFn` from `AutoTuner.h`); add `GAOptPIDCtrl`,
+  `PSOOptPIDCtrl`, `DEOptPIDCtrl` to Active Suspension 2-DOF sim (15→18 controllers, 75→90 runs).
+- New lib/ files require full 8-step checklist: bindings in `analysis_bindings.cpp`, smoke tests,
+  Catch2 `[genetic_algorithm]`/`[pso]`/`[de]` tests (3 each), combined Rosenbrock example.
+- Files: `lib/GeneticAlgorithm.h`, `lib/ParticleSwarmOptimizer.h`, `lib/DifferentialEvolution.h`,
+  `lib/ControllerToolbox.h`, `bindings/analysis_bindings.cpp`, `bindings/smoke_test.py`,
+  `tests/test_catch2_advanced.cpp`, `examples/exNN_metaheuristics.{cpp,py}`,
+  `case-study/Active Suspension .../sim/{include/controllers.h, src/controllers.cpp, src/main.cpp}`,
+  `tests/test_susp_regression.cpp`.
+
+---
+
+**C4 — SMISMO: disturbance-observer supply-pressure adaptation**
+
+- Paper: Chen & Wang 2018. Core contribution: 2nd-order DOB (Eq. 29-30) estimates load force
+  `F_hat`; adaptive supply pressure `P_s = k_f*|F_hat| + k_v*|v_L| + P_margin` (Eq. 37) achieves
+  ~5/6 energy reduction vs. fixed supply. Grey predictor (GM(1,1), Eq. 52) drives pump speed.
+- Gap: `smismo_sim` holds P_s constant at 60 bar; no disturbance observer; no energy comparison.
+- Fix: (1) `smismo_plant.h/cpp` — add `setSupplyPressure(bar)`; replace hardcoded `P_s` with
+  dynamic `P_s_dyn_` in valve flow equations; existing 12 controllers unaffected (never call setter).
+  (2) Add `DOBEnergyCtrl` (#13): inner PID for position + DOB for load force estimation +
+  adaptive P_s before each plant step. Observer gain L=30 (Chen Table 1). P_s clamped [22, 65] bar.
+  (3) Grey predictor omitted (requires pump dynamics not in current sim; noted in comment).
+- Files: `sim/include/smismo_plant.h`, `sim/src/smismo_plant.cpp`, `sim/include/controllers.h`,
+  `sim/src/controllers.cpp`, `sim/src/main.cpp` (N_CONTROLLERS 12→13), `tests/test_smismo_regression.cpp`.
+- Key invariant: `P_min = 22 bar > P_bd = 20 bar` — backpressure guard must be preserved.
+
+---
+
+**C5 — EHFS: PI + H∞ ODFC + nLMS 3-layer cascade**
+
+- Paper: Shen et al. 2017. Core contribution: 3-layer cascade — base PI + H∞ offline-designed
+  feedback controller (ODFC) + normalised LMS adaptive compensator (CSIA) for force ripple at
+  velocity reversal and load stiffness variation.
+- Gap: All 12 current EHFS controllers are generic toolbox algorithms; no H∞ ODFC or nLMS class.
+- Fix: Python-only. Linearise 5-state EHFS plant around operating point (F0=3000N, x_v0=0);
+  use `ctrl.DiscreteHinf.solve()` + `ctrl.MixedSensitivity.build()` offline at construction.
+  `HinfODFCCtrl` (#13): H∞ controller as standalone feedback. `HinfCascadeCtrl` (#14): PI +
+  H∞ (additive) + nLMS adaptive correction (additive). Fall back to PID if H∞ synthesis infeasible.
+  Local `NormalisedLMS` class (~30 lines): regressor shift-register + normalised update rule.
+- Files: `case-study/Tracking Control of Electro-Hydraulic Force Servo Systems/sim/main.py`
+  (add 2 controllers; 12→14; update docstring 60→70 runs).
+- Non-obvious: `DiscreteHinf` takes `HinfResult` in its constructor — use `ctrl.DiscreteHinf(result)`.
+  EHFS Ts=0.5ms → linearised state-space and H∞ design must use the same Ts.
+
+---
+
+**C6 — Active Suspension 6×6 EV Full Model (new Python-only case study)**
+
+- Paper: Aydogan & Yildiz 2025 (same as C3). Full 20-DOF (40-state) system: 15-DOF body
+  (Z, θ, φ + 6 wheels + 6 in-wheel motors) + 5-DOF human biodynamic model (seat/pelvis/lower
+  torso/upper torso/head). Paper proposes GA/PSO/DE-optimised PD control for all 6 wheel actuators.
+- Directory: `case-study/Active Suspension 6x6 EV Full Model/` (Python-only; not in CMake or compile.bat).
+- Plant: `EV6x6Plant` in `sim/ev6x6_plant.py` — assembles M (20×20 diagonal), K and C (20×20,
+  includes pitch/roll-to-wheel coupling via geometric offsets a_i, e_i), B_road (20×6), B_act (20×6);
+  state-space form `A=[0, I; -M^{-1}K, -M^{-1}C]` (40×40); discretised at Ts=0.005s via ZOH.
+- Road model: `sim/road_model.py` — 2 independent channels with time-delay ring buffer for middle
+  (delay=L1/v) and rear (delay=(L1+L2)/v) axles. L1=L2=2.0m, v=22.2m/s (80 km/h).
+- Parameters: per-corner values inherit from 2-DOF study (k_s=16000, c_s=980, k_t=160000,
+  M_w=36kg); human model from ISO 2631 Guide E / Griffin 1990; full-vehicle mass sourced from
+  paper Table 2. Note in README if any parameters are estimated.
+- Controllers (18): PassiveCtrl, PDCtrl, GAOptPDCtrl (paper's method), PSOOptPDCtrl, DEOptPDCtrl,
+  PIDCtrl, LQRCtrl (full 40-state DARE), LQGCtrl (partial obs), MPCCtrl (12-state reduced),
+  ADRCCtrl, SMCCtrl, MRACCtrl, FuzzyPIDCtrl, TubeMPCCtrl, ILCCtrl, CBFCtrl, L1AdaptiveCtrl,
+  ScenarioMPCCtrl. Per-wheel strategies = 6 independent SISO instances; centralised = full model.
+- 5 scenarios matching 2-DOF study (step bump, sine resonance, rough road, speed bump, comfort).
+  Total: 18 × 5 = 90 runs.
+- CSV columns: `t, Z_body, Z_head, theta, phi, Z_wr1-3, Z_wl1-3, F_act_1-6, z_r_1-6, seat_accel,
+  head_accel, body_accel, iae_cumulative`.
+- Key tribal knowledge: MPC/TubeMPC/ScenarioMPC use a 12-state reduced model for prediction;
+  the full 40-state plant always runs for simulation (they diverge). LQR uses the full system
+  (40 states, 6 inputs) — DARE is feasible since B_act has rank 6 (independent wheel actuators).
+  ADRC omega_o*Ts < 0.5 constraint at Ts=0.005s → omega_o < 100.

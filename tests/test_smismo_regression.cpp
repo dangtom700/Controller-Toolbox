@@ -88,6 +88,8 @@ static SmismoResult runSmismoSim(smismo::ControllerBase&    ctrl,
         double u_ctrl = ctrl.compute(plant.state(), x_ref);
         if (!std::isfinite(u_ctrl)) u_ctrl = 0.0;
 
+        ctrl.beforePlantStep(plant);  // DOBEnergyCtrl adjusts P_s; no-op for others
+
         const auto cmd = alloc.allocate(u_ctrl, plant.state());
         plant.step(cmd.u1, cmd.u2, F_ext);
     }
@@ -209,6 +211,7 @@ TEST_CASE("SMISMO: off-side backpressure regulated near P_bd during extension",
         const double t = k * p.Ts;
         double u_ctrl = ctrl.compute(plant.state(), X_REF_1);
         if (!std::isfinite(u_ctrl)) u_ctrl = 0.0;
+        ctrl.beforePlantStep(plant);
         const auto cmd = alloc.allocate(u_ctrl, plant.state());
         plant.step(cmd.u1, cmd.u2, F_EXT);
 
@@ -226,10 +229,10 @@ TEST_CASE("SMISMO: off-side backpressure regulated near P_bd during extension",
 }
 
 // ---------------------------------------------------------------------------
-// TEST 6 - Smoke: all 12 controllers run 200 steps without exception or NaN
+// TEST 6 - Smoke: all 13 controllers run 200 steps without exception or NaN
 // ---------------------------------------------------------------------------
 
-TEST_CASE("SMISMO: all 12 controllers complete 200 steps without exception or NaN",
+TEST_CASE("SMISMO: all 13 controllers complete 200 steps without exception or NaN",
           "[smismo][regression][smoke]")
 {
     smismo::PlantParams p;
@@ -248,8 +251,9 @@ TEST_CASE("SMISMO: all 12 controllers complete 200 steps without exception or Na
     ctrls.push_back(std::make_unique<L1Ctrl>(p));
     ctrls.push_back(std::make_unique<GainSchedCtrl>(p));
     ctrls.push_back(std::make_unique<NMPCCtrl>(p));
+    ctrls.push_back(std::make_unique<DOBEnergyCtrl>(p));
 
-    REQUIRE(ctrls.size() == 12u);
+    REQUIRE(ctrls.size() == 13u);
 
     constexpr double T_SMOKE = 0.2;  // 200 steps at Ts = 1 ms
 

@@ -696,6 +696,42 @@ assert _bo_result.cost < 8.0, f"BO should improve: cost={_bo_result.cost}"
 assert 'bayesian_optimizer' in ctrl.features()
 print('BayesianOptimizer smoke test passed.')
 
+# ---- GeneticAlgorithm -------------------------------------------------------
+import numpy as _npga
+_gap = ctrl.GAParams()
+_gap.n_dim = 2; _gap.population = 20; _gap.max_gen = 30; _gap.seed = 1
+_gap.lower = _npga.array([0.0, 0.0]); _gap.upper = _npga.array([5.0, 5.0])
+_ga = ctrl.GeneticAlgorithm(_gap)
+_ga_result = _ga.optimize(lambda x: float((x[0]-2.0)**2 + (x[1]-3.0)**2))
+assert _npga.isfinite(_ga_result.cost), f"GA result cost not finite"
+assert _ga_result.cost < 2.0, f"GA should converge near min: cost={_ga_result.cost}"
+assert 'genetic_algorithm' in ctrl.features()
+print('GeneticAlgorithm smoke test passed.')
+
+# ---- ParticleSwarmOptimizer -------------------------------------------------
+import numpy as _nppso
+_psop = ctrl.PSOParams()
+_psop.n_dim = 2; _psop.n_particles = 15; _psop.max_iter = 30; _psop.seed = 2
+_psop.lower = _nppso.array([0.0, 0.0]); _psop.upper = _nppso.array([5.0, 5.0])
+_pso = ctrl.ParticleSwarmOptimizer(_psop)
+_pso_result = _pso.optimize(lambda x: float((x[0]-2.0)**2 + (x[1]-3.0)**2))
+assert _nppso.isfinite(_pso_result.cost), f"PSO result cost not finite"
+assert _pso_result.cost < 2.0, f"PSO should converge near min: cost={_pso_result.cost}"
+assert 'particle_swarm' in ctrl.features()
+print('ParticleSwarmOptimizer smoke test passed.')
+
+# ---- DifferentialEvolution --------------------------------------------------
+import numpy as _npde
+_dep = ctrl.DEParams()
+_dep.n_dim = 2; _dep.population = 15; _dep.max_gen = 30; _dep.seed = 3
+_dep.lower = _npde.array([0.0, 0.0]); _dep.upper = _npde.array([5.0, 5.0])
+_de = ctrl.DifferentialEvolution(_dep)
+_de_result = _de.optimize(lambda x: float((x[0]-2.0)**2 + (x[1]-3.0)**2))
+assert _npde.isfinite(_de_result.cost), f"DE result cost not finite"
+assert _de_result.cost < 2.0, f"DE should converge near min: cost={_de_result.cost}"
+assert 'differential_evolution' in ctrl.features()
+print('DifferentialEvolution smoke test passed.')
+
 # ---- ControllerRegistry (M2) -----------------------------------------------
 assert ctrl.registry_count() > 0, "Registry should have entries after umbrella include"
 assert ctrl.registry_has('pid'),  "pid should be registered"

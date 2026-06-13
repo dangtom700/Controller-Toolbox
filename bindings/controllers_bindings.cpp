@@ -17,6 +17,9 @@
 #include "DynaController.h"
 #include "ScenarioMPC.h"
 #include "BayesianOptimizer.h"
+#include "GeneticAlgorithm.h"
+#include "ParticleSwarmOptimizer.h"
+#include "DifferentialEvolution.h"
 #include "HybridModel.h"
 #include "HybridMPC.h"
 #include "HybridModelTrainer.h"
@@ -919,6 +922,121 @@ Usage
              },
              py::arg("cost"), py::arg("x0"),
              "Minimise cost(params) starting from x0. Returns TunerResult.");
+
+    // -----------------------------------------------------------------------
+    // GeneticAlgorithm
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::GAParams>(m, "GAParams", "Parameters for GeneticAlgorithm.")
+        .def(py::init<>())
+        .def_readwrite("n_dim",       &ctrl::GAParams::n_dim)
+        .def_readwrite("population",  &ctrl::GAParams::population)
+        .def_readwrite("max_gen",     &ctrl::GAParams::max_gen)
+        .def_readwrite("crossover",   &ctrl::GAParams::crossover)
+        .def_readwrite("mutation",    &ctrl::GAParams::mutation)
+        .def_readwrite("alpha",       &ctrl::GAParams::alpha)
+        .def_readwrite("elite_frac",  &ctrl::GAParams::elite_frac)
+        .def_readwrite("tol",         &ctrl::GAParams::tol)
+        .def_readwrite("lower",       &ctrl::GAParams::lower)
+        .def_readwrite("upper",       &ctrl::GAParams::upper)
+        .def_readwrite("seed",        &ctrl::GAParams::seed);
+
+    py::class_<ctrl::GeneticAlgorithm>(m, "GeneticAlgorithm", R"doc(
+Real-valued Genetic Algorithm: BLX-alpha crossover, tournament selection, elitism.
+Minimises a scalar cost function over a box-bounded parameter space.
+
+Usage
+-----
+>>> p = ctrl.GAParams(); p.n_dim = 2; p.lower = np.array([0.,0.]); p.upper = np.array([5.,5.])
+>>> ga = ctrl.GeneticAlgorithm(p)
+>>> r = ga.optimize(lambda x: (x[0]-2.)**2 + (x[1]-3.)**2)
+>>> print(r.params, r.cost)
+)doc")
+        .def(py::init<const ctrl::GAParams&>(), py::arg("params"))
+        .def("optimize",
+             [](ctrl::GeneticAlgorithm& self, py::object cost_py) {
+                 auto fn = [cost_py](const Eigen::VectorXd& p) -> double {
+                     return cost_py(p).cast<double>();
+                 };
+                 return self.optimize(fn);
+             },
+             py::arg("cost"),
+             "Minimise cost(params) over the box [lower, upper]. Returns TunerResult.");
+
+    // -----------------------------------------------------------------------
+    // ParticleSwarmOptimizer
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::PSOParams>(m, "PSOParams", "Parameters for ParticleSwarmOptimizer.")
+        .def(py::init<>())
+        .def_readwrite("n_dim",        &ctrl::PSOParams::n_dim)
+        .def_readwrite("n_particles",  &ctrl::PSOParams::n_particles)
+        .def_readwrite("max_iter",     &ctrl::PSOParams::max_iter)
+        .def_readwrite("w",            &ctrl::PSOParams::w)
+        .def_readwrite("c1",           &ctrl::PSOParams::c1)
+        .def_readwrite("c2",           &ctrl::PSOParams::c2)
+        .def_readwrite("v_frac",       &ctrl::PSOParams::v_frac)
+        .def_readwrite("tol",          &ctrl::PSOParams::tol)
+        .def_readwrite("lower",        &ctrl::PSOParams::lower)
+        .def_readwrite("upper",        &ctrl::PSOParams::upper)
+        .def_readwrite("seed",         &ctrl::PSOParams::seed);
+
+    py::class_<ctrl::ParticleSwarmOptimizer>(m, "ParticleSwarmOptimizer", R"doc(
+Particle Swarm Optimizer with Clerc-Kennedy constriction coefficients.
+Suitable for continuous box-bounded optimisation problems.
+
+Usage
+-----
+>>> p = ctrl.PSOParams(); p.n_dim = 2; p.lower = np.array([0.,0.]); p.upper = np.array([5.,5.])
+>>> pso = ctrl.ParticleSwarmOptimizer(p)
+>>> r = pso.optimize(lambda x: (x[0]-2.)**2 + (x[1]-3.)**2)
+>>> print(r.params, r.cost)
+)doc")
+        .def(py::init<const ctrl::PSOParams&>(), py::arg("params"))
+        .def("optimize",
+             [](ctrl::ParticleSwarmOptimizer& self, py::object cost_py) {
+                 auto fn = [cost_py](const Eigen::VectorXd& p) -> double {
+                     return cost_py(p).cast<double>();
+                 };
+                 return self.optimize(fn);
+             },
+             py::arg("cost"),
+             "Minimise cost(params) over the box [lower, upper]. Returns TunerResult.");
+
+    // -----------------------------------------------------------------------
+    // DifferentialEvolution
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::DEParams>(m, "DEParams", "Parameters for DifferentialEvolution.")
+        .def(py::init<>())
+        .def_readwrite("n_dim",       &ctrl::DEParams::n_dim)
+        .def_readwrite("population",  &ctrl::DEParams::population)
+        .def_readwrite("max_gen",     &ctrl::DEParams::max_gen)
+        .def_readwrite("F",           &ctrl::DEParams::F)
+        .def_readwrite("CR",          &ctrl::DEParams::CR)
+        .def_readwrite("tol",         &ctrl::DEParams::tol)
+        .def_readwrite("lower",       &ctrl::DEParams::lower)
+        .def_readwrite("upper",       &ctrl::DEParams::upper)
+        .def_readwrite("seed",        &ctrl::DEParams::seed);
+
+    py::class_<ctrl::DifferentialEvolution>(m, "DifferentialEvolution", R"doc(
+Differential Evolution (DE/rand/1/bin) with boundary reflection.
+Robust global optimizer for noisy and multimodal cost functions.
+
+Usage
+-----
+>>> p = ctrl.DEParams(); p.n_dim = 2; p.lower = np.array([0.,0.]); p.upper = np.array([5.,5.])
+>>> de = ctrl.DifferentialEvolution(p)
+>>> r = de.optimize(lambda x: (x[0]-2.)**2 + (x[1]-3.)**2)
+>>> print(r.params, r.cost)
+)doc")
+        .def(py::init<const ctrl::DEParams&>(), py::arg("params"))
+        .def("optimize",
+             [](ctrl::DifferentialEvolution& self, py::object cost_py) {
+                 auto fn = [cost_py](const Eigen::VectorXd& p) -> double {
+                     return cost_py(p).cast<double>();
+                 };
+                 return self.optimize(fn);
+             },
+             py::arg("cost"),
+             "Minimise cost(params) over the box [lower, upper]. Returns TunerResult.");
 
     // -----------------------------------------------------------------------
     // TubeMPC - robust MPC with mRPI tube (Mayne, Seron, Rakovic 2005)

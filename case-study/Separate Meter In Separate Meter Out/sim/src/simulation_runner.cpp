@@ -46,6 +46,8 @@ void runSimulation(const PlantParams&    p,
         double u_ctrl = ctrl.compute(plant.state(), x_ref);
         if (!std::isfinite(u_ctrl)) u_ctrl = 0.0;   // NaN guard: hold valves shut
 
+        ctrl.beforePlantStep(plant);   // DOBEnergyCtrl adjusts P_s here; no-op for others
+
         const ValveAllocator::Cmd cmd = alloc.allocate(u_ctrl, plant.state());
 
         const double err = x_ref - plant.x_L();

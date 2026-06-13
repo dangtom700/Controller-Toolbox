@@ -454,4 +454,70 @@ double NMPCCtrl::compute(const SmismoPlant::State& state, double x_ref)
 
 void NMPCCtrl::reset() { nmpc_->reset(); }
 
+// ===========================================================================
+// 13. DOBEnergyCtrl
+//
+// Second-order disturbance observer (Chen 2018 Eq. 29-30) estimates the
+// external load force F_hat from P_1, P_2, v_L without differentiating
+// acceleration. Adaptive supply pressure reduces hydraulic energy in s05.
+//
+// Observer (forward Euler at Ts):
+//   z_dot = -L * z - L^2 * (A1*P1 - A2*P2)
+//   F_hat = z + L * (A1*P1 - A2*P2)
+//
+// Adaptive supply pressure (Eq. 37 spirit):
+//   P_s_cmd = |F_hat|/(A1+A2) + |v_L|*B_v/(A_avg) + P_margin
+//   P_s_cmd clamped to [P_MIN_CMD, P_MAX_CMD]
+// ===========================================================================
+
+DOBEnergyCtrl::DOBEnergyCtrl(const PlantParams& p)
+    : p_(p),
+      P_s_cmd_(p.P_s),
+      pid_(ctrl::PIDParams{
+          .Kp   = 12.0,
+          .Ki   = 0.5,
+          .Kd   = 0.0,
+          .N    = 5.0,
+          .uMin = -U_MAX,
+          .uMax =  U_MAX,
+          .Kb   = 1.0
+      }, p.Ts)
+{}
+
+double DOBEnergyCtrl::compute(const SmismoPlant::State& state, double x_ref)
+{
+    const double P1  = state(2);
+    const double P2  = state(3);
+    const double v_L = state(1);
+
+    // Force balance proxy: F_cyl = A1*P1 - A2*P2  (gravity + friction included)
+    const double F_cyl = p_.A1 * P1 - p_.A2 * P2;
+
+    // Observer step (forward Euler, Ts = 1 ms)
+    const double z_dot = -L_OBS * z_obs_ - L_OBS * L_OBS * F_cyl;
+    z_obs_  += z_dot * p_.Ts;
+    F_hat_   = z_obs_ + L_OBS * F_cyl;
+
+    // Adaptive supply pressure — store for beforePlantStep() to apply
+    P_s_cmd_ = std::clamp(
+        std::abs(F_hat_) / (p_.A1 + p_.A2) + P_MARGIN,
+        P_MIN_CMD, P_MAX_CMD);
+
+    // Position control: same cascade structure as PIDPosCtrl
+    return pid_.compute(x_ref - state(0));
+}
+
+void DOBEnergyCtrl::beforePlantStep(SmismoPlant& plant)
+{
+    plant.setSupplyPressure(P_s_cmd_);
+}
+
+void DOBEnergyCtrl::reset()
+{
+    pid_.reset();
+    z_obs_   = 0.0;
+    F_hat_   = 0.0;
+    P_s_cmd_ = p_.P_s;
+}
+
 } // namespace smismo

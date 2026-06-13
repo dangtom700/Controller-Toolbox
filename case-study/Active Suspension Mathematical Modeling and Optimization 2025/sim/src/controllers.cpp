@@ -620,4 +620,181 @@ double DynaSuspCtrl::compute(const Vector4d& state, double /*z_r*/)
 
 void DynaSuspCtrl::reset() { dyna_.reset(); }
 
+// ===========================================================================
+// Shared helper for metaheuristic PID tuning (GA / PSO / DE)
+//
+// Runs a short 200-step (1.0 s) step-bump simulation with a given DiscretePID
+// and returns a cost combining RMS body displacement and peak actuator usage.
+//
+// The simulation uses the full 4-state quarter-car plant (forward Euler on the
+// linearised system, matching the RK4 plant at the accuracy needed for offline
+// tuning). Road input z_r = 0.025 m step starting at k=0.
+// ===========================================================================
+
+static ctrl::StateSpace makeFull4SSForTuning(const PlantParams& p)
+{
+    // 4-state continuous: [z_s, dz_s, z_u, dz_u], input F_act, road via Bd.
+    Eigen::MatrixXd Ac(4,4);
+    Ac << 0,           1,          0,           0,
+          -p.k_s/p.m_s, -p.c_s/p.m_s, p.k_s/p.m_s, p.c_s/p.m_s,
+          0,           0,          0,           1,
+          p.k_s/p.m_u, p.c_s/p.m_u, -(p.k_s+p.k_t)/p.m_u, -p.c_s/p.m_u;
+    Eigen::MatrixXd Bc(4,1); Bc << 0.0, 1.0/p.m_s, 0.0, -1.0/p.m_u;
+    Eigen::MatrixXd Cc(1,4); Cc << 1.0, 0.0, 0.0, 0.0;
+    Eigen::MatrixXd Dc(1,1); Dc << 0.0;
+    ctrl::StateSpace ss_c(Ac, Bc, Cc, Dc, 0.0);
+    return ctrl::c2d(ss_c, p.Ts, ctrl::C2dMethod::ZOH);
+}
+
+static double suspPIDCost(const Eigen::VectorXd& gains, const PlantParams& pp)
+{
+    const double Kp = gains(0);
+    const double Ki = gains(1);
+    const double Kd = gains(2);
+
+    ctrl::PIDParams pidp;
+    pidp.Kp = Kp; pidp.Ki = Ki; pidp.Kd = Kd;
+    pidp.N = 10.0; pidp.uMin = -pp.F_max; pidp.uMax = pp.F_max; pidp.Kb = 1.0;
+    ctrl::DiscretePID pid(pidp, pp.Ts);
+
+    ctrl::StateSpace sys = makeFull4SSForTuning(pp);
+    const auto& Ad = sys.A();
+    const auto& Bd = sys.B();
+
+    Eigen::Vector4d x = Eigen::Vector4d::Zero();
+    const double z_r = 0.025;  // 25 mm step bump
+    const int N_STEPS = 200;
+
+    double iae = 0.0, max_f = 0.0;
+    for (int k = 0; k < N_STEPS; ++k) {
+        // Road disturbance enters via wheel-tyre spring: Bz_r = [0, 0, 0, k_t/m_u]*z_r
+        // Incorporated into the effective wheel ODE
+        double z_s  = x(0);
+        double z_u  = x(2);
+        double dz_u = x(3);
+
+        double u = pid.compute(-z_s);   // r=0, error = -z_s
+        u = std::clamp(u, -pp.F_max, pp.F_max);
+
+        Eigen::Vector4d x_new = Ad * x + Bd.col(0) * u;
+        // Add road input disturbance to wheel dynamics (tyre spring k_t)
+        x_new(2) += 0.0;  // z_u from SS already; tyre adds to dz_u row
+        // Apply tyre force to wheel velocity row in forward Euler correction:
+        x_new(3) += (pp.k_t / pp.m_u) * z_r * pp.Ts;
+
+        x = x_new;
+        iae += std::abs(z_s);
+        if (std::abs(u) > max_f) max_f = std::abs(u);
+    }
+    return iae * pp.Ts + 0.05 * max_f / pp.F_max;
+}
+
+static ctrl::PIDParams tuneWithCost(const PlantParams& pp,
+                                    std::function<ctrl::TunerResult(ctrl::AutoTuner::CostFn)> run)
+{
+    auto fn = [&pp](const Eigen::VectorXd& gains) { return suspPIDCost(gains, pp); };
+    auto r  = run(fn);
+
+    ctrl::PIDParams p;
+    p.Kp = r.params(0); p.Ki = r.params(1); p.Kd = r.params(2);
+    p.N   = 10.0; p.uMin = -pp.F_max; p.uMax = pp.F_max; p.Kb = 1.0;
+    return p;
+}
+
+// ===========================================================================
+// 16. GAOptPIDCtrl
+// ===========================================================================
+
+GAOptPIDCtrl::GAOptPIDCtrl(const PlantParams& p)
+    : pid_([&]() {
+        ctrl::GAParams gp;
+        gp.n_dim      = 3;
+        gp.population = 30;
+        gp.max_gen    = 60;
+        gp.lower = Eigen::Vector3d(0.0,  0.0,  0.0);
+        gp.upper = Eigen::Vector3d(5000.0, 500.0, 1000.0);
+        gp.seed  = 11;
+
+        ctrl::GeneticAlgorithm ga(gp);
+        auto fn = [&p](const Eigen::VectorXd& gains) { return suspPIDCost(gains, p); };
+        auto r  = ga.optimize(fn);
+
+        ctrl::PIDParams pp;
+        pp.Kp = r.params(0); pp.Ki = r.params(1); pp.Kd = r.params(2);
+        pp.N  = 10.0; pp.uMin = -p.F_max; pp.uMax = p.F_max; pp.Kb = 1.0;
+        return ctrl::DiscretePID(pp, p.Ts);
+      }())
+{}
+
+double GAOptPIDCtrl::compute(const Vector4d& state, double /*z_r*/)
+{
+    return std::clamp(pid_.compute(-state(0)), -F_ACT_MAX, F_ACT_MAX);
+}
+
+void GAOptPIDCtrl::reset() { pid_.reset(); }
+
+// ===========================================================================
+// 17. PSOOptPIDCtrl
+// ===========================================================================
+
+PSOOptPIDCtrl::PSOOptPIDCtrl(const PlantParams& p)
+    : pid_([&]() {
+        ctrl::PSOParams pp;
+        pp.n_dim       = 3;
+        pp.n_particles = 20;
+        pp.max_iter    = 60;
+        pp.lower = Eigen::Vector3d(0.0,  0.0,  0.0);
+        pp.upper = Eigen::Vector3d(5000.0, 500.0, 1000.0);
+        pp.seed  = 22;
+
+        ctrl::ParticleSwarmOptimizer pso(pp);
+        auto fn = [&p](const Eigen::VectorXd& gains) { return suspPIDCost(gains, p); };
+        auto r  = pso.optimize(fn);
+
+        ctrl::PIDParams pidp;
+        pidp.Kp = r.params(0); pidp.Ki = r.params(1); pidp.Kd = r.params(2);
+        pidp.N  = 10.0; pidp.uMin = -p.F_max; pidp.uMax = p.F_max; pidp.Kb = 1.0;
+        return ctrl::DiscretePID(pidp, p.Ts);
+      }())
+{}
+
+double PSOOptPIDCtrl::compute(const Vector4d& state, double /*z_r*/)
+{
+    return std::clamp(pid_.compute(-state(0)), -F_ACT_MAX, F_ACT_MAX);
+}
+
+void PSOOptPIDCtrl::reset() { pid_.reset(); }
+
+// ===========================================================================
+// 18. DEOptPIDCtrl
+// ===========================================================================
+
+DEOptPIDCtrl::DEOptPIDCtrl(const PlantParams& p)
+    : pid_([&]() {
+        ctrl::DEParams dp;
+        dp.n_dim      = 3;
+        dp.population = 20;
+        dp.max_gen    = 60;
+        dp.lower = Eigen::Vector3d(0.0,  0.0,  0.0);
+        dp.upper = Eigen::Vector3d(5000.0, 500.0, 1000.0);
+        dp.seed  = 33;
+
+        ctrl::DifferentialEvolution de(dp);
+        auto fn = [&p](const Eigen::VectorXd& gains) { return suspPIDCost(gains, p); };
+        auto r  = de.optimize(fn);
+
+        ctrl::PIDParams pidp;
+        pidp.Kp = r.params(0); pidp.Ki = r.params(1); pidp.Kd = r.params(2);
+        pidp.N  = 10.0; pidp.uMin = -p.F_max; pidp.uMax = p.F_max; pidp.Kb = 1.0;
+        return ctrl::DiscretePID(pidp, p.Ts);
+      }())
+{}
+
+double DEOptPIDCtrl::compute(const Vector4d& state, double /*z_r*/)
+{
+    return std::clamp(pid_.compute(-state(0)), -F_ACT_MAX, F_ACT_MAX);
+}
+
+void DEOptPIDCtrl::reset() { pid_.reset(); }
+
 } // namespace susp

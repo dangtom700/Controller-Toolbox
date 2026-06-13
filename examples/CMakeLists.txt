@@ -112,6 +112,9 @@ add_example(ex80_grey_box_estimator)
 # Phase 2: Hybrid Models (H1/H2/H4)
 add_example(ex81_hybrid_model_mpc)
 
+# Metaheuristic optimisers (GA / PSO / DE)
+add_example(ex82_metaheuristics)
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)

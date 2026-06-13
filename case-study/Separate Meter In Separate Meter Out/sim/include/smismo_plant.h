@@ -130,6 +130,11 @@ public:
     double Q_supply() const { return Q_s_last_; }
     double energy()   const { return energy_J_; }
 
+    // Dynamic supply pressure (DOBEnergyCtrl adjusts this each step).
+    // Other controllers leave it unchanged (defaults to p_.P_s at construction).
+    void   setSupplyPressure(double P_s_pa) { P_s_dyn_ = P_s_pa; }
+    double supplyPressure()  const { return P_s_dyn_; }
+
     // Signed orifice flows at the current state [m^3/s]
     double Q1() const;
     double Q2() const;
@@ -145,6 +150,7 @@ private:
     State       x_;
     double      Q_s_last_ = 0.0;
     double      energy_J_ = 0.0;
+    double      P_s_dyn_  = 0.0;  // set to p_.P_s in constructor; adjustable via setSupplyPressure()
 
     // Signed, regularised orifice characteristic: dp/sqrt(|dp|+eps) ~ sgn(dp)*sqrt(|dp|)
     double flowSqrt(double dp) const;

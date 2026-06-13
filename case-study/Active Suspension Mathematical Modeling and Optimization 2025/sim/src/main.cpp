@@ -71,6 +71,9 @@ int main(int argc, char* argv[])
     controllers.push_back(std::make_unique<susp::L1AdaptiveSuspCtrl>(plant));
     controllers.push_back(std::make_unique<susp::ScenarioMPCSuspCtrl>(plant));
     controllers.push_back(std::make_unique<susp::DynaSuspCtrl>(plant));
+    controllers.push_back(std::make_unique<susp::GAOptPIDCtrl>(plant));
+    controllers.push_back(std::make_unique<susp::PSOOptPIDCtrl>(plant));
+    controllers.push_back(std::make_unique<susp::DEOptPIDCtrl>(plant));
 
     // -- Run all pairs --------------------------------------------------------
     int total = static_cast<int>(scen_files.size() * controllers.size());

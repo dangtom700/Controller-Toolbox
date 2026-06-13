@@ -98,17 +98,18 @@ ScenarioConfig ScenarioConfig::fromJson(const std::string& path) {
 // ---------------------------------------------------------------------------
 // SmismoPlant
 // ---------------------------------------------------------------------------
-SmismoPlant::SmismoPlant(const PlantParams& p) : p_(p) {
+SmismoPlant::SmismoPlant(const PlantParams& p) : p_(p), P_s_dyn_(p.P_s) {
     reset(0.05, 2.5e6, 2.0e6);
 }
 
 void SmismoPlant::reset(double x_init, double P1_init, double P2_init) {
     x_.setZero();
-    x_(0) = std::clamp(x_init, 0.0, p_.stroke);
-    x_(2) = P1_init;
-    x_(3) = P2_init;
+    x_(0)     = std::clamp(x_init, 0.0, p_.stroke);
+    x_(2)     = P1_init;
+    x_(3)     = P2_init;
     Q_s_last_ = 0.0;
     energy_J_ = 0.0;
+    P_s_dyn_  = p_.P_s;  // restore to nominal on reset
 }
 
 double SmismoPlant::flowSqrt(double dp) const {
@@ -124,7 +125,7 @@ double SmismoPlant::orificeFlow(double xv, double P_chamber, double Q_nom) const
     //   xv <  0: chamber discharges to tank, DP = P_chamber - P_r
     const double K_q = Q_nom / std::sqrt(p_.DP_nom);
     if (xv >= 0.0)
-        return K_q * xv * flowSqrt(p_.P_s - P_chamber);
+        return K_q * xv * flowSqrt(P_s_dyn_ - P_chamber);
     return K_q * xv * flowSqrt(P_chamber - p_.P_r);
 }
 
@@ -219,7 +220,7 @@ void SmismoPlant::step(double u1, double u2, double F_ext) {
         if (x_(4) > 0.0) Q_s += std::max(0.0, q1);
         if (x_(6) > 0.0) Q_s += std::max(0.0, q2);
         Q_s_last_  = Q_s;
-        energy_J_ += p_.P_s * Q_s * dt;
+        energy_J_ += P_s_dyn_ * Q_s * dt;
     }
 }
 

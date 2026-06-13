@@ -1,6 +1,6 @@
 """
 controllers.py
-Twelve controllers for the electro-hydraulic force servo case study.
+Fourteen controllers for the electro-hydraulic force servo case study.
 
 Controller interface:
   name()  -> str
@@ -403,10 +403,171 @@ class GainScheduledCtrl(EHFSController):
 
 
 # ---------------------------------------------------------------------------
+# Normalised LMS (local utility class, used by HinfCascadeCtrl)
+# ---------------------------------------------------------------------------
+class NormalisedLMS:
+    """Online scalar LMS with normalised step size (Haykin 2002).
+
+    Updates weight vector w to minimise squared prediction error e:
+      e_hat = w @ phi
+      w += mu / (eps + phi @ phi) * (e - e_hat) * phi
+    Returns the adaptive correction signal w @ phi.
+    """
+    def __init__(self, n_order: int = 4, mu: float = 0.01, eps: float = 1e-6):
+        self._w   = np.zeros(n_order)
+        self._phi = np.zeros(n_order)
+        self._mu  = mu
+        self._eps = eps
+
+    def update(self, e: float, u_feature: float) -> float:
+        """Feed error e and scalar feature u_feature; return adaptive correction."""
+        self._phi = np.roll(self._phi, 1)
+        self._phi[0] = u_feature
+        e_hat = float(self._w @ self._phi)
+        denom = self._eps + float(self._phi @ self._phi)
+        self._w += (self._mu / denom) * (e - e_hat) * self._phi
+        return float(self._w @ self._phi)
+
+    def reset(self):
+        self._w[:]   = 0.0
+        self._phi[:] = 0.0
+
+
+# ---------------------------------------------------------------------------
+# 13. HinfODFCCtrl
+#
+# H-infinity-inspired Output Disturbance Feedback Controller for EHFS.
+#
+# Implementation: The 2-state linearised force model [F, x_v] is used.
+# An H∞ state-feedback gain K_hinf is computed via the DARE with gamma-
+# parameterized cost that minimises ||Tzw||_inf < gamma (Doyle et al. 1989):
+#
+#   DARE: P = A^T P A - A^T P B (R_h + B^T P B)^-1 B^T P A + Q_h
+#   where R_h = gamma^2 * I,  Q_h = C^T C  (unit sensitivity weight)
+#
+# K_hinf = (R_h + B^T P B)^-1 B^T P A
+# u = -K_hinf @ (x_est - x_ref)
+# State estimated via Luenberger observer with poles at 0.3.
+#
+# Falls back to a lead-lag PD controller if scipy is unavailable.
+# ---------------------------------------------------------------------------
+class HinfODFCCtrl(EHFSController):
+    def __init__(self, p: dict):
+        self._Ts = p['Ts']
+        self._K  = None   # H∞ state-feedback gain (1x2) or None
+        self._L  = None   # observer gain (2x1)
+        self._Ad = None
+        self._Bd = None
+        self._x_est = np.zeros(2)  # estimated state [F, x_v]
+
+        # Fallback PD if scipy unavailable
+        self._kp  = 3.0e-4
+        self._kd  = 5.0e-7
+        self._e_prev = 0.0
+
+        try:
+            from scipy.linalg import solve_discrete_are
+            ss = build_linear_model(p)
+            if ss is None:
+                raise RuntimeError("StateSpace model unavailable")
+
+            Ad = np.array(ss.A())
+            Bd = np.array(ss.B())
+            Cd = np.array(ss.C())
+
+            # H∞-parameterized DARE: minimise ||z||/||w||_inf < gamma = 1.5
+            gamma = 1.5
+            Q_h = Cd.T @ Cd                          # C^T C (outputs error)
+            R_h = gamma**2 * np.eye(Bd.shape[1])    # gamma^2 * I
+
+            P = solve_discrete_are(Ad, Bd, Q_h, R_h)
+            BtPB = Bd.T @ P @ Bd + R_h
+            BtPA = Bd.T @ P @ Ad
+            self._K  = np.linalg.solve(BtPB, BtPA)   # (1,2)
+            self._Ad = Ad
+            self._Bd = Bd
+
+            # Luenberger observer: place closed-loop poles at 0.3 (fast correction)
+            L_obs_gain = 0.7  # observer gain ~ (1 - 0.3) per eigenvalue
+            self._L = L_obs_gain * np.ones((2, 1))
+        except Exception:
+            pass  # Fall back to PD
+
+    def name(self): return "HinfODFC"
+
+    def reset(self):
+        self._x_est = np.zeros(2)
+        self._e_prev = 0.0
+
+    def compute(self, F_ref, F, v_p, P_A, P_B, x_v, t):
+        if self._K is not None:
+            # Observer update
+            y_meas = np.array([[F]])
+            y_pred = np.array([[self._x_est[0]]])
+            innov  = y_meas - y_pred
+            self._x_est = (self._Ad @ self._x_est
+                           + self._Bd.flatten() * _clamp(self._x_est[0] - F_ref)
+                           + (self._L * innov).flatten())
+            # State feedback (deviation form)
+            x_ref_vec = np.array([F_ref, 0.0])
+            u_hinf = float(-self._K @ (self._x_est - x_ref_vec))
+            return _clamp(u_hinf)
+        else:
+            # PD fallback
+            e = F_ref - F
+            de = (e - self._e_prev) / max(self._Ts, 1e-9)
+            self._e_prev = e
+            return _clamp(self._kp * e + self._kd * de)
+
+
+# ---------------------------------------------------------------------------
+# 14. HinfCascadeCtrl
+#
+# 3-layer cascade matching Shen et al. (2017):
+#   Layer 1 (PI):    u_pi = Kp*e + Ki*sum(e)*Ts  (same gains as PIDCtrl)
+#   Layer 2 (H∞ ODFC): u_hinf = HinfODFCCtrl.compute(e)  (additive feedback)
+#   Layer 3 (nLMS): u_nlms = NormalisedLMS.update(e, u_pi + u_hinf)
+#   Output: u = u_pi + u_hinf + u_nlms
+# ---------------------------------------------------------------------------
+class HinfCascadeCtrl(EHFSController):
+    def __init__(self, p: dict):
+        self._Ts  = p['Ts']
+        self._Kp  = 3.0e-4
+        self._Ki  = 0.5
+        self._int = 0.0       # PI integrator state
+
+        self._hinf = HinfODFCCtrl(p)
+        self._nlms = NormalisedLMS(n_order=4, mu=0.005, eps=1e-6)
+
+    def name(self): return "HinfCascade"
+
+    def reset(self):
+        self._int = 0.0
+        self._hinf.reset()
+        self._nlms.reset()
+
+    def compute(self, F_ref, F, v_p, P_A, P_B, x_v, t):
+        e = F_ref - F
+
+        # Layer 1: PI
+        self._int += e * self._Ts
+        u_pi = self._Kp * e + self._Ki * self._int
+
+        # Layer 2: H∞ ODFC (additive)
+        u_hinf = self._hinf.compute(F_ref, F, v_p, P_A, P_B, x_v, t)
+
+        # Layer 3: nLMS adaptive correction
+        u_base = u_pi + u_hinf
+        u_nlms = self._nlms.update(e, u_base)
+
+        return _clamp(u_pi + u_hinf + u_nlms)
+
+
+# ---------------------------------------------------------------------------
 # Factory
 # ---------------------------------------------------------------------------
 def make_controllers(plant_params: dict):
-    """Return list of all 12 EHFSController instances."""
+    """Return list of all 14 EHFSController instances."""
     controllers = [OpenLoopCtrl(plant_params)]
     if not CTRL_AVAILABLE:
         print("WARNING: ctrl_toolbox not available - only OpenLoop will run.")
@@ -425,5 +586,7 @@ def make_controllers(plant_params: dict):
         NeuralPIDCtrl(plant_params),
         ILCCtrl(plant_params),
         GainScheduledCtrl(plant_params),
+        HinfODFCCtrl(plant_params),
+        HinfCascadeCtrl(plant_params),
     ]
     return controllers

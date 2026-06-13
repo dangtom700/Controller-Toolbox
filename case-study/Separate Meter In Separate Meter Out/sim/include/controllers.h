@@ -65,6 +65,10 @@ public:
     virtual double compute(const SmismoPlant::State& state, double x_ref) = 0;
     virtual void   reset() = 0;
     virtual std::string name() const = 0;
+
+    // Called by the runner AFTER compute() but BEFORE plant.step().
+    // Override to adjust dynamic plant parameters (e.g., setSupplyPressure).
+    virtual void beforePlantStep(SmismoPlant& /*plant*/) {}
 };
 
 // ---------------------------------------------------------------------------
@@ -225,6 +229,40 @@ public:
     std::string name() const override { return "NonlinearMPC"; }
 private:
     std::unique_ptr<ctrl::NonlinearMPC> nmpc_;
+};
+
+// ---------------------------------------------------------------------------
+// 13. DOBEnergyCtrl - Disturbance Observer (Chen 2018 Eq. 29-30) estimating
+//     load force F_hat, then adapting supply pressure P_s adaptively to
+//     minimise hydraulic power while satisfying backpressure guard P_bd.
+//
+// Note: grey predictor GM(1,1) omitted (requires pump dynamics not in this
+// plant model; P_s is a boundary condition, not a pump state).
+//
+// The controller calls plant.setSupplyPressure() each step; other controllers
+// leave plant supply pressure unchanged (fixed at nominal p_.P_s = 60 bar).
+// ---------------------------------------------------------------------------
+class DOBEnergyCtrl : public ControllerBase {
+public:
+    explicit DOBEnergyCtrl(const PlantParams& p);
+    double compute(const SmismoPlant::State& state, double x_ref) override;
+    void   reset() override;
+    void   beforePlantStep(SmismoPlant& plant) override;
+    std::string name() const override { return "DOBEnergy"; }
+private:
+    PlantParams       p_;
+    ctrl::DiscretePID pid_;     // position controller (same gains as PIDPosCtrl)
+
+    // Second-order DOB state (Chen 2018 Eq. 29-30)
+    double z_obs_   = 0.0;     // observer internal state
+    double F_hat_   = 0.0;     // estimated load force [N]
+    double P_s_cmd_ = 0.0;     // adaptive supply pressure computed last step [Pa]
+
+    // Adaptive pressure constants
+    static constexpr double L_OBS     = 30.0;    // observer gain [1/s]
+    static constexpr double P_MARGIN  = 5.0e5;   // backpressure guard [Pa] (5 bar)
+    static constexpr double P_MIN_CMD = 22.0e5;  // min supply [Pa] (22 bar > P_bd=20bar)
+    static constexpr double P_MAX_CMD = 65.0e5;  // max supply [Pa] (65 bar)
 };
 
 } // namespace smismo

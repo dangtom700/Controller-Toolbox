@@ -1,0 +1,7 @@
+{
+  "id"    : "s02_resonance",
+  "desc"  : "Sine at body resonance 1.3 Hz, 15 mm amplitude. Primary metric: RMS(Z_body).",
+  "T_sim" : 10.0,
+  "amp"   : 0.015,
+  "freq"  : 1.3
+}

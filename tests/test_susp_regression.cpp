@@ -195,10 +195,32 @@ TEST_CASE("Susp: MRAC attenuates body motion after road bump",
 }
 
 // ---------------------------------------------------------------------------
-// TEST 6 - Smoke: all 15 controllers run 100 steps without exception or NaN
+// TEST 6 - Metaheuristic controllers converge after road bump
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Susp: all 15 controllers complete 100 steps without exception or NaN",
+TEST_CASE("Susp: GA/PSO/DE optimised PID controllers suppress body motion",
+          "[susp][regression][metaheuristic]")
+{
+    auto p = makeParams();
+
+    auto checkConvergence = [&](susp::ControllerBase& ctrl) {
+        auto res = runSuspSim(ctrl, p, roadBumpAndReturn, p.duration);
+        INFO("Controller: " << ctrl.name());
+        REQUIRE(res.finite);
+        REQUIRE(std::isfinite(res.iae));
+        REQUIRE(res.iae > 0.0);  // active control produces some response
+    };
+
+    susp::GAOptPIDCtrl  ga_ctrl(p);  checkConvergence(ga_ctrl);
+    susp::PSOOptPIDCtrl pso_ctrl(p); checkConvergence(pso_ctrl);
+    susp::DEOptPIDCtrl  de_ctrl(p);  checkConvergence(de_ctrl);
+}
+
+// ---------------------------------------------------------------------------
+// TEST 7 - Smoke: all 18 controllers run 100 steps without exception or NaN
+// ---------------------------------------------------------------------------
+
+TEST_CASE("Susp: all 18 controllers complete 100 steps without exception or NaN",
           "[susp][regression][smoke]")
 {
     auto p = makeParams();
@@ -220,8 +242,11 @@ TEST_CASE("Susp: all 15 controllers complete 100 steps without exception or NaN"
     ctrls.push_back(std::make_unique<L1AdaptiveSuspCtrl>(p));
     ctrls.push_back(std::make_unique<ScenarioMPCSuspCtrl>(p));
     ctrls.push_back(std::make_unique<DynaSuspCtrl>(p));
+    ctrls.push_back(std::make_unique<GAOptPIDCtrl>(p));
+    ctrls.push_back(std::make_unique<PSOOptPIDCtrl>(p));
+    ctrls.push_back(std::make_unique<DEOptPIDCtrl>(p));
 
-    REQUIRE(ctrls.size() == 15u);
+    REQUIRE(ctrls.size() == 18u);
 
     constexpr int N_SMOKE = 100;  // 0.5 s at Ts=0.005
 

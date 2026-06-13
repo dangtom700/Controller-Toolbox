@@ -119,6 +119,7 @@ for %%T in (
     ex79_registry_monitor
     ex80_grey_box_estimator
     ex81_hybrid_model_mpc
+    ex82_metaheuristics
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

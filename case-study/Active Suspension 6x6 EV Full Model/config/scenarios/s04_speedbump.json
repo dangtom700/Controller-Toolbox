@@ -1,0 +1,8 @@
+{
+  "id"    : "s04_speedbump",
+  "desc"  : "Versine speed bump: 50 mm height, 0.5 m length. Primary metric: max(Z_body).",
+  "T_sim" : 5.0,
+  "h"     : 0.050,
+  "L_bump": 0.5,
+  "t_hit" : 0.5
+}

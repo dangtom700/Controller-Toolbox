@@ -2,7 +2,7 @@
 main.py
 Electro-Hydraulic Force Servo Systems Control Case Study - entry point.
 
-Runs 12 controllers x 5 scenarios = 60 simulations.
+Runs 14 controllers x 5 scenarios = 70 simulations.
 Writes CSV telemetry to ../logs/ and prints a summary table.
 
 Usage (from project root):

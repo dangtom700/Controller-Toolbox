@@ -51,8 +51,8 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    // -- Controllers (12) -----------------------------------------------------
-    static constexpr int N_CONTROLLERS = 12;
+    // -- Controllers (13) -----------------------------------------------------
+    static constexpr int N_CONTROLLERS = 13;
 
     std::vector<std::unique_ptr<smismo::ControllerBase>> controllers;
     controllers.push_back(std::make_unique<smismo::PIDPosCtrl>(plant));
@@ -67,8 +67,9 @@ int main(int argc, char* argv[])
     controllers.push_back(std::make_unique<smismo::L1Ctrl>(plant));
     controllers.push_back(std::make_unique<smismo::GainSchedCtrl>(plant));
     controllers.push_back(std::make_unique<smismo::NMPCCtrl>(plant));
+    controllers.push_back(std::make_unique<smismo::DOBEnergyCtrl>(plant));
 
-    static_assert(N_CONTROLLERS == 12, "Update N_CONTROLLERS when adding/removing controllers");
+    static_assert(N_CONTROLLERS == 13, "Update N_CONTROLLERS when adding/removing controllers");
     if (static_cast<int>(controllers.size()) != N_CONTROLLERS) {
         std::cerr << "Controller count mismatch: expected " << N_CONTROLLERS
                   << " got " << controllers.size() << '\n';
