@@ -662,7 +662,7 @@ def phase_bug_report(log_path):
     The report includes context lines around each failure (or cluster of failures)
     and a summary.  The log file is read with error resilience.
     """
-    keywords = ['fail', 'error', 'exception', 'fatal', 'abort', 'assert', 'nan', 'warn', 'alarm', 'critical', 'Traceback']
+    keywords = ['fail', 'error', 'exception', 'fatal', 'abort', 'assert', 'nan', 'warn', 'alarm', 'critical', 'Traceback', 'skip'] # case-insensitive keywords
     context_lines = 10          # lines before and after each failure marker
 
     # Phrases that mark a line as "passed / no bug" even if a keyword appears in it.

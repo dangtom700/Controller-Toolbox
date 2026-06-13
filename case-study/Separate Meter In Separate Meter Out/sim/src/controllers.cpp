@@ -498,7 +498,7 @@ double DOBEnergyCtrl::compute(const SmismoPlant::State& state, double x_ref)
     z_obs_  += z_dot * p_.Ts;
     F_hat_   = z_obs_ + L_OBS * F_cyl;
 
-    // Adaptive supply pressure — store for beforePlantStep() to apply
+    // Adaptive supply pressure - store for beforePlantStep() to apply
     P_s_cmd_ = std::clamp(
         std::abs(F_hat_) / (p_.A1 + p_.A2) + P_MARGIN,
         P_MIN_CMD, P_MAX_CMD);

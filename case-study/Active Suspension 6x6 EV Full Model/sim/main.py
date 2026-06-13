@@ -1,6 +1,6 @@
 """
 main.py
-Active Suspension 6x6 EV Full Model — entry point.
+Active Suspension 6x6 EV Full Model - entry point.
 
 Runs 18 controllers x 5 scenarios = 90 simulations.
 Writes CSV telemetry to ../logs/ and prints a summary table.
@@ -24,7 +24,7 @@ sys.path.insert(0, _ROOT)
 try:
     import ctrl_toolbox as ctrl
     if not hasattr(ctrl, 'DiscretePID'):
-        raise AttributeError("ctrl_toolbox missing DiscretePID — rebuild bindings")
+        raise AttributeError("ctrl_toolbox missing DiscretePID - rebuild bindings")
 except (ImportError, AttributeError) as _e:
     print(f"SKIP: {_e}")
     sys.exit(0)

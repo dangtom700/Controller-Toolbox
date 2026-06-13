@@ -2,7 +2,7 @@
 controllers.py
 Eighteen controllers for the Active Suspension 6x6 EV Full Model.
 
-Each controller outputs F_act[6] — one active force per wheel corner
+Each controller outputs F_act[6] - one active force per wheel corner
 (order: right-front, right-mid, right-rear, left-front, left-mid, left-rear).
 
 Positive F_act[i] pushes the wheel downward (increases wheel-body gap).
@@ -20,7 +20,7 @@ sys.path.insert(0, _ROOT)
 try:
     import ctrl_toolbox as ctrl
     if not hasattr(ctrl, 'DiscretePID'):
-        raise AttributeError("ctrl_toolbox missing DiscretePID — rebuild bindings")
+        raise AttributeError("ctrl_toolbox missing DiscretePID - rebuild bindings")
 except (ImportError, AttributeError) as _e:
     print(f"SKIP: {_e}")
     sys.exit(0)
@@ -118,7 +118,7 @@ class ControllerBase:
 
 
 # ======================================================================
-# 1. PassiveCtrl — no active force
+# 1. PassiveCtrl - no active force
 # ======================================================================
 
 class PassiveCtrl(ControllerBase):
@@ -127,7 +127,7 @@ class PassiveCtrl(ControllerBase):
 
 
 # ======================================================================
-# 2. PDCtrl — per-wheel PD, hand-tuned
+# 2. PDCtrl - per-wheel PD, hand-tuned
 # ======================================================================
 
 class PDCtrl(ControllerBase):
@@ -150,7 +150,7 @@ class PDCtrl(ControllerBase):
 
 
 # ======================================================================
-# 3–5. Metaheuristic-optimised PD (GA/PSO/DE)
+# 3-5. Metaheuristic-optimised PD (GA/PSO/DE)
 # ======================================================================
 
 class _MetaOptPDBase(ControllerBase):
@@ -218,7 +218,7 @@ class DEOptPDCtrl(_MetaOptPDBase):
 
 
 # ======================================================================
-# 6. PIDCtrl — per-wheel PID (extends PD with integral)
+# 6. PIDCtrl - per-wheel PID (extends PD with integral)
 # ======================================================================
 
 class PIDCtrl(ControllerBase):
@@ -235,7 +235,7 @@ class PIDCtrl(ControllerBase):
 
 
 # ======================================================================
-# 7. LQRCtrl — full-state LQR (DARE on 40-state system)
+# 7. LQRCtrl - full-state LQR (DARE on 40-state system)
 # ======================================================================
 
 class LQRCtrl(ControllerBase):
@@ -269,7 +269,7 @@ class LQRCtrl(ControllerBase):
 
 
 # ======================================================================
-# 8. LQGCtrl — LQR + Kalman filter (partial observations)
+# 8. LQGCtrl - LQR + Kalman filter (partial observations)
 # ======================================================================
 
 class LQGCtrl(ControllerBase):
@@ -334,13 +334,13 @@ class LQGCtrl(ControllerBase):
 
 
 # ======================================================================
-# 9. MPCCtrl — condensed QP on 12-state reduced body+wheel model
+# 9. MPCCtrl - condensed QP on 12-state reduced body+wheel model
 # ======================================================================
 
 class MPCCtrl(ControllerBase):
     def __init__(self, plant: EV6x6Plant, Np: int = 10, Nu: int = 3):
         # Reduced 12-state model: Z_body, theta, phi + 3 right wheels + 3 left wheels
-        # + corresponding velocities (DOFs 0-2, 3-8 → 12 displacement states + 12 vel)
+        # + corresponding velocities (DOFs 0-2, 3-8 -> 12 displacement states + 12 vel)
         # Use ctrl.MPC with MPC params
         self._F_max  = plant.params['F_max']
         self._Ts     = plant.params['Ts']
@@ -390,7 +390,7 @@ class MPCCtrl(ControllerBase):
 
 
 # ======================================================================
-# 10. ADRCCtrl — per-wheel ADRC (omega_o*Ts < 0.5 guard)
+# 10. ADRCCtrl - per-wheel ADRC (omega_o*Ts < 0.5 guard)
 # ======================================================================
 
 class ADRCCtrl(ControllerBase):
@@ -419,7 +419,7 @@ class ADRCCtrl(ControllerBase):
 
 
 # ======================================================================
-# 11. SMCCtrl — per-wheel SMC
+# 11. SMCCtrl - per-wheel SMC
 # ======================================================================
 
 class SMCCtrl(ControllerBase):
@@ -444,7 +444,7 @@ class SMCCtrl(ControllerBase):
 
 
 # ======================================================================
-# 12. MRACCtrl — per-wheel MRAC (set_reference + compute(y))
+# 12. MRACCtrl - per-wheel MRAC (set_reference + compute(y))
 # ======================================================================
 
 class MRACCtrl(ControllerBase):
@@ -473,7 +473,7 @@ class MRACCtrl(ControllerBase):
 
 
 # ======================================================================
-# 13. FuzzyPIDCtrl — per-wheel FuzzyPID
+# 13. FuzzyPIDCtrl - per-wheel FuzzyPID
 # ======================================================================
 
 class FuzzyPIDCtrl(ControllerBase):
@@ -501,7 +501,7 @@ class FuzzyPIDCtrl(ControllerBase):
 
 
 # ======================================================================
-# 14. TubeMPCCtrl — Tube MPC on reduced body model
+# 14. TubeMPCCtrl - Tube MPC on reduced body model
 # ======================================================================
 
 class TubeMPCCtrl(ControllerBase):
@@ -556,7 +556,7 @@ class TubeMPCCtrl(ControllerBase):
 
 
 # ======================================================================
-# 15. ILCCtrl — per-wheel ILC (P-type, episode = one scenario run)
+# 15. ILCCtrl - per-wheel ILC (P-type, episode = one scenario run)
 # ======================================================================
 
 class ILCCtrl(ControllerBase):
@@ -589,7 +589,7 @@ class ILCCtrl(ControllerBase):
 
 
 # ======================================================================
-# 16. CBFCtrl — per-wheel CBF wrapping hand-tuned PD
+# 16. CBFCtrl - per-wheel CBF wrapping hand-tuned PD
 # ======================================================================
 
 class CBFCtrl(ControllerBase):
@@ -626,7 +626,7 @@ class CBFCtrl(ControllerBase):
 
 
 # ======================================================================
-# 17. L1AdaptiveCtrl — per-wheel L1 Adaptive
+# 17. L1AdaptiveCtrl - per-wheel L1 Adaptive
 # ======================================================================
 
 class L1AdaptiveCtrl(ControllerBase):
@@ -657,7 +657,7 @@ class L1AdaptiveCtrl(ControllerBase):
 
 
 # ======================================================================
-# 18. ScenarioMPCCtrl — Scenario MPC on 2-state per-wheel model
+# 18. ScenarioMPCCtrl - Scenario MPC on 2-state per-wheel model
 # ======================================================================
 
 class ScenarioMPCCtrl(ControllerBase):

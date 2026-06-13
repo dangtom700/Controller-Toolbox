@@ -439,7 +439,7 @@ class NormalisedLMS:
 # H-infinity-inspired Output Disturbance Feedback Controller for EHFS.
 #
 # Implementation: The 2-state linearised force model [F, x_v] is used.
-# An H∞ state-feedback gain K_hinf is computed via the DARE with gamma-
+# An Hinf state-feedback gain K_hinf is computed via the DARE with gamma-
 # parameterized cost that minimises ||Tzw||_inf < gamma (Doyle et al. 1989):
 #
 #   DARE: P = A^T P A - A^T P B (R_h + B^T P B)^-1 B^T P A + Q_h
@@ -454,7 +454,7 @@ class NormalisedLMS:
 class HinfODFCCtrl(EHFSController):
     def __init__(self, p: dict):
         self._Ts = p['Ts']
-        self._K  = None   # H∞ state-feedback gain (1x2) or None
+        self._K  = None   # Hinf state-feedback gain (1x2) or None
         self._L  = None   # observer gain (2x1)
         self._Ad = None
         self._Bd = None
@@ -475,7 +475,7 @@ class HinfODFCCtrl(EHFSController):
             Bd = np.array(ss.B())
             Cd = np.array(ss.C())
 
-            # H∞-parameterized DARE: minimise ||z||/||w||_inf < gamma = 1.5
+            # Hinf-parameterized DARE: minimise ||z||/||w||_inf < gamma = 1.5
             gamma = 1.5
             Q_h = Cd.T @ Cd                          # C^T C (outputs error)
             R_h = gamma**2 * np.eye(Bd.shape[1])    # gamma^2 * I
@@ -525,7 +525,7 @@ class HinfODFCCtrl(EHFSController):
 #
 # 3-layer cascade matching Shen et al. (2017):
 #   Layer 1 (PI):    u_pi = Kp*e + Ki*sum(e)*Ts  (same gains as PIDCtrl)
-#   Layer 2 (H∞ ODFC): u_hinf = HinfODFCCtrl.compute(e)  (additive feedback)
+#   Layer 2 (Hinf ODFC): u_hinf = HinfODFCCtrl.compute(e)  (additive feedback)
 #   Layer 3 (nLMS): u_nlms = NormalisedLMS.update(e, u_pi + u_hinf)
 #   Output: u = u_pi + u_hinf + u_nlms
 # ---------------------------------------------------------------------------
@@ -553,7 +553,7 @@ class HinfCascadeCtrl(EHFSController):
         self._int += e * self._Ts
         u_pi = self._Kp * e + self._Ki * self._int
 
-        # Layer 2: H∞ ODFC (additive)
+        # Layer 2: Hinf ODFC (additive)
         u_hinf = self._hinf.compute(F_ref, F, v_p, P_A, P_B, x_v, t)
 
         # Layer 3: nLMS adaptive correction

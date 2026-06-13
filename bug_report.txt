@@ -1,38 +1,330 @@
-Bug Report - generated from run_20260613_084300.log on 2026-06-13 09:12:24.606603
-Total failure indicators found: 3
-Merged into 1 block(s)
+Bug Report - generated from run_20260613_114515.log on 2026-06-13 12:19:04.177805
+Total failure indicators found: 23
+Merged into 8 block(s)
 ========================================================================
 
---- FAILURE BLOCK #1 (keywords: warn, nan) ---
-Lines 4958 - 4984
+--- FAILURE BLOCK #1 (keywords: assert, fatal, fail, exception) ---
+Lines 836 - 953
 
-    4958: 
-    4959: Randomness seeded to: 784299453
-    4960: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
-    4961: [DiscreteLQR] WARNING: DARE did not converge in 100 iterations. Using last iterate - verify (A,B) is stabilisable and (A,sqrt(Q)) is detectable.
-    4962: 
-    4963: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    4964: test_catch2_advanced.exe is a Catch2 v3.5.4 host application.
-    4965: Run with -? for options
-    4966: 
-    4967: -------------------------------------------------------------------------------
->>> 4968: DiscreteHinf NaN guard returns last finite output, state not corrupted
-    4969: -------------------------------------------------------------------------------
-    4970: tests/test_catch2_advanced.cpp:3697
-    4971: ...............................................................................
-    4972: 
-    4973: tests/test_catch2_advanced.cpp:3712: warning:
-    4974:   H-inf synthesis infeasible - NaN-guard test skipped
-    4975: 
-    4976: ===============================================================================
-    4977: All tests passed (2787 assertions in 189 test cases)
-    4978: 
-    4979: 
-    4980:   EXIT 0 — PASSED
-    4981: 
-    4982: ------------------------------------------------------------------------
-    4983:   [103/115]  build\tests\test_catch2_pilot.exe
-    4984: ------------------------------------------------------------------------
+     836: ----------------------------------------------------------
+     837: [BUILD] ex82_metaheuristics
+     838: ----------------------------------------------------------
+     839: [1/2] Building CXX object examples/CMakeFiles/ex82_metaheuristics.dir/ex82_metaheuristics.cpp.obj
+     840: [2/2] Linking CXX executable examples\ex82_metaheuristics.exe
+     841: [OK] ex82_metaheuristics
+     842: 
+     843: ----------------------------------------------------------
+     844: [BUILD] test_autoscheduling
+     845: ----------------------------------------------------------
+>>>  846: [1/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generator_exception.cpp.obj
+     847: [2/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_benchmark_function.cpp.obj
+     848: [3/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/catch_chronometer.cpp.obj
+     849: [4/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_automake.cpp.obj
+     850: [5/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_event_listener.cpp.obj
+     851: [6/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_run_for_at_least.cpp.obj
+     852: [7/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_common_base.cpp.obj
+     853: [8/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_analyse.cpp.obj
+     854: [9/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_compact.cpp.obj
+     855: [10/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generators.cpp.obj
+     856: [11/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_registrars.cpp.obj
+     857: [12/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generators_random.cpp.obj
+     858: [13/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_console.cpp.obj
+     859: [14/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_cumulative_base.cpp.obj
+     860: [15/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_helpers.cpp.obj
+     861: [16/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_exception.cpp.obj
+     862: [17/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_registry_hub.cpp.obj
+     863: [18/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_generatortracker.cpp.obj
+     864: [19/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_streaming_base.cpp.obj
+     865: [20/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_testcase.cpp.obj
+     866: [21/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_reporter_factory.cpp.obj
+     867: [22/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_config.cpp.obj
+     868: [23/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_teamcity.cpp.obj
+     869: [24/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_capture.cpp.obj
+     870: [25/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_junit.cpp.obj
+     871: [26/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_stats.cpp.obj
+     872: [27/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_tap.cpp.obj
+     873: [28/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_sonarqube.cpp.obj
+     874: [29/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_assertion_result.cpp.obj
+     875: [30/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_xml.cpp.obj
+     876: [31/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_json.cpp.obj
+     877: [32/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_multi.cpp.obj
+     878: [33/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_tag_alias_autoregistrar.cpp.obj
+     879: [34/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_totals.cpp.obj
+     880: [35/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_translate_exception.cpp.obj
+     881: [36/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_approx.cpp.obj
+     882: [37/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_version.cpp.obj
+     883: [38/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_reporter.cpp.obj
+     884: [39/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_test_case_info.cpp.obj
+     885: [40/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_get_random_seed.cpp.obj
+     886: [41/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_context.cpp.obj
+     887: [42/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_debugger.cpp.obj
+     888: [43/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_case_insensitive_comparisons.cpp.obj
+     889: [44/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_message.cpp.obj
+     890: [45/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_timer.cpp.obj
+     891: [46/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_registry_hub.cpp.obj
+     892: [47/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_enforce.cpp.obj
+     893: [48/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_assertion_handler.cpp.obj
+     894: [49/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_errno_guard.cpp.obj
+     895: [50/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_test_spec.cpp.obj
+     896: [51/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_getenv.cpp.obj
+     897: [52/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_floating_point_helpers.cpp.obj
+     898: [53/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_config.cpp.obj
+     899: [54/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_enum_values_registry.cpp.obj
+     900: [55/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_tostring.cpp.obj
+     901: [56/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_exception_translator_registry.cpp.obj
+     902: [57/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_leak_detector.cpp.obj
+     903: [58/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_jsonwriter.cpp.obj
+     904: [59/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_message_info.cpp.obj
+     905: [60/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_istream.cpp.obj
+     906: [61/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_decomposer.cpp.obj
+     907: [62/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_random_number_generator.cpp.obj
+     908: [63/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_polyfills.cpp.obj
+     909: [64/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_output_redirect.cpp.obj
+     910: [65/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_result_type.cpp.obj
+     911: [66/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_parse_numbers.cpp.obj
+     912: [67/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_random_seed_generation.cpp.obj
+     913: [68/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_clara.cpp.obj
+     914: [69/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_singletons.cpp.obj
+     915: [70/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reusable_string_stream.cpp.obj
+     916: [71/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_lazy_expr.cpp.obj
+     917: [72/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_source_line_info.cpp.obj
+     918: [73/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_startup_exception_registry.cpp.obj
+     919: [74/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_debug_console.cpp.obj
+     920: [75/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_stdstreams.cpp.obj
+     921: [76/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_info_hasher.cpp.obj
+     922: [77/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_section.cpp.obj
+     923: [78/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_list.cpp.obj
+     924: [79/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_stringref.cpp.obj
+     925: [80/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_string_manip.cpp.obj
+     926: [81/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_tag_alias_registry.cpp.obj
+     927: [82/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_fatal_condition_handler.cpp.obj
+     928: [83/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reporter_spec_parser.cpp.obj
+     929: [84/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_uncaught_exceptions.cpp.obj
+     930: [85/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_failure_exception.cpp.obj
+     931: [86/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_console_colour.cpp.obj
+     932: [87/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_registry.cpp.obj
+     933: [88/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reporter_registry.cpp.obj
+     934: [89/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_wildcard_pattern.cpp.obj
+     935: [90/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_tracker.cpp.obj
+     936: [91/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_spec_parser.cpp.obj
+     937: [92/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_textflow.cpp.obj
+     938: [93/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_run_context.cpp.obj
+     939: [94/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_xmlwriter.cpp.obj
+     940: [95/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_commandline.cpp.obj
+     941: [96/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers.cpp.obj
+     942: [97/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_container_properties.cpp.obj
+     943: [98/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_exception.cpp.obj
+     944: [99/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_registry_impl.cpp.obj
+     945: [100/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_predicate.cpp.obj
+     946: [101/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_quantifiers.cpp.obj
+     947: [102/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_templated.cpp.obj
+     948: [103/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/internal/catch_matchers_impl.cpp.obj
+     949: [104/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_floating_point.cpp.obj
+     950: [105/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2WithMain.dir/catch2/internal/catch_main.cpp.obj
+     951: [106/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_session.cpp.obj
+     952: [107/111] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_string.cpp.obj
+     953: [108/111] Linking CXX static library _deps\catch2-build\src\libCatch2.a
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #2 (keywords: fail, error) ---
+Lines 1066 - 1089
+
+    1066: [5/6] Building CXX object "case-study/Porous Fiber Plate Humidification System/CMakeFiles/humidification_sim.dir/sim/src/main.cpp.obj"
+    1067: [6/6] Linking CXX executable "case-study\Porous Fiber Plate Humidification System\humidification_sim.exe"
+    1068: [OK] humidification_sim
+    1069: 
+    1070: ----------------------------------------------------------
+    1071: [BUILD] susp_sim
+    1072: ----------------------------------------------------------
+    1073: [1/6] Building CXX object "case-study/Active Suspension Mathematical Modeling and Optimization 2025/CMakeFiles/susp_sim.dir/sim/src/road_profile.cpp.obj"
+    1074: [2/6] Building CXX object "case-study/Active Suspension Mathematical Modeling and Optimization 2025/CMakeFiles/susp_sim.dir/sim/src/susp_plant.cpp.obj"
+    1075: [3/6] Building CXX object "case-study/Active Suspension Mathematical Modeling and Optimization 2025/CMakeFiles/susp_sim.dir/sim/src/controllers.cpp.obj"
+>>> 1076: FAILED: case-study/Active Suspension Mathematical Modeling and Optimization 2025/CMakeFiles/susp_sim.dir/sim/src/controllers.cpp.obj 
+    1077: C:\msys64\mingw64\bin\g++.exe -DCTRL_HAS_ADVANCED_KALMAN -DCTRL_HAS_FUNCTION_APPROX -DCTRL_HAS_FUZZY -DCTRL_HAS_HINF -DCTRL_HAS_SUBSPACE -DM_PI=3.14159265358979323846 -DPROJECT_DATA_DIR="\"data\"" -DSUSP_SIM_SOURCE_DIR="\"case-study/Active Suspension Mathematical Modeling and Optimization 2025\"" -I"case-study/Active Suspension Mathematical Modeling and Optimization 2025/sim/include" -I"lib" -isystem C:/msys64/mingw64/include/eigen3 -O3 -DNDEBUG -std=c++20 -MD -MT "case-study/Active Suspension Mathematical Modeling and Optimization 2025/CMakeFiles/susp_sim.dir/sim/src/controllers.cpp.obj" -MF "case-study\Active Suspension Mathematical Modeling and Optimization 2025\CMakeFiles\susp_sim.dir\sim\src\controllers.cpp.obj.d" -o "case-study/Active Suspension Mathematical Modeling and Optimization 2025/CMakeFiles/susp_sim.dir/sim/src/controllers.cpp.obj" -c "case-study/Active Suspension Mathematical Modeling and Optimization 2025/sim/src/controllers.cpp"
+    1078: case-study/Active Suspension Mathematical Modeling and Optimization 2025/sim/src/controllers.cpp: In function 'double susp::suspPIDCost(const Eigen::VectorXd&, const PlantParams&)':
+    1079: case-study/Active Suspension Mathematical Modeling and Optimization 2025/sim/src/controllers.cpp:661:27: error: no match for call to '(Eigen::MatrixXd {aka Eigen::Matrix<double, -1, -1>}) ()'
+    1080:   661 |     const auto& Ad = sys.A();
+    1081:       |                      ~~~~~^~
+    1082: In file included from C:/msys64/mingw64/include/eigen3/Eigen/src/Core/DenseBase.h:660,
+    1083:                  from C:/msys64/mingw64/include/eigen3/Eigen/Core:272,
+    1084:                  from C:/msys64/mingw64/include/eigen3/Eigen/Dense:1,
+    1085:                  from case-study/Active Suspension Mathematical Modeling and Optimization 2025/sim/include/susp_plant.h:2,
+    1086:                  from case-study/Active Suspension Mathematical Modeling and Optimization 2025/sim/include/controllers.h:2,
+    1087:                  from case-study/Active Suspension Mathematical Modeling and Optimization 2025/sim/src/controllers.cpp:1:
+    1088: C:/msys64/mingw64/include/eigen3/Eigen/src/plugins/IndexedViewMethods.h:73:1: note: candidate: 'template<class RowIndices, class ColIndices> typename Eigen::internal::enable_if<(Eigen::internal::valid_indexed_view_overload<RowIndices, ColIndices>::value && Eigen::internal::traits<typename Eigen::DenseBase<Derived>::ConstIndexedViewType<RowIndices, ColIndices>::type>::ReturnAsIndexedView), typename Eigen::DenseBase<Derived>::ConstIndexedViewType<RowIndices, ColIndices>::type>::type Eigen::DenseBase<Derived>::operator()(const RowIndices&, const ColIndices&) const [with ColIndices = RowIndices; Derived = Eigen::Matrix<double, -1, -1>]'
+    1089:    73 | operator()(const RowIndices& rowIndices, const ColIndices& colIndices) EIGEN_INDEXED_VIEW_METHOD_CONST
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #3 (keywords: error) ---
+Lines 1192 - 1212
+
+    1192:       |     ^~~~~~~~
+    1193: C:/msys64/mingw64/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h:364:5: note:   candidate expects 2 arguments, 0 provided
+    1194: C:/msys64/mingw64/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h:116:41: note: candidate: 'Eigen::DenseCoeffsBase<Derived, 0>::CoeffReturnType Eigen::DenseCoeffsBase<Derived, 0>::operator()(Eigen::Index, Eigen::Index) const [with Derived = Eigen::Matrix<double, -1, -1>; CoeffReturnType = const double&; Eigen::Index = long long int]'
+    1195:   116 |     EIGEN_STRONG_INLINE CoeffReturnType operator()(Index row, Index col) const
+    1196:       |                                         ^~~~~~~~
+    1197: C:/msys64/mingw64/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h:116:41: note:   candidate expects 2 arguments, 0 provided
+    1198: C:/msys64/mingw64/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h:179:5: note: candidate: 'Eigen::DenseCoeffsBase<Derived, 0>::CoeffReturnType Eigen::DenseCoeffsBase<Derived, 0>::operator()(Eigen::Index) const [with Derived = Eigen::Matrix<double, -1, -1>; CoeffReturnType = const double&; Eigen::Index = long long int]'
+    1199:   179 |     operator()(Index index) const
+    1200:       |     ^~~~~~~~
+    1201: C:/msys64/mingw64/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h:179:5: note:   candidate expects 1 argument, 0 provided
+>>> 1202: case-study/Active Suspension Mathematical Modeling and Optimization 2025/sim/src/controllers.cpp:662:27: error: no match for call to '(Eigen::MatrixXd {aka Eigen::Matrix<double, -1, -1>}) ()'
+    1203:   662 |     const auto& Bd = sys.B();
+    1204:       |                      ~~~~~^~
+    1205: C:/msys64/mingw64/include/eigen3/Eigen/src/plugins/IndexedViewMethods.h:73:1: note: candidate: 'template<class RowIndices, class ColIndices> typename Eigen::internal::enable_if<(Eigen::internal::valid_indexed_view_overload<RowIndices, ColIndices>::value && Eigen::internal::traits<typename Eigen::DenseBase<Derived>::ConstIndexedViewType<RowIndices, ColIndices>::type>::ReturnAsIndexedView), typename Eigen::DenseBase<Derived>::ConstIndexedViewType<RowIndices, ColIndices>::type>::type Eigen::DenseBase<Derived>::operator()(const RowIndices&, const ColIndices&) const [with ColIndices = RowIndices; Derived = Eigen::Matrix<double, -1, -1>]'
+    1206:    73 | operator()(const RowIndices& rowIndices, const ColIndices& colIndices) EIGEN_INDEXED_VIEW_METHOD_CONST
+    1207:       | ^~~~~~~~
+    1208: C:/msys64/mingw64/include/eigen3/Eigen/src/plugins/IndexedViewMethods.h:73:1: note:   candidate expects 2 arguments, 0 provided
+    1209: C:/msys64/mingw64/include/eigen3/Eigen/src/plugins/IndexedViewMethods.h:85:1: note: candidate: 'template<class RowIndices, class ColIndices> typename Eigen::internal::enable_if<(Eigen::internal::valid_indexed_view_overload<RowIndices, ColIndices>::value && Eigen::internal::traits<typename Eigen::DenseBase<Derived>::ConstIndexedViewType<RowIndices, ColIndices>::type>::ReturnAsBlock), typename Eigen::internal::traits<typename Eigen::DenseBase<Derived>::ConstIndexedViewType<RowIndices, ColIndices>::type>::BlockType>::type Eigen::DenseBase<Derived>::operator()(const RowIndices&, const ColIndices&) const [with ColIndices = RowIndices; Derived = Eigen::Matrix<double, -1, -1>]'
+    1210:    85 | operator()(const RowIndices& rowIndices, const ColIndices& colIndices) EIGEN_INDEXED_VIEW_METHOD_CONST
+    1211:       | ^~~~~~~~
+    1212: C:/msys64/mingw64/include/eigen3/Eigen/src/plugins/IndexedViewMethods.h:85:1: note:   candidate expects 2 arguments, 0 provided
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #4 (keywords: fail, error) ---
+Lines 1309 - 1332
+
+    1309: C:/msys64/mingw64/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h:116:41: note: candidate: 'Eigen::DenseCoeffsBase<Derived, 0>::CoeffReturnType Eigen::DenseCoeffsBase<Derived, 0>::operator()(Eigen::Index, Eigen::Index) const [with Derived = Eigen::Matrix<double, -1, -1>; CoeffReturnType = const double&; Eigen::Index = long long int]'
+    1310:   116 |     EIGEN_STRONG_INLINE CoeffReturnType operator()(Index row, Index col) const
+    1311:       |                                         ^~~~~~~~
+    1312: C:/msys64/mingw64/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h:116:41: note:   candidate expects 2 arguments, 0 provided
+    1313: C:/msys64/mingw64/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h:179:5: note: candidate: 'Eigen::DenseCoeffsBase<Derived, 0>::CoeffReturnType Eigen::DenseCoeffsBase<Derived, 0>::operator()(Eigen::Index) const [with Derived = Eigen::Matrix<double, -1, -1>; CoeffReturnType = const double&; Eigen::Index = long long int]'
+    1314:   179 |     operator()(Index index) const
+    1315:       |     ^~~~~~~~
+    1316: C:/msys64/mingw64/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h:179:5: note:   candidate expects 1 argument, 0 provided
+    1317: [4/6] Building CXX object "case-study/Active Suspension Mathematical Modeling and Optimization 2025/CMakeFiles/susp_sim.dir/sim/src/simulation_runner.cpp.obj"
+    1318: [5/6] Building CXX object "case-study/Active Suspension Mathematical Modeling and Optimization 2025/CMakeFiles/susp_sim.dir/sim/src/main.cpp.obj"
+>>> 1319: ninja: build stopped: subcommand failed.
+    1320: 
+    1321: ERROR: Failed to build [susp_sim]
+    1322:        Fix the error above and re-run compile.bat.
+    1323: 
+    1324: Compile succeeded.
+    1325: 
+    1326: ========================================================================
+    1327:   Phase 3 - Python bindings build + smoke test
+    1328: ========================================================================
+    1329: 
+    1330:   [cmake configure (bindings)]
+    1331: 
+    1332: -- Found Python3: C:/Users/dangs/miniconda3/envs/soft_robotics/python.exe (found version "3.14.4") found components: Interpreter Development Development.Module Development.Embed
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #5 (keywords: nan, warn) ---
+Lines 5420 - 5446
+
+    5420: 
+    5421: Randomness seeded to: 2422196152
+    5422: [DiscreteLQR] WARNING: (A,B) failed the PBH stabilizability test. DARE may not converge - check that all unstable modes are controllable.
+    5423: [DiscreteLQR] WARNING: DARE did not converge in 100 iterations. Using last iterate - verify (A,B) is stabilisable and (A,sqrt(Q)) is detectable.
+    5424: 
+    5425: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    5426: test_catch2_advanced.exe is a Catch2 v3.5.4 host application.
+    5427: Run with -? for options
+    5428: 
+    5429: -------------------------------------------------------------------------------
+>>> 5430: DiscreteHinf NaN guard returns last finite output, state not corrupted
+    5431: -------------------------------------------------------------------------------
+    5432: tests/test_catch2_advanced.cpp:3697
+    5433: ...............................................................................
+    5434: 
+    5435: tests/test_catch2_advanced.cpp:3712: warning:
+    5436:   H-inf synthesis infeasible - NaN-guard test skipped
+    5437: 
+    5438: ===============================================================================
+    5439: All tests passed (2787 assertions in 189 test cases)
+    5440: 
+    5441: 
+    5442:   EXIT 0 - PASSED
+    5443: 
+    5444: ------------------------------------------------------------------------
+    5445:   [104/116]  build\tests\test_catch2_pilot.exe
+    5446: ------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #6 (keywords: skip) ---
+Lines 6694 - 6714
+
+    6694:   Training IAE (mean last 10): 0.8298
+    6695: 
+    6696: [PASS] H3 RL-MPC stitching checks passed.
+    6697: 
+    6698:   EXIT 0 - PASSED
+    6699: 
+    6700: ------------------------------------------------------------------------
+    6701:   [12/106]  examples\python\ex102_metaheuristics.py
+    6702: ------------------------------------------------------------------------
+    6703: 
+>>> 6704: SKIP: No module named 'ctrl_toolbox'
+    6705: 
+    6706:   EXIT 0 - PASSED
+    6707: 
+    6708: ------------------------------------------------------------------------
+    6709:   [13/106]  examples\python\ex10_imc_pid_tuning.py
+    6710: ------------------------------------------------------------------------
+    6711: 
+    6712: ============================================================
+    6713: ex10 - IMC-PID Tuning
+    6714: ============================================================
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #7 (keywords: skip) ---
+Lines 8271 - 8291
+
+    8271:    199    1.0000      0.0000  
+    8272:    200    1.1500      0.0000  gain change
+    8273:    250    1.0363      0.7628  
+    8274:    399    1.0012      0.5102  
+    8275: 
+    8276:   IAE phase-1 (k=0..199):   0.1185
+    8277:   IAE phase-2 (k=200..399): 0.0570  (gain doubled at k=200)
+    8278:   Final y: 1.0012  (target: 1.0)
+    8279: 
+    8280: -- MRAC comparison (MRACController) --
+>>> 8281:   (MRACController not found - skipping comparison)
+    8282: 
+    8283: [PASS] L1AdaptiveController demo complete.
+    8284: 
+    8285:   EXIT 0 - PASSED
+    8286: 
+    8287: ------------------------------------------------------------------------
+    8288:   [95/106]  examples\python\ex88_cbf_safety.py
+    8289: ------------------------------------------------------------------------
+    8290: 
+    8291: === ex88: CBF Safety Filter ===
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #8 (keywords: skip) ---
+Lines 8555 - 8575
+
+    8555:   [ 3] case-study\High-Altitude Aerial Firefighting Bag Drop\sim\main.py
+    8556:   [ 4] case-study\Multi-Body Floating Wind-Wave Platform\sim\main.py
+    8557:   [ 5] case-study\Nonlinear Surface Ship Manoeuvring Control\sim\main.py
+    8558:   [ 6] case-study\Tracking Control of Electro-Hydraulic Force Servo Systems\sim\main.py
+    8559:   [ 7] case-study\Vertical Drill String Mathematical Review 2025\sim\main.py
+    8560: 
+    8561: ------------------------------------------------------------------------
+    8562:   [1/7]  case-study\Active Suspension 6x6 EV Full Model\sim\main.py
+    8563: ------------------------------------------------------------------------
+    8564: 
+>>> 8565: SKIP: No module named 'ctrl_toolbox'
+    8566: 
+    8567:   EXIT 0 - PASSED
+    8568: 
+    8569: ------------------------------------------------------------------------
+    8570:   [2/7]  case-study\Air-Cooled Battery Thermal Management System\sim\main.py
+    8571: ------------------------------------------------------------------------
+    8572: 
+    8573: ==========================================================================
+    8574:   Air-Cooled Battery Thermal Management System Case Study
+    8575:   12 controllers x 5 scenarios = 60 runs
 
 ------------------------------------------------------------------------
 

@@ -111,7 +111,7 @@ class RoadProfile:
                 zR = zL = 0.0
 
         elif pid == 's05_comfort':
-            # ISO 2631 comfort: sine sweep 1 → 10 Hz over T_sweep seconds
+            # ISO 2631 comfort: sine sweep 1 -> 10 Hz over T_sweep seconds
             amp    = cfg.get('amp', 0.010)         # 10 mm
             f_end  = cfg.get('f_end', 10.0)
             f_rate = cfg.get('f_rate', 0.02)       # Hz / s

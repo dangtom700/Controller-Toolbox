@@ -200,7 +200,7 @@ private:
     GAParams       p_;
     std::mt19937   rng_;
 
-    // Tournament selection (size 3) — returns copy of winner individual
+    // Tournament selection (size 3) - returns copy of winner individual
     Eigen::VectorXd tournamentSelect(const std::vector<Eigen::VectorXd>& pop,
                                      const std::vector<double>& fitness)
     {

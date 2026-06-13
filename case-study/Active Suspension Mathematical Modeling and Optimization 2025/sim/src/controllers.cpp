@@ -658,8 +658,8 @@ static double suspPIDCost(const Eigen::VectorXd& gains, const PlantParams& pp)
     ctrl::DiscretePID pid(pidp, pp.Ts);
 
     ctrl::StateSpace sys = makeFull4SSForTuning(pp);
-    const auto& Ad = sys.A();
-    const auto& Bd = sys.B();
+    const auto& Ad = sys.A;
+    const auto& Bd = sys.B;
 
     Eigen::Vector4d x = Eigen::Vector4d::Zero();
     const double z_r = 0.025;  // 25 mm step bump
