@@ -64,8 +64,8 @@ public:
     {
         if (!cb_)
             throw std::logic_error("ZephyrScheduler::start() called with no callback.");
-        if (period_ns_ == 0)
-            throw std::logic_error("ZephyrScheduler::start() called before setPeriodNs().");
+        if (period_ns_ < 1'000'000ULL)
+            throw std::logic_error("ZephyrScheduler::start(): period_ns must be >= 1 ms (1000000 ns).");
 
         // Store this pointer in timer user-data for the trampoline.
         k_timer_user_data_set(&timer_, this);

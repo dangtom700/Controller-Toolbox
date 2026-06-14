@@ -4,6 +4,7 @@
 
 **Type:** Python-only case study (sim/main.py). Discovered by run.py Phase 6.
 **Runs:** 18 controllers * 5 scenarios = **90 runs**
+**Reference:** case-study\Active Suspension Mathematical Modeling and Optimization 2025
 
 ---
 

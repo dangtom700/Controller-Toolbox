@@ -291,12 +291,22 @@ struct DAESystem
 };
 
 /**
+ * @brief Result of a @c consistentInit() solve.
+ */
+struct ConsistentInitResult
+{
+    Eigen::VectorXd x;        ///< Best iterate found for x2.
+    bool            converged = false; ///< True when ||g|| < tol before max_iter.
+    double          residual  = 0.0;   ///< ||g|| at the returned iterate.
+};
+
+/**
  * @brief Find consistent algebraic states: solve g(x1_init, x2, u0) = 0 for x2.
  *
  * Runs Newton-Raphson on the algebraic constraint starting from @p x2_guess.
  * The numerical Jacobian dg/dx2 is computed via central differences.
- * Returns the last iterate (not necessarily converged) when the Jacobian is
- * singular or max_iter is reached - callers should check residual if needed.
+ * Returns the last iterate when the Jacobian is singular or max_iter is reached;
+ * callers should check @c .converged before using the result in safety-critical code.
  *
  * @param dae      DAESystem whose AlgFunc g defines the constraint.
  * @param x1_init  Fixed differential states (not modified).
@@ -304,14 +314,15 @@ struct DAESystem
  * @param x2_guess Initial guess for x2.
  * @param max_iter Maximum Newton iterations (default 20).
  * @param tol      Convergence tolerance on ||g|| (default 1e-9).
- * @return         x2 satisfying ||g(x1_init, x2, u0)|| < tol (or best iterate).
+ * @return         ConsistentInitResult with @c x, @c converged, and @c residual.
  */
-Eigen::VectorXd consistentInit(const DAESystem     &dae,
-                                const Eigen::VectorXd &x1_init,
-                                double               u0,
-                                const Eigen::VectorXd &x2_guess,
-                                int                  max_iter = 20,
-                                double               tol      = 1e-9);
+[[nodiscard]] ConsistentInitResult
+consistentInit(const DAESystem     &dae,
+               const Eigen::VectorXd &x1_init,
+               double               u0,
+               const Eigen::VectorXd &x2_guess,
+               int                  max_iter = 20,
+               double               tol      = 1e-9);
 
 /**
  * @brief Convert a DAESystem to a discrete-time step function.

@@ -43,23 +43,30 @@ void RecursiveGreyBoxEstimator::initialize(const Eigen::VectorXd& x0,
     const int rk4s  = par_.rk4_steps;
     OdeFn f_copy    = f_;
 
-    auto f_aug = [f_copy, n_x, n_p, Ts, rk4s](
+    // Pre-allocate RK4 scratch inside the closure to avoid per-sigma-point heap alloc
+    auto f_aug = [f_copy, n_x, n_p, Ts, rk4s,
+                  x_scr   = Eigen::VectorXd(n_x),
+                  p_scr   = Eigen::VectorXd(n_p),
+                  k1      = Eigen::VectorXd(n_x),
+                  k2      = Eigen::VectorXd(n_x),
+                  k3      = Eigen::VectorXd(n_x),
+                  k4      = Eigen::VectorXd(n_x),
+                  z_next  = Eigen::VectorXd(n_x + n_p)](
         const Eigen::VectorXd& z,
-        const Eigen::VectorXd& u) -> Eigen::VectorXd
+        const Eigen::VectorXd& u) mutable -> Eigen::VectorXd
     {
-        Eigen::VectorXd x = z.head(n_x);
-        const Eigen::VectorXd p = z.tail(n_p);
+        x_scr = z.head(n_x);
+        p_scr = z.tail(n_p);
         const double h = Ts / rk4s;
         for (int s = 0; s < rk4s; ++s) {
-            const Eigen::VectorXd k1 = f_copy(x,             u, p);
-            const Eigen::VectorXd k2 = f_copy(x + 0.5*h*k1, u, p);
-            const Eigen::VectorXd k3 = f_copy(x + 0.5*h*k2, u, p);
-            const Eigen::VectorXd k4 = f_copy(x + h*k3,     u, p);
-            x += (h / 6.0) * (k1 + 2.0*k2 + 2.0*k3 + k4);
+            k1 = f_copy(x_scr,             u, p_scr);
+            k2 = f_copy(x_scr + 0.5*h*k1, u, p_scr);
+            k3 = f_copy(x_scr + 0.5*h*k2, u, p_scr);
+            k4 = f_copy(x_scr + h*k3,     u, p_scr);
+            x_scr += (h / 6.0) * (k1 + 2.0*k2 + 2.0*k3 + k4);
         }
-        Eigen::VectorXd z_next(n_x + n_p);
-        z_next.head(n_x) = x;
-        z_next.tail(n_p) = p;
+        z_next.head(n_x) = x_scr;
+        z_next.tail(n_p) = p_scr;
         return z_next;
     };
 

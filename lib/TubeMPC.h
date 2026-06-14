@@ -281,7 +281,9 @@ private:
 
     // QP scratch vectors (pre-allocated)
     Eigen::VectorXd g_;    ///< Linear cost vector (Nu*m).
-    Eigen::VectorXd tmp1_, tmp2_; ///< FISTA scratch (Nu*m).
+    Eigen::VectorXd tmp1_, tmp2_, y_fista_; ///< FISTA scratch (Nu*m).
+    Eigen::VectorXd R_stacked_; ///< Stacked reference (Np*pp).
+    Eigen::VectorXd Qy_err_;    ///< Q-weighted output error (Np*pp).
 };
 
 } // namespace ctrl

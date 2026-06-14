@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <complex>
+#include <iostream>
 #include <stdexcept>
 
 namespace ctrl
@@ -220,6 +221,12 @@ namespace ctrl
         Eigen::VectorXd residues = Eigen::VectorXd::Ones(n_poles) * 0.1;
         double d_gain = mag[N / 2]; // rough DC initialisation
 
+        // Hoisted outside the SK loop to avoid reallocating the solver each iteration
+        Eigen::MatrixXd companion = Eigen::MatrixXd::Zero(n_poles, n_poles);
+        for (int k = 0; k < n_poles - 1; ++k)
+            companion(k + 1, k) = 1.0;
+        Eigen::EigenSolver<Eigen::MatrixXd> es;
+
         for (int iter = 0; iter < params.max_iter; ++iter)
         {
             Eigen::MatrixXd A;
@@ -234,21 +241,40 @@ namespace ctrl
             const Eigen::VectorXd c_coeff = x.head(nc);      // numerator
             const Eigen::VectorXd a_coeff = x.tail(n_poles); // denominator a_1..a_n
 
-            // Build denominator polynomial D(z) = z^n + a_1 z^{n-1} + ... + a_n
-            // Companion matrix for root finding
-            Eigen::MatrixXd companion = Eigen::MatrixXd::Zero(n_poles, n_poles);
-            for (int k = 0; k < n_poles - 1; ++k)
-                companion(k + 1, k) = 1.0;
+            // Update companion matrix denominator row (subdiagonal is fixed after hoisting)
             for (int k = 0; k < n_poles; ++k)
                 companion(0, k) = -a_coeff(n_poles - 1 - k);
 
-            Eigen::EigenSolver<Eigen::MatrixXd> es(companion, false);
+            es.compute(companion, false);
             Eigen::VectorXd new_poles(n_poles);
             const auto &evals = es.eigenvalues();
+            // For a real polynomial, eigenvalues come as real scalars or conjugate pairs.
+            // For each complex pair (r+ji, r-ji): represent as two real poles at r and
+            // r+1e-6*|j| to avoid exact-duplicate degenerate poles in the LS system.
+            std::vector<bool> conjugate_used(n_poles, false);
             for (int k = 0; k < n_poles; ++k)
             {
-                // Take real part; imaginary part should be ~0 for real-valued signals
-                new_poles(k) = evals(k).real();
+                if (conjugate_used[k]) continue;
+                const std::complex<double> ev = evals(k);
+                const double im = std::abs(ev.imag());
+                if (im > 1e-10 * (std::abs(ev.real()) + 1.0)) {
+                    // Complex eigenvalue: find and mark its conjugate
+                    for (int j = k + 1; j < n_poles; ++j) {
+                        if (!conjugate_used[j] &&
+                            std::abs(evals(j).real() - ev.real()) < 1e-8 &&
+                            std::abs(evals(j).imag() + ev.imag()) < 1e-8) {
+                            // Conjugate found: second slot gets a slight perturbation to avoid
+                            // rank-deficient Vandermonde when two poles are identical
+                            new_poles(j) = ev.real() + 1e-6 * im;
+                            conjugate_used[j] = true;
+                            break;
+                        }
+                    }
+                    std::clog << "[VectorFitting] complex pole " << k
+                              << " (" << ev.real() << "+" << ev.imag() << "j)"
+                              << " - real-pole approximation only; upgrade poles to VectorXcd for exact complex-pole support\n";
+                }
+                new_poles(k) = ev.real();
             }
             enforcePoleStability(new_poles);
 

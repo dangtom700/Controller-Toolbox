@@ -176,10 +176,10 @@ private:
 
     // Sample n_acq_restarts random points in [0,1]^n, return the argmin of acquisition
     Eigen::VectorXd maximiseAcquisition(const GaussianProcess& gp,
-                                         double f_best) const;
+                                         double f_best);
 
-    BayesOptParams     p_;
-    mutable std::mt19937 rng_;
+    BayesOptParams   p_;
+    std::mt19937     rng_;
 };
 
 // =============================================================================
@@ -224,7 +224,7 @@ inline double BayesianOptimizer::acqEI(const GaussianProcess& gp,
 
 inline Eigen::VectorXd
 BayesianOptimizer::maximiseAcquisition(const GaussianProcess& gp,
-                                        double f_best) const
+                                        double f_best)
 {
     std::uniform_real_distribution<double> uniform(0.0, 1.0);
 

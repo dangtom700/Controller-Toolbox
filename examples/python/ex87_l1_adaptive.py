@@ -83,8 +83,8 @@ try:
     mp = ctrl.MRACParams()
     mp.a_m    = 0.85
     mp.b_m    = 0.15
-    mp.Gamma  = 50.0   # must be lower to stay stable without LP filter
-    mp.k_g    = 1.0
+    mp.gamma_r = 3.0
+    mp.gamma_y = 1.5
     mp.uMin   = -5.0
     mp.uMax   =  5.0
     mrac = ctrl.MRACController(mp, TS)

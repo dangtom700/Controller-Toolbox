@@ -121,6 +121,7 @@ private:
     double e_prev_; ///< Previous error e[k-1].
     double s_prev_; ///< Previous sliding surface s[k-1].
     double u_prev_; ///< Previous output u[k-1].
+    mutable Eigen::VectorXd notify_buf_{Eigen::VectorXd::Constant(1, 0.0)};
 };
 
 // -----------------------------------------------------------------------------

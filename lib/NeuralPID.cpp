@@ -42,6 +42,13 @@ NeuralPID::NeuralPID(const Params& p) : p_(p)
     b2_(2) = sp_inv(p_.Kd0 + 1e-6);
 
     Kp_ = p_.Kp0;  Ki_ = p_.Ki0;  Kd_ = p_.Kd0;
+
+    dW2_.resize(3, p_.n_hidden);
+    db2_.resize(3);
+    dJ_dh_.resize(p_.n_hidden);
+    dJ_dpre1_.resize(p_.n_hidden);
+    dW1_.resize(p_.n_hidden, 3);
+    db1_.resize(p_.n_hidden);
 }
 
 // ---------------------------------------------------------------------------
@@ -97,22 +104,22 @@ double NeuralPID::compute(double error)
     // dJ/dpre = dJ_dgains .* sp_d
     Eigen::Vector3d dJ_dpre = dJ_dgains.array() * sp_d.array();
 
-    // Gradients for W2, b2
-    const Eigen::MatrixXd dW2 = dJ_dpre * h.transpose();
-    const Eigen::VectorXd db2 = dJ_dpre;
+    // Gradients for W2, b2 (into pre-allocated members)
+    dW2_.noalias() = dJ_dpre * h.transpose();
+    db2_ = dJ_dpre;
 
     // Backprop through hidden: dJ/dh = W2' * dJ_dpre,  dJ/dpre1 = dJ/dh .* (1-h^2)
-    Eigen::VectorXd dJ_dh    = W2_.transpose() * dJ_dpre;
-    Eigen::VectorXd dJ_dpre1 = dJ_dh.array() * (1.0 - h.array().square());
+    dJ_dh_.noalias()    = W2_.transpose() * dJ_dpre;
+    dJ_dpre1_.array()   = dJ_dh_.array() * (1.0 - h.array().square());
 
-    const Eigen::MatrixXd dW1 = dJ_dpre1 * z.transpose();
-    const Eigen::VectorXd db1 = dJ_dpre1;
+    dW1_.noalias() = dJ_dpre1_ * z.transpose();
+    db1_ = dJ_dpre1_;
 
     // Gradient step
-    W2_ -= p_.lr * dW2;
-    b2_ -= p_.lr * db2;
-    W1_ -= p_.lr * dW1;
-    b1_ -= p_.lr * db1;
+    W2_ -= p_.lr * dW2_;
+    b2_ -= p_.lr * db2_;
+    W1_ -= p_.lr * dW1_;
+    b1_ -= p_.lr * db1_;
 
     clipWeights();
 

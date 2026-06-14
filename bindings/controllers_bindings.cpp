@@ -382,10 +382,32 @@ Example
         .def("is_healthy",  &ctrl::LQRAdapter::isHealthy,
              "False if the underlying DARE did not converge at construction.");
 
+    m.def("make_lqr_controller",
+          [](const ctrl::StateSpace& plant,
+             const ctrl::LQRParams& params,
+             py::object state_fn_obj,
+             py::object ref_fn_obj) -> std::shared_ptr<ctrl::LQRAdapter> {
+              std::function<Eigen::VectorXd()> state_fn =
+                  [state_fn_obj]() -> Eigen::VectorXd {
+                      return state_fn_obj().cast<Eigen::VectorXd>();
+                  };
+              std::function<Eigen::VectorXd()> ref_fn;
+              if (!ref_fn_obj.is_none()) {
+                  ref_fn = [ref_fn_obj]() -> Eigen::VectorXd {
+                      return ref_fn_obj().cast<Eigen::VectorXd>();
+                  };
+              }
+              return ctrl::makeLQRController(plant, params,
+                                             std::move(state_fn), std::move(ref_fn));
+          },
+          py::arg("plant"), py::arg("params"),
+          py::arg("state_provider"), py::arg("ref_provider") = py::none(),
+          "Factory: construct an LQRAdapter (shared_ptr<IController>) in one call.");
+
     // -----------------------------------------------------------------------
     // DiscreteLQG
     // -----------------------------------------------------------------------
-    py::class_<ctrl::DiscreteLQG>(m, "DiscreteLQG", R"doc(
+    py::class_<ctrl::DiscreteLQG, std::shared_ptr<ctrl::DiscreteLQG>>(m, "DiscreteLQG", R"doc(
 Discrete-time Linear Quadratic Gaussian (LQG) controller (LQR + Kalman filter).
 
 Combines optimal state-feedback (LQR) with optimal state estimation (Kalman filter)
@@ -840,7 +862,7 @@ Usage
         .def_readonly("n_gens",    &ctrl::TunerResult::nGens)
         .def_readonly("converged", &ctrl::TunerResult::converged);
 
-    py::class_<ctrl::AutoTuner>(m, "AutoTuner", R"doc(
+    py::class_<ctrl::AutoTuner, std::shared_ptr<ctrl::AutoTuner>>(m, "AutoTuner", R"doc(
 CMA-ES black-box optimizer for controller parameter tuning.
 
 Usage
@@ -896,7 +918,7 @@ Usage
                        "GP surrogate hyperparameters (GaussianProcess.Params).")
         .def_readwrite("seed",           &ctrl::BayesOptParams::seed);
 
-    py::class_<ctrl::BayesianOptimizer>(m, "BayesianOptimizer", R"doc(
+    py::class_<ctrl::BayesianOptimizer, std::shared_ptr<ctrl::BayesianOptimizer>>(m, "BayesianOptimizer", R"doc(
 Bayesian Optimization with GP surrogate and UCB/EI acquisition.
 
 Preferred over AutoTuner (CMA-ES) when cost evaluations are expensive
@@ -940,7 +962,7 @@ Usage
         .def_readwrite("upper",       &ctrl::GAParams::upper)
         .def_readwrite("seed",        &ctrl::GAParams::seed);
 
-    py::class_<ctrl::GeneticAlgorithm>(m, "GeneticAlgorithm", R"doc(
+    py::class_<ctrl::GeneticAlgorithm, std::shared_ptr<ctrl::GeneticAlgorithm>>(m, "GeneticAlgorithm", R"doc(
 Real-valued Genetic Algorithm: BLX-alpha crossover, tournament selection, elitism.
 Minimises a scalar cost function over a box-bounded parameter space.
 
@@ -979,7 +1001,7 @@ Usage
         .def_readwrite("upper",        &ctrl::PSOParams::upper)
         .def_readwrite("seed",         &ctrl::PSOParams::seed);
 
-    py::class_<ctrl::ParticleSwarmOptimizer>(m, "ParticleSwarmOptimizer", R"doc(
+    py::class_<ctrl::ParticleSwarmOptimizer, std::shared_ptr<ctrl::ParticleSwarmOptimizer>>(m, "ParticleSwarmOptimizer", R"doc(
 Particle Swarm Optimizer with Clerc-Kennedy constriction coefficients.
 Suitable for continuous box-bounded optimisation problems.
 
@@ -1016,7 +1038,7 @@ Usage
         .def_readwrite("upper",       &ctrl::DEParams::upper)
         .def_readwrite("seed",        &ctrl::DEParams::seed);
 
-    py::class_<ctrl::DifferentialEvolution>(m, "DifferentialEvolution", R"doc(
+    py::class_<ctrl::DifferentialEvolution, std::shared_ptr<ctrl::DifferentialEvolution>>(m, "DifferentialEvolution", R"doc(
 Differential Evolution (DE/rand/1/bin) with boundary reflection.
 Robust global optimizer for noisy and multimodal cost functions.
 
@@ -1225,6 +1247,30 @@ Example
              "Feed back the true applied output when external clamping overrides the internal one.");
 
     // -----------------------------------------------------------------------
+    // ComputationalDelayWrapper - one-sample actuator delay decorator
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::ComputationalDelayWrapper, ctrl::IController,
+               std::shared_ptr<ctrl::ComputationalDelayWrapper>>(
+        m, "ComputationalDelayWrapper", R"doc(
+One-sample computational delay wrapper for any IController.
+
+Models the real-world delay between compute() and actuator application:
+u_out[k] = u_inner[k-1].  The first compute() returns initial_output (default 0).
+)doc")
+        .def(py::init<std::shared_ptr<ctrl::IController>, double>(),
+             py::arg("inner"), py::arg("initial_output") = 0.0,
+             "Wrap inner controller with a one-sample delay.")
+        .def("compute",      &ctrl::ComputationalDelayWrapper::compute,
+             py::arg("signal"),
+             "Return last step's inner output; schedule this step's computation for next step.")
+        .def("reset",        &ctrl::ComputationalDelayWrapper::reset,
+             "Reset inner controller and clear the delayed output to 0.")
+        .def("sample_time",  &ctrl::ComputationalDelayWrapper::sampleTime,
+             "Sample time [s] inherited from the inner controller.")
+        .def("last_output",  &ctrl::ComputationalDelayWrapper::lastOutput,
+             "Output buffered from the previous step (will be returned on next compute()).");
+
+    // -----------------------------------------------------------------------
     // ILC
     // -----------------------------------------------------------------------
     py::enum_<ctrl::ILC::Mode>(m, "ILCMode")
@@ -1247,7 +1293,7 @@ Example
         .def_readwrite("uMin",     &ctrl::ILC::Params::uMin,     "Feedforward lower bound.")
         .def_readwrite("uMax",     &ctrl::ILC::Params::uMax,     "Feedforward upper bound.");
 
-    py::class_<ctrl::ILC>(m, "ILC", R"doc(
+    py::class_<ctrl::ILC, std::shared_ptr<ctrl::ILC>>(m, "ILC", R"doc(
 Iterative Learning Controller (ILC).
 
 Learns a feedforward correction that eliminates repeating tracking errors across
@@ -1319,7 +1365,7 @@ Returned by SINDy.fit().  Use predict(x, u) to evaluate the identified dynamics.
              py::return_value_policy::copy,
              "Coefficient matrix Xi (n_terms x n_state).");
 
-    py::class_<ctrl::SINDy>(m, "SINDy", R"doc(
+    py::class_<ctrl::SINDy, std::shared_ptr<ctrl::SINDy>>(m, "SINDy", R"doc(
 Sparse Identification of Nonlinear Dynamics (SINDy).
 
 Collects I/O snapshots, builds a polynomial (or trig) library Theta(x,u),
@@ -1368,7 +1414,7 @@ Example
         .def_readwrite("rbf_width",  &ctrl::KoopmanEDMD::Params::rbf_width)
         .def_readwrite("tikhonov",   &ctrl::KoopmanEDMD::Params::tikhonov);
 
-    py::class_<ctrl::KoopmanEDMD>(m, "KoopmanEDMD",
+    py::class_<ctrl::KoopmanEDMD, std::shared_ptr<ctrl::KoopmanEDMD>>(m, "KoopmanEDMD",
         "Extended Dynamic Mode Decomposition (Koopman operator approximation).")
         .def(py::init<const ctrl::KoopmanEDMD::Params&>(), py::arg("params"))
         .def("add_snapshot",    &ctrl::KoopmanEDMD::addSnapshot,
@@ -1451,7 +1497,7 @@ Example
         .def_readonly("mean",     &ctrl::GaussianProcess::Prediction::mean)
         .def_readonly("variance", &ctrl::GaussianProcess::Prediction::variance);
 
-    py::class_<ctrl::GaussianProcess>(m, "GaussianProcess",
+    py::class_<ctrl::GaussianProcess, std::shared_ptr<ctrl::GaussianProcess>>(m, "GaussianProcess",
         "Gaussian Process Regression (SE kernel, Cholesky inference, fixed-budget).")
         .def(py::init<int, const ctrl::GaussianProcess::Params&>(),
              py::arg("x_dim"), py::arg("params"))
@@ -1548,7 +1594,7 @@ Or batch fit:
         .def_readwrite("washout",         &ctrl::EchoStateNetwork::Params::washout)
         .def_readwrite("seed",            &ctrl::EchoStateNetwork::Params::seed);
 
-    py::class_<ctrl::EchoStateNetwork>(m, "EchoStateNetwork",
+    py::class_<ctrl::EchoStateNetwork, std::shared_ptr<ctrl::EchoStateNetwork>>(m, "EchoStateNetwork",
         "Echo State Network / Reservoir Computing (Jaeger 2001). Random reservoir, trained readout.")
         .def(py::init<const ctrl::EchoStateNetwork::Params&>(), py::arg("params"))
         .def("step_reservoir",      &ctrl::EchoStateNetwork::stepReservoir, py::arg("u"))
@@ -1866,15 +1912,6 @@ Example
              py::arg("model"), py::arg("X_obs"), py::arg("U_obs"), py::arg("X_next_obs"),
              "Evaluate prediction RMSE of model against observed transitions.");
 
-    // -----------------------------------------------------------------------
-    // Fuzzy module (optional - guarded by CTRL_HAS_FUZZY)
-    // -----------------------------------------------------------------------
-#if defined(CTRL_HAS_FUZZY)
-    // TODO: bind FuzzyPDParams, FuzzyPIDParams, SupervisorParams
-    // TODO: bind FuzzyPD, FuzzyPID, FuzzySupervisor
-    // TODO: bind FuzzySystem, LinguisticVariable, LinguisticTerm, Rule
-    // TODO: bind membership-function factories (mfTriangular, mfGaussian, ...)
-    // TODO: bind InferenceMethod and DefuzzMethod enums
-    (void)m; // suppress unused-variable warning until stubs are filled
-#endif
+    // Fuzzy bindings are fully implemented in advanced_bindings.cpp (bind_advanced).
+    // The stale TODO stub that used to live here was removed (audit 2026-06-13, Finding 34).
 }

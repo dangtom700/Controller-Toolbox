@@ -834,6 +834,7 @@ assert abs(_p_hat[0] - _true_a) < 0.3, f"GreyBoxEstimator a estimate off: {_p_ha
 assert abs(_p_hat[1] - _true_b) < 0.3, f"GreyBoxEstimator b estimate off: {_p_hat[1]:.3f}"
 _Y_hat = _gbe.predict(_npgb.zeros(1), _U_gb)
 assert _Y_hat.shape == (1, _N_gb), "GreyBoxEstimator predict wrong shape"
+assert _npgb.all(_npgb.isfinite(_Y_hat)), "GreyBoxEstimator predict contains non-finite values"
 assert ctrl.registry_has('grey_box_estimator'), "grey_box_estimator not registered"
 print('GreyBoxEstimator (E1) smoke test passed.')
 
@@ -1009,5 +1010,14 @@ assert not _d1_kf.mismatch_detected(), "KF mismatch should not fire on zero step
 assert isinstance(_d1_kf.mismatch_score(), float), "mismatch_score should be float"
 assert ctrl.registry_has('mismatch_detector'), "mismatch_detector not registered"
 print('MismatchDetector (D1) smoke test passed.')
+
+# Binding presence checks for classes tested in integration but not constructed here
+assert hasattr(ctrl, 'ComputationalDelayWrapper'), "ComputationalDelayWrapper not bound"
+assert hasattr(ctrl, 'CUSUMChart'),  "CUSUMChart not bound"
+assert hasattr(ctrl, 'EWMAChart'),   "EWMAChart not bound"
+assert hasattr(ctrl, 'SmithPredictor'), "SmithPredictor not bound"
+assert hasattr(ctrl, 'ExtremumSeeker'), "ExtremumSeeker not bound"
+assert hasattr(ctrl, 'make_lqr_controller'), "make_lqr_controller not bound"
+print('Binding presence checks passed.')
 
 print('\nAll smoke tests passed.')

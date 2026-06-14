@@ -130,6 +130,12 @@ int SINDy::snapshotCount() const noexcept
     return static_cast<int>(theta_rows_.size());
 }
 
+void SINDy::reserveSnapshots(int N)
+{
+    theta_rows_.reserve(N);
+    xdot_rows_.reserve(N);
+}
+
 // ---------------------------------------------------------------------------
 // Sequentially-Thresholded Least Squares (STLS)
 // ---------------------------------------------------------------------------
@@ -159,28 +165,29 @@ Eigen::MatrixXd SINDy::stls(const Eigen::MatrixXd& Theta,
         // Refit each state using only the active (non-zero) terms
         for (int s = 0; s < S; ++s) {
             // Find active indices for column s
-            std::vector<int> active;
+            stls_active_.clear();
             for (int l = 0; l < L; ++l)
                 if (Xi(l, s) != 0.0)
-                    active.push_back(l);
+                    stls_active_.push_back(l);
 
-            if (active.empty())
+            if (stls_active_.empty())
                 continue;
 
             // Sub-matrix of active columns
-            Eigen::MatrixXd Theta_a(K, static_cast<int>(active.size()));
-            for (int j = 0; j < static_cast<int>(active.size()); ++j)
-                Theta_a.col(j) = Theta.col(active[j]);
+            const int na = static_cast<int>(stls_active_.size());
+            stls_Theta_a_.resize(K, na);
+            for (int j = 0; j < na; ++j)
+                stls_Theta_a_.col(j) = Theta.col(stls_active_[j]);
 
             // Least-squares on reduced system
             Eigen::VectorXd xi_a =
-                Theta_a.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV)
-                       .solve(Xdot.col(s));
+                stls_Theta_a_.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV)
+                             .solve(Xdot.col(s));
 
             // Write back, zeroing inactive
             Xi.col(s).setZero();
-            for (int j = 0; j < static_cast<int>(active.size()); ++j)
-                Xi(active[j], s) = xi_a(j);
+            for (int j = 0; j < static_cast<int>(stls_active_.size()); ++j)
+                Xi(stls_active_[j], s) = xi_a(j);
         }
     }
     return Xi;
@@ -226,17 +233,17 @@ SINDyModel SINDy::fit() const
 Eigen::VectorXd SINDyModel::predict(const Eigen::VectorXd& x_dev,
                                       const Eigen::VectorXd& u_dev) const
 {
-    // Reconstruct library row using the same parameters stored in the model
-    // We need the SINDy library builder, so we re-implement the row construction
-    // inline to avoid a circular dependency.
-    SINDy::Params p_tmp;
-    p_tmp.n_state  = n_state_;
-    p_tmp.n_input  = n_input_;
-    p_tmp.library  = lib_type_;
-    SINDy helper(p_tmp);
-
-    const Eigen::VectorXd row = helper.libraryRow(x_dev, u_dev);
-    return xi_.transpose() * row;
+    // Lazy-initialise the cached helper so the constructor runs once, not once per call
+    if (!helper_cache_) {
+        SINDy::Params p_tmp;
+        p_tmp.n_state = n_state_;
+        p_tmp.n_input = n_input_;
+        p_tmp.library = lib_type_;
+        helper_cache_ = std::make_unique<SINDy>(p_tmp);
+        row_work_.resize(helper_cache_->nTerms());
+    }
+    row_work_ = helper_cache_->libraryRow(x_dev, u_dev);
+    return xi_.transpose() * row_work_;
 }
 
 StateFunc SINDyModel::stateFunc() const

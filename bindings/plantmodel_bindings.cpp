@@ -194,7 +194,7 @@ and dae_c2d() to linearise and discretise for controller design.
           [](const ctrl::DAESystem &dae, const Eigen::VectorXd &x1,
              double u, const Eigen::VectorXd &x2_guess,
              int max_iter, double tol) {
-              return ctrl::consistentInit(dae, x1, u, x2_guess, max_iter, tol);
+              return ctrl::consistentInit(dae, x1, u, x2_guess, max_iter, tol).x;
           },
           py::arg("dae"), py::arg("x1"), py::arg("u"), py::arg("x2_guess"),
           py::arg("max_iter") = 20, py::arg("tol") = 1e-9,

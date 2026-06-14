@@ -13,6 +13,7 @@ HybridMPC::HybridMPC(const HybridMPCParams& params, std::shared_ptr<HybridModel>
                        -> Eigen::VectorXd { return m->predict(x, u); })
     , hp_(params)
     , model_(std::move(model))
+    , max_buffer_(std::max(params.min_observations * 2, 1))
 {}
 
 void HybridMPC::addStateObservation(const Eigen::VectorXd& x,
@@ -28,6 +29,12 @@ void HybridMPC::addStateObservation(const Eigen::VectorXd& x,
     feat_data_.push_back(feat);
     resid_data_.push_back(residual);
     ++obs_since_refit_;
+
+    // FIFO eviction: keep at most max_buffer_ observations to bound memory
+    if (static_cast<int>(feat_data_.size()) > max_buffer_) {
+        feat_data_.erase(feat_data_.begin());
+        resid_data_.erase(resid_data_.begin());
+    }
 
     const int interval = hp_.data_update_interval;
     if (interval > 0

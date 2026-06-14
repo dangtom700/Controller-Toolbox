@@ -45,6 +45,9 @@ ParticleFilter::ParticleFilter(const ParticleFilterParams &p,
     particles_.resize(p_.n_particles, Eigen::VectorXd::Zero(n_states_));
     w_.resize(p_.n_particles);
     w_.setConstant(1.0 / static_cast<double>(p_.n_particles));
+
+    resample_buf_.resize(p_.n_particles, Eigen::VectorXd::Zero(n_states_));
+    cdf_.resize(p_.n_particles);
 }
 
 // ---------------------------------------------------------------------------
@@ -137,13 +140,11 @@ void ParticleFilter::step(const Eigen::VectorXd &y,
 void ParticleFilter::resample()
 {
     const int N = p_.n_particles;
-    std::vector<Eigen::VectorXd> new_particles(N);
 
-    // Build CDF
-    std::vector<double> cdf(N);
-    cdf[0] = w_(0);
+    // Build CDF into pre-allocated member
+    cdf_(0) = w_(0);
     for (int i = 1; i < N; ++i)
-        cdf[i] = cdf[i - 1] + w_(i);
+        cdf_(i) = cdf_(i - 1) + w_(i);
 
     // Single uniform draw U ~ Uniform[0, 1/N)
     const double inv_N = 1.0 / static_cast<double>(N);
@@ -152,12 +153,12 @@ void ParticleFilter::resample()
     int j = 0;
     for (int i = 0; i < N; ++i) {
         const double ui = u0 + static_cast<double>(i) * inv_N;
-        while (j < N - 1 && cdf[j] < ui)
+        while (j < N - 1 && cdf_(j) < ui)
             ++j;
-        new_particles[i] = particles_[j];
+        resample_buf_[i] = particles_[j];
     }
 
-    particles_ = std::move(new_particles);
+    particles_.swap(resample_buf_);
     w_.setConstant(inv_N);
     ++resample_count_;
 }

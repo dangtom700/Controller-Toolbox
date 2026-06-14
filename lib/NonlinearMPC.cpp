@@ -70,6 +70,11 @@ void NonlinearMPC::init()
     y_ref_     = Eigen::VectorXd::Zero(p);
     U_warm_    = Eigen::MatrixXd::Zero(m, Nu);
 
+    x_traj_.assign(Np + 1, Eigen::VectorXd::Zero(n));
+    A_list_.assign(Np,     Eigen::MatrixXd::Zero(n, n));
+    B_list_.assign(Np,     Eigen::MatrixXd::Zero(n, m));
+    y_fista_.resize(m * Nu); y_fista_.setZero();
+
     Theta_.resize(p * Np, Nu_total);
     xi_.resize(p * Np);
 
@@ -111,27 +116,25 @@ void NonlinearMPC::buildAndSolve()
     const int Np = p_.Np;
     const int Nu = p_.Nu;
 
-    // Step 1 - simulate nominal trajectory from x_current_ under U_warm_
-    std::vector<Eigen::VectorXd> x_traj(Np + 1);
-    x_traj[0] = x_current_;
+    // Step 1 - simulate nominal trajectory from x_current_ under U_warm_ (reuse pre-allocated x_traj_)
+    x_traj_[0] = x_current_;
     for (int j = 0; j < Np; ++j)
     {
         const int k = std::min(j, Nu - 1);
-        x_traj[j + 1] = f_(x_traj[j], U_warm_.col(k));
+        x_traj_[j + 1] = f_(x_traj_[j], U_warm_.col(k));
     }
 
-    // Step 2 - linearise at each step: A_j = df/dx, B_j = df/du
-    std::vector<Eigen::MatrixXd> A_list(Np), B_list(Np);
+    // Step 2 - linearise at each step: A_j = df/dx, B_j = df/du (reuse pre-allocated lists)
     for (int j = 0; j < Np; ++j)
     {
         const int k = std::min(j, Nu - 1);
-        A_list[j] = jacX_discrete(f_, x_traj[j], U_warm_.col(k));
-        B_list[j] = jacU_discrete(f_, x_traj[j], U_warm_.col(k));
+        A_list_[j] = jacX_discrete(f_, x_traj_[j], U_warm_.col(k));
+        B_list_[j] = jacU_discrete(f_, x_traj_[j], U_warm_.col(k));
     }
 
     // Step 3 - build xi: nominal output trajectory minus reference (stacked Np times)
     for (int j = 0; j < Np; ++j)
-        xi_.segment(j * p, p) = C_ * x_traj[j + 1] - y_ref_;
+        xi_.segment(j * p, p) = C_ * x_traj_[j + 1] - y_ref_;
 
     // Step 4 - build Theta (p*Np x m*Nu): time-varying step-response matrix.
     //
@@ -150,11 +153,11 @@ void NonlinearMPC::buildAndSolve()
         Eigen::MatrixXd Phi = Eigen::MatrixXd::Identity(n, n);
         for (int k = j; k >= 0; --k)
         {
-            const Eigen::MatrixXd contrib = C_ * Phi * B_list[k];
+            const Eigen::MatrixXd contrib = C_ * Phi * B_list_[k];
             const int col_k = std::min(k, Nu - 1);
             Theta_.block(j * p, col_k * m, p, m) += contrib;
             // Update Phi for k-1: Phi_new = Phi_old * A_k
-            Phi = Phi * A_list[k];
+            Phi = Phi * A_list_[k];
         }
     }
 
@@ -184,7 +187,7 @@ void NonlinearMPC::buildAndSolve()
     auto res = solveGradientProjectionQP(H_qp_, g_qp_, lb_qp_, ub_qp_,
                                          ldlt_, L_qp_,
                                          p_.qpMaxIter, p_.qpTol,
-                                         dU_sol_, tmp1_, tmp2_);
+                                         dU_sol_, tmp1_, tmp2_, y_fista_);
     last_qp_converged_ = res.converged;
     last_qp_iters_     = res.iters;
 

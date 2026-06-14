@@ -389,18 +389,21 @@ namespace ctrl
     // ---------------------------------------------------------------------------
     // consistentInit - Newton-Raphson solve for g(x1, x2, u) = 0 over x2.
     // ---------------------------------------------------------------------------
-    Eigen::VectorXd consistentInit(const DAESystem     &dae,
-                                    const Eigen::VectorXd &x1_init,
-                                    double               u0,
-                                    const Eigen::VectorXd &x2_guess,
-                                    int                  max_iter,
-                                    double               tol)
+    ConsistentInitResult consistentInit(const DAESystem     &dae,
+                                        const Eigen::VectorXd &x1_init,
+                                        double               u0,
+                                        const Eigen::VectorXd &x2_guess,
+                                        int                  max_iter,
+                                        double               tol)
     {
         Eigen::VectorXd x2 = x2_guess;
+        double residual = 0.0;
+        bool   converged = false;
         for (int iter = 0; iter < max_iter; ++iter)
         {
             const Eigen::VectorXd g_val = dae.g(x1_init, x2, u0);
-            if (g_val.norm() < tol) break;
+            residual = g_val.norm();
+            if (residual < tol) { converged = true; break; }
 
             const Eigen::MatrixXd G2 = algJacX2(dae.g, x1_init, x2, u0);
             const auto ldlt = G2.ldlt();
@@ -409,7 +412,7 @@ namespace ctrl
 
             x2 -= ldlt.solve(g_val);
         }
-        return x2;
+        return {std::move(x2), converged, residual};
     }
 
     // ---------------------------------------------------------------------------
@@ -444,7 +447,7 @@ namespace ctrl
 
             // Step 1: project x2 onto constraint manifold (eliminates integration drift)
             if (n2 > 0)
-                x2 = consistentInit(dae, x1, u, x2, newton_max_iter, newton_tol);
+                x2 = consistentInit(dae, x1, u, x2, newton_max_iter, newton_tol).x;
 
             // Step 2: integrate differential states with forward Euler
             const Eigen::VectorXd x1_dot = dae.f(x1, x2, u);
@@ -453,7 +456,7 @@ namespace ctrl
             // Step 3: solve for algebraic states at the new differential state
             Eigen::VectorXd x2_next = x2; // warm start from current x2
             if (n2 > 0)
-                x2_next = consistentInit(dae, x1_next, u, x2, newton_max_iter, newton_tol);
+                x2_next = consistentInit(dae, x1_next, u, x2, newton_max_iter, newton_tol).x;
 
             // Step 4: assemble augmented state
             Eigen::VectorXd x_aug_next(n1 + n2);

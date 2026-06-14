@@ -2,6 +2,10 @@
 #include <atomic>
 #include <array>
 #include <cstdint>
+#include <thread>
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)
+#  include <immintrin.h>
+#endif
 
 /**
  * @file AtomicParamBuffer.h
@@ -82,7 +86,14 @@ public:
         uint64_t s0, s1;
         do {
             s0 = seq_.load(std::memory_order_acquire);
-            if (s0 & 1u) continue;  // writer in progress - spin
+            if (s0 & 1u) {  // writer in progress
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)
+                _mm_pause();
+#else
+                std::this_thread::yield();
+#endif
+                continue;
+            }
             result = bufs_[active_.load(std::memory_order_acquire)];
             s1 = seq_.load(std::memory_order_acquire);
         } while (s0 != s1);

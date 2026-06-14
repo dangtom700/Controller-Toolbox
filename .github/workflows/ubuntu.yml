@@ -16,6 +16,8 @@ jobs:
         arch: [x86_64, x86]
 
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     concurrency:
       group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-ubuntu-${{ matrix.arch }}
@@ -62,6 +64,33 @@ jobs:
 
       - name: Test
         run: cd build && ctest --output-on-failure
+
+      - name: Install pybind11 (x86_64 only)
+        if: matrix.arch == 'x86_64'
+        run: sudo apt-get install -y pybind11-dev python3-dev
+
+      - name: Build Python bindings (x86_64 only)
+        if: matrix.arch == 'x86_64'
+        run: |
+          cmake -S . -B build_py \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_COMPILER=g++-13 \
+            -DCTRL_BUILD_PYTHON_BINDINGS=ON
+          cmake --build build_py --parallel $(nproc) --target ctrl_toolbox
+
+      - name: Smoke test Python bindings (x86_64 only)
+        if: matrix.arch == 'x86_64'
+        run: python3 bindings/smoke_test.py
+
+      - name: ASAN/UBSAN Debug build (x86_64 only)
+        if: matrix.arch == 'x86_64'
+        run: |
+          cmake -S . -B build_san \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_COMPILER=g++-13 \
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          cmake --build build_san --parallel $(nproc)
+          cd build_san && ctest --output-on-failure
 
       - name: Package library
         run: |

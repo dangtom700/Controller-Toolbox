@@ -24,6 +24,7 @@ import os
 import sys
 import re
 import json
+import hashlib
 import argparse
 import datetime
 import traceback
@@ -346,7 +347,7 @@ def stage_deploy(section, params, staged_path, env, deploy_dir, log, dry_run) ->
             "controller":    section,
             "environment":   env,
             "deployed_at":   datetime.datetime.now().isoformat(),
-            "params_hash":   str(hash(json.dumps(params, sort_keys=True))),
+            "params_hash":   hashlib.sha256(json.dumps(params, sort_keys=True).encode()).hexdigest()[:16],
             "platform":      platform.platform(),
             "python":        sys.version,
         }, f, indent=2)

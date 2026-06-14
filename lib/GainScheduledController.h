@@ -1,5 +1,6 @@
 #pragma once
 #include "IController.h"
+#include <cassert>
 #include <vector>
 #include <memory>
 #include <algorithm>
@@ -230,6 +231,7 @@ private:
 
     // Returns index of the largest p_i <= current_p (clamped to valid range).
     int lowerIndex(double p) const noexcept {
+        assert(!schedule_.empty() && "GainScheduledController: schedule must not be empty");
         if (p <= schedule_.front().p) return 0;
         if (p >= schedule_.back().p)
             return static_cast<int>(schedule_.size()) - 1;

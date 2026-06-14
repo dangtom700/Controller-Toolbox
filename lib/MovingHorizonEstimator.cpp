@@ -107,30 +107,32 @@ Eigen::VectorXd MovingHorizonEstimator::estimate(const Eigen::VectorXd &y,
     // --- Build QP linear cost g = H_mhe*prior_z - Psi'*C_bar'*Rinv*y_hist ---
     // Decision variable z = [x_bar_; 0; ...; 0] (prior on the process-noise window)
 
-    // Stack measurements from window tail (most recent eff_N steps + 1 measurement)
-    Eigen::VectorXd Y_hist(p_ * eff_Np1);
+    // Stack measurements from window tail into pre-allocated workspace
     for (int i = 0; i < eff_Np1; ++i) {
-        // y_hist_[N - eff_N + i] maps to window position i
         const int idx = N - eff_N + i;
-        Y_hist.segment(i * p_, p_) = y_hist_[idx];
+        Y_hist_ws_.segment(i * p_, p_) = y_hist_[idx];
     }
+    auto Y_hist = Y_hist_ws_.head(p_ * eff_Np1);
 
-    // Prior z_prior = [x_bar_; 0; ...; 0]
-    Eigen::VectorXd z_prior = Eigen::VectorXd::Zero(dz);
-    z_prior.head(n_) = x_bar_;
+    // Prior z_prior into workspace
+    z_prior_ws_.head(dz).setZero();
+    z_prior_ws_.head(n_) = x_bar_;
+    auto z_prior = z_prior_ws_.head(dz);
 
-    // Stack inputs for the effective window
-    Eigen::VectorXd U_hist_eff((eff_N) * m_);
+    // Stack inputs for the effective window into workspace
     for (int i = 0; i < eff_N; ++i) {
         const int idx = N - eff_N + i;
-        U_hist_eff.segment(i * m_, m_) = u_hist_[idx];
+        U_hist_eff_ws_.segment(i * m_, m_) = u_hist_[idx];
     }
+    auto U_hist_eff = U_hist_eff_ws_.head(m_ * eff_N);
 
-    // For the effective horizon, build Psi, Gamma_u, C_bar sub-matrices
-    // Psi_eff: (n*eff_Np1) x (n*eff_Np1)
-    Eigen::MatrixXd Psi_eff = Eigen::MatrixXd::Zero(n_ * eff_Np1, n_ * eff_Np1);
-    Eigen::MatrixXd Gamma_u_eff = Eigen::MatrixXd::Zero(n_ * eff_Np1, m_ * eff_N);
-    Eigen::MatrixXd C_bar_eff = Eigen::MatrixXd::Zero(p_ * eff_Np1, n_ * eff_Np1);
+    // For the effective horizon, fill pre-allocated workspace matrices via block views
+    auto Psi_eff     = Psi_eff_ws_    .topLeftCorner(n_ * eff_Np1, n_ * eff_Np1);
+    auto Gamma_u_eff = Gamma_u_eff_ws_.topLeftCorner(n_ * eff_Np1, m_ * eff_N);
+    auto C_bar_eff   = C_bar_eff_ws_  .topLeftCorner(p_ * eff_Np1, n_ * eff_Np1);
+    Psi_eff    .setZero();
+    Gamma_u_eff.setZero();
+    C_bar_eff  .setZero();
 
     // x_0 row
     Psi_eff.block(0, 0, n_, n_) = Eigen::MatrixXd::Identity(n_, n_);
@@ -157,19 +159,18 @@ Eigen::VectorXd MovingHorizonEstimator::estimate(const Eigen::VectorXd &y,
         C_bar_eff.block(i * p_, i * n_, p_, n_) = plant_.C;
     }
 
-    // Build Hessian for effective horizon
-    // H_eff = Hprior + Psi'*C_bar'*Rinv*C_bar*Psi
-    // Hprior = block_diag(P0inv, Qinv_block)  (only for effective size)
+    // Build Hessian for effective horizon using pre-allocated workspaces
     Eigen::MatrixXd Qinv = Q_proc_.ldlt().solve(Eigen::MatrixXd::Identity(n_, n_));
     Eigen::MatrixXd Rinv = R_meas_.ldlt().solve(Eigen::MatrixXd::Identity(p_, p_));
 
-    Eigen::MatrixXd H_prior = Eigen::MatrixXd::Zero(dz, dz);
+    auto H_prior = H_prior_ws_.topLeftCorner(dz, dz);
+    H_prior.setZero();
     H_prior.block(0, 0, n_, n_) = P0inv_;
     for (int i = 1; i < eff_Np1; ++i)
         H_prior.block(i * n_, i * n_, n_, n_) = Qinv;
 
-    // R_bar = block_diag(Rinv, ..., Rinv), size p*eff_Np1
-    Eigen::MatrixXd R_bar = Eigen::MatrixXd::Zero(p_ * eff_Np1, p_ * eff_Np1);
+    auto R_bar = R_bar_ws_.topLeftCorner(p_ * eff_Np1, p_ * eff_Np1);
+    R_bar.setZero();
     for (int i = 0; i < eff_Np1; ++i)
         R_bar.block(i * p_, i * p_, p_, p_) = Rinv;
 
@@ -181,13 +182,15 @@ Eigen::VectorXd MovingHorizonEstimator::estimate(const Eigen::VectorXd &y,
     Eigen::VectorXd Y_pred_u = C_bar_eff * Gamma_u_eff * U_hist_eff;
     Eigen::VectorXd Y_res = Y_hist - Y_pred_u;
 
-    Eigen::VectorXd f_eff = -H_prior * z_prior
-                             - Psi_eff.transpose() * C_bar_eff.transpose() * R_bar * Y_res;
+    auto f_eff = f_eff_ws_.head(dz);
+    f_eff.noalias() = -H_prior * z_prior
+                      - Psi_eff.transpose() * C_bar_eff.transpose() * R_bar * Y_res;
 
-    // Box constraints on z: x_0 state bounds + per-element w noise bounds.
-    // Decision vector layout: z = [x_0 (n); w_0 (n); w_1 (n); ...; w_{eff_N-1} (n)]
-    Eigen::VectorXd lb_eff = Eigen::VectorXd::Constant(dz, -1e30);
-    Eigen::VectorXd ub_eff = Eigen::VectorXd::Constant(dz,  1e30);
+    // Box constraints on z using pre-allocated workspaces
+    auto lb_eff = lb_eff_ws_.head(dz);
+    auto ub_eff = ub_eff_ws_.head(dz);
+    lb_eff.fill(-1e30);
+    ub_eff.fill( 1e30);
 
     // x_0 state bounds (MHEParams::xMin / xMax), if provided.
     if (params_.xMin.size() == n_) lb_eff.head(n_) = params_.xMin;
@@ -209,32 +212,32 @@ Eigen::VectorXd MovingHorizonEstimator::estimate(const Eigen::VectorXd &y,
         return x_est_;
     }
 
-    const double L_eff = H_eff.eigenvalues().real().maxCoeff();
+    const double L_eff = Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd>(H_eff).eigenvalues().maxCoeff();
     if (L_eff <= 0.0) {
         x_est_ = x_bar_;
         last_converged_ = false;
         return x_est_;
     }
 
-    Eigen::VectorXd z_sol_eff(dz), t1(dz), t2(dz);
-    z_sol_eff.setZero();
+    // Reuse z_sol_, tmp1_, tmp2_, y_fista_ws_ pre-allocated at full-horizon size; dz <= their full size
+    z_sol_.head(dz).setZero();
     auto result = solveGradientProjectionQP(
         H_eff, f_eff, lb_eff, ub_eff,
         ldlt_eff, L_eff,
         params_.qpMaxIter, params_.qpTol,
-        z_sol_eff, t1, t2);
+        z_sol_.head(dz), tmp1_.head(dz), tmp2_.head(dz), y_fista_ws_.head(dz));
 
     last_converged_ = result.converged;
     last_qp_iters_  = result.iters;
 
     // Extract x_0 from solution; apply polytopic projection (E4) if constraints are set.
-    Eigen::VectorXd x0_opt = projectX0Polytope(z_sol_eff.head(n_));
+    Eigen::VectorXd x0_opt = projectX0Polytope(z_sol_.head(n_));
 
     // Propagate x_0_opt through the horizon using stored inputs and estimated w
     Eigen::VectorXd x_cur = x0_opt;
     for (int i = 0; i < eff_N; ++i) {
         const int idx = N - eff_N + i;
-        const Eigen::VectorXd w_i = z_sol_eff.segment((i + 1) * n_, n_);
+        const Eigen::VectorXd w_i = z_sol_.segment((i + 1) * n_, n_);
         x_cur = plant_.A * x_cur + plant_.B * u_hist_[idx] + w_i;
     }
 
@@ -250,7 +253,7 @@ Eigen::VectorXd MovingHorizonEstimator::estimate(const Eigen::VectorXd &y,
     // (the oldest state in the window advances by one step)
     if (step_count_ >= N) {
         // x_bar_ = A*x0_opt + B*u_hist_[N-eff_N] + w_0
-        const Eigen::VectorXd w0 = z_sol_eff.segment(n_, n_);
+        const Eigen::VectorXd w0 = z_sol_.segment(n_, n_);
         const int u0_idx = N - eff_N;
         x_bar_ = plant_.A * x0_opt + plant_.B * u_hist_[u0_idx] + w0;
     } else {
@@ -364,6 +367,20 @@ void MovingHorizonEstimator::buildCondensedMatrices()
     ub_z_ .resize(dz); ub_z_ .fill( 1e30);
     tmp1_  .resize(dz); tmp1_ .setZero();
     tmp2_  .resize(dz); tmp2_ .setZero();
+
+    // Effective-horizon workspaces (sized to full N; estimate() uses block views during ramp-up)
+    Psi_eff_ws_    .resize(n_ * Np1, n_ * Np1);
+    Gamma_u_eff_ws_.resize(n_ * Np1, m_ * N);
+    C_bar_eff_ws_  .resize(p_ * Np1, n_ * Np1);
+    H_prior_ws_    .resize(dz, dz);
+    R_bar_ws_      .resize(p_ * Np1, p_ * Np1);
+    Y_hist_ws_     .resize(p_ * Np1);
+    U_hist_eff_ws_ .resize(m_ * N);
+    f_eff_ws_      .resize(dz);
+    lb_eff_ws_     .resize(dz);
+    ub_eff_ws_     .resize(dz);
+    z_prior_ws_    .resize(dz);
+    y_fista_ws_    .resize(dz);
 }
 
 // =============================================================================

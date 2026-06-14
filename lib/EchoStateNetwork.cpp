@@ -134,11 +134,10 @@ Eigen::VectorXd EchoStateNetwork::predict(const Eigen::VectorXd& u)
 
 StateFunc EchoStateNetwork::reservoirStateFunc() const
 {
-    EchoStateNetwork self = *this;
-    return [self](const Eigen::VectorXd& r, const Eigen::VectorXd& u) mutable -> Eigen::VectorXd {
-        self.r_ = r;
-        const Eigen::VectorXd r_new = (self.W_res_ * r + self.W_in_ * u).array().tanh();
-        return (1.0 - self.p_.alpha) * r + self.p_.alpha * r_new;
+    auto self = const_cast<EchoStateNetwork*>(this)->shared_from_this();
+    return [self](const Eigen::VectorXd& r, const Eigen::VectorXd& u) -> Eigen::VectorXd {
+        const Eigen::VectorXd r_new = (self->W_res_ * r + self->W_in_ * u).array().tanh();
+        return (1.0 - self->p_.alpha) * r + self->p_.alpha * r_new;
     };
 }
 

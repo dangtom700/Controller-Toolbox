@@ -229,6 +229,10 @@ private:
     double  resample_thresh_;
     bool    initialised_{false};
     int     resample_count_{0};
+
+    // Pre-allocated systematic resampling workspaces
+    std::vector<Eigen::VectorXd> resample_buf_; ///< N particle scratch buffer for resample()
+    Eigen::VectorXd              cdf_;           ///< N-length CDF for systematic resampling
 };
 
 } // namespace ctrl

@@ -46,8 +46,12 @@ ScenarioMPC::ScenarioMPC(const StateSpace &sys, const ScenarioMPCParams &p)
     V_warm_   = Eigen::VectorXd::Zero(p_.Nu * m_);
     avg_W_    = Eigen::VectorXd::Zero(p_.Np * pp_);
     g_        = Eigen::VectorXd::Zero(p_.Nu * m_);
-    tmp1_     = Eigen::VectorXd::Zero(p_.Nu * m_);
-    tmp2_     = Eigen::VectorXd::Zero(p_.Nu * m_);
+    tmp1_      = Eigen::VectorXd::Zero(p_.Nu * m_);
+    tmp2_      = Eigen::VectorXd::Zero(p_.Nu * m_);
+    y_fista_   = Eigen::VectorXd::Zero(p_.Nu * m_);
+    x_noise_   = Eigen::VectorXd::Zero(n_);
+    z_noise_   = Eigen::VectorXd::Zero(n_);
+    R_stacked_ = Eigen::VectorXd::Zero(p_.Np * pp_);
 }
 
 // ---------------------------------------------------------------------------
@@ -148,32 +152,26 @@ Eigen::VectorXd ScenarioMPC::computeControl()
     // avg_W[j] = C * (mean over s of: sum_{l=0}^{j-1} A^(j-1-l) * w^(s)[l])
     avg_W_.setZero();
 
-    Eigen::VectorXd x_noise(n_);
-    Eigen::VectorXd z(n_);
-
     for (int s = 0; s < p_.N_samples; ++s) {
-        x_noise.setZero();
+        x_noise_.setZero();
         for (int j = 0; j < Np; ++j) {
             // Accumulate C * x_noise for this scenario's step j
-            avg_W_.segment(j * pp_, pp_) += sys_.C * x_noise;
+            avg_W_.segment(j * pp_, pp_) += sys_.C * x_noise_;
 
-            // Sample w_j ~ N(0, Sigma_w) = Sigma_w_chol * z, z ~ N(0,I)
+            // Sample w_j ~ N(0, Sigma_w) = Sigma_w_chol * z, z ~ N(0,I) (reuse z_noise_)
             for (int i = 0; i < n_; ++i)
-                z(i) = normal_(rng_);
-            const Eigen::VectorXd w_j = Sigma_w_chol_ * z;
-
-            x_noise = sys_.A * x_noise + w_j;
+                z_noise_(i) = normal_(rng_);
+            x_noise_ = sys_.A * x_noise_ + Sigma_w_chol_ * z_noise_;
         }
     }
     avg_W_ /= static_cast<double>(p_.N_samples);
 
-    // --- stacked reference --------------------------------------------------
-    Eigen::VectorXd R_stacked(Np * pp_);
+    // --- stacked reference (reuse pre-allocated R_stacked_) -----------------
     for (int k = 0; k < Np; ++k)
-        R_stacked.segment(k * pp_, pp_) = y_ref_;
+        R_stacked_.segment(k * pp_, pp_) = y_ref_;
 
     // --- linear cost: g = 2 * Phi'*Q_blk * (F*x_nom + avg_W - R) -----------
-    const Eigen::VectorXd err = F_ * x_nom_ + avg_W_ - R_stacked;
+    const Eigen::VectorXd err = F_ * x_nom_ + avg_W_ - R_stacked_;
 
     // g = 2 * Phi' * Q_blk * err  (PhiTQy_ = Phi' * Q_blk precomputed at construction)
     g_ = 2.0 * (PhiTQy_ * err);
@@ -181,7 +179,7 @@ Eigen::VectorXd ScenarioMPC::computeControl()
     // --- solve FISTA QP -----------------------------------------------------
     QPSolveResult res = solveGradientProjectionQP(
         H_, g_, lb_, ub_, ldlt_, 1.0 / L_inv_, p_.qpMaxIter, p_.qpTol,
-        V_warm_, tmp1_, tmp2_);
+        V_warm_, tmp1_, tmp2_, y_fista_);
     qp_converged_ = res.converged;
 
     // --- extract first nominal move -----------------------------------------

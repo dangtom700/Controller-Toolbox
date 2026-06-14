@@ -132,8 +132,9 @@ private:
     std::shared_ptr<HybridModel> model_;
     int                          obs_since_refit_ = 0;
     bool                         data_fitted_     = false;
+    int                          max_buffer_      = 0; ///< FIFO cap; set to min_observations*2 in ctor.
 
-    // Accumulated training data
+    // Accumulated training data (capped at max_buffer_ with FIFO eviction)
     std::vector<Eigen::VectorXd> feat_data_;   // [x; u] for each observation
     std::vector<Eigen::VectorXd> resid_data_;  // delta_x for each observation
 };

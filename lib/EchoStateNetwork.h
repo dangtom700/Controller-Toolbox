@@ -3,6 +3,7 @@
 #include "LinearisationHelper.h" // StateFunc
 #include <Eigen/Dense>
 #include <functional>
+#include <memory>
 #include <random>
 #include <stdexcept>
 #include <string>
@@ -51,7 +52,7 @@ namespace ctrl {
  * @see Jaeger, H. (2001). The echo state approach to analysing and training
  *      recurrent neural networks. Technical Report GMD 148, German National Research Center for IT.
  */
-class EchoStateNetwork {
+class EchoStateNetwork : public std::enable_shared_from_this<EchoStateNetwork> {
 public:
     struct Params {
         int    n_res           = 100;   ///< Reservoir size (number of recurrent units)
@@ -110,6 +111,9 @@ public:
     void   reset();
     bool   isFitted()   const noexcept { return fitted_; }
     int    reservoirSize() const noexcept { return p_.n_res; }
+
+    /** @brief Pre-reserve training snapshot storage for N time steps. */
+    void reserveSnapshots(int N) { states_.reserve(N); targets_.reserve(N); }
 
     const Eigen::VectorXd& reservoirState() const noexcept { return r_; }
 

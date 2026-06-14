@@ -56,8 +56,11 @@ TubeMPC::TubeMPC(const StateSpace &sys, const TubeMPCParams &p)
     y_ref_    = Eigen::VectorXd::Zero(pp_);
     V_warm_   = Eigen::VectorXd::Zero(p_.Nu * m_);
     g_        = Eigen::VectorXd::Zero(p_.Nu * m_);
-    tmp1_     = Eigen::VectorXd::Zero(p_.Nu * m_);
-    tmp2_     = Eigen::VectorXd::Zero(p_.Nu * m_);
+    tmp1_      = Eigen::VectorXd::Zero(p_.Nu * m_);
+    tmp2_      = Eigen::VectorXd::Zero(p_.Nu * m_);
+    y_fista_   = Eigen::VectorXd::Zero(p_.Nu * m_);
+    R_stacked_ = Eigen::VectorXd::Zero(p_.Np * pp_);
+    Qy_err_    = Eigen::VectorXd::Zero(p_.Np * pp_);
 }
 
 // ---------------------------------------------------------------------------
@@ -236,27 +239,23 @@ Eigen::VectorXd TubeMPC::computeControl()
 {
     const int Nu = p_.Nu;
 
-    // --- build stacked reference ---
-    Eigen::VectorXd R_stacked(p_.Np * pp_);
+    // --- build stacked reference (reuse pre-allocated R_stacked_) ---
     for (int k = 0; k < p_.Np; ++k)
-        R_stacked.segment(k * pp_, pp_) = y_ref_;
+        R_stacked_.segment(k * pp_, pp_) = y_ref_;
 
-    // --- linear cost: g = 2*Phi'*Qy*(F*x_nom - R_stacked) ---
-    // (Qy factored into Phi'*Q block products for efficiency)
+    // --- linear cost: g = 2*Phi'*Qy*(F*x_nom - R_stacked_) ---
     const Eigen::VectorXd Fx = F_ * x_nom_;
-    const Eigen::VectorXd err = Fx - R_stacked; // (Np*pp) x 1
+    const Eigen::VectorXd err = Fx - R_stacked_;
 
-    // g = 2 * Phi' * Qy * err
-    // Qy = block-diag(Q) - apply block-wise to avoid explicit Qy allocation
-    Eigen::VectorXd Qy_err(p_.Np * pp_);
+    // g = 2 * Phi' * Qy * err (Qy = block-diag(Q), applied block-wise; reuse Qy_err_)
     for (int k = 0; k < p_.Np; ++k)
-        Qy_err.segment(k * pp_, pp_) = p_.Q * err.segment(k * pp_, pp_);
-    g_ = 2.0 * (Phi_.transpose() * Qy_err);
+        Qy_err_.segment(k * pp_, pp_) = p_.Q * err.segment(k * pp_, pp_);
+    g_ = 2.0 * (Phi_.transpose() * Qy_err_);
 
     // --- solve QP ---
     QPSolveResult res = solveGradientProjectionQP(
         H_, g_, lb_, ub_, ldlt_, 1.0 / L_inv_, p_.qpMaxIter, p_.qpTol,
-        V_warm_, tmp1_, tmp2_);
+        V_warm_, tmp1_, tmp2_, y_fista_);
     qp_converged_ = res.converged;
 
     // --- extract nominal first move ---

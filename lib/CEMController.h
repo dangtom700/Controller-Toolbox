@@ -73,10 +73,10 @@ public:
      * @param C      Output matrix: y_k = C . x_k.
      * @param Ts     Sample time [s].
      */
-    CEMController(const Params& p,
-                  StateFunc     f,
-                  Eigen::MatrixXd C,
-                  double Ts);
+    CEMController(const Params&          p,
+                  StateFunc              f,
+                  const Eigen::MatrixXd& C,
+                  double                 Ts);
 
     /**
      * @brief Set the current plant state (called before compute()).
@@ -118,6 +118,12 @@ private:
     double          last_cost_ = 0.0;
 
     std::mt19937 rng_;
+
+    // Pre-allocated workspaces for computeRef() - avoids per-call heap allocation
+    std::vector<Eigen::VectorXd> samples_;  ///< N_samples x Np candidate sequences
+    std::vector<double>          costs_;    ///< N_samples rollout costs
+    Eigen::VectorXd              new_mu_;   ///< Elite mean update workspace (Np)
+    Eigen::VectorXd              u_k_;      ///< Single-step control vector (size 1)
 
     // Cost of a single action sequence under f, starting from x0
     double rolloutCost(const Eigen::VectorXd& x0,

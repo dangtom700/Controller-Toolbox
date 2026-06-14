@@ -19,7 +19,11 @@ _BASE_DIR = os.path.dirname(_SIM_DIR)
 _ROOT     = os.path.dirname(os.path.dirname(_BASE_DIR))
 
 sys.path.insert(0, _SIM_DIR)
-sys.path.insert(0, _ROOT)
+sys.path.insert(0, os.path.join(_ROOT, 'build', 'bindings'))
+if sys.platform == 'win32' and hasattr(os, 'add_dll_directory'):
+    for _p in [r'C:\msys64\mingw64\bin']:
+        if os.path.isdir(_p):
+            os.add_dll_directory(_p)
 
 try:
     import ctrl_toolbox as ctrl

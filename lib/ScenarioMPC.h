@@ -218,13 +218,17 @@ private:
     Eigen::VectorXd g_;          ///< Linear QP cost (Nu*m).
     Eigen::VectorXd tmp1_;       ///< FISTA scratch.
     Eigen::VectorXd tmp2_;       ///< FISTA scratch.
+    Eigen::VectorXd y_fista_;    ///< FISTA momentum point (pre-allocated).
+    Eigen::VectorXd x_noise_;    ///< Per-scenario noise accumulation (n_).
+    Eigen::VectorXd z_noise_;    ///< Standard-normal sample vector (n_).
+    Eigen::VectorXd R_stacked_;  ///< Stacked reference vector (Np*pp_).
     bool            first_step_  = true;
     bool            qp_converged_ = true;
     double          u_prev_       = 0.0; ///< Last finite compute(error) scalar (hold-last NaN contract).
 
     // RNG
-    mutable std::mt19937                     rng_;
-    mutable std::normal_distribution<double> normal_{0.0, 1.0};
+    std::mt19937                     rng_;
+    std::normal_distribution<double> normal_{0.0, 1.0};
 };
 
 } // namespace ctrl

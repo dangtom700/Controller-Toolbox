@@ -297,6 +297,7 @@ public:
 private:
     Eigen::MatrixXd Ak_, Bk_, Ck_, Dk_;
     Eigen::VectorXd xk_;
+    Eigen::VectorXd u_work_; ///< Pre-allocated control output vector for computeVec().
     double Ts_;
     double gamma_;
     double u_prev_ = 0.0; ///< Last finite compute() scalar (hold-last NaN contract).

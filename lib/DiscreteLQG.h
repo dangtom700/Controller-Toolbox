@@ -37,6 +37,12 @@ namespace ctrl
 
 /**
  * @brief Discrete-time LQG controller (LQR + Kalman filter).
+ *
+ * @note DiscreteLQG is intentionally **not** an IController. Its compute(y) sign
+ *       convention differs from the IController::compute(error) contract, and it
+ *       exposes a MIMO step() interface that IController does not capture.
+ *       To use DiscreteLQG inside a ControllerStack, wrap it in a lambda adapter
+ *       that calls step() and converts the output to a scalar.
  */
 class DiscreteLQG
 {

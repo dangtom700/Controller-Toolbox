@@ -174,6 +174,13 @@ private:
     Eigen::MatrixXd P_;     ///< Error covariance P[k|k].
     double Ts_;
 
+    // Pre-allocated update() workspaces - eliminates four heap allocs per update call.
+    Eigen::MatrixXd R_safe_; ///< R with minimum noise floor applied.
+    Eigen::MatrixXd S_;      ///< Innovation covariance (p x p).
+    Eigen::MatrixXd Kf_;     ///< Kalman gain (n x p).
+    Eigen::MatrixXd IKC_;    ///< (I - Kf*C) (n x n).
+    Eigen::MatrixXd P_new_;  ///< Scratch for Joseph-form P update (avoids P_=f(P_) aliasing).
+
     std::optional<MismatchDetector> mismatch_det_;  ///< D1: optional innovation CUSUM.
 };
 

@@ -73,7 +73,7 @@ struct QPSolveResult
  * @param tmp2    Scratch vector (pre-allocated to size n). Contents are overwritten.
  * @return QPSolveResult {converged, iters}.
  *
- * @pre @p H, @p g, @p lb, @p ub, @p x, @p tmp1, @p tmp2 all have the same size n.
+ * @pre @p H, @p g, @p lb, @p ub, @p x, @p tmp1, @p tmp2, @p y_fista all have the same size n.
  * @pre @p L > 0.
  * @pre @p ldlt.info() == Eigen::Success.
  */
@@ -86,15 +86,16 @@ inline QPSolveResult solveGradientProjectionQP(
     double                                  L,
     int                                     maxIter,
     double                                  tol,
-    Eigen::VectorXd                        &x,
-    Eigen::VectorXd                        &tmp1,  // gradient workspace
-    Eigen::VectorXd                        &tmp2)  // x_new workspace
+    Eigen::Ref<Eigen::VectorXd>             x,
+    Eigen::Ref<Eigen::VectorXd>             tmp1,    // gradient workspace
+    Eigen::Ref<Eigen::VectorXd>             tmp2,    // x_new workspace
+    Eigen::Ref<Eigen::VectorXd>             y_fista) // FISTA momentum point (pre-allocated)
 {
     // Warm start: clamped unconstrained optimum
     x = (-ldlt.solve(g)).cwiseMax(lb).cwiseMin(ub);
 
-    // FISTA momentum point y (one allocation per QP solve, not per iteration)
-    Eigen::VectorXd y = x;
+    // FISTA momentum point initialised from warm-started x (no allocation)
+    y_fista = x;
 
     const double alpha = 1.0 / L;
     double t           = 1.0;
@@ -102,11 +103,11 @@ inline QPSolveResult solveGradientProjectionQP(
 
     for (int iter = 0; iter < maxIter; ++iter)
     {
-        // Gradient at momentum point y
-        tmp1.noalias() = H * y + g;
+        // Gradient at momentum point y_fista
+        tmp1.noalias() = H * y_fista + g;
 
-        // Projected gradient step: x_new = proj(y - alpha*grad, lb, ub)
-        tmp2 = (y - alpha * tmp1).cwiseMax(lb).cwiseMin(ub);
+        // Projected gradient step: x_new = proj(y_fista - alpha*grad, lb, ub)
+        tmp2 = (y_fista - alpha * tmp1).cwiseMax(lb).cwiseMin(ub);
 
         // Convergence check on ||x_new - x_k||_inf
         const double delta = (tmp2 - x).cwiseAbs().maxCoeff();
@@ -115,8 +116,8 @@ inline QPSolveResult solveGradientProjectionQP(
         const double t_new  = 0.5 * (1.0 + std::sqrt(1.0 + 4.0 * t * t));
         const double beta   = (t - 1.0) / t_new;
 
-        // y_{k+1} = x_new + beta * (x_new - x_k)
-        y.noalias() = tmp2 + beta * (tmp2 - x);
+        // y_fista_{k+1} = x_new + beta * (x_new - x_k)
+        y_fista.noalias() = tmp2 + beta * (tmp2 - x);
 
         // Advance iterates
         x = tmp2;

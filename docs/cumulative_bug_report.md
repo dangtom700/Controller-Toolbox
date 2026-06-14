@@ -27,7 +27,7 @@ Read both compact files for tribal knowledge before making any changes to contro
 | **H4** | `HybridModelTrainer` — hyperopt for `f_data` component | LOW | **Done (Part 53)** |
 | **D1** | Mismatch Detector — CUSUM on KF/MHE innovation | LOW | **Done (Part 54)** |
 | **D2** | Digital Twin Lite Python app | LOW | Open |
-| **C2** | 8 spec-only stubs (BEMS + MEMS no blocker; others need plant design) | MED | Open |
+| **C2** | 9 spec-only stubs (BEMS + MEMS no blocker; others need plant design); **DeePC added** — `lib/DeePC.{h,cpp}` confirmed absent (audit 2026-06-13); README + cheatsheets list it as implemented — update those if/when files land | MED | Open |
 | **C3** | Active Suspension 2-DOF: add `GAOptPIDCtrl` / `PSOOptPIDCtrl` / `DEOptPIDCtrl` using new lib/ GA/PSO/DE optimisers; 15→18 controllers, 75→90 runs | MED | **Done (Part 55)** |
 | **C4** | SMISMO: modify plant for variable P_s; add `DOBEnergyCtrl` (Chen 2018 Eq. 29-30 DOB + adaptive supply pressure); 12→13 controllers, 60→65 runs | MED | **Done (Part 55)** |
 | **C5** | EHFS: add `HinfODFCCtrl` + `HinfCascadeCtrl` (DiscreteHinf ODFC + local nLMS); 12→14 controllers, 60→70 runs | MED | **Done (Part 55)** |

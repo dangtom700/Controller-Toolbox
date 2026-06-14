@@ -66,9 +66,12 @@ public:
 
     /**
      * @brief Read-only access to the current state x[k].
-     * @return Const reference to the state vector.
+     * @return Copy of the state vector (mutex-protected).
      */
-    const Eigen::VectorXd& state() const { return x_; }
+    Eigen::VectorXd state() const {
+        std::lock_guard<std::mutex> lk(mu_);
+        return x_;
+    }
 
     /**
      * @brief Inject a state vector (for Kalman initialisation or non-zero operating point).

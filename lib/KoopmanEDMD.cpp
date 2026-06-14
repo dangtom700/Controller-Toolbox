@@ -42,6 +42,8 @@ KoopmanEDMD::KoopmanEDMD(const Params& p) : p_(p)
     if (p_.n_state <= 0)
         throw std::invalid_argument("KoopmanEDMD: n_state must be positive");
     n_lifted_ = computeNLifted();
+    lift_z_.resize(p_.n_state + p_.n_input);
+    lift_psi_.resize(n_lifted_);
 }
 
 // ---------------------------------------------------------------------------
@@ -53,23 +55,20 @@ Eigen::VectorXd KoopmanEDMD::liftPoly(const Eigen::VectorXd& x,
 {
     const int n = p_.n_state, m = p_.n_input;
     const int d = n + m;
-    Eigen::VectorXd z(n + m);
-    z.head(n) = x;
-    if (m > 0) z.tail(m) = u;
+    lift_z_.head(n) = x;
+    if (m > 0) lift_z_.tail(m) = u;
 
-    Eigen::VectorXd psi(n_lifted_);
     int idx = 0;
-
-    psi(idx++) = 1.0;
-    psi.segment(idx, n) = x; idx += n;
-    if (m > 0) { psi.segment(idx, m) = u; idx += m; }
+    lift_psi_(idx++) = 1.0;
+    lift_psi_.segment(idx, n) = x; idx += n;
+    if (m > 0) { lift_psi_.segment(idx, m) = u; idx += m; }
 
     if (p_.dict == Dict::PolyDeg2) {
         for (int i = 0; i < d; ++i)
             for (int j = i; j < d; ++j)
-                psi(idx++) = z(i) * z(j);
+                lift_psi_(idx++) = lift_z_(i) * lift_z_(j);
     }
-    return psi;
+    return lift_psi_;
 }
 
 Eigen::VectorXd KoopmanEDMD::liftRBF(const Eigen::VectorXd& x,
@@ -139,6 +138,13 @@ void KoopmanEDMD::addSnapshot(const Eigen::VectorXd& x_k,
 int KoopmanEDMD::snapshotCount() const noexcept
 {
     return static_cast<int>(psi_k_.size());
+}
+
+void KoopmanEDMD::reserveSnapshots(int N)
+{
+    psi_k_.reserve(N);
+    x_k1_.reserve(N);
+    psi_k1_.reserve(N);
 }
 
 // ---------------------------------------------------------------------------

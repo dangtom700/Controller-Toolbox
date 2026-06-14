@@ -3,6 +3,7 @@
 #include "LinearisationHelper.h" // StateFunc
 #include <Eigen/Dense>
 #include <functional>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -62,6 +63,9 @@ enum class SINDyLibrary {
     PolyTrig  = 10,  ///< PolyDeg2 + sin(x_i) + cos(x_i) for each state
 };
 
+// Forward declaration so SINDyModel can hold a cached SINDy helper
+class SINDy;
+
 // ---------------------------------------------------------------------------
 // SINDyModel - the fitted sparse model
 // ---------------------------------------------------------------------------
@@ -75,6 +79,23 @@ enum class SINDyLibrary {
 class SINDyModel {
 public:
     SINDyModel() = default;
+
+    // helper_cache_ is a lazy-init perf cache, not model state - copy only real data
+    SINDyModel(const SINDyModel& o)
+        : n_state_(o.n_state_), n_input_(o.n_input_)
+        , lib_type_(o.lib_type_), xi_(o.xi_) {}
+
+    SINDyModel& operator=(const SINDyModel& o) {
+        if (this != &o) {
+            n_state_ = o.n_state_; n_input_ = o.n_input_;
+            lib_type_ = o.lib_type_; xi_ = o.xi_;
+            helper_cache_.reset();
+        }
+        return *this;
+    }
+
+    SINDyModel(SINDyModel&&)            = default;
+    SINDyModel& operator=(SINDyModel&&) = default;
 
     /**
      * @brief Predict the state derivative at (x_dev, u_dev).
@@ -107,6 +128,10 @@ private:
     int             n_input_ = 0;
     SINDyLibrary    lib_type_ = SINDyLibrary::PolyDeg2;
     Eigen::MatrixXd xi_;   ///< n_terms * n_state coefficient matrix
+
+    // Cached library helper (avoids constructing SINDy each predict() call)
+    mutable std::unique_ptr<SINDy> helper_cache_;
+    mutable Eigen::VectorXd        row_work_;    ///< workspace for libraryRow output
 };
 
 // ---------------------------------------------------------------------------
@@ -158,6 +183,9 @@ public:
     /** @brief Number of snapshots accumulated so far. */
     int snapshotCount() const noexcept;
 
+    /** @brief Pre-reserve snapshot storage for N time steps. */
+    void reserveSnapshots(int N);
+
     /** @brief Build the library row Theta(x, u) for a single snapshot. */
     Eigen::VectorXd libraryRow(const Eigen::VectorXd& x,
                                 const Eigen::VectorXd& u) const;
@@ -178,6 +206,10 @@ private:
     // Sequentially-thresholded least squares (STLS / sparse regression)
     Eigen::MatrixXd stls(const Eigen::MatrixXd& Theta,
                           const Eigen::MatrixXd& Xdot) const;
+
+    // Workspace for stls() inner loop - avoids per-iteration heap allocation
+    mutable std::vector<int>     stls_active_;
+    mutable Eigen::MatrixXd      stls_Theta_a_;
 };
 
 } // namespace ctrl

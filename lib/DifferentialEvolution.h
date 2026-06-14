@@ -128,12 +128,15 @@ public:
                 // Mutation: DE/rand/1
                 Eigen::VectorXd v = pop[r1] + p_.F * (pop[r2] - pop[r3]);
 
-                // Boundary handling: reflect out-of-bounds genes
+                // Boundary handling: reflect out-of-bounds genes (capped to avoid infinite loop
+                // when lower==upper or a large mutation overshoots both bounds simultaneously)
                 for (int j = 0; j < n; ++j) {
-                    while (v[j] < p_.lower[j] || v[j] > p_.upper[j]) {
+                    int reflect_iters = 0;
+                    while ((v[j] < p_.lower[j] || v[j] > p_.upper[j]) && ++reflect_iters < 20) {
                         if (v[j] < p_.lower[j]) v[j] = 2.0 * p_.lower[j] - v[j];
                         if (v[j] > p_.upper[j]) v[j] = 2.0 * p_.upper[j] - v[j];
                     }
+                    v[j] = std::clamp(v[j], p_.lower[j], p_.upper[j]);
                 }
 
                 // Crossover: binomial (at least one gene from mutant)

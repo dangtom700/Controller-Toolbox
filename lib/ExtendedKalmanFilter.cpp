@@ -123,7 +123,12 @@ namespace ctrl
         const Eigen::MatrixXd G2 = numericalJacobian(
             [&](const Eigen::VectorXd &x2v) { return alg_g_(x1, x2v, u_s); }, x2); // n2 x n2
 
-        Eigen::MatrixXd G2inv_G1 = G2.ldlt().solve(G1); // n2 x n1 (best-effort; not checked)
+        auto ldlt_g2 = G2.ldlt();
+        if (ldlt_g2.info() != Eigen::Success) {
+            dae_projection_failed_ = true;
+            return; // leave P_ unchanged rather than corrupt it with a garbage solve
+        }
+        Eigen::MatrixXd G2inv_G1 = ldlt_g2.solve(G1); // n2 x n1
 
         Eigen::MatrixXd J_proj = Eigen::MatrixXd::Zero(n1 + n2, n1 + n2);
         J_proj.topLeftCorner(n1, n1)    = Eigen::MatrixXd::Identity(n1, n1);

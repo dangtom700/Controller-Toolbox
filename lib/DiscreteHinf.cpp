@@ -32,7 +32,9 @@ DiscreteHinf::DiscreteHinf(const HinfResult &result)
     gamma_ = result.achievedGamma;
 
     const int nk = static_cast<int>(Ak_.rows());
-    xk_  = Eigen::VectorXd::Zero(nk);
+    const int nu = static_cast<int>(Ck_.rows());
+    xk_     = Eigen::VectorXd::Zero(nk);
+    u_work_.resize(nu);
 }
 
 double DiscreteHinf::compute(double signal)
@@ -50,9 +52,10 @@ Eigen::VectorXd DiscreteHinf::computeVec(const Eigen::VectorXd &y)
     // Controller update:
     //   u[k]   = Ck xk[k] + Dk y[k]
     //   xk[k+1] = Ak xk[k] + Bk y[k]
-    const Eigen::VectorXd u = Ck_ * xk_ + Dk_ * y;
+    u_work_.noalias() = Ck_ * xk_;
+    u_work_.noalias() += Dk_ * y;
     xk_ = Ak_ * xk_ + Bk_ * y;
-    return u;
+    return u_work_;
 }
 
 void DiscreteHinf::reset()

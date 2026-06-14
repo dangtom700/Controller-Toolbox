@@ -183,7 +183,6 @@ public:
         if (refFn_)
             x_ref = refFn_();
         const Eigen::VectorXd u = lqr_.compute(stateFn_(), x_ref);
-#ifndef NDEBUG
         if (u.size() > 1 && !warned_mimo_)
         {
             std::fprintf(stderr,
@@ -192,7 +191,6 @@ public:
                 static_cast<int>(u.size()));
             warned_mimo_ = true;
         }
-#endif
         return u(0);
     }
 

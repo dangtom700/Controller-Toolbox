@@ -726,12 +726,17 @@ def phase_bug_report(log_path):
         'cross-validation state rms error',          # ex81 LPV cross-val metric
         'max error nominal:',             # ex80 GPResidual "max error nominal:" metric
         'dominant_rho_y',                 # ex101 RL-MPC: "dominant" contains "nan" substring
+        'resonance',                      # scenario name "s02_resonance" contains "nan" substring
         'initial p guess',                # ex98 RecursiveGreyBox "(error 0.300)" line
         'max error gp-corrected:',        # ex80 GPResidual "max error GP-corrected:" metric
         '| warned |',                     # ex26 soft-warning table column header ("warned")
         'warning |',                      # ex26 table data rows: "no warning |"
         '1 warning',                      # ex26 table data rows: "1 warning  |" / "1 warning|"
         'final p estimate',               # ex98 RecursiveGreyBox "Final p estimate : ... (error ...)" line
+        'nan guard',                      # DiscreteHinf NaN-guard test-case name/header
+        'h-inf synthesis infeasible',     # Catch2 WARN when H-inf synthesis can't converge (skipped gracefully)
+        'test_catch2_advanced.cpp:3718',  # Catch2 warning: source location line for H-inf NaN-guard WARN
+        'all assertions passed',          # ex102 / other examples final pass line
     ]
 
     # Try to read the log - fall back to latin‑1 if UTF‑8 fails

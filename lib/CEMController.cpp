@@ -1,18 +1,19 @@
 #include "CEMController.h"
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <numeric>
 #include <stdexcept>
 
 namespace ctrl {
 
-CEMController::CEMController(const Params& p,
-                               StateFunc f,
-                               Eigen::MatrixXd C,
-                               double Ts)
+CEMController::CEMController(const Params&          p,
+                               StateFunc              f,
+                               const Eigen::MatrixXd& C,
+                               double                 Ts)
     : p_(p)
     , f_(std::move(f))
-    , C_(std::move(C))
+    , C_(C)
     , Ts_(Ts)
     , rng_(p.seed)
 {
@@ -21,7 +22,11 @@ CEMController::CEMController(const Params& p,
     if (p_.elite_frac <= 0.0 || p_.elite_frac >= 1.0)
         throw std::invalid_argument("CEMController: elite_frac must be in (0, 1)");
 
-    mu_.setZero(p_.Np);   // initial mean = zeros (no initial warm-start)
+    mu_.setZero(p_.Np);
+    samples_.assign(p_.N_samples, Eigen::VectorXd(p_.Np));
+    costs_.resize(p_.N_samples);
+    new_mu_.resize(p_.Np);
+    u_k_.resize(1);
 }
 
 // ---------------------------------------------------------------------------
@@ -33,9 +38,10 @@ double CEMController::rolloutCost(const Eigen::VectorXd& x0,
                                     const Eigen::VectorXd& y_ref) const
 {
     Eigen::VectorXd x = x0;
+    Eigen::VectorXd u_k(1);
     double cost = 0.0;
     for (int k = 0; k < p_.Np; ++k) {
-        Eigen::VectorXd u_k(1); u_k(0) = u_seq(k);
+        u_k(0) = u_seq(k);
         x = f_(x, u_k);
         Eigen::VectorXd e = C_ * x - y_ref;
         cost += p_.Q * e.squaredNorm() + p_.R * u_k.squaredNorm();
@@ -58,32 +64,30 @@ Eigen::VectorXd CEMController::computeRef(const Eigen::VectorXd& x_cur,
 
     std::normal_distribution<double> nd(0.0, 1.0);
 
-    std::vector<Eigen::VectorXd> samples(N, Eigen::VectorXd(p_.Np));
-    std::vector<double>          costs(N);
-
+    // Reuse pre-allocated workspace (samples_, costs_, new_mu_)
     for (int iter = 0; iter < p_.n_iter; ++iter) {
         // Sample action sequences
         for (int i = 0; i < N; ++i) {
             for (int k = 0; k < p_.Np; ++k)
-                samples[i](k) = std::clamp(mu(k) + sigma * nd(rng_),
-                                            p_.uMin, p_.uMax);
-            costs[i] = rolloutCost(x_cur, samples[i], y_ref);
+                samples_[i](k) = std::clamp(mu(k) + sigma * nd(rng_),
+                                             p_.uMin, p_.uMax);
+            costs_[i] = rolloutCost(x_cur, samples_[i], y_ref);
         }
 
         // Sort by cost and keep elite set
         std::vector<int> idx(N);
         std::iota(idx.begin(), idx.end(), 0);
         std::partial_sort(idx.begin(), idx.begin() + K, idx.end(),
-                          [&](int a, int b) { return costs[a] < costs[b]; });
+                          [&](int a, int b) { return costs_[a] < costs_[b]; });
 
         // Update distribution from elite set
-        Eigen::VectorXd new_mu = Eigen::VectorXd::Zero(p_.Np);
+        new_mu_.setZero();
         double new_var = 0.0;
         for (int j = 0; j < K; ++j) {
-            new_mu += samples[idx[j]];
-            new_var += (samples[idx[j]] - mu).squaredNorm() / p_.Np;
+            new_mu_ += samples_[idx[j]];
+            new_var += (samples_[idx[j]] - mu).squaredNorm() / p_.Np;
         }
-        mu      = new_mu / K;
+        mu      = new_mu_ / K;
         sigma   = std::max(p_.sigma_min, std::sqrt(new_var / K));
     }
 
@@ -98,8 +102,12 @@ Eigen::VectorXd CEMController::computeRef(const Eigen::VectorXd& x_cur,
 
 double CEMController::compute(double error)
 {
-    if (!std::isfinite(error) || x_.size() == 0 || r_.size() == 0)
+    if (!std::isfinite(error) || x_.size() == 0 || r_.size() == 0) {
+#ifndef NDEBUG
+        std::clog << "[CEMController] WARNING: compute() called before setState/setReference - returning 0\n";
+#endif
         return 0.0;
+    }
 
     auto u = computeRef(x_, r_);
     return u(0);

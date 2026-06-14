@@ -430,15 +430,8 @@ Example
         .def("reset_mismatch_detector",  &ctrl::MovingHorizonEstimator::resetMismatchDetector,
              "Reset CUSUM accumulators without disabling detection.");
 
-    // -----------------------------------------------------------------------
-    // SubspaceID  (optional - CTRL_HAS_SUBSPACE)
-    // -----------------------------------------------------------------------
-#if defined(CTRL_HAS_SUBSPACE)
-    // TODO: bind N4SIDResult struct (model, order, singular_values, success)
-    // TODO: bind SubspaceID::n4sid(y_data, u_data, n_order, n_block)
-    // TODO: bind SubspaceID::suggestOrder(y_data, u_data, n_block, max_order)
-    // Note: data matrices are MatrixXd (rows = channels, cols = time steps)
-#endif
+    // SubspaceID bindings are implemented in bind_advanced (advanced_bindings.cpp).
+    // The stale TODO stub was removed here (audit 2026-06-13, Finding 36).
 
     // -----------------------------------------------------------------------
     // ParticleFilter - SIR sequential importance resampling

@@ -246,6 +246,11 @@ private:
     // Pre-allocated QP work vectors
     Eigen::VectorXd z_sol_, g_qp_, lb_z_, ub_z_, tmp1_, tmp2_;
 
+    // Effective-horizon workspace (sized to full N; sliced via block views during ramp-up)
+    Eigen::MatrixXd Psi_eff_ws_, Gamma_u_eff_ws_, C_bar_eff_ws_;
+    Eigen::MatrixXd H_prior_ws_, R_bar_ws_;
+    Eigen::VectorXd Y_hist_ws_, U_hist_eff_ws_, f_eff_ws_, lb_eff_ws_, ub_eff_ws_, z_prior_ws_, y_fista_ws_;
+
     Eigen::VectorXd x_est_;    ///< Last returned state estimate.
     bool last_converged_ = true;
     int  last_qp_iters_  = 0;

@@ -21,8 +21,8 @@ double GaussianProcess::kernel(const Eigen::VectorXd& a,
 void GaussianProcess::addPoint(const Eigen::VectorXd& x, double y)
 {
     if (p_.n_max > 0 && static_cast<int>(X_.size()) >= p_.n_max) {
-        X_.erase(X_.begin());
-        Y_.erase(Y_.begin());
+        X_.pop_front();
+        Y_.pop_front();
     }
     X_.push_back(x);
     Y_.push_back(y);
@@ -46,12 +46,13 @@ void GaussianProcess::fit()
         }
     }
 
-    L_chol_.compute(K);
-    if (L_chol_.info() != Eigen::Success)
+    K_ldlt_.compute(K);
+    if (K_ldlt_.info() != Eigen::Success)
         throw std::runtime_error("GaussianProcess::fit(): covariance not positive-definite");
 
-    Eigen::VectorXd y_vec = Eigen::Map<const Eigen::VectorXd>(Y_.data(), N);
-    alpha_ = L_chol_.solve(y_vec);
+    Eigen::VectorXd y_vec(N);
+    for (int i = 0; i < N; ++i) y_vec(i) = Y_[i];
+    alpha_ = K_ldlt_.solve(y_vec);
     fitted_ = true;
 }
 
@@ -73,7 +74,7 @@ GaussianProcess::predict(const Eigen::VectorXd& x_test) const
     double mean = k_star.dot(alpha_);
 
     // Posterior variance: k** - k_*' K^{-1} k_*
-    Eigen::VectorXd v = L_chol_.solve(k_star);
+    Eigen::VectorXd v = K_ldlt_.solve(k_star);
     double var = kernel(x_test, x_test) - k_star.dot(v);
     var = std::max(var, 0.0);   // numerical safety
 

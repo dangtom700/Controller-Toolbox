@@ -110,7 +110,6 @@ private:
     double r_        = 0.0;  ///< Stored reference
     double pred_err_ = 0.0;  ///< Last prediction error |x_hat - y|
 
-    bool use_compute_y_ = false; // flag to distinguish compute(y) vs compute(error) calls
 };
 
 } // namespace ctrl

@@ -169,6 +169,11 @@ private:
     // Warm-started control sequence: U_warm_(m x Nu), column k = u_bar_k.
     Eigen::MatrixXd  U_warm_;
 
+    // Pre-allocated trajectory workspace (sized once in init() via p_.Np / p_.n_states / p_.n_inputs).
+    std::vector<Eigen::VectorXd> x_traj_;  ///< Np+1 state vectors for nominal trajectory.
+    std::vector<Eigen::MatrixXd> A_list_;  ///< Np linearised A matrices.
+    std::vector<Eigen::MatrixXd> B_list_;  ///< Np linearised B matrices.
+
     // Condensed matrices rebuilt every RTI step.
     Eigen::MatrixXd  Theta_;   ///< (p*Np) x (m*Nu): time-varying step-response matrix.
     Eigen::VectorXd  xi_;      ///< (p*Np): nominal output deviation from reference.
@@ -177,7 +182,7 @@ private:
     Eigen::MatrixXd  H_qp_;
     Eigen::VectorXd  g_qp_;
     Eigen::VectorXd  lb_qp_, ub_qp_;
-    Eigen::VectorXd  dU_sol_, tmp1_, tmp2_;
+    Eigen::VectorXd  dU_sol_, tmp1_, tmp2_, y_fista_;
     Eigen::LDLT<Eigen::MatrixXd> ldlt_;
     double           L_qp_ = 1.0;
 

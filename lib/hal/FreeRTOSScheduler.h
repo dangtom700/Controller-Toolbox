@@ -26,6 +26,7 @@
  */
 
 #if defined(FREERTOS_VERSION) || defined(INC_FREERTOS_H)
+#include <atomic>
 
 #include "IScheduler.h"
 #include <FreeRTOS.h>
@@ -130,8 +131,8 @@ private:
     uint64_t period_ns_{0};
     TickType_t period_ticks_{0};
     bool     running_{false};
-    uint64_t ticks_{0};
-    uint64_t overruns_{0};
+    std::atomic<uint64_t> ticks_{0};
+    std::atomic<uint64_t> overruns_{0};
 };
 
 } // namespace ctrl

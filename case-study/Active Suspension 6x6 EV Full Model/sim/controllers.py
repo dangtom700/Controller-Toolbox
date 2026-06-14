@@ -14,8 +14,13 @@ import numpy as np
 from typing import Optional
 
 # --- Import ctrl_toolbox from project root ---
-_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, _ROOT)
+_THIS = os.path.dirname(os.path.abspath(__file__))
+_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(_THIS)))
+sys.path.insert(0, os.path.join(_ROOT, 'build', 'bindings'))
+if sys.platform == 'win32' and hasattr(os, 'add_dll_directory'):
+    for _p in [r'C:\msys64\mingw64\bin']:
+        if os.path.isdir(_p):
+            os.add_dll_directory(_p)
 
 try:
     import ctrl_toolbox as ctrl
@@ -68,10 +73,8 @@ def _opt_pd_cost(gains: np.ndarray, plant_params: dict, Ts: float) -> float:
     z_body_sq = 0.0
     head_sq   = 0.0
     tyre_max  = 0.0
-    k_t       = plant_params['k_t']
     tyre_clearance = 0.10  # 100 mm max tyre deflection
 
-    # simple ring buffer for prev state (for derivative term)
     prev_wheel_err = np.zeros(6)
 
     for k in range(N_sim):
@@ -81,10 +84,9 @@ def _opt_pd_cost(gains: np.ndarray, plant_params: dict, Ts: float) -> float:
             z_r[:] = bump_h
 
         x = plant.state()
-        wheel_disp = x[3:9]       # Z_wr1-3, Z_wl1-3
-        tyre_defl  = z_r - wheel_disp  # tyre compression
+        wheel_disp = x[3:9]
+        tyre_defl  = z_r - wheel_disp
 
-        # PD control on tyre deflection (keep wheel in contact with road)
         wheel_err     = tyre_defl
         wheel_err_dot = (wheel_err - prev_wheel_err) / Ts if k > 0 else np.zeros(6)
         F_act         = np.clip(Kp * wheel_err + Kd * wheel_err_dot, -F_max, F_max)
@@ -141,12 +143,8 @@ class PDCtrl(ControllerBase):
 
     def compute(self, state, z_r, t=0.0):
         wheel_disp = state[3:9]
-        wheel_vel  = state[N_DOF + 3 : N_DOF + 9]
-        F_act = np.zeros(6)
-        for i in range(6):
-            e = (z_r[i] - wheel_disp[i]) - (0.0 - wheel_vel[i]) * 0.0
-            F_act[i] = float(self._pids[i].compute(z_r[i] - wheel_disp[i]))
-        return F_act
+        return np.array([float(self._pids[i].compute(z_r[i] - wheel_disp[i]))
+                         for i in range(6)])
 
 
 # ======================================================================
@@ -179,16 +177,15 @@ class _MetaOptPDBase(ControllerBase):
         err   = z_r - wheel_disp
         d_err = (err - self._prev_err) / self._Ts
         self._prev_err = err.copy()
-        F_act = np.clip(self._Kp * err + self._Kd * d_err,
-                        -self._Fmax, self._Fmax)
-        return F_act
+        return np.clip(self._Kp * err + self._Kd * d_err,
+                       -self._Fmax, self._Fmax)
 
 
 class GAOptPDCtrl(_MetaOptPDBase):
     def _run_opt(self, params, Ts, lo, hi):
         p = ctrl.GAParams()
         p.n_dim = 2;  p.population = 30;  p.max_gen = 60
-        p.lower_bound = lo;  p.upper_bound = hi
+        p.lower = lo;  p.upper = hi
         p.seed = 11
         ga = ctrl.GeneticAlgorithm(p)
         res = ga.optimize(lambda g: _opt_pd_cost(np.asarray(g), params, Ts))
@@ -199,7 +196,7 @@ class PSOOptPDCtrl(_MetaOptPDBase):
     def _run_opt(self, params, Ts, lo, hi):
         p = ctrl.PSOParams()
         p.n_dim = 2;  p.n_particles = 20;  p.max_iter = 60
-        p.lower_bound = lo;  p.upper_bound = hi
+        p.lower = lo;  p.upper = hi
         p.seed = 22
         pso = ctrl.ParticleSwarmOptimizer(p)
         res = pso.optimize(lambda g: _opt_pd_cost(np.asarray(g), params, Ts))
@@ -210,7 +207,7 @@ class DEOptPDCtrl(_MetaOptPDBase):
     def _run_opt(self, params, Ts, lo, hi):
         p = ctrl.DEParams()
         p.n_dim = 2;  p.population = 20;  p.max_gen = 60
-        p.lower_bound = lo;  p.upper_bound = hi
+        p.lower = lo;  p.upper = hi
         p.seed = 33
         de = ctrl.DifferentialEvolution(p)
         res = de.optimize(lambda g: _opt_pd_cost(np.asarray(g), params, Ts))
@@ -244,7 +241,6 @@ class LQRCtrl(ControllerBase):
         Bda = plant.Bd_act
         p   = plant.params
 
-        # Bryson Q: penalise body Z, pitch, roll, head vertical, seat
         q_diag = np.ones(N_STAT) * 1.0
         q_diag[0]  = 1000.0   # Z body
         q_diag[1]  = 500.0    # pitch
@@ -254,7 +250,6 @@ class LQRCtrl(ControllerBase):
         Q = np.diag(q_diag)
         R = np.eye(6) * (1.0 / p['F_max']**2)
 
-        # Solve DARE
         try:
             from scipy.linalg import solve_discrete_are
             P = solve_discrete_are(Ad, Bda, Q, R)
@@ -264,8 +259,7 @@ class LQRCtrl(ControllerBase):
         self._F_max = p['F_max']
 
     def compute(self, state, z_r, t=0.0):
-        F_act = -self._K @ state
-        return np.clip(F_act, -self._F_max, self._F_max)
+        return np.clip(-self._K @ state, -self._F_max, self._F_max)
 
 
 # ======================================================================
@@ -293,7 +287,6 @@ class LQGCtrl(ControllerBase):
         except Exception:
             self._K = np.zeros((6, N_STAT))
 
-        # Partial observation: body Z + pitch + roll + head Z (4 outputs)
         C_obs = np.zeros((4, N_STAT))
         C_obs[0, 0]  = 1.0  # Z body
         C_obs[1, 1]  = 1.0  # pitch
@@ -306,8 +299,7 @@ class LQGCtrl(ControllerBase):
         try:
             from scipy.linalg import solve_discrete_are
             P_k = solve_discrete_are(Ad.T, C_obs.T, Q_kf, R_kf)
-            Lk  = P_k @ C_obs.T @ np.linalg.inv(C_obs @ P_k @ C_obs.T + R_kf)
-            self._L  = Lk
+            self._L = P_k @ C_obs.T @ np.linalg.inv(C_obs @ P_k @ C_obs.T + R_kf)
         except Exception:
             self._L = np.zeros((N_STAT, 4))
 
@@ -322,39 +314,31 @@ class LQGCtrl(ControllerBase):
         self._u_prev[:] = 0.0
 
     def compute(self, state, z_r, t=0.0):
-        y = self._C @ state
-        y_hat = self._C @ self._x_hat
-        innov = y - y_hat
+        y     = self._C @ state
+        innov = y - self._C @ self._x_hat
         self._x_hat = (self._Ad @ self._x_hat
                        + self._Bda @ self._u_prev
                        + self._L @ innov)
-        F_act = -self._K @ self._x_hat
-        self._u_prev = np.clip(F_act, -self._F_max, self._F_max).copy()
-        return self._u_prev.copy()
+        F_act = np.clip(-self._K @ self._x_hat, -self._F_max, self._F_max)
+        self._u_prev = F_act.copy()
+        return F_act
 
 
 # ======================================================================
-# 9. MPCCtrl - condensed QP on 12-state reduced body+wheel model
+# 9. MPCCtrl - condensed QP on 24-state reduced body+wheel model
 # ======================================================================
 
 class MPCCtrl(ControllerBase):
     def __init__(self, plant: EV6x6Plant, Np: int = 10, Nu: int = 3):
-        # Reduced 12-state model: Z_body, theta, phi + 3 right wheels + 3 left wheels
-        # + corresponding velocities (DOFs 0-2, 3-8 -> 12 displacement states + 12 vel)
-        # Use ctrl.MPC with MPC params
         self._F_max  = plant.params['F_max']
         self._Ts     = plant.params['Ts']
-
-        # Extract reduced 12-DOF sub-system from full plant matrices
-        # (use ctrl toolbox ZOH-discretised state-space or fall back to heuristic PID)
         self._fallback_pids = _make_6_pids(500.0, 0.0, 80.0, self._Ts, self._F_max)
         self._use_fallback  = True
 
         try:
-            # Pull out rows/cols 0-11 (displacements) + N_DOF + 0:12 (velocities)
             idx = list(range(0, 12)) + list(range(N_DOF, N_DOF + 12))
-            Ad_r = plant.Ad[np.ix_(idx, idx)]
-            Bda_r = plant.Bd_act[idx, :][:, :6]  # 24x6
+            Ad_r  = plant.Ad[np.ix_(idx, idx)]
+            Bda_r = plant.Bd_act[idx, :][:, :6]
 
             ss = ctrl.StateSpace()
             ss.A = Ad_r;  ss.B = Bda_r
@@ -380,13 +364,10 @@ class MPCCtrl(ControllerBase):
             wheel_disp = state[3:9]
             return np.array([float(self._fallback_pids[i].compute(z_r[i] - wheel_disp[i]))
                              for i in range(6)])
-        # Only regulate body Z (index 0) to zero; rest self-stabilises
         idx = list(range(0, 12)) + list(range(N_DOF, N_DOF + 12))
         x_r = state[idx]
-        ref  = np.zeros(24)
-        u    = float(self._mpc.compute(x_r[0] - ref[0]))
-        F_act = np.full(6, np.clip(u, -self._F_max, self._F_max))
-        return F_act
+        u   = float(self._mpc.compute(x_r[0]))
+        return np.full(6, np.clip(u, -self._F_max, self._F_max))
 
 
 # ======================================================================
@@ -396,8 +377,8 @@ class MPCCtrl(ControllerBase):
 class ADRCCtrl(ControllerBase):
     def __init__(self, params: dict, Ts: float):
         F_max   = params['F_max']
-        omega_c = 80.0    # control bandwidth
-        omega_o = 80.0    # observer bandwidth (omega_o * Ts = 80*0.005 = 0.40 < 0.5)
+        omega_c = 80.0
+        omega_o = 80.0    # omega_o * Ts = 80*0.005 = 0.40 < 0.5 (check)
         assert omega_o * Ts < 0.5, "ADRC: omega_o*Ts constraint violated"
 
         self._ctrls = []
@@ -407,7 +388,6 @@ class ADRCCtrl(ControllerBase):
             p.b0      = params['k_s'] / params['M_w']
             p.uMin    = -F_max;   p.uMax = F_max
             self._ctrls.append(ctrl.DiscreteADRC(p, Ts))
-        self._Ts = Ts
 
     def reset(self):
         for c in self._ctrls: c.reset()
@@ -428,10 +408,11 @@ class SMCCtrl(ControllerBase):
         self._ctrls = []
         for _ in range(6):
             p = ctrl.SMCParams()
-            p.lambda_s = 5.0;  p.K = F_max * 0.5;  p.phi = 0.02
-            p.uMin = -F_max;   p.uMax = F_max
+            # c_de = lambda * Ts; lambda = 5 rad/s sliding surface bandwidth
+            p.c_e  = 1.0;  p.c_de = 5.0 * Ts
+            p.K    = F_max * 0.5;  p.phi = 0.02
+            p.uMin = -F_max;  p.uMax = F_max
             self._ctrls.append(ctrl.DiscreteSMC(p, Ts))
-        self._Ts = Ts
 
     def reset(self):
         for c in self._ctrls: c.reset()
@@ -444,7 +425,7 @@ class SMCCtrl(ControllerBase):
 
 
 # ======================================================================
-# 12. MRACCtrl - per-wheel MRAC (set_reference + compute(y))
+# 12. MRACCtrl - per-wheel MRAC (set_reference + compute(y_plant))
 # ======================================================================
 
 class MRACCtrl(ControllerBase):
@@ -453,12 +434,11 @@ class MRACCtrl(ControllerBase):
         self._ctrls = []
         for _ in range(6):
             p = ctrl.MRACParams()
-            p.a_m     = np.exp(-5.0 * Ts)  # stable reference model
-            p.b_m     = 1 - p.a_m
+            p.a_m     = np.exp(-5.0 * Ts)
+            p.b_m     = 1.0 - p.a_m
             p.gamma_r = 0.1;  p.gamma_y = 0.1
             p.uMin    = -F_max;  p.uMax = F_max
             self._ctrls.append(ctrl.MRACController(p, Ts))
-        self._Ts = Ts
 
     def reset(self):
         for c in self._ctrls: c.reset()
@@ -481,15 +461,18 @@ class FuzzyPIDCtrl(ControllerBase):
         F_max = params['F_max']
         self._ctrls = []
         for _ in range(6):
+            # FuzzyPD scaling: +/-5 cm displacement -> [-1,1]; +/-0.5 m/s vel -> [-1,1]
+            pd = ctrl.FuzzyPDParams()
+            pd.e_scale  = 0.05    # +/-5 cm displacement -> universe [-1, 1]
+            pd.de_scale = 0.5     # +/-0.5 m/s velocity  -> universe [-1, 1]
+            pd.u_scale  = F_max   # output in Newtons
+
             po = ctrl.FuzzyPIDParams()
-            po.Kp = 600.0;  po.Ki = 50.0;  po.Kd = 100.0
+            po.pd   = pd
+            po.Ki   = 5.0         # integral gain [N/(m.s)]
+            po.Kb   = 1.0
             po.uMin = -F_max;  po.uMax = F_max
-            # Inner PD params
-            pi_ = ctrl.FuzzyPDParams()
-            pi_.uMin = -1.0;  pi_.uMax = 1.0
-            po.inner = pi_
-            self._ctrls.append(ctrl.FuzzyPIDController(po, Ts))
-        self._Ts = Ts
+            self._ctrls.append(ctrl.FuzzyPID(po, Ts))
 
     def reset(self):
         for c in self._ctrls: c.reset()
@@ -501,7 +484,7 @@ class FuzzyPIDCtrl(ControllerBase):
 
 
 # ======================================================================
-# 14. TubeMPCCtrl - Tube MPC on reduced body model
+# 14. TubeMPCCtrl - Tube MPC on 2-state per-wheel reduced model
 # ======================================================================
 
 class TubeMPCCtrl(ControllerBase):
@@ -514,11 +497,10 @@ class TubeMPCCtrl(ControllerBase):
         self._fallback_pids = _make_6_pids(600.0, 0.0, 90.0, Ts, F_max)
 
         try:
-            # 2-state per-wheel reduced model: [z_w, dz_w]
             k_s = plant.params['k_s'];  c_s = plant.params['c_s']
             M_w = plant.params['M_w']
-            Ac = np.array([[0, 1], [-k_s / M_w, -c_s / M_w]])
-            Bc = np.array([[0], [1.0 / M_w]])
+            Ac  = np.array([[0, 1], [-k_s / M_w, -c_s / M_w]])
+            Bc  = np.array([[0], [1.0 / M_w]])
             from scipy.signal import cont2discrete as c2d_sp
             sys_d = c2d_sp((Ac, Bc, np.eye(2), np.zeros((2, 1))), Ts, method='zoh')
             Ad2, Bd2 = sys_d[0], sys_d[1]
@@ -529,7 +511,8 @@ class TubeMPCCtrl(ControllerBase):
             ss.Ts = Ts
 
             tp = ctrl.TubeMPCParams()
-            tp.Np = 10;  tp.Nu = 3;  tp.Q = 100.0;  tp.R = 0.05
+            tp.Np = 10;  tp.Nu = 3
+            tp.Q  = 100.0;  tp.R = 0.05   # scalar weights (SISO)
             tp.uMin = -F_max;  tp.uMax = F_max
 
             self._tmpc_list = [ctrl.TubeMPC(ss, tp) for _ in range(6)]
@@ -549,79 +532,119 @@ class TubeMPCCtrl(ControllerBase):
                              for i in range(6)])
         F_act = np.zeros(6)
         for i in range(6):
-            wi   = 3 + i
-            xw   = np.array([state[wi], state[N_DOF + wi]])
-            F_act[i] = float(self._tmpc_list[i].compute_ref(xw, np.array([z_r[i]])))
+            wi    = 3 + i
+            xw    = np.array([state[wi], state[N_DOF + wi]])
+            u_vec = self._tmpc_list[i].compute_ref(xw, np.array([z_r[i]]))
+            F_act[i] = float(u_vec) if np.ndim(u_vec) == 0 else float(u_vec[0])
         return np.clip(F_act, -self._F_max, self._F_max)
 
 
 # ======================================================================
-# 15. ILCCtrl - per-wheel ILC (P-type, episode = one scenario run)
+# 15. ILCCtrl - per-wheel ILC (P-type, two-phase within each scenario)
+#
+# Phase 1 (steps 0..N_TRIAL-1): nominal PD + record errors.
+# At step N_TRIAL: update_feedforward().
+# Phase 2 (steps N_TRIAL..): PD + learned feedforward.
 # ======================================================================
 
 class ILCCtrl(ControllerBase):
-    def __init__(self, params: dict, Ts: float, N_steps: int = 4000):
+    N_TRIAL = 500  # first 500 steps = 2.5 s at Ts=0.005 (half of 5 s scenario)
+
+    def __init__(self, params: dict, Ts: float):
         F_max = params['F_max']
         self._Ts    = Ts
         self._F_max = F_max
-        self._N     = N_steps
-        self._ctrls = []
+        self._N     = self.N_TRIAL
+        self._pids  = _make_6_pids(800.0, 0.0, 120.0, Ts, F_max)
+        self._ilcs  = []
         for _ in range(6):
-            p = ctrl.ILCParams()
-            p.Lp    = 0.5;  p.N_trial = N_steps
-            p.uMin  = -F_max;  p.uMax = F_max
-            p.mode  = ctrl.ILCMode.P_TYPE
-            self._ctrls.append(ctrl.IterativeLearningControl(p, Ts))
-        self._step = 0
+            ip = ctrl.ILCParams()
+            ip.N        = self._N;  ip.Ts = Ts
+            ip.mode     = ctrl.ILCMode.PType
+            ip.Lp       = 0.5;  ip.Q_filter = 0.95
+            ip.uMin     = -F_max;  ip.uMax = F_max
+            self._ilcs.append(ctrl.ILC(ip))
+        self._k      = 0
+        self._phase2 = False
 
     def reset(self):
-        for c in self._ctrls: c.reset()
-        self._step = 0
+        for p in self._pids: p.reset()
+        for c in self._ilcs: c.reset()
+        self._k      = 0
+        self._phase2 = False
 
     def compute(self, state, z_r, t=0.0):
         wheel_disp = state[3:9]
         F_act = np.zeros(6)
         for i in range(6):
-            err     = z_r[i] - wheel_disp[i]
-            F_act[i] = float(self._ctrls[i].compute(err))
-        self._step += 1
+            err   = z_r[i] - wheel_disp[i]
+            u_pid = float(self._pids[i].compute(err))
+            if not self._phase2:
+                if self._k < self._N:
+                    self._ilcs[i].record_error(self._k, err)
+                F_act[i] = u_pid
+            else:
+                k2 = min(self._k, self._N - 1)
+                u_ff = float(self._ilcs[i].feedforward(k2))
+                F_act[i] = np.clip(u_pid + u_ff, -self._F_max, self._F_max)
+
+        self._k += 1
+        if not self._phase2 and self._k == self._N:
+            for c in self._ilcs:
+                c.update_feedforward()
+            self._phase2 = True
+            self._k = 0
+
         return F_act
 
 
 # ======================================================================
-# 16. CBFCtrl - per-wheel CBF wrapping hand-tuned PD
+# 16. CBFCtrl - per-wheel CBF wrapping per-wheel PD nominal controller
+#
+# Barrier: h(x) = max_travel - x >= 0, where x = wheel_disp - body_Z
+# (suspension travel must stay within 100 mm).
+# This is an approximate barrier (ignores pitch/roll coupling) - intentional
+# "bad fit" for comparison.
 # ======================================================================
 
 class CBFCtrl(ControllerBase):
     def __init__(self, params: dict, Ts: float):
-        F_max = params['F_max']
-        self._pids = _make_6_pids(800.0, 0.0, 120.0, Ts, F_max)
-        self._Ts   = Ts
-        self._ctrls = []
-        max_susp_travel = 0.10   # 100 mm suspension travel limit
+        F_max      = params['F_max']
+        M_w        = params['M_w']
+        max_travel = 0.10       # 100 mm suspension travel limit
+        g_val      = 1.0 / M_w  # actuator gain on wheel acceleration
+
+        self._cbfs  = []
         for _ in range(6):
+            pid_i = ctrl.DiscretePID(_pid_params(800.0, 0.0, 120.0, Ts, F_max), Ts)
+
             cp = ctrl.CBFParams()
-            cp.h_max  = max_susp_travel
-            cp.alpha  = 5.0
-            cp.f0     = 0.0
-            cp.g      = 1.0 / params['M_w']
-            cp.uMin   = -F_max;  cp.uMax = F_max
-            self._ctrls.append(ctrl.CBFSafetyFilter(cp, Ts))
-        self._F_max = F_max
+            cp.alpha = 5.0
+            cp.uMin  = -F_max;  cp.uMax = F_max
+
+            cbf_i = ctrl.CBFSafetyFilter(
+                pid_i,
+                lambda x, mt=max_travel: mt - x,  # h(x) = max_travel - x >= 0
+                lambda x: -1.0,                    # dh/dx = -1
+                lambda x: 0.0,                     # f0: zero drift (simplified)
+                lambda x, g=g_val: g,              # g(x) = 1/M_w
+                cp,
+                Ts
+            )
+            self._cbfs.append(cbf_i)
 
     def reset(self):
-        for p in self._pids: p.reset()
-        for c in self._ctrls: c.reset()
+        for c in self._cbfs: c.reset()
 
     def compute(self, state, z_r, t=0.0):
         wheel_disp = state[3:9]
         body_Z     = state[0]
         F_act = np.zeros(6)
         for i in range(6):
-            u_nom = float(self._pids[i].compute(z_r[i] - wheel_disp[i]))
-            # Barrier: susp_travel = wheel_disp - body_Z_at_corner
-            h_val = wheel_disp[i] - body_Z   # simplified (ignore pitch/roll)
-            F_act[i] = float(self._ctrls[i].compute(u_nom, h_val, 0.0))
+            # Simplified suspension travel (ignores pitch/roll coupling)
+            susp_travel = wheel_disp[i] - body_Z
+            self._cbfs[i].set_state(susp_travel)
+            F_act[i] = float(self._cbfs[i].compute(z_r[i] - wheel_disp[i]))
         return F_act
 
 
@@ -635,14 +658,13 @@ class L1AdaptiveCtrl(ControllerBase):
         self._ctrls = []
         for _ in range(6):
             p = ctrl.L1AdaptiveParams()
-            p.a_m    = np.exp(-4.0 * Ts)
-            p.b_m    = 1 - p.a_m
-            p.Gamma  = 200.0
-            p.omega_c = 2.0
+            p.a_m       = np.exp(-4.0 * Ts)
+            p.b_m       = 1.0 - p.a_m
+            p.Gamma     = 200.0
+            p.omega_c   = 2.0
             p.sigma_max = 5000.0
-            p.uMin   = -F_max;  p.uMax = F_max
+            p.uMin      = -F_max;  p.uMax = F_max
             self._ctrls.append(ctrl.L1AdaptiveController(p, Ts))
-        self._Ts = Ts
 
     def reset(self):
         for c in self._ctrls: c.reset()
@@ -657,7 +679,7 @@ class L1AdaptiveCtrl(ControllerBase):
 
 
 # ======================================================================
-# 18. ScenarioMPCCtrl - Scenario MPC on 2-state per-wheel model
+# 18. ScenarioMPCCtrl - Scenario MPC on 2-state per-wheel reduced model
 # ======================================================================
 
 class ScenarioMPCCtrl(ControllerBase):
@@ -666,10 +688,10 @@ class ScenarioMPCCtrl(ControllerBase):
         Ts    = plant.params['Ts']
         k_s   = plant.params['k_s'];  c_s = plant.params['c_s']
         M_w   = plant.params['M_w']
-        self._F_max    = F_max
-        self._Ts       = Ts
-        self._use_fb   = True
-        self._fb_pids  = _make_6_pids(600.0, 0.0, 90.0, Ts, F_max)
+        self._F_max   = F_max
+        self._Ts      = Ts
+        self._use_fb  = True
+        self._fb_pids = _make_6_pids(600.0, 0.0, 90.0, Ts, F_max)
 
         try:
             Ac = np.array([[0, 1], [-k_s / M_w, -c_s / M_w]])
@@ -684,11 +706,14 @@ class ScenarioMPCCtrl(ControllerBase):
             ss.Ts = Ts
 
             sp = ctrl.ScenarioMPCParams()
-            sp.Np       = 10;  sp.Nu = 3
+            sp.Np        = 10;  sp.Nu = 3
             sp.N_samples = 30
-            sp.rho_y    = 100.0;  sp.rho_u = 1e-6
-            sp.uMin     = -F_max;  sp.uMax = F_max
-            sp.Sigma_w  = np.eye(2) * (0.002)**2   # 2 mm road noise
+            sp.Q         = np.eye(2) * 100.0        # 2x2 state weight [z_w, dz_w]
+            sp.R         = np.array([[1e-6]])        # 1x1 input weight
+            sp.Sigma_w   = np.eye(2) * (0.002)**2   # 2 mm road noise covariance
+            sp.uMin      = np.array([-F_max])
+            sp.uMax      = np.array([F_max])
+            sp.Ts        = Ts
 
             self._smpc_list = [ctrl.ScenarioMPC(ss, sp) for _ in range(6)]
             self._use_fb = False
@@ -707,10 +732,10 @@ class ScenarioMPCCtrl(ControllerBase):
                              for i in range(6)])
         F_act = np.zeros(6)
         for i in range(6):
-            wi   = 3 + i
-            xw   = np.array([state[wi], state[N_DOF + wi]])
-            ref  = np.array([z_r[i], 0.0])
-            F_act[i] = float(self._smpc_list[i].compute(xw[0] - ref[0]))
+            wi    = 3 + i
+            xw    = np.array([state[wi], state[N_DOF + wi]])
+            u_vec = self._smpc_list[i].compute_ref(xw, np.array([z_r[i]]))
+            F_act[i] = float(u_vec) if np.ndim(u_vec) == 0 else float(u_vec[0])
         return np.clip(F_act, -self._F_max, self._F_max)
 
 

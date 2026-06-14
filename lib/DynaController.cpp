@@ -72,12 +72,12 @@ void DynaController::reset()
 
 void DynaController::addTransition(double e, double u, double e_next)
 {
-    Eigen::VectorXd e_v(1);  e_v(0)  = e;
-    Eigen::VectorXd en_v(1); en_v(0) = e_next;
-    Eigen::VectorXd u_v(1);  u_v(0)  = u;
+    x_scalar_(0)     = e;
+    xnext_scalar_(0) = e_next;
+    u_scalar_(0)     = u;
 
     // addSnapshotFD(x_k, x_k1, u_k, Ts) - computes xdot = (x_k1 - x_k) / Ts
-    sindy_.addSnapshotFD(e_v, en_v, u_v, p_.Ts);
+    sindy_.addSnapshotFD(x_scalar_, xnext_scalar_, u_scalar_, p_.Ts);
 
     ++n_total_;
     ++steps_since_fit_;

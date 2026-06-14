@@ -36,7 +36,8 @@ namespace ctrl
         s_prev_ = s;
         u_prev_ = u;
         // M3 telemetry: sliding surface value
-        notifyObserverState("surface", Eigen::VectorXd::Constant(1, s));
+        notify_buf_(0) = s;
+        notifyObserverState("surface", notify_buf_);
         notifyObserver(u, error);
         return u;
     }

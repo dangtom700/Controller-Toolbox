@@ -1,5 +1,6 @@
 #pragma once
 #include <Eigen/Dense>
+#include <deque>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -85,12 +86,12 @@ private:
     Params p_;
     bool   fitted_ = false;
 
-    // Training data stored as lists for O(1) insert/remove at front
-    std::vector<Eigen::VectorXd> X_;   // inputs
-    std::vector<double>          Y_;   // outputs
+    // Training data stored as deques for O(1) push_back and pop_front (fixed-budget eviction)
+    std::deque<Eigen::VectorXd>  X_;   // inputs
+    std::deque<double>           Y_;   // outputs
 
-    // Cholesky of training covariance K + sigma_n^2 I  (rebuilt in fit())
-    Eigen::LDLT<Eigen::MatrixXd> L_chol_;
+    // LDLT factorisation of training covariance K + sigma_n^2 I  (rebuilt in fit())
+    Eigen::LDLT<Eigen::MatrixXd> K_ldlt_;
     Eigen::VectorXd              alpha_;   // K^{-1} y
 
     double kernel(const Eigen::VectorXd& a, const Eigen::VectorXd& b) const;

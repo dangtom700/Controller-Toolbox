@@ -95,6 +95,7 @@ namespace ctrl
         DeltaU_.resize(Nc * m);
         grad_k_.resize(Nc * m);
         DU_new_.resize(Nc * m);
+        y_fista_.resize(Nc * m);
         lb_.resize(Nc * m);
         ub_.resize(Nc * m);
         cumMin_.resize(m);
@@ -179,17 +180,19 @@ namespace ctrl
         // Gradient projection - all work vectors pre-allocated; zero per-step allocation.
         const auto qp = solveGradientProjectionQP(
             H_, grad_, lb_, ub_, ldlt_, L_, p_.qpMaxIter, p_.qpTol,
-            DeltaU_, grad_k_, DU_new_);
+            DeltaU_, grad_k_, DU_new_, y_fista_);
         last_qp_converged_ = qp.converged;
         last_qp_iters_     = qp.iters;
 
         // Emit convergence telemetry via observer (M3/R3).
         // "qp_iters" carries the iteration count; "health" is 1.0 (ok) / 0.0 (failed).
         // Zero-cost when no observer is attached.
-        notifyObserverState("qp_iters",
-            Eigen::VectorXd::Constant(1, static_cast<double>(last_qp_iters_)));
-        if (!last_qp_converged_)
-            notifyObserverState("health", Eigen::VectorXd::Constant(1, 0.0));
+        notify_buf_(0) = static_cast<double>(last_qp_iters_);
+        notifyObserverState("qp_iters", notify_buf_);
+        if (!last_qp_converged_) {
+            notify_buf_(0) = 0.0;
+            notifyObserverState("health", notify_buf_);
+        }
 
         // Non-convergence is queryable via lastQPConverged() / isHealthy().
         // The clog print is debug-only: it produces ~50 k lines per boiler run at

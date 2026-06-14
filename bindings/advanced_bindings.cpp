@@ -192,9 +192,9 @@ Example (simple 2-input Mamdani)
         .def("num_outputs",  &ctrl::FuzzySystem::numOutputs)
         .def("num_rules",    &ctrl::FuzzySystem::numRules)
         .def("input_var",    &ctrl::FuzzySystem::inputVar,  py::arg("i"),
-             py::return_value_policy::reference_internal)
+             py::return_value_policy::copy)
         .def("output_var",   &ctrl::FuzzySystem::outputVar, py::arg("i"),
-             py::return_value_policy::reference_internal);
+             py::return_value_policy::copy);
 
     // --- FuzzyPDParams + FuzzyPD ---------------------------------------------
     py::class_<ctrl::FuzzyPDParams>(m, "FuzzyPDParams",

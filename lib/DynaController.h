@@ -133,6 +133,11 @@ private:
     double e_prev_    = 0.0;
     double u_prev_    = 0.0;
     bool   has_prev_  = false;
+
+    // 1-element workspace vectors - avoids per-call heap allocation in addTransition()
+    Eigen::VectorXd x_scalar_{1};
+    Eigen::VectorXd u_scalar_{1};
+    Eigen::VectorXd xnext_scalar_{1};
 };
 
 } // namespace ctrl

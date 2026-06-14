@@ -193,11 +193,12 @@ private:
     using AlgConstraintFn = std::function<Eigen::VectorXd(const Eigen::VectorXd &,
                                                            const Eigen::VectorXd &,
                                                            double)>;
-    AlgConstraintFn alg_g_;     ///< Algebraic constraint g(x1, x2, u) = 0.
-    int    n_diff_alg_ = 0;     ///< Number of differential states for projection.
-    int    n_alg_      = 0;     ///< Number of algebraic states for projection.
-    double alg_tol_    = 1e-9;  ///< Newton convergence tolerance.
-    bool   alg_set_    = false; ///< True when constraint is active.
+    AlgConstraintFn alg_g_;           ///< Algebraic constraint g(x1, x2, u) = 0.
+    int    n_diff_alg_ = 0;           ///< Number of differential states for projection.
+    int    n_alg_      = 0;           ///< Number of algebraic states for projection.
+    double alg_tol_    = 1e-9;        ///< Newton convergence tolerance.
+    bool   alg_set_    = false;       ///< True when constraint is active.
+    bool   dae_projection_failed_ = false; ///< Set when G2 LDLT factorisation fails; P_ left unchanged.
 
     void projectAlgebraicStates(const Eigen::VectorXd &u);
 };

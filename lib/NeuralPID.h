@@ -83,6 +83,14 @@ private:
     Eigen::MatrixXd W2_;  // 3 * n_h
     Eigen::VectorXd b2_;  // 3
 
+    // Pre-allocated gradient workspaces - sized in constructor
+    Eigen::MatrixXd dW2_;       // 3 * n_h
+    Eigen::VectorXd db2_;       // 3
+    Eigen::VectorXd dJ_dh_;     // n_h
+    Eigen::VectorXd dJ_dpre1_;  // n_h
+    Eigen::MatrixXd dW1_;       // n_h * 3
+    Eigen::VectorXd db1_;       // n_h
+
     // Runtime state
     double e_prev_  = 0.0;
     double e_int_   = 0.0;

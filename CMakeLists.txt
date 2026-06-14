@@ -19,8 +19,11 @@ if(MSVC)
     add_compile_definitions(_USE_MATH_DEFINES)
 endif()
 
-# Global fallback definition of M_PI - safe on all platforms
-add_compile_definitions(M_PI=3.14159265358979323846)
+# Global fallback definition of M_PI - only needed on non-MSVC where _USE_MATH_DEFINES
+# is not set, and only when the compiler doesn't already provide it (MinGW, older GCC).
+if(NOT MSVC)
+    add_compile_definitions(M_PI=3.14159265358979323846)
+endif()
 
 add_subdirectory(lib)
 

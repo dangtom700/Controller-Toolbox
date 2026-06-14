@@ -163,9 +163,11 @@ public:
     /**
      * @brief Return a NonlinearMPC::DiscreteDynamics capturing this model by raw pointer.
      *
-     * Callers must ensure the HybridModel outlives the returned lambda.
-     * Prefer makeDynamicsFunc(shared_ptr) for safe ownership.
+     * @deprecated Use HybridModel::makeDynamicsFunc(shared_ptr<HybridModel>) instead.
+     *             The raw-pointer capture causes UB if the HybridModel is destroyed before
+     *             the lambda (e.g. when passed to NonlinearMPC which outlives the model).
      */
+    [[deprecated("use HybridModel::makeDynamicsFunc(shared_ptr<HybridModel>)")]]
     NonlinearMPC::DiscreteDynamics dynamicsFunc() {
         return [this](const Eigen::VectorXd& x, const Eigen::VectorXd& u) {
             return this->predict(x, u);

@@ -22,7 +22,7 @@ namespace ctrl {
  *
  * The result is projected back onto the original state coordinates to give a
  * `ctrl::StateSpace` that can be used directly with `DiscreteMPC`, `DiscreteLQR`,
- * `DiscreteLQG`, and `DiscreteLQG`.
+ * `DiscreteLQG`, and `DiscreteHinf`.
  *
  * **Dictionary options:**
  *  - `PolyDeg1` : [1; x; u]  (recovers a linear model, equivalent to DMDc)
@@ -99,6 +99,9 @@ public:
     /** @brief Number of snapshots accumulated. */
     int snapshotCount() const noexcept;
 
+    /** @brief Pre-reserve snapshot storage for N time steps. */
+    void reserveSnapshots(int N);
+
     /**
      * @brief Lift a state-input pair to the full observable vector ψ(x, u).
      */
@@ -117,6 +120,10 @@ private:
     // RBF centres (n_state * n_centres), set from first batch of snapshots
     Eigen::MatrixXd rbf_centres_;
     bool centres_set_ = false;
+
+    // Workspace vectors for liftPoly (avoids per-call allocation)
+    mutable Eigen::VectorXd lift_z_;
+    mutable Eigen::VectorXd lift_psi_;
 
     void maybeSetCentres(const Eigen::VectorXd& x);
     int computeNLifted() const;

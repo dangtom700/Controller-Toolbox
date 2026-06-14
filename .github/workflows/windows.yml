@@ -16,6 +16,8 @@ jobs:
         arch: [x64, x86]
 
     runs-on: windows-2022
+    permissions:
+      contents: read
 
     concurrency:
       group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-windows-${{ matrix.arch }}

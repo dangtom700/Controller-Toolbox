@@ -92,6 +92,7 @@ public:
     void update(const Eigen::VectorXd& innov)
     {
         const double n = static_cast<double>(innov.size());
+        // Guard against zero-size innovation (e.g., when called before first measurement)
         update(innov.norm() / std::sqrt(n > 0.0 ? n : 1.0));
     }
 

@@ -193,7 +193,7 @@ int main()
 
     // Plain NonlinearMPC (no data model, physical only)
     ctrl::NMPCParams np = hpars.nmpc;
-    ctrl::NonlinearMPC nmpc(np, model_plain->dynamicsFunc());
+    ctrl::NonlinearMPC nmpc(np, ctrl::HybridModel::makeDynamicsFunc(model_plain));
 
     Eigen::VectorXd y_ref(2); y_ref << 1.0, 0.0;  // position=1, velocity=0
 

@@ -90,13 +90,15 @@ double AdaptiveSmithPredictor::compute(double error)
     has_y_ = false;
 
     // Append u[k-1] (the control applied at the previous step) and current y[k].
-    u_hist_.push_back(last_u_);
-    y_hist_.push_back(y_buf_val);
+    if (params_.bufferLen > 0) {
+        u_hist_.push_back(last_u_);
+        y_hist_.push_back(y_buf_val);
 
-    if (static_cast<int>(u_hist_.size()) > params_.bufferLen)
-    {
-        u_hist_.pop_front();
-        y_hist_.pop_front();
+        if (static_cast<int>(u_hist_.size()) > params_.bufferLen)
+        {
+            u_hist_.pop_front();
+            y_hist_.pop_front();
+        }
     }
 
     last_u_ = u; // store for next step

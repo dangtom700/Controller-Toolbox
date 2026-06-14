@@ -160,7 +160,7 @@ public:
      * Repeated non-convergence indicates qpMaxIter is too small, qpTol is too tight,
      * or H is ill-conditioned (large Np, small rhou).
      */
-    bool lastQPConverged() const { return last_qp_converged_; }
+    [[nodiscard]] bool lastQPConverged() const { return last_qp_converged_; }
 
     /** @brief Actual gradient-projection iterations used in the most recent computeRef(). */
     int  lastQPIters()     const { return last_qp_iters_; }
@@ -171,7 +171,7 @@ public:
      * Returns @c false when the most recent QP exited at qpMaxIter without converging.
      * ControllerStack uses this to fall back to a backup controller (e.g., PID).
      */
-    bool isHealthy() const override { return last_qp_converged_; }
+    [[nodiscard]] bool isHealthy() const override { return last_qp_converged_; }
 
 private:
     StateSpace plant_;
@@ -193,10 +193,11 @@ private:
     Eigen::LDLT<Eigen::MatrixXd> ldlt_;
 
     // Pre-allocated work vectors - eliminate per-step heap allocation in computeRef().
-    Eigen::VectorXd R_stack_, pred_err_, grad_, DeltaU_, grad_k_, DU_new_, lb_, ub_, cumMin_, cumMax_;
+    Eigen::VectorXd R_stack_, pred_err_, grad_, DeltaU_, grad_k_, DU_new_, lb_, ub_, cumMin_, cumMax_, y_fista_;
 
     bool last_qp_converged_ = true;
     int  last_qp_iters_     = 0;
+    mutable Eigen::VectorXd notify_buf_{Eigen::VectorXd::Constant(1, 0.0)};
 
     void buildPredictionMatrices();
     void buildCostMatrix();

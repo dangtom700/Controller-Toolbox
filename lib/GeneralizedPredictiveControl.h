@@ -166,7 +166,7 @@ namespace ctrl
          *
          * Repeated @c false indicates qpMaxIter is too small or H is ill-conditioned.
          */
-        bool lastQPConverged() const { return last_qp_converged_; }
+        [[nodiscard]] bool lastQPConverged() const { return last_qp_converged_; }
 
         /** @brief Actual gradient-projection iterations used in the most recent computeRef(). */
         int lastQPIters() const { return last_qp_iters_; }
@@ -175,7 +175,7 @@ namespace ctrl
          * @brief Health reflects QP convergence for ControllerStack fallback.
          * @return @c false when the most recent QP exited at qpMaxIter.
          */
-        bool isHealthy() const override { return last_qp_converged_; }
+        [[nodiscard]] bool isHealthy() const override { return last_qp_converged_; }
 
     private:
         void buildCondensedMatrices();
@@ -196,12 +196,13 @@ namespace ctrl
         /// stale or incorrect matrix silently corrupts every subsequent QP solve.
         Eigen::LDLT<Eigen::MatrixXd> ldlt_;
 
-        Eigen::VectorXd Rtraj_, err_, grad_, DeltaU_, grad_k_, DU_new_, lb_, ub_, cumMin_, cumMax_;
+        Eigen::VectorXd Rtraj_, err_, grad_, DeltaU_, grad_k_, DU_new_, lb_, ub_, cumMin_, cumMax_, y_fista_;
 
         double L_;
 
         bool last_qp_converged_ = true;
         int last_qp_iters_ = 0;
+        mutable Eigen::VectorXd notify_buf_{Eigen::VectorXd::Constant(1, 0.0)};
 
         Eigen::VectorXd xa_;     ///< Augmented state estimate.
         Eigen::VectorXd u_prev_; ///< u[k-1] for Deltau = u - u_prev.
