@@ -86,6 +86,7 @@ $(function() {
 <div class="textblock"><code>#include &lt;atomic&gt;</code><br />
 <code>#include &lt;array&gt;</code><br />
 <code>#include &lt;cstdint&gt;</code><br />
+<code>#include &lt;thread&gt;</code><br />
 </div>
 <p><a href="AtomicParamBuffer_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -119,8 +120,8 @@ Namespaces</h2></td></tr>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Background thread (called on tuner update):</span></div>
 <div class="line">buf.publish({2.0, 0.2, 0.1});</div>
-<div class="ttc" id="aclassctrl_1_1AtomicParamBuffer_html"><div class="ttname"><a href="classctrl_1_1AtomicParamBuffer.html">ctrl::AtomicParamBuffer</a></div><div class="ttdoc">Seqlock double-buffer for lock-free parameter hand-off between a background writer thread and a real-...</div><div class="ttdef"><b>Definition</b> <a href="AtomicParamBuffer_8h_source.html#l00054">AtomicParamBuffer.h:54</a></div></div>
-<div class="ttc" id="aclassctrl_1_1AtomicParamBuffer_html_a9c63717ca1dfde3a2edefc696a17a422"><div class="ttname"><a href="classctrl_1_1AtomicParamBuffer.html#a9c63717ca1dfde3a2edefc696a17a422">ctrl::AtomicParamBuffer::read</a></div><div class="ttdeci">Params read() const</div><div class="ttdoc">Read the current parameter set (real-time thread).</div><div class="ttdef"><b>Definition</b> <a href="AtomicParamBuffer_8h_source.html#l00079">AtomicParamBuffer.h:79</a></div></div>
+<div class="ttc" id="aclassctrl_1_1AtomicParamBuffer_html"><div class="ttname"><a href="classctrl_1_1AtomicParamBuffer.html">ctrl::AtomicParamBuffer</a></div><div class="ttdoc">Seqlock double-buffer for lock-free parameter hand-off between a background writer thread and a real-...</div><div class="ttdef"><b>Definition</b> <a href="AtomicParamBuffer_8h_source.html#l00058">AtomicParamBuffer.h:58</a></div></div>
+<div class="ttc" id="aclassctrl_1_1AtomicParamBuffer_html_a9c63717ca1dfde3a2edefc696a17a422"><div class="ttname"><a href="classctrl_1_1AtomicParamBuffer.html#a9c63717ca1dfde3a2edefc696a17a422">ctrl::AtomicParamBuffer::read</a></div><div class="ttdeci">Params read() const</div><div class="ttdoc">Read the current parameter set (real-time thread).</div><div class="ttdef"><b>Definition</b> <a href="AtomicParamBuffer_8h_source.html#l00083">AtomicParamBuffer.h:83</a></div></div>
 </div><!-- fragment --> 
 <p class="definition">Definition in file <a class="el" href="AtomicParamBuffer_8h_source.html">AtomicParamBuffer.h</a>.</p>
 </div></div><!-- contents -->

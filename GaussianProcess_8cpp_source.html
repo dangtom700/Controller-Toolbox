@@ -108,8 +108,8 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="classctrl_1_1GaussianProcess.html#ae49608ad8a4d172c58f25b85015b08a0">   21</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1GaussianProcess.html#ae49608ad8a4d172c58f25b85015b08a0">GaussianProcess::addPoint</a>(<span class="keyword">const</span> Eigen::VectorXd&amp; x, <span class="keywordtype">double</span> y)</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>{</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keywordflow">if</span> (p_.<a class="code hl_variable" href="structctrl_1_1GaussianProcess_1_1Params.html#af1af3f0c52b67ec974f345a1cdb2485b">n_max</a> &gt; 0 &amp;&amp; <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(X_.size()) &gt;= p_.<a class="code hl_variable" href="structctrl_1_1GaussianProcess_1_1Params.html#af1af3f0c52b67ec974f345a1cdb2485b">n_max</a>) {</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        X_.erase(X_.begin());</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        Y_.erase(Y_.begin());</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        X_.pop_front();</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        Y_.pop_front();</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    }</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    X_.push_back(x);</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    Y_.push_back(y);</div>
@@ -135,68 +135,69 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        }</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    }</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    L_chol_.compute(K);</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keywordflow">if</span> (L_chol_.info() != Eigen::Success)</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    K_ldlt_.compute(K);</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keywordflow">if</span> (K_ldlt_.info() != Eigen::Success)</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;GaussianProcess::fit(): covariance not positive-definite&quot;</span>);</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    Eigen::VectorXd y_vec = Eigen::Map&lt;const Eigen::VectorXd&gt;(Y_.data(), N);</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    alpha_ = L_chol_.solve(y_vec);</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    fitted_ = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    Eigen::VectorXd y_vec(N);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; ++i) y_vec(i) = Y_[i];</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    alpha_ = K_ldlt_.solve(y_vec);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    fitted_ = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>}</div>
 </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><a class="code hl_struct" href="structctrl_1_1GaussianProcess_1_1Prediction.html">GaussianProcess::Prediction</a></div>
-<div class="foldopen" id="foldopen00059" data-start="{" data-end="}">
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="classctrl_1_1GaussianProcess.html#aef6bba0348163ebea75ae78b8d8525a9">   59</a></span><a class="code hl_function" href="classctrl_1_1GaussianProcess.html#aef6bba0348163ebea75ae78b8d8525a9">GaussianProcess::predict</a>(<span class="keyword">const</span> Eigen::VectorXd&amp; x_test)<span class="keyword"> const</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keywordflow">if</span> (!fitted_)</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;GaussianProcess::predict(): call fit() first&quot;</span>);</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> N = <a class="code hl_function" href="classctrl_1_1GaussianProcess.html#a95723ee0737c554137e39edf46e66d5c">size</a>();</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keywordflow">if</span> (N == 0)</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keywordflow">return</span> {0.0, p_.<a class="code hl_variable" href="structctrl_1_1GaussianProcess_1_1Params.html#ad9228a56c2c5b8da5ad5cb4aabe0d2e8">signal_var</a>};</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="comment">// k_star: covariance between test point and training data</span></div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    Eigen::VectorXd k_star(N);</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; ++i)</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        k_star(i) = kernel(x_test, X_[i]);</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keywordtype">double</span> mean = k_star.dot(alpha_);</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="comment">// Posterior variance: k** - k_*&#39; K^{-1} k_*</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    Eigen::VectorXd v = L_chol_.solve(k_star);</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keywordtype">double</span> var = kernel(x_test, x_test) - k_star.dot(v);</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    var = std::max(var, 0.0);   <span class="comment">// numerical safety</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keywordflow">return</span> {mean, var};</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>}</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><a class="code hl_struct" href="structctrl_1_1GaussianProcess_1_1Prediction.html">GaussianProcess::Prediction</a></div>
+<div class="foldopen" id="foldopen00060" data-start="{" data-end="}">
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="classctrl_1_1GaussianProcess.html#aef6bba0348163ebea75ae78b8d8525a9">   60</a></span><a class="code hl_function" href="classctrl_1_1GaussianProcess.html#aef6bba0348163ebea75ae78b8d8525a9">GaussianProcess::predict</a>(<span class="keyword">const</span> Eigen::VectorXd&amp; x_test)<span class="keyword"> const</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keywordflow">if</span> (!fitted_)</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;GaussianProcess::predict(): call fit() first&quot;</span>);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> N = <a class="code hl_function" href="classctrl_1_1GaussianProcess.html#a95723ee0737c554137e39edf46e66d5c">size</a>();</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordflow">if</span> (N == 0)</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <span class="keywordflow">return</span> {0.0, p_.<a class="code hl_variable" href="structctrl_1_1GaussianProcess_1_1Params.html#ad9228a56c2c5b8da5ad5cb4aabe0d2e8">signal_var</a>};</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="comment">// k_star: covariance between test point and training data</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    Eigen::VectorXd k_star(N);</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; ++i)</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        k_star(i) = kernel(x_test, X_[i]);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keywordtype">double</span> mean = k_star.dot(alpha_);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    <span class="comment">// Posterior variance: k** - k_*&#39; K^{-1} k_*</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    Eigen::VectorXd v = K_ldlt_.solve(k_star);</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordtype">double</span> var = kernel(x_test, x_test) - k_star.dot(v);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    var = std::max(var, 0.0);   <span class="comment">// numerical safety</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordflow">return</span> {mean, var};</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>}</div>
 </div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
-<div class="foldopen" id="foldopen00083" data-start="{" data-end="}">
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="classctrl_1_1GaussianProcess.html#a1487bea6829fa703b03588762be24b0b">   83</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1GaussianProcess.html#a1487bea6829fa703b03588762be24b0b">GaussianProcess::reset</a>()</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>{</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    X_.clear();</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    Y_.clear();</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    alpha_.resize(0);</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    fitted_ = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>}</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+<div class="foldopen" id="foldopen00084" data-start="{" data-end="}">
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="classctrl_1_1GaussianProcess.html#a1487bea6829fa703b03588762be24b0b">   84</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1GaussianProcess.html#a1487bea6829fa703b03588762be24b0b">GaussianProcess::reset</a>()</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>{</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    X_.clear();</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    Y_.clear();</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    alpha_.resize(0);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    fitted_ = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>}</div>
 </div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aGaussianProcess_8h_html"><div class="ttname"><a href="GaussianProcess_8h.html">GaussianProcess.h</a></div></div>
-<div class="ttc" id="aclassctrl_1_1GaussianProcess_html_a1487bea6829fa703b03588762be24b0b"><div class="ttname"><a href="classctrl_1_1GaussianProcess.html#a1487bea6829fa703b03588762be24b0b">ctrl::GaussianProcess::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8cpp_source.html#l00083">GaussianProcess.cpp:83</a></div></div>
+<div class="ttc" id="aclassctrl_1_1GaussianProcess_html_a1487bea6829fa703b03588762be24b0b"><div class="ttname"><a href="classctrl_1_1GaussianProcess.html#a1487bea6829fa703b03588762be24b0b">ctrl::GaussianProcess::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8cpp_source.html#l00084">GaussianProcess.cpp:84</a></div></div>
 <div class="ttc" id="aclassctrl_1_1GaussianProcess_html_a39afce049ca6b66ee42bd37f18b6eb0b"><div class="ttname"><a href="classctrl_1_1GaussianProcess.html#a39afce049ca6b66ee42bd37f18b6eb0b">ctrl::GaussianProcess::GaussianProcess</a></div><div class="ttdeci">GaussianProcess(int x_dim, const Params &amp;p)</div><div class="ttdoc">Construct GP with given input dimension and parameters.</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8cpp_source.html#l00007">GaussianProcess.cpp:7</a></div></div>
 <div class="ttc" id="aclassctrl_1_1GaussianProcess_html_a7e7f7e672613811c19a7dc60509e195d"><div class="ttname"><a href="classctrl_1_1GaussianProcess.html#a7e7f7e672613811c19a7dc60509e195d">ctrl::GaussianProcess::fit</a></div><div class="ttdeci">void fit()</div><div class="ttdoc">(Re-)compute the Cholesky factorisation of the training covariance.</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8cpp_source.html#l00032">GaussianProcess.cpp:32</a></div></div>
-<div class="ttc" id="aclassctrl_1_1GaussianProcess_html_a95723ee0737c554137e39edf46e66d5c"><div class="ttname"><a href="classctrl_1_1GaussianProcess.html#a95723ee0737c554137e39edf46e66d5c">ctrl::GaussianProcess::size</a></div><div class="ttdeci">int size() const noexcept</div><div class="ttdoc">Number of training points currently stored.</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8h_source.html#l00078">GaussianProcess.h:78</a></div></div>
+<div class="ttc" id="aclassctrl_1_1GaussianProcess_html_a95723ee0737c554137e39edf46e66d5c"><div class="ttname"><a href="classctrl_1_1GaussianProcess.html#a95723ee0737c554137e39edf46e66d5c">ctrl::GaussianProcess::size</a></div><div class="ttdeci">int size() const noexcept</div><div class="ttdoc">Number of training points currently stored.</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8h_source.html#l00079">GaussianProcess.h:79</a></div></div>
 <div class="ttc" id="aclassctrl_1_1GaussianProcess_html_ae49608ad8a4d172c58f25b85015b08a0"><div class="ttname"><a href="classctrl_1_1GaussianProcess.html#ae49608ad8a4d172c58f25b85015b08a0">ctrl::GaussianProcess::addPoint</a></div><div class="ttdeci">void addPoint(const Eigen::VectorXd &amp;x, double y)</div><div class="ttdoc">Add a training point (x, y) to the dataset.</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8cpp_source.html#l00021">GaussianProcess.cpp:21</a></div></div>
-<div class="ttc" id="aclassctrl_1_1GaussianProcess_html_aef6bba0348163ebea75ae78b8d8525a9"><div class="ttname"><a href="classctrl_1_1GaussianProcess.html#aef6bba0348163ebea75ae78b8d8525a9">ctrl::GaussianProcess::predict</a></div><div class="ttdeci">Prediction predict(const Eigen::VectorXd &amp;x_test) const</div><div class="ttdoc">Predict the posterior distribution at x_test.</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8cpp_source.html#l00059">GaussianProcess.cpp:59</a></div></div>
+<div class="ttc" id="aclassctrl_1_1GaussianProcess_html_aef6bba0348163ebea75ae78b8d8525a9"><div class="ttname"><a href="classctrl_1_1GaussianProcess.html#aef6bba0348163ebea75ae78b8d8525a9">ctrl::GaussianProcess::predict</a></div><div class="ttdeci">Prediction predict(const Eigen::VectorXd &amp;x_test) const</div><div class="ttdoc">Predict the posterior distribution at x_test.</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8cpp_source.html#l00060">GaussianProcess.cpp:60</a></div></div>
 <div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AdaptiveSmithPredictor_8cpp_source.html#l00005">AdaptiveSmithPredictor.cpp:6</a></div></div>
-<div class="ttc" id="astructctrl_1_1GaussianProcess_1_1Params_html"><div class="ttname"><a href="structctrl_1_1GaussianProcess_1_1Params.html">ctrl::GaussianProcess::Params</a></div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8h_source.html#l00041">GaussianProcess.h:41</a></div></div>
-<div class="ttc" id="astructctrl_1_1GaussianProcess_1_1Params_html_a361ea8cbf80bafef35a03b43822e8a1c"><div class="ttname"><a href="structctrl_1_1GaussianProcess_1_1Params.html#a361ea8cbf80bafef35a03b43822e8a1c">ctrl::GaussianProcess::Params::noise_var</a></div><div class="ttdeci">double noise_var</div><div class="ttdoc">Observation noise variance sigma_n^2.</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8h_source.html#l00044">GaussianProcess.h:44</a></div></div>
-<div class="ttc" id="astructctrl_1_1GaussianProcess_1_1Params_html_abbf7e5b08091a679124a1186245c00e9"><div class="ttname"><a href="structctrl_1_1GaussianProcess_1_1Params.html#abbf7e5b08091a679124a1186245c00e9">ctrl::GaussianProcess::Params::length_scale</a></div><div class="ttdeci">double length_scale</div><div class="ttdoc">RBF length scale ℓ</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8h_source.html#l00042">GaussianProcess.h:42</a></div></div>
-<div class="ttc" id="astructctrl_1_1GaussianProcess_1_1Params_html_ad9228a56c2c5b8da5ad5cb4aabe0d2e8"><div class="ttname"><a href="structctrl_1_1GaussianProcess_1_1Params.html#ad9228a56c2c5b8da5ad5cb4aabe0d2e8">ctrl::GaussianProcess::Params::signal_var</a></div><div class="ttdeci">double signal_var</div><div class="ttdoc">Signal variance sigma_f^2.</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8h_source.html#l00043">GaussianProcess.h:43</a></div></div>
-<div class="ttc" id="astructctrl_1_1GaussianProcess_1_1Params_html_af1af3f0c52b67ec974f345a1cdb2485b"><div class="ttname"><a href="structctrl_1_1GaussianProcess_1_1Params.html#af1af3f0c52b67ec974f345a1cdb2485b">ctrl::GaussianProcess::Params::n_max</a></div><div class="ttdeci">int n_max</div><div class="ttdoc">Fixed budget (oldest points evicted; &lt;=0 = unlimited)</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8h_source.html#l00045">GaussianProcess.h:45</a></div></div>
-<div class="ttc" id="astructctrl_1_1GaussianProcess_1_1Prediction_html"><div class="ttname"><a href="structctrl_1_1GaussianProcess_1_1Prediction.html">ctrl::GaussianProcess::Prediction</a></div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8h_source.html#l00048">GaussianProcess.h:48</a></div></div>
+<div class="ttc" id="astructctrl_1_1GaussianProcess_1_1Params_html"><div class="ttname"><a href="structctrl_1_1GaussianProcess_1_1Params.html">ctrl::GaussianProcess::Params</a></div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8h_source.html#l00042">GaussianProcess.h:42</a></div></div>
+<div class="ttc" id="astructctrl_1_1GaussianProcess_1_1Params_html_a361ea8cbf80bafef35a03b43822e8a1c"><div class="ttname"><a href="structctrl_1_1GaussianProcess_1_1Params.html#a361ea8cbf80bafef35a03b43822e8a1c">ctrl::GaussianProcess::Params::noise_var</a></div><div class="ttdeci">double noise_var</div><div class="ttdoc">Observation noise variance sigma_n^2.</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8h_source.html#l00045">GaussianProcess.h:45</a></div></div>
+<div class="ttc" id="astructctrl_1_1GaussianProcess_1_1Params_html_abbf7e5b08091a679124a1186245c00e9"><div class="ttname"><a href="structctrl_1_1GaussianProcess_1_1Params.html#abbf7e5b08091a679124a1186245c00e9">ctrl::GaussianProcess::Params::length_scale</a></div><div class="ttdeci">double length_scale</div><div class="ttdoc">RBF length scale ℓ</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8h_source.html#l00043">GaussianProcess.h:43</a></div></div>
+<div class="ttc" id="astructctrl_1_1GaussianProcess_1_1Params_html_ad9228a56c2c5b8da5ad5cb4aabe0d2e8"><div class="ttname"><a href="structctrl_1_1GaussianProcess_1_1Params.html#ad9228a56c2c5b8da5ad5cb4aabe0d2e8">ctrl::GaussianProcess::Params::signal_var</a></div><div class="ttdeci">double signal_var</div><div class="ttdoc">Signal variance sigma_f^2.</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8h_source.html#l00044">GaussianProcess.h:44</a></div></div>
+<div class="ttc" id="astructctrl_1_1GaussianProcess_1_1Params_html_af1af3f0c52b67ec974f345a1cdb2485b"><div class="ttname"><a href="structctrl_1_1GaussianProcess_1_1Params.html#af1af3f0c52b67ec974f345a1cdb2485b">ctrl::GaussianProcess::Params::n_max</a></div><div class="ttdeci">int n_max</div><div class="ttdoc">Fixed budget (oldest points evicted; &lt;=0 = unlimited)</div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8h_source.html#l00046">GaussianProcess.h:46</a></div></div>
+<div class="ttc" id="astructctrl_1_1GaussianProcess_1_1Prediction_html"><div class="ttname"><a href="structctrl_1_1GaussianProcess_1_1Prediction.html">ctrl::GaussianProcess::Prediction</a></div><div class="ttdef"><b>Definition</b> <a href="GaussianProcess_8h_source.html#l00049">GaussianProcess.h:49</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

@@ -107,8 +107,8 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="keyword">    </span>{</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <span class="keywordflow">if</span> (!cb_)</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>            <span class="keywordflow">throw</span> std::logic_error(<span class="stringliteral">&quot;ZephyrScheduler::start() called with no callback.&quot;</span>);</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <span class="keywordflow">if</span> (period_ns_ == 0)</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>            <span class="keywordflow">throw</span> std::logic_error(<span class="stringliteral">&quot;ZephyrScheduler::start() called before setPeriodNs().&quot;</span>);</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <span class="keywordflow">if</span> (period_ns_ &lt; 1&#39;000&#39;000ULL)</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>            <span class="keywordflow">throw</span> std::logic_error(<span class="stringliteral">&quot;ZephyrScheduler::start(): period_ns must be &gt;= 1 ms (1000000 ns).&quot;</span>);</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="comment">// Store this pointer in timer user-data for the trampoline.</span></div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        k_timer_user_data_set(&amp;timer_, <span class="keyword">this</span>);</div>

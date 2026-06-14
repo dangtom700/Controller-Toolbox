@@ -149,6 +149,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ComputationalDelayWrapper.html">ComputationalDelayWrapper</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classctrl_1_1IController.html" title="Abstract interface for all discrete-time controllers.">IController</a> decorator that introduces exactly one sample of computational delay.  <a href="classctrl_1_1ComputationalDelayWrapper.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1ConsistentInitResult.html">ConsistentInitResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of a <code><a class="el" href="namespacectrl.html#a9adebf1fde07cc078c28ae301c9d39f5" title="Find consistent algebraic states: solve g(x1_init, x2, u0) = 0 for x2.">consistentInit()</a></code> solve.  <a href="structctrl_1_1ConsistentInitResult.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1ControllerMonitor.html">ControllerMonitor</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classctrl_1_1ControllerMonitor.html" title="ControllerMonitor - observer that runs SPC charts on controller output.">ControllerMonitor</a> - observer that runs SPC charts on controller output.  <a href="classctrl_1_1ControllerMonitor.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -802,9 +805,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a51fde5bfdb017e748806ed5d80959b97" id="r_a51fde5bfdb017e748806ed5d80959b97"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a51fde5bfdb017e748806ed5d80959b97">nuGapMatrix</a> (const std::vector&lt; <a class="el" href="structctrl_1_1StateSpace.html">StateSpace</a> &gt; &amp;models, int freq_points=200)</td></tr>
 <tr class="memdesc:a51fde5bfdb017e748806ed5d80959b97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Symmetric N*N nu-gap distance matrix for a collection of systems.  <br /></td></tr>
 <tr class="separator:a51fde5bfdb017e748806ed5d80959b97"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35c170c14a2cf3926e4b26bf41a38ff1" id="r_a35c170c14a2cf3926e4b26bf41a38ff1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1QPSolveResult.html">QPSolveResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a35c170c14a2cf3926e4b26bf41a38ff1">solveGradientProjectionQP</a> (const Eigen::MatrixXd &amp;H, const Eigen::VectorXd &amp;g, const Eigen::VectorXd &amp;lb, const Eigen::VectorXd &amp;ub, const Eigen::LDLT&lt; Eigen::MatrixXd &gt; &amp;ldlt, double L, int maxIter, double tol, Eigen::VectorXd &amp;x, Eigen::VectorXd &amp;tmp1, Eigen::VectorXd &amp;tmp2)</td></tr>
-<tr class="memdesc:a35c170c14a2cf3926e4b26bf41a38ff1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve a box-constrained QP via FISTA (zero-allocation per iteration).  <br /></td></tr>
-<tr class="separator:a35c170c14a2cf3926e4b26bf41a38ff1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af47a37a386cad124b6fdbba85d4a9e17" id="r_af47a37a386cad124b6fdbba85d4a9e17"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1QPSolveResult.html">QPSolveResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#af47a37a386cad124b6fdbba85d4a9e17">solveGradientProjectionQP</a> (const Eigen::MatrixXd &amp;H, const Eigen::VectorXd &amp;g, const Eigen::VectorXd &amp;lb, const Eigen::VectorXd &amp;ub, const Eigen::LDLT&lt; Eigen::MatrixXd &gt; &amp;ldlt, double L, int maxIter, double tol, Eigen::Ref&lt; Eigen::VectorXd &gt; x, Eigen::Ref&lt; Eigen::VectorXd &gt; tmp1, Eigen::Ref&lt; Eigen::VectorXd &gt; tmp2, Eigen::Ref&lt; Eigen::VectorXd &gt; y_fista)</td></tr>
+<tr class="memdesc:af47a37a386cad124b6fdbba85d4a9e17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solve a box-constrained QP via FISTA (zero-allocation per iteration).  <br /></td></tr>
+<tr class="separator:af47a37a386cad124b6fdbba85d4a9e17"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a250ebc9ea0eab12cf24cb43d45c7241e" id="r_a250ebc9ea0eab12cf24cb43d45c7241e"><td class="memItemLeft" align="right" valign="top">static Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a250ebc9ea0eab12cf24cb43d45c7241e">numJacImpl</a> (const std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;)&gt; &amp;func, const Eigen::VectorXd &amp;x0, double eps_scale)</td></tr>
 <tr class="separator:a250ebc9ea0eab12cf24cb43d45c7241e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6cc60eb5b71614401fe3c46d67629805" id="r_a6cc60eb5b71614401fe3c46d67629805"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a6cc60eb5b71614401fe3c46d67629805">jacobianX</a> (const <a class="el" href="namespacectrl.html#a084e413f17f1128b83fe38d6ebc6c289">StateFunc</a> &amp;func, const Eigen::VectorXd &amp;x0, const Eigen::VectorXd &amp;u0, double eps_scale=1e-4)</td></tr>
@@ -864,9 +867,9 @@ Functions</h2></td></tr>
 <tr class="separator:adc3f901abfebb4a110cd75de9e35d6fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab6270d74095d70b3ea345d9f572e0718" id="r_ab6270d74095d70b3ea345d9f572e0718"><td class="memItemLeft" align="right" valign="top">static Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ab6270d74095d70b3ea345d9f572e0718">algJacU</a> (const <a class="el" href="structctrl_1_1DAESystem.html#ad6126f05ed12f7da6ad688731441e06d">DAESystem::AlgFunc</a> &amp;g, const Eigen::VectorXd &amp;x1, const Eigen::VectorXd &amp;x2, double u, double eps=1e-5)</td></tr>
 <tr class="separator:ab6270d74095d70b3ea345d9f572e0718"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a21c327dfa2de10884adbffff15e92705" id="r_a21c327dfa2de10884adbffff15e92705"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a21c327dfa2de10884adbffff15e92705">consistentInit</a> (const <a class="el" href="structctrl_1_1DAESystem.html">DAESystem</a> &amp;dae, const Eigen::VectorXd &amp;x1_init, double u0, const Eigen::VectorXd &amp;x2_guess, int max_iter=20, double tol=1e-9)</td></tr>
-<tr class="memdesc:a21c327dfa2de10884adbffff15e92705"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find consistent algebraic states: solve g(x1_init, x2, u0) = 0 for x2.  <br /></td></tr>
-<tr class="separator:a21c327dfa2de10884adbffff15e92705"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9adebf1fde07cc078c28ae301c9d39f5" id="r_a9adebf1fde07cc078c28ae301c9d39f5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structctrl_1_1ConsistentInitResult.html">ConsistentInitResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#a9adebf1fde07cc078c28ae301c9d39f5">consistentInit</a> (const <a class="el" href="structctrl_1_1DAESystem.html">DAESystem</a> &amp;dae, const Eigen::VectorXd &amp;x1_init, double u0, const Eigen::VectorXd &amp;x2_guess, int max_iter=20, double tol=1e-9)</td></tr>
+<tr class="memdesc:a9adebf1fde07cc078c28ae301c9d39f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find consistent algebraic states: solve g(x1_init, x2, u0) = 0 for x2.  <br /></td></tr>
+<tr class="separator:a9adebf1fde07cc078c28ae301c9d39f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae262e4114a6d4a2baa7565492e43d13e" id="r_ae262e4114a6d4a2baa7565492e43d13e"><td class="memItemLeft" align="right" valign="top">std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;, double)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html#ae262e4114a6d4a2baa7565492e43d13e">dae2ode</a> (const <a class="el" href="structctrl_1_1DAESystem.html">DAESystem</a> &amp;dae, int newton_max_iter=20, double newton_tol=1e-9)</td></tr>
 <tr class="memdesc:ae262e4114a6d4a2baa7565492e43d13e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a <a class="el" href="structctrl_1_1DAESystem.html" title="Index-1 semi-explicit Differential-Algebraic Equation system.">DAESystem</a> to a discrete-time step function.  <br /></td></tr>
 <tr class="separator:ae262e4114a6d4a2baa7565492e43d13e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1196,7 +1199,7 @@ Variables</h2></td></tr>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="GainScheduledController_8h_source.html#l00060">60</a> of file <a class="el" href="GainScheduledController_8h_source.html">GainScheduledController.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="GainScheduledController_8h_source.html#l00061">61</a> of file <a class="el" href="GainScheduledController_8h_source.html">GainScheduledController.h</a>.</p>
 
 </div>
 </div>
@@ -1256,7 +1259,7 @@ Variables</h2></td></tr>
 <p>Williams, Kevrekidis &amp; Rowley (2015) / Proctor et al. (2016, DMDc). Lifts nonlinear I/O data into a high-dimensional linear space via a dictionary of observable functions ψ(x), then estimates a linear operator K:</p>
 <div class="fragment"><div class="line">z[k] = ψ(x[k], u[k])     (lifting map)</div>
 <div class="line">z[k+1] approx = K . z[k]        (linear dynamics in lifted space)</div>
-</div><!-- fragment --><p>The result is projected back onto the original state coordinates to give a <code><a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">ctrl::StateSpace</a></code> that can be used directly with <code><a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a></code>, <code><a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a></code>, <code><a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a></code>, and <code><a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a></code>.</p>
+</div><!-- fragment --><p>The result is projected back onto the original state coordinates to give a <code><a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">ctrl::StateSpace</a></code> that can be used directly with <code><a class="el" href="classctrl_1_1DiscreteMPC.html" title="Discrete-time Model Predictive Controller.">DiscreteMPC</a></code>, <code><a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a></code>, <code><a class="el" href="classctrl_1_1DiscreteLQG.html" title="Discrete-time LQG controller (LQR + Kalman filter).">DiscreteLQG</a></code>, and <code><a class="el" href="classctrl_1_1DiscreteHinf.html" title="Discrete-time dynamic output-feedback Hinf controller.">DiscreteHinf</a></code>.</p>
 <p><b>Dictionary options:</b></p><ul>
 <li><code>PolyDeg1</code> : [1; x; u] (recovers a linear model, equivalent to DMDc)</li>
 <li><code>PolyDeg2</code> : [1; x; u; x^2; xu; u^2] (quadratic lifting)</li>
@@ -1373,13 +1376,13 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 <div class="line"><span class="comment">// Use as StateFunc in NonlinearMPC / EKF</span></div>
 <div class="line"><a class="code hl_class" href="classctrl_1_1NonlinearMPC.html">ctrl::NonlinearMPC</a> nmpc(nmpc_params, model.<a class="code hl_function" href="classctrl_1_1SINDyModel.html#aa1acdd1fd9c4504263c6424d5cbf4ecc">stateFunc</a>(), C);</div>
 <div class="ttc" id="aclassctrl_1_1NonlinearMPC_html"><div class="ttname"><a href="classctrl_1_1NonlinearMPC.html">ctrl::NonlinearMPC</a></div><div class="ttdoc">Nonlinear MPC controller using Real-Time Iteration (RTI).</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8h_source.html#l00070">NonlinearMPC.h:71</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SINDyModel_html"><div class="ttname"><a href="classctrl_1_1SINDyModel.html">ctrl::SINDyModel</a></div><div class="ttdoc">Fitted SINDy model: xdot = Theta(x,u) .</div><div class="ttdef"><b>Definition</b> <a href="SINDy_8h_source.html#l00075">SINDy.h:75</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SINDyModel_html_aa1acdd1fd9c4504263c6424d5cbf4ecc"><div class="ttname"><a href="classctrl_1_1SINDyModel.html#aa1acdd1fd9c4504263c6424d5cbf4ecc">ctrl::SINDyModel::stateFunc</a></div><div class="ttdeci">StateFunc stateFunc() const</div><div class="ttdoc">Return a StateFunc lambda wrapping predict().</div><div class="ttdef"><b>Definition</b> <a href="SINDy_8cpp_source.html#l00242">SINDy.cpp:242</a></div></div>
-<div class="ttc" id="aclassctrl_1_1SINDy_html"><div class="ttname"><a href="classctrl_1_1SINDy.html">ctrl::SINDy</a></div><div class="ttdef"><b>Definition</b> <a href="SINDy_8h_source.html#l00116">SINDy.h:116</a></div></div>
-<div class="ttc" id="astructctrl_1_1SINDy_1_1Params_html"><div class="ttname"><a href="structctrl_1_1SINDy_1_1Params.html">ctrl::SINDy::Params</a></div><div class="ttdef"><b>Definition</b> <a href="SINDy_8h_source.html#l00118">SINDy.h:118</a></div></div>
-<div class="ttc" id="astructctrl_1_1SINDy_1_1Params_html_a036704251220ade2e6e68b9a37637d4f"><div class="ttname"><a href="structctrl_1_1SINDy_1_1Params.html#a036704251220ade2e6e68b9a37637d4f">ctrl::SINDy::Params::threshold</a></div><div class="ttdeci">double threshold</div><div class="ttdoc">STLS sparsity threshold.</div><div class="ttdef"><b>Definition</b> <a href="SINDy_8h_source.html#l00122">SINDy.h:122</a></div></div>
-<div class="ttc" id="astructctrl_1_1SINDy_1_1Params_html_a9c3cf6f84413ccbac56b0e166053a8f7"><div class="ttname"><a href="structctrl_1_1SINDy_1_1Params.html#a9c3cf6f84413ccbac56b0e166053a8f7">ctrl::SINDy::Params::n_input</a></div><div class="ttdeci">int n_input</div><div class="ttdoc">Input dimension.</div><div class="ttdef"><b>Definition</b> <a href="SINDy_8h_source.html#l00120">SINDy.h:120</a></div></div>
-<div class="ttc" id="astructctrl_1_1SINDy_1_1Params_html_adfd37ea06e5f37fd00fb0601cd79693c"><div class="ttname"><a href="structctrl_1_1SINDy_1_1Params.html#adfd37ea06e5f37fd00fb0601cd79693c">ctrl::SINDy::Params::n_state</a></div><div class="ttdeci">int n_state</div><div class="ttdoc">State dimension.</div><div class="ttdef"><b>Definition</b> <a href="SINDy_8h_source.html#l00119">SINDy.h:119</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SINDyModel_html"><div class="ttname"><a href="classctrl_1_1SINDyModel.html">ctrl::SINDyModel</a></div><div class="ttdoc">Fitted SINDy model: xdot = Theta(x,u) .</div><div class="ttdef"><b>Definition</b> <a href="SINDy_8h_source.html#l00079">SINDy.h:79</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SINDyModel_html_aa1acdd1fd9c4504263c6424d5cbf4ecc"><div class="ttname"><a href="classctrl_1_1SINDyModel.html#aa1acdd1fd9c4504263c6424d5cbf4ecc">ctrl::SINDyModel::stateFunc</a></div><div class="ttdeci">StateFunc stateFunc() const</div><div class="ttdoc">Return a StateFunc lambda wrapping predict().</div><div class="ttdef"><b>Definition</b> <a href="SINDy_8cpp_source.html#l00249">SINDy.cpp:249</a></div></div>
+<div class="ttc" id="aclassctrl_1_1SINDy_html"><div class="ttname"><a href="classctrl_1_1SINDy.html">ctrl::SINDy</a></div><div class="ttdef"><b>Definition</b> <a href="SINDy_8h_source.html#l00141">SINDy.h:141</a></div></div>
+<div class="ttc" id="astructctrl_1_1SINDy_1_1Params_html"><div class="ttname"><a href="structctrl_1_1SINDy_1_1Params.html">ctrl::SINDy::Params</a></div><div class="ttdef"><b>Definition</b> <a href="SINDy_8h_source.html#l00143">SINDy.h:143</a></div></div>
+<div class="ttc" id="astructctrl_1_1SINDy_1_1Params_html_a036704251220ade2e6e68b9a37637d4f"><div class="ttname"><a href="structctrl_1_1SINDy_1_1Params.html#a036704251220ade2e6e68b9a37637d4f">ctrl::SINDy::Params::threshold</a></div><div class="ttdeci">double threshold</div><div class="ttdoc">STLS sparsity threshold.</div><div class="ttdef"><b>Definition</b> <a href="SINDy_8h_source.html#l00147">SINDy.h:147</a></div></div>
+<div class="ttc" id="astructctrl_1_1SINDy_1_1Params_html_a9c3cf6f84413ccbac56b0e166053a8f7"><div class="ttname"><a href="structctrl_1_1SINDy_1_1Params.html#a9c3cf6f84413ccbac56b0e166053a8f7">ctrl::SINDy::Params::n_input</a></div><div class="ttdeci">int n_input</div><div class="ttdoc">Input dimension.</div><div class="ttdef"><b>Definition</b> <a href="SINDy_8h_source.html#l00145">SINDy.h:145</a></div></div>
+<div class="ttc" id="astructctrl_1_1SINDy_1_1Params_html_adfd37ea06e5f37fd00fb0601cd79693c"><div class="ttname"><a href="structctrl_1_1SINDy_1_1Params.html#adfd37ea06e5f37fd00fb0601cd79693c">ctrl::SINDy::Params::n_state</a></div><div class="ttdeci">int n_state</div><div class="ttdoc">State dimension.</div><div class="ttdef"><b>Definition</b> <a href="SINDy_8h_source.html#l00144">SINDy.h:144</a></div></div>
 </div><!-- fragment --><dl class="section see"><dt>See also</dt><dd>Brunton, S.L., Proctor, J.L. &amp; Kutz, J.N. (2016). Discovering governing equations from data by sparse identification of nonlinear dynamical systems. PNAS 113(15), 3932-3937.</dd></dl>
 <p>Types of basis functions included in the <a class="el" href="classctrl_1_1SINDy.html">SINDy</a> library. </p>
 <table class="fieldtable">
@@ -1393,7 +1396,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00058">58</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00059">59</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
 
 </div>
 </div>
@@ -1560,7 +1563,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00379">379</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00478">c2d()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00481">c2d()</a>.</p>
 
 </div>
 </div>
@@ -1618,7 +1621,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00355">355</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00478">c2d()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00481">c2d()</a>.</p>
 
 </div>
 </div>
@@ -1676,7 +1679,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00331">331</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00478">c2d()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00392">consistentInit()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00481">c2d()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00392">consistentInit()</a>.</p>
 
 </div>
 </div>
@@ -1999,7 +2002,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> of dimension n_diff. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00478">478</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00481">481</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="PlantModel_8cpp_source.html#l00379">algJacU()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00355">algJacX1()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00331">algJacX2()</a>, <a class="el" href="PlantModel_8cpp_source.html#l00197">c2d()</a>, <a class="el" href="PlantModel_8h_source.html#l00285">ctrl::DAESystem::f</a>, <a class="el" href="PlantModel_8h_source.html#l00286">ctrl::DAESystem::g</a>, <a class="el" href="PlantModel_8h_source.html#l00287">ctrl::DAESystem::h</a>, <a class="el" href="PlantModel_8h_source.html#l00289">ctrl::DAESystem::n_alg</a>, and <a class="el" href="PlantModel_8h_source.html#l00288">ctrl::DAESystem::n_diff</a>.</p>
 
@@ -2065,7 +2068,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::C</a>, <a class="el" href="PlantModel_8cpp_source.html#l00173">checkDiscreteStability()</a>, <a class="el" href="PlantModel_8h_source.html#l00073">ctrl::StateSpace::D</a>, <a class="el" href="PlantModel_8h_source.html#l00096">ctrl::StateSpace::inputSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00095">ctrl::StateSpace::stateSize()</a>, <a class="el" href="PlantModel_8h_source.html#l00074">ctrl::StateSpace::Ts</a>, <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156a0032796475fd7203f9b920f1a59b969f">TustinPrewarped</a>, and <a class="el" href="namespacectrl.html#adca30ca249ad63cca5be491ba5520156aac9e476630041765ab95ce5582fa09bd">ZOH</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00478">c2d()</a>, and <a class="el" href="LinearisationHelper_8cpp_source.html#l00056">lineariseAtPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00481">c2d()</a>, and <a class="el" href="LinearisationHelper_8cpp_source.html#l00056">lineariseAtPoint()</a>.</p>
 
 </div>
 </div>
@@ -2254,14 +2257,14 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 </div>
 </div>
-<a id="a21c327dfa2de10884adbffff15e92705" name="a21c327dfa2de10884adbffff15e92705"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a21c327dfa2de10884adbffff15e92705">&#9670;&#160;</a></span>consistentInit()</h2>
+<a id="a9adebf1fde07cc078c28ae301c9d39f5" name="a9adebf1fde07cc078c28ae301c9d39f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9adebf1fde07cc078c28ae301c9d39f5">&#9670;&#160;</a></span>consistentInit()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Eigen::VectorXd ctrl::consistentInit </td>
+          <td class="memname"><a class="el" href="structctrl_1_1ConsistentInitResult.html">ConsistentInitResult</a> ctrl::consistentInit </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structctrl_1_1DAESystem.html">DAESystem</a> &amp;&#160;</td>
           <td class="paramname"><em>dae</em>, </td>
@@ -2305,7 +2308,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 </div><div class="memdoc">
 
 <p>Find consistent algebraic states: solve g(x1_init, x2, u0) = 0 for x2. </p>
-<p>Runs Newton-Raphson on the algebraic constraint starting from <code>x2_guess</code>. The numerical Jacobian dg/dx2 is computed via central differences. Returns the last iterate (not necessarily converged) when the Jacobian is singular or max_iter is reached - callers should check residual if needed.</p>
+<p>Runs Newton-Raphson on the algebraic constraint starting from <code>x2_guess</code>. The numerical Jacobian dg/dx2 is computed via central differences. Returns the last iterate when the Jacobian is singular or max_iter is reached; callers should check <code></code>.converged before using the result in safety-critical code.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">dae</td><td><a class="el" href="structctrl_1_1DAESystem.html" title="Index-1 semi-explicit Differential-Algebraic Equation system.">DAESystem</a> whose AlgFunc g defines the constraint. </td></tr>
@@ -2317,13 +2320,13 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>x2 satisfying ||g(x1_init, x2, u0)|| &lt; tol (or best iterate). </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1ConsistentInitResult.html" title="Result of a consistentInit() solve.">ConsistentInitResult</a> with <code>x</code>, <code>converged</code>, and <code>residual</code>. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00392">392</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="PlantModel_8cpp_source.html#l00331">algJacX2()</a>, and <a class="el" href="PlantModel_8h_source.html#l00286">ctrl::DAESystem::g</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00426">dae2ode()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00429">dae2ode()</a>.</p>
 
 </div>
 </div>
@@ -2417,9 +2420,9 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Step function <code>x_aug_next</code> = F(x_aug, u). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00426">426</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PlantModel_8cpp_source.html#l00429">429</a> of file <a class="el" href="PlantModel_8cpp_source.html">PlantModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8cpp_source.html#l00392">consistentInit()</a>, <a class="el" href="PlantModel_8h_source.html#l00285">ctrl::DAESystem::f</a>, <a class="el" href="PlantModel_8h_source.html#l00289">ctrl::DAESystem::n_alg</a>, <a class="el" href="PlantModel_8h_source.html#l00288">ctrl::DAESystem::n_diff</a>, and <a class="el" href="PlantModel_8h_source.html#l00290">ctrl::DAESystem::Ts</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8cpp_source.html#l00392">consistentInit()</a>, <a class="el" href="PlantModel_8h_source.html#l00285">ctrl::DAESystem::f</a>, <a class="el" href="PlantModel_8h_source.html#l00289">ctrl::DAESystem::n_alg</a>, <a class="el" href="PlantModel_8h_source.html#l00288">ctrl::DAESystem::n_diff</a>, <a class="el" href="PlantModel_8h_source.html#l00290">ctrl::DAESystem::Ts</a>, and <a class="el" href="PlantModel_8h_source.html#l00298">ctrl::ConsistentInitResult::x</a>.</p>
 
 </div>
 </div>
@@ -2640,7 +2643,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 <p class="definition">Definition at line <a class="el" href="DynaController_8cpp_source.html#l00011">11</a> of file <a class="el" href="DynaController_8cpp_source.html">DynaController.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="SINDy_8h_source.html#l00120">ctrl::SINDy::Params::n_input</a>, and <a class="el" href="SINDy_8h_source.html#l00119">ctrl::SINDy::Params::n_state</a>.</p>
+<p class="reference">References <a class="el" href="SINDy_8h_source.html#l00145">ctrl::SINDy::Params::n_input</a>, and <a class="el" href="SINDy_8h_source.html#l00144">ctrl::SINDy::Params::n_state</a>.</p>
 
 </div>
 </div>
@@ -3411,7 +3414,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 <div class="line">    lp.<a class="code hl_variable" href="structctrl_1_1LQRParams.html#ab2e060a8d2cb1b80bbaf93d9e7f22fc3">R</a> = Eigen::MatrixXd::Identity(sys.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a7ad091cf54b39bd4564617daf686b104">inputSize</a>(),  sys.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a7ad091cf54b39bd4564617daf686b104">inputSize</a>());</div>
 <div class="line">    <span class="keywordflow">return</span> <a class="code hl_function" href="namespacectrl.html#a9f8b591ebf0c74ed79fce0578ff79817">ctrl::makeLQRController</a>(sys, lp, [&amp;x_state]{ <span class="keywordflow">return</span> x_state; });</div>
 <div class="line">};</div>
-<div class="ttc" id="anamespacectrl_html_a9f8b591ebf0c74ed79fce0578ff79817"><div class="ttname"><a href="namespacectrl.html#a9f8b591ebf0c74ed79fce0578ff79817">ctrl::makeLQRController</a></div><div class="ttdeci">std::shared_ptr&lt; LQRAdapter &gt; makeLQRController(const StateSpace &amp;plant, const LQRParams &amp;params, std::function&lt; Eigen::VectorXd()&gt; stateProvider, std::function&lt; Eigen::VectorXd()&gt; refProvider={})</div><div class="ttdoc">Convenience factory: design an LQR and immediately wrap it in an IController-compatible LQRAdapter th...</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLQR_8h_source.html#l00277">DiscreteLQR.h:277</a></div></div>
+<div class="ttc" id="anamespacectrl_html_a9f8b591ebf0c74ed79fce0578ff79817"><div class="ttname"><a href="namespacectrl.html#a9f8b591ebf0c74ed79fce0578ff79817">ctrl::makeLQRController</a></div><div class="ttdeci">std::shared_ptr&lt; LQRAdapter &gt; makeLQRController(const StateSpace &amp;plant, const LQRParams &amp;params, std::function&lt; Eigen::VectorXd()&gt; stateProvider, std::function&lt; Eigen::VectorXd()&gt; refProvider={})</div><div class="ttdoc">Convenience factory: design an LQR and immediately wrap it in an IController-compatible LQRAdapter th...</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLQR_8h_source.html#l00275">DiscreteLQR.h:275</a></div></div>
 <div class="ttc" id="astructctrl_1_1LQRParams_html"><div class="ttname"><a href="structctrl_1_1LQRParams.html">ctrl::LQRParams</a></div><div class="ttdoc">LQR weighting matrices.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLQR_8h_source.html#l00042">DiscreteLQR.h:43</a></div></div>
 <div class="ttc" id="astructctrl_1_1LQRParams_html_a2519111db115bc6ce3760e63fca054e3"><div class="ttname"><a href="structctrl_1_1LQRParams.html#a2519111db115bc6ce3760e63fca054e3">ctrl::LQRParams::Q</a></div><div class="ttdeci">Eigen::MatrixXd Q</div><div class="ttdoc">State cost (n * n, positive semi-definite). Increase Q_ii to tighten tracking of state i.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLQR_8h_source.html#l00044">DiscreteLQR.h:44</a></div></div>
 <div class="ttc" id="astructctrl_1_1LQRParams_html_ab2e060a8d2cb1b80bbaf93d9e7f22fc3"><div class="ttname"><a href="structctrl_1_1LQRParams.html#ab2e060a8d2cb1b80bbaf93d9e7f22fc3">ctrl::LQRParams::R</a></div><div class="ttdeci">Eigen::MatrixXd R</div><div class="ttdoc">Control cost (m * m, positive definite). Increase R_jj to penalise actuator j.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteLQR_8h_source.html#l00045">DiscreteLQR.h:45</a></div></div>
@@ -3429,7 +3432,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 <dl class="section return"><dt>Returns</dt><dd>shared_ptr&lt;LQRAdapter&gt; (implicitly convertible to shared_ptr&lt;IController&gt;). </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classctrl_1_1LQRAdapter.html" title="Adapter that wraps DiscreteLQR as an IController for use in ControllerStack.">LQRAdapter</a>, <a class="el" href="classctrl_1_1DiscreteLQR.html" title="Discrete-time Linear Quadratic Regulator.">DiscreteLQR</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00277">277</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteLQR_8h_source.html#l00275">275</a> of file <a class="el" href="DiscreteLQR_8h_source.html">DiscreteLQR.h</a>.</p>
 
 </div>
 </div>
@@ -4144,8 +4147,8 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 </div>
 </div>
-<a id="a35c170c14a2cf3926e4b26bf41a38ff1" name="a35c170c14a2cf3926e4b26bf41a38ff1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a35c170c14a2cf3926e4b26bf41a38ff1">&#9670;&#160;</a></span>solveGradientProjectionQP()</h2>
+<a id="af47a37a386cad124b6fdbba85d4a9e17" name="af47a37a386cad124b6fdbba85d4a9e17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af47a37a386cad124b6fdbba85d4a9e17">&#9670;&#160;</a></span>solveGradientProjectionQP()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -4204,20 +4207,26 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramtype">Eigen::Ref&lt; Eigen::VectorXd &gt;&#160;</td>
           <td class="paramname"><em>x</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Eigen::VectorXd &amp;&#160;</td>
+          <td class="paramtype">Eigen::Ref&lt; Eigen::VectorXd &gt;&#160;</td>
           <td class="paramname"><em>tmp1</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Eigen::VectorXd &amp;&#160;</td>
-          <td class="paramname"><em>tmp2</em>&#160;</td>
+          <td class="paramtype">Eigen::Ref&lt; Eigen::VectorXd &gt;&#160;</td>
+          <td class="paramname"><em>tmp2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Eigen::Ref&lt; Eigen::VectorXd &gt;&#160;</td>
+          <td class="paramname"><em>y_fista</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -4251,7 +4260,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="structctrl_1_1QPSolveResult.html" title="Result of a gradient-projection QP solve.">QPSolveResult</a> {converged, iters}.</dd></dl>
-<dl class="section pre"><dt>Precondition</dt><dd><code>H</code>, <code>g</code>, <code>lb</code>, <code>ub</code>, <code>x</code>, <code>tmp1</code>, <code>tmp2</code> all have the same size n. </dd>
+<dl class="section pre"><dt>Precondition</dt><dd><code>H</code>, <code>g</code>, <code>lb</code>, <code>ub</code>, <code>x</code>, <code>tmp1</code>, <code>tmp2</code>, <code>y_fista</code> all have the same size n. </dd>
 <dd>
 <code>L</code> &gt; 0. </dd>
 <dd>
@@ -4261,7 +4270,7 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 
 <p class="reference">References <a class="el" href="GradientProjectionQP_8h_source.html#l00053">ctrl::QPSolveResult::converged</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ScenarioMPC_8cpp_source.html#l00142">ctrl::ScenarioMPC::computeControl()</a>, <a class="el" href="TubeMPC_8cpp_source.html#l00235">ctrl::TubeMPC::computeControl()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00138">ctrl::DiscreteMPC::computeRef()</a>, <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00096">ctrl::GeneralizedPredictiveController::computeRef()</a>, and <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00082">ctrl::MovingHorizonEstimator::estimate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ScenarioMPC_8cpp_source.html#l00146">ctrl::ScenarioMPC::computeControl()</a>, <a class="el" href="TubeMPC_8cpp_source.html#l00238">ctrl::TubeMPC::computeControl()</a>, <a class="el" href="DiscreteMPC_8cpp_source.html#l00139">ctrl::DiscreteMPC::computeRef()</a>, <a class="el" href="GeneralizedPredictiveControl_8cpp_source.html#l00097">ctrl::GeneralizedPredictiveController::computeRef()</a>, and <a class="el" href="MovingHorizonEstimator_8cpp_source.html#l00082">ctrl::MovingHorizonEstimator::estimate()</a>.</p>
 
 </div>
 </div>
@@ -4814,9 +4823,9 @@ Proctor, J.L., Brunton, S.L. &amp; Kutz, J.N. (2016). Dynamic mode decomposition
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8cpp_source.html#l00544">544</a> of file <a class="el" href="DiscreteHinf_8cpp_source.html">DiscreteHinf.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DiscreteHinf_8cpp_source.html#l00547">547</a> of file <a class="el" href="DiscreteHinf_8cpp_source.html">DiscreteHinf.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00584">ctrl::MixedSensitivity::makeW1()</a>, <a class="el" href="DiscreteHinf_8cpp_source.html#l00603">ctrl::MixedSensitivity::makeW2highpass()</a>, and <a class="el" href="DiscreteHinf_8cpp_source.html#l00611">ctrl::MixedSensitivity::makeW3()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DiscreteHinf_8cpp_source.html#l00587">ctrl::MixedSensitivity::makeW1()</a>, <a class="el" href="DiscreteHinf_8cpp_source.html#l00606">ctrl::MixedSensitivity::makeW2highpass()</a>, and <a class="el" href="DiscreteHinf_8cpp_source.html#l00614">ctrl::MixedSensitivity::makeW3()</a>.</p>
 
 </div>
 </div>

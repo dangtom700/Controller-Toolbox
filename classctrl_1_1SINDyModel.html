@@ -91,6 +91,14 @@ $(function() {
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ac5bdbf881de8653a274fd6b6f49ae825" id="r_ac5bdbf881de8653a274fd6b6f49ae825"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SINDyModel.html#ac5bdbf881de8653a274fd6b6f49ae825">SINDyModel</a> ()=default</td></tr>
 <tr class="separator:ac5bdbf881de8653a274fd6b6f49ae825"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9d3e3c9ccb1b76e7f489c92c472df1d" id="r_aa9d3e3c9ccb1b76e7f489c92c472df1d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SINDyModel.html#aa9d3e3c9ccb1b76e7f489c92c472df1d">SINDyModel</a> (const <a class="el" href="classctrl_1_1SINDyModel.html">SINDyModel</a> &amp;o)</td></tr>
+<tr class="separator:aa9d3e3c9ccb1b76e7f489c92c472df1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67aa1d13789e264ef46ee396b061ceac" id="r_a67aa1d13789e264ef46ee396b061ceac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classctrl_1_1SINDyModel.html">SINDyModel</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SINDyModel.html#a67aa1d13789e264ef46ee396b061ceac">operator=</a> (const <a class="el" href="classctrl_1_1SINDyModel.html">SINDyModel</a> &amp;o)</td></tr>
+<tr class="separator:a67aa1d13789e264ef46ee396b061ceac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abaa01f7bb5603125c44bf7197f961044" id="r_abaa01f7bb5603125c44bf7197f961044"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SINDyModel.html#abaa01f7bb5603125c44bf7197f961044">SINDyModel</a> (<a class="el" href="classctrl_1_1SINDyModel.html">SINDyModel</a> &amp;&amp;)=default</td></tr>
+<tr class="separator:abaa01f7bb5603125c44bf7197f961044"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03139be435c3cb1e37b84829a6d87c13" id="r_a03139be435c3cb1e37b84829a6d87c13"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classctrl_1_1SINDyModel.html">SINDyModel</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SINDyModel.html#a03139be435c3cb1e37b84829a6d87c13">operator=</a> (<a class="el" href="classctrl_1_1SINDyModel.html">SINDyModel</a> &amp;&amp;)=default</td></tr>
+<tr class="separator:a03139be435c3cb1e37b84829a6d87c13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac8b8a02e6af885275cb4fb2326072b1b" id="r_ac8b8a02e6af885275cb4fb2326072b1b"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SINDyModel.html#ac8b8a02e6af885275cb4fb2326072b1b">predict</a> (const Eigen::VectorXd &amp;x_dev, const Eigen::VectorXd &amp;u_dev) const</td></tr>
 <tr class="memdesc:ac8b8a02e6af885275cb4fb2326072b1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Predict the state derivative at (x_dev, u_dev).  <br /></td></tr>
 <tr class="separator:ac8b8a02e6af885275cb4fb2326072b1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -123,10 +131,10 @@ Friends</h2></td></tr>
 <p>Ξ.</p>
 <p>Returned by <a class="el" href="classctrl_1_1SINDy.html#a3bdae4694ed9c3648a5bc38968fb3395" title="Fit the sparse model to all accumulated snapshots.">SINDy::fit()</a>. Acts as an opaque black-box; use <a class="el" href="classctrl_1_1SINDyModel.html#aa1acdd1fd9c4504263c6424d5cbf4ecc" title="Return a StateFunc lambda wrapping predict().">stateFunc()</a> to get a <code>StateFunc</code> lambda for use with <a class="el" href="classctrl_1_1NonlinearMPC.html" title="Nonlinear MPC controller using Real-Time Iteration (RTI).">NonlinearMPC</a> / EKF / UKF. </p>
 
-<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00075">75</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00079">79</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ac5bdbf881de8653a274fd6b6f49ae825" name="ac5bdbf881de8653a274fd6b6f49ae825"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac5bdbf881de8653a274fd6b6f49ae825">&#9670;&#160;</a></span>SINDyModel()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5bdbf881de8653a274fd6b6f49ae825">&#9670;&#160;</a></span>SINDyModel() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -137,6 +145,60 @@ Friends</h2></td></tr>
         <tr>
           <td class="memname">ctrl::SINDyModel::SINDyModel </td>
           <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa9d3e3c9ccb1b76e7f489c92c472df1d" name="aa9d3e3c9ccb1b76e7f489c92c472df1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9d3e3c9ccb1b76e7f489c92c472df1d">&#9670;&#160;</a></span>SINDyModel() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ctrl::SINDyModel::SINDyModel </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classctrl_1_1SINDyModel.html">SINDyModel</a> &amp;&#160;</td>
+          <td class="paramname"><em>o</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00084">84</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
+
+</div>
+</div>
+<a id="abaa01f7bb5603125c44bf7197f961044" name="abaa01f7bb5603125c44bf7197f961044"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abaa01f7bb5603125c44bf7197f961044">&#9670;&#160;</a></span>SINDyModel() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ctrl::SINDyModel::SINDyModel </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classctrl_1_1SINDyModel.html">SINDyModel</a> &amp;&amp;&#160;</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
@@ -176,7 +238,7 @@ Friends</h2></td></tr>
 
 <p>Coefficient matrix Ξ, size (n_terms * n_state). </p>
 
-<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00101">101</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00122">122</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
 
 </div>
 </div>
@@ -205,7 +267,7 @@ Friends</h2></td></tr>
 
 <p>Number of inputs. </p>
 
-<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00094">94</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00115">115</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
 
 </div>
 </div>
@@ -234,7 +296,7 @@ Friends</h2></td></tr>
 
 <p>Number of states. </p>
 
-<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00092">92</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00113">113</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
 
 </div>
 </div>
@@ -263,7 +325,61 @@ Friends</h2></td></tr>
 
 <p>Number of library terms. </p>
 
-<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00096">96</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00117">117</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
+
+</div>
+</div>
+<a id="a67aa1d13789e264ef46ee396b061ceac" name="a67aa1d13789e264ef46ee396b061ceac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67aa1d13789e264ef46ee396b061ceac">&#9670;&#160;</a></span>operator=() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classctrl_1_1SINDyModel.html">SINDyModel</a> &amp; ctrl::SINDyModel::operator= </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classctrl_1_1SINDyModel.html">SINDyModel</a> &amp;&#160;</td>
+          <td class="paramname"><em>o</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00088">88</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
+
+</div>
+</div>
+<a id="a03139be435c3cb1e37b84829a6d87c13" name="a03139be435c3cb1e37b84829a6d87c13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03139be435c3cb1e37b84829a6d87c13">&#9670;&#160;</a></span>operator=() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classctrl_1_1SINDyModel.html">SINDyModel</a> &amp; ctrl::SINDyModel::operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classctrl_1_1SINDyModel.html">SINDyModel</a> &amp;&amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -303,11 +419,11 @@ Friends</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>xdot (length n_state). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="SINDy_8cpp_source.html#l00226">226</a> of file <a class="el" href="SINDy_8cpp_source.html">SINDy.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SINDy_8cpp_source.html#l00233">233</a> of file <a class="el" href="SINDy_8cpp_source.html">SINDy.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="SINDy_8h_source.html#l00121">ctrl::SINDy::Params::library</a>, <a class="el" href="SINDy_8cpp_source.html#l00056">ctrl::SINDy::libraryRow()</a>, <a class="el" href="SINDy_8h_source.html#l00120">ctrl::SINDy::Params::n_input</a>, and <a class="el" href="SINDy_8h_source.html#l00119">ctrl::SINDy::Params::n_state</a>.</p>
+<p class="reference">References <a class="el" href="SINDy_8h_source.html#l00146">ctrl::SINDy::Params::library</a>, <a class="el" href="SINDy_8h_source.html#l00145">ctrl::SINDy::Params::n_input</a>, and <a class="el" href="SINDy_8h_source.html#l00144">ctrl::SINDy::Params::n_state</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="DynaController_8cpp_source.html#l00101">ctrl::DynaController::modelRollout()</a>, and <a class="el" href="SINDy_8cpp_source.html#l00242">stateFunc()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="DynaController_8cpp_source.html#l00101">ctrl::DynaController::modelRollout()</a>, and <a class="el" href="SINDy_8cpp_source.html#l00249">stateFunc()</a>.</p>
 
 </div>
 </div>
@@ -328,7 +444,7 @@ Friends</h2></td></tr>
 
 <p>Non-zero fraction of the coefficient matrix (sparsity metric). </p>
 
-<p class="definition">Definition at line <a class="el" href="SINDy_8cpp_source.html#l00251">251</a> of file <a class="el" href="SINDy_8cpp_source.html">SINDy.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SINDy_8cpp_source.html#l00258">258</a> of file <a class="el" href="SINDy_8cpp_source.html">SINDy.cpp</a>.</p>
 
 </div>
 </div>
@@ -349,9 +465,9 @@ Friends</h2></td></tr>
 
 <p>Return a StateFunc lambda wrapping <a class="el" href="classctrl_1_1SINDyModel.html#ac8b8a02e6af885275cb4fb2326072b1b" title="Predict the state derivative at (x_dev, u_dev).">predict()</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="SINDy_8cpp_source.html#l00242">242</a> of file <a class="el" href="SINDy_8cpp_source.html">SINDy.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SINDy_8cpp_source.html#l00249">249</a> of file <a class="el" href="SINDy_8cpp_source.html">SINDy.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="SINDy_8cpp_source.html#l00226">predict()</a>.</p>
+<p class="reference">References <a class="el" href="SINDy_8cpp_source.html#l00233">predict()</a>.</p>
 
 </div>
 </div>
@@ -376,7 +492,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00104">104</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SINDy_8h_source.html#l00125">125</a> of file <a class="el" href="SINDy_8h_source.html">SINDy.h</a>.</p>
 
 </div>
 </div>

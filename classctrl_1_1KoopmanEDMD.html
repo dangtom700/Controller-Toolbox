@@ -114,6 +114,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a7ae0359b9f29cb7fa9713e198455ad2c" id="r_a7ae0359b9f29cb7fa9713e198455ad2c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KoopmanEDMD.html#a7ae0359b9f29cb7fa9713e198455ad2c">snapshotCount</a> () const noexcept</td></tr>
 <tr class="memdesc:a7ae0359b9f29cb7fa9713e198455ad2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of snapshots accumulated.  <br /></td></tr>
 <tr class="separator:a7ae0359b9f29cb7fa9713e198455ad2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a143b71bc97f9bd3ed8ed68fc8e834f86" id="r_a143b71bc97f9bd3ed8ed68fc8e834f86"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KoopmanEDMD.html#a143b71bc97f9bd3ed8ed68fc8e834f86">reserveSnapshots</a> (int N)</td></tr>
+<tr class="memdesc:a143b71bc97f9bd3ed8ed68fc8e834f86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pre-reserve snapshot storage for N time steps.  <br /></td></tr>
+<tr class="separator:a143b71bc97f9bd3ed8ed68fc8e834f86"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d6ee1fb43db519aca21759b5860dbc1" id="r_a6d6ee1fb43db519aca21759b5860dbc1"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1KoopmanEDMD.html#a6d6ee1fb43db519aca21759b5860dbc1">lift</a> (const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u) const</td></tr>
 <tr class="memdesc:a6d6ee1fb43db519aca21759b5860dbc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lift a state-input pair to the full observable vector ψ(x, u).  <br /></td></tr>
 <tr class="separator:a6d6ee1fb43db519aca21759b5860dbc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -165,7 +168,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="KoopmanEDMD_8cpp_source.html#l00040">40</a> of file <a class="el" href="KoopmanEDMD_8cpp_source.html">KoopmanEDMD.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="KoopmanEDMD_8h_source.html#l00065">ctrl::KoopmanEDMD::Params::n_state</a>.</p>
+<p class="reference">References <a class="el" href="KoopmanEDMD_8h_source.html#l00066">ctrl::KoopmanEDMD::Params::n_input</a>, and <a class="el" href="KoopmanEDMD_8h_source.html#l00065">ctrl::KoopmanEDMD::Params::n_state</a>.</p>
 
 </div>
 </div>
@@ -204,9 +207,9 @@ Public Member Functions</h2></td></tr>
 
 <p>Add a snapshot: (state at k, input at k) -&gt; state at k+1. </p>
 
-<p class="definition">Definition at line <a class="el" href="KoopmanEDMD_8cpp_source.html#l00127">127</a> of file <a class="el" href="KoopmanEDMD_8cpp_source.html">KoopmanEDMD.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KoopmanEDMD_8cpp_source.html#l00126">126</a> of file <a class="el" href="KoopmanEDMD_8cpp_source.html">KoopmanEDMD.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="KoopmanEDMD_8cpp_source.html#l00098">lift()</a>, and <a class="el" href="KoopmanEDMD_8h_source.html#l00066">ctrl::KoopmanEDMD::Params::n_input</a>.</p>
+<p class="reference">References <a class="el" href="KoopmanEDMD_8cpp_source.html#l00097">lift()</a>, and <a class="el" href="KoopmanEDMD_8h_source.html#l00066">ctrl::KoopmanEDMD::Params::n_input</a>.</p>
 
 </div>
 </div>
@@ -234,11 +237,11 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="KoopmanEDMD_8cpp_source.html#l00150">150</a> of file <a class="el" href="KoopmanEDMD_8cpp_source.html">KoopmanEDMD.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KoopmanEDMD_8cpp_source.html#l00156">156</a> of file <a class="el" href="KoopmanEDMD_8cpp_source.html">KoopmanEDMD.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="KoopmanEDMD_8h_source.html#l00066">ctrl::KoopmanEDMD::Params::n_input</a>, <a class="el" href="KoopmanEDMD_8cpp_source.html#l00139">snapshotCount()</a>, and <a class="el" href="KoopmanEDMD_8h_source.html#l00070">ctrl::KoopmanEDMD::Params::tikhonov</a>.</p>
+<p class="reference">References <a class="el" href="KoopmanEDMD_8h_source.html#l00066">ctrl::KoopmanEDMD::Params::n_input</a>, <a class="el" href="KoopmanEDMD_8cpp_source.html#l00138">snapshotCount()</a>, and <a class="el" href="KoopmanEDMD_8h_source.html#l00070">ctrl::KoopmanEDMD::Params::tikhonov</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="KoopmanEDMD_8cpp_source.html#l00189">fitProjected()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="KoopmanEDMD_8cpp_source.html#l00195">fitProjected()</a>.</p>
 
 </div>
 </div>
@@ -260,9 +263,9 @@ Public Member Functions</h2></td></tr>
 <p>Fit and project back to original n_state coordinates. </p>
 <p>The resulting <code><a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">ctrl::StateSpace</a></code> has n_state states, matching the original plant dimension - ready for LQR/MPC/LQG. </p>
 
-<p class="definition">Definition at line <a class="el" href="KoopmanEDMD_8cpp_source.html#l00189">189</a> of file <a class="el" href="KoopmanEDMD_8cpp_source.html">KoopmanEDMD.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KoopmanEDMD_8cpp_source.html#l00195">195</a> of file <a class="el" href="KoopmanEDMD_8cpp_source.html">KoopmanEDMD.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::B</a>, <a class="el" href="KoopmanEDMD_8cpp_source.html#l00150">fit()</a>, <a class="el" href="KoopmanEDMD_8h_source.html#l00066">ctrl::KoopmanEDMD::Params::n_input</a>, <a class="el" href="KoopmanEDMD_8h_source.html#l00065">ctrl::KoopmanEDMD::Params::n_state</a>, <a class="el" href="KoopmanEDMD_8cpp_source.html#l00139">snapshotCount()</a>, and <a class="el" href="KoopmanEDMD_8h_source.html#l00070">ctrl::KoopmanEDMD::Params::tikhonov</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::B</a>, <a class="el" href="KoopmanEDMD_8cpp_source.html#l00156">fit()</a>, <a class="el" href="KoopmanEDMD_8h_source.html#l00066">ctrl::KoopmanEDMD::Params::n_input</a>, <a class="el" href="KoopmanEDMD_8h_source.html#l00065">ctrl::KoopmanEDMD::Params::n_state</a>, <a class="el" href="KoopmanEDMD_8cpp_source.html#l00138">snapshotCount()</a>, and <a class="el" href="KoopmanEDMD_8h_source.html#l00070">ctrl::KoopmanEDMD::Params::tikhonov</a>.</p>
 
 </div>
 </div>
@@ -294,11 +297,11 @@ Public Member Functions</h2></td></tr>
 
 <p>Lift a state-input pair to the full observable vector ψ(x, u). </p>
 
-<p class="definition">Definition at line <a class="el" href="KoopmanEDMD_8cpp_source.html#l00098">98</a> of file <a class="el" href="KoopmanEDMD_8cpp_source.html">KoopmanEDMD.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KoopmanEDMD_8cpp_source.html#l00097">97</a> of file <a class="el" href="KoopmanEDMD_8cpp_source.html">KoopmanEDMD.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="KoopmanEDMD_8h_source.html#l00067">ctrl::KoopmanEDMD::Params::dict</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="KoopmanEDMD_8cpp_source.html#l00127">addSnapshot()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="KoopmanEDMD_8cpp_source.html#l00126">addSnapshot()</a>.</p>
 
 </div>
 </div>
@@ -331,6 +334,28 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a143b71bc97f9bd3ed8ed68fc8e834f86" name="a143b71bc97f9bd3ed8ed68fc8e834f86"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a143b71bc97f9bd3ed8ed68fc8e834f86">&#9670;&#160;</a></span>reserveSnapshots()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ctrl::KoopmanEDMD::reserveSnapshots </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>N</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Pre-reserve snapshot storage for N time steps. </p>
+
+<p class="definition">Definition at line <a class="el" href="KoopmanEDMD_8cpp_source.html#l00143">143</a> of file <a class="el" href="KoopmanEDMD_8cpp_source.html">KoopmanEDMD.cpp</a>.</p>
+
+</div>
+</div>
 <a id="a7ae0359b9f29cb7fa9713e198455ad2c" name="a7ae0359b9f29cb7fa9713e198455ad2c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7ae0359b9f29cb7fa9713e198455ad2c">&#9670;&#160;</a></span>snapshotCount()</h2>
 
@@ -356,9 +381,9 @@ Public Member Functions</h2></td></tr>
 
 <p>Number of snapshots accumulated. </p>
 
-<p class="definition">Definition at line <a class="el" href="KoopmanEDMD_8cpp_source.html#l00139">139</a> of file <a class="el" href="KoopmanEDMD_8cpp_source.html">KoopmanEDMD.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="KoopmanEDMD_8cpp_source.html#l00138">138</a> of file <a class="el" href="KoopmanEDMD_8cpp_source.html">KoopmanEDMD.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="KoopmanEDMD_8cpp_source.html#l00150">fit()</a>, and <a class="el" href="KoopmanEDMD_8cpp_source.html#l00189">fitProjected()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="KoopmanEDMD_8cpp_source.html#l00156">fit()</a>, and <a class="el" href="KoopmanEDMD_8cpp_source.html#l00195">fitProjected()</a>.</p>
 
 </div>
 </div>

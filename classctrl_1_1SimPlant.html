@@ -97,9 +97,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a53edf7706f7e6e6a1abdfb0df7dbdd7f" id="r_a53edf7706f7e6e6a1abdfb0df7dbdd7f"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimPlant.html#a53edf7706f7e6e6a1abdfb0df7dbdd7f">output</a> () const</td></tr>
 <tr class="memdesc:a53edf7706f7e6e6a1abdfb0df7dbdd7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the cached output from the last <a class="el" href="classctrl_1_1SimPlant.html#a1bd8fa92d3fd14548ad06912eba68f73" title="Advance one sample: x[k+1] = A.x[k] + B.u[k], y[k] = C.x[k] + D.u[k].">step()</a> call.  <br /></td></tr>
 <tr class="separator:a53edf7706f7e6e6a1abdfb0df7dbdd7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac3b58cddcff6463bc1fb32c5240b2e48" id="r_ac3b58cddcff6463bc1fb32c5240b2e48"><td class="memItemLeft" align="right" valign="top">const Eigen::VectorXd &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimPlant.html#ac3b58cddcff6463bc1fb32c5240b2e48">state</a> () const</td></tr>
-<tr class="memdesc:ac3b58cddcff6463bc1fb32c5240b2e48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read-only access to the current state x[k].  <br /></td></tr>
-<tr class="separator:ac3b58cddcff6463bc1fb32c5240b2e48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36bd9bf771cdd687c20f1507c6194b17" id="r_a36bd9bf771cdd687c20f1507c6194b17"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimPlant.html#a36bd9bf771cdd687c20f1507c6194b17">state</a> () const</td></tr>
+<tr class="memdesc:a36bd9bf771cdd687c20f1507c6194b17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read-only access to the current state x[k].  <br /></td></tr>
+<tr class="separator:a36bd9bf771cdd687c20f1507c6194b17"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a38e25cd4e6417a64e5f30a25dbd5dfd3" id="r_a38e25cd4e6417a64e5f30a25dbd5dfd3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1SimPlant.html#a38e25cd4e6417a64e5f30a25dbd5dfd3">setState</a> (const Eigen::VectorXd &amp;x)</td></tr>
 <tr class="memdesc:a38e25cd4e6417a64e5f30a25dbd5dfd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inject a state vector (for Kalman initialisation or non-zero operating point).  <br /></td></tr>
 <tr class="separator:a38e25cd4e6417a64e5f30a25dbd5dfd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -190,7 +190,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Read-only access to the state-space model. </p>
 
-<p class="definition">Definition at line <a class="el" href="SimPlant_8h_source.html#l00085">85</a> of file <a class="el" href="SimPlant_8h_source.html">SimPlant.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SimPlant_8h_source.html#l00088">88</a> of file <a class="el" href="SimPlant_8h_source.html">SimPlant.h</a>.</p>
 
 </div>
 </div>
@@ -270,8 +270,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ac3b58cddcff6463bc1fb32c5240b2e48" name="ac3b58cddcff6463bc1fb32c5240b2e48"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac3b58cddcff6463bc1fb32c5240b2e48">&#9670;&#160;</a></span>state()</h2>
+<a id="a36bd9bf771cdd687c20f1507c6194b17" name="a36bd9bf771cdd687c20f1507c6194b17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36bd9bf771cdd687c20f1507c6194b17">&#9670;&#160;</a></span>state()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -280,7 +280,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const Eigen::VectorXd &amp; ctrl::SimPlant::state </td>
+          <td class="memname">Eigen::VectorXd ctrl::SimPlant::state </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -294,7 +294,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Read-only access to the current state x[k]. </p>
-<dl class="section return"><dt>Returns</dt><dd>Const reference to the state vector. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Copy of the state vector (mutex-protected). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="SimPlant_8h_source.html#l00071">71</a> of file <a class="el" href="SimPlant_8h_source.html">SimPlant.h</a>.</p>
 

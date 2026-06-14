@@ -293,9 +293,9 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Return a <a class="el" href="classctrl_1_1NonlinearMPC.html#a30f2dda7d0fe7bc116bb150fbb6f9219" title="Discrete-time dynamics: x[k+1] = f(x[k], u[k]).">NonlinearMPC::DiscreteDynamics</a> capturing this model by raw pointer. </p>
-<p>Callers must ensure the <a class="el" href="classctrl_1_1HybridModel.html" title="Hybrid plant model: physics + data-driven additive correction.">HybridModel</a> outlives the returned lambda. Prefer makeDynamicsFunc(shared_ptr) for safe ownership. </p>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000001">Deprecated:</a></b></dt><dd>Use <a class="el" href="classctrl_1_1HybridModel.html#a953f76a15aff3f6c27ffdeca49d7fec5" title="Return a NonlinearMPC::DiscreteDynamics capturing this model by shared_ptr.">HybridModel::makeDynamicsFunc(shared_ptr&lt;HybridModel&gt;)</a> instead. The raw-pointer capture causes UB if the <a class="el" href="classctrl_1_1HybridModel.html" title="Hybrid plant model: physics + data-driven additive correction.">HybridModel</a> is destroyed before the lambda (e.g. when passed to <a class="el" href="classctrl_1_1NonlinearMPC.html" title="Nonlinear MPC controller using Real-Time Iteration (RTI).">NonlinearMPC</a> which outlives the model). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="HybridModel_8h_source.html#l00169">169</a> of file <a class="el" href="HybridModel_8h_source.html">HybridModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HybridModel_8h_source.html#l00171">171</a> of file <a class="el" href="HybridModel_8h_source.html">HybridModel.h</a>.</p>
 
 <p class="reference">References <a class="el" href="HybridModel_8h_source.html#l00133">predict()</a>.</p>
 
@@ -353,7 +353,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="HybridModel_8h_source.html#l00180">180</a> of file <a class="el" href="HybridModel_8h_source.html">HybridModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HybridModel_8h_source.html#l00182">182</a> of file <a class="el" href="HybridModel_8h_source.html">HybridModel.h</a>.</p>
 
 <p class="reference">References <a class="el" href="HybridModel_8h_source.html#l00056">ctrl::HybridModelParams::n_inputs</a>.</p>
 
@@ -419,7 +419,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="HybridModel_8h_source.html#l00181">181</a> of file <a class="el" href="HybridModel_8h_source.html">HybridModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HybridModel_8h_source.html#l00183">183</a> of file <a class="el" href="HybridModel_8h_source.html">HybridModel.h</a>.</p>
 
 <p class="reference">References <a class="el" href="HybridModel_8h_source.html#l00057">ctrl::HybridModelParams::n_outputs</a>.</p>
 
@@ -494,7 +494,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="HybridModel_8h_source.html#l00133">133</a> of file <a class="el" href="HybridModel_8h_source.html">HybridModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="HybridModel_8h_source.html#l00169">dynamicsFunc()</a>, <a class="el" href="HybridModelTrainer_8cpp_source.html#l00020">ctrl::HybridModelTrainer::trainHybridModel()</a>, and <a class="el" href="HybridModelTrainer_8cpp_source.html#l00076">ctrl::HybridModelTrainer::validate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="HybridModel_8h_source.html#l00171">dynamicsFunc()</a>, <a class="el" href="HybridModelTrainer_8cpp_source.html#l00020">ctrl::HybridModelTrainer::trainHybridModel()</a>, and <a class="el" href="HybridModelTrainer_8cpp_source.html#l00076">ctrl::HybridModelTrainer::validate()</a>.</p>
 
 </div>
 </div>
@@ -564,7 +564,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="HybridModel_8h_source.html#l00182">182</a> of file <a class="el" href="HybridModel_8h_source.html">HybridModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HybridModel_8h_source.html#l00184">184</a> of file <a class="el" href="HybridModel_8h_source.html">HybridModel.h</a>.</p>
 
 <p class="reference">References <a class="el" href="HybridModel_8h_source.html#l00058">ctrl::HybridModelParams::Ts</a>.</p>
 
@@ -655,7 +655,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="HybridModel_8h_source.html#l00179">179</a> of file <a class="el" href="HybridModel_8h_source.html">HybridModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HybridModel_8h_source.html#l00181">181</a> of file <a class="el" href="HybridModel_8h_source.html">HybridModel.h</a>.</p>
 
 <p class="reference">References <a class="el" href="HybridModel_8h_source.html#l00055">ctrl::HybridModelParams::n_states</a>.</p>
 

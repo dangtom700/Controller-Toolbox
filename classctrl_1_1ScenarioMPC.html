@@ -261,9 +261,9 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="ScenarioMPC_8cpp_source.html#l00206">206</a> of file <a class="el" href="ScenarioMPC_8cpp_source.html">ScenarioMPC.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ScenarioMPC_8cpp_source.html#l00204">204</a> of file <a class="el" href="ScenarioMPC_8cpp_source.html">ScenarioMPC.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::C</a>, <a class="el" href="ScenarioMPC_8cpp_source.html#l00142">computeControl()</a>, and <a class="el" href="ScenarioMPC_8cpp_source.html#l00127">setReference()</a>.</p>
+<p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::C</a>, <a class="el" href="ScenarioMPC_8cpp_source.html#l00146">computeControl()</a>, and <a class="el" href="ScenarioMPC_8cpp_source.html#l00131">setReference()</a>.</p>
 
 </div>
 </div>
@@ -286,11 +286,11 @@ Additional Inherited Members</h2></td></tr>
 <p><a class="el" href="classctrl_1_1ScenarioMPC.html#ae03ab17f8e60591a76c87dc8ab02f53a" title="Set the current measured plant state (n x 1).">setState()</a> and <a class="el" href="classctrl_1_1ScenarioMPC.html#a2084411df7299ab2ca55b57b73000f6c" title="Set the output reference for the next solve (pp x 1).">setReference()</a> must have been called this step.</p>
 <dl class="section return"><dt>Returns</dt><dd>Optimal first control action u[0] (m x 1), clamped to [uMin, uMax]. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="ScenarioMPC_8cpp_source.html#l00142">142</a> of file <a class="el" href="ScenarioMPC_8cpp_source.html">ScenarioMPC.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ScenarioMPC_8cpp_source.html#l00146">146</a> of file <a class="el" href="ScenarioMPC_8cpp_source.html">ScenarioMPC.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="PlantModel_8h_source.html#l00070">ctrl::StateSpace::A</a>, <a class="el" href="PlantModel_8h_source.html#l00071">ctrl::StateSpace::B</a>, <a class="el" href="PlantModel_8h_source.html#l00072">ctrl::StateSpace::C</a>, <a class="el" href="GradientProjectionQP_8h_source.html#l00053">ctrl::QPSolveResult::converged</a>, <a class="el" href="ScenarioMPC_8h_source.html#l00097">ctrl::ScenarioMPCParams::N_samples</a>, <a class="el" href="IController_8h_source.html#l00177">ctrl::IController::notifyObserver()</a>, <a class="el" href="ScenarioMPC_8h_source.html#l00074">ctrl::ScenarioMPCParams::Np</a>, <a class="el" href="ScenarioMPC_8h_source.html#l00075">ctrl::ScenarioMPCParams::Nu</a>, <a class="el" href="ScenarioMPC_8h_source.html#l00105">ctrl::ScenarioMPCParams::qpMaxIter</a>, <a class="el" href="ScenarioMPC_8h_source.html#l00106">ctrl::ScenarioMPCParams::qpTol</a>, <a class="el" href="GradientProjectionQP_8h_source.html#l00080">ctrl::solveGradientProjectionQP()</a>, <a class="el" href="ScenarioMPC_8h_source.html#l00102">ctrl::ScenarioMPCParams::uMax</a>, and <a class="el" href="ScenarioMPC_8h_source.html#l00100">ctrl::ScenarioMPCParams::uMin</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ScenarioMPC_8cpp_source.html#l00206">compute()</a>, and <a class="el" href="ScenarioMPC_8cpp_source.html#l00133">computeRef()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ScenarioMPC_8cpp_source.html#l00204">compute()</a>, and <a class="el" href="ScenarioMPC_8cpp_source.html#l00137">computeRef()</a>.</p>
 
 </div>
 </div>
@@ -330,9 +330,9 @@ Additional Inherited Members</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Optimal first control action u[0] (m x 1). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="ScenarioMPC_8cpp_source.html#l00133">133</a> of file <a class="el" href="ScenarioMPC_8cpp_source.html">ScenarioMPC.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ScenarioMPC_8cpp_source.html#l00137">137</a> of file <a class="el" href="ScenarioMPC_8cpp_source.html">ScenarioMPC.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="ScenarioMPC_8cpp_source.html#l00142">computeControl()</a>, <a class="el" href="ScenarioMPC_8cpp_source.html#l00127">setReference()</a>, and <a class="el" href="ScenarioMPC_8cpp_source.html#l00121">setState()</a>.</p>
+<p class="reference">References <a class="el" href="ScenarioMPC_8cpp_source.html#l00146">computeControl()</a>, <a class="el" href="ScenarioMPC_8cpp_source.html#l00131">setReference()</a>, and <a class="el" href="ScenarioMPC_8cpp_source.html#l00125">setState()</a>.</p>
 
 </div>
 </div>
@@ -521,7 +521,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac69ef6691d5831cda3adcdc59971fcac">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="ScenarioMPC_8cpp_source.html#l00219">219</a> of file <a class="el" href="ScenarioMPC_8cpp_source.html">ScenarioMPC.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ScenarioMPC_8cpp_source.html#l00217">217</a> of file <a class="el" href="ScenarioMPC_8cpp_source.html">ScenarioMPC.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="IController_8h_source.html#l00197">ctrl::IController::notifyObserverReset()</a>.</p>
 
@@ -579,9 +579,9 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Set the output reference for the next solve (pp x 1). </p>
 
-<p class="definition">Definition at line <a class="el" href="ScenarioMPC_8cpp_source.html#l00127">127</a> of file <a class="el" href="ScenarioMPC_8cpp_source.html">ScenarioMPC.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ScenarioMPC_8cpp_source.html#l00131">131</a> of file <a class="el" href="ScenarioMPC_8cpp_source.html">ScenarioMPC.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ScenarioMPC_8cpp_source.html#l00206">compute()</a>, and <a class="el" href="ScenarioMPC_8cpp_source.html#l00133">computeRef()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ScenarioMPC_8cpp_source.html#l00204">compute()</a>, and <a class="el" href="ScenarioMPC_8cpp_source.html#l00137">computeRef()</a>.</p>
 
 </div>
 </div>
@@ -603,9 +603,9 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Set the current measured plant state (n x 1). </p>
 
-<p class="definition">Definition at line <a class="el" href="ScenarioMPC_8cpp_source.html#l00121">121</a> of file <a class="el" href="ScenarioMPC_8cpp_source.html">ScenarioMPC.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ScenarioMPC_8cpp_source.html#l00125">125</a> of file <a class="el" href="ScenarioMPC_8cpp_source.html">ScenarioMPC.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ScenarioMPC_8cpp_source.html#l00133">computeRef()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ScenarioMPC_8cpp_source.html#l00137">computeRef()</a>.</p>
 
 </div>
 </div>

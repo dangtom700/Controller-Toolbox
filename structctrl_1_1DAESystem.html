@@ -125,7 +125,7 @@ Public Attributes</h2></td></tr>
 <p>Represents plants of the form: </p><div class="fragment"><div class="line">x1<span class="stringliteral">&#39; = f(x1, x2, u)     (n_diff differential states)</span></div>
 <div class="line"><span class="stringliteral">0   = g(x1, x2, u)     (n_alg  algebraic states)</span></div>
 <div class="line"><span class="stringliteral">y   = h(x1, x2, u)     (output map)</span></div>
-</div><!-- fragment --><p>Use <code><a class="el" href="namespacectrl.html#ae262e4114a6d4a2baa7565492e43d13e" title="Convert a DAESystem to a discrete-time step function.">dae2ode()</a></code> to obtain a discrete-time step function, <code><a class="el" href="namespacectrl.html#a21c327dfa2de10884adbffff15e92705" title="Find consistent algebraic states: solve g(x1_init, x2, u0) = 0 for x2.">consistentInit()</a></code> to find consistent initial conditions, and the <code><a class="el" href="namespacectrl.html#a49df1e780437c779996e8f431faaa542" title="Discretise a continuous-time state-space model.">c2d()</a></code> overload to obtain a linearised discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> for controller design (MPC, LQR, LQG).</p>
+</div><!-- fragment --><p>Use <code><a class="el" href="namespacectrl.html#ae262e4114a6d4a2baa7565492e43d13e" title="Convert a DAESystem to a discrete-time step function.">dae2ode()</a></code> to obtain a discrete-time step function, <code><a class="el" href="namespacectrl.html#a9adebf1fde07cc078c28ae301c9d39f5" title="Find consistent algebraic states: solve g(x1_init, x2, u0) = 0 for x2.">consistentInit()</a></code> to find consistent initial conditions, and the <code><a class="el" href="namespacectrl.html#a49df1e780437c779996e8f431faaa542" title="Discretise a continuous-time state-space model.">c2d()</a></code> overload to obtain a linearised discrete-time <a class="el" href="structctrl_1_1StateSpace.html" title="Discrete-time state-space model.">StateSpace</a> for controller design (MPC, LQR, LQG).</p>
 <dl class="section note"><dt>Note</dt><dd>Only SISO (scalar u) is supported at the DAE level. MIMO extensions can be layered on top by the user. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00270">270</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
@@ -201,7 +201,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00285">285</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00478">ctrl::c2d()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00426">ctrl::dae2ode()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00481">ctrl::c2d()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00429">ctrl::dae2ode()</a>.</p>
 
 </div>
 </div>
@@ -221,7 +221,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00286">286</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00478">ctrl::c2d()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00392">ctrl::consistentInit()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00481">ctrl::c2d()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00392">ctrl::consistentInit()</a>.</p>
 
 </div>
 </div>
@@ -241,7 +241,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00287">287</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00478">ctrl::c2d()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00481">ctrl::c2d()</a>.</p>
 
 </div>
 </div>
@@ -261,7 +261,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00289">289</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00478">ctrl::c2d()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00426">ctrl::dae2ode()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00481">ctrl::c2d()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00429">ctrl::dae2ode()</a>.</p>
 
 </div>
 </div>
@@ -281,7 +281,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00288">288</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00478">ctrl::c2d()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00426">ctrl::dae2ode()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00481">ctrl::c2d()</a>, and <a class="el" href="PlantModel_8cpp_source.html#l00429">ctrl::dae2ode()</a>.</p>
 
 </div>
 </div>
@@ -301,7 +301,7 @@ Public Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="PlantModel_8h_source.html#l00290">290</a> of file <a class="el" href="PlantModel_8h_source.html">PlantModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00426">ctrl::dae2ode()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="PlantModel_8cpp_source.html#l00429">ctrl::dae2ode()</a>.</p>
 
 </div>
 </div>

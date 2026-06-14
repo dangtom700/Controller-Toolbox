@@ -103,9 +103,9 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad28334088e2807a2561d4f6352f4d7a2" id="r_ad28334088e2807a2561d4f6352f4d7a2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1CEMController.html#ad28334088e2807a2561d4f6352f4d7a2">CEMController</a> (const <a class="el" href="structctrl_1_1CEMController_1_1Params.html">Params</a> &amp;p, <a class="el" href="namespacectrl.html#a084e413f17f1128b83fe38d6ebc6c289">StateFunc</a> f, Eigen::MatrixXd C, double Ts)</td></tr>
-<tr class="memdesc:ad28334088e2807a2561d4f6352f4d7a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct CEM-MPC with a discrete-time plant model.  <br /></td></tr>
-<tr class="separator:ad28334088e2807a2561d4f6352f4d7a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9707ad6854011079a4ca2c5b060a8975" id="r_a9707ad6854011079a4ca2c5b060a8975"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1CEMController.html#a9707ad6854011079a4ca2c5b060a8975">CEMController</a> (const <a class="el" href="structctrl_1_1CEMController_1_1Params.html">Params</a> &amp;p, <a class="el" href="namespacectrl.html#a084e413f17f1128b83fe38d6ebc6c289">StateFunc</a> f, const Eigen::MatrixXd &amp;C, double Ts)</td></tr>
+<tr class="memdesc:a9707ad6854011079a4ca2c5b060a8975"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct CEM-MPC with a discrete-time plant model.  <br /></td></tr>
+<tr class="separator:a9707ad6854011079a4ca2c5b060a8975"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a02488d4b18c7561f5093717caf0cdd5a" id="r_a02488d4b18c7561f5093717caf0cdd5a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1CEMController.html#a02488d4b18c7561f5093717caf0cdd5a">setState</a> (const Eigen::VectorXd &amp;x)</td></tr>
 <tr class="memdesc:a02488d4b18c7561f5093717caf0cdd5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the current plant state (called before <a class="el" href="classctrl_1_1CEMController.html#a1b2806a819fb062c8d64323ab9122898" title="Advance one sample step - scalar SISO interface.">compute()</a>).  <br /></td></tr>
 <tr class="separator:a02488d4b18c7561f5093717caf0cdd5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -208,8 +208,8 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="CEMController_8h_source.html#l00053">53</a> of file <a class="el" href="CEMController_8h_source.html">CEMController.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ad28334088e2807a2561d4f6352f4d7a2" name="ad28334088e2807a2561d4f6352f4d7a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad28334088e2807a2561d4f6352f4d7a2">&#9670;&#160;</a></span>CEMController()</h2>
+<a id="a9707ad6854011079a4ca2c5b060a8975" name="a9707ad6854011079a4ca2c5b060a8975"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9707ad6854011079a4ca2c5b060a8975">&#9670;&#160;</a></span>CEMController()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -229,7 +229,7 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Eigen::MatrixXd&#160;</td>
+          <td class="paramtype">const Eigen::MatrixXd &amp;&#160;</td>
           <td class="paramname"><em>C</em>, </td>
         </tr>
         <tr>
@@ -257,7 +257,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="CEMController_8cpp_source.html#l00009">9</a> of file <a class="el" href="CEMController_8cpp_source.html">CEMController.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="CEMController_8cpp_source.html#l00010">10</a> of file <a class="el" href="CEMController_8cpp_source.html">CEMController.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="CEMController_8h_source.html#l00059">ctrl::CEMController::Params::elite_frac</a>, <a class="el" href="CEMController_8h_source.html#l00058">ctrl::CEMController::Params::n_iter</a>, <a class="el" href="CEMController_8h_source.html#l00057">ctrl::CEMController::Params::N_samples</a>, and <a class="el" href="CEMController_8h_source.html#l00056">ctrl::CEMController::Params::Np</a>.</p>
 
@@ -303,9 +303,9 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#a6a5967a1fe140ab705a2761268d49eb8">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="CEMController_8cpp_source.html#l00099">99</a> of file <a class="el" href="CEMController_8cpp_source.html">CEMController.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="CEMController_8cpp_source.html#l00103">103</a> of file <a class="el" href="CEMController_8cpp_source.html">CEMController.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="CEMController_8cpp_source.html#l00050">computeRef()</a>.</p>
+<p class="reference">References <a class="el" href="CEMController_8cpp_source.html#l00056">computeRef()</a>.</p>
 
 </div>
 </div>
@@ -345,11 +345,11 @@ Additional Inherited Members</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Optimal first action u_0. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="CEMController_8cpp_source.html#l00050">50</a> of file <a class="el" href="CEMController_8cpp_source.html">CEMController.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="CEMController_8cpp_source.html#l00056">56</a> of file <a class="el" href="CEMController_8cpp_source.html">CEMController.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="CEMController_8h_source.html#l00059">ctrl::CEMController::Params::elite_frac</a>, <a class="el" href="CEMController_8h_source.html#l00058">ctrl::CEMController::Params::n_iter</a>, <a class="el" href="CEMController_8h_source.html#l00057">ctrl::CEMController::Params::N_samples</a>, <a class="el" href="IController_8h_source.html#l00177">ctrl::IController::notifyObserver()</a>, <a class="el" href="CEMController_8h_source.html#l00056">ctrl::CEMController::Params::Np</a>, <a class="el" href="CEMController_8h_source.html#l00060">ctrl::CEMController::Params::sigma_init</a>, <a class="el" href="CEMController_8h_source.html#l00061">ctrl::CEMController::Params::sigma_min</a>, <a class="el" href="CEMController_8h_source.html#l00065">ctrl::CEMController::Params::uMax</a>, and <a class="el" href="CEMController_8h_source.html#l00064">ctrl::CEMController::Params::uMin</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="CEMController_8cpp_source.html#l00099">compute()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="CEMController_8cpp_source.html#l00103">compute()</a>.</p>
 
 </div>
 </div>
@@ -441,7 +441,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="classctrl_1_1IController.html#ac69ef6691d5831cda3adcdc59971fcac">ctrl::IController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="CEMController_8cpp_source.html#l00108">108</a> of file <a class="el" href="CEMController_8cpp_source.html">CEMController.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="CEMController_8cpp_source.html#l00116">116</a> of file <a class="el" href="CEMController_8cpp_source.html">CEMController.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="CEMController_8h_source.html#l00056">ctrl::CEMController::Params::Np</a>.</p>
 

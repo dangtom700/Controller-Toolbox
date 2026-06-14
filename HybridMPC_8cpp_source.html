@@ -98,70 +98,77 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>                       -&gt; Eigen::VectorXd { return m-&gt;predict(x, u); })</div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    , hp_(params)</div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    , model_(std::move(model))</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>{}</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    , max_buffer_(std::max(params.min_observations * 2, 1))</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>{}</div>
 </div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
-<div class="foldopen" id="foldopen00018" data-start="{" data-end="}">
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="classctrl_1_1HybridMPC.html#aa68dcae49768ec82818fee6dd54affa4">   18</a></span><span class="keywordtype">void</span> HybridMPC::addStateObservation(<span class="keyword">const</span> Eigen::VectorXd&amp; x,</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>                                     <span class="keyword">const</span> Eigen::VectorXd&amp; u,</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>                                     <span class="keyword">const</span> Eigen::VectorXd&amp; x_next_true)</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>{</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keyword">const</span> Eigen::VectorXd x_next_phys = model_-&gt;predictPhys(x, u);</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keyword">const</span> Eigen::VectorXd residual    = x_next_true - x_next_phys;</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    Eigen::VectorXd feat(x.size() + u.size());</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    feat &lt;&lt; x, u;</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    feat_data_.push_back(feat);</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    resid_data_.push_back(residual);</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    ++obs_since_refit_;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> interval = hp_.data_update_interval;</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keywordflow">if</span> (interval &gt; 0</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        &amp;&amp; obs_since_refit_ &gt;= interval</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        &amp;&amp; <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(feat_data_.size()) &gt;= hp_.min_observations)</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    {</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        refitDataModel();</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    }</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>}</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="foldopen" id="foldopen00019" data-start="{" data-end="}">
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="classctrl_1_1HybridMPC.html#aa68dcae49768ec82818fee6dd54affa4">   19</a></span><span class="keywordtype">void</span> HybridMPC::addStateObservation(<span class="keyword">const</span> Eigen::VectorXd&amp; x,</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>                                     <span class="keyword">const</span> Eigen::VectorXd&amp; u,</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>                                     <span class="keyword">const</span> Eigen::VectorXd&amp; x_next_true)</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>{</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keyword">const</span> Eigen::VectorXd x_next_phys = model_-&gt;predictPhys(x, u);</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keyword">const</span> Eigen::VectorXd residual    = x_next_true - x_next_phys;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    Eigen::VectorXd feat(x.size() + u.size());</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    feat &lt;&lt; x, u;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    feat_data_.push_back(feat);</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    resid_data_.push_back(residual);</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    ++obs_since_refit_;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="comment">// FIFO eviction: keep at most max_buffer_ observations to bound memory</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keywordflow">if</span> (<span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(feat_data_.size()) &gt; max_buffer_) {</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        feat_data_.erase(feat_data_.begin());</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        resid_data_.erase(resid_data_.begin());</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    }</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> interval = hp_.data_update_interval;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordflow">if</span> (interval &gt; 0</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        &amp;&amp; obs_since_refit_ &gt;= interval</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        &amp;&amp; <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(feat_data_.size()) &gt;= hp_.min_observations)</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    {</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        refitDataModel();</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    }</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>}</div>
 </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="foldopen" id="foldopen00041" data-start="{" data-end="}">
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="classctrl_1_1HybridMPC.html#a4efce12a51a0d5630d5b587935a88097">   41</a></span><span class="keywordtype">bool</span> HybridMPC::refitDataModel()</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>{</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> N = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(feat_data_.size());</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keywordflow">if</span> (N &lt; hp_.min_observations) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> n_feat = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(feat_data_[0].size());</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> n_out  = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(resid_data_[0].size());</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="comment">// Build design matrix X (N x n_feat) and target Y (N x n_out)</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    Eigen::MatrixXd X(N, n_feat), Y(N, n_out);</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; N; ++k) {</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        X.row(k) = feat_data_[k].transpose();</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        Y.row(k) = resid_data_[k].transpose();</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    }</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="foldopen" id="foldopen00048" data-start="{" data-end="}">
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="classctrl_1_1HybridMPC.html#a4efce12a51a0d5630d5b587935a88097">   48</a></span><span class="keywordtype">bool</span> HybridMPC::refitDataModel()</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>{</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> N = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(feat_data_.size());</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordflow">if</span> (N &lt; hp_.min_observations) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> n_feat = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(feat_data_[0].size());</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> n_out  = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(resid_data_[0].size());</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="comment">// Ridge regression: W = (X&#39;X + lambda*I)^{-1} X&#39;Y  (n_feat x n_out)</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    Eigen::MatrixXd XtX = X.transpose() * X;</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    XtX.diagonal().array() += hp_.ridge_lambda;</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keyword">const</span> Eigen::MatrixXd W = XtX.ldlt().solve(X.transpose() * Y);</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="comment">// Install fitted linear model as the data component</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    model_-&gt;setDataModel(</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        [W](<span class="keyword">const</span> Eigen::VectorXd&amp; x, <span class="keyword">const</span> Eigen::VectorXd&amp; u) -&gt; Eigen::VectorXd {</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>            Eigen::VectorXd feat(x.size() + u.size());</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>            feat &lt;&lt; x, u;</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>            <span class="keywordflow">return</span> W.transpose() * feat;  <span class="comment">// n_out x 1</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        });</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    data_fitted_     = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    obs_since_refit_ = 0;</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>}</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="comment">// Build design matrix X (N x n_feat) and target Y (N x n_out)</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    Eigen::MatrixXd X(N, n_feat), Y(N, n_out);</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; N; ++k) {</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        X.row(k) = feat_data_[k].transpose();</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        Y.row(k) = resid_data_[k].transpose();</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    }</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="comment">// Ridge regression: W = (X&#39;X + lambda*I)^{-1} X&#39;Y  (n_feat x n_out)</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    Eigen::MatrixXd XtX = X.transpose() * X;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    XtX.diagonal().array() += hp_.ridge_lambda;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keyword">const</span> Eigen::MatrixXd W = XtX.ldlt().solve(X.transpose() * Y);</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="comment">// Install fitted linear model as the data component</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    model_-&gt;setDataModel(</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        [W](<span class="keyword">const</span> Eigen::VectorXd&amp; x, <span class="keyword">const</span> Eigen::VectorXd&amp; u) -&gt; Eigen::VectorXd {</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>            Eigen::VectorXd feat(x.size() + u.size());</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>            feat &lt;&lt; x, u;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>            <span class="keywordflow">return</span> W.transpose() * feat;  <span class="comment">// n_out x 1</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        });</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    data_fitted_     = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    obs_since_refit_ = 0;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>}</div>
 </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aHybridMPC_8h_html"><div class="ttname"><a href="HybridMPC_8h.html">HybridMPC.h</a></div><div class="ttdoc">Hybrid Model Predictive Controller (H2).</div></div>
 <div class="ttc" id="aclassctrl_1_1HybridMPC_html_aa8b18195f20dedb098bf682805856e7d"><div class="ttname"><a href="classctrl_1_1HybridMPC.html#aa8b18195f20dedb098bf682805856e7d">ctrl::HybridMPC::HybridMPC</a></div><div class="ttdeci">HybridMPC(const HybridMPCParams &amp;params, std::shared_ptr&lt; HybridModel &gt; model)</div><div class="ttdoc">Construct HybridMPC.</div><div class="ttdef"><b>Definition</b> <a href="HybridMPC_8cpp_source.html#l00007">HybridMPC.cpp:7</a></div></div>
 <div class="ttc" id="aclassctrl_1_1NonlinearMPC_html"><div class="ttname"><a href="classctrl_1_1NonlinearMPC.html">ctrl::NonlinearMPC</a></div><div class="ttdoc">Nonlinear MPC controller using Real-Time Iteration (RTI).</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8h_source.html#l00070">NonlinearMPC.h:71</a></div></div>

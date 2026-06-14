@@ -222,9 +222,9 @@ Public Member Functions</h2></td></tr>
 <p>Weighted sample covariance P = Sigma w_i * (x_i - x_hat)(x_i - x_hat)'. </p>
 <dl class="section return"><dt>Returns</dt><dd>Covariance matrix (n * n). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00175">175</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00176">176</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="ParticleFilter_8h_source.html#l00062">ctrl::ParticleFilterParams::n_particles</a>, and <a class="el" href="ParticleFilter_8cpp_source.html#l00166">state()</a>.</p>
+<p class="reference">References <a class="el" href="ParticleFilter_8h_source.html#l00062">ctrl::ParticleFilterParams::n_particles</a>, and <a class="el" href="ParticleFilter_8cpp_source.html#l00167">state()</a>.</p>
 
 </div>
 </div>
@@ -247,9 +247,9 @@ Public Member Functions</h2></td></tr>
 <p>N_eff approx = N: all particles contribute equally (good diversity). N_eff approx = 1: weight degeneracy (increase Q or n_particles).</p>
 <dl class="section return"><dt>Returns</dt><dd>Effective sample size \in [1, N]. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00187">187</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00188">188</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ParticleFilter_8cpp_source.html#l00099">update()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ParticleFilter_8cpp_source.html#l00102">update()</a>.</p>
 
 </div>
 </div>
@@ -289,7 +289,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00051">51</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00054">54</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="ParticleFilter_8h_source.html#l00062">ctrl::ParticleFilterParams::n_particles</a>.</p>
 
@@ -375,11 +375,11 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00085">85</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00088">88</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="ParticleFilter_8h_source.html#l00062">ctrl::ParticleFilterParams::n_particles</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ParticleFilter_8cpp_source.html#l00126">step()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ParticleFilter_8cpp_source.html#l00129">step()</a>.</p>
 
 </div>
 </div>
@@ -401,11 +401,11 @@ Public Member Functions</h2></td></tr>
 <p>Trigger a manual resample regardless of N_eff. </p>
 <p>Systematic resampling (Kitagawa 1996) - lower variance than multinomial. </p>
 
-<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00137">137</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00140">140</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="ParticleFilter_8h_source.html#l00062">ctrl::ParticleFilterParams::n_particles</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ParticleFilter_8cpp_source.html#l00099">update()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ParticleFilter_8cpp_source.html#l00102">update()</a>.</p>
 
 </div>
 </div>
@@ -455,7 +455,7 @@ Public Member Functions</h2></td></tr>
 <p>Reset the filter (particles and weights) to the initial distribution. </p>
 <p>Requires a subsequent <a class="el" href="classctrl_1_1ParticleFilter.html#a99a36f1c3a827733fd9484c239022cb6" title="Initialise particle cloud from a Gaussian prior N(x0, P0).">initialise()</a> call before predict/update. </p>
 
-<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00193">193</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00194">194</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="ParticleFilter_8h_source.html#l00062">ctrl::ParticleFilterParams::n_particles</a>.</p>
 
@@ -509,11 +509,11 @@ Public Member Functions</h2></td></tr>
 <p>Weighted mean estimate x_hat = Sigma w_i * x_i. </p>
 <dl class="section return"><dt>Returns</dt><dd>State estimate (n * 1). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00166">166</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00167">167</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="ParticleFilter_8h_source.html#l00062">ctrl::ParticleFilterParams::n_particles</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ParticleFilter_8cpp_source.html#l00175">covariance()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ParticleFilter_8cpp_source.html#l00176">covariance()</a>.</p>
 
 </div>
 </div>
@@ -553,9 +553,9 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00126">126</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00129">129</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="ParticleFilter_8cpp_source.html#l00085">predict()</a>, and <a class="el" href="ParticleFilter_8cpp_source.html#l00099">update()</a>.</p>
+<p class="reference">References <a class="el" href="ParticleFilter_8cpp_source.html#l00088">predict()</a>, and <a class="el" href="ParticleFilter_8cpp_source.html#l00102">update()</a>.</p>
 
 </div>
 </div>
@@ -595,11 +595,11 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00099">99</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ParticleFilter_8cpp_source.html#l00102">102</a> of file <a class="el" href="ParticleFilter_8cpp_source.html">ParticleFilter.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="ParticleFilter_8cpp_source.html#l00187">effectiveSampleSize()</a>, <a class="el" href="ParticleFilter_8h_source.html#l00062">ctrl::ParticleFilterParams::n_particles</a>, and <a class="el" href="ParticleFilter_8cpp_source.html#l00137">resample()</a>.</p>
+<p class="reference">References <a class="el" href="ParticleFilter_8cpp_source.html#l00188">effectiveSampleSize()</a>, <a class="el" href="ParticleFilter_8h_source.html#l00062">ctrl::ParticleFilterParams::n_particles</a>, and <a class="el" href="ParticleFilter_8cpp_source.html#l00140">resample()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="ParticleFilter_8cpp_source.html#l00126">step()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="ParticleFilter_8cpp_source.html#l00129">step()</a>.</p>
 
 </div>
 </div>

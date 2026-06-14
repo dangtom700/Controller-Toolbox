@@ -96,93 +96,102 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>        : plant_(plant), Q_(Q_noise), R_(R_noise), Ts_(plant.Ts)</div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    {</div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> n = plant.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a2fb0b092751ef357a0b6c2beb0efba8a">stateSize</a>();</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>        x_hat_ = Eigen::VectorXd::Zero(n);</div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>        P_ = P0.rows() == n ? P0 : Eigen::MatrixXd::Identity(n, n);</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    }</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> p = plant.<a class="code hl_function" href="structctrl_1_1StateSpace.html#ae4ad7c88e0250e0c5648204a56365d2e">outputSize</a>();</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>        x_hat_ = Eigen::VectorXd::Zero(n);</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>        P_ = P0.rows() == n ? P0 : Eigen::MatrixXd::Identity(n, n);</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>        R_safe_.resize(p, p);</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        S_    .resize(p, p);</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        Kf_   .resize(n, p);</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>        IKC_  .resize(n, n);</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        P_new_.resize(n, n);</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    }</div>
 </div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <span class="comment">// Predict: advance state estimate and inflate covariance with process noise.</span></div>
-<div class="foldopen" id="foldopen00019" data-start="{" data-end="}">
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="classctrl_1_1KalmanFilter.html#acf9a9b384da9b6fa0decdaf86b3dd778">   19</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#acf9a9b384da9b6fa0decdaf86b3dd778">KalmanFilter::predict</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;u)</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    {</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        x_hat_ = plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a5692af54040746138b34d3d502e22add">A</a> * x_hat_ + plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a9bc2151f5d148bcb5676d81d57a38410">B</a> * u;</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        P_ = plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a5692af54040746138b34d3d502e22add">A</a> * P_ * plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a5692af54040746138b34d3d502e22add">A</a>.transpose() + Q_;</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    }</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="comment">// Predict: advance state estimate and inflate covariance with process noise.</span></div>
+<div class="foldopen" id="foldopen00025" data-start="{" data-end="}">
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classctrl_1_1KalmanFilter.html#acf9a9b384da9b6fa0decdaf86b3dd778">   25</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#acf9a9b384da9b6fa0decdaf86b3dd778">KalmanFilter::predict</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;u)</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    {</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        x_hat_ = plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a5692af54040746138b34d3d502e22add">A</a> * x_hat_ + plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a9bc2151f5d148bcb5676d81d57a38410">B</a> * u;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        P_ = plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a5692af54040746138b34d3d502e22add">A</a> * P_ * plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a5692af54040746138b34d3d502e22add">A</a>.transpose() + Q_;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    }</div>
 </div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <span class="comment">// Update: incorporate measurement y[k], correct estimate, deflate covariance.</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="comment">// Joseph form for P update maintains positive semi-definiteness numerically.</span></div>
-<div class="foldopen" id="foldopen00027" data-start="{" data-end="}">
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classctrl_1_1KalmanFilter.html#a555b459680345323b9670665dfa9417c">   27</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#a555b459680345323b9670665dfa9417c">KalmanFilter::update</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;y,</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>                              <span class="keyword">const</span> Eigen::VectorXd &amp;u_current)</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    {</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        <span class="keyword">const</span> Eigen::MatrixXd &amp;C = plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a102ebd15fc174335e7be995a37afdcd4">C</a>;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <span class="keyword">const</span> Eigen::MatrixXd &amp;D = plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a29841a16218926079b626c4661444ccd">D</a>;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> p = plant_.<a class="code hl_function" href="structctrl_1_1StateSpace.html#ae4ad7c88e0250e0c5648204a56365d2e">outputSize</a>();</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> n = plant_.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a2fb0b092751ef357a0b6c2beb0efba8a">stateSize</a>();</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        <span class="comment">// Enforce minimum noise floor on R to prevent near-singular innovation covariance</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        Eigen::MatrixXd R_safe = R_;</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        R_safe.diagonal() = R_safe.diagonal().cwiseMax(1e-12);</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="comment">// Innovation covariance</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        <span class="keyword">const</span> Eigen::MatrixXd S = C * P_ * C.transpose() + R_safe;</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        <span class="comment">// Kalman gain - skip update entirely if S is numerically singular</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <span class="keyword">const</span> <span class="keyword">auto</span> ldlt = S.ldlt();</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        <span class="keywordflow">if</span> (ldlt.info() != Eigen::Success)</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>            <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <span class="keyword">const</span> Eigen::MatrixXd Kf = P_ * C.transpose() *</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>                                   ldlt.solve(Eigen::MatrixXd::Identity(p, p));</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="comment">// Update: incorporate measurement y[k], correct estimate, deflate covariance.</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="comment">// Joseph form for P update maintains positive semi-definiteness numerically.</span></div>
+<div class="foldopen" id="foldopen00033" data-start="{" data-end="}">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="classctrl_1_1KalmanFilter.html#a555b459680345323b9670665dfa9417c">   33</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#a555b459680345323b9670665dfa9417c">KalmanFilter::update</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;y,</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>                              <span class="keyword">const</span> Eigen::VectorXd &amp;u_current)</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    {</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        <span class="keyword">const</span> Eigen::MatrixXd &amp;C = plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a102ebd15fc174335e7be995a37afdcd4">C</a>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <span class="keyword">const</span> Eigen::MatrixXd &amp;D = plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a29841a16218926079b626c4661444ccd">D</a>;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> p = plant_.<a class="code hl_function" href="structctrl_1_1StateSpace.html#ae4ad7c88e0250e0c5648204a56365d2e">outputSize</a>();</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> n = plant_.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a2fb0b092751ef357a0b6c2beb0efba8a">stateSize</a>();</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <span class="comment">// Enforce minimum noise floor on R_ into pre-allocated R_safe_</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        R_safe_ = R_;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        R_safe_.diagonal() = R_safe_.diagonal().cwiseMax(1e-12);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="comment">// Innovation covariance (pre-allocated S_)</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        S_.noalias() = C * P_ * C.transpose();</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        S_ += R_safe_;</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="comment">// State update</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        <span class="keyword">const</span> Eigen::VectorXd innov = y - C * x_hat_ - D * u_current;</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        <span class="keywordflow">if</span> (mismatch_det_) mismatch_det_-&gt;update(innov);</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        x_hat_.noalias() += Kf * innov;</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <span class="comment">// Covariance update - Joseph form: P = (I-KC).P.(I-KC)&#39; + K.R.K&#39;</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        <span class="keyword">const</span> Eigen::MatrixXd IKC = Eigen::MatrixXd::Identity(n, n) - Kf * C;</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        P_ = IKC * P_ * IKC.transpose() + Kf * R_safe * Kf.transpose();</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    }</div>
-</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="foldopen" id="foldopen00059" data-start="{" data-end="}">
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="classctrl_1_1KalmanFilter.html#a3ef0abd00aa2240bc3c065f19ea34b52">   59</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#a3ef0abd00aa2240bc3c065f19ea34b52">KalmanFilter::step</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;y,</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>                            <span class="keyword">const</span> Eigen::VectorXd &amp;u_prev,</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>                            std::optional&lt;std::reference_wrapper&lt;const Eigen::VectorXd&gt;&gt; u_current)</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    {</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#acf9a9b384da9b6fa0decdaf86b3dd778">predict</a>(u_prev);</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <span class="comment">// Use u_current for the D.u innovation term when provided; fall back to u_prev for D=0 plants.</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#a555b459680345323b9670665dfa9417c">update</a>(y, u_current.has_value() ? u_current-&gt;get() : u_prev);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="comment">// Kalman gain (pre-allocated Kf_) - skip update entirely if S is numerically singular</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        <span class="keyword">const</span> <span class="keyword">auto</span> ldlt = S_.ldlt();</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        <span class="keywordflow">if</span> (ldlt.info() != Eigen::Success)</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        Kf_.noalias() = P_ * C.transpose() * ldlt.solve(Eigen::MatrixXd::Identity(p, p));</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        <span class="comment">// State update</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        <span class="keyword">const</span> Eigen::VectorXd innov = y - C * x_hat_ - D * u_current;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        <span class="keywordflow">if</span> (mismatch_det_) mismatch_det_-&gt;update(innov);</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        x_hat_.noalias() += Kf_ * innov;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <span class="comment">// Covariance update - Joseph form: P = (I-KC).P.(I-KC)&#39; + K.R.K&#39;</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        <span class="comment">// Accumulate into P_new_ to avoid aliasing (P_ appears on both sides)</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        IKC_.noalias() = Eigen::MatrixXd::Identity(n, n) - Kf_ * C;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        P_new_.noalias() = IKC_ * P_ * IKC_.transpose();</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        P_new_.noalias() += Kf_ * R_safe_ * Kf_.transpose();</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        P_ = P_new_;</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    }</div>
 </div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="comment">// Plain-reference overload - avoids std::optional&lt;std::reference_wrapper&lt;...&gt;&gt; for pybind11.</span></div>
-<div class="foldopen" id="foldopen00069" data-start="{" data-end="}">
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="classctrl_1_1KalmanFilter.html#a53de1e13bd1f5c18018b40f420a2e940">   69</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#a3ef0abd00aa2240bc3c065f19ea34b52">KalmanFilter::step</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;y,</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>                            <span class="keyword">const</span> Eigen::VectorXd &amp;u_prev,</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>                            <span class="keyword">const</span> Eigen::VectorXd &amp;u_current)</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    {</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#acf9a9b384da9b6fa0decdaf86b3dd778">predict</a>(u_prev);</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#a555b459680345323b9670665dfa9417c">update</a>(y, u_current);</div>
+<div class="foldopen" id="foldopen00068" data-start="{" data-end="}">
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="classctrl_1_1KalmanFilter.html#a3ef0abd00aa2240bc3c065f19ea34b52">   68</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#a3ef0abd00aa2240bc3c065f19ea34b52">KalmanFilter::step</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;y,</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>                            <span class="keyword">const</span> Eigen::VectorXd &amp;u_prev,</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>                            std::optional&lt;std::reference_wrapper&lt;const Eigen::VectorXd&gt;&gt; u_current)</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    {</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#acf9a9b384da9b6fa0decdaf86b3dd778">predict</a>(u_prev);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        <span class="comment">// Use u_current for the D.u innovation term when provided; fall back to u_prev for D=0 plants.</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#a555b459680345323b9670665dfa9417c">update</a>(y, u_current.has_value() ? u_current-&gt;get() : u_prev);</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    }</div>
 </div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
-<div class="foldopen" id="foldopen00077" data-start="{" data-end="}">
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="classctrl_1_1KalmanFilter.html#a1aae1aea67146371347c0a2cf3ca7c76">   77</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#a1aae1aea67146371347c0a2cf3ca7c76">KalmanFilter::reset</a>()</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    {</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        x_hat_.setZero();</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        P_ = Eigen::MatrixXd::Identity(plant_.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a2fb0b092751ef357a0b6c2beb0efba8a">stateSize</a>(), plant_.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a2fb0b092751ef357a0b6c2beb0efba8a">stateSize</a>());</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    }</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="comment">// Plain-reference overload - avoids std::optional&lt;std::reference_wrapper&lt;...&gt;&gt; for pybind11.</span></div>
+<div class="foldopen" id="foldopen00078" data-start="{" data-end="}">
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="classctrl_1_1KalmanFilter.html#a53de1e13bd1f5c18018b40f420a2e940">   78</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#a3ef0abd00aa2240bc3c065f19ea34b52">KalmanFilter::step</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;y,</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>                            <span class="keyword">const</span> Eigen::VectorXd &amp;u_prev,</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>                            <span class="keyword">const</span> Eigen::VectorXd &amp;u_current)</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    {</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#acf9a9b384da9b6fa0decdaf86b3dd778">predict</a>(u_prev);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#a555b459680345323b9670665dfa9417c">update</a>(y, u_current);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    }</div>
 </div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="foldopen" id="foldopen00086" data-start="{" data-end="}">
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classctrl_1_1KalmanFilter.html#a1aae1aea67146371347c0a2cf3ca7c76">   86</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1KalmanFilter.html#a1aae1aea67146371347c0a2cf3ca7c76">KalmanFilter::reset</a>()</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    {</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        x_hat_.setZero();</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        P_ = Eigen::MatrixXd::Identity(plant_.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a2fb0b092751ef357a0b6c2beb0efba8a">stateSize</a>(), plant_.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a2fb0b092751ef357a0b6c2beb0efba8a">stateSize</a>());</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    }</div>
+</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aKalmanFilter_8h_html"><div class="ttname"><a href="KalmanFilter_8h.html">KalmanFilter.h</a></div><div class="ttdoc">Discrete-time Linear Kalman Filter (LKF).</div></div>
-<div class="ttc" id="aclassctrl_1_1KalmanFilter_html_a1aae1aea67146371347c0a2cf3ca7c76"><div class="ttname"><a href="classctrl_1_1KalmanFilter.html#a1aae1aea67146371347c0a2cf3ca7c76">ctrl::KalmanFilter::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdoc">Reset state estimate to zero and covariance to P0 (or identity).</div><div class="ttdef"><b>Definition</b> <a href="KalmanFilter_8cpp_source.html#l00077">KalmanFilter.cpp:77</a></div></div>
+<div class="ttc" id="aclassctrl_1_1KalmanFilter_html_a1aae1aea67146371347c0a2cf3ca7c76"><div class="ttname"><a href="classctrl_1_1KalmanFilter.html#a1aae1aea67146371347c0a2cf3ca7c76">ctrl::KalmanFilter::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdoc">Reset state estimate to zero and covariance to P0 (or identity).</div><div class="ttdef"><b>Definition</b> <a href="KalmanFilter_8cpp_source.html#l00086">KalmanFilter.cpp:86</a></div></div>
 <div class="ttc" id="aclassctrl_1_1KalmanFilter_html_a226052d8a01efa2589f81e7c52964d0c"><div class="ttname"><a href="classctrl_1_1KalmanFilter.html#a226052d8a01efa2589f81e7c52964d0c">ctrl::KalmanFilter::KalmanFilter</a></div><div class="ttdeci">KalmanFilter(const StateSpace &amp;plant, const Eigen::MatrixXd &amp;Q_noise, const Eigen::MatrixXd &amp;R_noise, const Eigen::MatrixXd &amp;P0=Eigen::MatrixXd())</div><div class="ttdoc">Construct the Kalman filter.</div><div class="ttdef"><b>Definition</b> <a href="KalmanFilter_8cpp_source.html#l00007">KalmanFilter.cpp:7</a></div></div>
-<div class="ttc" id="aclassctrl_1_1KalmanFilter_html_a3ef0abd00aa2240bc3c065f19ea34b52"><div class="ttname"><a href="classctrl_1_1KalmanFilter.html#a3ef0abd00aa2240bc3c065f19ea34b52">ctrl::KalmanFilter::step</a></div><div class="ttdeci">void step(const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u_prev, std::optional&lt; std::reference_wrapper&lt; const Eigen::VectorXd &gt; &gt; u_current=std::nullopt)</div><div class="ttdoc">Combined predict + update - most common usage pattern.</div><div class="ttdef"><b>Definition</b> <a href="KalmanFilter_8cpp_source.html#l00059">KalmanFilter.cpp:59</a></div></div>
-<div class="ttc" id="aclassctrl_1_1KalmanFilter_html_a555b459680345323b9670665dfa9417c"><div class="ttname"><a href="classctrl_1_1KalmanFilter.html#a555b459680345323b9670665dfa9417c">ctrl::KalmanFilter::update</a></div><div class="ttdeci">void update(const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u_current)</div><div class="ttdoc">Update step - incorporate a new measurement.</div><div class="ttdef"><b>Definition</b> <a href="KalmanFilter_8cpp_source.html#l00027">KalmanFilter.cpp:27</a></div></div>
-<div class="ttc" id="aclassctrl_1_1KalmanFilter_html_acf9a9b384da9b6fa0decdaf86b3dd778"><div class="ttname"><a href="classctrl_1_1KalmanFilter.html#acf9a9b384da9b6fa0decdaf86b3dd778">ctrl::KalmanFilter::predict</a></div><div class="ttdeci">void predict(const Eigen::VectorXd &amp;u)</div><div class="ttdoc">Prediction step - advance state estimate with the previous control input.</div><div class="ttdef"><b>Definition</b> <a href="KalmanFilter_8cpp_source.html#l00019">KalmanFilter.cpp:19</a></div></div>
+<div class="ttc" id="aclassctrl_1_1KalmanFilter_html_a3ef0abd00aa2240bc3c065f19ea34b52"><div class="ttname"><a href="classctrl_1_1KalmanFilter.html#a3ef0abd00aa2240bc3c065f19ea34b52">ctrl::KalmanFilter::step</a></div><div class="ttdeci">void step(const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u_prev, std::optional&lt; std::reference_wrapper&lt; const Eigen::VectorXd &gt; &gt; u_current=std::nullopt)</div><div class="ttdoc">Combined predict + update - most common usage pattern.</div><div class="ttdef"><b>Definition</b> <a href="KalmanFilter_8cpp_source.html#l00068">KalmanFilter.cpp:68</a></div></div>
+<div class="ttc" id="aclassctrl_1_1KalmanFilter_html_a555b459680345323b9670665dfa9417c"><div class="ttname"><a href="classctrl_1_1KalmanFilter.html#a555b459680345323b9670665dfa9417c">ctrl::KalmanFilter::update</a></div><div class="ttdeci">void update(const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u_current)</div><div class="ttdoc">Update step - incorporate a new measurement.</div><div class="ttdef"><b>Definition</b> <a href="KalmanFilter_8cpp_source.html#l00033">KalmanFilter.cpp:33</a></div></div>
+<div class="ttc" id="aclassctrl_1_1KalmanFilter_html_acf9a9b384da9b6fa0decdaf86b3dd778"><div class="ttname"><a href="classctrl_1_1KalmanFilter.html#acf9a9b384da9b6fa0decdaf86b3dd778">ctrl::KalmanFilter::predict</a></div><div class="ttdeci">void predict(const Eigen::VectorXd &amp;u)</div><div class="ttdoc">Prediction step - advance state estimate with the previous control input.</div><div class="ttdef"><b>Definition</b> <a href="KalmanFilter_8cpp_source.html#l00025">KalmanFilter.cpp:25</a></div></div>
 <div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AdaptiveSmithPredictor_8cpp_source.html#l00005">AdaptiveSmithPredictor.cpp:6</a></div></div>
 <div class="ttc" id="astructctrl_1_1StateSpace_html"><div class="ttname"><a href="structctrl_1_1StateSpace.html">ctrl::StateSpace</a></div><div class="ttdoc">Discrete-time state-space model.</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00068">PlantModel.h:69</a></div></div>
 <div class="ttc" id="astructctrl_1_1StateSpace_html_a102ebd15fc174335e7be995a37afdcd4"><div class="ttname"><a href="structctrl_1_1StateSpace.html#a102ebd15fc174335e7be995a37afdcd4">ctrl::StateSpace::C</a></div><div class="ttdeci">Eigen::MatrixXd C</div><div class="ttdoc">Output matrix (p * n).</div><div class="ttdef"><b>Definition</b> <a href="PlantModel_8h_source.html#l00072">PlantModel.h:72</a></div></div>

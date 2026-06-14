@@ -158,198 +158,201 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    y_ref_     = Eigen::VectorXd::Zero(p);</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    U_warm_    = Eigen::MatrixXd::Zero(m, Nu);</div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    Theta_.resize(p * Np, Nu_total);</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    xi_.resize(p * Np);</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    H_qp_.resize(Nu_total, Nu_total);</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    g_qp_.resize(Nu_total);</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    lb_qp_.resize(Nu_total);</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    ub_qp_.resize(Nu_total);</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    dU_sol_.resize(Nu_total);</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    tmp1_.resize(Nu_total);</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    tmp2_.resize(Nu_total);</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    u_opt_.resize(m);</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>}</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
-<div class="foldopen" id="foldopen00086" data-start="{" data-end="}">
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="classctrl_1_1NonlinearMPC.html#addd1fd8b444fc527c57a9b392956b2a0">   86</a></span><a class="code hl_function" href="classctrl_1_1NonlinearMPC.html#addd1fd8b444fc527c57a9b392956b2a0">NonlinearMPC::NonlinearMPC</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1NMPCParams.html">NMPCParams</a> &amp;params, <a class="code hl_typedef" href="classctrl_1_1NonlinearMPC.html#a30f2dda7d0fe7bc116bb150fbb6f9219">DiscreteDynamics</a> f_d)</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    : p_(params), f_(std::move(f_d))</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>{</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> n = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a9f4357c4fddc129af8e2629123302383">n_states</a>;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> p = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a3cdd1a4927d08a73235a3eda9106748d">n_outputs</a>;</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    C_ = Eigen::MatrixXd::Identity(p, n);</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    init();</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>}</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    x_traj_.assign(Np + 1, Eigen::VectorXd::Zero(n));</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    A_list_.assign(Np,     Eigen::MatrixXd::Zero(n, n));</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    B_list_.assign(Np,     Eigen::MatrixXd::Zero(n, m));</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    y_fista_.resize(m * Nu); y_fista_.setZero();</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    Theta_.resize(p * Np, Nu_total);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    xi_.resize(p * Np);</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    H_qp_.resize(Nu_total, Nu_total);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    g_qp_.resize(Nu_total);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    lb_qp_.resize(Nu_total);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    ub_qp_.resize(Nu_total);</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    dU_sol_.resize(Nu_total);</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    tmp1_.resize(Nu_total);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    tmp2_.resize(Nu_total);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    u_opt_.resize(m);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>}</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="foldopen" id="foldopen00091" data-start="{" data-end="}">
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="classctrl_1_1NonlinearMPC.html#addd1fd8b444fc527c57a9b392956b2a0">   91</a></span><a class="code hl_function" href="classctrl_1_1NonlinearMPC.html#addd1fd8b444fc527c57a9b392956b2a0">NonlinearMPC::NonlinearMPC</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1NMPCParams.html">NMPCParams</a> &amp;params, <a class="code hl_typedef" href="classctrl_1_1NonlinearMPC.html#a30f2dda7d0fe7bc116bb150fbb6f9219">DiscreteDynamics</a> f_d)</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    : p_(params), f_(std::move(f_d))</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>{</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> n = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a9f4357c4fddc129af8e2629123302383">n_states</a>;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> p = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a3cdd1a4927d08a73235a3eda9106748d">n_outputs</a>;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    C_ = Eigen::MatrixXd::Identity(p, n);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    init();</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>}</div>
 </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
-<div class="foldopen" id="foldopen00095" data-start="{" data-end="}">
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="classctrl_1_1NonlinearMPC.html#ae6803190ebc503cc271414c0b64a0c7e">   95</a></span><a class="code hl_function" href="classctrl_1_1NonlinearMPC.html#addd1fd8b444fc527c57a9b392956b2a0">NonlinearMPC::NonlinearMPC</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1NMPCParams.html">NMPCParams</a> &amp;params, <a class="code hl_typedef" href="classctrl_1_1NonlinearMPC.html#a30f2dda7d0fe7bc116bb150fbb6f9219">DiscreteDynamics</a> f_d,</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>                           <span class="keyword">const</span> Eigen::MatrixXd &amp;C_out)</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    : p_(params), f_(std::move(f_d)), C_(C_out)</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>{</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    init();</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>}</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="foldopen" id="foldopen00100" data-start="{" data-end="}">
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="classctrl_1_1NonlinearMPC.html#ae6803190ebc503cc271414c0b64a0c7e">  100</a></span><a class="code hl_function" href="classctrl_1_1NonlinearMPC.html#addd1fd8b444fc527c57a9b392956b2a0">NonlinearMPC::NonlinearMPC</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1NMPCParams.html">NMPCParams</a> &amp;params, <a class="code hl_typedef" href="classctrl_1_1NonlinearMPC.html#a30f2dda7d0fe7bc116bb150fbb6f9219">DiscreteDynamics</a> f_d,</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>                           <span class="keyword">const</span> Eigen::MatrixXd &amp;C_out)</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    : p_(params), f_(std::move(f_d)), C_(C_out)</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>{</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    init();</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>}</div>
 </div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="comment">// -----------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="comment">// buildAndSolve - RTI step</span></div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="comment">// -----------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="keywordtype">void</span> NonlinearMPC::buildAndSolve()</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>{</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> n  = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a9f4357c4fddc129af8e2629123302383">n_states</a>;</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> m  = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a133599061f135044d218e9d3161d1b05">n_inputs</a>;</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> p  = C_.rows();</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> Np = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a53299a9f5e58d6c4b44ca799709585df">Np</a>;</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> Nu = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a525eefdda60c2a43d588a35e003dcebe">Nu</a>;</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="comment">// Step 1 - simulate nominal trajectory from x_current_ under U_warm_</span></div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    std::vector&lt;Eigen::VectorXd&gt; x_traj(Np + 1);</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    x_traj[0] = x_current_;</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; Np; ++j)</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    {</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> k = std::min(j, Nu - 1);</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>        x_traj[j + 1] = f_(x_traj[j], U_warm_.col(k));</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    }</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="comment">// Step 2 - linearise at each step: A_j = df/dx, B_j = df/du</span></div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    std::vector&lt;Eigen::MatrixXd&gt; A_list(Np), B_list(Np);</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; Np; ++j)</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    {</div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> k = std::min(j, Nu - 1);</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>        A_list[j] = <a class="code hl_function" href="namespacectrl.html#a14802f0d74704a3eb8136813e29d27e3">jacX_discrete</a>(f_, x_traj[j], U_warm_.col(k));</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>        B_list[j] = <a class="code hl_function" href="namespacectrl.html#ab49742b8ed1e3a96746b6e6d35a9a501">jacU_discrete</a>(f_, x_traj[j], U_warm_.col(k));</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    }</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="comment">// Step 3 - build xi: nominal output trajectory minus reference (stacked Np times)</span></div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; Np; ++j)</div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>        xi_.segment(j * p, p) = C_ * x_traj[j + 1] - y_ref_;</div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="comment">// Step 4 - build Theta (p*Np x m*Nu): time-varying step-response matrix.</span></div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="comment">// Row block j (output Deltay_{j+1}), col block k (from Deltau_k):</span></div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    <span class="comment">//   Theta[j, k] = C * A_j * A_{j-1} * ... * A_{k+1} * B_k   for k &lt;= j</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="comment">// -----------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="comment">// buildAndSolve - RTI step</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="comment">// -----------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="keywordtype">void</span> NonlinearMPC::buildAndSolve()</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>{</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> n  = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a9f4357c4fddc129af8e2629123302383">n_states</a>;</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> m  = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a133599061f135044d218e9d3161d1b05">n_inputs</a>;</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> p  = C_.rows();</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> Np = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a53299a9f5e58d6c4b44ca799709585df">Np</a>;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> Nu = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a525eefdda60c2a43d588a35e003dcebe">Nu</a>;</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <span class="comment">// Step 1 - simulate nominal trajectory from x_current_ under U_warm_ (reuse pre-allocated x_traj_)</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    x_traj_[0] = x_current_;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; Np; ++j)</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    {</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> k = std::min(j, Nu - 1);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        x_traj_[j + 1] = f_(x_traj_[j], U_warm_.col(k));</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    }</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="comment">// Step 2 - linearise at each step: A_j = df/dx, B_j = df/du (reuse pre-allocated lists)</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; Np; ++j)</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    {</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> k = std::min(j, Nu - 1);</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>        A_list_[j] = <a class="code hl_function" href="namespacectrl.html#a14802f0d74704a3eb8136813e29d27e3">jacX_discrete</a>(f_, x_traj_[j], U_warm_.col(k));</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>        B_list_[j] = <a class="code hl_function" href="namespacectrl.html#ab49742b8ed1e3a96746b6e6d35a9a501">jacU_discrete</a>(f_, x_traj_[j], U_warm_.col(k));</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    }</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <span class="comment">// Step 3 - build xi: nominal output trajectory minus reference (stacked Np times)</span></div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; Np; ++j)</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        xi_.segment(j * p, p) = C_ * x_traj_[j + 1] - y_ref_;</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    <span class="comment">// Step 4 - build Theta (p*Np x m*Nu): time-varying step-response matrix.</span></div>
 <div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    <span class="comment">// For k &gt;= Nu the input is held at Deltau_{Nu-1}, so contributions are</span></div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>    <span class="comment">// accumulated into column block Nu-1.</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    <span class="comment">// Row block j (output Deltay_{j+1}), col block k (from Deltau_k):</span></div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>    <span class="comment">//   Theta[j, k] = C * A_j * A_{j-1} * ... * A_{k+1} * B_k   for k &lt;= j</span></div>
 <div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    <span class="comment">// Incremental product: for fixed j iterate k from j down to 0.</span></div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    <span class="comment">//   Phi starts at I, then after each k: Phi = Phi * A_k.</span></div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>    <span class="comment">//   This gives Phi[k-1] = A_j * ... * A_k correctly.</span></div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    Theta_.setZero();</div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; Np; ++j)</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>    {</div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        Eigen::MatrixXd Phi = Eigen::MatrixXd::Identity(n, n);</div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = j; k &gt;= 0; --k)</div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>        {</div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>            <span class="keyword">const</span> Eigen::MatrixXd contrib = C_ * Phi * B_list[k];</div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>            <span class="keyword">const</span> <span class="keywordtype">int</span> col_k = std::min(k, Nu - 1);</div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>            Theta_.block(j * p, col_k * m, p, m) += contrib;</div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>            <span class="comment">// Update Phi for k-1: Phi_new = Phi_old * A_k</span></div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>            Phi = Phi * A_list[k];</div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>        }</div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    }</div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    <span class="comment">// Step 5 - build QP in terms of DeltaU (deviation from warm start)</span></div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    <span class="comment">//   H = rho_y * Theta^T Theta + rho_u * I</span></div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    <span class="comment">//   g = rho_y * Theta^T * xi</span></div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> Nu_total = m * Nu;</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    H_qp_.noalias() = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a29c7d8ef6f06b3eda34e3950c3c665be">rho_y</a> * (Theta_.transpose() * Theta_);</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    H_qp_ += p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#aa8fca52717a5a99dc19ab362934b3336">rho_u</a> * Eigen::MatrixXd::Identity(Nu_total, Nu_total);</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    g_qp_.noalias() = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a29c7d8ef6f06b3eda34e3950c3c665be">rho_y</a> * (Theta_.transpose() * xi_);</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    <span class="comment">// Box constraints on DeltaU: uMin - u_bar_k &lt;= DeltaU_k &lt;= uMax - u_bar_k</span></div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; Nu; ++k)</div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    {</div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>        lb_qp_.segment(k * m, m).setConstant(p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#aa7188a052d3cc5daa92b521c4f41eea7">uMin</a>);</div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>        ub_qp_.segment(k * m, m).setConstant(p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a60ce0d5ef2ec02b5e6ba2956e1d5ddd3">uMax</a>);</div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        lb_qp_.segment(k * m, m) -= U_warm_.col(k);</div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        ub_qp_.segment(k * m, m) -= U_warm_.col(k);</div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    }</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    <span class="comment">// Lipschitz constant and LDLT (must be recomputed each RTI step)</span></div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    L_qp_ = H_qp_.selfadjointView&lt;Eigen::Upper&gt;().eigenvalues().maxCoeff();</div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>    <span class="keywordflow">if</span> (L_qp_ &lt; 1e-12) L_qp_ = 1.0; <span class="comment">// guard against degenerate H</span></div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>    ldlt_  = H_qp_.ldlt();</div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span> </div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    <span class="comment">// Step 6 - solve QP via FISTA for DeltaU</span></div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>    <span class="keyword">auto</span> res = <a class="code hl_function" href="namespacectrl.html#a35c170c14a2cf3926e4b26bf41a38ff1">solveGradientProjectionQP</a>(H_qp_, g_qp_, lb_qp_, ub_qp_,</div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>                                         ldlt_, L_qp_,</div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>                                         p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#ae300c99753e83815cc8e35380b2cafb6">qpMaxIter</a>, p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a1aceba18e0715abb4b70a5bc877154ae">qpTol</a>,</div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>                                         dU_sol_, tmp1_, tmp2_);</div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    last_qp_converged_ = res.converged;</div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    last_qp_iters_     = res.iters;</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span> </div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    <span class="comment">// Step 7 - reconstruct U* = U_warm + DeltaU; extract first control</span></div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    Eigen::MatrixXd U_opt(m, Nu);</div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; Nu; ++k)</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        U_opt.col(k) = U_warm_.col(k) + dU_sol_.segment(k * m, m);</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    u_opt_      = U_opt.col(0);</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    last_output_ = u_opt_(0);</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    <span class="comment">// For k &gt;= Nu the input is held at Deltau_{Nu-1}, so contributions are</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    <span class="comment">// accumulated into column block Nu-1.</span></div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>    <span class="comment">//</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    <span class="comment">// Incremental product: for fixed j iterate k from j down to 0.</span></div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="comment">//   Phi starts at I, then after each k: Phi = Phi * A_k.</span></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>    <span class="comment">//   This gives Phi[k-1] = A_j * ... * A_k correctly.</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    Theta_.setZero();</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; Np; ++j)</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    {</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>        Eigen::MatrixXd Phi = Eigen::MatrixXd::Identity(n, n);</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = j; k &gt;= 0; --k)</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>        {</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>            <span class="keyword">const</span> Eigen::MatrixXd contrib = C_ * Phi * B_list_[k];</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>            <span class="keyword">const</span> <span class="keywordtype">int</span> col_k = std::min(k, Nu - 1);</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>            Theta_.block(j * p, col_k * m, p, m) += contrib;</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>            <span class="comment">// Update Phi for k-1: Phi_new = Phi_old * A_k</span></div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>            Phi = Phi * A_list_[k];</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>        }</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    }</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <span class="comment">// Step 5 - build QP in terms of DeltaU (deviation from warm start)</span></div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    <span class="comment">//   H = rho_y * Theta^T Theta + rho_u * I</span></div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    <span class="comment">//   g = rho_y * Theta^T * xi</span></div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> Nu_total = m * Nu;</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>    H_qp_.noalias() = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a29c7d8ef6f06b3eda34e3950c3c665be">rho_y</a> * (Theta_.transpose() * Theta_);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    H_qp_ += p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#aa8fca52717a5a99dc19ab362934b3336">rho_u</a> * Eigen::MatrixXd::Identity(Nu_total, Nu_total);</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    g_qp_.noalias() = p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a29c7d8ef6f06b3eda34e3950c3c665be">rho_y</a> * (Theta_.transpose() * xi_);</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    <span class="comment">// Box constraints on DeltaU: uMin - u_bar_k &lt;= DeltaU_k &lt;= uMax - u_bar_k</span></div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; Nu; ++k)</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    {</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        lb_qp_.segment(k * m, m).setConstant(p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#aa7188a052d3cc5daa92b521c4f41eea7">uMin</a>);</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        ub_qp_.segment(k * m, m).setConstant(p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a60ce0d5ef2ec02b5e6ba2956e1d5ddd3">uMax</a>);</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        lb_qp_.segment(k * m, m) -= U_warm_.col(k);</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        ub_qp_.segment(k * m, m) -= U_warm_.col(k);</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    }</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>    <span class="comment">// Lipschitz constant and LDLT (must be recomputed each RTI step)</span></div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    L_qp_ = H_qp_.selfadjointView&lt;Eigen::Upper&gt;().eigenvalues().maxCoeff();</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    <span class="keywordflow">if</span> (L_qp_ &lt; 1e-12) L_qp_ = 1.0; <span class="comment">// guard against degenerate H</span></div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>    ldlt_  = H_qp_.ldlt();</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    <span class="comment">// Step 6 - solve QP via FISTA for DeltaU</span></div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>    <span class="keyword">auto</span> res = <a class="code hl_function" href="namespacectrl.html#af47a37a386cad124b6fdbba85d4a9e17">solveGradientProjectionQP</a>(H_qp_, g_qp_, lb_qp_, ub_qp_,</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>                                         ldlt_, L_qp_,</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>                                         p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#ae300c99753e83815cc8e35380b2cafb6">qpMaxIter</a>, p_.<a class="code hl_variable" href="structctrl_1_1NMPCParams.html#a1aceba18e0715abb4b70a5bc877154ae">qpTol</a>,</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>                                         dU_sol_, tmp1_, tmp2_, y_fista_);</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    last_qp_converged_ = res.converged;</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    last_qp_iters_     = res.iters;</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <span class="comment">// Step 7 - reconstruct U* = U_warm + DeltaU; extract first control</span></div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    Eigen::MatrixXd U_opt(m, Nu);</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; Nu; ++k)</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        U_opt.col(k) = U_warm_.col(k) + dU_sol_.segment(k * m, m);</div>
 <div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span> </div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    <span class="comment">// Shift warm start: [u*_1, u*_2, ..., u*_{Nu-1}, u*_{Nu-1}]</span></div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; Nu - 1; ++k)</div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        U_warm_.col(k) = U_opt.col(k + 1);</div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>    U_warm_.col(Nu - 1) = U_opt.col(Nu - 1);</div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>}</div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span><span class="comment">// -----------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span><span class="comment">// Public interface</span></div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span><span class="comment">// -----------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span> </div>
-<div class="foldopen" id="foldopen00209" data-start="{" data-end="}">
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno"><a class="line" href="classctrl_1_1NonlinearMPC.html#a462a21352c3cd8f2ce2bcfc0bf36c673">  209</a></span>Eigen::VectorXd <a class="code hl_function" href="classctrl_1_1NonlinearMPC.html#a462a21352c3cd8f2ce2bcfc0bf36c673">NonlinearMPC::computeRef</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;x_current,</div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>                                          <span class="keyword">const</span> Eigen::VectorXd &amp;y_ref)</div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>{</div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    x_current_ = x_current;</div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    y_ref_     = y_ref;</div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    buildAndSolve();</div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    <a class="code hl_function" href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">notifyObserver</a>(last_output_, (C_ * x_current_ - y_ref_)(0));</div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    <span class="keywordflow">return</span> u_opt_;</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>}</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    u_opt_      = U_opt.col(0);</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>    last_output_ = u_opt_(0);</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>    <span class="comment">// Shift warm start: [u*_1, u*_2, ..., u*_{Nu-1}, u*_{Nu-1}]</span></div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; Nu - 1; ++k)</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        U_warm_.col(k) = U_opt.col(k + 1);</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>    U_warm_.col(Nu - 1) = U_opt.col(Nu - 1);</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>}</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span> </div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span><span class="comment">// -----------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span><span class="comment">// Public interface</span></div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span><span class="comment">// -----------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span> </div>
+<div class="foldopen" id="foldopen00212" data-start="{" data-end="}">
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno"><a class="line" href="classctrl_1_1NonlinearMPC.html#a462a21352c3cd8f2ce2bcfc0bf36c673">  212</a></span>Eigen::VectorXd <a class="code hl_function" href="classctrl_1_1NonlinearMPC.html#a462a21352c3cd8f2ce2bcfc0bf36c673">NonlinearMPC::computeRef</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;x_current,</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>                                          <span class="keyword">const</span> Eigen::VectorXd &amp;y_ref)</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>{</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    x_current_ = x_current;</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    y_ref_     = y_ref;</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>    buildAndSolve();</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>    <a class="code hl_function" href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">notifyObserver</a>(last_output_, (C_ * x_current_ - y_ref_)(0));</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>    <span class="keywordflow">return</span> u_opt_;</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>}</div>
 </div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
-<div class="foldopen" id="foldopen00219" data-start="{" data-end="}">
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno"><a class="line" href="classctrl_1_1NonlinearMPC.html#ab6d66a825136f14951ae0592cf382014">  219</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1NonlinearMPC.html#ab6d66a825136f14951ae0592cf382014">NonlinearMPC::compute</a>(<span class="keywordtype">double</span> error)</div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>{</div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>    <span class="keywordflow">if</span> (!std::isfinite(error)) <span class="keywordflow">return</span> last_output_;</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    <span class="comment">// Reconstruct scalar output reference from error: y_ref = y + error</span></div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>    <span class="keyword">const</span> Eigen::VectorXd y_current = C_ * x_current_;</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    y_ref_ = y_current.array() + error;</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    buildAndSolve();</div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    <a class="code hl_function" href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">notifyObserver</a>(last_output_, error);</div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    <span class="keywordflow">return</span> last_output_;</div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>}</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span> </div>
+<div class="foldopen" id="foldopen00222" data-start="{" data-end="}">
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno"><a class="line" href="classctrl_1_1NonlinearMPC.html#ab6d66a825136f14951ae0592cf382014">  222</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1NonlinearMPC.html#ab6d66a825136f14951ae0592cf382014">NonlinearMPC::compute</a>(<span class="keywordtype">double</span> error)</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>{</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    <span class="keywordflow">if</span> (!std::isfinite(error)) <span class="keywordflow">return</span> last_output_;</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    <span class="comment">// Reconstruct scalar output reference from error: y_ref = y + error</span></div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    <span class="keyword">const</span> Eigen::VectorXd y_current = C_ * x_current_;</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    y_ref_ = y_current.array() + error;</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    buildAndSolve();</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    <a class="code hl_function" href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">notifyObserver</a>(last_output_, error);</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    <span class="keywordflow">return</span> last_output_;</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>}</div>
 </div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span> </div>
-<div class="foldopen" id="foldopen00230" data-start="{" data-end="}">
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno"><a class="line" href="classctrl_1_1NonlinearMPC.html#abc85042ee02af6be9c5bbee995e726b7">  230</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1NonlinearMPC.html#abc85042ee02af6be9c5bbee995e726b7">NonlinearMPC::reset</a>()</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>{</div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    x_current_.setZero();</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>    y_ref_.setZero();</div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    U_warm_.setZero();</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    u_opt_.setZero();</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>    last_output_        = 0.0;</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    last_qp_converged_  = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    last_qp_iters_      = 0;</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    <a class="code hl_function" href="classctrl_1_1IController.html#add3b2b28b1048f8cd5c1130b80676138">notifyObserverReset</a>();</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>}</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span> </div>
+<div class="foldopen" id="foldopen00233" data-start="{" data-end="}">
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno"><a class="line" href="classctrl_1_1NonlinearMPC.html#abc85042ee02af6be9c5bbee995e726b7">  233</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1NonlinearMPC.html#abc85042ee02af6be9c5bbee995e726b7">NonlinearMPC::reset</a>()</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>{</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    x_current_.setZero();</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>    y_ref_.setZero();</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    U_warm_.setZero();</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    u_opt_.setZero();</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    last_output_        = 0.0;</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    last_qp_converged_  = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    last_qp_iters_      = 0;</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    <a class="code hl_function" href="classctrl_1_1IController.html#add3b2b28b1048f8cd5c1130b80676138">notifyObserverReset</a>();</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>}</div>
 </div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span> </div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aNonlinearMPC_8h_html"><div class="ttname"><a href="NonlinearMPC_8h.html">NonlinearMPC.h</a></div><div class="ttdoc">Nonlinear MPC via Real-Time Iteration (RTI) with time-varying condensed QP.</div></div>
 <div class="ttc" id="aclassctrl_1_1IController_html_add3b2b28b1048f8cd5c1130b80676138"><div class="ttname"><a href="classctrl_1_1IController.html#add3b2b28b1048f8cd5c1130b80676138">ctrl::IController::notifyObserverReset</a></div><div class="ttdeci">void notifyObserverReset() const</div><div class="ttdoc">Fire the observer's onReset() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00197">IController.h:197</a></div></div>
 <div class="ttc" id="aclassctrl_1_1IController_html_aff795d6bd36f8a8d20796d0670fef301"><div class="ttname"><a href="classctrl_1_1IController.html#aff795d6bd36f8a8d20796d0670fef301">ctrl::IController::notifyObserver</a></div><div class="ttdeci">void notifyObserver(double u, double signal) const</div><div class="ttdoc">Fire the observer's onCompute() callback (if attached).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00177">IController.h:177</a></div></div>
 <div class="ttc" id="aclassctrl_1_1NonlinearMPC_html_a30f2dda7d0fe7bc116bb150fbb6f9219"><div class="ttname"><a href="classctrl_1_1NonlinearMPC.html#a30f2dda7d0fe7bc116bb150fbb6f9219">ctrl::NonlinearMPC::DiscreteDynamics</a></div><div class="ttdeci">std::function&lt; Eigen::VectorXd(const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u)&gt; DiscreteDynamics</div><div class="ttdoc">Discrete-time dynamics: x[k+1] = f(x[k], u[k]).</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8h_source.html#l00074">NonlinearMPC.h:75</a></div></div>
-<div class="ttc" id="aclassctrl_1_1NonlinearMPC_html_a462a21352c3cd8f2ce2bcfc0bf36c673"><div class="ttname"><a href="classctrl_1_1NonlinearMPC.html#a462a21352c3cd8f2ce2bcfc0bf36c673">ctrl::NonlinearMPC::computeRef</a></div><div class="ttdeci">Eigen::VectorXd computeRef(const Eigen::VectorXd &amp;x_current, const Eigen::VectorXd &amp;y_ref)</div><div class="ttdoc">Full MIMO interface - inject state and reference, return u*_0.</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8cpp_source.html#l00209">NonlinearMPC.cpp:209</a></div></div>
-<div class="ttc" id="aclassctrl_1_1NonlinearMPC_html_ab6d66a825136f14951ae0592cf382014"><div class="ttname"><a href="classctrl_1_1NonlinearMPC.html#ab6d66a825136f14951ae0592cf382014">ctrl::NonlinearMPC::compute</a></div><div class="ttdeci">double compute(double error) override</div><div class="ttdoc">SISO compute interface.</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8cpp_source.html#l00219">NonlinearMPC.cpp:219</a></div></div>
-<div class="ttc" id="aclassctrl_1_1NonlinearMPC_html_abc85042ee02af6be9c5bbee995e726b7"><div class="ttname"><a href="classctrl_1_1NonlinearMPC.html#abc85042ee02af6be9c5bbee995e726b7">ctrl::NonlinearMPC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset warm-started input sequence, state, and reference to zero.</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8cpp_source.html#l00230">NonlinearMPC.cpp:230</a></div></div>
-<div class="ttc" id="aclassctrl_1_1NonlinearMPC_html_addd1fd8b444fc527c57a9b392956b2a0"><div class="ttname"><a href="classctrl_1_1NonlinearMPC.html#addd1fd8b444fc527c57a9b392956b2a0">ctrl::NonlinearMPC::NonlinearMPC</a></div><div class="ttdeci">NonlinearMPC(const NMPCParams &amp;params, DiscreteDynamics f_d)</div><div class="ttdoc">Construct NMPC with full-state output (C = I).</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8cpp_source.html#l00086">NonlinearMPC.cpp:86</a></div></div>
+<div class="ttc" id="aclassctrl_1_1NonlinearMPC_html_a462a21352c3cd8f2ce2bcfc0bf36c673"><div class="ttname"><a href="classctrl_1_1NonlinearMPC.html#a462a21352c3cd8f2ce2bcfc0bf36c673">ctrl::NonlinearMPC::computeRef</a></div><div class="ttdeci">Eigen::VectorXd computeRef(const Eigen::VectorXd &amp;x_current, const Eigen::VectorXd &amp;y_ref)</div><div class="ttdoc">Full MIMO interface - inject state and reference, return u*_0.</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8cpp_source.html#l00212">NonlinearMPC.cpp:212</a></div></div>
+<div class="ttc" id="aclassctrl_1_1NonlinearMPC_html_ab6d66a825136f14951ae0592cf382014"><div class="ttname"><a href="classctrl_1_1NonlinearMPC.html#ab6d66a825136f14951ae0592cf382014">ctrl::NonlinearMPC::compute</a></div><div class="ttdeci">double compute(double error) override</div><div class="ttdoc">SISO compute interface.</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8cpp_source.html#l00222">NonlinearMPC.cpp:222</a></div></div>
+<div class="ttc" id="aclassctrl_1_1NonlinearMPC_html_abc85042ee02af6be9c5bbee995e726b7"><div class="ttname"><a href="classctrl_1_1NonlinearMPC.html#abc85042ee02af6be9c5bbee995e726b7">ctrl::NonlinearMPC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset warm-started input sequence, state, and reference to zero.</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8cpp_source.html#l00233">NonlinearMPC.cpp:233</a></div></div>
+<div class="ttc" id="aclassctrl_1_1NonlinearMPC_html_addd1fd8b444fc527c57a9b392956b2a0"><div class="ttname"><a href="classctrl_1_1NonlinearMPC.html#addd1fd8b444fc527c57a9b392956b2a0">ctrl::NonlinearMPC::NonlinearMPC</a></div><div class="ttdeci">NonlinearMPC(const NMPCParams &amp;params, DiscreteDynamics f_d)</div><div class="ttdoc">Construct NMPC with full-state output (C = I).</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8cpp_source.html#l00091">NonlinearMPC.cpp:91</a></div></div>
 <div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AdaptiveSmithPredictor_8cpp_source.html#l00005">AdaptiveSmithPredictor.cpp:6</a></div></div>
 <div class="ttc" id="anamespacectrl_html_a14802f0d74704a3eb8136813e29d27e3"><div class="ttname"><a href="namespacectrl.html#a14802f0d74704a3eb8136813e29d27e3">ctrl::jacX_discrete</a></div><div class="ttdeci">static Eigen::MatrixXd jacX_discrete(const NonlinearMPC::DiscreteDynamics &amp;f, const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u, double eps=1e-5)</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8cpp_source.html#l00012">NonlinearMPC.cpp:12</a></div></div>
-<div class="ttc" id="anamespacectrl_html_a35c170c14a2cf3926e4b26bf41a38ff1"><div class="ttname"><a href="namespacectrl.html#a35c170c14a2cf3926e4b26bf41a38ff1">ctrl::solveGradientProjectionQP</a></div><div class="ttdeci">QPSolveResult solveGradientProjectionQP(const Eigen::MatrixXd &amp;H, const Eigen::VectorXd &amp;g, const Eigen::VectorXd &amp;lb, const Eigen::VectorXd &amp;ub, const Eigen::LDLT&lt; Eigen::MatrixXd &gt; &amp;ldlt, double L, int maxIter, double tol, Eigen::VectorXd &amp;x, Eigen::VectorXd &amp;tmp1, Eigen::VectorXd &amp;tmp2)</div><div class="ttdoc">Solve a box-constrained QP via FISTA (zero-allocation per iteration).</div><div class="ttdef"><b>Definition</b> <a href="GradientProjectionQP_8h_source.html#l00080">GradientProjectionQP.h:80</a></div></div>
 <div class="ttc" id="anamespacectrl_html_ab49742b8ed1e3a96746b6e6d35a9a501"><div class="ttname"><a href="namespacectrl.html#ab49742b8ed1e3a96746b6e6d35a9a501">ctrl::jacU_discrete</a></div><div class="ttdeci">static Eigen::MatrixXd jacU_discrete(const NonlinearMPC::DiscreteDynamics &amp;f, const Eigen::VectorXd &amp;x, const Eigen::VectorXd &amp;u, double eps=1e-5)</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8cpp_source.html#l00035">NonlinearMPC.cpp:35</a></div></div>
+<div class="ttc" id="anamespacectrl_html_af47a37a386cad124b6fdbba85d4a9e17"><div class="ttname"><a href="namespacectrl.html#af47a37a386cad124b6fdbba85d4a9e17">ctrl::solveGradientProjectionQP</a></div><div class="ttdeci">QPSolveResult solveGradientProjectionQP(const Eigen::MatrixXd &amp;H, const Eigen::VectorXd &amp;g, const Eigen::VectorXd &amp;lb, const Eigen::VectorXd &amp;ub, const Eigen::LDLT&lt; Eigen::MatrixXd &gt; &amp;ldlt, double L, int maxIter, double tol, Eigen::Ref&lt; Eigen::VectorXd &gt; x, Eigen::Ref&lt; Eigen::VectorXd &gt; tmp1, Eigen::Ref&lt; Eigen::VectorXd &gt; tmp2, Eigen::Ref&lt; Eigen::VectorXd &gt; y_fista)</div><div class="ttdoc">Solve a box-constrained QP via FISTA (zero-allocation per iteration).</div><div class="ttdef"><b>Definition</b> <a href="GradientProjectionQP_8h_source.html#l00080">GradientProjectionQP.h:80</a></div></div>
 <div class="ttc" id="astructctrl_1_1NMPCParams_html"><div class="ttname"><a href="structctrl_1_1NMPCParams.html">ctrl::NMPCParams</a></div><div class="ttdoc">Parameters for NonlinearMPC.</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8h_source.html#l00048">NonlinearMPC.h:49</a></div></div>
 <div class="ttc" id="astructctrl_1_1NMPCParams_html_a133599061f135044d218e9d3161d1b05"><div class="ttname"><a href="structctrl_1_1NMPCParams.html#a133599061f135044d218e9d3161d1b05">ctrl::NMPCParams::n_inputs</a></div><div class="ttdeci">int n_inputs</div><div class="ttdoc">Input dimension m.</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8h_source.html#l00060">NonlinearMPC.h:60</a></div></div>
 <div class="ttc" id="astructctrl_1_1NMPCParams_html_a1aceba18e0715abb4b70a5bc877154ae"><div class="ttname"><a href="structctrl_1_1NMPCParams.html#a1aceba18e0715abb4b70a5bc877154ae">ctrl::NMPCParams::qpTol</a></div><div class="ttdeci">double qpTol</div><div class="ttdoc">FISTA convergence tolerance ||Delta_u||_inf.</div><div class="ttdef"><b>Definition</b> <a href="NonlinearMPC_8h_source.html#l00057">NonlinearMPC.h:57</a></div></div>

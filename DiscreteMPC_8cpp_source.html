@@ -181,176 +181,179 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        DeltaU_.resize(Nc * m);</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        grad_k_.resize(Nc * m);</div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        DU_new_.resize(Nc * m);</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        lb_.resize(Nc * m);</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        ub_.resize(Nc * m);</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        cumMin_.resize(m);</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        cumMax_.resize(m);</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    }</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="comment">// Full rebuild - plant model + cost matrices. Used by constructor and setPlant().</span></div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="keywordtype">void</span> DiscreteMPC::buildCondensedMatrices()</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    {</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        buildPredictionMatrices();</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        buildCostMatrix();</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    }</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <span class="comment">// IController wrapper - reconstructs reference from error and delegates to computeRef.</span></div>
-<div class="foldopen" id="foldopen00112" data-start="{" data-end="}">
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="classctrl_1_1DiscreteMPC.html#a934980cf4c18a14707cb4392feafc63c">  112</a></span>    <span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1DiscreteMPC.html#a934980cf4c18a14707cb4392feafc63c">DiscreteMPC::compute</a>(<span class="keywordtype">double</span> error)</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    {</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>        <span class="keywordflow">if</span> (!std::isfinite(error)) <span class="keywordflow">return</span> u_prev_(0);</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        <span class="keyword">const</span> Eigen::VectorXd y_hat = plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a102ebd15fc174335e7be995a37afdcd4">C</a> * x_hat_ + plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a29841a16218926079b626c4661444ccd">D</a> * u_prev_;</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        <span class="keyword">const</span> Eigen::VectorXd r_ref = y_hat.array() + error; <span class="comment">// r = y + (r - y)</span></div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2">computeRef</a>(x_hat_, r_ref)(0);</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    }</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        y_fista_.resize(Nc * m);</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        lb_.resize(Nc * m);</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        ub_.resize(Nc * m);</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        cumMin_.resize(m);</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        cumMax_.resize(m);</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    }</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="comment">// Full rebuild - plant model + cost matrices. Used by constructor and setPlant().</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <span class="keywordtype">void</span> DiscreteMPC::buildCondensedMatrices()</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    {</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        buildPredictionMatrices();</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>        buildCostMatrix();</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    }</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    <span class="comment">// IController wrapper - reconstructs reference from error and delegates to computeRef.</span></div>
+<div class="foldopen" id="foldopen00113" data-start="{" data-end="}">
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="classctrl_1_1DiscreteMPC.html#a934980cf4c18a14707cb4392feafc63c">  113</a></span>    <span class="keywordtype">double</span> <a class="code hl_function" href="classctrl_1_1DiscreteMPC.html#a934980cf4c18a14707cb4392feafc63c">DiscreteMPC::compute</a>(<span class="keywordtype">double</span> error)</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>    {</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        <span class="keywordflow">if</span> (!std::isfinite(error)) <span class="keywordflow">return</span> u_prev_(0);</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        <span class="keyword">const</span> Eigen::VectorXd y_hat = plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a102ebd15fc174335e7be995a37afdcd4">C</a> * x_hat_ + plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a29841a16218926079b626c4661444ccd">D</a> * u_prev_;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        <span class="keyword">const</span> Eigen::VectorXd r_ref = y_hat.array() + error; <span class="comment">// r = y + (r - y)</span></div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2">computeRef</a>(x_hat_, r_ref)(0);</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    }</div>
 </div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="comment">// Full interface: optimise and return u[k].</span></div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    <span class="comment">// Solves the box-constrained QP:</span></div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="comment">//   min_{DeltaU}  0.5 DeltaU&#39;HDeltaU + g&#39;DeltaU</span></div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    <span class="comment">//   s.t.      lb_ &lt;= DeltaU &lt;= ub_</span></div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="comment">// via gradient projection with constant step alpha = 1/L (L = max eigenvalue of H).</span></div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="comment">// Warm-started from the clamped unconstrained optimum; typically converges in</span></div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="comment">// a handful of iterations for MPC horizon sizes.</span></div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="comment">// Bounds per horizon step j (rolling worst-case tightening):</span></div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="comment">//   u[j] = u_prev + Sigma_{i=0}^{j} Deltau_i  must satisfy  uMin &lt;= u[j] &lt;= uMax.</span></div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="comment">//   At step j, Deltau_j is bounded by the worst-case contribution from prior steps:</span></div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="comment">//     lb_(j,k) = max(duMin, uMin_k - u_prev_k - cumMax_k)</span></div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <span class="comment">//     ub_(j,k) = min(duMax, uMax_k - u_prev_k - cumMin_k)</span></div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="comment">//   where cumMin/cumMax track the tightest possible cumulative Deltau range.</span></div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    <span class="comment">//   This guarantees u feasibility across the full horizon without a full-QP reformulation.</span></div>
-<div class="foldopen" id="foldopen00138" data-start="{" data-end="}">
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno"><a class="line" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2">  138</a></span>    Eigen::VectorXd <a class="code hl_function" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2">DiscreteMPC::computeRef</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;x,</div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>                                            <span class="keyword">const</span> Eigen::VectorXd &amp;r_ref)</div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>    {</div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> p  = plant_.<a class="code hl_function" href="structctrl_1_1StateSpace.html#ae4ad7c88e0250e0c5648204a56365d2e">outputSize</a>();</div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> m  = plant_.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a7ad091cf54b39bd4564617daf686b104">inputSize</a>();</div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> Np = p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#af9281564b038417138f22da60f5708bd">Np</a>;</div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> Nc = p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#ad1b1940642dcc9f8473da14ed6ef8be1">Nc</a>;</div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span> </div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>        <span class="comment">// Stack reference for all prediction steps</span></div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; Np; ++i)</div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>            R_stack_.segment(i * p, p) = r_ref;</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        <span class="comment">// Gradient at DeltaU = 0: g = Phi&#39;.Qy.(F.x + Gu.u_prev - R)</span></div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>        pred_err_.noalias() = F_ * x + Gu_ * u_prev_ - R_stack_;</div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>        grad_.noalias()     = Phi_.transpose() * (Qy_ * pred_err_);</div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>        <span class="comment">// Build rolling worst-case tightened box bounds lb_/ub_ on DeltaU \in R^{Nc*m}.</span></div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>        <span class="comment">// cumMin_(k) / cumMax_(k) track the range of cumulative Deltau for input channel k</span></div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>        <span class="comment">// up to (but not including) the current step, assuming each prior Deltau_i was at</span></div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>        <span class="comment">// its own tightened lb/ub.  This is conservative (over-tightens slightly) but</span></div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>        <span class="comment">// guarantees that u = u_prev + Sigma Deltau stays within [uMin, uMax] for every step.</span></div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        cumMin_.setZero();</div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        cumMax_.setZero();</div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; Nc; ++j)</div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        {</div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; m; ++k)</div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>            {</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>                <span class="keyword">const</span> <span class="keywordtype">int</span> idx = j * m + k;</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>                <span class="keyword">const</span> <span class="keywordtype">double</span> lo = std::max(p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#abd6b7302a4bd41fd59268c4c73a079d6">duMin</a>, p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#ae13a552150983b917d5cb57abb45a442">uMin</a> - u_prev_(k) - cumMax_(k));</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>                <span class="keyword">const</span> <span class="keywordtype">double</span> hi = std::min(p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#a0ac4045664a9990c14bb4488563d5891">duMax</a>, p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#a97f59d2c640d8eb892747c67825d3cfe">uMax</a> - u_prev_(k) - cumMin_(k));</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>                lb_(idx) = lo;</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>                ub_(idx) = (hi &gt;= lo) ? hi : lo; <span class="comment">// collapse infeasible interval to lo</span></div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>                cumMin_(k) += lo;</div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>                cumMax_(k) += ub_(idx);</div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>            }</div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>        }</div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        <span class="comment">// Warm-start: clamped unconstrained optimum (ldlt_ pre-factored in buildCondensedMatrices)</span></div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        <span class="keywordflow">if</span> (ldlt_.info() != Eigen::Success)</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>            <span class="keywordflow">return</span> u_prev_; <span class="comment">// degenerate Hessian - hold previous input</span></div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>        <span class="comment">// Gradient projection - all work vectors pre-allocated; zero per-step allocation.</span></div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>        <span class="keyword">const</span> <span class="keyword">auto</span> qp = <a class="code hl_function" href="namespacectrl.html#a35c170c14a2cf3926e4b26bf41a38ff1">solveGradientProjectionQP</a>(</div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>            H_, grad_, lb_, ub_, ldlt_, L_, p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#a5fefe6ea4abdd680d991e0dea0ded7f1">qpMaxIter</a>, p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#a69b1dd9c27d3b993002628dde3cfebad">qpTol</a>,</div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>            DeltaU_, grad_k_, DU_new_);</div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>        last_qp_converged_ = qp.converged;</div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>        last_qp_iters_     = qp.iters;</div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>        <span class="comment">// Emit convergence telemetry via observer (M3/R3).</span></div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>        <span class="comment">// &quot;qp_iters&quot; carries the iteration count; &quot;health&quot; is 1.0 (ok) / 0.0 (failed).</span></div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>        <span class="comment">// Zero-cost when no observer is attached.</span></div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>        <a class="code hl_function" href="classctrl_1_1IController.html#a8209b0a7f469ab75271a71ef25617a1e">notifyObserverState</a>(<span class="stringliteral">&quot;qp_iters&quot;</span>,</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>            Eigen::VectorXd::Constant(1, <span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(last_qp_iters_)));</div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>        <span class="keywordflow">if</span> (!last_qp_converged_)</div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>            <a class="code hl_function" href="classctrl_1_1IController.html#a8209b0a7f469ab75271a71ef25617a1e">notifyObserverState</a>(<span class="stringliteral">&quot;health&quot;</span>, Eigen::VectorXd::Constant(1, 0.0));</div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        <span class="comment">// Non-convergence is queryable via lastQPConverged() / isHealthy().</span></div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        <span class="comment">// The clog print is debug-only: it produces ~50 k lines per boiler run at</span></div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        <span class="comment">// default qpMaxIter=200 and corrupts stdout.  Use lastQPConverged() in</span></div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        <span class="comment">// application code to detect and handle non-convergence.</span></div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span><span class="preprocessor">#ifndef NDEBUG</span></div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        <span class="keywordflow">if</span> (!last_qp_converged_)</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>            std::clog &lt;&lt; <span class="stringliteral">&quot;[DiscreteMPC] WARNING: QP solver reached max iterations (&quot;</span></div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>                      &lt;&lt; p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#a5fefe6ea4abdd680d991e0dea0ded7f1">qpMaxIter</a> &lt;&lt; <span class="stringliteral">&quot;). Use lastQPConverged() to check per step.\n&quot;</span>;</div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span> </div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        <span class="comment">// Apply first control increment</span></div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>        <span class="keyword">const</span> Eigen::VectorXd du = DeltaU_.head(m);</div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>        <span class="keyword">const</span> Eigen::VectorXd u  = (u_prev_ + du).cwiseMax(p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#ae13a552150983b917d5cb57abb45a442">uMin</a>).cwiseMin(p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#a97f59d2c640d8eb892747c67825d3cfe">uMax</a>);</div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span> </div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        <span class="comment">// Advance open-loop state estimate (used by compute() wrapper next step).</span></div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>        <span class="comment">// This is a pure-prediction step with no measurement correction. For plants</span></div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        <span class="comment">// with model mismatch, persistent disturbances, or integrating modes, x_hat_</span></div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>        <span class="comment">// will drift away from the real plant state over time. Call setState() with an</span></div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>        <span class="comment">// external observer estimate (e.g., KalmanFilter::state()) before each step to</span></div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>        <span class="comment">// avoid this. The compute(error) wrapper is only reliable for D=0, well-matched</span></div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        <span class="comment">// models without significant unmeasured disturbances.</span></div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        x_hat_  = plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a5692af54040746138b34d3d502e22add">A</a> * x + plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a9bc2151f5d148bcb5676d81d57a38410">B</a> * u;</div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        u_prev_ = u;</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span> </div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>        <span class="keywordflow">return</span> u;</div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>    }</div>
-</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    <span class="comment">// Full interface: optimise and return u[k].</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    <span class="comment">//</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    <span class="comment">// Solves the box-constrained QP:</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    <span class="comment">//   min_{DeltaU}  0.5 DeltaU&#39;HDeltaU + g&#39;DeltaU</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    <span class="comment">//   s.t.      lb_ &lt;= DeltaU &lt;= ub_</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="comment">//</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="comment">// via gradient projection with constant step alpha = 1/L (L = max eigenvalue of H).</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="comment">// Warm-started from the clamped unconstrained optimum; typically converges in</span></div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="comment">// a handful of iterations for MPC horizon sizes.</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="comment">//</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    <span class="comment">// Bounds per horizon step j (rolling worst-case tightening):</span></div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="comment">//   u[j] = u_prev + Sigma_{i=0}^{j} Deltau_i  must satisfy  uMin &lt;= u[j] &lt;= uMax.</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    <span class="comment">//</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="comment">//   At step j, Deltau_j is bounded by the worst-case contribution from prior steps:</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <span class="comment">//     lb_(j,k) = max(duMin, uMin_k - u_prev_k - cumMax_k)</span></div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="comment">//     ub_(j,k) = min(duMax, uMax_k - u_prev_k - cumMin_k)</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    <span class="comment">//   where cumMin/cumMax track the tightest possible cumulative Deltau range.</span></div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="comment">//   This guarantees u feasibility across the full horizon without a full-QP reformulation.</span></div>
+<div class="foldopen" id="foldopen00139" data-start="{" data-end="}">
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno"><a class="line" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2">  139</a></span>    Eigen::VectorXd <a class="code hl_function" href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2">DiscreteMPC::computeRef</a>(<span class="keyword">const</span> Eigen::VectorXd &amp;x,</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>                                            <span class="keyword">const</span> Eigen::VectorXd &amp;r_ref)</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    {</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> p  = plant_.<a class="code hl_function" href="structctrl_1_1StateSpace.html#ae4ad7c88e0250e0c5648204a56365d2e">outputSize</a>();</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> m  = plant_.<a class="code hl_function" href="structctrl_1_1StateSpace.html#a7ad091cf54b39bd4564617daf686b104">inputSize</a>();</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> Np = p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#af9281564b038417138f22da60f5708bd">Np</a>;</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>        <span class="keyword">const</span> <span class="keywordtype">int</span> Nc = p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#ad1b1940642dcc9f8473da14ed6ef8be1">Nc</a>;</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>        <span class="comment">// Stack reference for all prediction steps</span></div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; Np; ++i)</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>            R_stack_.segment(i * p, p) = r_ref;</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>        <span class="comment">// Gradient at DeltaU = 0: g = Phi&#39;.Qy.(F.x + Gu.u_prev - R)</span></div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>        pred_err_.noalias() = F_ * x + Gu_ * u_prev_ - R_stack_;</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>        grad_.noalias()     = Phi_.transpose() * (Qy_ * pred_err_);</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>        <span class="comment">// Build rolling worst-case tightened box bounds lb_/ub_ on DeltaU \in R^{Nc*m}.</span></div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>        <span class="comment">// cumMin_(k) / cumMax_(k) track the range of cumulative Deltau for input channel k</span></div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>        <span class="comment">// up to (but not including) the current step, assuming each prior Deltau_i was at</span></div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>        <span class="comment">// its own tightened lb/ub.  This is conservative (over-tightens slightly) but</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        <span class="comment">// guarantees that u = u_prev + Sigma Deltau stays within [uMin, uMax] for every step.</span></div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        cumMin_.setZero();</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>        cumMax_.setZero();</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; Nc; ++j)</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        {</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> k = 0; k &lt; m; ++k)</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>            {</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>                <span class="keyword">const</span> <span class="keywordtype">int</span> idx = j * m + k;</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>                <span class="keyword">const</span> <span class="keywordtype">double</span> lo = std::max(p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#abd6b7302a4bd41fd59268c4c73a079d6">duMin</a>, p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#ae13a552150983b917d5cb57abb45a442">uMin</a> - u_prev_(k) - cumMax_(k));</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>                <span class="keyword">const</span> <span class="keywordtype">double</span> hi = std::min(p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#a0ac4045664a9990c14bb4488563d5891">duMax</a>, p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#a97f59d2c640d8eb892747c67825d3cfe">uMax</a> - u_prev_(k) - cumMin_(k));</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>                lb_(idx) = lo;</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>                ub_(idx) = (hi &gt;= lo) ? hi : lo; <span class="comment">// collapse infeasible interval to lo</span></div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>                cumMin_(k) += lo;</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>                cumMax_(k) += ub_(idx);</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>            }</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        }</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        <span class="comment">// Warm-start: clamped unconstrained optimum (ldlt_ pre-factored in buildCondensedMatrices)</span></div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        <span class="keywordflow">if</span> (ldlt_.info() != Eigen::Success)</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>            <span class="keywordflow">return</span> u_prev_; <span class="comment">// degenerate Hessian - hold previous input</span></div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>        <span class="comment">// Gradient projection - all work vectors pre-allocated; zero per-step allocation.</span></div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        <span class="keyword">const</span> <span class="keyword">auto</span> qp = <a class="code hl_function" href="namespacectrl.html#af47a37a386cad124b6fdbba85d4a9e17">solveGradientProjectionQP</a>(</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>            H_, grad_, lb_, ub_, ldlt_, L_, p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#a5fefe6ea4abdd680d991e0dea0ded7f1">qpMaxIter</a>, p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#a69b1dd9c27d3b993002628dde3cfebad">qpTol</a>,</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>            DeltaU_, grad_k_, DU_new_, y_fista_);</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>        last_qp_converged_ = qp.converged;</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>        last_qp_iters_     = qp.iters;</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span> </div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>        <span class="comment">// Emit convergence telemetry via observer (M3/R3).</span></div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>        <span class="comment">// &quot;qp_iters&quot; carries the iteration count; &quot;health&quot; is 1.0 (ok) / 0.0 (failed).</span></div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>        <span class="comment">// Zero-cost when no observer is attached.</span></div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        notify_buf_(0) = <span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(last_qp_iters_);</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>        <a class="code hl_function" href="classctrl_1_1IController.html#a8209b0a7f469ab75271a71ef25617a1e">notifyObserverState</a>(<span class="stringliteral">&quot;qp_iters&quot;</span>, notify_buf_);</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        <span class="keywordflow">if</span> (!last_qp_converged_) {</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>            notify_buf_(0) = 0.0;</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>            <a class="code hl_function" href="classctrl_1_1IController.html#a8209b0a7f469ab75271a71ef25617a1e">notifyObserverState</a>(<span class="stringliteral">&quot;health&quot;</span>, notify_buf_);</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        }</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        <span class="comment">// Non-convergence is queryable via lastQPConverged() / isHealthy().</span></div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        <span class="comment">// The clog print is debug-only: it produces ~50 k lines per boiler run at</span></div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        <span class="comment">// default qpMaxIter=200 and corrupts stdout.  Use lastQPConverged() in</span></div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        <span class="comment">// application code to detect and handle non-convergence.</span></div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span><span class="preprocessor">#ifndef NDEBUG</span></div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        <span class="keywordflow">if</span> (!last_qp_converged_)</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>            std::clog &lt;&lt; <span class="stringliteral">&quot;[DiscreteMPC] WARNING: QP solver reached max iterations (&quot;</span></div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>                      &lt;&lt; p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#a5fefe6ea4abdd680d991e0dea0ded7f1">qpMaxIter</a> &lt;&lt; <span class="stringliteral">&quot;). Use lastQPConverged() to check per step.\n&quot;</span>;</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span> </div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>        <span class="comment">// Apply first control increment</span></div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        <span class="keyword">const</span> Eigen::VectorXd du = DeltaU_.head(m);</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>        <span class="keyword">const</span> Eigen::VectorXd u  = (u_prev_ + du).cwiseMax(p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#ae13a552150983b917d5cb57abb45a442">uMin</a>).cwiseMin(p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#a97f59d2c640d8eb892747c67825d3cfe">uMax</a>);</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span> </div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>        <span class="comment">// Advance open-loop state estimate (used by compute() wrapper next step).</span></div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>        <span class="comment">// This is a pure-prediction step with no measurement correction. For plants</span></div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>        <span class="comment">// with model mismatch, persistent disturbances, or integrating modes, x_hat_</span></div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        <span class="comment">// will drift away from the real plant state over time. Call setState() with an</span></div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        <span class="comment">// external observer estimate (e.g., KalmanFilter::state()) before each step to</span></div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        <span class="comment">// avoid this. The compute(error) wrapper is only reliable for D=0, well-matched</span></div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>        <span class="comment">// models without significant unmeasured disturbances.</span></div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>        x_hat_  = plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a5692af54040746138b34d3d502e22add">A</a> * x + plant_.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#a9bc2151f5d148bcb5676d81d57a38410">B</a> * u;</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>        u_prev_ = u;</div>
 <div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span> </div>
-<div class="foldopen" id="foldopen00221" data-start="{" data-end="}">
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno"><a class="line" href="classctrl_1_1DiscreteMPC.html#ac8eab9fca0cd413ec22d3a412f16b18c">  221</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1DiscreteMPC.html#ac8eab9fca0cd413ec22d3a412f16b18c">DiscreteMPC::setParams</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1MPCParams.html">MPCParams</a> &amp;p)</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    {</div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        <span class="keyword">const</span> <span class="keywordtype">bool</span> horizon_changed = (p.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#af9281564b038417138f22da60f5708bd">Np</a> != p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#af9281564b038417138f22da60f5708bd">Np</a>) || (p.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#ad1b1940642dcc9f8473da14ed6ef8be1">Nc</a> != p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#ad1b1940642dcc9f8473da14ed6ef8be1">Nc</a>);</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        p_ = p;</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>        <span class="comment">// Horizon changes affect F_, Phi_, Gu_ - full rebuild required.</span></div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        <span class="comment">// Weight-only changes (rho_y, rho_u) only need to rebuild H_, L_, ldlt_.</span></div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        <span class="keywordflow">if</span> (horizon_changed)</div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>            buildCondensedMatrices();</div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>            buildCostMatrix();</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    }</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        <span class="keywordflow">return</span> u;</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    }</div>
 </div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span> </div>
-<div class="foldopen" id="foldopen00233" data-start="{" data-end="}">
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno"><a class="line" href="classctrl_1_1DiscreteMPC.html#afe19d733608e6aaa4c4d55732b86e630">  233</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1DiscreteMPC.html#afe19d733608e6aaa4c4d55732b86e630">DiscreteMPC::setPlant</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;plant)</div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    {</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        plant_ = plant;</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        Ts_ = plant.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#ad6ed610dbd71a5f06d923a224e6371a4">Ts</a>;</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        buildCondensedMatrices();</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    }</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span> </div>
+<div class="foldopen" id="foldopen00224" data-start="{" data-end="}">
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno"><a class="line" href="classctrl_1_1DiscreteMPC.html#ac8eab9fca0cd413ec22d3a412f16b18c">  224</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1DiscreteMPC.html#ac8eab9fca0cd413ec22d3a412f16b18c">DiscreteMPC::setParams</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1MPCParams.html">MPCParams</a> &amp;p)</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    {</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        <span class="keyword">const</span> <span class="keywordtype">bool</span> horizon_changed = (p.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#af9281564b038417138f22da60f5708bd">Np</a> != p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#af9281564b038417138f22da60f5708bd">Np</a>) || (p.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#ad1b1940642dcc9f8473da14ed6ef8be1">Nc</a> != p_.<a class="code hl_variable" href="structctrl_1_1MPCParams.html#ad1b1940642dcc9f8473da14ed6ef8be1">Nc</a>);</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        p_ = p;</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        <span class="comment">// Horizon changes affect F_, Phi_, Gu_ - full rebuild required.</span></div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        <span class="comment">// Weight-only changes (rho_y, rho_u) only need to rebuild H_, L_, ldlt_.</span></div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        <span class="keywordflow">if</span> (horizon_changed)</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>            buildCondensedMatrices();</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>            buildCostMatrix();</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    }</div>
 </div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span> </div>
-<div class="foldopen" id="foldopen00240" data-start="{" data-end="}">
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno"><a class="line" href="classctrl_1_1DiscreteMPC.html#a211de191cc5da0deb483db1f9fedbf5b">  240</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1DiscreteMPC.html#a211de191cc5da0deb483db1f9fedbf5b">DiscreteMPC::reset</a>()</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    {</div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>        x_hat_.setZero();</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>        u_prev_.setZero();</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>    }</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span> </div>
+<div class="foldopen" id="foldopen00236" data-start="{" data-end="}">
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno"><a class="line" href="classctrl_1_1DiscreteMPC.html#afe19d733608e6aaa4c4d55732b86e630">  236</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1DiscreteMPC.html#afe19d733608e6aaa4c4d55732b86e630">DiscreteMPC::setPlant</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structctrl_1_1StateSpace.html">StateSpace</a> &amp;plant)</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    {</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        plant_ = plant;</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        Ts_ = plant.<a class="code hl_variable" href="structctrl_1_1StateSpace.html#ad6ed610dbd71a5f06d923a224e6371a4">Ts</a>;</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        buildCondensedMatrices();</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    }</div>
 </div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> </div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
+<div class="foldopen" id="foldopen00243" data-start="{" data-end="}">
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno"><a class="line" href="classctrl_1_1DiscreteMPC.html#a211de191cc5da0deb483db1f9fedbf5b">  243</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classctrl_1_1DiscreteMPC.html#a211de191cc5da0deb483db1f9fedbf5b">DiscreteMPC::reset</a>()</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>    {</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>        x_hat_.setZero();</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>        u_prev_.setZero();</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>    }</div>
+</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aDiscreteMPC_8h_html"><div class="ttname"><a href="DiscreteMPC_8h.html">DiscreteMPC.h</a></div><div class="ttdoc">Discrete-time Model Predictive Controller - condensed incremental QP formulation.</div></div>
 <div class="ttc" id="aGradientProjectionQP_8h_html"><div class="ttname"><a href="GradientProjectionQP_8h.html">GradientProjectionQP.h</a></div><div class="ttdoc">Header-only FISTA solver for box-constrained convex QPs.</div></div>
-<div class="ttc" id="aclassctrl_1_1DiscreteMPC_html_a211de191cc5da0deb483db1f9fedbf5b"><div class="ttname"><a href="classctrl_1_1DiscreteMPC.html#a211de191cc5da0deb483db1f9fedbf5b">ctrl::DiscreteMPC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset internal state estimate and previous input to zero.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8cpp_source.html#l00240">DiscreteMPC.cpp:240</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DiscreteMPC_html_a65deea4c912e4e79d54ac91cc8fadcf2"><div class="ttname"><a href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2">ctrl::DiscreteMPC::computeRef</a></div><div class="ttdeci">Eigen::VectorXd computeRef(const Eigen::VectorXd &amp;x_current, const Eigen::VectorXd &amp;r_ref)</div><div class="ttdoc">Full MIMO interface - optimise u[k] given state and reference vector.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8cpp_source.html#l00138">DiscreteMPC.cpp:138</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DiscreteMPC_html_a211de191cc5da0deb483db1f9fedbf5b"><div class="ttname"><a href="classctrl_1_1DiscreteMPC.html#a211de191cc5da0deb483db1f9fedbf5b">ctrl::DiscreteMPC::reset</a></div><div class="ttdeci">void reset() override</div><div class="ttdoc">Reset internal state estimate and previous input to zero.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8cpp_source.html#l00243">DiscreteMPC.cpp:243</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DiscreteMPC_html_a65deea4c912e4e79d54ac91cc8fadcf2"><div class="ttname"><a href="classctrl_1_1DiscreteMPC.html#a65deea4c912e4e79d54ac91cc8fadcf2">ctrl::DiscreteMPC::computeRef</a></div><div class="ttdeci">Eigen::VectorXd computeRef(const Eigen::VectorXd &amp;x_current, const Eigen::VectorXd &amp;r_ref)</div><div class="ttdoc">Full MIMO interface - optimise u[k] given state and reference vector.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8cpp_source.html#l00139">DiscreteMPC.cpp:139</a></div></div>
 <div class="ttc" id="aclassctrl_1_1DiscreteMPC_html_a88ffdafcdd2e4e4ac9c2b9fe5dc18597"><div class="ttname"><a href="classctrl_1_1DiscreteMPC.html#a88ffdafcdd2e4e4ac9c2b9fe5dc18597">ctrl::DiscreteMPC::DiscreteMPC</a></div><div class="ttdeci">DiscreteMPC(const StateSpace &amp;plant, const MPCParams &amp;params)</div><div class="ttdoc">Construct the MPC and precompute condensed prediction matrices.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8cpp_source.html#l00010">DiscreteMPC.cpp:10</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DiscreteMPC_html_a934980cf4c18a14707cb4392feafc63c"><div class="ttname"><a href="classctrl_1_1DiscreteMPC.html#a934980cf4c18a14707cb4392feafc63c">ctrl::DiscreteMPC::compute</a></div><div class="ttdeci">double compute(double error) override</div><div class="ttdoc">SISO convenience interface - compute u[k] from tracking error.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8cpp_source.html#l00112">DiscreteMPC.cpp:112</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DiscreteMPC_html_ac8eab9fca0cd413ec22d3a412f16b18c"><div class="ttname"><a href="classctrl_1_1DiscreteMPC.html#ac8eab9fca0cd413ec22d3a412f16b18c">ctrl::DiscreteMPC::setParams</a></div><div class="ttdeci">void setParams(const MPCParams &amp;p)</div><div class="ttdoc">Update horizon/weight parameters and recompute condensed matrices.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8cpp_source.html#l00221">DiscreteMPC.cpp:221</a></div></div>
-<div class="ttc" id="aclassctrl_1_1DiscreteMPC_html_afe19d733608e6aaa4c4d55732b86e630"><div class="ttname"><a href="classctrl_1_1DiscreteMPC.html#afe19d733608e6aaa4c4d55732b86e630">ctrl::DiscreteMPC::setPlant</a></div><div class="ttdeci">void setPlant(const StateSpace &amp;plant)</div><div class="ttdoc">Replace the internal plant model (successive linearisation).</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8cpp_source.html#l00233">DiscreteMPC.cpp:233</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DiscreteMPC_html_a934980cf4c18a14707cb4392feafc63c"><div class="ttname"><a href="classctrl_1_1DiscreteMPC.html#a934980cf4c18a14707cb4392feafc63c">ctrl::DiscreteMPC::compute</a></div><div class="ttdeci">double compute(double error) override</div><div class="ttdoc">SISO convenience interface - compute u[k] from tracking error.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8cpp_source.html#l00113">DiscreteMPC.cpp:113</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DiscreteMPC_html_ac8eab9fca0cd413ec22d3a412f16b18c"><div class="ttname"><a href="classctrl_1_1DiscreteMPC.html#ac8eab9fca0cd413ec22d3a412f16b18c">ctrl::DiscreteMPC::setParams</a></div><div class="ttdeci">void setParams(const MPCParams &amp;p)</div><div class="ttdoc">Update horizon/weight parameters and recompute condensed matrices.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8cpp_source.html#l00224">DiscreteMPC.cpp:224</a></div></div>
+<div class="ttc" id="aclassctrl_1_1DiscreteMPC_html_afe19d733608e6aaa4c4d55732b86e630"><div class="ttname"><a href="classctrl_1_1DiscreteMPC.html#afe19d733608e6aaa4c4d55732b86e630">ctrl::DiscreteMPC::setPlant</a></div><div class="ttdeci">void setPlant(const StateSpace &amp;plant)</div><div class="ttdoc">Replace the internal plant model (successive linearisation).</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8cpp_source.html#l00236">DiscreteMPC.cpp:236</a></div></div>
 <div class="ttc" id="aclassctrl_1_1IController_html_a8209b0a7f469ab75271a71ef25617a1e"><div class="ttname"><a href="classctrl_1_1IController.html#a8209b0a7f469ab75271a71ef25617a1e">ctrl::IController::notifyObserverState</a></div><div class="ttdeci">void notifyObserverState(std::string_view key, const Eigen::VectorXd &amp;value) const</div><div class="ttdoc">Fire the observer's onState() callback (M3 internal-state telemetry).</div><div class="ttdef"><b>Definition</b> <a href="IController_8h_source.html#l00211">IController.h:211</a></div></div>
 <div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AdaptiveSmithPredictor_8cpp_source.html#l00005">AdaptiveSmithPredictor.cpp:6</a></div></div>
-<div class="ttc" id="anamespacectrl_html_a35c170c14a2cf3926e4b26bf41a38ff1"><div class="ttname"><a href="namespacectrl.html#a35c170c14a2cf3926e4b26bf41a38ff1">ctrl::solveGradientProjectionQP</a></div><div class="ttdeci">QPSolveResult solveGradientProjectionQP(const Eigen::MatrixXd &amp;H, const Eigen::VectorXd &amp;g, const Eigen::VectorXd &amp;lb, const Eigen::VectorXd &amp;ub, const Eigen::LDLT&lt; Eigen::MatrixXd &gt; &amp;ldlt, double L, int maxIter, double tol, Eigen::VectorXd &amp;x, Eigen::VectorXd &amp;tmp1, Eigen::VectorXd &amp;tmp2)</div><div class="ttdoc">Solve a box-constrained QP via FISTA (zero-allocation per iteration).</div><div class="ttdef"><b>Definition</b> <a href="GradientProjectionQP_8h_source.html#l00080">GradientProjectionQP.h:80</a></div></div>
+<div class="ttc" id="anamespacectrl_html_af47a37a386cad124b6fdbba85d4a9e17"><div class="ttname"><a href="namespacectrl.html#af47a37a386cad124b6fdbba85d4a9e17">ctrl::solveGradientProjectionQP</a></div><div class="ttdeci">QPSolveResult solveGradientProjectionQP(const Eigen::MatrixXd &amp;H, const Eigen::VectorXd &amp;g, const Eigen::VectorXd &amp;lb, const Eigen::VectorXd &amp;ub, const Eigen::LDLT&lt; Eigen::MatrixXd &gt; &amp;ldlt, double L, int maxIter, double tol, Eigen::Ref&lt; Eigen::VectorXd &gt; x, Eigen::Ref&lt; Eigen::VectorXd &gt; tmp1, Eigen::Ref&lt; Eigen::VectorXd &gt; tmp2, Eigen::Ref&lt; Eigen::VectorXd &gt; y_fista)</div><div class="ttdoc">Solve a box-constrained QP via FISTA (zero-allocation per iteration).</div><div class="ttdef"><b>Definition</b> <a href="GradientProjectionQP_8h_source.html#l00080">GradientProjectionQP.h:80</a></div></div>
 <div class="ttc" id="astructctrl_1_1MPCParams_html"><div class="ttname"><a href="structctrl_1_1MPCParams.html">ctrl::MPCParams</a></div><div class="ttdoc">Tuning and horizon parameters for DiscreteMPC.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8h_source.html#l00041">DiscreteMPC.h:42</a></div></div>
 <div class="ttc" id="astructctrl_1_1MPCParams_html_a0ac4045664a9990c14bb4488563d5891"><div class="ttname"><a href="structctrl_1_1MPCParams.html#a0ac4045664a9990c14bb4488563d5891">ctrl::MPCParams::duMax</a></div><div class="ttdeci">double duMax</div><div class="ttdoc">Hard upper limit on Deltau.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8h_source.html#l00066">DiscreteMPC.h:66</a></div></div>
 <div class="ttc" id="astructctrl_1_1MPCParams_html_a5fefe6ea4abdd680d991e0dea0ded7f1"><div class="ttname"><a href="structctrl_1_1MPCParams.html#a5fefe6ea4abdd680d991e0dea0ded7f1">ctrl::MPCParams::qpMaxIter</a></div><div class="ttdeci">int qpMaxIter</div><div class="ttdoc">Gradient-projection iteration limit.</div><div class="ttdef"><b>Definition</b> <a href="DiscreteMPC_8h_source.html#l00067">DiscreteMPC.h:67</a></div></div>

@@ -25,7 +25,7 @@ var searchData=
   ['measfunc_22',['MeasFunc',['../namespacectrl.html#a769cb9afa3b7f334221a10089e948da1',1,'ctrl']]],
   ['membership_20function_20factories_23',['Membership function factories',['../md_docs_2DOCUMENTATION.html#autotoc_md88',1,'']]],
   ['message_24',['message',['../structctrl_1_1SubspaceIDResult.html#ab11bfc9d8aa33ea86ee77445613957d8',1,'ctrl::SubspaceIDResult']]],
-  ['method_25',['method',['../classctrl_1_1HybridModelTrainer.html#a93c34b3101af015f00c3243e03acc471',1,'ctrl::HybridModelTrainer::Method'],['../structctrl_1_1HybridModelTrainer_1_1Result.html#ab0af24b0ff34640a32e50ec19b71986f',1,'ctrl::HybridModelTrainer::Result::method'],['../structctrl_1_1HybridModelTrainer_1_1Params.html#a73e474c70f56315ab68215679636be72',1,'ctrl::HybridModelTrainer::Params::method']]],
+  ['method_25',['method',['../structctrl_1_1HybridModelTrainer_1_1Result.html#ab0af24b0ff34640a32e50ec19b71986f',1,'ctrl::HybridModelTrainer::Result::method'],['../structctrl_1_1HybridModelTrainer_1_1Params.html#a73e474c70f56315ab68215679636be72',1,'ctrl::HybridModelTrainer::Params::method'],['../classctrl_1_1HybridModelTrainer.html#a93c34b3101af015f00c3243e03acc471',1,'ctrl::HybridModelTrainer::Method']]],
   ['metrics_26',['5.6 Analysis &amp; Metrics',['../md_docs_2DOCUMENTATION.html#autotoc_md133',1,'']]],
   ['metricsanalyzer_27',['MetricsAnalyzer',['../classctrl_1_1MetricsAnalyzer.html',1,'ctrl']]],
   ['metricsanalyzer_20tt_20a_20href_20lib_20metricsanalyzer_20h_20metricsanalyzer_20h_20a_28',['&lt;tt&gt;MetricsAnalyzer&lt;/tt&gt; (&lt;a href=&quot;lib/MetricsAnalyzer.h&quot; &gt;MetricsAnalyzer.h&lt;/a&gt;)',['../md_docs_2DOCUMENTATION.html#autotoc_md134',1,'']]],

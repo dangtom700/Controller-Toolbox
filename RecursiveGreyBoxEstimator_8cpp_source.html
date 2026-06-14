@@ -130,99 +130,106 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> rk4s  = par_.<a class="code hl_variable" href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#a8b2b9b5306192a70105b495646df3995">rk4_steps</a>;</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <a class="code hl_typedef" href="classctrl_1_1RecursiveGreyBoxEstimator.html#a6bd55a1815475450fce841350c217813">OdeFn</a> f_copy    = f_;</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keyword">auto</span> f_aug = [f_copy, n_x, n_p, Ts, rk4s](</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        <span class="keyword">const</span> Eigen::VectorXd&amp; z,</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="keyword">const</span> Eigen::VectorXd&amp; u) -&gt; Eigen::VectorXd</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    {</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        Eigen::VectorXd x = z.head(n_x);</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        <span class="keyword">const</span> Eigen::VectorXd p = z.tail(n_p);</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        <span class="keyword">const</span> <span class="keywordtype">double</span> h = Ts / rk4s;</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> s = 0; s &lt; rk4s; ++s) {</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>            <span class="keyword">const</span> Eigen::VectorXd k1 = f_copy(x,             u, p);</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>            <span class="keyword">const</span> Eigen::VectorXd k2 = f_copy(x + 0.5*h*k1, u, p);</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>            <span class="keyword">const</span> Eigen::VectorXd k3 = f_copy(x + 0.5*h*k2, u, p);</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>            <span class="keyword">const</span> Eigen::VectorXd k4 = f_copy(x + h*k3,     u, p);</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>            x += (h / 6.0) * (k1 + 2.0*k2 + 2.0*k3 + k4);</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        }</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        Eigen::VectorXd z_next(n_x + n_p);</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        z_next.head(n_x) = x;</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        z_next.tail(n_p) = p;</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="keywordflow">return</span> z_next;</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    };</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="comment">// ---- Augmented measurement function ------------------------------------</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <a class="code hl_typedef" href="classctrl_1_1RecursiveGreyBoxEstimator.html#a11117692f0ee6ecd14abb233fe6ba81f">MeasFn</a> h_copy = h_;</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keyword">auto</span> h_aug = [h_copy, n_x, n_p](</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keyword">const</span> Eigen::VectorXd&amp; z,</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keyword">const</span> Eigen::VectorXd&amp; <span class="comment">/*u*/</span>) -&gt; Eigen::VectorXd</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    {</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="keywordflow">return</span> h_copy(z.head(n_x), z.tail(n_p));</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    };</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="comment">// ---- Build UKF ---------------------------------------------------------</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    ukf_ = std::make_unique&lt;UnscentedKalmanFilter&gt;(</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        n_aug, n_meas_,</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        std::move(f_aug), std::move(h_aug),</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        Q_aug, par_.<a class="code hl_variable" href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#afbf8d23c03cd638f120661bb930cb935">R_meas</a>,</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        Ts, P0_aug,</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        par_.<a class="code hl_variable" href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#ae285bd5be9e63554e3810cb575c53578">alpha</a>, par_.<a class="code hl_variable" href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#abe7eab83bee2bc85709f043e84ecd210">beta</a>, par_.<a class="code hl_variable" href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#a52909db08d54f9ff76add9ebc8f7cad1">kappa</a>);</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="comment">// Set initial augmented state [x0; p0]</span></div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    Eigen::VectorXd z0(n_aug);</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    z0.head(n_state_) = x0;</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    z0.tail(n_param_) = par_.<a class="code hl_variable" href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#a456970570e51979a1b5fbb2c7447b85d">p0</a>;</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    ukf_-&gt;setState(z0);</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    initialized_ = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>}</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="comment">// Pre-allocate RK4 scratch inside the closure to avoid per-sigma-point heap alloc</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keyword">auto</span> f_aug = [f_copy, n_x, n_p, Ts, rk4s,</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>                  x_scr   = Eigen::VectorXd(n_x),</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>                  p_scr   = Eigen::VectorXd(n_p),</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>                  k1      = Eigen::VectorXd(n_x),</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>                  k2      = Eigen::VectorXd(n_x),</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>                  k3      = Eigen::VectorXd(n_x),</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>                  k4      = Eigen::VectorXd(n_x),</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>                  z_next  = Eigen::VectorXd(n_x + n_p)](</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        <span class="keyword">const</span> Eigen::VectorXd&amp; z,</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        <span class="keyword">const</span> Eigen::VectorXd&amp; u) <span class="keyword">mutable</span> -&gt; Eigen::VectorXd</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    {</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        x_scr = z.head(n_x);</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        p_scr = z.tail(n_p);</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <span class="keyword">const</span> <span class="keywordtype">double</span> h = Ts / rk4s;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> s = 0; s &lt; rk4s; ++s) {</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>            k1 = f_copy(x_scr,             u, p_scr);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>            k2 = f_copy(x_scr + 0.5*h*k1, u, p_scr);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>            k3 = f_copy(x_scr + 0.5*h*k2, u, p_scr);</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>            k4 = f_copy(x_scr + h*k3,     u, p_scr);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>            x_scr += (h / 6.0) * (k1 + 2.0*k2 + 2.0*k3 + k4);</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        }</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        z_next.head(n_x) = x_scr;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        z_next.tail(n_p) = p_scr;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keywordflow">return</span> z_next;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    };</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="comment">// ---- Augmented measurement function ------------------------------------</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <a class="code hl_typedef" href="classctrl_1_1RecursiveGreyBoxEstimator.html#a11117692f0ee6ecd14abb233fe6ba81f">MeasFn</a> h_copy = h_;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keyword">auto</span> h_aug = [h_copy, n_x, n_p](</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        <span class="keyword">const</span> Eigen::VectorXd&amp; z,</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keyword">const</span> Eigen::VectorXd&amp; <span class="comment">/*u*/</span>) -&gt; Eigen::VectorXd</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    {</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        <span class="keywordflow">return</span> h_copy(z.head(n_x), z.tail(n_p));</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    };</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="comment">// ---- Build UKF ---------------------------------------------------------</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    ukf_ = std::make_unique&lt;UnscentedKalmanFilter&gt;(</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        n_aug, n_meas_,</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        std::move(f_aug), std::move(h_aug),</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        Q_aug, par_.<a class="code hl_variable" href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#afbf8d23c03cd638f120661bb930cb935">R_meas</a>,</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        Ts, P0_aug,</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        par_.<a class="code hl_variable" href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#ae285bd5be9e63554e3810cb575c53578">alpha</a>, par_.<a class="code hl_variable" href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#abe7eab83bee2bc85709f043e84ecd210">beta</a>, par_.<a class="code hl_variable" href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#a52909db08d54f9ff76add9ebc8f7cad1">kappa</a>);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="comment">// Set initial augmented state [x0; p0]</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    Eigen::VectorXd z0(n_aug);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    z0.head(n_state_) = x0;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    z0.tail(n_param_) = par_.<a class="code hl_variable" href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#a456970570e51979a1b5fbb2c7447b85d">p0</a>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    ukf_-&gt;setState(z0);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    initialized_ = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>}</div>
 </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
-<div class="foldopen" id="foldopen00092" data-start="{" data-end="}">
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="classctrl_1_1RecursiveGreyBoxEstimator.html#ab3c0c65a5c4a04051c4c73fa99b285c3">   92</a></span>Eigen::VectorXd <a class="code hl_function" href="classctrl_1_1RecursiveGreyBoxEstimator.html#ab3c0c65a5c4a04051c4c73fa99b285c3">RecursiveGreyBoxEstimator::step</a>(<span class="keyword">const</span> Eigen::VectorXd&amp; y,</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>                                                  <span class="keyword">const</span> Eigen::VectorXd&amp; u)</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>{</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordflow">if</span> (!initialized_)</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        <span class="keywordflow">throw</span> std::logic_error(<span class="stringliteral">&quot;RecursiveGreyBoxEstimator: call initialize() first&quot;</span>);</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    ukf_-&gt;step(y, u);</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="keywordflow">return</span> ukf_-&gt;state().head(n_state_);</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>}</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="foldopen" id="foldopen00099" data-start="{" data-end="}">
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="classctrl_1_1RecursiveGreyBoxEstimator.html#ab3c0c65a5c4a04051c4c73fa99b285c3">   99</a></span>Eigen::VectorXd <a class="code hl_function" href="classctrl_1_1RecursiveGreyBoxEstimator.html#ab3c0c65a5c4a04051c4c73fa99b285c3">RecursiveGreyBoxEstimator::step</a>(<span class="keyword">const</span> Eigen::VectorXd&amp; y,</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>                                                  <span class="keyword">const</span> Eigen::VectorXd&amp; u)</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>{</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>    <span class="keywordflow">if</span> (!initialized_)</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        <span class="keywordflow">throw</span> std::logic_error(<span class="stringliteral">&quot;RecursiveGreyBoxEstimator: call initialize() first&quot;</span>);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    ukf_-&gt;step(y, u);</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="keywordflow">return</span> ukf_-&gt;state().head(n_state_);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>}</div>
 </div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
-<div class="foldopen" id="foldopen00101" data-start="{" data-end="}">
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="classctrl_1_1RecursiveGreyBoxEstimator.html#ab54dd73a7273ddcb7a6e7a33fd8ed72b">  101</a></span>Eigen::VectorXd <a class="code hl_function" href="classctrl_1_1RecursiveGreyBoxEstimator.html#ab54dd73a7273ddcb7a6e7a33fd8ed72b">RecursiveGreyBoxEstimator::stateEstimate</a>()<span class="keyword"> const</span></div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    <span class="keywordflow">if</span> (!initialized_) <span class="keywordflow">return</span> Eigen::VectorXd::Zero(n_state_);</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <span class="keywordflow">return</span> ukf_-&gt;state().head(n_state_);</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>}</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="foldopen" id="foldopen00108" data-start="{" data-end="}">
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno"><a class="line" href="classctrl_1_1RecursiveGreyBoxEstimator.html#ab54dd73a7273ddcb7a6e7a33fd8ed72b">  108</a></span>Eigen::VectorXd <a class="code hl_function" href="classctrl_1_1RecursiveGreyBoxEstimator.html#ab54dd73a7273ddcb7a6e7a33fd8ed72b">RecursiveGreyBoxEstimator::stateEstimate</a>()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keywordflow">if</span> (!initialized_) <span class="keywordflow">return</span> Eigen::VectorXd::Zero(n_state_);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <span class="keywordflow">return</span> ukf_-&gt;state().head(n_state_);</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>}</div>
 </div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
-<div class="foldopen" id="foldopen00107" data-start="{" data-end="}">
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="classctrl_1_1RecursiveGreyBoxEstimator.html#a9da6cf41f50cf477c905f8ad0e9c9089">  107</a></span>Eigen::VectorXd <a class="code hl_function" href="classctrl_1_1RecursiveGreyBoxEstimator.html#a9da6cf41f50cf477c905f8ad0e9c9089">RecursiveGreyBoxEstimator::paramEstimate</a>()<span class="keyword"> const</span></div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keywordflow">if</span> (!initialized_) <span class="keywordflow">return</span> par_.<a class="code hl_variable" href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#a456970570e51979a1b5fbb2c7447b85d">p0</a>;</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keywordflow">return</span> ukf_-&gt;state().tail(n_param_);</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>}</div>
-</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
-<div class="foldopen" id="foldopen00113" data-start="{" data-end="}">
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="classctrl_1_1RecursiveGreyBoxEstimator.html#ad08f20fea249c3e1f2c6db61f0aca87b">  113</a></span><span class="keyword">const</span> Eigen::MatrixXd&amp; <a class="code hl_function" href="classctrl_1_1RecursiveGreyBoxEstimator.html#ad08f20fea249c3e1f2c6db61f0aca87b">RecursiveGreyBoxEstimator::covariance</a>()<span class="keyword"> const</span></div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="keywordflow">if</span> (!initialized_)</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>        <span class="keywordflow">throw</span> std::logic_error(<span class="stringliteral">&quot;RecursiveGreyBoxEstimator: not initialized&quot;</span>);</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="keywordflow">return</span> ukf_-&gt;covariance();</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="foldopen" id="foldopen00114" data-start="{" data-end="}">
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="classctrl_1_1RecursiveGreyBoxEstimator.html#a9da6cf41f50cf477c905f8ad0e9c9089">  114</a></span>Eigen::VectorXd <a class="code hl_function" href="classctrl_1_1RecursiveGreyBoxEstimator.html#a9da6cf41f50cf477c905f8ad0e9c9089">RecursiveGreyBoxEstimator::paramEstimate</a>()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <span class="keywordflow">if</span> (!initialized_) <span class="keywordflow">return</span> par_.<a class="code hl_variable" href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#a456970570e51979a1b5fbb2c7447b85d">p0</a>;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <span class="keywordflow">return</span> ukf_-&gt;state().tail(n_param_);</div>
 <div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>}</div>
 </div>
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>} <span class="comment">// namespace ctrl</span></div>
+<div class="foldopen" id="foldopen00120" data-start="{" data-end="}">
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno"><a class="line" href="classctrl_1_1RecursiveGreyBoxEstimator.html#ad08f20fea249c3e1f2c6db61f0aca87b">  120</a></span><span class="keyword">const</span> Eigen::MatrixXd&amp; <a class="code hl_function" href="classctrl_1_1RecursiveGreyBoxEstimator.html#ad08f20fea249c3e1f2c6db61f0aca87b">RecursiveGreyBoxEstimator::covariance</a>()<span class="keyword"> const</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="keyword"></span>{</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    <span class="keywordflow">if</span> (!initialized_)</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        <span class="keywordflow">throw</span> std::logic_error(<span class="stringliteral">&quot;RecursiveGreyBoxEstimator: not initialized&quot;</span>);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    <span class="keywordflow">return</span> ukf_-&gt;covariance();</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>}</div>
+</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>} <span class="comment">// namespace ctrl</span></div>
 <div class="ttc" id="aRecursiveGreyBoxEstimator_8h_html"><div class="ttname"><a href="RecursiveGreyBoxEstimator_8h.html">RecursiveGreyBoxEstimator.h</a></div></div>
 <div class="ttc" id="aclassctrl_1_1RecursiveGreyBoxEstimator_html_a099b245a9aef576f489a6d44be74d167"><div class="ttname"><a href="classctrl_1_1RecursiveGreyBoxEstimator.html#a099b245a9aef576f489a6d44be74d167">ctrl::RecursiveGreyBoxEstimator::initialize</a></div><div class="ttdeci">void initialize(const Eigen::VectorXd &amp;x0, const Eigen::MatrixXd &amp;P0_state)</div><div class="ttdoc">Set initial state and (re-)build the augmented UKF.</div><div class="ttdef"><b>Definition</b> <a href="RecursiveGreyBoxEstimator_8cpp_source.html#l00021">RecursiveGreyBoxEstimator.cpp:21</a></div></div>
 <div class="ttc" id="aclassctrl_1_1RecursiveGreyBoxEstimator_html_a11117692f0ee6ecd14abb233fe6ba81f"><div class="ttname"><a href="classctrl_1_1RecursiveGreyBoxEstimator.html#a11117692f0ee6ecd14abb233fe6ba81f">ctrl::RecursiveGreyBoxEstimator::MeasFn</a></div><div class="ttdeci">GreyBoxEstimator::MeasFn MeasFn</div><div class="ttdef"><b>Definition</b> <a href="RecursiveGreyBoxEstimator_8h_source.html#l00048">RecursiveGreyBoxEstimator.h:48</a></div></div>
 <div class="ttc" id="aclassctrl_1_1RecursiveGreyBoxEstimator_html_a6bd55a1815475450fce841350c217813"><div class="ttname"><a href="classctrl_1_1RecursiveGreyBoxEstimator.html#a6bd55a1815475450fce841350c217813">ctrl::RecursiveGreyBoxEstimator::OdeFn</a></div><div class="ttdeci">GreyBoxEstimator::OdeFn OdeFn</div><div class="ttdef"><b>Definition</b> <a href="RecursiveGreyBoxEstimator_8h_source.html#l00047">RecursiveGreyBoxEstimator.h:47</a></div></div>
-<div class="ttc" id="aclassctrl_1_1RecursiveGreyBoxEstimator_html_a9da6cf41f50cf477c905f8ad0e9c9089"><div class="ttname"><a href="classctrl_1_1RecursiveGreyBoxEstimator.html#a9da6cf41f50cf477c905f8ad0e9c9089">ctrl::RecursiveGreyBoxEstimator::paramEstimate</a></div><div class="ttdeci">Eigen::VectorXd paramEstimate() const</div><div class="ttdoc">Current parameter estimate p^[k|k] (n_p x 1).</div><div class="ttdef"><b>Definition</b> <a href="RecursiveGreyBoxEstimator_8cpp_source.html#l00107">RecursiveGreyBoxEstimator.cpp:107</a></div></div>
-<div class="ttc" id="aclassctrl_1_1RecursiveGreyBoxEstimator_html_ab3c0c65a5c4a04051c4c73fa99b285c3"><div class="ttname"><a href="classctrl_1_1RecursiveGreyBoxEstimator.html#ab3c0c65a5c4a04051c4c73fa99b285c3">ctrl::RecursiveGreyBoxEstimator::step</a></div><div class="ttdeci">Eigen::VectorXd step(const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u)</div><div class="ttdoc">Run one UKF predict + update step.</div><div class="ttdef"><b>Definition</b> <a href="RecursiveGreyBoxEstimator_8cpp_source.html#l00092">RecursiveGreyBoxEstimator.cpp:92</a></div></div>
-<div class="ttc" id="aclassctrl_1_1RecursiveGreyBoxEstimator_html_ab54dd73a7273ddcb7a6e7a33fd8ed72b"><div class="ttname"><a href="classctrl_1_1RecursiveGreyBoxEstimator.html#ab54dd73a7273ddcb7a6e7a33fd8ed72b">ctrl::RecursiveGreyBoxEstimator::stateEstimate</a></div><div class="ttdeci">Eigen::VectorXd stateEstimate() const</div><div class="ttdoc">Current state estimate x^[k|k] (n_x x 1).</div><div class="ttdef"><b>Definition</b> <a href="RecursiveGreyBoxEstimator_8cpp_source.html#l00101">RecursiveGreyBoxEstimator.cpp:101</a></div></div>
+<div class="ttc" id="aclassctrl_1_1RecursiveGreyBoxEstimator_html_a9da6cf41f50cf477c905f8ad0e9c9089"><div class="ttname"><a href="classctrl_1_1RecursiveGreyBoxEstimator.html#a9da6cf41f50cf477c905f8ad0e9c9089">ctrl::RecursiveGreyBoxEstimator::paramEstimate</a></div><div class="ttdeci">Eigen::VectorXd paramEstimate() const</div><div class="ttdoc">Current parameter estimate p^[k|k] (n_p x 1).</div><div class="ttdef"><b>Definition</b> <a href="RecursiveGreyBoxEstimator_8cpp_source.html#l00114">RecursiveGreyBoxEstimator.cpp:114</a></div></div>
+<div class="ttc" id="aclassctrl_1_1RecursiveGreyBoxEstimator_html_ab3c0c65a5c4a04051c4c73fa99b285c3"><div class="ttname"><a href="classctrl_1_1RecursiveGreyBoxEstimator.html#ab3c0c65a5c4a04051c4c73fa99b285c3">ctrl::RecursiveGreyBoxEstimator::step</a></div><div class="ttdeci">Eigen::VectorXd step(const Eigen::VectorXd &amp;y, const Eigen::VectorXd &amp;u)</div><div class="ttdoc">Run one UKF predict + update step.</div><div class="ttdef"><b>Definition</b> <a href="RecursiveGreyBoxEstimator_8cpp_source.html#l00099">RecursiveGreyBoxEstimator.cpp:99</a></div></div>
+<div class="ttc" id="aclassctrl_1_1RecursiveGreyBoxEstimator_html_ab54dd73a7273ddcb7a6e7a33fd8ed72b"><div class="ttname"><a href="classctrl_1_1RecursiveGreyBoxEstimator.html#ab54dd73a7273ddcb7a6e7a33fd8ed72b">ctrl::RecursiveGreyBoxEstimator::stateEstimate</a></div><div class="ttdeci">Eigen::VectorXd stateEstimate() const</div><div class="ttdoc">Current state estimate x^[k|k] (n_x x 1).</div><div class="ttdef"><b>Definition</b> <a href="RecursiveGreyBoxEstimator_8cpp_source.html#l00108">RecursiveGreyBoxEstimator.cpp:108</a></div></div>
 <div class="ttc" id="aclassctrl_1_1RecursiveGreyBoxEstimator_html_ac62acbed369b7df36e938e28fb1ac863"><div class="ttname"><a href="classctrl_1_1RecursiveGreyBoxEstimator.html#ac62acbed369b7df36e938e28fb1ac863">ctrl::RecursiveGreyBoxEstimator::RecursiveGreyBoxEstimator</a></div><div class="ttdeci">RecursiveGreyBoxEstimator(OdeFn ode, MeasFn meas, int n_state, int n_meas, const Params &amp;par)</div><div class="ttdoc">Construct estimator.</div><div class="ttdef"><b>Definition</b> <a href="RecursiveGreyBoxEstimator_8cpp_source.html#l00006">RecursiveGreyBoxEstimator.cpp:6</a></div></div>
-<div class="ttc" id="aclassctrl_1_1RecursiveGreyBoxEstimator_html_ad08f20fea249c3e1f2c6db61f0aca87b"><div class="ttname"><a href="classctrl_1_1RecursiveGreyBoxEstimator.html#ad08f20fea249c3e1f2c6db61f0aca87b">ctrl::RecursiveGreyBoxEstimator::covariance</a></div><div class="ttdeci">const Eigen::MatrixXd &amp; covariance() const</div><div class="ttdoc">Full augmented covariance P_aug[k|k] (n_aug x n_aug).</div><div class="ttdef"><b>Definition</b> <a href="RecursiveGreyBoxEstimator_8cpp_source.html#l00113">RecursiveGreyBoxEstimator.cpp:113</a></div></div>
+<div class="ttc" id="aclassctrl_1_1RecursiveGreyBoxEstimator_html_ad08f20fea249c3e1f2c6db61f0aca87b"><div class="ttname"><a href="classctrl_1_1RecursiveGreyBoxEstimator.html#ad08f20fea249c3e1f2c6db61f0aca87b">ctrl::RecursiveGreyBoxEstimator::covariance</a></div><div class="ttdeci">const Eigen::MatrixXd &amp; covariance() const</div><div class="ttdoc">Full augmented covariance P_aug[k|k] (n_aug x n_aug).</div><div class="ttdef"><b>Definition</b> <a href="RecursiveGreyBoxEstimator_8cpp_source.html#l00120">RecursiveGreyBoxEstimator.cpp:120</a></div></div>
 <div class="ttc" id="anamespacectrl_html"><div class="ttname"><a href="namespacectrl.html">ctrl</a></div><div class="ttdef"><b>Definition</b> <a href="AdaptiveSmithPredictor_8cpp_source.html#l00005">AdaptiveSmithPredictor.cpp:6</a></div></div>
 <div class="ttc" id="astructctrl_1_1RecursiveGreyBoxEstimator_1_1Params_html"><div class="ttname"><a href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html">ctrl::RecursiveGreyBoxEstimator::Params</a></div><div class="ttdef"><b>Definition</b> <a href="RecursiveGreyBoxEstimator_8h_source.html#l00050">RecursiveGreyBoxEstimator.h:50</a></div></div>
 <div class="ttc" id="astructctrl_1_1RecursiveGreyBoxEstimator_1_1Params_html_a3acf28cac4cb8b79b952f3d520c7e888"><div class="ttname"><a href="structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#a3acf28cac4cb8b79b952f3d520c7e888">ctrl::RecursiveGreyBoxEstimator::Params::P0_param</a></div><div class="ttdeci">Eigen::MatrixXd P0_param</div><div class="ttdoc">Initial param covariance (n_p x n_p); empty -&gt; 100*Q_param.</div><div class="ttdef"><b>Definition</b> <a href="RecursiveGreyBoxEstimator_8h_source.html#l00055">RecursiveGreyBoxEstimator.h:55</a></div></div>
