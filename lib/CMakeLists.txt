@@ -62,6 +62,7 @@ set(CTRL_CORE_SOURCES
     EchoStateNetwork.cpp
     NeuralPID.cpp
     CEMController.cpp
+    DeePC.cpp
     DynaController.cpp
     ScenarioMPC.cpp
     GreyBoxEstimator.cpp

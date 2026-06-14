@@ -1912,6 +1912,99 @@ Example
              py::arg("model"), py::arg("X_obs"), py::arg("U_obs"), py::arg("X_next_obs"),
              "Evaluate prediction RMSE of model against observed transitions.");
 
+    // -----------------------------------------------------------------------
+    // DeePC - Data-Enabled Predictive Control (Coulson, Lygeros, Dorfler 2019)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::DeePCParams>(m, "DeePCParams", R"doc(
+Tuning parameters for the DeePC controller.
+
+Attributes:
+    T_ini (int):      Past trajectory window (steps). Default 20.
+    N (int):          Prediction horizon (steps). Default 10.
+    Q (float):        Output tracking weight. Default 1.0.
+    R (float):        Future input regularization weight. Default 0.1.
+    lambda_g (float): Tikhonov weight on Hankel coefficients. Default 1.0.
+    lambda_y (float): Past output soft-constraint weight. Default 100.0.
+    lambda_u (float): Past input soft-constraint weight. Default 10.0.
+    uMin (float):     Hard lower bound on control output. Default -1e9.
+    uMax (float):     Hard upper bound on control output. Default +1e9.
+    rho (float):      ADMM penalty parameter. Default 10.0.
+    admm_iters (int): Max ADMM iterations per step. Default 200.
+    admm_tol (float): Primal/dual residual convergence tolerance. Default 1e-6.
+)doc")
+        .def(py::init<>())
+        .def_readwrite("T_ini",       &ctrl::DeePCParams::T_ini)
+        .def_readwrite("N",           &ctrl::DeePCParams::N)
+        .def_readwrite("Q",           &ctrl::DeePCParams::Q)
+        .def_readwrite("R",           &ctrl::DeePCParams::R)
+        .def_readwrite("lambda_g",    &ctrl::DeePCParams::lambda_g)
+        .def_readwrite("lambda_y",    &ctrl::DeePCParams::lambda_y)
+        .def_readwrite("lambda_u",    &ctrl::DeePCParams::lambda_u)
+        .def_readwrite("uMin",        &ctrl::DeePCParams::uMin)
+        .def_readwrite("uMax",        &ctrl::DeePCParams::uMax)
+        .def_readwrite("rho",         &ctrl::DeePCParams::rho)
+        .def_readwrite("admm_iters",  &ctrl::DeePCParams::admm_iters)
+        .def_readwrite("admm_tol",    &ctrl::DeePCParams::admm_tol);
+
+    py::class_<ctrl::DeePC, ctrl::IController, std::shared_ptr<ctrl::DeePC>>(m, "DeePC", R"doc(
+Data-Enabled Predictive Control (DeePC) - SISO.
+
+Implements Coulson, Lygeros & Dorfler (2019): uses Willems' Fundamental Lemma to
+represent all LTI system behaviours via a Hankel matrix built from offline data,
+without explicit system identification.  Solves a regularised QP via ADMM with a
+pre-factored constant Hessian (LDLT) so per-step cost is O(M^2).
+
+Example::
+
+    import ctrl_toolbox as ctrl
+    import numpy as np
+
+    p = ctrl.DeePCParams()
+    p.T_ini = 5; p.N = 10; p.Q = 10.0; p.R = 0.1; p.lambda_g = 1.0
+    p.uMin = -1.0; p.uMax = 1.0
+    deepc = ctrl.DeePC(p, Ts=0.1)
+
+    # Collect offline PRBS data
+    deepc.collect_data(u_prbs, y_prbs)   # numpy 1-D arrays, length >= T_ini+N+1
+    deepc.set_reference(1.0)
+
+    # Control loop
+    u = deepc.compute(y_meas)
+
+Notes:
+    - collect_data() must be called before compute().
+    - is_healthy() returns False if the ADMM solver did not converge within admm_iters;
+      the best-iterate output is still applied.
+)doc")
+        .def(py::init<const ctrl::DeePCParams&, double>(),
+             py::arg("params"), py::arg("Ts"),
+             "Construct a DeePC controller with the given params and sample time.")
+        .def("collect_data",
+             &ctrl::DeePC::collectData,
+             py::arg("u_data"), py::arg("y_data"),
+             "Provide offline persistently exciting data and build Hankel matrices. "
+             "u_data and y_data must be numpy 1-D arrays of equal length >= T_ini+N+1.")
+        .def("is_data_collected",
+             &ctrl::DeePC::isDataCollected,
+             "True once collect_data() has been called successfully.")
+        .def("hankel_columns",
+             &ctrl::DeePC::hankelColumns,
+             "Number of Hankel columns M = N_data - T_ini - N + 1.")
+        .def("set_reference",
+             &ctrl::DeePC::setReference,
+             py::arg("r"),
+             "Set the constant output reference for all horizon steps.")
+        .def("compute",
+             &ctrl::DeePC::compute,
+             py::arg("y_meas"),
+             "Advance one step: update history, solve ADMM QP, return u[k].")
+        .def("reset",        &ctrl::DeePC::reset,
+             "Reset past trajectory buffers (collected Hankel data is preserved).")
+        .def("sample_time",  &ctrl::DeePC::sampleTime)
+        .def("name",         &ctrl::DeePC::name)
+        .def("is_healthy",   &ctrl::DeePC::isHealthy,
+             "False if the last ADMM solve did not converge within admm_iters.");
+
     // Fuzzy bindings are fully implemented in advanced_bindings.cpp (bind_advanced).
     // The stale TODO stub that used to live here was removed (audit 2026-06-13, Finding 34).
 }

@@ -9,8 +9,14 @@ if sys.platform == "win32" and hasattr(os, "add_dll_directory"):
         if os.path.isdir(_p):
             os.add_dll_directory(_p)
 
-# Load the .pyd from the build output directory
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'build', 'bindings'))
+# Load the .pyd / .so from the build output directory.
+# Try build_py/bindings first (CI workflow), then build/bindings (local dev).
+_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+for _build_dir in ['build_py', 'build']:
+    _p = os.path.join(_root, _build_dir, 'bindings')
+    if os.path.isdir(_p):
+        sys.path.insert(0, _p)
+        break
 
 import ctrl_toolbox as ctrl
 import numpy as np
@@ -1019,5 +1025,31 @@ assert hasattr(ctrl, 'SmithPredictor'), "SmithPredictor not bound"
 assert hasattr(ctrl, 'ExtremumSeeker'), "ExtremumSeeker not bound"
 assert hasattr(ctrl, 'make_lqr_controller'), "make_lqr_controller not bound"
 print('Binding presence checks passed.')
+
+# DeePC smoke test
+assert hasattr(ctrl, 'DeePCParams'), "DeePCParams not bound"
+assert hasattr(ctrl, 'DeePC'), "DeePC not bound"
+assert ctrl.registry_has('deepc'), "deepc not registered"
+_dp = ctrl.DeePCParams()
+_dp.T_ini = 5; _dp.N = 5; _dp.Q = 1.0; _dp.R = 0.1
+_dp.lambda_g = 1.0; _dp.lambda_y = 10.0; _dp.lambda_u = 5.0
+_dp.uMin = -2.0; _dp.uMax = 2.0
+_deepc = ctrl.DeePC(_dp, 0.1)
+assert not _deepc.is_data_collected(), "should be False before collect_data"
+import numpy as np
+_N_d = _dp.T_ini + _dp.N + 20  # 30 samples
+_u_d = np.random.uniform(-1.0, 1.0, _N_d)
+_y_d = np.zeros(_N_d)
+for _k in range(1, _N_d):
+    _y_d[_k] = 0.7 * _y_d[_k-1] + 0.3 * _u_d[_k-1]
+_deepc.collect_data(_u_d, _y_d)
+assert _deepc.is_data_collected(), "collect_data should set flag"
+assert _deepc.hankel_columns() == _N_d - _dp.T_ini - _dp.N + 1
+_deepc.set_reference(1.0)
+_u0 = _deepc.compute(0.0)
+assert isinstance(_u0, float), "compute should return float"
+assert _dp.uMin <= _u0 <= _dp.uMax, "output must respect uMin/uMax bounds"
+_deepc.reset()
+print('DeePC smoke test passed.')
 
 print('\nAll smoke tests passed.')

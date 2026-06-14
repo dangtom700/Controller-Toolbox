@@ -108,6 +108,7 @@
 #include "EchoStateNetwork.h"           ///< ESN - Echo State Network; random reservoir, ridge-regression readout (Jaeger 2001).
 #include "NeuralPID.h"                  ///< NeuralPID - online neural network adapts Kp/Ki/Kd via backprop through linearised plant.
 #include "CEMController.h"              ///< CEM-MPC - Cross-Entropy Method MPC; derivative-free stochastic rollout optimisation.
+#include "DeePC.h"                      ///< DeePC - Data-Enabled Predictive Control; Hankel + ADMM, no system ID needed (Coulson 2019).
 #include "DynaController.h"             ///< Dyna - model-based RL; SINDy error-dynamics fit + synthetic rollout planning (Sutton 1991).
 #include "ScenarioMPC.h"                ///< ScenarioMPC - stochastic MPC; N_s noise-trajectory average cost QP (Calafiore & Campi 2006).
 #include "BayesianOptimizer.h"          ///< BayesianOptimizer - GP surrogate + UCB/EI acquisition for expensive controller tuning (Srinivas 2010).

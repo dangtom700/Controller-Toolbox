@@ -15,7 +15,7 @@
 ---
 
 ### 2. State-Space and Optimal Control
-- **Linear Quadratic Regulator (LQR)** - infinite & finite horizon - **implemented: `DiscreteLQR`** (DARE, LQRAdapter)
+- **Linear Quadratic Regulator (LQR)** - infinite & finite horizon - **implemented: `DiscreteLQR`** (DARE, LQRAdapter); Python factory: **`ctrl.make_lqr_controller(plant_ss, params, state_fn, ref_fn=None)`** (returns `shared_ptr<IController>`-compatible handle)
 - **Linear Quadratic Gaussian (LQG)** - LQR + Kalman filter - **implemented: `DiscreteLQG`**
 - **LQG with Loop Transfer Recovery (LQG/LTR)**
 - **Linear Quadratic Integral (LQI)** - LQR with integral action
