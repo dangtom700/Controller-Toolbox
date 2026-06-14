@@ -8,7 +8,9 @@ var searchData=
   ['acq_5',['acq',['../structctrl_1_1BayesOptParams.html#a7b255eecdc4c79145a9a0fdf695396f3',1,'ctrl::BayesOptParams']]],
   ['activationcondition_6',['activationCondition',['../structctrl_1_1StackEntry.html#a9371582306ca70e3f37d2515b724cd84',1,'ctrl::StackEntry']]],
   ['active_7',['active',['../structctrl_1_1StackEntry.html#a1b8579344546ccd78f602cfb11f9b104',1,'ctrl::StackEntry']]],
-  ['ak_8',['Ak',['../structctrl_1_1HinfResult.html#a1ad747b2a5167abae6f92a1d21b7fcfc',1,'ctrl::HinfResult']]],
-  ['alpha_9',['alpha',['../structctrl_1_1CBFSafetyFilter_1_1Params.html#a7fcd5104cf2dc8f0d1a5ad5d9ba34fcc',1,'ctrl::CBFSafetyFilter::Params::alpha'],['../structctrl_1_1EchoStateNetwork_1_1Params.html#a1fc77c18197d931fedcc0c124aa57445',1,'ctrl::EchoStateNetwork::Params::alpha'],['../structctrl_1_1GPCParams.html#a10fb636e34f7fac3b77bec9ec907cbf0',1,'ctrl::GPCParams::alpha'],['../structctrl_1_1GAParams.html#a03b5d87ed08920e357f60aba8c99179c',1,'ctrl::GAParams::alpha'],['../structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#ae285bd5be9e63554e3810cb575c53578',1,'ctrl::RecursiveGreyBoxEstimator::Params::alpha']]],
-  ['antecedents_10',['antecedents',['../structctrl_1_1Rule.html#aa072aaa6d9f7c3758934ad3c962fa621',1,'ctrl::Rule']]]
+  ['admm_5fiters_8',['admm_iters',['../structctrl_1_1DeePCParams.html#a8970e9c6de383800b3bcda6dad3166ec',1,'ctrl::DeePCParams']]],
+  ['admm_5ftol_9',['admm_tol',['../structctrl_1_1DeePCParams.html#a431d97ba377c412958ff2e766580c084',1,'ctrl::DeePCParams']]],
+  ['ak_10',['Ak',['../structctrl_1_1HinfResult.html#a1ad747b2a5167abae6f92a1d21b7fcfc',1,'ctrl::HinfResult']]],
+  ['alpha_11',['alpha',['../structctrl_1_1CBFSafetyFilter_1_1Params.html#a7fcd5104cf2dc8f0d1a5ad5d9ba34fcc',1,'ctrl::CBFSafetyFilter::Params::alpha'],['../structctrl_1_1EchoStateNetwork_1_1Params.html#a1fc77c18197d931fedcc0c124aa57445',1,'ctrl::EchoStateNetwork::Params::alpha'],['../structctrl_1_1GPCParams.html#a10fb636e34f7fac3b77bec9ec907cbf0',1,'ctrl::GPCParams::alpha'],['../structctrl_1_1GAParams.html#a03b5d87ed08920e357f60aba8c99179c',1,'ctrl::GAParams::alpha'],['../structctrl_1_1RecursiveGreyBoxEstimator_1_1Params.html#ae285bd5be9e63554e3810cb575c53578',1,'ctrl::RecursiveGreyBoxEstimator::Params::alpha']]],
+  ['antecedents_12',['antecedents',['../structctrl_1_1Rule.html#aa072aaa6d9f7c3758934ad3c962fa621',1,'ctrl::Rule']]]
 ];

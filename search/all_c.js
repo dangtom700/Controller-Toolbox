@@ -32,7 +32,7 @@ var searchData=
   ['error_5fnorm_29',['error_norm',['../structctrl_1_1SupervisorDecision.html#af706e539fc0660eb74f811b7014653f4',1,'ctrl::SupervisorDecision']]],
   ['errorbound_30',['errorBound',['../structctrl_1_1TruncationResult.html#af70e309649e89b2f412f150ce77d6822',1,'ctrl::TruncationResult']]],
   ['esc_31',['ESC',['../namespacectrl.html#ae9f75df6083768f99f318568d9b9038aa6351aefd1e5e1b62c76f8580116964be',1,'ctrl']]],
-  ['esn_32',['esn',['../classctrl_1_1HybridModelTrainer.html#a93c34b3101af015f00c3243e03acc471ae9757248f28b696b3f575603799aeca6',1,'ctrl::HybridModelTrainer::ESN'],['../structctrl_1_1HybridModelTrainer_1_1Params.html#a026e2e216e0fdf0ba645b5b9f21a6572',1,'ctrl::HybridModelTrainer::Params::esn']]],
+  ['esn_32',['esn',['../structctrl_1_1HybridModelTrainer_1_1Params.html#a026e2e216e0fdf0ba645b5b9f21a6572',1,'ctrl::HybridModelTrainer::Params::esn'],['../classctrl_1_1HybridModelTrainer.html#a93c34b3101af015f00c3243e03acc471ae9757248f28b696b3f575603799aeca6',1,'ctrl::HybridModelTrainer::ESN']]],
   ['eso_20instability_20forward_20euler_33',['ADRC ESO Instability (Forward-Euler)',['../md_docs_2DEPLOYMENT.html#autotoc_md202',1,'']]],
   ['esostate_34',['esoState',['../classctrl_1_1DiscreteADRC.html#a760f92489a75869283cf62fa1558b821',1,'ctrl::DiscreteADRC']]],
   ['estimate_35',['estimate',['../classctrl_1_1MovingHorizonEstimator.html#aca478abc3185eaabcc8679d76d8b6c1f',1,'ctrl::MovingHorizonEstimator']]],

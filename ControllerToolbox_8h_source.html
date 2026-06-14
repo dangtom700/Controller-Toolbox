@@ -141,54 +141,55 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="preprocessor">#include &quot;<a class="code" href="EchoStateNetwork_8h.html">EchoStateNetwork.h</a>&quot;</span>           </div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="preprocessor">#include &quot;<a class="code" href="NeuralPID_8h.html">NeuralPID.h</a>&quot;</span>                  </div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="preprocessor">#include &quot;<a class="code" href="CEMController_8h.html">CEMController.h</a>&quot;</span>              </div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="preprocessor">#include &quot;<a class="code" href="DynaController_8h.html">DynaController.h</a>&quot;</span>             </div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="preprocessor">#include &quot;<a class="code" href="ScenarioMPC_8h.html">ScenarioMPC.h</a>&quot;</span>                </div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="preprocessor">#include &quot;<a class="code" href="BayesianOptimizer_8h.html">BayesianOptimizer.h</a>&quot;</span>          </div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="preprocessor">#include &quot;<a class="code" href="GeneticAlgorithm_8h.html">GeneticAlgorithm.h</a>&quot;</span>           </div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="preprocessor">#include &quot;<a class="code" href="ParticleSwarmOptimizer_8h.html">ParticleSwarmOptimizer.h</a>&quot;</span>     </div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="preprocessor">#include &quot;<a class="code" href="DifferentialEvolution_8h.html">DifferentialEvolution.h</a>&quot;</span>      </div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="preprocessor">#include &quot;<a class="code" href="ControllerMonitor_8h.html">ControllerMonitor.h</a>&quot;</span>          </div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="preprocessor">#include &quot;<a class="code" href="ComputationalDelayWrapper_8h.html">ComputationalDelayWrapper.h</a>&quot;</span>  </div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="preprocessor">#include &quot;<a class="code" href="GreyBoxEstimator_8h.html">GreyBoxEstimator.h</a>&quot;</span>           </div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="preprocessor">#include &quot;<a class="code" href="GPResidualModel_8h.html">GPResidualModel.h</a>&quot;</span>            </div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="preprocessor">#include &quot;<a class="code" href="HybridModel_8h.html">HybridModel.h</a>&quot;</span>               </div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="preprocessor">#include &quot;<a class="code" href="HybridMPC_8h.html">HybridMPC.h</a>&quot;</span>                 </div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="preprocessor">#include &quot;<a class="code" href="HybridModelTrainer_8h.html">HybridModelTrainer.h</a>&quot;</span>        </div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="preprocessor">#include &quot;<a class="code" href="VectorFitting_8h.html">VectorFitting.h</a>&quot;</span>             </div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="preprocessor">#include &quot;<a class="code" href="BasicPID_8h.html">BasicPID.h</a>&quot;</span>                  </div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="preprocessor">#include &quot;<a class="code" href="BasicSMC_8h.html">BasicSMC.h</a>&quot;</span>                  </div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="preprocessor">#include &quot;<a class="code" href="MismatchDetector_8h.html">MismatchDetector.h</a>&quot;</span>          </div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="comment">// Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).</span></div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="comment">// When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,</span></div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="comment">// or define CTRL_DISABLE_* (legacy) to suppress them.</span></div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><span class="preprocessor">#if defined(CTRL_HAS_ADVANCED_KALMAN) || (!defined(CTRL_DISABLE_ADVANCED_KALMAN))</span></div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span><span class="preprocessor">#include &quot;<a class="code" href="ExtendedKalmanFilter_8h.html">ExtendedKalmanFilter.h</a>&quot;</span>          </div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="preprocessor">#include &quot;<a class="code" href="UnscentedKalmanFilter_8h.html">UnscentedKalmanFilter.h</a>&quot;</span>         </div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span><span class="preprocessor">#include &quot;<a class="code" href="RecursiveGreyBoxEstimator_8h.html">RecursiveGreyBoxEstimator.h</a>&quot;</span>     </div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span> </div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span><span class="preprocessor">#if defined(CTRL_HAS_SUBSPACE) || (!defined(CTRL_DISABLE_SUBSPACE))</span></div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span><span class="preprocessor">#include &quot;<a class="code" href="SubspaceID_8h.html">SubspaceID.h</a>&quot;</span> </div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span> </div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span><span class="preprocessor">#if defined(CTRL_HAS_FUZZY) || (!defined(CTRL_DISABLE_FUZZY))</span></div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="preprocessor">#include &quot;<a class="code" href="FuzzyLogic_8h.html">FuzzyLogic.h</a>&quot;</span> </div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="comment">// Hinf - honour both legacy CTRL_DISABLE_HINF and new CTRL_HAS_HINF / CTRL_DISABLE_HINF2.</span></div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span><span class="preprocessor">#if (defined(CTRL_HAS_HINF) || !defined(CTRL_DISABLE_HINF))</span></div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="preprocessor">#include &quot;<a class="code" href="DiscreteHinf_8h.html">DiscreteHinf.h</a>&quot;</span> </div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span><span class="preprocessor">#if defined(CTRL_HAS_FUNCTION_APPROX) || (!defined(CTRL_DISABLE_FUNCTION_APPROX))</span></div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span><span class="preprocessor">#include &quot;<a class="code" href="FunctionApproximator_8h.html">FunctionApproximator.h</a>&quot;</span> </div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span><span class="comment">// M2: Centralized registrations for all pre-M2 controllers.</span></div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span><span class="comment">// Must come AFTER all algorithm includes so the conditional CTRL_HAS_* flags are set.</span></div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span><span class="preprocessor">#include &quot;<a class="code" href="ControllerRegistrations_8h.html">ControllerRegistrations.h</a>&quot;</span></div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="preprocessor">#include &quot;<a class="code" href="DeePC_8h.html">DeePC.h</a>&quot;</span>                      </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="preprocessor">#include &quot;<a class="code" href="DynaController_8h.html">DynaController.h</a>&quot;</span>             </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="preprocessor">#include &quot;<a class="code" href="ScenarioMPC_8h.html">ScenarioMPC.h</a>&quot;</span>                </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="preprocessor">#include &quot;<a class="code" href="BayesianOptimizer_8h.html">BayesianOptimizer.h</a>&quot;</span>          </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="preprocessor">#include &quot;<a class="code" href="GeneticAlgorithm_8h.html">GeneticAlgorithm.h</a>&quot;</span>           </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="preprocessor">#include &quot;<a class="code" href="ParticleSwarmOptimizer_8h.html">ParticleSwarmOptimizer.h</a>&quot;</span>     </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="preprocessor">#include &quot;<a class="code" href="DifferentialEvolution_8h.html">DifferentialEvolution.h</a>&quot;</span>      </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="preprocessor">#include &quot;<a class="code" href="ControllerMonitor_8h.html">ControllerMonitor.h</a>&quot;</span>          </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="preprocessor">#include &quot;<a class="code" href="ComputationalDelayWrapper_8h.html">ComputationalDelayWrapper.h</a>&quot;</span>  </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="preprocessor">#include &quot;<a class="code" href="GreyBoxEstimator_8h.html">GreyBoxEstimator.h</a>&quot;</span>           </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="preprocessor">#include &quot;<a class="code" href="GPResidualModel_8h.html">GPResidualModel.h</a>&quot;</span>            </div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="preprocessor">#include &quot;<a class="code" href="HybridModel_8h.html">HybridModel.h</a>&quot;</span>               </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="preprocessor">#include &quot;<a class="code" href="HybridMPC_8h.html">HybridMPC.h</a>&quot;</span>                 </div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="preprocessor">#include &quot;<a class="code" href="HybridModelTrainer_8h.html">HybridModelTrainer.h</a>&quot;</span>        </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="preprocessor">#include &quot;<a class="code" href="VectorFitting_8h.html">VectorFitting.h</a>&quot;</span>             </div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="preprocessor">#include &quot;<a class="code" href="BasicPID_8h.html">BasicPID.h</a>&quot;</span>                  </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="preprocessor">#include &quot;<a class="code" href="BasicSMC_8h.html">BasicSMC.h</a>&quot;</span>                  </div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span><span class="preprocessor">#include &quot;<a class="code" href="MismatchDetector_8h.html">MismatchDetector.h</a>&quot;</span>          </div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="comment">// Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="comment">// When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,</span></div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span><span class="comment">// or define CTRL_DISABLE_* (legacy) to suppress them.</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span><span class="preprocessor">#if defined(CTRL_HAS_ADVANCED_KALMAN) || (!defined(CTRL_DISABLE_ADVANCED_KALMAN))</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="preprocessor">#include &quot;<a class="code" href="ExtendedKalmanFilter_8h.html">ExtendedKalmanFilter.h</a>&quot;</span>          </div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span><span class="preprocessor">#include &quot;<a class="code" href="UnscentedKalmanFilter_8h.html">UnscentedKalmanFilter.h</a>&quot;</span>         </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><span class="preprocessor">#include &quot;<a class="code" href="RecursiveGreyBoxEstimator_8h.html">RecursiveGreyBoxEstimator.h</a>&quot;</span>     </div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span> </div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span><span class="preprocessor">#if defined(CTRL_HAS_SUBSPACE) || (!defined(CTRL_DISABLE_SUBSPACE))</span></div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span><span class="preprocessor">#include &quot;<a class="code" href="SubspaceID_8h.html">SubspaceID.h</a>&quot;</span> </div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span> </div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="preprocessor">#if defined(CTRL_HAS_FUZZY) || (!defined(CTRL_DISABLE_FUZZY))</span></div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span><span class="preprocessor">#include &quot;<a class="code" href="FuzzyLogic_8h.html">FuzzyLogic.h</a>&quot;</span> </div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span><span class="comment">// Hinf - honour both legacy CTRL_DISABLE_HINF and new CTRL_HAS_HINF / CTRL_DISABLE_HINF2.</span></div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="preprocessor">#if (defined(CTRL_HAS_HINF) || !defined(CTRL_DISABLE_HINF))</span></div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span><span class="preprocessor">#include &quot;<a class="code" href="DiscreteHinf_8h.html">DiscreteHinf.h</a>&quot;</span> </div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span><span class="preprocessor">#if defined(CTRL_HAS_FUNCTION_APPROX) || (!defined(CTRL_DISABLE_FUNCTION_APPROX))</span></div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span><span class="preprocessor">#include &quot;<a class="code" href="FunctionApproximator_8h.html">FunctionApproximator.h</a>&quot;</span> </div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span><span class="comment">// M2: Centralized registrations for all pre-M2 controllers.</span></div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span><span class="comment">// Must come AFTER all algorithm includes so the conditional CTRL_HAS_* flags are set.</span></div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span><span class="preprocessor">#include &quot;<a class="code" href="ControllerRegistrations_8h.html">ControllerRegistrations.h</a>&quot;</span></div>
 <div class="ttc" id="aAdaptiveSmithPredictor_8h_html"><div class="ttname"><a href="AdaptiveSmithPredictor_8h.html">AdaptiveSmithPredictor.h</a></div><div class="ttdoc">Smith Predictor with online dead-time estimation via cross-correlation.</div></div>
 <div class="ttc" id="aAntiWindupWrapper_8h_html"><div class="ttname"><a href="AntiWindupWrapper_8h.html">AntiWindupWrapper.h</a></div><div class="ttdoc">Generic anti-windup decorator for any IController.</div></div>
 <div class="ttc" id="aAutoGainScheduler_8h_html"><div class="ttname"><a href="AutoGainScheduler_8h.html">AutoGainScheduler.h</a></div><div class="ttdoc">Automated gain-scheduled controller builder via gap-metric clustering.</div></div>
@@ -206,6 +207,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aControllerStack_8h_html"><div class="ttname"><a href="ControllerStack_8h.html">ControllerStack.h</a></div><div class="ttdoc">Multi-controller orchestration - Supervisory, Additive, and Weighted modes.</div></div>
 <div class="ttc" id="aControllerTraits_8h_html"><div class="ttname"><a href="ControllerTraits_8h.html">ControllerTraits.h</a></div><div class="ttdoc">Compile-time metadata mapping each controller type to supported tuning strategies.</div></div>
 <div class="ttc" id="aControllerTuner_8h_html"><div class="ttname"><a href="ControllerTuner_8h.html">ControllerTuner.h</a></div><div class="ttdoc">Offline and online tuning utilities with compile-time type safety.</div></div>
+<div class="ttc" id="aDeePC_8h_html"><div class="ttname"><a href="DeePC_8h.html">DeePC.h</a></div></div>
 <div class="ttc" id="aDifferentialEvolution_8h_html"><div class="ttname"><a href="DifferentialEvolution_8h.html">DifferentialEvolution.h</a></div><div class="ttdoc">Header-only Differential Evolution (DE) for controller parameter tuning.</div></div>
 <div class="ttc" id="aDiscreteADRC_8h_html"><div class="ttname"><a href="DiscreteADRC_8h.html">DiscreteADRC.h</a></div><div class="ttdoc">Active Disturbance Rejection Controller - 2nd-order Linear ADRC (LADRC).</div></div>
 <div class="ttc" id="aDiscreteHinf_8h_html"><div class="ttname"><a href="DiscreteHinf_8h.html">DiscreteHinf.h</a></div><div class="ttdoc">Discrete-time Hinf controller synthesis (DGKF two-Riccati method).</div></div>

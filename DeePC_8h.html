@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Controller Toolbox: Class Members - Functions</title>
+<title>Controller Toolbox: lib/DeePC.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -47,7 +47,6 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
-</div><!-- top -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -69,22 +68,41 @@ $(function() {
 </div>
 </div>
 
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="dir_97aefd0d527b934f1d99a682da8fe6a9.html">lib</a></li>  </ul>
+</div>
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#namespaces">Namespaces</a>  </div>
+  <div class="headertitle"><div class="title">DeePC.h File Reference</div></div>
+</div><!--header-->
 <div class="contents">
-<div class="textblock">Here is a list of all functions with links to the classes they belong to:</div>
-
-<h3><a id="index_h" name="index_h"></a>- h -</h3><ul>
-<li>hankelColumns()&#160;:&#160;<a class="el" href="classctrl_1_1DeePC.html#ab4d6f3e6c16b5a15e828554fdb02a67b">ctrl::DeePC</a></li>
-<li>has()&#160;:&#160;<a class="el" href="classctrl_1_1ControllerRegistry.html#a991c170b13d7a0c9b3a93bc72c09adaf">ctrl::ControllerRegistry</a></li>
-<li>hasAlgebraicConstraint()&#160;:&#160;<a class="el" href="classctrl_1_1ExtendedKalmanFilter.html#a5afcf366af9bbbf723462858877a1d09">ctrl::ExtendedKalmanFilter</a></li>
-<li>hasDataModel()&#160;:&#160;<a class="el" href="classctrl_1_1HybridModel.html#afd41889a9dd4684a140cc5ef4629fce8">ctrl::HybridModel</a></li>
-<li>hasInternalAntiWindup()&#160;:&#160;<a class="el" href="classctrl_1_1DiscretePID.html#a84d600b24d5cdfb545ca5a1204c9a9b4">ctrl::DiscretePID</a>, <a class="el" href="classctrl_1_1IController.html#ad3147fb76b4d9ed978f58737e521a50b">ctrl::IController</a></li>
-<li>hasObserver()&#160;:&#160;<a class="el" href="classctrl_1_1IController.html#a465690c69f9da6a0dffffbe6d50808fb">ctrl::IController</a></li>
-<li>hasPoleInDomain()&#160;:&#160;<a class="el" href="classctrl_1_1PadeApproximator.html#ae3ec858ffcd1f787477b850c567886c8">ctrl::PadeApproximator</a></li>
-<li>HybridModel()&#160;:&#160;<a class="el" href="classctrl_1_1HybridModel.html#a938ed997209f3720c89b3ee0c774c086">ctrl::HybridModel</a></li>
-<li>hybridModel()&#160;:&#160;<a class="el" href="classctrl_1_1HybridMPC.html#a7401707fa33bd4924ab9c9039465963c">ctrl::HybridMPC</a></li>
-<li>HybridModelTrainer()&#160;:&#160;<a class="el" href="classctrl_1_1HybridModelTrainer.html#a41fe1cd008e052a969032c3078f85372">ctrl::HybridModelTrainer</a></li>
-<li>HybridMPC()&#160;:&#160;<a class="el" href="classctrl_1_1HybridMPC.html#aa8b18195f20dedb098bf682805856e7d">ctrl::HybridMPC</a></li>
-</ul>
+<div class="textblock"><code>#include &quot;<a class="el" href="IController_8h_source.html">IController.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="ControllerRegistry_8h_source.html">ControllerRegistry.h</a>&quot;</code><br />
+<code>#include &lt;Eigen/Dense&gt;</code><br />
+<code>#include &lt;deque&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;stdexcept&gt;</code><br />
+</div>
+<p><a href="DeePC_8h_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structctrl_1_1DeePCParams.html">ctrl::DeePCParams</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuning parameters for the <a class="el" href="classctrl_1_1DeePC.html" title="Data-Enabled Predictive Control (DeePC) - SISO.">DeePC</a> controller.  <a href="structctrl_1_1DeePCParams.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classctrl_1_1DeePC.html">ctrl::DeePC</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data-Enabled Predictive Control (<a class="el" href="classctrl_1_1DeePC.html" title="Data-Enabled Predictive Control (DeePC) - SISO.">DeePC</a>) - SISO.  <a href="classctrl_1_1DeePC.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespacectrl" id="r_namespacectrl"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacectrl.html">ctrl</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
