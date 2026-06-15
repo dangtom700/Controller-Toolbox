@@ -90,6 +90,7 @@ private:
     Eigen::VectorXd dJ_dpre1_;  // n_h
     Eigen::MatrixXd dW1_;       // n_h * 3
     Eigen::VectorXd db1_;       // n_h
+    Eigen::VectorXd h_;         // n_h - hidden activation workspace (eliminates per-step heap alloc)
 
     // Runtime state
     double e_prev_  = 0.0;

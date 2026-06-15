@@ -11,11 +11,7 @@ Plant: double integrator  x[k+1] = A*x[k] + B*u[k],  y = x[0] (position)
 """
 
 import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'bindings'))
-if sys.platform == "win32" and hasattr(os, "add_dll_directory"):
-    for _p in [r"C:\msys64\mingw64\bin"]:
-        if os.path.isdir(_p):
-            os.add_dll_directory(_p)
+import _setup_bindings  # noqa: F401
 
 try:
     import ctrl_toolbox as ctrl

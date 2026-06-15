@@ -73,6 +73,7 @@ public:
     explicit FeedforwardController(const StateSpace &ff_model)
         : model_(ff_model),
           x_(Eigen::VectorXd::Zero(ff_model.stateSize())),
+          rv_(Eigen::VectorXd::Zero(ff_model.inputSize())),
           Ts_(ff_model.Ts)
     {}
 
@@ -84,10 +85,9 @@ public:
      */
     double compute(double r) override
     {
-        Eigen::VectorXd rv(model_.inputSize());
-        rv.fill(r);
-        const double u_ff = (model_.C * x_ + model_.D * rv)(0);
-        x_ = model_.A * x_ + model_.B * rv;
+        rv_.fill(r);
+        const double u_ff = (model_.C * x_ + model_.D * rv_)(0);
+        x_ = model_.A * x_ + model_.B * rv_;
         notifyObserver(u_ff, r);   // (u, signal) convention: u_ff is output, r is input
         return u_ff;
     }
@@ -123,6 +123,7 @@ public:
 private:
     StateSpace       model_;
     Eigen::VectorXd  x_;
+    Eigen::VectorXd  rv_;  ///< Pre-allocated input broadcast vector; avoids per-step heap alloc.
     double           Ts_;
 };
 

@@ -16,11 +16,8 @@ from typing import Optional
 # --- Import ctrl_toolbox from project root ---
 _THIS = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(os.path.dirname(os.path.dirname(_THIS)))
-sys.path.insert(0, os.path.join(_ROOT, 'build', 'bindings'))
-if sys.platform == 'win32' and hasattr(os, 'add_dll_directory'):
-    for _p in [r'C:\msys64\mingw64\bin']:
-        if os.path.isdir(_p):
-            os.add_dll_directory(_p)
+sys.path.insert(0, _ROOT)
+import _setup_bindings  # noqa: F401
 
 try:
     import ctrl_toolbox as ctrl

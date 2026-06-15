@@ -94,7 +94,19 @@ public:
     /** @brief Sample time inherited from the wrapped controller. */
     double sampleTime() const override { return inner_->sampleTime(); }
 
-    /** @brief The output that will be delivered on the next compute() call. */
+    /**
+     * @brief The output held in the one-step delay buffer.
+     *
+     * This is the value that was **returned** at the most recent compute() call
+     * (the "last output" in the traditional sense), and is also the value that
+     * **will be returned** at the next compute() call - because the one-step
+     * delay means the inner controller's current result is only released after
+     * one more sample.  The two descriptions are equivalent:
+     * @code
+     *   lastOutput() == u_out at the previous compute()
+     *               == u_out at the NEXT compute()  (before it is overwritten)
+     * @endcode
+     */
     double lastOutput() const { return u_delayed_; }
 
     /** @brief Read-only access to the inner controller. */

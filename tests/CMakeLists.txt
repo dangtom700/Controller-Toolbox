@@ -201,7 +201,16 @@ target_link_libraries(test_sotec_regression PRIVATE
 )
 target_compile_features(test_sotec_regression PRIVATE cxx_std_20)
 
+# -- Embedded subset tests (DIST-2) ------------------------------------------
+# No Eigen dependency: links only Catch2. Verifies header-only embedded subset
+# compiles and behaves correctly with float and double instantiations.
+add_executable(test_embedded_subset test_embedded_subset.cpp)
+target_link_libraries(test_embedded_subset PRIVATE Catch2::Catch2WithMain)
+target_include_directories(test_embedded_subset PRIVATE ${CMAKE_SOURCE_DIR})
+target_compile_features(test_embedded_subset PRIVATE cxx_std_17)
+
 enable_testing()
+catch_discover_tests(test_embedded_subset)
 catch_discover_tests(test_catch2_pilot)
 catch_discover_tests(test_catch2_advanced)
 catch_discover_tests(test_tugsim_regression)

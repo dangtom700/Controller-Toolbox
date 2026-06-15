@@ -217,7 +217,7 @@ private:
     ParticleMeasFn         h_;
 
     std::vector<Eigen::VectorXd> particles_; ///< Current particle set (N * n).
-    Eigen::VectorXd              w_;          ///< Normalised log-sum-exp weights (N).
+    Eigen::VectorXd              w_;          ///< Normalised probability weights (N), each in [0, 1], sum = 1.
 
     Eigen::MatrixXd L_Q_; ///< Cholesky of Q for noise sampling.
     Eigen::MatrixXd R_inv_; ///< R^{-1} for likelihood evaluation.

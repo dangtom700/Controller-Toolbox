@@ -27,7 +27,7 @@ Read both compact files for tribal knowledge before making any changes to contro
 | **H4** | `HybridModelTrainer` — hyperopt for `f_data` component | LOW | **Done (Part 53)** |
 | **D1** | Mismatch Detector — CUSUM on KF/MHE innovation | LOW | **Done (Part 54)** |
 | **D2** | Digital Twin Lite Python app | LOW | Open |
-| **C2** | 9 spec-only stubs (BEMS + MEMS no blocker; others need plant design); **DeePC added** — `lib/DeePC.{h,cpp}` confirmed absent (audit 2026-06-13); README + cheatsheets list it as implemented — update those if/when files land | MED | Open |
+| **C2** | 8 spec-only stubs remain (BEMS + MEMS no blocker; DustControl/ModularEvap/SoftRobot/ControlTheory need plant-model design; Bioreactor/Nuclear thin specs). **DeePC closed (Part 57)** — `lib/DeePC.{h,cpp}` confirmed present and fully smoke-tested. | MED | Open |
 | **C3** | Active Suspension 2-DOF: add `GAOptPIDCtrl` / `PSOOptPIDCtrl` / `DEOptPIDCtrl` using new lib/ GA/PSO/DE optimisers; 15→18 controllers, 75→90 runs | MED | **Done (Part 55)** |
 | **C4** | SMISMO: modify plant for variable P_s; add `DOBEnergyCtrl` (Chen 2018 Eq. 29-30 DOB + adaptive supply pressure); 12→13 controllers, 60→65 runs | MED | **Done (Part 55)** |
 | **C5** | EHFS: add `HinfODFCCtrl` + `HinfCascadeCtrl` (DiscreteHinf ODFC + local nLMS); 12→14 controllers, 60→70 runs | MED | **Done (Part 55)** |
@@ -42,6 +42,218 @@ Read both compact files for tribal knowledge before making any changes to contro
 ---
 
 *(New parts appended below as work proceeds.)*
+
+---
+
+## Part 57E — Audit Iter E + DIST-1/2/4/5 — 2026-06-14
+
+### Audit Iteration E (13 code changes, 29 verified/deferred — all 84 findings now closed)
+
+All remaining audit findings from Iterations A–D were swept. See `docs/audit_report.md` Part 57E
+section for full detail. Key code changes:
+- **#46** `EchoStateNetwork.h` `W_out_` comment corrected (`n_out×n_res`, not `n_out×(n_res+n_in)`)
+- **#54** `DiscreteSMC.h` `slidingSurface()` docstring clarified (returns s[k-1], not current s[k])
+- **#55** `ParticleFilter.h` `w_` comment corrected (normalised probabilities, not log-sum-exp)
+- **#59** `FeedforwardController.h` `rv_` promoted to pre-allocated member (no per-step heap alloc)
+- **#64/#66** `test_catch2_advanced.cpp`: added `[pid]` tests (Kb anti-windup, N-filter decay, computeDoM comparative)
+- **#65** `test_catch2_advanced.cpp`: added `[repetitive]` edge-case tests (invalid period, NaN hold-last, setParams reset)
+- **#67** `test_catch2_advanced.cpp`: added `[extremum_seeker]` convergence test (J=(θ-2)²)
+- **#68** `test_catch2_advanced.cpp`: renamed DynaController test + added bounded-range assertions
+- **#69** `controllers_bindings.cpp`: `DynaController::inner_controller()` changed to `return_value_policy::copy`
+- **#71** `smoke_test.py`: GreyBoxEstimator predict() shape assertion now checks both dimensions
+- **#72** Created `_setup_bindings.py` (repo root); removed inline DLL block from 19 `examples/python/` + 9 `case-study/sim/` files
+- **#74/#75** `doc.yml`: peaceiris action pinned to SHA `4f9cc6ed`; added `permissions: contents: write`
+
+### DIST-1 — CMake install targets + vcpkg port (complete)
+
+- **`lib/CMakeLists.txt`** — Added `EXPORT ControllerToolboxTargets` + `configure_package_config_file` +
+  `write_basic_package_version_file` + install rules for cmake config files.
+  Consumers use: `find_package(ControllerToolbox REQUIRED)` then `target_link_libraries(app ctrl::controller_toolbox)`
+- **`cmake/ControllerToolboxConfig.cmake.in`** — Package config template; propagates Eigen3 dependency.
+- **`cmake/ports/ctrl_toolbox/vcpkg.json`** — vcpkg port manifest (eigen3 dependency, python-bindings feature).
+- **`cmake/ports/ctrl_toolbox/portfile.cmake`** — Standard `vcpkg_from_git` + configure + install pattern.
+  *Note: SHA512 must be updated with actual hash after first v*.*.* tag push.*
+
+### DIST-2 — Embedded header-only subset (complete)
+
+- **`lib/embedded/DiscreteIntegrator.h`** — `template<Scalar>` backward-Euler integrator; `integrate()`, `value()`, `reset()`, `set()`.
+- **`lib/embedded/FixedRateFilter.h`** — `template<Scalar, Order>` compile-time-order IIR LPF; backward Euler, stack state.
+- **`lib/embedded/RingBuffer.h`** — `template<T, N>` fixed-capacity FIFO ring buffer; `push()`, `pop()`, `peek()`, `clear()`.
+- **`lib/embedded/EmbeddedControllers.h`** — Umbrella include: re-exports `BasicPID.h`, `BasicSMC.h` + all 3 new files.
+- **`examples/embedded/main.cpp`** — Demo: zero Eigen includes; verify with `grep -r "Eigen" examples/embedded/main.cpp`.
+- **`tests/test_embedded_subset.cpp`** — 13 Catch2 `[basic_pid_embedded]`/`[basic_smc_embedded]`/`[discrete_integrator]`/`[fixed_rate_filter]`/`[ring_buffer]` tests; links only Catch2 (no controller_toolbox Eigen dep).
+- **`CMakeLists.txt`** — Added `CTRL_BUILD_EMBEDDED_ONLY` option (early `return()` skips all Eigen targets) and
+  `CTRL_FETCH_EIGEN_IF_MISSING` option (FetchContent fallback for CI wheel builds).
+- **`tests/CMakeLists.txt`** — Added `test_embedded_subset` target (no Eigen, C++17, Catch2 only).
+
+### DIST-4 — PyPI wheel distribution (complete)
+
+- **`pyproject.toml`** — `scikit-build-core` backend; `cmake.args` enable Python bindings, disable tests;
+  `CTRL_FETCH_EIGEN_IF_MISSING=ON` for CI containers. Triggered on `v*.*.*` tag.
+- **`.github/workflows/publish.yml`** — cibuildwheel v2.21.3 (pinned SHA); builds cp39–cp312 on
+  Linux/Windows/macOS; skips musl and 32-bit; publishes via PyPI trusted publishing (OIDC).
+  *Requires "Trusted Publisher" configured in PyPI settings before first push.*
+
+### DIST-5 — GitHub Release workflow (complete)
+
+- **`.github/workflows/release.yml`** — Triggered on `v*.*.*` tag; builds Release on 3 platforms;
+  `cmake --install` collects lib + headers + cmake config; zips and attaches to GitHub Release.
+  Uses softprops/action-gh-release pinned to SHA `c062e08b` (v2.0.8).
+
+---
+
+## Part 59 — Cross-Platform Scripts + Case Study Tracker — 2026-06-15
+
+### PLT-1 — `setup.sh` (Linux/macOS bootstrap)
+
+Mirrors `setup.ps1` exactly. Five steps:
+
+1. **Toolchain check** — accepts `gcc` or `clang`; cmake, ninja via `_need()`; eigen3 by
+   header-path scan (`/usr/include/eigen3`, `/opt/homebrew/...`). Non-fatal eigen3 miss:
+   emits `CTRL_FETCH_EIGEN_IF_MISSING=ON` to cmake (FetchContent fallback).
+   Per-distro install hints printed for apt/dnf/pacman/brew.
+2. **Conda check** — fails clearly with Miniconda install URL if not on PATH.
+3. **Env create/update** — `conda env create -f environment.yml` (first time) or
+   `conda env update --prune` (existing). Skipped by `--skip-conda-create`.
+4. **Bindings build** — `conda run -n soft_robotics -- cmake -G Ninja ... --target ctrl_toolbox`.
+   Locates built `.so`/`.dylib` under `build/bindings/`; fails clearly if absent.
+5. **Smoke test** — `conda run -n soft_robotics -- python bindings/smoke_test.py`.
+6. **Optional full build** — calls `compile.sh` when `--full-build` passed.
+
+Staged with `git update-index --chmod=+x` (100755 mode) → lands executable on Linux clone.
+
+### PLT-1 — `compile.sh` (Linux/macOS full build)
+
+Mirrors `compile.bat`. Bash array of all 120 targets in dependency order; `cmake --build`
+called once per target (sequential, no `--parallel`). Exits on first failure with clear error.
+Flag: `--no-config` to skip cmake re-configure.
+
+Staged with `git update-index --chmod=+x` (100755 mode).
+
+### TRK-1 — `tools/case_study_tracker.py` + `docs/case_study_status.md`
+
+Completed the tracker stub. Key fixes/additions:
+
+- **`detect_language()`** — fixed extension comparison (was comparing `'cpp'` vs `'.cpp'`);
+  fixed division-by-zero when no source files found; removed unreachable `return "mixed"`.
+  Now follows 3-step spec: (1) check `sim/main.py` or `sim/src/main.cpp`; (2) depth heuristic
+  on `sim/src/` existence; (3) extension count across whole tree.
+- **`detect_status()`** — new: Complete (sim+logs+config+HTML), On-going (sim+logs+config),
+  Incomplete (PDF or README on disk), Not started (default).
+- **`find_pdf_link()`** / **`find_readme_link()`** — return `docs/`-relative markdown links.
+- **`main()`** — walks `case-study/*/`; writes `docs/case_study_status.md` (Markdown table).
+
+**Output (2026-06-15):** 23 studies detected.
+
+| Status | Count | Examples |
+|--------|-------|---------|
+| On-going | 16 | All 9 C++ studies + 7 Python-only studies |
+| Incomplete | 7 | BEMS, SoftRobot + 5 newly discovered (see below) |
+
+Language breakdown: 9 C++, 7 Python, 7 undetermined (spec-only stubs with no source files).
+
+### Reconciliation finding: 5 previously undocumented stubs
+
+The tracker scan revealed 5 case-study directories on disk that were **not in CLAUDE.md**:
+
+| Directory | Has PDF | Has README | Notes |
+|-----------|---------|-----------|-------|
+| `6-DOF Stewart Platform Vessel Motion Simulator/` | ✓ | ✓ | Stewart platform 6-DOF kinematics |
+| `Heavy-Duty Parallel-Serial Hydraulic Manipulator VDC/` | ✓ | ✓ | VDC control; hydraulic parallel-serial arm |
+| `Hybrid-Driven Tendon-Pneumatic Soft Manipulator/` | ✓ | ✓ | Adaptive kinematic + stiffness control |
+| `Underwater Robotic Manipulator Trajectory Tracking/` | ✓ | ✓ | Implicit rigid TubeMPC + ASMC |
+| `Unmanned Surface Vehicle Wave-Predictive Attitude Control/` | ✓ | ✓ | Short-time wave prediction MPC |
+
+All added to the CLAUDE.md spec-only stubs table. Total stubs updated from 8 → 12
+(7 on-disk with PDF+README, 5 plan-only with no directory yet).
+
+### Non-obvious caveats (Part 59)
+```
+setup.sh eigen3 check      -> non-fatal; emits CTRL_FETCH_EIGEN_IF_MISSING=ON when headers absent
+setup.sh BINDING detection -> find build/bindings -name 'ctrl_toolbox*.so' -o -name '*.dylib'
+compile.sh --no-config     -> skips cmake configure; build/ must already exist
+case_study_tracker.py ROOT -> "case-study" relative path; must run from repo root
+detect_status "Complete"   -> requires .html report file in study dir (generate_report.py output)
+detect_language step 3     -> extension count only reaches here when no sim/ dir exists
+```
+
+---
+
+## Part 58 — ANA-1..7 + RPT-1 Analysis Pipeline + Test Bug Fixes — 2026-06-15
+
+### Analysis pipeline (`tools/`) — ANA-1 through ANA-7 + RPT-1
+
+All analysis and reporting tools are now implemented as standalone CLI scripts under `tools/`.
+
+**ANA-1 — `tools/metrics.py`** (prerequisite module)
+- `compute_metrics(t, y, u, ref)` → dict with `iae`, `rms_error`, `settle_time_s`, `overshoot_pct`,
+  `max_u`, `energy_var`. Settling uses 2% band + 10-sample hysteresis.
+- `compute_metrics_from_df(df)` — heuristic column detection; works on any case-study CSV.
+- `extract_final_iae(df)` — reads last-row IAE from `iae_cumulative`, `IAE_y1..y3`, or computes from `error`.
+
+**ANA-1 — `tools/compare_controllers.py`** (T7 re-implementation + ANA-1 extension)
+- Auto-discovers `case-study/*/logs/run_*.csv`.
+- Parses `run_{scenario}_{controller}.csv` naming convention (last `_`-token = controller).
+- Flags: `--study`, `--scenario`, `--controller`, `--metric` (iae/rms_error/...), `--sort`, `--wide`, `--csv`.
+
+**ANA-2 — `tools/monte_carlo.py` + `tools/mc_plots.py`**
+- Imports study `sim/main.py` and calls `run_single(ctrl_name, perturbed_params)` if present.
+- Perturbs `plant_params.json` numeric keys by `N(0, sigma)` per sample.
+- Writes `mc_summary_*.csv`; `mc_plots.py` produces violin and scatter PNGs.
+
+**ANA-3 — `tools/fault_injector.py` + `tools/fault_sweep.py` + `tools/fault_plots.py`**
+- `FaultInjector`: composable sensor/actuator fault injection (bias, noise, loss, stuck, setpoint step).
+- `fault_sweep.py` calls `sim.run_with_fault(ctrl_name, FaultSpec)` if present; writes `fault_sweep_*.csv`.
+- `fault_plots.py` produces heatmaps and degradation curves per fault kind.
+
+**ANA-4 — `tools/anova.py`**
+- One-way ANOVA (scipy `f_oneway`) + Tukey HSD post-hoc (statsmodels `pairwise_tukeyhsd`).
+- Reads any CSV with `controller` + metric column. Reports F, p, significance, and pairwise table.
+
+**ANA-5 — `tools/wcet_report.py`**
+- Discovers `wcet_*.csv` files (produced by optional timing instrumentation in `sim/main.py`).
+- Aggregates mean, median, p99, WCET (q=0.999) per controller; writes `wcet_summary.csv` + optional bar chart.
+- Includes instrumentation howto printed when no files found.
+
+**ANA-6 — `tools/model_validation.py`**
+- Uses `ctrl.GreyBoxEstimator` to fit ODE parameters to logged data; reports NRMSE.
+- Studies must expose `grey_box_model()` → `(ode_fn, h_fn, x0, param_names, bounds)` in `sim/main.py`.
+- Graceful fallback (IAE proxy) when hook is missing.
+
+**ANA-7 — `tools/mu_analysis.py` + `tools/mu_plots.py`**
+- Identifies discrete ARMA(2,2) model from each CSV; evaluates peak singular value of S(z) and T(z).
+- Peak |T(z)| is an unstructured mu upper bound. Writes `mu_summary.csv`; plots bar + S vs T scatter.
+
+**RPT-1 — `tools/generate_report.py`**
+- Single self-contained HTML with 8 sections: Summary, Comparison, Heatmap, MC, Fault, ANOVA, WCET, Mu.
+- Uses Plotly (inline CDN) for interactive charts. Gracefully degrades to plain tables if plotly absent.
+- `--out report.html --open` writes and opens in browser.
+
+### Test bug fixes
+
+**`lib/RepetitiveController.cpp` — `setParams()` did not reset `v_now_`**
+- When `periodSteps` changes, `v_buf_.assign(...)` cleared the buffer to zeros but `v_now_` was not
+  updated. `correction()` returned the stale pre-change value. Fixed: added `v_now_ = 0.0` inside the
+  `if (p.periodSteps != p_.periodSteps)` block.
+
+**`tests/test_catch2_advanced.cpp` — `computeDoM` test measured wrong signal**
+- Test "DiscretePID computeDoM gives strictly lower peak output" measured plant output `y`, not
+  control signal `u`. For a first-order plant, DoE gives higher `u[0]` (derivative kick) but that
+  does not reliably translate to lower `max(y)` across all plants/gains. Fixed: test now measures
+  `peak_u` (peak control signal). DoM provably eliminates the derivative kick in `u`, so
+  `peak_dom_u < peak_standard_u` holds unconditionally for any `Kd > 0`.
+- Test renamed to "DiscretePID computeDoM gives strictly lower peak control signal than compute on step".
+
+### Non-obvious API facts (Part 58)
+```
+tools/compare_controllers.py  -> auto-discovers CSVs; controller = last _-token in filename
+tools/monte_carlo.py          -> requires run_single(ctrl_name, params) hook in sim/main.py
+tools/fault_sweep.py          -> requires run_with_fault(ctrl_name, FaultSpec) hook
+tools/model_validation.py     -> requires grey_box_model() in sim/main.py + ctrl_toolbox binding
+tools/wcet_report.py          -> discovers wcet_*.csv; prints instrumentation guide if none found
+tools/generate_report.py      -> requires plotly (pip install plotly) for interactive charts
+RepetitiveController.setParams -> now also resets v_now_ when periodSteps changes
+```
 
 ---
 
@@ -463,3 +675,111 @@ make_lqr_controller         -> Python: ctrl.make_lqr_controller(plant_ss, lqr_pa
                                state_fn, ref_fn=None); callables must return np.ndarray
 HybridModel.dynamicsFunc()  -> DEPRECATED; use ctrl.HybridModel.makeDynamicsFunc(model_sptr)
 ```
+
+---
+
+## Part 57 — Audit Iteration A Verification — 2026-06-14
+
+No new algorithms or case-study logic added. All 17 Iteration A findings from `docs/audit_report.md`
+(2026-06-13) were verified as **already resolved** in the codebase before this session.
+
+**DeePC confirmed implemented.** The CRITICAL audit finding (#1) — `lib/DeePC.{h,cpp}` absent —
+was invalidated: both files are present. The smoke test at `bindings/smoke_test.py:1029–1050`
+asserts `ctrl.DeePC`, `ctrl.DeePCParams`, and `registry_has('deepc')`. C2 DeePC note closed.
+
+**Iteration A findings verified already resolved (no code changes needed):**
+
+| Audit # | Sev | Finding | Confirmed state |
+|---------|-----|---------|----------------|
+| 1 | CRIT | DeePC files absent | `lib/DeePC.{h,cpp}` present |
+| 2 | HIGH | DE reflection infinite loop | Cap at 20 iters + `std::clamp` already in `DifferentialEvolution.h:135` |
+| 3 | HIGH | LQR MIMO warning in NDEBUG only | No `#ifndef NDEBUG` guard in current `DiscreteLQR.h:186` |
+| 4 | HIGH | EKF LDLT unchecked | `.info() != Eigen::Success` guard + flag already at `ExtendedKalmanFilter.cpp:127` |
+| 5 | HIGH | L1 dead `use_compute_y_` field | Field absent from `L1AdaptiveController.h` |
+| 6 | HIGH | HybridModel raw-this capture | `[[deprecated(...)]]` already on `dynamicsFunc()` at `HybridModel.h:170` |
+| 13 | HIGH | DiscreteLQG missing `shared_ptr` holder | `shared_ptr<ctrl::DiscreteLQG>` already at `controllers_bindings.cpp:410` |
+| 14 | HIGH | 8 ML/optimizer classes missing `shared_ptr` holder | All 10 classes (AutoTuner, BayesianOptimizer, GA, PSO, DE, SINDy, KoopmanEDMD, GP, ESN, ILC) already have `shared_ptr<T>` |
+| 19 | MED | HybridMPC training buffer unbounded | FIFO eviction (`max_buffer_` cap) already at `HybridMPC.cpp:34` |
+| 20 | MED | GainScheduled `lowerIndex()` unchecked empty | `assert(!schedule_.empty())` already at `GainScheduledController.h:234` |
+| 21 | MED | CEM silent zero return | `#ifndef NDEBUG` clog warning already at `CEMController.cpp:106` |
+| 34 | MED | Stale Fuzzy TODO dead block | Block absent from `controllers_bindings.cpp` |
+| 36 | MED | SubspaceID TODO stub dead block | Replaced with comment at `estimation_bindings.cpp:433` |
+| 70 | LOW | 4 classes not smoke-tested | `CUSUMChart`, `EWMAChart`, `SmithPredictor`, `ExtremumSeeker` asserted at `smoke_test.py:1022–1025` |
+| 73 | LOW | `cxx_std_17` in examples CMake | `cxx_std_20` already in `examples/CMakeLists.txt:6` |
+| 76 | LOW | `.gitignore` missing patterns | `*.pyd`, `*.exe`, `CMakeCache.txt`, `CMakeFiles/`, `.idea/`, `case-study/**/logs/` all present |
+| 77 | LOW | `/tools` gitignored | `/tools` is not gitignored; `!/tools/*.py` negation is superfluous but harmless |
+
+**Docs updated this session:**
+- `docs/audit_report.md`: resolution status table appended (Part 57 section)
+- `docs/cumulative_bug_report.md`: C2 DeePC note closed; Part 57 section added
+- `CLAUDE.md`: Open Items updated to Part 57; Part 57 Done block added
+
+**Remaining open:** 67 audit findings — #7–12 (HIGH Performance), #15–18, #22–33, #35, #37–69,
+#71–72, #74–75, #78–84. See Iterations B–E in `prompt/prompt_enhanced.txt` for the work order.
+
+---
+
+## Part 57B — Audit Iteration B (Performance Pre-allocation) — 2026-06-14
+
+**Iteration B complete.** 13 per-step heap allocation findings checked; 9 already resolved,
+4 required code changes. All 4 are now fixed:
+
+| Finding | Controller | Code change |
+|---------|-----------|-------------|
+| #8 MHE `estimate()` | `MovingHorizonEstimator` | Added `A_pow_ws_` (pre-computed A-power table, eliminates N matrix mults/allocs per step), `Qinv_`/`Rinv_` (cached LDLT inverses, eliminates 2 LDLT solves per step), `CTPsi_ws_`/`H_eff_ws_` (scratch matrices, eliminate 2 large allocs per step). Zero heap allocs from these 5 sources in steady-state. |
+| #24 CEM `rolloutCost()` | `CEMController` | Added `mutable x_roll_`, `e_roll_`, `u_k_roll_`; eliminates `VectorXd(n)` + `VectorXd(p)` inside the Np-step rollout loop (hottest allocation path in CEM). `computeRef()` uses pre-allocated `u_k_` for return value. |
+| #26 NeuralPID `compute()` | `NeuralPID` | Added `Eigen::VectorXd h_` member; eliminates per-control-step `VectorXd(n_hidden)` hidden activation alloc. |
+| #48 KoopmanEDMD `liftRBF()` | `KoopmanEDMD` | `liftRBF()` uses pre-allocated `mutable lift_psi_` instead of local `VectorXd psi(n_lifted_)`. |
+
+**Non-obvious caveats from Part 57B:**
+```
+CEMController mutable workspaces  -> x_roll_/e_roll_ lazy-sized on first computeRef() call
+                                      (state/output dims not known at construction time)
+MHE CTPsi_ws_/H_eff_ws_ resize()  -> resize(dz,dz) is no-op in steady-state (dz == dz_max);
+                                      ramp-up (first N steps) still reallocates as dz grows —
+                                      this is correct and identical to original behaviour
+KoopmanEDMD liftRBF vs liftPoly   -> both now share mutable lift_psi_; only one path is
+                                      active per call (Dict::RBF dispatches to liftRBF,
+                                      Dict::PolyDeg1/2 dispatches to liftPoly) — no aliasing
+```
+
+**Audit progress:** 17 (Iter A) + 13 (Iter B) = 30 findings closed. 63 remain (Iter C-E, mostly LOW/MED).
+**Docs updated:** `docs/audit_report.md` Part 57B table appended; this section added.
+
+---
+
+## Part 57C — Audit Iteration C (Correctness Sweep) — 2026-06-14
+
+**Iteration C complete.** 12 correctness findings checked (#9, #15–18, #22, #27–28, #30–33); 10 already resolved, 2 required code changes:
+
+| Finding | Controller / File | Code change |
+|---------|------------------|-------------|
+| #22 MHE general `EigenSolver` on symmetric PD Hessian | `MovingHorizonEstimator` | `Eigen::SelfAdjointEigenSolver` at both `estimate()` call sites; avoids complex arithmetic on guaranteed-real eigenvalues |
+| #33 `MismatchDetector::update(VectorXd)` zero-size undocumented | `MismatchDetector.h` | `@note` added explaining zero-size → 0 fed to CUSUM (no alarm update) and `sqrt(max(p,1))` guards division-by-zero |
+
+**Docs updated:** `docs/audit_report.md` Part 57C table appended; this section added.
+
+---
+
+## Part 57D — Audit Iteration D (LOW-severity batch) — 2026-06-14
+
+**Iteration D complete.** 9 LOW-severity findings checked (#44, #45, #47, #50, #51, #53, #56, #58, #60); 5 already resolved/deferred, 4 required code changes:
+
+| Finding | Controller / File | Code change |
+|---------|------------------|-------------|
+| #44 `ComputationalDelayWrapper::lastOutput()` naming ambiguity | `lib/ComputationalDelayWrapper.h` | Expanded docstring to clarify "last returned" == "next to be returned" equivalence under one-step delay semantics |
+| #45 `EchoStateNetwork::extendedState()` dead private method | `lib/EchoStateNetwork.{h,cpp}` | Removed declaration + definition; method was never called after Part 31 |
+| #51 `UnscentedKalmanFilter::sigmaPoints()` allocs n×(2n+1) per call | `lib/UnscentedKalmanFilter.{h,cpp}` | Added `mutable Eigen::MatrixXd sigma_pts_ws_` (sized in constructor); `sigmaPoints()` writes into it and returns `const Eigen::MatrixXd&`; callers in `predict()`/`update()` bind by const ref — eliminates two matrix allocs per `step()` |
+| #56 `findEquilibrium()` silent 1000× tolerance fallback | `lib/AutoGainScheduler.h` | Added `#ifndef NDEBUG` `std::clog` warning when the `tol * 1e3` fallback fires; added `#include <iostream>` |
+
+**Non-obvious caveats from Part 57D:**
+```
+UKF sigma_pts_ws_          -> mutable workspace; sigmaPoints() returns const&;
+                               callers must bind const Eigen::MatrixXd& (not by value)
+DiscreteADRC #58 deferred  -> runtime assert for "setReference() never called"
+                               would fire spuriously in ControllerStack (r_=0 intentional);
+                               @warning in header docstring is the correct guard
+```
+
+**Audit progress:** 51 total findings closed across Iterations A–D. 42 remain (Iter E).
+**Docs updated:** `docs/audit_report.md` Part 57D table appended; this section added.

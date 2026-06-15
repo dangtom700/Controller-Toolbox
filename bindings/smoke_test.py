@@ -839,7 +839,8 @@ assert _p_hat.shape == (2,), "GreyBoxEstimator params wrong shape"
 assert abs(_p_hat[0] - _true_a) < 0.3, f"GreyBoxEstimator a estimate off: {_p_hat[0]:.3f}"
 assert abs(_p_hat[1] - _true_b) < 0.3, f"GreyBoxEstimator b estimate off: {_p_hat[1]:.3f}"
 _Y_hat = _gbe.predict(_npgb.zeros(1), _U_gb)
-assert _Y_hat.shape == (1, _N_gb), "GreyBoxEstimator predict wrong shape"
+assert _Y_hat.shape[0] == 1 and _Y_hat.shape[1] == _N_gb, \
+    f"GreyBoxEstimator predict() shape mismatch: got {_Y_hat.shape}, expected (1, {_N_gb})"
 assert _npgb.all(_npgb.isfinite(_Y_hat)), "GreyBoxEstimator predict contains non-finite values"
 assert ctrl.registry_has('grey_box_estimator'), "grey_box_estimator not registered"
 print('GreyBoxEstimator (E1) smoke test passed.')

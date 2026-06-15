@@ -49,6 +49,7 @@ NeuralPID::NeuralPID(const Params& p) : p_(p)
     dJ_dpre1_.resize(p_.n_hidden);
     dW1_.resize(p_.n_hidden, 3);
     db1_.resize(p_.n_hidden);
+    h_.resize(p_.n_hidden);
 }
 
 // ---------------------------------------------------------------------------
@@ -79,9 +80,8 @@ double NeuralPID::compute(double error)
 
     Eigen::Vector3d z(e, e_dot, e_int_);
 
-    // Forward pass
-    Eigen::VectorXd h;
-    Eigen::Vector3d gains = forward(z, h);
+    // Forward pass (h_ is a pre-allocated member; no per-step heap alloc)
+    Eigen::Vector3d gains = forward(z, h_);
     Kp_ = gains(0);
     Ki_ = gains(1);
     Kd_ = gains(2);
@@ -98,19 +98,19 @@ double NeuralPID::compute(double error)
     Eigen::Vector3d dJ_dgains = dJ_du * du_dgains;
 
     // dgains_i/dpre_i = softplus'(pre_i)
-    Eigen::Vector3d pre = W2_ * h + b2_;
+    Eigen::Vector3d pre = W2_ * h_ + b2_;
     Eigen::Vector3d sp_d = pre.unaryExpr([](double x) { return 1.0 / (1.0 + std::exp(-x)); });
 
     // dJ/dpre = dJ_dgains .* sp_d
     Eigen::Vector3d dJ_dpre = dJ_dgains.array() * sp_d.array();
 
     // Gradients for W2, b2 (into pre-allocated members)
-    dW2_.noalias() = dJ_dpre * h.transpose();
+    dW2_.noalias() = dJ_dpre * h_.transpose();
     db2_ = dJ_dpre;
 
     // Backprop through hidden: dJ/dh = W2' * dJ_dpre,  dJ/dpre1 = dJ/dh .* (1-h^2)
     dJ_dh_.noalias()    = W2_.transpose() * dJ_dpre;
-    dJ_dpre1_.array()   = dJ_dh_.array() * (1.0 - h.array().square());
+    dJ_dpre1_.array()   = dJ_dh_.array() * (1.0 - h_.array().square());
 
     dW1_.noalias() = dJ_dpre1_ * z.transpose();
     db1_ = dJ_dpre1_;

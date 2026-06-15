@@ -67,7 +67,7 @@ jobs:
 
       - name: Install pybind11 (x86_64 only)
         if: matrix.arch == 'x86_64'
-        run: sudo apt-get install -y pybind11-dev python3-dev
+        run: sudo apt-get install -y pybind11-dev python3-dev python3-numpy
 
       - name: Build Python bindings (x86_64 only)
         if: matrix.arch == 'x86_64'
@@ -81,6 +81,14 @@ jobs:
       - name: Smoke test Python bindings (x86_64 only)
         if: matrix.arch == 'x86_64'
         run: python3 bindings/smoke_test.py
+
+      - name: Upload Python binding (x86_64 only)
+        if: matrix.arch == 'x86_64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ctrl-toolbox-linux-x86_64-so
+          path: build_py/bindings/ctrl_toolbox*.so
+          retention-days: 30
 
       - name: ASAN/UBSAN Debug build (x86_64 only)
         if: matrix.arch == 'x86_64'

@@ -125,6 +125,11 @@ private:
     Eigen::VectorXd              new_mu_;   ///< Elite mean update workspace (Np)
     Eigen::VectorXd              u_k_;      ///< Single-step control vector (size 1)
 
+    // Mutable rollout workspaces for rolloutCost() - avoids per-rollout heap alloc
+    mutable Eigen::VectorXd x_roll_;    ///< State trajectory workspace (n)
+    mutable Eigen::VectorXd e_roll_;    ///< Output error workspace (p)
+    mutable Eigen::VectorXd u_k_roll_;  ///< Single-step control workspace for rollout (size 1)
+
     // Cost of a single action sequence under f, starting from x0
     double rolloutCost(const Eigen::VectorXd& x0,
                        const Eigen::VectorXd& u_seq,

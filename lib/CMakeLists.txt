@@ -121,7 +121,12 @@ if(CTRL_ENABLE_ADVANCED_KALMAN)
 endif()
 
 # lib/ is the public include root: consumers write  #include "ControllerToolbox.h"
-target_include_directories(controller_toolbox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+# BUILD_INTERFACE / INSTALL_INTERFACE generator expressions are required once the
+# target is exported - CMake rejects bare source-tree paths in exported targets.
+target_include_directories(controller_toolbox PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/controller_toolbox>
+)
 target_link_libraries(controller_toolbox PUBLIC Eigen3::Eigen)
 target_compile_features(controller_toolbox PUBLIC cxx_std_20)
 
@@ -131,13 +136,40 @@ target_compile_options(controller_toolbox PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
 )
 
-# --- Install rules (consumed by pip/scikit-build and system packaging) -------
+# --- Install rules (consumed by pip/scikit-build, vcpkg, and system packaging) ---
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
 install(TARGETS controller_toolbox
+    EXPORT ControllerToolboxTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/controller_toolbox
     FILES_MATCHING PATTERN "*.h"
+)
+
+# CMake package config - lets consumers use find_package(ControllerToolbox REQUIRED)
+# then target_link_libraries(app ctrl::controller_toolbox)
+set(_cfg_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/ControllerToolbox")
+install(EXPORT ControllerToolboxTargets
+    FILE ControllerToolboxTargets.cmake
+    NAMESPACE ctrl::
+    DESTINATION ${_cfg_install_dir}
+)
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/ControllerToolboxConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/ControllerToolboxConfig.cmake"
+    INSTALL_DESTINATION ${_cfg_install_dir}
+)
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/ControllerToolboxConfigVersion.cmake"
+    VERSION "${CMAKE_PROJECT_VERSION}"
+    COMPATIBILITY SameMajorVersion
+)
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/ControllerToolboxConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/ControllerToolboxConfigVersion.cmake"
+    DESTINATION ${_cfg_install_dir}
 )

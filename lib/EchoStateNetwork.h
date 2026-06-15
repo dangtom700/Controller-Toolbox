@@ -122,7 +122,7 @@ private:
 
     Eigen::MatrixXd W_res_;   ///< n_res * n_res  (fixed, random, sparse)
     Eigen::MatrixXd W_in_;    ///< n_res * n_in   (fixed, random)
-    Eigen::MatrixXd W_out_;   ///< n_out * (n_res + n_in)  (trained)
+    Eigen::MatrixXd W_out_;   ///< n_out * n_res  (readout uses reservoir state r only, not [r; u])
 
     Eigen::VectorXd r_;       ///< Current reservoir state
 
@@ -134,7 +134,6 @@ private:
     bool fitted_ = false;
 
     void initWeights();
-    Eigen::VectorXd extendedState(const Eigen::VectorXd& u) const;
 };
 
 } // namespace ctrl

@@ -126,9 +126,14 @@ public:
 private:
     /**
      * @brief Compute 2n+1 sigma points from the current state estimate and covariance.
-     * @return Matrix of size n * (2n+1); each column is a sigma point.
+     *
+     * Writes into the pre-allocated mutable workspace @c sigma_pts_ws_ and returns a
+     * const reference to it - no per-call heap allocation in steady state.
+     *
+     * @return Const reference to an n * (2n+1) matrix; each column is a sigma point.
+     *         The reference is valid until the next call to sigmaPoints().
      */
-    Eigen::MatrixXd sigmaPoints() const;
+    const Eigen::MatrixXd& sigmaPoints() const;
 
     int n_states_, n_outputs_;
     std::function<Eigen::VectorXd(const Eigen::VectorXd &, const Eigen::VectorXd &)> f_, h_;
@@ -136,6 +141,8 @@ private:
     Eigen::VectorXd x_hat_;
     Eigen::MatrixXd P_;
     double Ts_;
+
+    mutable Eigen::MatrixXd sigma_pts_ws_; ///< Pre-allocated n * (2n+1) sigma-point workspace.
 
     double lambda_;          ///< UT scaling parameter lambda = alpha^2.(n+κ) - n.
     Eigen::VectorXd Wm_, Wc_; ///< Mean and covariance weights (2n+1), precomputed at construction.

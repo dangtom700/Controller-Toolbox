@@ -138,44 +138,43 @@ Eigen::VectorXd MovingHorizonEstimator::estimate(const Eigen::VectorXd &y,
     Psi_eff.block(0, 0, n_, n_) = Eigen::MatrixXd::Identity(n_, n_);
     C_bar_eff.block(0, 0, p_, n_) = plant_.C;
 
-    // Precompute powers of A
-    std::vector<Eigen::MatrixXd> A_pow(eff_Np1);
-    A_pow[0] = Eigen::MatrixXd::Identity(n_, n_);
-    for (int i = 1; i < eff_Np1; ++i) A_pow[i] = plant_.A * A_pow[i - 1];
-
+    // Fill effective-horizon matrices using cached A_pow_ws_ (no per-step alloc or recompute)
     for (int i = 1; i < eff_Np1; ++i) {
         // x_i: Psi block [i] col 0 = A^i (x_0 contribution)
-        Psi_eff.block(i * n_, 0, n_, n_) = A_pow[i];
+        Psi_eff.block(i * n_, 0, n_, n_) = A_pow_ws_[i];
         // w_j contributes A^{i-1-j} to x_i for j = 0..i-1
         for (int j = 0; j < i; ++j) {
             // w_j is decision variable index j+1 (after x_0)
-            Psi_eff.block(i * n_, (j + 1) * n_, n_, n_) = A_pow[i - 1 - j];
+            Psi_eff.block(i * n_, (j + 1) * n_, n_, n_) = A_pow_ws_[i - 1 - j];
         }
         // u_j contributes A^{i-1-j}*B*u_j (known, goes into Gamma_u)
         for (int j = 0; j < i; ++j) {
-            Gamma_u_eff.block(i * n_, j * m_, n_, m_) = A_pow[i - 1 - j] * plant_.B;
+            Gamma_u_eff.block(i * n_, j * m_, n_, m_) = A_pow_ws_[i - 1 - j] * plant_.B;
         }
         // C_bar block
         C_bar_eff.block(i * p_, i * n_, p_, n_) = plant_.C;
     }
 
-    // Build Hessian for effective horizon using pre-allocated workspaces
-    Eigen::MatrixXd Qinv = Q_proc_.ldlt().solve(Eigen::MatrixXd::Identity(n_, n_));
-    Eigen::MatrixXd Rinv = R_meas_.ldlt().solve(Eigen::MatrixXd::Identity(p_, p_));
+    // Use cached Qinv_ and Rinv_ (pre-computed in buildCondensedMatrices, not recomputed per step)
 
     auto H_prior = H_prior_ws_.topLeftCorner(dz, dz);
     H_prior.setZero();
     H_prior.block(0, 0, n_, n_) = P0inv_;
     for (int i = 1; i < eff_Np1; ++i)
-        H_prior.block(i * n_, i * n_, n_, n_) = Qinv;
+        H_prior.block(i * n_, i * n_, n_, n_) = Qinv_;
 
     auto R_bar = R_bar_ws_.topLeftCorner(p_ * eff_Np1, p_ * eff_Np1);
     R_bar.setZero();
     for (int i = 0; i < eff_Np1; ++i)
-        R_bar.block(i * p_, i * p_, p_, p_) = Rinv;
+        R_bar.block(i * p_, i * p_, p_, p_) = Rinv_;
 
-    Eigen::MatrixXd CTPsi = C_bar_eff.transpose() * R_bar * C_bar_eff;
-    Eigen::MatrixXd H_eff = H_prior + Psi_eff.transpose() * CTPsi * Psi_eff;
+    // Use pre-allocated scratch matrices; resize() is a no-op when already the right size.
+    CTPsi_ws_.resize(dz, dz);
+    CTPsi_ws_.noalias() = C_bar_eff.transpose() * R_bar * C_bar_eff;
+
+    H_eff_ws_.resize(dz, dz);
+    H_eff_ws_ = H_prior;  // copy block into full-size member
+    H_eff_ws_.noalias() += Psi_eff.transpose() * CTPsi_ws_ * Psi_eff;
 
     // Linear cost: f = -H_prior*z_prior - Psi'*C_bar'*Rinv*(Y - C_bar*Gamma_u*U)
     // (Y - C_bar*Gamma_u*U) is the residual from the known input contributions
@@ -202,8 +201,8 @@ Eigen::VectorXd MovingHorizonEstimator::estimate(const Eigen::VectorXd &y,
         ub_eff.segment(i * n_, n_).fill(params_.wMax);
     }
 
-    // Solve QP
-    Eigen::LDLT<Eigen::MatrixXd> ldlt_eff(H_eff);
+    // Solve QP using H_eff_ws_ (pre-allocated; sized to dz x dz this step)
+    Eigen::LDLT<Eigen::MatrixXd> ldlt_eff(H_eff_ws_);
     if (ldlt_eff.info() != Eigen::Success) {
         // Fallback: return prior estimate
         x_est_ = x_bar_;
@@ -212,7 +211,7 @@ Eigen::VectorXd MovingHorizonEstimator::estimate(const Eigen::VectorXd &y,
         return x_est_;
     }
 
-    const double L_eff = Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd>(H_eff).eigenvalues().maxCoeff();
+    const double L_eff = Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd>(H_eff_ws_).eigenvalues().maxCoeff();
     if (L_eff <= 0.0) {
         x_est_ = x_bar_;
         last_converged_ = false;
@@ -222,7 +221,7 @@ Eigen::VectorXd MovingHorizonEstimator::estimate(const Eigen::VectorXd &y,
     // Reuse z_sol_, tmp1_, tmp2_, y_fista_ws_ pre-allocated at full-horizon size; dz <= their full size
     z_sol_.head(dz).setZero();
     auto result = solveGradientProjectionQP(
-        H_eff, f_eff, lb_eff, ub_eff,
+        H_eff_ws_, f_eff, lb_eff, ub_eff,
         ldlt_eff, L_eff,
         params_.qpMaxIter, params_.qpTol,
         z_sol_.head(dz), tmp1_.head(dz), tmp2_.head(dz), y_fista_ws_.head(dz));
@@ -326,22 +325,25 @@ void MovingHorizonEstimator::buildCondensedMatrices()
     Psi_.block(0, 0, n_, n_) = Eigen::MatrixXd::Identity(n_, n_);
     C_bar_.block(0, 0, p_, n_) = plant_.C;
 
-    std::vector<Eigen::MatrixXd> A_pow(Np1);
-    A_pow[0] = Eigen::MatrixXd::Identity(n_, n_);
-    for (int i = 1; i < Np1; ++i) A_pow[i] = plant_.A * A_pow[i - 1];
+    // Pre-compute A-power table; reused every estimate() step (plant_.A is fixed).
+    A_pow_ws_.resize(Np1);
+    A_pow_ws_[0] = Eigen::MatrixXd::Identity(n_, n_);
+    for (int i = 1; i < Np1; ++i) A_pow_ws_[i] = plant_.A * A_pow_ws_[i - 1];
 
     for (int i = 1; i < Np1; ++i) {
-        Psi_.block(i * n_, 0, n_, n_) = A_pow[i];
+        Psi_.block(i * n_, 0, n_, n_) = A_pow_ws_[i];
         for (int j = 0; j < i; ++j) {
-            Psi_.block(i * n_, (j + 1) * n_, n_, n_) = A_pow[i - 1 - j];
-            Gamma_u_.block(i * n_, j * m_, n_, m_)   = A_pow[i - 1 - j] * plant_.B;
+            Psi_.block(i * n_, (j + 1) * n_, n_, n_) = A_pow_ws_[i - 1 - j];
+            Gamma_u_.block(i * n_, j * m_, n_, m_)   = A_pow_ws_[i - 1 - j] * plant_.B;
         }
         C_bar_.block(i * p_, i * n_, p_, n_) = plant_.C;
     }
 
-    // Inverses
-    Eigen::MatrixXd Qinv = Q_proc_.ldlt().solve(Eigen::MatrixXd::Identity(n_, n_));
-    Eigen::MatrixXd Rinv = R_meas_.ldlt().solve(Eigen::MatrixXd::Identity(p_, p_));
+    // Cache inverses - Q_proc_ and R_meas_ are fixed between buildCondensedMatrices() calls.
+    Qinv_ = Q_proc_.ldlt().solve(Eigen::MatrixXd::Identity(n_, n_));
+    Rinv_ = R_meas_.ldlt().solve(Eigen::MatrixXd::Identity(p_, p_));
+    const Eigen::MatrixXd& Qinv = Qinv_;
+    const Eigen::MatrixXd& Rinv = Rinv_;
 
     // H_prior = block_diag(P0inv, Qinv, ..., Qinv) size dz x dz
     Eigen::MatrixXd H_prior = Eigen::MatrixXd::Zero(dz, dz);
@@ -357,7 +359,8 @@ void MovingHorizonEstimator::buildCondensedMatrices()
     H_mhe_ = H_prior + Psi_.transpose() * C_bar_.transpose() * R_bar * C_bar_ * Psi_;
 
     ldlt_.compute(H_mhe_);
-    L_ = H_mhe_.eigenvalues().real().maxCoeff();
+    // Use SelfAdjointEigenSolver (H_mhe_ is symmetric PD) - avoids complex arithmetic of general EigenSolver.
+    L_ = Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd>(H_mhe_).eigenvalues().maxCoeff();
     if (L_ <= 0.0) L_ = 1.0;
 
     // Pre-allocate work vectors
@@ -381,6 +384,10 @@ void MovingHorizonEstimator::buildCondensedMatrices()
     ub_eff_ws_     .resize(dz);
     z_prior_ws_    .resize(dz);
     y_fista_ws_    .resize(dz);
+
+    // Pre-allocate effective-Hessian scratch (max size; block views slice to eff_N each step)
+    CTPsi_ws_.resize(dz, dz);
+    H_eff_ws_.resize(dz, dz);
 }
 
 // =============================================================================

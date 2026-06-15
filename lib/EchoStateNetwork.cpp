@@ -54,14 +54,6 @@ EchoStateNetwork::EchoStateNetwork(const Params& p) : p_(p)
 // Reservoir dynamics
 // ---------------------------------------------------------------------------
 
-Eigen::VectorXd EchoStateNetwork::extendedState(const Eigen::VectorXd& u) const
-{
-    Eigen::VectorXd z(p_.n_res + p_.n_in);
-    z.head(p_.n_res) = r_;
-    z.tail(p_.n_in)  = u;
-    return z;
-}
-
 void EchoStateNetwork::stepReservoir(const Eigen::VectorXd& u)
 {
     // Leaky integration: r[k+1] = (1-alpha)*r[k] + alpha*tanh(W_res*r[k] + W_in*u[k])

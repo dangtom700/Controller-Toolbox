@@ -25,6 +25,37 @@ if(NOT MSVC)
     add_compile_definitions(M_PI=3.14159265358979323846)
 endif()
 
+# --- DIST-2: embedded-only build shortcut ------------------------------------
+option(CTRL_BUILD_EMBEDDED_ONLY "Build only the header-only embedded subset (no Eigen)" OFF)
+if(CTRL_BUILD_EMBEDDED_ONLY)
+    add_library(ctrl_embedded INTERFACE)
+    target_include_directories(ctrl_embedded INTERFACE lib/embedded)
+    include(GNUInstallDirs)
+    install(DIRECTORY lib/embedded/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/controller_toolbox/embedded)
+    return()
+endif()
+
+# --- Eigen3: prefer system/vcpkg; FetchContent fallback for CI wheel builds --
+# Set CTRL_FETCH_EIGEN_IF_MISSING=ON when building PyPI wheels on machines
+# that do not have Eigen installed (cibuildwheel Linux/macOS containers).
+option(CTRL_FETCH_EIGEN_IF_MISSING "Fetch Eigen3 via FetchContent if not found on the system" OFF)
+if(CTRL_FETCH_EIGEN_IF_MISSING)
+    find_package(Eigen3 QUIET NO_MODULE)
+    if(NOT Eigen3_FOUND)
+        message(STATUS "Eigen3 not found on system -- fetching via FetchContent")
+        include(FetchContent)
+        FetchContent_Declare(
+            Eigen3
+            GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+            GIT_TAG        3.4.0
+            GIT_SHALLOW    TRUE
+        )
+        set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
+        set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+        FetchContent_MakeAvailable(Eigen3)
+    endif()
+endif()
+
 add_subdirectory(lib)
 
 # nlohmann/json - required by case-study executables and test_tugsim_regression.

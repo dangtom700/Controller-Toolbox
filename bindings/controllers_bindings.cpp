@@ -1718,7 +1718,7 @@ Usage
         .def("buffer_size",      &ctrl::DynaController::bufferSize)
         .def("new_since_last_fit", &ctrl::DynaController::newSinceLastFit)
         .def("inner_controller", &ctrl::DynaController::innerController,
-             py::return_value_policy::reference_internal);
+             py::return_value_policy::copy);
 
     // -----------------------------------------------------------------------
     // HybridModel (H1) - physics + data-driven plant model

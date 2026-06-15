@@ -8,6 +8,7 @@
 #include <vector>
 #include <stdexcept>
 #include <cmath>
+#include <iostream>
 #include <Eigen/Dense>
 
 /**
@@ -106,7 +107,15 @@ inline Eigen::VectorXd findEquilibrium(const StateFunc&        f,
     }
     // Accept if residual is within a loose tolerance
     if (f(x, u_eq).norm() < tol * 1e3)
+    {
+#ifndef NDEBUG
+        std::clog << "[findEquilibrium] WARNING: Newton-Raphson converged only within the "
+                     "loose tolerance (tol * 1e3 = " << tol * 1e3 << "). "
+                     "The returned equilibrium may be inaccurate. "
+                     "Consider providing a better initial guess x0 or increasing max_iter.\n";
+#endif
         return x;
+    }
     throw std::runtime_error(
         "findEquilibrium: Newton-Raphson failed to converge. "
         "Check that f(x_eq, u_eq)=0 has a solution near x0.");

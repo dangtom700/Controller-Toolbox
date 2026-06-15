@@ -27,6 +27,8 @@ CEMController::CEMController(const Params&          p,
     costs_.resize(p_.N_samples);
     new_mu_.resize(p_.Np);
     u_k_.resize(1);
+    u_k_roll_.resize(1);
+    // x_roll_ and e_roll_ sized lazily on first computeRef() (state size not known at ctor)
 }
 
 // ---------------------------------------------------------------------------
@@ -37,14 +39,14 @@ double CEMController::rolloutCost(const Eigen::VectorXd& x0,
                                     const Eigen::VectorXd& u_seq,
                                     const Eigen::VectorXd& y_ref) const
 {
-    Eigen::VectorXd x = x0;
-    Eigen::VectorXd u_k(1);
+    // Use pre-allocated mutable workspaces: no per-rollout or per-iteration heap allocs.
+    x_roll_ = x0;
     double cost = 0.0;
     for (int k = 0; k < p_.Np; ++k) {
-        u_k(0) = u_seq(k);
-        x = f_(x, u_k);
-        Eigen::VectorXd e = C_ * x - y_ref;
-        cost += p_.Q * e.squaredNorm() + p_.R * u_k.squaredNorm();
+        u_k_roll_(0) = u_seq(k);
+        x_roll_ = f_(x_roll_, u_k_roll_);
+        e_roll_.noalias() = C_ * x_roll_ - y_ref;
+        cost += p_.Q * e_roll_.squaredNorm() + p_.R * u_k_roll_.squaredNorm();
     }
     return cost;
 }
@@ -56,6 +58,10 @@ double CEMController::rolloutCost(const Eigen::VectorXd& x0,
 Eigen::VectorXd CEMController::computeRef(const Eigen::VectorXd& x_cur,
                                              const Eigen::VectorXd& y_ref)
 {
+    // Lazy-init rollout workspaces on first call (state/output sizes known here)
+    if (x_roll_.size() != x_cur.size()) x_roll_.resize(x_cur.size());
+    if (e_roll_.size() != C_.rows())    e_roll_.resize(C_.rows());
+
     const int N = p_.N_samples;
     const int K = std::max(1, static_cast<int>(p_.elite_frac * N));
 
@@ -94,10 +100,9 @@ Eigen::VectorXd CEMController::computeRef(const Eigen::VectorXd& x_cur,
     last_cost_ = rolloutCost(x_cur, mu, y_ref);
     mu_        = mu;   // warm-start next call
 
-    Eigen::VectorXd u_out(1);
-    u_out(0) = std::clamp(mu(0), p_.uMin, p_.uMax);
-    notifyObserver(u_out(0), x_cur.norm());
-    return u_out;
+    u_k_(0) = std::clamp(mu(0), p_.uMin, p_.uMax);
+    notifyObserver(u_k_(0), x_cur.norm());
+    return u_k_;
 }
 
 double CEMController::compute(double error)

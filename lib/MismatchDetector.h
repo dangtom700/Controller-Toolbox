@@ -88,11 +88,16 @@ public:
     /**
      * @brief Feed a vector innovation (computes ||v||/sqrt(p) internally).
      * @param innov  Innovation vector (p * 1).
+     *
+     * @note Zero-size innovation (e.g. called before the first measurement arrives)
+     *       is handled safely: the scalar fed to the CUSUM is `||innov||` (= 0), so the
+     *       CUSUM starts from zero and will not spuriously trigger the detector.
+     *       The guard `sqrt(max(p,1))` avoids a division-by-zero on empty vectors.
      */
     void update(const Eigen::VectorXd& innov)
     {
         const double n = static_cast<double>(innov.size());
-        // Guard against zero-size innovation (e.g., when called before first measurement)
+        // Guard: if innov is empty (p == 0), treat as p == 1 to avoid division-by-zero.
         update(innov.norm() / std::sqrt(n > 0.0 ? n : 1.0));
     }
 

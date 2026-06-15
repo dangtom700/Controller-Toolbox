@@ -251,6 +251,14 @@ private:
     Eigen::MatrixXd H_prior_ws_, R_bar_ws_;
     Eigen::VectorXd Y_hist_ws_, U_hist_eff_ws_, f_eff_ws_, lb_eff_ws_, ub_eff_ws_, z_prior_ws_, y_fista_ws_;
 
+    // Cached inverses and A-power table - computed once in buildCondensedMatrices(),
+    // reused every estimate() call to avoid per-step LDLT solves and matrix allocations.
+    Eigen::MatrixXd              Qinv_;       ///< Q_proc_^{-1}  (n*n)
+    Eigen::MatrixXd              Rinv_;       ///< R_meas_^{-1}  (p*p)
+    std::vector<Eigen::MatrixXd> A_pow_ws_;  ///< A^0 .. A^N  (N+1 matrices, each n*n)
+    Eigen::MatrixXd              CTPsi_ws_;  ///< scratch for C_bar_eff'*R_bar*C_bar_eff  (n*(N+1) sq)
+    Eigen::MatrixXd              H_eff_ws_;  ///< scratch for effective QP Hessian  (n*(N+1) sq)
+
     Eigen::VectorXd x_est_;    ///< Last returned state estimate.
     bool last_converged_ = true;
     int  last_qp_iters_  = 0;

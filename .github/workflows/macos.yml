@@ -31,6 +31,7 @@ jobs:
           set -eux
           brew update || true
           brew install cmake python eigen nlohmann-json pybind11 || true
+          pip3 install --break-system-packages numpy || pip3 install numpy
 
       - name: Print compiler
         run: clang --version || true

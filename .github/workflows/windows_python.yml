@@ -1,0 +1,79 @@
+name: Windows Python Bindings
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-2022
+    permissions:
+      contents: read
+
+    concurrency:
+      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-windows-python
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Build toolchain only (no MSYS2 Python/pybind11 — those come from conda below).
+      - name: Set up MSYS2 build toolchain
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-eigen3
+
+      # Creates (or updates) the 'soft_robotics' conda env from environment.yml.
+      # This provides Python 3.14 + pybind11 3.0.4 + numpy + scipy — the same
+      # versions used for local development, ensuring .pyd ABI compatibility.
+      - name: Set up conda environment
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          environment-file: environment.yml
+          activate-environment: soft_robotics
+          auto-activate-base: false
+
+      - name: Build Python bindings
+        shell: pwsh
+        run: |
+          # Put MSYS2 tools (cmake, ninja, gcc) first on PATH so 'conda run'
+          # finds them even though conda prepends its own bin dir.
+          $env:PATH = "C:\msys64\mingw64\bin;$env:PATH"
+
+          # cmake run via 'conda run' so find_package(pybind11) locates the
+          # pybind11 installed in the soft_robotics conda env (pip-installed).
+          conda run -n soft_robotics --no-capture-output cmake `
+            -S . -B build_py `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCTRL_BUILD_PYTHON_BINDINGS=ON `
+            -G Ninja
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          conda run -n soft_robotics --no-capture-output cmake `
+            --build build_py --target ctrl_toolbox
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Smoke test Python bindings
+        shell: pwsh
+        run: conda run -n soft_robotics python bindings/smoke_test.py
+
+      # Upload the .pyd so any Windows machine with the matching conda env
+      # (Python 3.14, cp314) can download and use it without building from source.
+      - name: Upload ctrl_toolbox binding
+        uses: actions/upload-artifact@v4
+        with:
+          name: ctrl-toolbox-windows-x64-pyd
+          path: build_py/bindings/ctrl_toolbox*.pyd
+          retention-days: 30

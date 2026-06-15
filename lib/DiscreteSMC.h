@@ -108,9 +108,11 @@ public:
     const SMCParams &params() const { return p_; }
 
     /**
-     * @brief Current sliding surface value s[k].
+     * @brief Sliding surface value from the previous sample s[k-1].
      *
-     * Useful for monitoring convergence. |s[k]| < phi indicates operation inside the
+     * Returns `s_prev_`, the surface computed during the last `compute()` call.
+     * Query immediately after `compute()` to read the surface used to produce the
+     * most recent output. |slidingSurface()| < phi indicates operation inside the
      * boundary layer (linear PD regime).
      */
     double slidingSurface() const { return s_prev_; }

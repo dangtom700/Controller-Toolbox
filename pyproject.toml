@@ -1,0 +1,40 @@
+[build-system]
+requires = ["scikit-build-core>=0.9", "pybind11>=2.13"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "controller-toolbox"
+version = "1.0.0"
+description = "Discrete-time control library — Python bindings (~85 algorithms: PID, LQR, MPC, Hinf, MRAC, GP, ESN, ILC, SINDy, Koopman, L1, CBF, DeePC, GA/PSO/DE)"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+dependencies = []
+keywords = ["control", "pid", "mpc", "lqr", "kalman", "robotics", "optimization"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: C++",
+    "Topic :: Scientific/Engineering",
+]
+
+[tool.scikit-build]
+cmake.build-type = "Release"
+cmake.args = [
+    "-DCTRL_BUILD_PYTHON_BINDINGS=ON",
+    "-DCTRL_BUILD_TESTS=OFF",
+    "-DCTRL_BUILD_BENCHMARKS=OFF",
+]
+wheel.packages = []
+# The pybind11 module is placed directly in the wheel root by bindings/CMakeLists.txt
+wheel.install-dir = "."
+
+[tool.scikit-build.cmake.define]
+# Allow Eigen to be fetched if not found on the build machine (CI environments)
+CTRL_FETCH_EIGEN_IF_MISSING = "ON"

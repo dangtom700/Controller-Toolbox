@@ -1,0 +1,62 @@
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build_wheels:
+    name: Build wheels (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@7940a4c0e76eb2030e473a5f864f291f63ee879b  # v2.21.3
+        env:
+          CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
+          CIBW_SKIP: "*-musllinux* *-win32 *-manylinux_i686"
+          # Install Eigen3 inside the build container/VM
+          CIBW_BEFORE_BUILD_LINUX: >
+            yum install -y eigen3-devel || apt-get install -y libeigen3-dev || true
+          CIBW_BEFORE_BUILD_MACOS: brew install eigen
+          CIBW_BEFORE_BUILD_WINDOWS: >
+            vcpkg install eigen3:x64-windows
+          CIBW_ENVIRONMENT_WINDOWS: >
+            CMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+          CIBW_TEST_COMMAND: >
+            python -c "import ctrl_toolbox as ctrl; assert ctrl.registry_has('discrete_pid'), 'Registry missing discrete_pid'; print('ctrl_toolbox OK')"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: wheelhouse/
+
+  upload_pypi:
+    needs: build_wheels
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write  # required for trusted publishing (OIDC)
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

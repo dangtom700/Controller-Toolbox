@@ -57,6 +57,7 @@ namespace ctrl
         {
             v_buf_.assign(p.periodSteps, 0.0);
             buf_idx_ = 0;
+            v_now_ = 0.0;  // clear diagnostic so correction() reflects the empty buffer
         }
         p_ = p;
     }

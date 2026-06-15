@@ -74,24 +74,24 @@ Eigen::VectorXd KoopmanEDMD::liftPoly(const Eigen::VectorXd& x,
 Eigen::VectorXd KoopmanEDMD::liftRBF(const Eigen::VectorXd& x,
                                        const Eigen::VectorXd& u) const
 {
+    // Reuse the pre-allocated mutable lift_psi_ member (sized to n_lifted_ at construction).
     const int n = p_.n_state, m = p_.n_input;
-    Eigen::VectorXd psi(n_lifted_);
     int idx = 0;
 
-    psi.segment(idx, n) = x; idx += n;
+    lift_psi_.segment(idx, n) = x; idx += n;
 
     const double inv2sig2 = 0.5 / (p_.rbf_width * p_.rbf_width);
     const int nc = std::min(p_.rbf_n_cent, static_cast<int>(rbf_centres_.cols()));
     for (int c = 0; c < nc; ++c) {
         double d2 = (x - rbf_centres_.col(c)).squaredNorm();
-        psi(idx++) = std::exp(-d2 * inv2sig2);
+        lift_psi_(idx++) = std::exp(-d2 * inv2sig2);
     }
     // Fill remaining centres slots with 0 if not yet set
     while (idx < n + p_.rbf_n_cent)
-        psi(idx++) = 0.0;
+        lift_psi_(idx++) = 0.0;
 
-    if (m > 0) { psi.segment(idx, m) = u; idx += m; }
-    return psi;
+    if (m > 0) { lift_psi_.segment(idx, m) = u; idx += m; }
+    return lift_psi_;
 }
 
 Eigen::VectorXd KoopmanEDMD::lift(const Eigen::VectorXd& x,

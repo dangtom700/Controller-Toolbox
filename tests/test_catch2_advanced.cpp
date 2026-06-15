@@ -3001,7 +3001,7 @@ TEST_CASE("CEMController IController compute() returns finite value", "[cem]")
 // DynaController (Sutton Dyna MBRL)
 // =============================================================================
 
-TEST_CASE("DynaController wraps inner controller and returns finite output", "[dyna]")
+TEST_CASE("DynaController single compute() returns finite bounded output", "[dyna]")
 {
     auto pid = std::make_shared<ctrl::DiscretePID>(
         ctrl::PIDParams{0.8, 0.2, 0.0}, 0.01);
@@ -3013,6 +3013,8 @@ TEST_CASE("DynaController wraps inner controller and returns finite output", "[d
     for (int k = 0; k < 5; ++k) {
         double u = dyna.compute(1.0 - 0.1 * k);
         REQUIRE(std::isfinite(u));
+        REQUIRE(u >= -1e6);
+        REQUIRE(u <= 1e6);
     }
     REQUIRE(dyna.bufferSize() == 4);
     REQUIRE_FALSE(dyna.modelFitted());   // only 4 transitions < n_collect=10
@@ -5690,4 +5692,159 @@ TEST_CASE("DeePC NaN hold-last and reset", "[deepc]") {
     dc.reset();
     const double u_after = dc.compute(0.0);
     REQUIRE(std::isfinite(u_after));
+}
+
+// =============================================================================
+// [pid] - DiscretePID supplemental tests (#64, #66)
+// =============================================================================
+
+TEST_CASE("DiscretePID Kb anti-windup limits integrator growth under saturation", "[pid]")
+{
+    ctrl::PIDParams p;
+    p.Kp = 1.0; p.Ki = 2.0; p.Kd = 0.0;
+    p.uMin = -1.0; p.uMax = 1.0;
+    p.Kb = 1.0;  // anti-windup active
+    ctrl::DiscretePID pid(p, 0.1);
+
+    // Drive hard into saturation for 50 steps with large positive error
+    for (int k = 0; k < 50; ++k)
+        pid.compute(10.0);
+
+    const double u_sat = pid.compute(10.0);
+    // Output must remain clamped; anti-windup prevents integrator runaway
+    REQUIRE(u_sat <= 1.0 + 1e-9);
+    REQUIRE(u_sat >= -1.0 - 1e-9);
+}
+
+TEST_CASE("DiscretePID N-filter decays derivative contribution after initial kick", "[pid]")
+{
+    ctrl::PIDParams p;
+    p.Kp = 0.0; p.Ki = 0.0; p.Kd = 1.0;
+    p.N  = 10.0;  // derivative filter pole at z = N/(N+1/Ts) -> fast pole, decays
+    p.uMin = -1e9; p.uMax = 1e9;
+    ctrl::DiscretePID pid(p, 0.01);
+
+    // Step error -> large derivative kick at first sample
+    const double u0 = pid.compute(1.0);
+    REQUIRE(u0 > 0.0);
+
+    // After several more steps with e=1 (de/dt=0), derivative component decays
+    double u_last = u0;
+    for (int k = 0; k < 20; ++k)
+        u_last = pid.compute(1.0);
+
+    // N-filtered derivative on constant error must decay toward zero
+    REQUIRE(u_last < u0);
+    REQUIRE(std::isfinite(u_last));
+}
+
+TEST_CASE("DiscretePID computeDoM gives strictly lower peak control signal than compute on step", "[pid]")
+{
+    // DoM (Derivative on Measurement) eliminates the derivative kick in the control signal
+    // that occurs when the setpoint steps.  Plant output peak is not a reliable discriminant
+    // because the N-filter smooths the kick before it reaches the plant.  The distinguishing
+    // property is the peak of the CONTROL SIGNAL u[k].
+    //
+    // With compute(r - y): at step k=0, e jumps from 0 to r, so the N-filtered derivative
+    // contributes +Kd*N*r to u[0] (the "derivative kick").
+    // With computeDoM(y, r): the derivative term is -Kd*N*(y - y_prev).  At k=0, y=y_prev=0,
+    // so the kick is zero.  Peak u(DoM) < peak u(standard) is guaranteed for any Kd > 0.
+    const double Ts = 0.01, a = 0.99, b = 0.01;
+    const double r = 1.0;
+
+    auto run_sim = [&](bool use_dom) {
+        ctrl::PIDParams p;
+        p.Kp = 5.0; p.Ki = 0.5; p.Kd = 0.3; p.N = 20.0;
+        p.uMin = -100.0; p.uMax = 100.0;
+        ctrl::DiscretePID pid(p, Ts);
+
+        double y = 0.0, peak_u = 0.0;
+        for (int k = 0; k < 300; ++k) {
+            double u = use_dom ? pid.computeDoM(y, r) : pid.compute(r - y);
+            y = a * y + b * u;
+            if (u > peak_u) peak_u = u;
+        }
+        return peak_u;
+    };
+
+    const double peak_standard = run_sim(false);
+    const double peak_dom      = run_sim(true);
+
+    // computeDoM avoids the derivative kick -> lower peak control signal
+    REQUIRE(peak_dom < peak_standard);
+}
+
+// =============================================================================
+// [repetitive] - RepetitiveController edge cases (#65)
+// =============================================================================
+
+TEST_CASE("RepetitiveController throws when periodSteps < 1", "[repetitive]")
+{
+    auto pid = std::make_shared<ctrl::DiscretePID>(ctrl::PIDParams{1.0, 0.0, 0.0}, 0.01);
+    ctrl::RepetitiveParams p;
+    p.periodSteps = 0;
+    REQUIRE_THROWS_AS(ctrl::RepetitiveController(pid, p, 0.01), std::invalid_argument);
+    p.periodSteps = -5;
+    REQUIRE_THROWS_AS(ctrl::RepetitiveController(pid, p, 0.01), std::invalid_argument);
+}
+
+TEST_CASE("RepetitiveController NaN input triggers hold-last contract", "[repetitive]")
+{
+    auto pid = std::make_shared<ctrl::DiscretePID>(ctrl::PIDParams{1.0, 0.0, 0.0}, 0.01);
+    ctrl::RepetitiveParams p;
+    p.periodSteps = 5;
+    ctrl::RepetitiveController rc(pid, p, 0.01);
+
+    const double u_good = rc.compute(0.5);
+    REQUIRE(std::isfinite(u_good));
+
+    const double u_nan = rc.compute(std::numeric_limits<double>::quiet_NaN());
+    REQUIRE_THAT(u_nan, WithinAbs(u_good, 1e-9));
+}
+
+TEST_CASE("RepetitiveController setParams with new period resets learning buffer", "[repetitive]")
+{
+    auto pid = std::make_shared<ctrl::DiscretePID>(ctrl::PIDParams{1.0, 0.0, 0.0}, 0.01);
+    ctrl::RepetitiveParams p;
+    p.periodSteps = 10; p.Krc = 0.5; p.Q = 0.98;
+    ctrl::RepetitiveController rc(pid, p, 0.01);
+
+    // Accumulate some learning
+    for (int k = 0; k < 10; ++k) rc.compute(1.0);
+    REQUIRE(rc.correction() != 0.0);
+
+    // Change period -> buffer cleared, correction resets
+    p.periodSteps = 20;
+    rc.setParams(p);
+    REQUIRE_THAT(rc.correction(), WithinAbs(0.0, 1e-12));
+    REQUIRE(rc.params().periodSteps == 20);
+}
+
+// =============================================================================
+// [extremum_seeker] - convergence to known quadratic minimum (#67)
+// =============================================================================
+
+TEST_CASE("ExtremumSeeker converges to minimum of quadratic J(theta)=(theta-2)^2", "[extremum_seeker]")
+{
+    // Cost surface: J(theta) = (theta - 2)^2, minimum at theta* = 2.
+    // Plant is static (memoryless), so the plant output = J evaluated at the current u.
+    ctrl::ExtremumSeekerParams ep;
+    ep.perturbAmp  = 0.05;
+    ep.perturbFreq = 0.5;    // [Hz]
+    ep.lpfCutoff   = 0.05;   // [Hz]
+    ep.hpfCutoff   = 0.02;   // [Hz]
+    ep.integGain   = 0.5;
+    ep.seekMinimum = true;
+
+    const double Ts = 0.01;
+    ctrl::ExtremumSeeker esc(ep, Ts);
+
+    // Start away from optimum - initial theta = 0
+    double u = 0.0;
+    for (int k = 0; k < 20000; ++k) {
+        const double J = (u - 2.0) * (u - 2.0);  // static quadratic cost
+        u = esc.compute(J);
+    }
+
+    REQUIRE_THAT(esc.currentEstimate(), WithinAbs(2.0, 0.5));
 }

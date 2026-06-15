@@ -50,27 +50,31 @@ namespace ctrl
         const double w_rest = 0.5 / (n + lambda_);
         for (int i = 1; i < L; ++i)
             Wm_(i) = Wc_(i) = w_rest;
+
+        // Pre-allocate sigma-point workspace; never reallocated in steady state.
+        sigma_pts_ws_.resize(n, 2 * n + 1);
     }
 
     // Cholesky of (n+lambda)P, columns are the perturbation vectors.
-    Eigen::MatrixXd UnscentedKalmanFilter::sigmaPoints() const
+    // Writes into the pre-allocated sigma_pts_ws_ and returns a const reference -
+    // avoids one heap allocation per predict/update call.
+    const Eigen::MatrixXd& UnscentedKalmanFilter::sigmaPoints() const
     {
         const Eigen::MatrixXd S =
             ((n_states_ + lambda_) * P_).llt().matrixL(); // lower triangular sqrt
 
-        Eigen::MatrixXd X(n_states_, 2 * n_states_ + 1);
-        X.col(0) = x_hat_;
+        sigma_pts_ws_.col(0) = x_hat_;
         for (int i = 0; i < n_states_; ++i)
         {
-            X.col(i + 1)             = x_hat_ + S.col(i);
-            X.col(i + 1 + n_states_) = x_hat_ - S.col(i);
+            sigma_pts_ws_.col(i + 1)             = x_hat_ + S.col(i);
+            sigma_pts_ws_.col(i + 1 + n_states_) = x_hat_ - S.col(i);
         }
-        return X;
+        return sigma_pts_ws_;
     }
 
     void UnscentedKalmanFilter::predict(const Eigen::VectorXd &u)
     {
-        const Eigen::MatrixXd X = sigmaPoints();
+        const Eigen::MatrixXd& X = sigmaPoints();
         const int L = 2 * n_states_ + 1;
 
         // Propagate sigma points through f
@@ -95,7 +99,7 @@ namespace ctrl
     void UnscentedKalmanFilter::update(const Eigen::VectorXd &y,
                                        const Eigen::VectorXd &u)
     {
-        const Eigen::MatrixXd X = sigmaPoints();
+        const Eigen::MatrixXd& X = sigmaPoints();
         const int L = 2 * n_states_ + 1;
 
         // Propagate sigma points through h
