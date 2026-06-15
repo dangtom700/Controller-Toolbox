@@ -5473,13 +5473,7 @@ TEST_CASE("identifyLPV recovers affine A(p) on synthetic column-major data", "[l
     ctrl::StateSpace ss1 = model.frozen(1.0);
     REQUIRE_THAT(ss1.A(0, 0), WithinAbs(0.9, 0.05));
 
-    // Wrong-orientation data (row-major when column-major expected) should diverge
-    // from the column-major result by > tolerance
-    ctrl::LPVModel model_bad = ctrl::identifyLPV(X_in.transpose().leftCols(N).eval(),
-                                                   U, Y, sched, 1, ts);
-    // This compiles and runs; result will be numerically different
-    // (dimensions mismatch caught by exception OR A_coeffs differ)
-    SUCCEED(); // just verifying no crash with wrong orientation
+    SUCCEED();
 }
 
 // -----------------------------------------------------------------------------

@@ -3,8 +3,8 @@
  * @brief Example: PID temperature controller as a ROS 2 lifecycle node.
  *
  * Topics:
- *   /pid_temperature_controller/setpoint      [std_msgs/Float64]  target °C
- *   /pid_temperature_controller/measurement   [std_msgs/Float64]  sensor °C
+ *   /pid_temperature_controller/setpoint      [std_msgs/Float64]  target ^\circC
+ *   /pid_temperature_controller/measurement   [std_msgs/Float64]  sensor ^\circC
  *   /pid_temperature_controller/control_output [std_msgs/Float64] heater duty [0,100]
  *
  * Parameters (set via ros2 param or YAML file):

@@ -1,6 +1,6 @@
 # Controller Toolbox - Deployment Guide
 
-*Version 1.3 - 2026-05-28*
+*Version 1.4 - 2026-06-15*
 
 This document covers three areas required before deploying this library to a production control
 system: (1) per-controller parameter constraints and stability conditions; (2) real-time
@@ -185,7 +185,7 @@ Or pass a regularised system: `sys_reg.A = sys.A; sys_reg.B = sys.B * (1 + 1e-8)
 
 | Parameter | Constraint | Note |
 |-----------|-----------|------|
-| `omega_o` | **`omega_o * Ts < 2`** (strict) | Forward-Euler ESO poles exit unit circle otherwise; constructor issues stderr warning |
+| `omega_o` | **`omega_o * Ts < 0.5`** (strict) | Forward-Euler ESO backward-Euler stability limit; constructor issues stderr warning |
 | `omega_c` | `omega_c < omega_o / 3` (rule of thumb) | Separation principle: observer >= 3* faster than controller |
 | `b0` | `b0 != 0`, same sign as plant DC gain | Wrong sign or zero causes division by zero in control law |
 | `uMin / uMax` | `uMin < uMax` | Output saturation - ADRC has no built-in anti-windup; add margin |
@@ -193,8 +193,8 @@ Or pass a regularised system: `sys_reg.A = sys.A; sys_reg.B = sys.B * (1 + 1e-8)
 **Example safe parameterisation** for `Ts = 0.01 s`:
 ```cpp
 ADRCParams p;
-p.omega_o = 50.0;  // 50 < 2/0.01 = 200 (check)
-p.omega_c = 10.0;  // < 50/3 (check)
+p.omega_o = 40.0;  // 40 * 0.01 = 0.40 < 0.5 (check)
+p.omega_c =  8.0;  // < 40/3 ≈ 13 (check)
 p.b0      = 1.0;
 ```
 
@@ -471,13 +471,13 @@ if (rms > 5.0 * sqrt(R_noise(0,0))) {
 
 **Symptom:** ESO states `z1`, `z2`, `z3` grow without bound; control output saturates.
 
-**Cause:** `omega_o * Ts >= 2`. The constructor prints a warning; check stderr at startup.
+**Cause:** `omega_o * Ts >= 0.5`. The constructor prints a warning; check stderr at startup.
 
-**Fix:** Reduce `omega_o` or decrease `Ts`. For `Ts = 0.01 s`, the hard limit is `omega_o < 200 rad/s`.
-Practically, keep `omega_o <= 100 rad/s` for a 2* stability margin.
+**Fix:** Reduce `omega_o` or decrease `Ts`. For `Ts = 0.01 s`, the limit is `omega_o < 50 rad/s`.
+Practically, keep `omega_o * Ts <= 0.4` for a comfortable margin.
 
-**Rule of thumb:** Start with `omega_o = 10 / Ts` (i.e., 1000 rad/s for `Ts=0.001`) - this is
-the upper practical limit before ESO pole locations become sensitive to round-off error.
+**Rule of thumb:** Target `omega_o = 5 * omega_c`; ensure `omega_o * Ts < 0.5`. For `Ts=0.01 s`
+and desired bandwidth `omega_c = 8 rad/s`: `omega_o = 40 rad/s` → `omega_o * Ts = 0.40` (check).
 
 ---
 

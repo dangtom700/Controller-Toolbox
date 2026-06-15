@@ -14,7 +14,7 @@ PROJECT_LOGO           =
 # Input
 # ---------------------------------------------------------------------------
 OUTPUT_DIRECTORY       = docs
-INPUT                  = lib README.md docs/DOCUMENTATION.md docs/DEPLOYMENT.md
+INPUT                  = lib README.md docs/DOCUMENTATION.md docs/DEPLOYMENT.md docs\compact_bug_report_parts_1-25.md docs\compact_bug_report_parts_26-50.md
 FILE_PATTERNS          = *.h *.hpp *.cpp *.md
 RECURSIVE              = YES
 EXCLUDE_PATTERNS       = */build/* */.godot/* */docs/html/*

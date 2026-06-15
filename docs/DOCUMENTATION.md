@@ -56,13 +56,20 @@ This installs `python=3.11`, `numpy`, `scipy`, `matplotlib`, `pandas`, `scikit-l
 controller/
 |-- CMakeLists.txt          # Root build, subdir aggregator
 |-- lib/                    # Library sources (build target: controller_toolbox)
-|-- examples/               # Single-file demos (ex01..ex22) + advanced cpp/ folder
-|-- case-study/             # 8 case studies: 6 C++ built + 2 Python-only (5 spec-only stubs)
+|-- examples/               # Single-file demos (ex01..ex82 C++) + examples/python/ (ex01..ex102 Python)
+|-- case-study/             # 23 case studies: 9 C++ built + 7 Python-only + 7 spec-only stubs
 |-- tests/                  # CTest-driven unit + integration tests
+|-- tools/                  # Analysis pipeline (compare_controllers, monte_carlo, fault_sweep, ...)
 |-- scripts/                # tune_all / simulate_all / realtime_all batch tools
+|-- ros2/                   # ROS2 thin wrapper (ctrl_toolbox_ros2, ControllerNode<T> lifecycle node)
 |-- cheatsheet/             # Markdown reference notes (tuning, identification)
+|-- setup.ps1               # Windows bootstrap (MSYS2 + conda + bindings)
+|-- setup.sh                # Linux/macOS bootstrap (mirrors setup.ps1)
+|-- compile.bat             # Windows full sequential build (~120 targets)
+|-- compile.sh              # Linux/macOS full sequential build (mirrors compile.bat)
+|-- run.py                  # 6-phase test runner (non-ASCII check, compile, bindings, C++, Python, case studies)
 |-- DEPLOYMENT.md           # Real-time / RTOS deployment guide (must-read for prod)
-|-- bug_report.md           # Internal code-review log
+|-- docs/                   # Documentation, roadmap, audit reports, case study status
 ```
 
 ---
@@ -74,9 +81,18 @@ controller/
 From the repository root:
 
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --parallel
+# Windows (one-shot bootstrap + bindings + smoke test):
+.\setup.ps1
+
+# Linux / macOS:
+./setup.sh
+
+# Manual configure + build (bindings only):
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCTRL_BUILD_PYTHON_BINDINGS=ON -G Ninja
+cmake --build build --target ctrl_toolbox
 ```
+
+**Important:** Do **not** use `cmake --build --parallel`. The build system requires sequential target ordering; parallel builds produce linker failures on some platforms. Use `compile.bat` (Windows) or `compile.sh` (Linux/macOS) to build all ~120 targets in the correct dependency order.
 
 This produces the static library `build/lib/libcontroller_toolbox.a` (or `.lib` on Windows) and every example/test/script executable. The root [CMakeLists.txt](CMakeLists.txt) aggregates: `lib/`, `tests/`, `examples/`, `scripts/`, `case-study/` (benchmarks are intentionally excluded).
 
@@ -163,75 +179,95 @@ cmake --build build --target docs
 
 ### 3.2 Examples (`examples/`)
 
-54 single-file C++ programs (`ex01_*` through `ex54_*`) plus `example_pid_feedback`. Each demonstrates one controller, composition pattern, identification method, or corrector architecture. See [examples/CMakeLists.txt](examples/CMakeLists.txt) for the full enumeration.
+82 single-file C++ programs (`ex01_*` through `ex82_*`) plus `example_pid_feedback`. Each demonstrates one controller, composition pattern, identification method, or corrector architecture. See [examples/CMakeLists.txt](examples/CMakeLists.txt) for the full enumeration.
 
-**Example groups:**
+**C++ example groups:**
 
 | Range | Theme |
 |-------|-------|
-| ex01-ex22 | Core controllers: PID, LQR, MPC, SMC, ADRC, ESC, Lead-Lag, Smith Predictor, LQG, stacks |
-| ex23-ex26 | Fuzzy Logic: FuzzyPD, FuzzyPID, FuzzySupervisor+MPC, TS gain scheduling |
-| ex27-ex31 | Advanced: function approximator, GPC, repetitive control, EKF, subspace ID |
-| ex32-ex41 | Part 18 algorithms: SOPDT ID, MHE, rational mu-synthesis, cascade/feedforward/smith/ESC/UKF/LPV |
-| ex42-ex54 | Corrector patterns: Cascade (PID+MPC, SMC+LQR, Fuzzy+PID, ADRC+PID, LeadLag+RC), Additive (ESC+PID, Fuzzy+SMC, LeadLag+I), Observer+SF (EKF+MPC, UKF+SMC, DOB+PI, MHE+MPC), Supervisory (bumpless transfer) |
-| ex55-ex56 | E2/E4 extensions: LinearisationHelper (Van der Pol + CSTR), FeedbackLinearisation (cubic drift + pendulum) |
-| ex57-ex59 | E3/E1/E5 extensions: MRAC with gain jump, BalancedTruncation (4th-order plant), ZPETC (min-phase + NMP) |
+| ex01–ex22 | Core controllers: PID, LQR, MPC, SMC, ADRC, ESC, Lead-Lag, Smith Predictor, LQG, stacks |
+| ex23–ex26 | Fuzzy Logic: FuzzyPD, FuzzyPID, FuzzySupervisor+MPC, TS gain scheduling |
+| ex27–ex31 | Advanced: function approximator, GPC, repetitive control, EKF, subspace ID |
+| ex32–ex41 | SOPDT ID, MHE, rational mu-synthesis, cascade/feedforward/smith/ESC/UKF/LPV |
+| ex42–ex54 | Corrector patterns: Cascade, Additive, Observer+SF, Supervisory/bumpless transfer |
+| ex55–ex59 | Extensions: LinearisationHelper, FeedbackLinearisation, MRAC, BalancedTruncation, ZPETC |
+| ex60–ex69 | Part 20–30: GapMetric/clustering, LPV ID, AutoGainScheduler, NonlinearMPC, AdaptiveSP, AutoTuner, AntiWindup, TubeMPC, ParticleFilter, DeePC |
+| ex70–ex79 | Part 31–33 ML/DD: ILC, SINDy, KoopmanEDMD, L1Adaptive, CBFSafety, GP+ESN+NeuralPID, DynaMBRL, ScenarioMPC, BayesianTuner, RegistryMonitor |
+| ex80–ex82 | Part 52–55: GreyBoxEstimator, HybridMPC, Metaheuristics (GA/PSO/DE) |
 
-**Python examples** (`examples/python/`, `ex01_*` through `ex75_*`): NumPy/python-control cross-validation and pybind11 binding demonstrations for every C++ class. Python examples 61-70 mirror corrector patterns; 71-75 mirror the new algorithm extensions.
+**Python examples** (`examples/python/`, `ex01_*` through `ex102_*`): NumPy/python-control cross-validation and pybind11 binding demonstrations for every C++ class. Includes RL-MPC stitching, all ML/DD controllers, DAE/hybrid-model workflows, and metaheuristic optimisers.
 
 ### 3.3 Case Studies (`case-study/`)
 
-Each case study pairs a nonlinear plant simulator with a roster of controllers, sweeps every controller across several scenarios, and writes CSV telemetry to `logs/` for post-processing. C++ studies build as self-contained executables; Python-only studies run via `sim/main.py` (discovered automatically by `run.py` Phase 6). See [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md) for full implementation status.
+Each case study pairs a nonlinear plant simulator with a roster of controllers, sweeps every controller across several scenarios, and writes CSV telemetry to `logs/` for post-processing. C++ studies build as self-contained executables; Python-only studies run via `sim/main.py` (discovered automatically by `run.py` Phase 6). The auto-generated status table is at [`docs/case_study_status.md`](case_study_status.md).
 
-#### C++ built (6) — registered in `case-study/CMakeLists.txt` + `compile.bat`
+#### C++ built (9) — registered in `case-study/CMakeLists.txt` + `compile.bat`
 
-| Study | Plant | Controllers | Scenarios | Runs | Build target |
+| Study | Plant | Ctrls | Scenarios | Runs | Target |
 |---|---|---|---|---|---|
-| [`Boiler Control/`](case-study/Boiler%20Control/) | Bell-Astrom 3x3 MIMO boiler-turbine, 3 operating points | 27 | 8 | 216 | `boiler_sim` |
-| [`Tug Boat Numerical Simulation/`](case-study/Tug%20Boat%20Numerical%20Simulation/) | 3-DOF marine vessel (Li et al. 2026, Ocean Engineering 357), 6-state MIMO + thrust allocation | 16 | 4 | 64 | `tug_sim` |
-| [`Solar-Driven Cooling .../`](case-study/Solar-Driven%20Cooling%20System%20with%20Photovoltaic%20Evaporative%20Chimney/) | Algebraic SISO solar cooling + PV evaporative chimney (Ruiz et al. 2024) | 9 | 5 | 45 | `solar_cooling_sim` |
-| [`Porous Fiber Plate Humidification System/`](case-study/Porous%20Fiber%20Plate%20Humidification%20System/) | Laminar flat-plate evaporative humidifier + room moisture ODE + 2-step sensor delay | 10 | 5 | 50 | `humidification_sim` |
-| [`Active Suspension Mathematical Modeling and Optimization 2025/`](case-study/Active%20Suspension%20Mathematical%20Modeling%20and%20Optimization%202025/) | 2-DOF quarter-car, 4-state RK4, F_act ±2000 N (Abdulwahab et al. 2025) | 10 | 5 | 50 | `susp_sim` |
-| [`Non-Inverting Buck-Boost Converter/`](case-study/Non-Inverting%20Buck-Boost%20Converter/) | Averaged 2-state buck-boost, RK4 at 50 kHz, mode hysteresis ±0.1 V (Almasi et al. 2017) | 12 | 5 | 60 | `buck_boost_sim` |
+| [`Boiler Control/`](../case-study/Boiler%20Control/) | Bell-Åström 3×3 MIMO boiler-turbine | 27 | 8 | 216 | `boiler_sim` |
+| [`Tug Boat Numerical Simulation/`](../case-study/Tug%20Boat%20Numerical%20Simulation/) | 3-DOF tug, 6-state MIMO + thrust allocation | 18 | 4 | 72 | `tug_sim` |
+| [`Solar-Driven Cooling .../`](../case-study/Solar-Driven%20Cooling%20System%20with%20Photovoltaic%20Evaporative%20Chimney/) | Algebraic SISO solar cooling + PV chimney | 14 | 5 | 70 | `solar_cooling_sim` |
+| [`Porous Fiber Plate Humidification System/`](../case-study/Porous%20Fiber%20Plate%20Humidification%20System/) | Flat-plate evaporative humidifier + room ODE + 2-step sensor delay | 15 | 5 | 75 | `humidification_sim` |
+| [`Active Suspension Mathematical Modeling and Optimization 2025/`](../case-study/Active%20Suspension%20Mathematical%20Modeling%20and%20Optimization%202025/) | 2-DOF quarter-car, 4-state RK4, F_act ±2000 N | 18 | 5 | 90 | `susp_sim` |
+| [`Non-Inverting Buck-Boost Converter/`](../case-study/Non-Inverting%20Buck-Boost%20Converter/) | Averaged 2-state buck-boost, RK4 at 50 kHz, mode hysteresis ±0.1 V | 12 | 5 | 60 | `buck_boost_sim` |
+| [`Solar Cooker with Reflector and Absorber/`](../case-study/Solar%20Cooker%20with%20Reflector%20and%20Absorber/) | 2-state absorber+pot ODE, PCM effective-C, RK4 (Ts=30 s) | 12 | 5 | 60 | `solar_cooker_sim` |
+| [`Solar Ocean Thermal Energy Conversion System/`](../case-study/Solar%20Ocean%20Thermal%20Energy%20Conversion%20System/) | 2-state collector+tank ODE, ORC algebraic map, Euler (Ts=30 s) | 12 | 5 | 60 | `sotec_sim` |
+| [`Separate Meter In Separate Meter Out/`](../case-study/Separate%20Meter%20In%20Separate%20Meter%20Out/) | SMISMO hydraulic cylinder, 8-state RK4 (Ts=1 ms), dual PDCVs + Stribeck friction | 13 | 5 | 65 | `smismo_sim` |
 
-**Boiler-Turbine** controllers: PID, LQR, LQG, MPC, SMC, ESC, ADRC, Lead-Lag+PID, Smith Predictor, GPC-RLS, EKF-LQR, UKF-LQR, FuzzyPID, FuzzySup-MPC, three `ControllerStack` compositions, Repetitive, MRAC, H-infinity, AdaptiveSmithPredictor, NonlinearMPC, FeedbackLinearisation, MHE-LQR, LPV gain-scheduled, SubspaceID-LQG, AutoGainScheduler-LQR.
+**Boiler-Turbine (27):** PID, LQR, LQG, MPC, SMC, ESC, ADRC, Lead-Lag+PID, Smith Predictor, GPC-RLS, EKF-LQR, UKF-LQR, FuzzyPID, FuzzySup-MPC, three ControllerStack compositions, Repetitive, MRAC, H-infinity, AdaptiveSP, NonlinearMPC, FeedbackLin, MHE-LQR, LPV-GS, SubspaceID-LQG, AutoGainScheduler-LQR.
 
-**Tug Boat** controllers: PID, KF-PID, SMC, MPC, ESC, FuzzyPID, FuzzySup-MPC, ADRC, Repetitive, MIMO LQR, LQG, per-axis TubeMPC, EKF-LQR, MRAC, AutoGainScheduler-LQR, NonlinearMPC.
+**Tug Boat (18):** PID, KF-PID, SMC, MPC, ESC, FuzzyPID, FuzzySup-MPC, ADRC, Repetitive, MIMO-LQR, LQG, per-axis TubeMPC, EKF-LQR, MRAC, AutoGainScheduler-LQR, NonlinearMPC, L1Adaptive, ScenarioMPC.
 
-**Buck-Boost** controllers include 4 fuzzy variants (FuzzyPD, FuzzyPID-Buck, FuzzyPID-Boost, TLCS-FuzzyPI) that validate the Almasi et al. T-S fuzzy TLCS result, plus PI-Buck, PI-Boost, TLCS-ClassicPI, GainScheduled, ADRC, MPC, LQR, and OpenLoop.
+**Active Suspension (18):** Passive, PID, ADRC, SMC, LQR (Bryson), LQG, MPC (2-state body SS), MRAC, FuzzyPID, TubeMPC, ILC, CBFSafety, L1Adaptive, ScenarioMPC, DynaCtrl, GAOptPID, PSOOptPID, DEOptPID.
 
-#### Python-only (2) — `sim/main.py`, run by Phase 6 of `run.py`
+**Buck-Boost (12):** OpenLoop, PI-Buck, PI-Boost, TLCS-ClassicPI, FuzzyPD, FuzzyPID-Buck, FuzzyPID-Boost, TLCS-FuzzyPI, GainScheduled, ADRC, MPC, LQR.
 
-| Study | Plant | Controllers | Scenarios | Runs |
+**SMISMO (13):** PID, CascadePID, LQR, LQG, MPC, ADRC, SMC, FeedbackLin, TubeMPC, L1Adaptive, GainScheduled, NonlinearMPC, DOBEnergyCtrl (adaptive supply-pressure DOB).
+
+#### Python-only (7) — `sim/main.py`, run by Phase 6 of `run.py`
+
+These studies use `ctrl_toolbox` Python bindings directly; no C++ compilation is needed. Run individually with `conda run -n soft_robotics -- python sim/main.py` from the study directory, or automatically via `run.py` Phase 6.
+
+| Study | Plant | Ctrls | Scenarios | Runs |
 |---|---|---|---|---|
-| [`Vertical Drill String Mathematical Review 2025/`](case-study/Vertical%20Drill%20String%20Mathematical%20Review%202025/) | 2-DOF torsional model with Stribeck friction, RK4 at Ts=0.1 s | 10 | 5 | 50 |
-| [`Multi-Body Floating Wind-Wave Platform/`](case-study/Multi-Body%20Floating%20Wind-Wave%20Platform/) | 4-state FOWT heave + WEC arm, sinusoidal wave forcing, RK4 at Ts=0.5 s | 8 | 5 | 40 |
+| [`Vertical Drill String Mathematical Review 2025/`](../case-study/Vertical%20Drill%20String%20Mathematical%20Review%202025/) | 2-DOF torsional model, Stribeck friction, RK4 (Ts=0.1 s) | 17 | 5 | 85 |
+| [`Multi-Body Floating Wind-Wave Platform/`](../case-study/Multi-Body%20Floating%20Wind-Wave%20Platform/) | 4-state FOWT heave + WEC arm, sinusoidal wave forcing, RK4 (Ts=0.5 s) | 16 | 5 | 80 |
+| [`Tracking Control of Electro-Hydraulic Force Servo Systems/`](../case-study/Tracking%20Control%20of%20Electro-Hydraulic%20Force%20Servo%20Systems/) | 5-state EHFS [P_A, P_B, x_v, v_p, x_p], servo valve + cylinder, RK4 (Ts=0.5 ms) | 14 | 5 | 70 |
+| [`High-Altitude Aerial Firefighting Bag Drop/`](../case-study/High-Altitude%20Aerial%20Firefighting%20Bag%20Drop/) | 3D bag trajectory, drag+gravity+wind, RK4 (Ts=0.05 s); primary metric = CEP | 12 | 5 | 60 |
+| [`Air-Cooled Battery Thermal Management System/`](../case-study/Air-Cooled%20Battery%20Thermal%20Management%20System/) | 1-D transient HX, N=9 cells, J/U/L flow switching, Forward Euler (Ts=1 s) | 12 | 5 | 60 |
+| [`Nonlinear Surface Ship Manoeuvring Control/`](../case-study/Nonlinear%20Surface%20Ship%20Manoeuvring%20Control/) | 3-DOF MMG model, 19 SRUKF-identified params, [u,v,r,ψ,x,y], RK4 (Ts=0.08 s) | 12 | 5 | 60 |
+| [`Active Suspension 6x6 EV Full Model/`](../case-study/Active%20Suspension%206x6%20EV%20Full%20Model/) | 40-state 20-DOF (body + 6 wheels + motors + 5-DOF human biodynamic), ZOH (Ts=5 ms) | 18 | 5 | 90 |
 
-**Drill String** controllers: OpenLoop, PID, ADRC, SMC, LQR, MPC, MRAC, GainScheduled, L1Adaptive, NeuralPID.
+**Drill String (17):** OpenLoop, PID, ADRC, SMC, LQR, MPC, MRAC, GainScheduled, L1Adaptive, NeuralPID, ILC, DynaCtrl, CEMCtrl, ScenarioMPC, KoopmanMPC, ESNCtrl, CBFSafety.
 
-**Wind-Wave** controllers: Passive (B_opt damping), Reactive (complex-conjugate), PID, ADRC, SMC, LQR, MPC, MRAC.
+**Wind-Wave (16):** Passive, Reactive, PID, ADRC, SMC, LQR, MPC, MRAC, L1Adaptive, ILC, DynaCtrl, CEMCtrl, ScenarioMPC, KoopmanMPC, ESNCtrl, CBFSafety.
 
-#### Spec-only stubs (4) — `README.md` present, no `sim/`, not built
+**EHFS (14):** OpenLoop, PID, ADRC, SMC, MPC, LQR, MRAC, L1Adaptive, FeedbackLin, NeuralPID, ILC, GainScheduled, HinfODFCCtrl, HinfCascadeCtrl.
 
-| Study | Notes |
-|---|---|
-| `Electrostatic MEMS with Tilted Micro-Pillars/` | 10 controllers × 5 scenarios spec'd in README |
-| `Bubble Column Bioreactor CO2 Biodiesel/` | Plant model needs design first |
-| `High-Altitude Aerial Firefighting Bag Drop/` | Monte-Carlo drop pattern, thin spec |
-| `Floating Nuclear Power Plant Ice Load Sensing/` | Ice-load estimation showcase (EKF/MHE), thin spec |
+**EV 6×6 (18):** Passive, PD, GAOptPD, PSOOptPD, DEOptPD, PID, LQR, LQG, MPC, ADRC, SMC, MRAC, FuzzyPID, TubeMPC, ILC, CBF, L1Adaptive, ScenarioMPC.
 
-The standalone boiler demo [ex21_boiler_turbine_case_study.cpp](examples/ex21_boiler_turbine_case_study.cpp) exercises the boiler plant directly without the full multi-controller sweep. All C++ targets are listed in `compile.bat`; Python-only studies are **not** in `CMakeLists.txt` or `compile.bat`.
+**Ship Manoeuvring (12):** OpenLoop, PID, SMC, ASMC, MPC, LQR, MRAC, L1Adaptive, GainScheduled, ADRC, NeuralPID, ILC.
+
+#### Spec-only stubs (12) — `README.md` or PDF present, no `sim/`, not built
+
+7 directories exist on disk (have PDF + README but no `sim/`); 5 are plan-only with no folder yet. See [`docs/case_study_status.md`](case_study_status.md) for the auto-generated current status, and `CLAUDE.md` Section "Spec-only stubs" for per-study notes.
+
+All C++ targets are listed in `compile.bat` / `compile.sh`; Python-only studies are **not** in `CMakeLists.txt` or the compile scripts. The standalone boiler demo [ex21_boiler_turbine_case_study.cpp](../examples/ex21_boiler_turbine_case_study.cpp) exercises the boiler plant without the full multi-controller sweep.
 
 ### 3.4 Tests (`tests/`)
 
-- `test_controllers.cpp` - per-class unit tests (custom `test_framework.h` harness)
-- `test_tuners_extended.cpp` - tuner suite tests (covers all 8 strategies)
-- `test_integration.cpp` - end-to-end closed-loop tests (c2d+MPC, N4SID+GPC adaptive pipeline)
-- `test_catch2_advanced.cpp` - Catch2 v3 regression suite (**51 test cases, 189 assertions**): GPC tracking, LQR convergence, SMC sign convention, ADRC double-integrator, n4sid identification, EKF/UKF, repetitive control, H-infinity, SOPDTIdentifier [sopdt], MovingHorizonEstimator [mhe], **LinearisationHelper** [linearisation], **FeedbackLinearisationController** [fl], **MRACController** [mrac], **BalancedTruncation** [btm], **ZeroPhaseTrackingFilter** [zpetc]
-- `test_catch2_pilot.cpp` - Catch2 v3 pilot tests (5 test cases, 21 assertions): LQRAdapter MIMO `computeVec()`, EKF scaled-epsilon Jacobian, PID DoM derivative suppression, 2DOF b_weight overshoot reduction, observer telemetry wiring
-- `test_framework.h` - lightweight assertion macros for the custom harness
+- `test_controllers.cpp` — per-class unit tests (custom `test_framework.h` harness)
+- `test_tuners_extended.cpp` — tuner suite tests (covers all 8 strategies)
+- `test_integration.cpp` — end-to-end closed-loop tests (c2d+MPC, N4SID+GPC adaptive pipeline)
+- `test_catch2_advanced.cpp` — main Catch2 v3 regression suite (~95 test cases). Tags include: `[pid]`, `[lqr]`, `[mpc]`, `[smc]`, `[adrc]`, `[mhe]`, `[mhe_constraints]`, `[mhe_polytopic]`, `[lqr_factory]`, `[delay_wrapper]`, `[gain_scheduled]`, `[mimo_nugap]`, `[ilc]`, `[sindy]`, `[koopman]`, `[l1adaptive]`, `[cbf]`, `[gp]`, `[esn]`, `[neuralpid]`, `[cem]`, `[dyna]`, `[scenario_mpc]`, `[bayesian_optimizer]`, `[registry]`, `[monitor]`, `[deepc]`, `[grey_box]`, `[recursive_grey_box]`, `[gp_residual]`, `[mismatch_detector]`, `[basic_pid]`, `[basic_smc]`, `[dae_system]`, `[dae_c2d]`, `[dae_ekf]`, `[genetic_algorithm]`, `[pso]`, `[de]`, `[repetitive]`, `[extremum_seeker]`
+- `test_catch2_pilot.cpp` — pilot Catch2 v3 tests (5 cases): LQRAdapter MIMO `computeVec()`, EKF scaled-epsilon Jacobian, PID DoM derivative suppression, 2DOF b_weight overshoot, observer telemetry
+- `test_stability_margins.cpp` — 3 `[stability_margins]` cases
+- `test_embedded_subset.cpp` — 13 tests, links only Catch2 (no Eigen); verifies `BasicPID<float>`, `BasicSMC<float>`, `DiscreteIntegrator`, `FixedRateFilter`, `RingBuffer` have zero Eigen dependency
+- Per-study regression tests: `test_boiler_regression`, `test_tugsim_regression`, `test_solar_regression`, `test_humid_regression`, `test_susp_regression`, `test_buck_boost_regression`, `test_solar_cooker_regression`, `test_sotec_regression`, `test_smismo_regression` (6 cases each)
+- `test_framework.h` — lightweight assertion macros for the custom harness
 
-**Current totals:** run `conda run -n soft_robotics -- python run.py` to get the live count. The 2026-05-28 snapshot (78 C++ / 79 Python) predates Part 31-38 additions; treat it as a lower bound only.
+**Current totals:** run `conda run -n soft_robotics -- python run.py` to get the live count. All counts are unverified until a clean run confirms them.
 
 ### 3.5 Scripts (`scripts/`)
 

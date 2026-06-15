@@ -162,7 +162,7 @@ see [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md).
 | **Model utilities** | LinearisationHelper (jacobianX/U, lineariseAtPoint ZOH), BalancedTruncation (Hinf bound), ZeroPhaseTrackingFilter (ZPETC + transmissionZeros), GapMetric (chordal SISO + subspace MIMO), HybridModel + HybridMPC + HybridModelTrainer (physical ODE + data correction) |
 | **DAE utilities** | `DAESystem` (Index-1 semi-explicit, `f`/`g`/`h` functors), `consistentInit` (Newton-Raphson), `dae2ode` (Euler+Newton discrete step function), `c2d(DAESystem)` (algebraic elimination + ZOH/Tustin), `setAlgebraicConstraint` on EKF (post-update Newton projection) |
 | **Embedded subset** | `BasicPID<Scalar>`, `BasicSMC<Scalar>` (header-only, no Eigen, no virtual dispatch, MCU-safe); `DiscreteIntegrator`, `FixedRateFilter`, `RingBuffer` in `lib/embedded/` |
-| **ROS 2 adapter** | `ctrl_toolbox_ros2::ControllerNode<T>` — lifecycle node wrapping any `ctrl::IController`; topics `~/setpoint`, `~/measurement`, `~/control_output`; factory pattern for param-driven construction |
+| **ROS 2 adapter** | `ctrl_toolbox_ros2::ControllerNode<T>` - lifecycle node wrapping any `ctrl::IController`; topics `~/setpoint`, `~/measurement`, `~/control_output`; factory pattern for param-driven construction |
 
 ---
 
@@ -231,16 +231,16 @@ Firefighting 60/60 . BTMS 60/60 . SurfaceShip 60/60 . EV6x6 90/90 (18 ctrl).
 `bug_report.txt`: 0 blocks expected after a clean run.
 
 **Part 60 (2026-06-16) - DIST-3 ROS 2 wrapper + CI/CD overhaul + cross-platform run.py:**
-- `ros2/ctrl_toolbox_ros2/` — ROS 2 Humble `ament_cmake` package; `ControllerNode<T>` lifecycle node template wrapping any `ctrl::IController`.
-- CI/CD consolidated from 8 → 3 workflow files (`documentation.yml`, `benchmarks.yml`, `cross-platform-cicd.yml`). Tag-triggered release + PyPI publish jobs folded into the unified workflow.
+- `ros2/ctrl_toolbox_ros2/` - ROS 2 Humble `ament_cmake` package; `ControllerNode<T>` lifecycle node template wrapping any `ctrl::IController`.
+- CI/CD consolidated from 8 -> 3 workflow files (`documentation.yml`, `benchmarks.yml`, `cross-platform-cicd.yml`). Tag-triggered release + PyPI publish jobs folded into the unified workflow.
 - `tests/test_embedded_subset.cpp` API aligned with Part 54 (`BasicPID`/`BasicSMC` single-arg constructor, `Ts` in Params, `sp.K` not `sp.eta`).
 - `run.py` cross-platform: Phase 2 dispatches `compile.sh` (bash) on Linux/macOS; Phase 3 cmake via `conda run`; Phase 4 finds executables by no-extension + executable-bit on Linux.
 
 **Part 55 (2026-06-13) - GA/PSO/DE + controller gap audit (C3-C6):**
 - `GeneticAlgorithm`, `ParticleSwarmOptimizer`, `DifferentialEvolution` added to `lib/` + Python bindings.
-- Active Suspension 2-DOF expanded 15 → 18 controllers (+ GAOptPID, PSOOptPID, DEOptPID); 90 runs.
-- SMISMO expanded 12 → 13 controllers (+ DOBEnergyCtrl with dynamic supply pressure); 65 runs.
-- EHFS expanded 12 → 14 controllers (+ HinfODFCCtrl, HinfCascadeCtrl); 70 runs.
+- Active Suspension 2-DOF expanded 15 -> 18 controllers (+ GAOptPID, PSOOptPID, DEOptPID); 90 runs.
+- SMISMO expanded 12 -> 13 controllers (+ DOBEnergyCtrl with dynamic supply pressure); 65 runs.
+- EHFS expanded 12 -> 14 controllers (+ HinfODFCCtrl, HinfCascadeCtrl); 70 runs.
 - Active Suspension 6x6 EV Full Model added as a new Python-only study: 40-state 20-DOF, 18 controllers, 90 runs.
 
 Details in [docs/cumulative_bug_report.md](docs/cumulative_bug_report.md). Real-time deployment guidance in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).

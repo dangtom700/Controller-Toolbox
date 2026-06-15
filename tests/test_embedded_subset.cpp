@@ -32,7 +32,7 @@ TEST_CASE("BasicPID<float> step response converges to reference", "[basic_pid_em
     ctrl::BasicPID<float> pid(pp);
 
     float y = 0.0f, ref = 1.0f;
-    // Dominant closed-loop pole at z≈0.9983 gives τ≈5.9 s; run 3000 steps (30 s)
+    // Dominant closed-loop pole at zapprox =0.9983 gives tauapprox =5.9 s; run 3000 steps (30 s)
     // so the remaining transient is < 0.003, comfortably within WithinAbs(1.0, 0.01).
     for (int k = 0; k < 3000; ++k) {
         float u = pid.compute(ref - y);

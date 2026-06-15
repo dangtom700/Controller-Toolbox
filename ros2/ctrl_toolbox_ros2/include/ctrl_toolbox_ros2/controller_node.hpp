@@ -34,11 +34,11 @@ namespace ctrl_toolbox_ros2
  * | `sample_time_s`  | double | 0.01    | Control loop period (seconds)  |
  *
  * ## Lifecycle transitions
- * - **on_configure** — invokes the user-supplied factory to construct T;
+ * - **on_configure** - invokes the user-supplied factory to construct T;
  *   reads `sample_time_s`.
- * - **on_activate** — creates publisher, subscriptions, and the control timer.
- * - **on_deactivate** — destroys the timer; calls `controller_->reset()`.
- * - **on_cleanup / on_shutdown** — releases all resources.
+ * - **on_activate** - creates publisher, subscriptions, and the control timer.
+ * - **on_deactivate** - destroys the timer; calls `controller_->reset()`.
+ * - **on_cleanup / on_shutdown** - releases all resources.
  *
  * ## Control law
  * At each timer tick:

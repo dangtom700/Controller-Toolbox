@@ -224,7 +224,7 @@ def scan_files(directory, show_context=True):
     files_hit = 0
     char_freq = defaultdict(int)
 
-    _SKIP_DIRS = {'build', '.git', '__pycache__', 'docs'}
+    _SKIP_DIRS = {'build', '.git', '__pycache__'}
     for root, dirs, files in os.walk(directory):
         dirs[:] = [d for d in dirs if d not in _SKIP_DIRS]
         for filename in sorted(files):

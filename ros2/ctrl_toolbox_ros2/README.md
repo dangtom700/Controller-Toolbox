@@ -15,13 +15,13 @@ Wraps any `ctrl::IController` as a managed ROS 2 lifecycle node.
 
 ```
 ctrl_toolbox_ros2/
-├── include/ctrl_toolbox_ros2/
-│   ├── controller_node.hpp   # ControllerNode<T> template (main API)
-│   └── visibility_control.h  # DLL export macros
-├── example/
-│   └── pid_temperature_node.cpp   # Concrete example: PID with DiscretePID
-├── CMakeLists.txt
-└── package.xml
+|-- include/ctrl_toolbox_ros2/
+|   |-- controller_node.hpp   # ControllerNode<T> template (main API)
+|   |-- visibility_control.h  # DLL export macros
+|-- example/
+|   |-- pid_temperature_node.cpp   # Concrete example: PID with DiscretePID
+|-- CMakeLists.txt
+|-- package.xml
 ```
 
 ## Build

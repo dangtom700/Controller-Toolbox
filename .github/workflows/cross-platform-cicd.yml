@@ -147,9 +147,13 @@ jobs:
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
 
       # ── Build & Test ───────────────────────────────────────────────────
-      - name: Build (Unix)
-        if: runner.os != 'Windows'
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
         run: cmake --build build --parallel $(nproc)
+
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        run: cmake --build build
 
       - name: Build (Windows)
         if: runner.os == 'Windows'
@@ -186,7 +190,7 @@ jobs:
           cmake -S . -B build_py \
             -DCMAKE_BUILD_TYPE=Release \
             -DCTRL_BUILD_PYTHON_BINDINGS=ON
-          cmake --build build_py --parallel --target ctrl_toolbox
+          cmake --build build_py --target ctrl_toolbox
 
       - name: Smoke test Python bindings
         if: matrix.has_python == true
