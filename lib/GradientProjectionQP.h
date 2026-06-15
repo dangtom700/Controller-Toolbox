@@ -71,6 +71,7 @@ struct QPSolveResult
  * @param x       [in/out] Solution vector (pre-allocated to size n).
  * @param tmp1    Scratch vector (pre-allocated to size n). Contents are overwritten.
  * @param tmp2    Scratch vector (pre-allocated to size n). Contents are overwritten.
+ * @param y_fista FISTA extrapolation workspace (pre-allocated to size n). Contents are overwritten.
  * @return QPSolveResult {converged, iters}.
  *
  * @pre @p H, @p g, @p lb, @p ub, @p x, @p tmp1, @p tmp2, @p y_fista all have the same size n.

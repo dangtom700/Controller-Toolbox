@@ -54,6 +54,7 @@ public:
     /**
      * @brief Construct GP with given input dimension and parameters.
      * @param x_dim Input dimension (e.g., 1 for SISO plant).
+     * @param p     Kernel and budget parameters (length-scale, noise variance, max points).
      */
     GaussianProcess(int x_dim, const Params& p);
 

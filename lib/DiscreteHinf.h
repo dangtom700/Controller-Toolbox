@@ -113,12 +113,18 @@ struct HinfResult
     Eigen::MatrixXd Dk; ///< Controller feedthrough (nu * ny).
     /** @} */
 
-    /** @name DARE solutions (available for diagnostics) @{ */
+    /**
+     * @name DARE solutions (available for diagnostics)
+     * @{
+     */
     Eigen::MatrixXd X_inf; ///< Control Riccati solution.
     Eigen::MatrixXd Y_inf; ///< Filter Riccati solution.
     /** @} */
 
-    /** @name Synthesis diagnostics @{ */
+    /**
+     * @name Synthesis diagnostics
+     * @{
+     */
     int    dareItersX    = 0;
     int    dareItersY    = 0;
     bool   dareConvX     = false;
@@ -181,7 +187,10 @@ struct MuSynResult
     double achievedMuUpper = 0.0;   ///< Best mu upper bound achieved.
     HinfResult hinfResult;          ///< H-infinity result for the best K found.
 
-    /** @name D-scaling information (available when MuSynParams::useRationalD is true) @{ */
+    /**
+     * @name D-scaling information (available when MuSynParams::useRationalD is true)
+     * @{
+     */
     /// Per-channel left D-scaling filters D_L_j(z), size = nz.
     /// Each entry is a first-order discrete-time StateSpace representing D_L_j(z).
     /// Empty when useRationalD = false (constant D was used).
@@ -287,7 +296,10 @@ public:
     /** @brief Achieved Hinf bound gamma from synthesis. */
     double achievedGamma() const { return gamma_; }
 
-    /** @name Read-only access to controller matrices @{ */
+    /**
+     * @name Read-only access to controller matrices
+     * @{
+     */
     const Eigen::MatrixXd &Ak() const { return Ak_; }
     const Eigen::MatrixXd &Bk() const { return Bk_; }
     const Eigen::MatrixXd &Ck() const { return Ck_; }
