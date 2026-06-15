@@ -168,6 +168,41 @@ for %%T in (
     echo [OK] %%T
 )
 
+REM =========================================================================
+REM  PYTHON BINDING (Release)  -  non-fatal; warns and continues on failure
+REM =========================================================================
+echo.
+echo ============================================================
+echo   Python Binding - ctrl_toolbox (Release)
+echo ============================================================
+echo.
+
+where conda >nul 2>&1
+if %ERRORLEVEL% neq 0 (
+    echo [WARN] conda not found - Python binding skipped.
+    echo        Run setup.ps1 to build ctrl_toolbox.pyd.
+    goto :ALL_DONE
+)
+
+echo [BINDING] Configuring with CTRL_BUILD_PYTHON_BINDINGS=ON...
+conda run -n soft_robotics -- cmake -B "%BUILD%" -S "%ROOT%" ^
+    -DCTRL_BUILD_PYTHON_BINDINGS=ON ^
+    -DCMAKE_BUILD_TYPE=Release
+if %ERRORLEVEL% neq 0 (
+    echo [WARN] Binding configure failed - ctrl_toolbox skipped.
+    echo        Run setup.ps1 to diagnose.
+    goto :ALL_DONE
+)
+
+echo [BINDING] Building ctrl_toolbox target...
+conda run -n soft_robotics -- cmake --build "%BUILD%" --target ctrl_toolbox --config Release
+if %ERRORLEVEL% neq 0 (
+    echo [WARN] ctrl_toolbox build failed - Python binding not updated.
+    goto :ALL_DONE
+)
+echo [OK] ctrl_toolbox (Python binding - Release)
+
+:ALL_DONE
 echo.
 echo ============================================================
 echo   All targets built successfully.

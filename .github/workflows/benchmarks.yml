@@ -1,6 +1,7 @@
-name: Latency Benchmark
+name: Benchmarks
 
-# Run benchmarks on every push to main and on demand.
+# Latency benchmarks for the controller hot paths.
+# Runs on every push to main and on demand (workflow_dispatch).
 # Results are uploaded as a workflow artifact for trend tracking.
 
 on:
@@ -9,9 +10,15 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.ref }}-benchmarks
+  cancel-in-progress: true
+
 jobs:
   benchmark:
     runs-on: windows-2022
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -19,8 +26,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install Eigen3 and nlohmann-json via vcpkg
-        run: |
-          vcpkg install "eigen3:x64-windows-static" "nlohmann-json:x64-windows-static"
+        run: vcpkg install "eigen3:x64-windows-static" "nlohmann-json:x64-windows-static"
 
       - name: Configure (MSVC x64 + benchmarks enabled)
         run: |
@@ -35,9 +41,9 @@ jobs:
 
       - name: Locate and run benchmark
         run: |
-          # For MSVC multi-config generators, the binary is in build/benchmark/Release/
-          # For single-config (Ninja/MinGW), it would be in build/benchmark/
-          # Use Get-ChildItem to find it robustly.
+          # MSVC multi-config generators place the binary in build/benchmark/Release/.
+          # Single-config (Ninja/MinGW) would place it in build/benchmark/.
+          # Get-ChildItem finds it robustly regardless of generator.
           $exe = Get-ChildItem -Path build -Recurse -Filter "bench_controllers.exe" |
                    Select-Object -First 1 -ExpandProperty FullName
           if (-not $exe) {

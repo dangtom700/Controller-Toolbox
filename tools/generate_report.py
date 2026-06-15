@@ -151,7 +151,7 @@ def _section_heatmap(df: pd.DataFrame) -> str:
             colorscale="RdYlGn_r",
             colorbar=dict(title="IAE"),
         ))
-        fig.update_layout(title=f"{study} — IAE heatmap", height=max(300, len(pivot.index) * 25 + 100))
+        fig.update_layout(title=f"{study} - IAE heatmap", height=max(300, len(pivot.index) * 25 + 100))
         figs_html.append(_fig_to_html(fig, f"fig_heat_{study[:20].replace(' ', '_')}"))
     return "\n".join(figs_html)
 
@@ -165,7 +165,7 @@ def _section_mc(mc_df: pd.DataFrame) -> str:
     for ctrl in sorted(mc_df["controller"].unique()):
         vals = mc_df[mc_df["controller"] == ctrl]["iae"].dropna()
         fig.add_trace(go.Violin(y=vals, name=ctrl, box_visible=True, meanline_visible=True))
-    fig.update_layout(title=f"{study} — MC IAE distribution", yaxis_title="IAE", height=450)
+    fig.update_layout(title=f"{study} - MC IAE distribution", yaxis_title="IAE", height=450)
     figs_html.append(_fig_to_html(fig, "fig_mc_violin"))
     return "\n".join(figs_html)
 
@@ -234,7 +234,7 @@ _HTML_TEMPLATE = """\
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Controller Toolbox Report — {date}</title>
+<title>Controller Toolbox Report - {date}</title>
 <style>
 body {{ font-family: Arial, sans-serif; margin: 2em; color: #222; }}
 h1   {{ color: #003366; }}
@@ -250,7 +250,7 @@ nav a {{ margin-right: 1em; color: #005599; text-decoration: none; }}
 </style>
 </head>
 <body>
-<h1>Controller Toolbox — Performance Report</h1>
+<h1>Controller Toolbox - Performance Report</h1>
 <p class="timestamp">Generated: {date}  &nbsp;|&nbsp;  {n_runs} runs across {n_studies} studies</p>
 
 <nav>
@@ -265,7 +265,7 @@ nav a {{ margin-right: 1em; color: #005599; text-decoration: none; }}
 </nav>
 
 <div class="section" id="summary">
-<h2>1. Summary — Best Controller per Study/Scenario</h2>
+<h2>1. Summary - Best Controller per Study/Scenario</h2>
 {section_summary}
 </div>
 
@@ -290,7 +290,7 @@ nav a {{ margin-right: 1em; color: #005599; text-decoration: none; }}
 </div>
 
 <div class="section" id="anova">
-<h2>6. ANOVA — Statistical Significance</h2>
+<h2>6. ANOVA - Statistical Significance</h2>
 {section_anova}
 </div>
 

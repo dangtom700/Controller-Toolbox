@@ -33,6 +33,38 @@ printf '\033[0;36m  Controller Toolbox  -  Sequential Build  (Linux/macOS)\033[0
 printf '\033[0;36m============================================================\033[0m\n'
 echo
 
+# ── Python binding helper (non-fatal) ─────────────────────────────────────────
+_build_python_binding() {
+    echo
+    echo "============================================================"
+    echo "  Python Binding - ctrl_toolbox (Release)"
+    echo "============================================================"
+    echo
+
+    if ! command -v conda >/dev/null 2>&1; then
+        echo "[WARN] conda not found - Python binding skipped."
+        echo "       Install Miniconda and create the soft_robotics env."
+        return 0
+    fi
+
+    echo "[BINDING] Configuring with CTRL_BUILD_PYTHON_BINDINGS=ON..."
+    if ! conda run -n soft_robotics -- cmake -B "$BUILD" -S "$ROOT" \
+            -DCTRL_BUILD_PYTHON_BINDINGS=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -G Ninja; then
+        printf '    \033[0;33m[WARN]\033[0m Binding configure failed - ctrl_toolbox skipped.\n'
+        return 0
+    fi
+
+    echo "[BINDING] Building ctrl_toolbox target..."
+    if ! conda run -n soft_robotics -- cmake --build "$BUILD" --target ctrl_toolbox; then
+        printf '    \033[0;33m[WARN]\033[0m ctrl_toolbox build failed - Python binding not updated.\n'
+        return 0
+    fi
+
+    printf '    \033[0;32m[OK]\033[0m ctrl_toolbox (Python binding - Release)\n'
+}
+
 # ── Configure ─────────────────────────────────────────────────────────────────
 if [[ $NO_CONFIG -eq 0 ]]; then
     echo "[CONFIG] Configuring CMake..."
@@ -180,6 +212,8 @@ for TARGET in "${TARGETS[@]}"; do
         exit 1
     fi
 done
+
+_build_python_binding
 
 echo
 echo "============================================================"

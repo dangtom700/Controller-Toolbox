@@ -30,7 +30,7 @@ try:
     _HAS_SCIPY = True
 except ImportError:
     _HAS_SCIPY = False
-    print("WARN: scipy not found — Tukey HSD will be skipped.  Install with: pip install scipy")
+    print("WARN: scipy not found - Tukey HSD will be skipped.  Install with: pip install scipy")
 
 
 def _one_way_anova(groups: list[np.ndarray], alpha: float) -> tuple[float, float]:
@@ -54,7 +54,7 @@ def _tukey_hsd(df: pd.DataFrame, group_col: str, value_col: str, alpha: float) -
         )
         return summary_df
     except ImportError:
-        print("WARN: statsmodels not found — Tukey HSD unavailable.  pip install statsmodels")
+        print("WARN: statsmodels not found - Tukey HSD unavailable.  pip install statsmodels")
         return None
 
 
@@ -99,9 +99,9 @@ def main(argv=None):
     print(f"F = {F:.4f}   p = {p:.6f}   significant: {'YES' if p < args.alpha else 'NO'} (alpha={args.alpha})")
 
     if p < args.alpha:
-        print(f"  → Significant differences exist between controllers (reject H0: all means equal)")
+        print(f"  -> Significant differences exist between controllers (reject H0: all means equal)")
     else:
-        print(f"  → No significant difference detected at alpha={args.alpha}")
+        print(f"  -> No significant difference detected at alpha={args.alpha}")
 
     # Tukey HSD
     tukey_df = _tukey_hsd(df, "controller", args.metric, args.alpha)

@@ -103,7 +103,7 @@ def _run_validation(study_dir: Path, csv_path: Path, params_override: dict | Non
         has_hook = False
 
     if not has_hook:
-        print("WARN: study has no grey_box_model() in sim/main.py — reporting IAE proxy only")
+        print("WARN: study has no grey_box_model() in sim/main.py - reporting IAE proxy only")
         df = pd.read_csv(csv_path)
         from tools.metrics import extract_final_iae
         iae = extract_final_iae(df)
@@ -112,7 +112,7 @@ def _run_validation(study_dir: Path, csv_path: Path, params_override: dict | Non
         return result
 
     if not _HAS_CTRL:
-        print("WARN: ctrl_toolbox not available or GreyBoxEstimator not found — skipping estimation")
+        print("WARN: ctrl_toolbox not available or GreyBoxEstimator not found - skipping estimation")
         return result
 
     # Load model hooks

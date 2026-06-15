@@ -151,7 +151,7 @@ def main(argv=None):
             plt.close(fig)
             print(f"Plot saved: {plot_path}")
         except ImportError:
-            print("WARN: matplotlib not found — skipping plot")
+            print("WARN: matplotlib not found - skipping plot")
 
 
 if __name__ == "__main__":

@@ -28,8 +28,8 @@ TEST_CASE("BasicPID<float> step response converges to reference", "[basic_pid_em
     ctrl::BasicPIDParams<float> pp;
     pp.Kp = 2.0f; pp.Ki = 0.5f; pp.Kd = 0.0f;
     pp.uMin = -100.0f; pp.uMax = 100.0f;
-    pp.Kb = 1.0f; pp.N = 10.0f;
-    ctrl::BasicPID<float> pid(pp, 0.01f);
+    pp.Kb = 1.0f; pp.N = 10.0f; pp.Ts = 0.01f;
+    ctrl::BasicPID<float> pid(pp);
 
     float y = 0.0f, ref = 1.0f;
     for (int k = 0; k < 500; ++k) {
@@ -44,8 +44,8 @@ TEST_CASE("BasicPID<float> anti-windup clamps output under saturation", "[basic_
     ctrl::BasicPIDParams<float> pp;
     pp.Kp = 1.0f; pp.Ki = 2.0f; pp.Kd = 0.0f;
     pp.uMin = -1.0f; pp.uMax = 1.0f;
-    pp.Kb = 1.0f;
-    ctrl::BasicPID<float> pid(pp, 0.1f);
+    pp.Kb = 1.0f; pp.Ts = 0.1f;
+    ctrl::BasicPID<float> pid(pp);
 
     for (int k = 0; k < 100; ++k) pid.compute(10.0f);  // saturate for many steps
     const float u = pid.compute(10.0f);
@@ -57,8 +57,8 @@ TEST_CASE("BasicPID<double> compute returns finite value", "[basic_pid_embedded]
 {
     ctrl::BasicPIDParams<double> pp;
     pp.Kp = 1.0; pp.Ki = 0.1; pp.Kd = 0.05;
-    pp.uMin = -1e6; pp.uMax = 1e6;
-    ctrl::BasicPID<double> pid(pp, 0.01);
+    pp.uMin = -1e6; pp.uMax = 1e6; pp.Ts = 0.01;
+    ctrl::BasicPID<double> pid(pp);
 
     for (int k = 0; k < 20; ++k) {
         double u = pid.compute(1.0 - 0.05 * k);
@@ -70,8 +70,8 @@ TEST_CASE("BasicPID<float> reset clears integrator", "[basic_pid_embedded]")
 {
     ctrl::BasicPIDParams<float> pp;
     pp.Kp = 0.0f; pp.Ki = 1.0f; pp.Kd = 0.0f;
-    pp.uMin = -1e6f; pp.uMax = 1e6f;
-    ctrl::BasicPID<float> pid(pp, 0.01f);
+    pp.uMin = -1e6f; pp.uMax = 1e6f; pp.Ts = 0.01f;
+    ctrl::BasicPID<float> pid(pp);
 
     pid.compute(1.0f);
     pid.compute(1.0f);
@@ -88,9 +88,9 @@ TEST_CASE("BasicPID<float> reset clears integrator", "[basic_pid_embedded]")
 TEST_CASE("BasicSMC<float> reaches zero sliding surface on constant error", "[basic_smc_embedded]")
 {
     ctrl::BasicSMCParams<float> sp;
-    sp.c_e = 1.0f; sp.c_de = 0.05f; sp.eta = 1.0f; sp.phi = 0.02f;
+    sp.c_e = 1.0f; sp.c_de = 0.05f; sp.K = 1.0f; sp.phi = 0.02f;
     sp.uMin = -50.0f; sp.uMax = 50.0f;
-    ctrl::BasicSMC<float> smc(sp, 0.01f);
+    ctrl::BasicSMC<float> smc(sp);
 
     float y = 0.0f, ref = 1.0f;
     float s_final = 0.0f;
@@ -106,9 +106,9 @@ TEST_CASE("BasicSMC<float> reaches zero sliding surface on constant error", "[ba
 TEST_CASE("BasicSMC<double> output is finite and within bounds", "[basic_smc_embedded]")
 {
     ctrl::BasicSMCParams<double> sp;
-    sp.c_e = 1.0; sp.c_de = 0.1; sp.eta = 0.5; sp.phi = 0.05;
+    sp.c_e = 1.0; sp.c_de = 0.1; sp.K = 0.5; sp.phi = 0.05;
     sp.uMin = -10.0; sp.uMax = 10.0;
-    ctrl::BasicSMC<double> smc(sp, 0.01);
+    ctrl::BasicSMC<double> smc(sp);
 
     for (int k = 0; k < 50; ++k) {
         double u = smc.compute(1.0 - 0.02 * k);
@@ -121,9 +121,9 @@ TEST_CASE("BasicSMC<double> output is finite and within bounds", "[basic_smc_emb
 TEST_CASE("BasicSMC<float> reset clears previous error state", "[basic_smc_embedded]")
 {
     ctrl::BasicSMCParams<float> sp;
-    sp.c_e = 1.0f; sp.c_de = 0.5f; sp.eta = 0.1f; sp.phi = 0.1f;
+    sp.c_e = 1.0f; sp.c_de = 0.5f; sp.K = 0.1f; sp.phi = 0.1f;
     sp.uMin = -100.0f; sp.uMax = 100.0f;
-    ctrl::BasicSMC<float> smc(sp, 0.01f);
+    ctrl::BasicSMC<float> smc(sp);
 
     smc.compute(2.0f);  // set e_prev to 2.0
     smc.reset();

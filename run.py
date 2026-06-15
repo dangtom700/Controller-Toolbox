@@ -1,10 +1,13 @@
 """
 run.py - Controller Toolbox build & test runner.
 
-Three automated phases (no user input required):
-  1. Non-ASCII clean - auto-replace known non-standard characters.
-  2. Compile         - run compile.bat once.
-  3. Run             - execute each .exe one-by-one, stream output, print summary.
+Six automated phases (no user input required):
+  1. Non-ASCII clean    - auto-replace known non-standard characters.
+  2. Compile            - run compile.bat (Windows) or compile.sh (Linux/macOS).
+  3. Python bindings    - configure + build ctrl_toolbox binding + smoke test.
+  4. Run C++ executables - execute each binary one-by-one, stream output, print summary.
+  5. Python examples    - run examples/python/exNN_*.py via conda.
+  6. Python case studies - run case-study/*/sim/main.py via conda.
 """
 import os
 import re
@@ -12,6 +15,8 @@ import sys
 import datetime
 import subprocess
 from collections import defaultdict
+
+IS_WINDOWS = sys.platform == 'win32'
 
 
 def _ascii(s):
@@ -373,14 +378,20 @@ def phase_compile():
     _divider()
     print()
 
-    script = 'compile.bat'
+    if IS_WINDOWS:
+        script = 'compile.bat'
+        cmd_prefix = ['cmd', '/c']
+    else:
+        script = 'compile.sh'
+        cmd_prefix = ['bash']
+
     if not os.path.isfile(script):
         print(f'Error: {script} not found in {os.getcwd()}')
         raise SystemExit(1)
 
     script_abs = os.path.abspath(script)
     cwd = os.getcwd()
-    with subprocess.Popen(['cmd', '/c', script_abs], stdout=subprocess.PIPE,
+    with subprocess.Popen(cmd_prefix + [script_abs], stdout=subprocess.PIPE,
                           stderr=subprocess.STDOUT, text=True,
                           encoding='utf-8', errors='backslashreplace',
                           cwd=cwd) as proc:
@@ -431,10 +442,15 @@ def phase_bindings():
         print()
         return proc.returncode
 
-    # Step 1: cmake configure — adds CTRL_BUILD_PYTHON_BINDINGS=ON to the
-    # existing build directory without reconfiguring everything else.
+    # Step 1: cmake configure via conda run so pybind11 (installed in the conda
+    # env) is discovered correctly.  Adds CTRL_BUILD_PYTHON_BINDINGS=ON and
+    # Release build type to the existing build directory.
     rc = _run_cmd(
-        ['cmake', '-S', '.', '-B', 'build', '-DCTRL_BUILD_PYTHON_BINDINGS=ON', '-G', 'Ninja'],
+        ['conda', 'run', '-n', 'soft_robotics', '--',
+         'cmake', '-S', '.', '-B', 'build',
+         '-DCTRL_BUILD_PYTHON_BINDINGS=ON',
+         '-DCMAKE_BUILD_TYPE=Release',
+         '-G', 'Ninja'],
         'cmake configure (bindings)'
     )
     if rc != 0:
@@ -443,7 +459,8 @@ def phase_bindings():
 
     # Step 2: build only the ctrl_toolbox binding target (sequential, no --parallel).
     rc = _run_cmd(
-        ['cmake', '--build', 'build', '--target', 'ctrl_toolbox'],
+        ['conda', 'run', '-n', 'soft_robotics', '--',
+         'cmake', '--build', 'build', '--target', 'ctrl_toolbox'],
         'cmake build ctrl_toolbox'
     )
     if rc != 0:
@@ -483,23 +500,38 @@ def phase_bindings():
 # Phase 4 — Run one-by-one
 # ---------------------------------------------------------------------------
 
+def _is_build_exe(fpath, fname):
+    """Return True if fpath is a compiled C++ executable to run.
+
+    Windows: any .exe file.
+    Linux/macOS: any file with no extension and the executable bit set.
+    .so/.dylib shared libraries and script files (.py, .sh) are excluded by
+    the 'no extension' rule on non-Windows platforms.
+    """
+    if IS_WINDOWS:
+        return fname.endswith('.exe')
+    return '.' not in fname and os.access(fpath, os.X_OK)
+
+
 def phase_run():
     _divider()
     print('  Phase 4 — Run executables')
     _divider()
     print()
 
-    # Discover .exe files (skip CMakeFiles dirs)
+    # Discover compiled executables (skip CMakeFiles and _deps dirs)
     exe_files = []
+    _SKIP_BUILD_DIRS = {'CMakeFiles', '_deps', '.cmake'}
     for root, dirs, files in os.walk('build'):
-        dirs[:] = [d for d in dirs if d != 'CMakeFiles']
+        dirs[:] = [d for d in dirs if d not in _SKIP_BUILD_DIRS]
         for f in sorted(files):
-            if f.endswith('.exe'):
-                exe_files.append(os.path.join(root, f))
+            full = os.path.join(root, f)
+            if _is_build_exe(full, f):
+                exe_files.append(full)
     exe_files.sort()
 
     if not exe_files:
-        print('No .exe files found under build/\n')
+        print('No executables found under build/\n')
         raise SystemExit(1)
 
     total = len(exe_files)
