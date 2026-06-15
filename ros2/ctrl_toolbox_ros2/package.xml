@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd"
+            schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>ctrl_toolbox_ros2</name>
+  <version>1.0.0</version>
+  <description>
+    ROS 2 lifecycle node adapter for the Controller Toolbox C++ library.
+    Wraps any ctrl::IController as a managed ROS 2 lifecycle node with
+    ~/setpoint, ~/measurement, and ~/control_output topics.
+    Requires the controller_toolbox library installed via DIST-1 CMake install targets.
+  </description>
+  <maintainer email="dangsontung03@gmail.com">Azalea1047</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>std_msgs</depend>
+
+  <!-- Installed by DIST-1 CMake install targets (find_package(ControllerToolbox)) -->
+  <build_depend>controller_toolbox</build_depend>
+  <exec_depend>controller_toolbox</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

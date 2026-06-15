@@ -1,33 +1,37 @@
 # Controller Toolbox -- Project Master State Document
 
 **Project:** Discrete-Time Controller Toolbox (C++20 / pybind11 / Catch2)
-**Current Part:** 49 (Surface Ship Manoeuvring Python-only study -- complete 2026-06-11)
+**Current Part:** 60 (DIST-3 ROS2 wrapper + CI/CD overhaul + cross-platform run.py -- complete 2026-06-16)
 **Maintained by:** Claude Code (Senior Principal Engineer role)
 **Update cadence:** End of every major iteration (new algorithm, case study, or binding pass)
 
 ---
 
-## 1. Baseline Health (Part 49 Exit State)
+## 1. Baseline Health (Part 60 Exit State)
 
 | Suite | Passing | Failing | Notes |
 |-------|---------|---------|-------|
-| C++ (Catch2 + binaries) | ~174 UNVERIFIED | 0 | Await next clean `run.py` to confirm. test_smismo_regression recreated Part 44 (6 tests new sim). |
-| Python examples | ~103 UNVERIFIED | 0 | ex70–ex102 added through Part 33 |
-| Case studies C++ | 748 runs UNVERIFIED | 0 | 9 studies × scenarios (see Section 3) |
-| Case studies Python | 480 runs UNVERIFIED | 0 | 6 Python-only studies × scenarios (Phase 6) |
-| Runtime warnings | ~0 in bug_report.txt | -- | 37-entry safe_phrases list suppresses all known benign messages |
+| C++ (Catch2 + binaries) | ~174 UNVERIFIED | 0 | Await next clean `run.py`. test_embedded_subset API fixed Part 60 (7 sites). |
+| Python examples | ~103 UNVERIFIED | 0 | ex70–ex102+ through Part 55 |
+| Case studies C++ | 748 runs UNVERIFIED | 0 | 9 studies × scenarios; ActiveSuspension 90, SMISMO 65 (Part 55) |
+| Case studies Python | 565 runs UNVERIFIED | 0 | 7 Python-only studies × scenarios (Phase 6); EV6x6 90 runs added Part 55 |
+| Runtime warnings | ~0 in bug_report.txt | -- | safe_phrases list in run.py suppresses all known benign messages |
 
 **Verify with:** `conda run -n soft_robotics -- python run.py`
 
 ---
 
-## 2. Algorithm Inventory (~85 `lib/` modules -- updated through Part 49)
+## 2. Algorithm Inventory (~90 `lib/` modules -- updated through Part 60)
 
 > Parts 26-33 added 13 new `lib/` algorithms (DeePC, ILC, SINDy, KoopmanEDMD, L1Adaptive,
 > CBFSafetyFilter, GaussianProcess, EchoStateNetwork, NeuralPID, CEMController, DynaController,
 > ScenarioMPC, BayesianOptimizer) plus 5 infrastructure modules (ControllerRegistry,
 > ControllerRegistrations, ControllerMonitor, LQRAdapter/makeLQRController, ComputationalDelayWrapper).
-> Parts 34-49 added case studies only; no new `lib/` algorithms.
+> Parts 51-55 added DAE architecture (P1/P2/P3), GreyBoxEstimator (E1), RecursiveGreyBoxEstimator (E2),
+> GPResidualModel (E3), MHE inequality constraints (E4), HybridModel/HybridMPC/HybridModelTrainer (H1-H4),
+> MismatchDetector (D1), BasicPID<Scalar>/BasicSMC<Scalar> (M4), GeneticAlgorithm, ParticleSwarmOptimizer,
+> DifferentialEvolution (C3 from Part 55). Parts 56-60 added CI/CD overhaul, cross-platform scripts,
+> case study tracker, and ROS2 adapter (no new lib/ algorithms).
 
 ### Core Controllers
 | Class | Header | Sign convention |
@@ -105,6 +109,31 @@
 | `LQRAdapter` / `makeLQRController()` | DiscreteLQR.h | Factory returns `shared_ptr<IController>` for design_fn |
 | `ComputationalDelayWrapper` | ComputationalDelayWrapper.h | One-sample delay decorator; first output = 0 |
 
+### Model Estimation (Parts 51-54)
+| Class | Header | Notes |
+|-------|--------|-------|
+| `GreyBoxEstimator` | GreyBoxEstimator.h | Levenberg-Marquardt ODE param fit; `fit(x0,U,Y)` -> `Result{params,cost,converged}` |
+| `RecursiveGreyBoxEstimator` | RecursiveGreyBoxEstimator.h | Augmented-state UKF; `step(y,u)` online; requires `CTRL_ENABLE_ADVANCED_KALMAN` |
+| `GPResidualModel` | GPResidualModel.h | GP on model-plant mismatch; `predictWithUncertainty(xf,model_pred)` |
+| `MismatchDetector` | MismatchDetector.h | CUSUM on KF/MHE innovation; `enableMismatchDetection()` on KF and MHE |
+| `DAESystem` | PlantModel.h | Index-1 semi-explicit DAE; `consistentInit`, `dae2ode`, `c2d(DAESystem)` |
+
+### Metaheuristic Optimisers (Part 55)
+| Class | Header | Notes |
+|-------|--------|-------|
+| `GeneticAlgorithm` | GeneticAlgorithm.h | BLX-alpha crossover, tournament selection, elitism; `optimize(cost_fn)` -> `TunerResult` |
+| `ParticleSwarmOptimizer` | ParticleSwarmOptimizer.h | Clerc-Kennedy w=0.729; V_max = v_frac*(upper-lower) |
+| `DifferentialEvolution` | DifferentialEvolution.h | DE/rand/1/bin; population >= 4 required |
+
+### Embedded Subset (Part 54/57E)
+| Class | Header | Notes |
+|-------|--------|-------|
+| `BasicPID<Scalar>` | BasicPID.h | Header-only, no Eigen, no virtual; `compute(r-y)`; `Ts` in Params |
+| `BasicSMC<Scalar>` | BasicSMC.h | Header-only, no Eigen; `K` is switching gain; `compute(r-y)` |
+| `DiscreteIntegrator<Scalar>` | embedded/DiscreteIntegrator.h | Backward Euler; `integrate(x)`, `reset()`, `value()` |
+| `FixedRateFilter<Scalar,N>` | embedded/FixedRateFilter.h | Compile-time order IIR; `filter(x)` |
+| `RingBuffer<T,N>` | embedded/RingBuffer.h | Fixed FIFO; `push()`, `pop()`, `peek(i)` |
+
 ### Infrastructure (always)
 `ControllerStack`, `ControllerTraits`, `MetricsAnalyzer`, `SystemAnalysis`,
 `BalancedTruncation`, `ZeroPhaseTrackingFilter`, `LinearisationHelper`,
@@ -141,7 +170,20 @@ Controller Toolbox/
 ├── examples/                 C++ examples (ex01-ex79)
 │   └── python/               Python examples (ex01-ex102)
 ├── tools/
-│   └── compare_controllers.py  IAE/ISE table across all case-study CSVs (Part 34)
+│   ├── metrics.py               compute_metrics / extract_final_iae (ANA-1)
+│   ├── compare_controllers.py   IAE/ISE/settle-time leaderboard across case-study CSVs
+│   ├── monte_carlo.py           MC sensitivity sweep (ANA-2)
+│   ├── mc_plots.py              violin + scatter PNGs for MC
+│   ├── fault_injector.py        FaultSpec / FaultInjector (sensor_bias/noise/actuator_loss)
+│   ├── fault_sweep.py           sweep fault severity per controller (ANA-3)
+│   ├── fault_plots.py           heatmap + degradation curves
+│   ├── anova.py                 one-way ANOVA + Tukey HSD (ANA-4)
+│   ├── wcet_report.py           WCET p99 bar chart (ANA-5)
+│   ├── model_validation.py      GreyBoxEstimator NRMSE fit + cross-val (ANA-6)
+│   ├── mu_analysis.py           mu upper bound on closed-loop (ANA-7)
+│   ├── mu_plots.py              mu(omega) Bode-like plots
+│   ├── generate_report.py       self-contained HTML report per study (RPT-1)
+│   └── case_study_tracker.py    auto-scans case-study/*/; writes docs/case_study_status.md (TRK-1)
 ├── case-study/               Full physics case studies
 │   │
 │   ├── [C++ built -- registered in CMakeLists.txt + compile.bat]
@@ -158,10 +200,11 @@ Controller Toolbox/
 │   ├── [Python-only -- discovered by Phase 6 via case-study/*/sim/main.py]
 │   ├── Vertical Drill String .../         17 ctrl, sim/main.py, 85 runs
 │   ├── Multi-Body Floating Wind-Wave .../  16 ctrl, sim/main.py, 80 runs
-│   ├── Tracking Control of EH Force .../   12 ctrl, sim/main.py, 60 runs
+│   ├── Tracking Control of EH Force .../   14 ctrl, sim/main.py, 70 runs  (Part 55)
 │   ├── High-Altitude Aerial Firefighting/  12 planners, sim/main.py, 60 runs
 │   ├── Air-Cooled Battery Thermal .../     12 ctrl, sim/main.py, 60 runs
-│   └── Nonlinear Surface Ship .../         12 ctrl, sim/main.py, 60 runs
+│   ├── Nonlinear Surface Ship .../         12 ctrl, sim/main.py, 60 runs
+│   └── Active Suspension 6x6 EV .../       18 ctrl, sim/main.py, 90 runs  (Part 55, C6)
 │
 ├── docs/
 │   ├── PROJECT_MASTER_STATE.md       <- this file
@@ -172,8 +215,17 @@ Controller Toolbox/
 │   ├── DOCUMENTATION.md              (API reference)
 │   └── CASE_STUDIES.md               (case study documentation)
 ├── prompt/prompt_enhanced.txt        Full session handoff
-├── run.py                            Master build + test runner (6 phases)
-├── compile.bat                       Windows quick-compile
+├── ros2/ctrl_toolbox_ros2/           ROS 2 Humble ament_cmake package (DIST-3, Part 60)
+│   ├── include/ctrl_toolbox_ros2/
+│   │   └── controller_node.hpp       ControllerNode<T> lifecycle node template
+│   ├── example/pid_temperature_node.cpp
+│   ├── CMakeLists.txt + package.xml
+│   └── README.md
+├── run.py                            Master build + test runner (6 phases, cross-platform Part 60)
+├── compile.bat                       Windows sequential build
+├── compile.sh                        Linux/macOS sequential build (PLT-1, Part 59)
+├── setup.ps1                         Windows bootstrap (conda env + bindings + smoke test)
+├── setup.sh                          Linux/macOS bootstrap (PLT-1, Part 59)
 ├── CMakeLists.txt
 └── CLAUDE.md                         Session guide (law of the project)
 ```

@@ -101,9 +101,9 @@
 - **Adaptive Neural Network Control** (online learning)
 - **Reinforcement Learning Control** (Q-learning, DDPG, SAC, PPO)
 - **Bayesian Optimization** (GP surrogate + UCB/EI acquisition) - **implemented: `BayesianOptimizer`** (header-only; shares `TunerResult`/`CostFn` with `AutoTuner`)
-- **Genetic Algorithm (GA) Tuned Controllers**
-- **Particle Swarm Optimization (PSO) Tuned Controllers**
-- **Ant Colony / Differential Evolution Based Tuning**
+- **Genetic Algorithm (GA) Tuned Controllers** - **implemented: `GeneticAlgorithm`** (BLX-alpha crossover, tournament selection, elitism; `optimize(cost_fn)` -> `TunerResult`; Python: pass bounds as `np.ndarray`)
+- **Particle Swarm Optimization (PSO) Tuned Controllers** - **implemented: `ParticleSwarmOptimizer`** (Clerc-Kennedy inertia w=0.729; V_max = v_frac*(upper-lower))
+- **Ant Colony / Differential Evolution Based Tuning** - **DE implemented: `DifferentialEvolution`** (DE/rand/1/bin; population >= 4 required; Python cost_fn receives Eigen VectorXd — wrap with `lambda g: cost(np.asarray(g))`)
 
 ---
 

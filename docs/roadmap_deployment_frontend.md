@@ -1,9 +1,9 @@
 # Controller Toolbox - Phase 3: Deployment & Frontend Roadmap
 
 **Created:** 2026-06-14 (Post-Part 56 strategic planning)
-**Status:** DIST-1, DIST-2, DIST-4, DIST-5 complete (Part 57E). ANA-1..7, RPT-1 complete (Part 58). DIST-3 pending.
+**Status:** DIST-1..5 complete (Parts 57E, 60). ANA-1..7, RPT-1 complete (Part 58). PLT-1/TRK-1 complete (Part 59).
 **Scope:** Library distribution (DIST-1..5) . Analysis pipeline (ANA-1..7) . Static report (RPT-1)
-**Not in scope:** Digital Twin / Streamlit (D2 remains open at LOW priority per handoff_part57.md Section 3), TCLab HIL.
+**Not in scope:** Digital Twin / Streamlit (D2 remains open at LOW priority), TCLab HIL.
 
 ---
 
@@ -791,9 +791,13 @@ DIST-2  [x] lib/embedded/: DiscreteIntegrator.h, FixedRateFilter.h, RingBuffer.h
         [x] CTRL_BUILD_EMBEDDED_ONLY=ON option added to root CMakeLists.txt (Part 57E)
         [ ] Verify test_embedded_subset passes after next cmake build
 
-DIST-3  [ ] colcon build succeeds on ROS2 Humble (Ubuntu 22.04)
+DIST-3  [x] ros2/ctrl_toolbox_ros2/ package created with ControllerNode<T> template (Part 60)
+        [x] package.xml + CMakeLists.txt (ament_cmake, finds ctrl::controller_toolbox)
+        [x] example/pid_temperature_node.cpp (DiscretePID, all gains as ROS 2 params)
+        [x] README with colcon build instructions and topic/parameter table
+        [ ] colcon build verified on ROS 2 Humble (Ubuntu 22.04) - needs ROS 2 environment
         [ ] PID lifecycle node tracks step reference in demo launch
-        [ ] ros2.yml CI workflow passes
+        [ ] Consider ros2.yml CI workflow (separate job, ros-humble-ros-base on ubuntu-22.04)
 
 DIST-4  [x] pyproject.toml created with scikit-build-core backend (Part 57E)
         [x] .github/workflows/publish.yml created, cibuildwheel v2.21.3 (Part 57E)

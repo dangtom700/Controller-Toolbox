@@ -25,7 +25,7 @@ The project uses a six-phase runner managed by `run.py`:
 | Phase | What happens |
 |---|---|
 | 1 - Non-ASCII scan | Auto-replaces known non-standard Unicode characters in all `.cpp`, `.h`, `.py`, `.txt` files. Write ASCII-only source. |
-| 2 - Compile | Runs `compile.bat` which calls `cmake --build` **sequentially** (no `--parallel`). Targets are listed explicitly in dependency order. |
+| 2 - Compile | Runs `compile.bat` (Windows) or `compile.sh` (Linux/macOS) which call `cmake --build` **sequentially** (no `--parallel`). Targets are listed explicitly in dependency order. |
 | 3 - Bindings | Builds `ctrl_toolbox` Python bindings and runs `bindings/smoke_test.py`. |
 | 4 - Run C++ | Runs every `.exe` under `build/` (examples, tests, and case-study `*_sim` targets), prints pass/fail. |
 | 5 - Run Python | Runs every `exNN_*.py` under `examples/python/` via the `soft_robotics` conda environment. |
@@ -38,11 +38,11 @@ conda run -n soft_robotics -- python run.py
 
 **Never use** `cmake --build build --parallel` - sequential compilation per `compile.bat` is required.
 
-**Expected baseline (as of Part 44, 2026-06-10):** `C++ ~174 passed | Python ~100 passed`,
-plus nine C++ case studies (Boiler 216, Tug 72, Solar 70, Humid 75, ActiveSuspension 75,
-BuckBoost 60, SolarCooker 60, SOTEC 60, SMISMO 60) and two Python-only studies
-(DrillString 85, WindWave 80).
-This number drifts every part - treat the latest `run_*.log` as the source of truth, not this line.
+**Expected baseline (as of Part 60, 2026-06-16, UNVERIFIED):** `C++ ~174 passed | Python ~100 passed`,
+nine C++ case studies (Boiler 216, Tug 72, Solar 70, Humid 75, ActiveSuspension **90**, BuckBoost 60,
+SolarCooker 60, SOTEC 60, SMISMO **65**) and seven Python-only studies
+(DrillString 85, WindWave 80, EHFS **70**, Firefighting 60, BTMS 60, SurfaceShip 60, EV6x6 **90**).
+Treat the latest `run_*.log` as the source of truth, not this line.
 
 A log file `run_YYYYMMDD_HHMMSS.log` is written to the project root after every run.
 
@@ -240,8 +240,9 @@ Before marking a PR ready for review, confirm all of the following:
 - [ ] `lib/ControllerToolbox.h` has the new `#include`
 - [ ] `lib/Features.h` has the new feature flag
 - [ ] `examples/CMakeLists.txt` has `add_example(exNN_name)`
-- [ ] `compile.bat` has the example target in the sequential build list
+- [ ] `compile.bat` **and** `compile.sh` have the example target in the sequential build list
 - [ ] Python binding uses `std::shared_ptr<T>` as third `py::class_` template argument
 - [ ] `bindings/smoke_test.py` has an assertion for the new class
 - [ ] All `float(numpy_array)` calls use `.squeeze()` or `[0]` indexing
 - [ ] `docs/cumulative_bug_report.md` has a new Part section documenting the change
+- [ ] If adding a new case study C++ target: registered in `case-study/CMakeLists.txt`, `compile.bat`, and `compile.sh`

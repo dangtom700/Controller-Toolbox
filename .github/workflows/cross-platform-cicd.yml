@@ -235,7 +235,12 @@ jobs:
 
       - name: Smoke test Python bindings
         shell: pwsh
-        run: conda run -n soft_robotics python bindings/smoke_test.py
+        run: |
+          # The .pyd was linked against MinGW64 runtime DLLs; add their directory
+          # to PATH so Windows DLL loader can find them at import time.
+          # (Each step runs in a fresh shell so PATH set during build is gone.)
+          $env:PATH = "C:\msys64\mingw64\bin;$env:PATH"
+          conda run -n soft_robotics --no-capture-output python bindings/smoke_test.py
 
       - name: Upload ctrl_toolbox binding
         uses: actions/upload-artifact@v4
