@@ -1,79 +1,48 @@
-name: Cross-Platform CI/CD
+name: CI/CD
 
 # Single source of truth for continuous integration and distribution.
 #
-#   push / pull_request -> main : build + test on Linux, Windows, macOS
+#   push / pull_request -> main : quick-test gate, then full 5-platform build matrix
 #                                  (C++ library, tests, Python bindings, sanitizers)
-#   push tag v*.*.*            : build release artifacts + GitHub Release
-#                                  + build wheels + publish to PyPI
+#   push tag v*.*.*            : same CI runs first; on success, build release artifacts
+#                                  + GitHub Release + wheels + publish to PyPI
 #
-# CI matrix jobs are skipped on tag pushes (the tag is cut from a main commit
-# that already passed CI); release/publish jobs run only on tag pushes.
+# Job dependency graph:
+#   quick-test ──► build (5-platform matrix)  ──► all-ci-passed ──► release-build ──► create-release
+#              └─► windows-python              ┘                 └─► wheels        ──► publish-pypi
 
 on:
   push:
-    branches:
-      - main
-    tags:
-      - "v*.*.*"
+    branches: [main]
+    tags: ["v*.*.*"]
   pull_request:
-    branches:
-      - main
+    branches: [main]
+
+# One run per ref; new push cancels the in-progress run for the same branch/tag/PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # ===========================================================================
-  # CI - Linux (x86_64 + x86 cross-compile)
+  # GATE: fast Linux-only compile + ctest before spending runner quota on the
+  #       full multi-platform matrix.  Uses the default system GCC (no PPA).
   # ===========================================================================
-  linux:
-    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [x86_64, x86]
-
+  quick-test:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
-    concurrency:
-      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-linux-${{ matrix.arch }}
-      cancel-in-progress: true
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install GCC-13 and multilib
-        run: |
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa -y
-          sudo apt-get update
-          sudo apt-get install -y g++-13 gcc-13 gcc-13-multilib g++-13-multilib
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 60 \
-            --slave /usr/bin/g++ g++ /usr/bin/g++-13
-
-      - name: Print GCC version
-        run: gcc --version
-
       - name: Install Eigen3 and nlohmann-json
         run: sudo apt-get install -y libeigen3-dev nlohmann-json3-dev
 
-      - name: Configure (x86_64)
-        if: matrix.arch == 'x86_64'
-        run: |
-          cmake -B build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_COMPILER=g++-13
-
-      - name: Configure (x86 cross-compile)
-        if: matrix.arch == 'x86'
-        run: |
-          cmake -B build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_COMPILER=g++-13 \
-            -DCMAKE_CXX_FLAGS="-m32" \
-            -DCMAKE_C_FLAGS="-m32" \
-            -DCMAKE_EXE_LINKER_FLAGS="-m32"
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         run: cmake --build build --parallel $(nproc)
@@ -81,77 +50,89 @@ jobs:
       - name: Test
         run: cd build && ctest --output-on-failure
 
-      - name: Install pybind11 (x86_64 only)
-        if: matrix.arch == 'x86_64'
-        run: sudo apt-get install -y pybind11-dev python3-dev python3-numpy
-
-      - name: Build Python bindings (x86_64 only)
-        if: matrix.arch == 'x86_64'
-        run: |
-          cmake -S . -B build_py \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_COMPILER=g++-13 \
-            -DCTRL_BUILD_PYTHON_BINDINGS=ON
-          cmake --build build_py --parallel $(nproc) --target ctrl_toolbox
-
-      - name: Smoke test Python bindings (x86_64 only)
-        if: matrix.arch == 'x86_64'
-        run: python3 bindings/smoke_test.py
-
-      - name: Upload Python binding (x86_64 only)
-        if: matrix.arch == 'x86_64'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ctrl-toolbox-linux-x86_64-so
-          path: build_py/bindings/ctrl_toolbox*.so
-          retention-days: 30
-
-      - name: ASAN/UBSAN Debug build (x86_64 only)
-        if: matrix.arch == 'x86_64'
-        run: |
-          cmake -S . -B build_san \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -DCMAKE_CXX_COMPILER=g++-13 \
-            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
-          cmake --build build_san --parallel $(nproc)
-          cd build_san && ctest --output-on-failure
-
   # ===========================================================================
-  # CI - Windows C++ (MSVC x64 + x86 via vcpkg)
+  # BUILD MATRIX: all five platform/arch combinations, after the gate passes.
+  #
+  # Matrix boolean flags drive per-platform conditional steps:
+  #   has_python : build + smoke-test Python bindings (.so / .dylib)
+  #   run_asan   : ASAN/UBSAN Debug build (linux-x86_64 only)
   # ===========================================================================
-  windows:
-    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+  build:
+    needs: quick-test
+    name: Build (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
-        arch: [x64, x86]
-
-    runs-on: windows-2022
-    permissions:
-      contents: read
-
-    concurrency:
-      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-windows-${{ matrix.arch }}
-      cancel-in-progress: true
+        include:
+          - { name: linux-x86_64, os: ubuntu-latest, arch: x86_64, has_python: true,  run_asan: true  }
+          - { name: linux-x86,    os: ubuntu-latest, arch: x86,    has_python: false, run_asan: false }
+          - { name: windows-x64,  os: windows-2022,  arch: x64,    has_python: false, run_asan: false }
+          - { name: windows-x86,  os: windows-2022,  arch: x86,    has_python: false, run_asan: false }
+          - { name: macos,        os: macos-latest,  arch: native, has_python: true,  run_asan: false }
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Cache vcpkg packages
+      # ── Linux setup ────────────────────────────────────────────────────
+      - name: Install GCC-13 and multilib (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa -y
+          sudo apt-get update
+          sudo apt-get install -y g++-13 gcc-13 gcc-13-multilib g++-13-multilib
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 60 \
+            --slave /usr/bin/g++ g++ /usr/bin/g++-13
+
+      - name: Install Eigen3 and nlohmann-json (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y libeigen3-dev nlohmann-json3-dev
+
+      # ── Windows setup ──────────────────────────────────────────────────
+      - name: Cache vcpkg packages (Windows)
+        if: runner.os == 'Windows'
         uses: actions/cache@v4
         with:
           path: C:\vcpkg\packages
           key: vcpkg-${{ matrix.arch }}-eigen3-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: vcpkg-${{ matrix.arch }}-eigen3-
 
-      - name: Install Eigen3 via vcpkg
+      - name: Install Eigen3 via vcpkg (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
         run: |
           $triplet = if ("${{ matrix.arch }}" -eq "x64") { "x64-windows-static" } else { "x86-windows-static" }
           vcpkg install "eigen3:$triplet"
 
-      - name: Configure
+      # ── macOS setup ────────────────────────────────────────────────────
+      - name: Install Homebrew deps (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          set -eux
+          brew update || true
+          brew install cmake python eigen nlohmann-json pybind11 || true
+          pip3 install --break-system-packages numpy || pip3 install numpy
+
+      # ── Configure ──────────────────────────────────────────────────────
+      - name: Configure (linux-x86_64)
+        if: matrix.name == 'linux-x86_64'
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++-13
+
+      - name: Configure (linux-x86)
+        if: matrix.name == 'linux-x86'
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++-13 \
+            -DCMAKE_CXX_FLAGS="-m32" \
+            -DCMAKE_C_FLAGS="-m32" \
+            -DCMAKE_EXE_LINKER_FLAGS="-m32"
+
+      - name: Configure (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
         run: |
           $triplet  = if ("${{ matrix.arch }}" -eq "x64") { "x64-windows-static" } else { "x86-windows-static" }
           $platform = if ("${{ matrix.arch }}" -eq "x64") { "x64" } else { "Win32" }
@@ -161,26 +142,85 @@ jobs:
             -DVCPKG_TARGET_TRIPLET="$triplet" `
             -A "$platform"
 
-      - name: Build
+      - name: Configure (macOS)
+        if: runner.os == 'macOS'
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      # ── Build & Test ───────────────────────────────────────────────────
+      - name: Build (Unix)
+        if: runner.os != 'Windows'
+        run: cmake --build build --parallel $(nproc)
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
         run: cmake --build build --config Release
 
-      - name: Test
+      - name: Test (Unix)
+        if: runner.os != 'Windows'
+        run: cd build && ctest --output-on-failure
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
         run: |
           Set-Location build
           ctest --output-on-failure -C Release
 
+      # ── Python bindings ────────────────────────────────────────────────
+      - name: Install pybind11 deps (linux-x86_64)
+        if: matrix.name == 'linux-x86_64'
+        run: sudo apt-get install -y pybind11-dev python3-dev python3-numpy
+
+      - name: Build Python bindings (linux-x86_64)
+        if: matrix.name == 'linux-x86_64'
+        run: |
+          cmake -S . -B build_py \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_COMPILER=g++-13 \
+            -DCTRL_BUILD_PYTHON_BINDINGS=ON
+          cmake --build build_py --parallel $(nproc) --target ctrl_toolbox
+
+      - name: Build Python bindings (macOS)
+        if: matrix.name == 'macos'
+        run: |
+          cmake -S . -B build_py \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCTRL_BUILD_PYTHON_BINDINGS=ON
+          cmake --build build_py --parallel --target ctrl_toolbox
+
+      - name: Smoke test Python bindings
+        if: matrix.has_python == true
+        run: python3 bindings/smoke_test.py
+
+      - name: Upload Python binding (linux-x86_64)
+        if: matrix.name == 'linux-x86_64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ctrl-toolbox-linux-x86_64-so
+          path: build_py/bindings/ctrl_toolbox*.so
+          retention-days: 30
+
+      # ── ASAN/UBSAN (linux-x86_64 only) ────────────────────────────────
+      - name: ASAN/UBSAN Debug build
+        if: matrix.run_asan == true
+        run: |
+          cmake -S . -B build_san \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_COMPILER=g++-13 \
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          cmake --build build_san --parallel $(nproc)
+          cd build_san && ctest --output-on-failure
+
   # ===========================================================================
   # CI - Windows Python bindings (MSYS2 MinGW64 + conda env)
+  # Separate job because the MSYS2+conda toolchain setup is incompatible with
+  # the MSVC vcpkg path used by the build matrix Windows entries.
   # ===========================================================================
   windows-python:
-    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+    needs: quick-test
     runs-on: windows-2022
     permissions:
       contents: read
-
-    concurrency:
-      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-windows-python
-      cancel-in-progress: true
 
     steps:
       - uses: actions/checkout@v4
@@ -250,57 +290,30 @@ jobs:
           retention-days: 30
 
   # ===========================================================================
-  # CI - macOS (Apple clang via Homebrew)
+  # AGGREGATOR: single status-check job for branch protection rules.
+  # Always runs (even when upstream jobs fail) so the branch rule never stalls.
+  # Set "all-ci-passed" as the only required check in GitHub Settings → Branches.
   # ===========================================================================
-  macos:
-    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-    runs-on: macos-latest
-    permissions:
-      contents: read
-
-    concurrency:
-      group: ${{ github.ref }}-${{ github.base_ref }}-${{ github.head_ref }}-macos
-      cancel-in-progress: true
-
+  all-ci-passed:
+    needs: [build, windows-python]
+    if: always()
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install Homebrew deps
+      - name: Check all jobs passed
         run: |
-          set -eux
-          brew update || true
-          brew install cmake python eigen nlohmann-json pybind11 || true
-          pip3 install --break-system-packages numpy || pip3 install numpy
-
-      - name: Print compiler
-        run: clang --version || true
-
-      - name: Configure (macOS)
-        run: cmake -B build_macos -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build
-        run: cmake --build build_macos --parallel
-
-      - name: Test
-        run: cd build_macos && ctest --output-on-failure
-
-      - name: Build Python bindings
-        run: |
-          cmake -S . -B build_py_macos \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCTRL_BUILD_PYTHON_BINDINGS=ON
-          cmake --build build_py_macos --parallel --target ctrl_toolbox
-
-      - name: Smoke test Python bindings
-        run: python3 bindings/smoke_test.py
+          build="${{ needs.build.result }}"
+          py="${{ needs.windows-python.result }}"
+          if [[ "$build" != "success" || "$py" != "success" ]]; then
+            echo "build=$build  windows-python=$py"
+            exit 1
+          fi
 
   # ===========================================================================
-  # RELEASE - build install artifacts (tags only)
+  # RELEASE - build install artifacts (tags only, after CI passes)
   # ===========================================================================
   release-build:
     if: startsWith(github.ref, 'refs/tags/v')
+    needs: all-ci-passed
     name: Release build (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
@@ -362,7 +375,7 @@ jobs:
   # ===========================================================================
   # RELEASE - create GitHub Release (tags only)
   # ===========================================================================
-  release:
+  create-release:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: release-build
     runs-on: ubuntu-latest
@@ -383,10 +396,11 @@ jobs:
           fail_on_unmatched_files: true
 
   # ===========================================================================
-  # PUBLISH - build wheels (tags only)
+  # PUBLISH - build wheels (tags only, after CI passes)
   # ===========================================================================
   wheels:
     if: startsWith(github.ref, 'refs/tags/v')
+    needs: all-ci-passed
     name: Build wheels (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
