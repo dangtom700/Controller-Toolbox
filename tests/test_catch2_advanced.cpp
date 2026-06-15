@@ -894,7 +894,7 @@ TEST_CASE("RLS with forgetting factor stays bounded on integrating-output signal
     // ARX form: y[k] + a1*y[k-1] = b1*u[k-1]  -> true params: a1=-1, b1=1.
     // RLS theta = [a1, b1] after identification.
     const double lambda_f = 0.95;
-    ctrl::RecursiveLeastSquares rls(1, 1, lambda_f, Ts);
+    ctrl::RecursiveLeastSquares rls(1, 1, Ts, lambda_f);
 
     double y = 0.0, u_prev = 0.0;
     std::srand(42);

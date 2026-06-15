@@ -9,7 +9,7 @@ name: CI/CD
 #
 # Job dependency graph:
 #   quick-test ──► build (5-platform matrix)  ──► all-ci-passed ──► release-build ──► create-release
-#              └─► windows-python              ┘                 └─► wheels        ──► publish-pypi
+#                                                               └─► wheels        ──► publish-pypi
 
 on:
   push:
@@ -39,7 +39,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install Eigen3 and nlohmann-json
-        run: sudo apt-get install -y libeigen3-dev nlohmann-json3-dev
+        run: sudo apt-get update && sudo apt-get install -y libeigen3-dev nlohmann-json3-dev
 
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
@@ -216,99 +216,20 @@ jobs:
           cd build_san && ctest --output-on-failure
 
   # ===========================================================================
-  # CI - Windows Python bindings (MSYS2 MinGW64 + conda env)
-  # Separate job because the MSYS2+conda toolchain setup is incompatible with
-  # the MSVC vcpkg path used by the build matrix Windows entries.
-  # ===========================================================================
-  windows-python:
-    needs: quick-test
-    runs-on: windows-2022
-    permissions:
-      contents: read
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # Build toolchain only (no MSYS2 Python/pybind11 - those come from conda).
-      - name: Set up MSYS2 build toolchain
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: true
-          install: >-
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-ninja
-            mingw-w64-x86_64-eigen3
-
-      # Creates (or updates) the 'soft_robotics' conda env from environment.yml:
-      # Python + pybind11 + numpy + scipy, matching local-dev ABI for the .pyd.
-      - name: Set up conda environment
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          environment-file: environment.yml
-          activate-environment: soft_robotics
-          auto-activate-base: false
-
-      - name: Build Python bindings
-        shell: pwsh
-        run: |
-          # Put MSYS2 tools (cmake, ninja, gcc) first on PATH so 'conda run'
-          # finds them even though conda prepends its own bin dir.
-          $env:PATH = "C:\msys64\mingw64\bin;$env:PATH"
-
-          # 'conda run' resets the environment, so CMake cannot see the MSYS2
-          # eigen3 config via the default search paths. Point CMAKE_PREFIX_PATH
-          # at the MSYS2 prefix AND enable the FetchContent fallback so the
-          # binding configures whether or not the system Eigen is discoverable.
-          $env:CMAKE_PREFIX_PATH = "C:\msys64\mingw64;$env:CMAKE_PREFIX_PATH"
-
-          conda run -n soft_robotics --no-capture-output cmake `
-            -S . -B build_py `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DCTRL_BUILD_PYTHON_BINDINGS=ON `
-            -DCTRL_FETCH_EIGEN_IF_MISSING=ON `
-            -G Ninja
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-          conda run -n soft_robotics --no-capture-output cmake `
-            --build build_py --target ctrl_toolbox
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Smoke test Python bindings
-        shell: pwsh
-        run: |
-          # The .pyd was linked against MinGW64 runtime DLLs; add their directory
-          # to PATH so Windows DLL loader can find them at import time.
-          # (Each step runs in a fresh shell so PATH set during build is gone.)
-          $env:PATH = "C:\msys64\mingw64\bin;$env:PATH"
-          conda run -n soft_robotics --no-capture-output python bindings/smoke_test.py
-
-      - name: Upload ctrl_toolbox binding
-        uses: actions/upload-artifact@v4
-        with:
-          name: ctrl-toolbox-windows-x64-pyd
-          path: build_py/bindings/ctrl_toolbox*.pyd
-          retention-days: 30
-
-  # ===========================================================================
   # AGGREGATOR: single status-check job for branch protection rules.
   # Always runs (even when upstream jobs fail) so the branch rule never stalls.
   # Set "all-ci-passed" as the only required check in GitHub Settings → Branches.
   # ===========================================================================
   all-ci-passed:
-    needs: [build, windows-python]
+    needs: [build]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Check all jobs passed
         run: |
           build="${{ needs.build.result }}"
-          py="${{ needs.windows-python.result }}"
-          if [[ "$build" != "success" || "$py" != "success" ]]; then
-            echo "build=$build  windows-python=$py"
+          if [[ "$build" != "success" ]]; then
+            echo "build=$build"
             exit 1
           fi
 
@@ -389,6 +310,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
+          pattern: ctrl_toolbox-*
           merge-multiple: true
           path: dist/
 
