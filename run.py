@@ -8,6 +8,9 @@ Six automated phases (no user input required):
   4. Run C++ executables - execute each binary one-by-one, stream output, print summary.
   5. Python examples    - run examples/python/exNN_*.py via conda.
   6. Python case studies - run case-study/*/sim/main.py via conda.
+  7. Status + report    - refresh docs/case_study_status.md and build a static
+                          HTML report (docs/report.html) over the on-going
+                          studies' freshly-written logs.
 """
 import os
 import re
@@ -769,6 +772,10 @@ def phase_bug_report(log_path):
         'h-inf synthesis infeasible',     # Catch2 WARN when H-inf synthesis can't converge (skipped gracefully)
         'test_catch2_advanced.cpp:3718',  # Catch2 warning: source location line for H-inf NaN-guard WARN
         'all assertions passed',          # ex102 / other examples final pass line
+
+        # --- Phase 7 report generation (benign) ---
+        'warn: plotly not found',         # generate_report.py: degrades to plain tables
+        'charts will be replaced by plain tables',  # generate_report.py plotly fallback note
     ]
 
     # Try to read the log - fall back to latin‑1 if UTF‑8 fails
@@ -945,6 +952,74 @@ def phase_python_case_studies():
 
 
 # ---------------------------------------------------------------------------
+# Phase 7 — Refresh case-study status + generate static HTML report
+# ---------------------------------------------------------------------------
+
+def phase_report():
+    """Refresh docs/case_study_status.md, then build a static HTML report.
+
+    The report (tools/generate_report.py) auto-discovers
+    case-study/*/logs/run_*.csv.  Only studies that actually ran in Phases 4-6
+    emit those CSVs, so the report naturally covers exactly the *on-going*
+    (and complete) studies -- spec-only "Incomplete" stubs have no logs and are
+    silently excluded.
+
+    Non-fatal: a failure here does not abort the run (same policy as Phases
+    5/6).  Requires pandas/numpy (and plotly for interactive charts; it
+    degrades to plain tables without it) in the soft_robotics env.
+    """
+    _divider()
+    print('  Phase 7 - Case-study status + static report')
+    _divider()
+    print()
+
+    cwd = os.getcwd()
+
+    def _run_cmd(cmd_list, label):
+        print(f'  [{label}]\n')
+        try:
+            with subprocess.Popen(
+                cmd_list, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                text=True, encoding='utf-8', errors='backslashreplace', cwd=cwd
+            ) as proc:
+                for line in proc.stdout:
+                    sys.stdout.write(line)
+                proc.wait()
+                rc = proc.returncode
+        except Exception as exc:
+            print(f'  ERROR launching {label}: {exc}')
+            rc = -1
+        print()
+        return rc
+
+    # Step 1: refresh the auto-generated status table (pure-stdlib; run directly).
+    tracker = os.path.join('tools', 'case_study_tracker.py')
+    if os.path.isfile(tracker):
+        _run_cmd([sys.executable, tracker], 'case_study_tracker.py')
+    else:
+        print(f'  [SKIP] {tracker} not found\n')
+
+    # Step 2: build the static HTML report from the freshly-written logs.
+    # Run via conda so pandas/numpy/plotly (in soft_robotics) are available.
+    reporter = os.path.join('tools', 'generate_report.py')
+    if not os.path.isfile(reporter):
+        print(f'  [SKIP] {reporter} not found\n')
+        return
+
+    out_html = os.path.join('docs', 'report.html')
+    rc = _run_cmd(
+        ['conda', 'run', '-n', 'soft_robotics', '--',
+         'python', reporter, '--out', out_html],
+        'generate_report.py'
+    )
+    if rc == 0:
+        print(f'  Static report written: {out_html}\n')
+    else:
+        print(f'  WARNING: report generation failed (exit {rc}).  '
+              f'Ensure pandas/numpy/plotly are installed in soft_robotics.\n')
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
@@ -962,6 +1037,7 @@ if __name__ == '__main__':
         phase_run()
         phase_python()
         phase_python_case_studies()
+        phase_report()     # refresh status table + static HTML report
     finally:
         sys.stdout = sys.__stdout__
         _log_file.close()

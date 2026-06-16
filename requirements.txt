@@ -1,0 +1,22 @@
+# Controller Toolbox - Python dependencies
+# Install with:  pip install -r requirements.txt
+# Or use environment.yml for a full conda env (manages Python + pybind11 ABI).
+
+# -- Core scientific stack ------------------------------------------------------
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7
+pandas>=2.0
+
+# -- Control-systems library (python-control) -----------------------------------
+control>=0.9
+
+# -- C++ bindings build (pybind11 header-only + CMake helpers) -----------------
+pybind11>=2.13
+
+# -- Analysis / reporting tools (tools/) ---------------------------------------
+plotly>=5.0          # tools/generate_report.py - optional; degrades to plain tables
+statsmodels>=0.14    # tools/anova.py (Tukey HSD) - optional; warned on import
+
+# -- PDF text extraction (tools/extract_text.py only) --------------------------
+pymupdf>=1.23        # provides the 'fitz' import

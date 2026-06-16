@@ -105,6 +105,11 @@ def _df_to_html_table(df: pd.DataFrame, float_fmt: str = "{:.4f}") -> str:
 def _section_summary(df: pd.DataFrame) -> str:
     if df.empty:
         return "<p>No run data found.</p>"
+    # Drop rows with no finite IAE so idxmin never sees an all-NA group
+    # (raises "idxmin encountered all NA values in a group" otherwise).
+    df = df[df["iae"].notna()]
+    if df.empty:
+        return "<p>No finite IAE values in run data.</p>"
     best = df.loc[df.groupby(["study", "scenario"])["iae"].idxmin()]
     best = best[["study", "scenario", "controller", "iae", "rms_error", "settle_time_s"]].sort_values(["study", "scenario"])
     return _df_to_html_table(best)
