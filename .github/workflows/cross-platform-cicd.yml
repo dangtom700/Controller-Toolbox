@@ -23,6 +23,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Workflow-wide environment.
+env:
+  # Force JS actions (checkout/upload-artifact/cache, still shipping a Node 20
+  # runtime) onto Node 24, clearing the deprecation warnings. Becomes the runner
+  # default on 2026-06-16; this opt-in is redundant after that, harmless before.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   # ===========================================================================
   # GATE: fast Linux-only compile + ctest before spending runner quota on the
