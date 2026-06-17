@@ -5,7 +5,9 @@ new_case_study.py - scaffold a case-study framework from a source PDF.
 Given a paper at ``case-study/<pdf_name>.pdf`` this generates a complete
 case-study skeleton (folders + files + extracted PDF text) for EITHER a C++
 study (headers + sources + CMakeLists) OR a Python-only study (modules), matching
-the conventions used by the existing studies in this repo.
+the conventions used by the existing studies in this repo. After scaffolding, the
+source PDF is moved into the new project folder
+(``case-study/<pdf_name>.pdf`` -> ``case-study/<project_name>/<pdf_name>.pdf``).
 
 Usage (from repo root):
   python tools/new_case_study.py case-study/MyPaper.pdf --lang cpp
@@ -26,13 +28,14 @@ Python studies need no registration; run.py Phase 6 auto-discovers sim/main.py.
 
 PDF text extraction uses PyMuPDF (`pip install pymupdf`, imported as `fitz`).
 If it is not installed the script still scaffolds everything and writes a
-placeholder note into extracted_text.md.
+placeholder note into extracted_text.txt.
 """
 
 import argparse
 import datetime
 import os
 import re
+import shutil
 import sys
 
 # --------------------------------------------------------------------------- #
@@ -104,7 +107,7 @@ README_TMPL = """# @@NAME@@
 ## Source
 
 - Paper PDF: `@@PDF@@`
-- Extracted text: [`extracted_text.md`](extracted_text.md) (verify; PDF extraction is lossy)
+- Extracted text: [`extracted_text.txt`](extracted_text.txt) (verify; PDF extraction is lossy)
 
 ## Plant model
 
@@ -128,13 +131,12 @@ TODO: describe each scenario in `config/scenarios/`.
 @@RUN_HINT@@
 """
 
-EXTRACTED_TMPL = """# Extracted text - @@PDF@@
+EXTRACTED_TMPL = """Extracted text - @@PDF@@
 
-> Auto-extracted by `tools/new_case_study.py` (backend: **@@BACKEND@@**) on @@DATE@@.
-> PDF text extraction is lossy: equations, tables, and figures are usually mangled.
-> Treat this as a searchable transcript, not ground truth - always cross-check the PDF.
-
----
+Auto-extracted by tools/new_case_study.py (backend: @@BACKEND@@) on @@DATE@@.
+PDF text extraction is lossy: equations, tables, and figures are usually mangled.
+Treat this as a searchable transcript, not ground truth - always cross-check the PDF.
+===========================================================================
 
 @@BODY@@
 """
@@ -164,10 +166,10 @@ SCENARIO_TMPL = """{
 def scaffold_common(study_dir, tokens, n_scen, pdf_text, backend):
     # extracted text
     body = pdf_text.strip() if pdf_text.strip() else (
-        "*(No PDF text extracted. Run `pip install pymupdf` then re-run, "
-        "or paste the paper text here manually.)*")
+        "(No PDF text extracted. Run `pip install pymupdf` then re-run, "
+        "or paste the paper text here manually.)")
     t = dict(tokens, BACKEND=backend, BODY=body)
-    write_file(os.path.join(study_dir, "extracted_text.md"), fill(EXTRACTED_TMPL, t))
+    write_file(os.path.join(study_dir, "extracted_text.txt"), fill(EXTRACTED_TMPL, t))
     write_file(os.path.join(study_dir, "README.md"), fill(README_TMPL, tokens))
     write_file(os.path.join(study_dir, "config", "plant_params.json"),
                fill(PLANT_PARAMS_TMPL, tokens))
@@ -661,6 +663,10 @@ def main(argv=None):
     if os.path.exists(study_dir) and not args.force:
         ap.error("study dir already exists (use --force): %s" % study_dir)
 
+    # The source PDF is relocated into the project folder after scaffolding;
+    # README/extracted_text reference it at its final location.
+    dest_pdf = os.path.join(study_dir, os.path.basename(pdf_path))
+
     guard = slug.upper()
     ns = slug.replace("_", "")
     target = "%s_sim" % slug
@@ -670,7 +676,7 @@ def main(argv=None):
 
     tokens = {
         "NAME": name, "SLUG": slug, "NS": ns, "GUARD": guard, "TARGET": target,
-        "DIRNAME": dirname, "PDF": os.path.relpath(pdf_path).replace("\\", "/"),
+        "DIRNAME": dirname, "PDF": os.path.relpath(dest_pdf).replace("\\", "/"),
         "DATE": datetime.date.today().isoformat(),
         "NCTRL": str(args.controllers), "NSCEN": str(args.scenarios),
         "MAINREL": main_rel, "RUN_HINT": run_hint,
@@ -691,6 +697,13 @@ def main(argv=None):
     else:
         scaffold_python(study_dir, tokens)
 
+    # Relocate the source PDF into the project folder (extraction already done).
+    if os.path.abspath(pdf_path) != os.path.abspath(dest_pdf):
+        if os.path.exists(dest_pdf):
+            os.remove(dest_pdf)
+        shutil.move(pdf_path, dest_pdf)
+        print("  moved PDF -> %s" % os.path.relpath(dest_pdf).replace("\\", "/"))
+
     print("\nDone. Next steps:")
     if args.lang == "cpp":
         print('  1. add_subdirectory("%s") in case-study/CMakeLists.txt' % dirname)
@@ -700,7 +713,7 @@ def main(argv=None):
     else:
         print("  1. implement plant dynamics + controller roster (TODO markers)")
         print("  2. run.py Phase 6 auto-discovers sim/main.py - no registration needed")
-    print("  Review extracted_text.md against the PDF before trusting it.")
+    print("  Review extracted_text.txt against the PDF before trusting it.")
     return 0
 
 

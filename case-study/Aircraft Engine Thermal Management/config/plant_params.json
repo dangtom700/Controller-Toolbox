@@ -1,0 +1,8 @@
+{
+  "_comment": "TODO: real plant parameters for Aircraft Engine Thermal Management",
+  "Ts":        0.01,
+  "param_a":   1.0,
+  "param_b":   1.0,
+  "u_max":     1.0,
+  "u_min":    -1.0
+}
