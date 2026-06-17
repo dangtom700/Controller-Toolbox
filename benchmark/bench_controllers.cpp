@@ -1,5 +1,6 @@
-// bench_controllers.cpp  - v2
+// bench_controllers.cpp  - v3
 // Full per-step latency benchmark for every Controller Toolbox controller.
+// v3 (Part 33+): added DeePC, ScenarioMPC, DynaController (Section 7).
 //
 // Build:  cmake -B build -DCTRL_BUILD_BENCHMARKS=ON
 //         cmake --build build --target bench_controllers
@@ -19,6 +20,7 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -143,14 +145,15 @@ ctrl::StateSpace makePlant(int n, double Ts = 0.01)
 // ===========================================================================
 int main()
 {
-    const long long STEPS     = 1'000'000;
-    const long long STEPS_OPT = 100'000;   // slower QP-based controllers
-    const double    Ts        = 0.01;
-    const double    WARMUP    = 0.10;
+    const long long STEPS       = 1'000'000;
+    const long long STEPS_OPT   = 100'000;   // slower QP-based controllers
+    const long long STEPS_HEAVY = 20'000;    // ADMM / multi-scenario QP per step
+    const double    Ts          = 0.01;
+    const double    WARMUP      = 0.10;
 
     std::cout << "======================================================================"
                  "================\n"
-              << "  Controller Toolbox  -  Per-Step Latency Benchmark  (v2)\n"
+              << "  Controller Toolbox  -  Per-Step Latency Benchmark  (v3)\n"
               << "  Steps: " << STEPS << " (QP-based: " << STEPS_OPT << ")"
               << "   Warm-up: " << static_cast<int>(WARMUP * 100) << "%"
               << "   Platform: " << sizeof(void *) * 8 << "-bit\n"
@@ -746,6 +749,77 @@ int main()
                      [&](long long) {
                          return edmd.lift(x_b, u_b)(0);
                      }));
+    }
+
+    std::cout << "\n";
+
+    // =======================================================================
+    // Section 7 - Part 33+ additions: DeePC / ScenarioMPC / DynaController
+    // =======================================================================
+    std::cout << "-- Part 33+ (DeePC / ScenarioMPC / DynaController) ---------------------"
+                 "----------------\n";
+    printHeader();
+
+    // DeePC (SISO, T_ini=10, N=10; offline persistently-exciting data collected once)
+    {
+        const double a = 0.7, b = 0.3;        // first-order plant for PE data
+        const int    N_data = 100;
+        std::mt19937 rng(12345);
+        std::uniform_real_distribution<double> dist(-1.0, 1.0);
+
+        Eigen::VectorXd u_d(N_data), y_d(N_data);
+        y_d(0) = 0.0;
+        for (int k = 0; k < N_data; ++k) {
+            u_d(k) = dist(rng);
+            if (k + 1 < N_data) y_d(k + 1) = a * y_d(k) + b * u_d(k);
+        }
+
+        ctrl::DeePCParams dp;
+        dp.T_ini = 10; dp.N = 10; dp.Q = 10.0; dp.R = 0.05;
+        dp.lambda_g = 1.0; dp.lambda_y = 50.0; dp.lambda_u = 5.0;
+        dp.uMin = -3.0; dp.uMax = 3.0; dp.rho = 10.0;
+        dp.admm_iters = 300; dp.admm_tol = 1e-4;
+
+        ctrl::DeePC deepc(dp, Ts);
+        deepc.collectData(u_d, y_d);
+        deepc.setReference(1.0);
+        record(bench("DeePC (Tini=10, N=10)", STEPS_HEAVY, WARMUP,
+                     [&](long long) { return deepc.compute(0.9); }));
+    }
+
+    // ScenarioMPC (n=2, Np=10, Nu=3, N_samples=30 noise scenarios per step)
+    {
+        const int n = 2;
+        ctrl::StateSpace sys = makePlant(n, Ts);
+        ctrl::ScenarioMPCParams sp;
+        sp.Np = 10; sp.Nu = 3;
+        sp.Q       = Eigen::MatrixXd::Identity(1, 1) * 1.0;
+        sp.R       = Eigen::MatrixXd::Identity(1, 1) * 0.1;
+        sp.Sigma_w = Eigen::MatrixXd::Identity(n, n) * 1e-3;
+        sp.N_samples = 30;
+        sp.uMin = Eigen::VectorXd::Constant(1, -10.0);
+        sp.uMax = Eigen::VectorXd::Constant(1,  10.0);
+        sp.Ts   = Ts;
+        ctrl::ScenarioMPC smpc(sys, sp);
+        Eigen::VectorXd x_s = Eigen::VectorXd::Constant(n, 0.1);
+        Eigen::VectorXd yref_s(1); yref_s << 1.0;
+        record(bench("ScenarioMPC Ns=30 (n=2)", STEPS_HEAVY, WARMUP,
+                     [&](long long) { return smpc.computeRef(x_s, yref_s)(0); }));
+    }
+
+    // DynaController (PID inner; mid-bench model refit disabled -> steady per-step cost,
+    // mirroring the AdaptiveSmithPredictor estimateInterval pattern above).
+    {
+        ctrl::PIDParams pp; pp.Kp = 1.0; pp.Ki = 0.1;
+        auto pid_inner = std::make_shared<ctrl::DiscretePID>(pp, Ts);
+        ctrl::DynaController::Params dyp;
+        dyp.n_collect     = 50;
+        dyp.n_refit_every = 100'000'000;   // single fit during warm-up, none while timed
+        dyp.Ts            = Ts;
+        dyp.sindy.n_state = 1; dyp.sindy.n_input = 1;
+        ctrl::DynaController dyna(dyp, pid_inner);
+        record(bench("DynaController (PID inner)", STEPS_OPT, WARMUP,
+                     [&](long long) { return dyna.compute(1.0); }));
     }
 
     std::cout << "\n";

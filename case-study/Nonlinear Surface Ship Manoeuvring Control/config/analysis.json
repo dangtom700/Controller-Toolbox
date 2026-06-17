@@ -1,0 +1,14 @@
+{
+  "mc_n_samples": 20,
+  "mc_sigma": 0.08,
+  "mc_perturb_keys": ["a1", "a2", "a3", "a4", "a5", "a6",
+                      "b1", "b2", "b3", "b4", "b5", "b6", "b7",
+                      "c1", "c2", "c3", "c4", "c5", "c6"],
+  "nominal_scenario_id": "s01_straight_ahead",
+  "fault_specs": [
+    {"kind": "sensor_bias",   "magnitudes": [0.01, 0.05, 0.10, 0.20]},
+    {"kind": "actuator_loss", "magnitudes": [0.05, 0.10, 0.20, 0.30]},
+    {"kind": "actuator_stuck","magnitudes": [0.0, 0.1, 0.2]}
+  ],
+  "notes": "Perturbs SRUKF-identified MMG hydrodynamic coefficients by ±8%. Keys are identified_params sub-keys; run_single merges them via _h_merge_params. sensor = psi [rad]; actuator = delta_cmd [rad]."
+}

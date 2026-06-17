@@ -26,9 +26,11 @@ try:
     import ctrl_toolbox as ctrl
     if not hasattr(ctrl, 'DiscretePID'):
         raise AttributeError("ctrl_toolbox missing DiscretePID - rebuild bindings")
+    _CTRL_AVAILABLE = True
+    _CTRL_ERR = None
 except (ImportError, AttributeError) as _e:
-    print(f"SKIP: {_e}")
-    sys.exit(0)
+    _CTRL_AVAILABLE = False
+    _CTRL_ERR = str(_e)
 
 from ev6x6_plant      import EV6x6Plant, DEFAULT_PARAMS
 from controllers      import make_controllers
@@ -41,6 +43,9 @@ def _load_json(path: str) -> dict:
 
 
 def main():
+    if not _CTRL_AVAILABLE:
+        print(f"SKIP: {_CTRL_ERR}")
+        sys.exit(0)
     config_dir = os.path.join(_BASE_DIR, 'config')
     scen_dir   = os.path.join(config_dir, 'scenarios')
     log_dir    = os.path.join(_BASE_DIR,  'logs')
@@ -110,3 +115,86 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+# ===========================================================================
+# Analysis hooks - for tools/monte_carlo.py and tools/fault_sweep.py
+# See tools/study_protocol.py for the full contract.
+# ===========================================================================
+import copy as _copy
+import tempfile as _tempfile
+
+_H_CFG  = os.path.join(_BASE_DIR, 'config')
+_H_SCEN = os.path.join(_H_CFG,    'scenarios')
+
+
+def _h_json(path):
+    with open(path) as _fh:
+        return json.load(_fh)
+
+
+def _h_nom():
+    _pj = os.path.join(_H_CFG, 'plant_params.json')
+    raw = _h_json(_pj) if os.path.isfile(_pj) else {}
+    merged = dict(DEFAULT_PARAMS)
+    merged.update(raw)
+    return merged
+
+
+def _h_scenario(sid=None):
+    fnames = sorted(f for f in os.listdir(_H_SCEN) if f.endswith('.json'))
+    if not fnames:
+        raise RuntimeError("No scenario JSONs in " + _H_SCEN)
+    if sid is None:
+        return _h_json(os.path.join(_H_SCEN, fnames[0]))
+    for fn in fnames:
+        sc = _h_json(os.path.join(_H_SCEN, fn))
+        if sc.get('id') == sid:
+            return sc
+    raise ValueError(f"Scenario {sid!r} not found")
+
+
+# CONTROLLER_NAMES: EV6x6 make_controllers runs GA/PSO/DE - evaluated lazily
+# to avoid long computation on module import by analysis tools.
+try:
+    _H_NOM = _h_nom()
+    if _CTRL_AVAILABLE:
+        _plant_ref_h = EV6x6Plant(_H_NOM)
+        CONTROLLER_NAMES = [c.name() for c in make_controllers(_H_NOM, _plant_ref_h)]
+    else:
+        CONTROLLER_NAMES = []
+except Exception:
+    _H_NOM = dict(DEFAULT_PARAMS)
+    CONTROLLER_NAMES = []
+
+
+def run_single(ctrl_name, params=None, scenario_id=None):
+    """Run ctrl_name with optional perturbed params; returns metrics dict."""
+    if not _CTRL_AVAILABLE:
+        raise ImportError(f"ctrl_toolbox not available: {_CTRL_ERR}")
+    _p = {**_copy.deepcopy(_H_NOM), **(params or {})}
+    sc = _h_scenario(scenario_id)
+    plant_ref = EV6x6Plant(_p)
+    ctrls = make_controllers(_p, plant_ref)
+    ctrl_obj = next((c for c in ctrls if c.name() == ctrl_name), None)
+    if ctrl_obj is None:
+        raise ValueError(f"Unknown controller {ctrl_name!r}")
+    with _tempfile.TemporaryDirectory() as tmp:
+        return run_simulation(_p, sc, ctrl_obj, tmp)
+
+
+def run_with_fault(ctrl_name, fault, scenario_id=None):
+    """Run ctrl_name with FaultSpec injected; returns metrics dict."""
+    if not _CTRL_AVAILABLE:
+        raise ImportError(f"ctrl_toolbox not available: {_CTRL_ERR}")
+    from tools.fault_injector import FaultInjector
+    _p = _copy.deepcopy(_H_NOM)
+    sc = _h_scenario(scenario_id)
+    plant_ref = EV6x6Plant(_p)
+    ctrls = make_controllers(_p, plant_ref)
+    ctrl_obj = next((c for c in ctrls if c.name() == ctrl_name), None)
+    if ctrl_obj is None:
+        raise ValueError(f"Unknown controller {ctrl_name!r}")
+    with _tempfile.TemporaryDirectory() as tmp:
+        return run_simulation(_p, sc, ctrl_obj, tmp,
+                              fault_injector=FaultInjector([fault]))

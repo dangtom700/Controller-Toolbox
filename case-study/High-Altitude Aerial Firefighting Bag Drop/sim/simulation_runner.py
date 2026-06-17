@@ -29,15 +29,20 @@ from planners import IterativeRefinementDrop, AdaptiveRLSDrop
 def run_simulation(plant_params: dict,
                    scenario:     dict,
                    planner,
-                   log_dir:      str) -> dict:
+                   log_dir:      str,
+                   fault_injector=None) -> dict:
     """
     Evaluate planner on the given scenario using N_mc random wind realizations.
 
     Returns dict:
       name, scenario_id, IAE (=CEP [m]), max_error, pattern_length,
       pattern_width, csv (path)
+    Optional fault_injector: tools.fault_injector.FaultInjector instance.
+      - sensor fault: biases the wind estimate (wx_mean, wy_mean) seen by planner
+      - actuator fault: scales the planned release offsets (x_off, y_off)
     """
     planner.reset()
+    fi = fault_injector
 
     h_drop    = float(scenario.get('h_drop', plant_params['h_drop_nom']))
     V_aircraft = float(scenario.get('V_aircraft', plant_params['V_aircraft']))
@@ -54,8 +59,18 @@ def run_simulation(plant_params: dict,
     ref_plant = BagDropPlant(plant_params)
     x_nom, y_nom, t_nom, _ = ref_plant.nominal_impact(h_drop, V_aircraft)
 
-    # --- Planner decision -------------------------------------------------
-    x_off, y_off = planner.plan(scenario, plant_params)
+    # --- Planner decision (sensor fault biases wind estimate) -------------
+    if fi:
+        sc_obs = dict(scenario,
+                      wx_mean=fi.inject_sensor(0.0, wx_mean),
+                      wy_mean=fi.inject_sensor(0.0, wy_mean))
+    else:
+        sc_obs = scenario
+    x_off, y_off = planner.plan(sc_obs, plant_params)
+    # Actuator fault: scale planning offsets (navigation/execution error)
+    if fi:
+        x_off = fi.inject_actuator(0.0, x_off)
+        y_off = fi.inject_actuator(0.0, y_off)
 
     # --- Monte Carlo evaluation -------------------------------------------
     rng = random.Random(scenario.get('rng_seed', 0) + hash(ctrl_name) % 997)

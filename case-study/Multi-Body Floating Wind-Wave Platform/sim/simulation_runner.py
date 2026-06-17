@@ -77,17 +77,20 @@ def _make_x_ref_fn(scenario: dict, plant_params: dict):
 def run_simulation(plant_params: dict,
                    scenario:     dict,
                    controller,
-                   log_dir:      str) -> dict:
+                   log_dir:      str,
+                   fault_injector=None) -> dict:
     """
     Simulate the FOWT+WEC for one scenario/controller pair.
 
     Returns summary dict: {name, scenario_id, mean_power, IAE, fowt_rms, csv}
+    Optional fault_injector: tools.fault_injector.FaultInjector instance.
     """
     plant = FOWTWECPlant(plant_params)
     wave_fn  = make_wave_fn(scenario, plant_params)
     x_ref_fn = _make_x_ref_fn(scenario, plant_params)
     plant.set_wave(wave_fn)
     controller.reset()
+    fi = fault_injector
 
     Ts    = plant_params['Ts']
     T_sim = float(scenario['T_sim'])
@@ -111,10 +114,19 @@ def run_simulation(plant_params: dict,
             x_ref   = x_ref_fn(t)
             ps      = plant.state()     # (z, zdot, x_rel, xrel_dot)
 
-            F_pto = controller.compute(x_ref, ps, t)
+            # Sensor fault: corrupt WEC arm displacement measurement
+            if fi:
+                _z, _zd, _xr, _xrd = ps
+                ps_obs = (_z, _zd, fi.inject_sensor(t, _xr), _xrd)
+            else:
+                ps_obs = ps
+
+            F_pto = controller.compute(x_ref, ps_obs, t)
+            # Actuator fault: corrupt PTO force command
+            F_pto = fi.inject_actuator(t, F_pto) if fi else F_pto
             F_pto = max(-plant_params['F_max'], min(plant_params['F_max'], F_pto))
 
-            z, zd, xr, xrd = ps
+            z, zd, xr, xrd = ps  # true state for metrics
             power        = F_pto * xrd
             total_power += power * Ts
             fowt_sq_sum += z ** 2 * Ts

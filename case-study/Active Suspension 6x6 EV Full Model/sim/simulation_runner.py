@@ -19,14 +19,18 @@ from controllers import ControllerBase
 def run_simulation(plant_params: dict,
                    scenario:      dict,
                    controller:    ControllerBase,
-                   log_dir:       str) -> dict:
+                   log_dir:       str,
+                   fault_injector=None) -> dict:
     """
     Simulate one (controller, scenario) pair.
 
     Returns
     -------
     dict with keys: name, scenario_id, IAE, RMS_body, RMS_head, max_body,
-                    peak_force, runs.
+                    peak_force, csv.
+    Optional fault_injector: tools.fault_injector.FaultInjector instance.
+      - sensor fault: biases body vertical displacement (state[0])
+      - actuator fault: scales all 6 actuator forces uniformly
     """
     Ts        = plant_params['Ts']
     T_sim     = float(scenario.get('T_sim', 5.0))
@@ -34,6 +38,7 @@ def run_simulation(plant_params: dict,
     v_vehicle = float(plant_params.get('v_vehicle', 22.2))
     L1        = float(plant_params.get('L1', 2.0))
     L2        = float(plant_params.get('L2', 2.0))
+    fi        = fault_injector
 
     plant = EV6x6Plant(plant_params)
     plant.reset()
@@ -43,10 +48,10 @@ def run_simulation(plant_params: dict,
 
     controller.reset()
 
-    scen_id = scenario.get('id', 'unknown')
+    scen_id   = scenario.get('id', 'unknown')
     ctrl_name = controller.name()
-    csv_name = f"{scen_id}_{ctrl_name}.csv"
-    csv_path = os.path.join(log_dir, csv_name)
+    csv_name  = f"run_{scen_id}_{ctrl_name}.csv"
+    csv_path  = os.path.join(log_dir, csv_name)
 
     iae_cum  = 0.0
     body_sq  = 0.0
@@ -61,7 +66,19 @@ def run_simulation(plant_params: dict,
         z_r = road.step()
         x   = plant.state()
 
-        F_act = controller.compute(x, z_r, t)
+        # Sensor fault: bias body vertical displacement seen by controller
+        if fi:
+            x_obs = np.array(x, dtype=float)
+            x_obs[0] = fi.inject_sensor(t, x_obs[0])
+        else:
+            x_obs = x
+
+        F_act = controller.compute(x_obs, z_r, t)
+
+        # Actuator fault: scale all forces uniformly
+        if fi:
+            F_act = np.array([fi.inject_actuator(t, f) for f in F_act],
+                             dtype=float)
 
         body_Z      = plant.body_Z()
         head_accel  = plant.head_accel()
@@ -113,4 +130,5 @@ def run_simulation(plant_params: dict,
         'RMS_head':    rms_head,
         'max_body':    max_body,
         'peak_force':  peak_f,
+        'csv':         csv_path,
     }

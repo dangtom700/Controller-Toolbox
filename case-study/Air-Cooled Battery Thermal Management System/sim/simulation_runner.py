@@ -80,15 +80,20 @@ def _soc_from_scenario(scenario: dict, t: float) -> float:
 def run_simulation(plant_params: dict,
                    scenario:     dict,
                    controller,
-                   log_dir:      str) -> dict:
+                   log_dir:      str,
+                   fault_injector=None) -> dict:
     """
     Simulate one (scenario, controller) pair.
     Returns summary dict: {name, scenario_id, IAE, max_delta_T, avg_delta_T,
                            T_max_final, n_switches, csv}
+    Optional fault_injector: tools.fault_injector.FaultInjector instance.
+      - sensor fault: biases DeltaT reading seen by controller
+      - actuator fault: not applied (output is discrete flow pattern string)
     """
     plant = BTMSPlant(plant_params)
     plant.set_pattern('J')        # always start with J-type (lowest DeltaT at 5C, per paper)
     controller.reset()
+    fi = fault_injector
 
     # Inject plant reference for MPC look-ahead
     if hasattr(controller, 'set_plant_ref'):
@@ -128,8 +133,11 @@ def run_simulation(plant_params: dict,
             T_avg_val = sum(plant.temperatures()) / 9
             x_hot     = plant.x_hotspot_norm()
 
-            # Controller decision
-            new_pattern = controller.compute(DeltaT, x_hot, soc, t)
+            # Sensor fault: corrupt temperature non-uniformity reading
+            DeltaT_obs = fi.inject_sensor(t, DeltaT) if fi else DeltaT
+
+            # Controller decision (actuator output is discrete - no actuator fault)
+            new_pattern = controller.compute(DeltaT_obs, x_hot, soc, t)
             plant.set_pattern(new_pattern)
 
             # Metrics

@@ -48,14 +48,17 @@ def _get_reference(scenario: dict, t: float) -> float:
 def run_simulation(plant_params: dict,
                    scenario:     dict,
                    controller,
-                   log_dir:      str) -> dict:
+                   log_dir:      str,
+                   fault_injector=None) -> dict:
     """
     Simulate the drill string for one scenario/controller pair.
 
     Returns a summary dict: {name, scenario_id, IAE, settling_time, max_error}
+    Optional fault_injector: tools.fault_injector.FaultInjector instance.
     """
     plant = DrillStringPlant(plant_params)
     controller.reset()
+    fi = fault_injector
 
     Ts    = plant_params['Ts']
     T_sim = float(scenario['T_sim'])
@@ -81,13 +84,17 @@ def run_simulation(plant_params: dict,
             t         = k * Ts
             omega_ref = _get_reference(scenario, t)
 
-            # Clamp to safe range
-            omega_t = controller.compute(omega_ref, plant.omega_b, plant.phi, t)
+            phi, omega_b = plant.state()
+            # Sensor fault: corrupt bit-speed measurement seen by controller
+            omega_b_obs = fi.inject_sensor(t, omega_b) if fi else omega_b
+
+            omega_t = controller.compute(omega_ref, omega_b_obs, phi, t)
+            # Actuator fault: corrupt top-drive speed command
+            omega_t = fi.inject_actuator(t, omega_t) if fi else omega_t
             omega_t = max(-plant_params['omega_max'],
                           min(plant_params['omega_max'], omega_t))
 
-            phi, omega_b = plant.state()
-            error = omega_ref - omega_b
+            error = omega_ref - omega_b  # true state for metrics
             iae  += abs(error) * Ts
             max_error = max(max_error, abs(error))
 

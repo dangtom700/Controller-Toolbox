@@ -47,15 +47,18 @@ def _get_kL(scenario: dict, t: float, k_L_nominal: float) -> float:
 def run_simulation(plant_params: dict,
                    scenario:     dict,
                    controller,
-                   log_dir:      str) -> dict:
+                   log_dir:      str,
+                   fault_injector=None) -> dict:
     """
     Simulate the EHFS for one scenario/controller pair.
     Returns summary: {name, scenario_id, IAE, max_error, settling_time, csv}
+    Optional fault_injector: tools.fault_injector.FaultInjector instance.
     """
     # Clone params so per-scenario k_L changes don't leak
     params = dict(plant_params)
     plant  = EHFSPlant(params)
     controller.reset()
+    fi = fault_injector
 
     Ts    = params['Ts']
     T_sim = float(scenario['T_sim'])
@@ -86,8 +89,12 @@ def run_simulation(plant_params: dict,
 
             P_A, P_B, xv, vp, xp = plant.state()
             F = plant.force()
+            # Sensor fault: corrupt force measurement seen by controller
+            F_obs = fi.inject_sensor(t, F) if fi else F
 
-            u_v = controller.compute(F_ref, F, vp, P_A, P_B, xv, t)
+            u_v = controller.compute(F_ref, F_obs, vp, P_A, P_B, xv, t)
+            # Actuator fault: corrupt valve command
+            u_v = fi.inject_actuator(t, u_v) if fi else u_v
             u_v = max(-1.0, min(1.0, u_v))
 
             error = F_ref - F

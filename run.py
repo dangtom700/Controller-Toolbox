@@ -776,6 +776,13 @@ def phase_bug_report(log_path):
         # --- Phase 7 report generation (benign) ---
         'warn: plotly not found',         # generate_report.py: degrades to plain tables
         'charts will be replaced by plain tables',  # generate_report.py plotly fallback note
+        # --- Phase 7 run_analysis.py (benign progress / info messages) ---
+        '[mc]',                            # run_analysis.py MC progress lines
+        '[fault]',                         # run_analysis.py fault sweep progress lines
+        '[mu]',                            # run_analysis.py mu analysis progress lines
+        'ctrl_run_analysis=1',             # info hint printed when analysis is skipped
+        'mc + fault sweep',                # run_analysis.py info line
+        'run_analysis.py complete',        # run_analysis.py final summary
     ]
 
     # Try to read the log - fall back to latin‑1 if UTF‑8 fails
@@ -999,7 +1006,23 @@ def phase_report():
     else:
         print(f'  [SKIP] {tracker} not found\n')
 
-    # Step 2: build the static HTML report from the freshly-written logs.
+    # Step 2 (opt-in): MC + fault sweep analysis.
+    # Set env var CTRL_RUN_ANALYSIS=1 to enable; skipped by default because
+    # MC/fault runs can take many minutes (especially EV6x6 with GA/PSO/DE).
+    run_analysis_flag = os.environ.get('CTRL_RUN_ANALYSIS', '').strip()
+    analyser = os.path.join('tools', 'run_analysis.py')
+    if run_analysis_flag == '1' and os.path.isfile(analyser):
+        print('  [INFO] CTRL_RUN_ANALYSIS=1 — running MC + fault sweep analysis\n')
+        _run_cmd(
+            ['conda', 'run', '-n', 'soft_robotics', '--',
+             'python', analyser],
+            'run_analysis.py'
+        )
+    elif not run_analysis_flag:
+        print('  [INFO] Set CTRL_RUN_ANALYSIS=1 to run MC / fault sweep '
+              'analysis (tools/run_analysis.py).\n')
+
+    # Step 3: build the static HTML report from the freshly-written logs.
     # Run via conda so pandas/numpy/plotly (in soft_robotics) are available.
     reporter = os.path.join('tools', 'generate_report.py')
     if not os.path.isfile(reporter):
