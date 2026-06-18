@@ -1,0 +1,393 @@
+name: CI/CD
+
+# Single source of truth for continuous integration and distribution.
+#
+#   push / pull_request -> main : quick-test gate, then full 5-platform build matrix
+#                                  (C++ library, tests, Python bindings, sanitizers)
+#   push tag v*.*.*            : same CI runs first; on success, build release artifacts
+#                                  + GitHub Release + wheels + publish to PyPI
+#
+# Job dependency graph:
+#   quick-test ──► build (5-platform matrix)  ──► all-ci-passed ──► release-build ──► create-release
+#                                                               └─► wheels        ──► publish-pypi
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: [main]
+
+# One run per ref; new push cancels the in-progress run for the same branch/tag/PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Workflow-wide environment.
+env:
+  # Force JS actions (checkout/upload-artifact/cache, still shipping a Node 20
+  # runtime) onto Node 24, clearing the deprecation warnings. Becomes the runner
+  # default on 2026-06-16; this opt-in is redundant after that, harmless before.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  # ===========================================================================
+  # GATE: fast Linux-only compile + ctest before spending runner quota on the
+  #       full multi-platform matrix.  Uses the default system GCC (no PPA).
+  # ===========================================================================
+  quick-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Eigen3 and nlohmann-json
+        run: sudo apt-get update && sudo apt-get install -y libeigen3-dev nlohmann-json3-dev
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel $(nproc)
+
+      - name: Test
+        run: cd build && ctest --output-on-failure
+
+  # ===========================================================================
+  # BUILD MATRIX: all five platform/arch combinations, after the gate passes.
+  #
+  # Matrix boolean flags drive per-platform conditional steps:
+  #   has_python : build + smoke-test Python bindings (.so / .dylib)
+  #   run_asan   : ASAN/UBSAN Debug build (linux-x86_64 only)
+  # ===========================================================================
+  build:
+    needs: quick-test
+    name: Build (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-x86_64, os: ubuntu-latest, arch: x86_64, has_python: true,  run_asan: true  }
+          - { name: linux-x86,    os: ubuntu-latest, arch: x86,    has_python: false, run_asan: false }
+          - { name: windows-x64,  os: windows-2022,  arch: x64,    has_python: false, run_asan: false }
+          - { name: windows-x86,  os: windows-2022,  arch: x86,    has_python: false, run_asan: false }
+          - { name: macos,        os: macos-latest,  arch: native, has_python: true,  run_asan: false }
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── Linux setup ────────────────────────────────────────────────────
+      - name: Install GCC-13 and multilib (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa -y
+          sudo apt-get update
+          sudo apt-get install -y g++-13 gcc-13 gcc-13-multilib g++-13-multilib
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 60 \
+            --slave /usr/bin/g++ g++ /usr/bin/g++-13
+
+      - name: Install Eigen3 and nlohmann-json (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y libeigen3-dev nlohmann-json3-dev
+
+      # ── Windows setup ──────────────────────────────────────────────────
+      - name: Cache vcpkg packages (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: C:\vcpkg\packages
+          key: vcpkg-${{ matrix.arch }}-eigen3-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: vcpkg-${{ matrix.arch }}-eigen3-
+
+      - name: Install Eigen3 via vcpkg (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $triplet = if ("${{ matrix.arch }}" -eq "x64") { "x64-windows-static" } else { "x86-windows-static" }
+          vcpkg install "eigen3:$triplet"
+
+      # ── macOS setup ────────────────────────────────────────────────────
+      - name: Install Homebrew deps (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          set -eux
+          brew update || true
+          brew install cmake python eigen nlohmann-json pybind11 || true
+          pip3 install --break-system-packages numpy || pip3 install numpy
+
+      # ── Configure ──────────────────────────────────────────────────────
+      - name: Configure (linux-x86_64)
+        if: matrix.name == 'linux-x86_64'
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++-13
+
+      - name: Configure (linux-x86)
+        if: matrix.name == 'linux-x86'
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++-13 \
+            -DCMAKE_CXX_FLAGS="-m32" \
+            -DCMAKE_C_FLAGS="-m32" \
+            -DCMAKE_EXE_LINKER_FLAGS="-m32"
+
+      - name: Configure (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $triplet  = if ("${{ matrix.arch }}" -eq "x64") { "x64-windows-static" } else { "x86-windows-static" }
+          $platform = if ("${{ matrix.arch }}" -eq "x64") { "x64" } else { "Win32" }
+          cmake -B build `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+            -DVCPKG_TARGET_TRIPLET="$triplet" `
+            -A "$platform"
+
+      - name: Configure (macOS)
+        if: runner.os == 'macOS'
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      # ── Build & Test ───────────────────────────────────────────────────
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
+        run: cmake --build build --parallel $(nproc)
+
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        run: cmake --build build
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: cmake --build build --config Release
+
+      - name: Test (Unix)
+        if: runner.os != 'Windows'
+        run: cd build && ctest --output-on-failure
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Set-Location build
+          ctest --output-on-failure -C Release
+
+      # ── Python bindings ────────────────────────────────────────────────
+      - name: Install pybind11 deps (linux-x86_64)
+        if: matrix.name == 'linux-x86_64'
+        run: sudo apt-get install -y pybind11-dev python3-dev python3-numpy
+
+      - name: Build Python bindings (linux-x86_64)
+        if: matrix.name == 'linux-x86_64'
+        run: |
+          cmake -S . -B build_py \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_COMPILER=g++-13 \
+            -DCTRL_BUILD_PYTHON_BINDINGS=ON
+          cmake --build build_py --parallel $(nproc) --target ctrl_toolbox
+
+      - name: Build Python bindings (macOS)
+        if: matrix.name == 'macos'
+        run: |
+          cmake -S . -B build_py \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCTRL_BUILD_PYTHON_BINDINGS=ON
+          cmake --build build_py --target ctrl_toolbox
+
+      - name: Smoke test Python bindings
+        if: matrix.has_python == true
+        run: python3 bindings/smoke_test.py
+
+      - name: Upload Python binding (linux-x86_64)
+        if: matrix.name == 'linux-x86_64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ctrl-toolbox-linux-x86_64-so
+          path: build_py/bindings/ctrl_toolbox*.so
+          retention-days: 30
+
+      # ── ASAN/UBSAN (linux-x86_64 only) ────────────────────────────────
+      - name: ASAN/UBSAN Debug build
+        if: matrix.run_asan == true
+        run: |
+          cmake -S . -B build_san \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_COMPILER=g++-13 \
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          cmake --build build_san --parallel $(nproc)
+          cd build_san && ctest --output-on-failure
+
+  # ===========================================================================
+  # AGGREGATOR: single status-check job for branch protection rules.
+  # Always runs (even when upstream jobs fail) so the branch rule never stalls.
+  # Set "all-ci-passed" as the only required check in GitHub Settings → Branches.
+  # ===========================================================================
+  all-ci-passed:
+    needs: [build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all jobs passed
+        run: |
+          build="${{ needs.build.result }}"
+          if [[ "$build" != "success" ]]; then
+            echo "build=$build"
+            exit 1
+          fi
+
+  # ===========================================================================
+  # RELEASE - build install artifacts (tags only, after CI passes)
+  # ===========================================================================
+  release-build:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: all-ci-passed
+    name: Release build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: ctrl_toolbox-linux
+          - os: windows-latest
+            artifact: ctrl_toolbox-windows
+          - os: macos-latest
+            artifact: ctrl_toolbox-macos
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Eigen3 (Ubuntu)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -qq && sudo apt-get install -y libeigen3-dev
+
+      - name: Install Eigen3 (macOS)
+        if: runner.os == 'macOS'
+        run: brew install eigen
+
+      # Windows has no system Eigen here; the FetchContent fallback supplies it.
+      - name: Configure (Release)
+        run: >
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DCTRL_BUILD_PYTHON_BINDINGS=OFF
+          -DCTRL_BUILD_BENCHMARKS=OFF
+          -DCTRL_FETCH_EIGEN_IF_MISSING=ON
+
+      - name: Build library
+        run: cmake --build build --config Release --target controller_toolbox
+
+      - name: Install to staging
+        run: cmake --install build --prefix staging --config Release
+
+      - name: Package (Unix)
+        if: runner.os != 'Windows'
+        run: cd staging && zip -r ../${{ matrix.artifact }}-${{ github.ref_name }}.zip .
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path staging\* -DestinationPath "${{ matrix.artifact }}-${{ github.ref_name }}.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}-${{ github.ref_name }}.zip
+
+  # ===========================================================================
+  # RELEASE - create GitHub Release (tags only)
+  # ===========================================================================
+  create-release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: release-build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ctrl_toolbox-*
+          merge-multiple: true
+          path: dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191  # v2.0.8
+        with:
+          files: dist/*.zip
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+
+  # ===========================================================================
+  # PUBLISH - build wheels (tags only, after CI passes)
+  # ===========================================================================
+  wheels:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: all-ci-passed
+    name: Build wheels (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@7940a4c0e76eb2030e473a5f864f291f63ee879b  # v2.21.3
+        env:
+          CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
+          CIBW_SKIP: "*-musllinux* *-win32 *-manylinux_i686"
+          # Eigen3 inside the build container/VM (fetch fallback if package missing).
+          CIBW_BEFORE_BUILD_LINUX: >
+            yum install -y eigen3-devel || apt-get install -y libeigen3-dev || true
+          CIBW_BEFORE_BUILD_MACOS: brew install eigen
+          CIBW_BEFORE_BUILD_WINDOWS: >
+            vcpkg install eigen3:x64-windows
+          CIBW_ENVIRONMENT_WINDOWS: >
+            CMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+          CIBW_TEST_COMMAND: >
+            python -c "import ctrl_toolbox as ctrl; assert ctrl.registry_has('discrete_pid'), 'Registry missing discrete_pid'; print('ctrl_toolbox OK')"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: wheelhouse/
+
+  # ===========================================================================
+  # PUBLISH - upload to PyPI (tags only)
+  # ===========================================================================
+  publish-pypi:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: wheels
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write  # required for trusted publishing (OIDC)
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

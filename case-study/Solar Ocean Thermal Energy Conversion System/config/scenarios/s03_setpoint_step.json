@@ -1,0 +1,15 @@
+{
+    "id":            "s03_setpoint_step",
+    "description":   "T_h_ref steps 54->72 C at t=2700s; tests step tracking and P_inlet limit",
+    "T_h_ref":       54.0,
+    "T_h_ref_type":  "step",
+    "T_h_ref_1":     72.0,
+    "t_T_h_step":    2700.0,
+    "T_h_init":      20.0,
+    "T_coll_init":   20.0,
+    "duration_s":    5400.0,
+    "g_type":        "constant",
+    "G_0":           800.0,
+    "T_amb_0":       20.0,
+    "T_c_0":         6.0
+}

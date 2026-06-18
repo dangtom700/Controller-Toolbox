@@ -1,0 +1,12 @@
+{
+  "id": "s03_sine_tracking",
+  "description": "Chen (2018) paper trajectory x_Ld = 0.25 + 0.25*sin(pi*t/2 - pi/2), gravity load only",
+  "duration_s": 16.0,
+  "x_init": 0.0,
+  "P1_init": 2.5e6,
+  "P2_init": 2.0e6,
+  "ref_type": "paper_sine",
+  "F_0": 0.0,
+  "F_1": 0.0,
+  "t_F_step": -1.0
+}

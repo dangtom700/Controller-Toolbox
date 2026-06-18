@@ -1,0 +1,7 @@
+{
+  "id"    : "s01_bump",
+  "desc"  : "25 mm single step bump at t=0.5 s. Primary metric: settling time of Z_body.",
+  "T_sim" : 5.0,
+  "amp"   : 0.025,
+  "t_hit" : 0.5
+}

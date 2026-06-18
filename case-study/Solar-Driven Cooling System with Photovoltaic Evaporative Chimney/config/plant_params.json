@@ -1,0 +1,83 @@
+{
+  "_ref": "Ruiz, Martinez, Aguilar, Lucas - Applied Thermal Engineering 245 (2024) 122878",
+
+  "pv_panel": {
+    "_comment": "Convective (non-wetted) PV zone. Eqs. (1)-(12).",
+    "area_m2": 2.0,
+    "tau": 0.9,
+    "eta_ref": 0.157,
+    "beta_ref": 0.0044,
+    "T_ref_C": 25.0,
+    "G_ref_Wm2": 1000.0,
+    "T_NOCT_C": 47.0,
+    "T_ref_NOCT_C": 20.0,
+    "G_ref_NOCT_Wm2": 800.0,
+    "gamma": 0.02748,
+    "layers": {
+      "_comment": "Glass / cell / tedlar conductance (k/x) [W m-2 K-1]. Typical PV values: glass ~100, Si cell ~150, tedlar ~80.",
+      "k_g_over_xg": 100.0,
+      "k_c_over_xc": 150.0,
+      "k_t_over_xt": 80.0
+    }
+  },
+
+  "evaporative_area": {
+    "_comment": "Wetted zone where water cools via evaporation (Poppe theory, Eqs. 13-18). RK4 integrated over Tw range.",
+    "merkel_a": 0.7099,
+    "merkel_b": -0.3254,
+    "air_flow_a": -6.1751,
+    "air_flow_b": 2.2469,
+    "air_flow_c": -0.07653,
+    "vi_a": -207.325,
+    "vi_b": 67.978,
+    "vi_c": -2.380,
+    "lewis_factor": 0.9,
+    "cp_w_J_kgK": 4186.0,
+    "cp_ma_J_kgK": 1006.0,
+    "h_fg_J_kg": 2.454e6,
+    "rk4_steps": 20
+  },
+
+  "chiller": {
+    "_comment": "Water-cooled chiller EER quadratic correlation (Eq. 20, Table 2).",
+    "Q_evap_kW": 3.8,
+    "T_w2_evap_C": 7.0,
+    "eer_quadratic": {
+      "a":  12.15,
+      "b":  -1.826,
+      "c":   0.2108,
+      "d":   0.1166,
+      "e":   0.004213,
+      "f":  -0.05686
+    }
+  },
+
+  "hydraulics": {
+    "_comment": "Condenser loop pump model (Eqs. 22-27). Variable-speed via VFD (kr = speed ratio).",
+    "H0_m": 45.05,
+    "Q0_ls": 1.308,
+    "eta_pump0": 0.34,
+    "system_curve_a": 1.0,
+    "system_curve_b": 89.649,
+    "rho_water_kgm3": 1000.0,
+    "g_ms2": 9.81,
+    "kr_min": 0.3,
+    "kr_max": 1.0
+  },
+
+  "design_point": {
+    "_comment": "Table 4 optimisation design point.",
+    "T_amb_C": 35.6,
+    "phi_amb": 0.35,
+    "G_Wm2": 920.17,
+    "v_w_ms": 3.028,
+    "Q_evap_kW": 3.8,
+    "T_w2_evap_C": 7.0,
+    "Q_flow_m3h": 1.05
+  },
+
+  "simulation": {
+    "dt_s": 10.0,
+    "duration_s": 3600.0
+  }
+}

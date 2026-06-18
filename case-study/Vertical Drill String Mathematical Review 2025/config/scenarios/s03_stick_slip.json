@@ -1,0 +1,9 @@
+{
+  "id":          "s03_stick_slip",
+  "description": "Step to 4 rad/s - low-speed stick-slip prone regime",
+  "T_sim":       80.0,
+  "ref_type":    "step",
+  "omega_init":  0.0,
+  "omega_final": 4.0,
+  "step_time":   5.0
+}

@@ -1,0 +1,9 @@
+{
+  "id":          "s04_high_rate_pulse",
+  "description": "7C pulse for 300 s then drops to 2C for 600 s. Tests transient response.",
+  "T_sim":       900.0,
+  "phi_profile": "pulse_then_low",
+  "c_rate_hi":   7.0,
+  "c_rate_lo":   2.0,
+  "t_switch":    300.0
+}

@@ -1,0 +1,11 @@
+{
+  "mc_n_samples": 30,
+  "mc_sigma": 0.10,
+  "mc_perturb_keys": ["T_in", "T_0", "Q_in", "I_1C"],
+  "nominal_scenario_id": "s01_constant_5c",
+  "fault_specs": [
+    {"kind": "sensor_bias",   "magnitudes": [0.5, 1.0, 2.0, 5.0]},
+    {"kind": "sensor_noise",  "magnitudes": [0.1, 0.5, 1.0]}
+  ],
+  "notes": "Perturbs inlet temperature, initial temp, heat load, and 1C current by ±10%. Actuator fault not applied (output is discrete J/U/L pattern). sensor = DeltaT [K] (temperature non-uniformity reading). Top-level scalars only — nested geometry is not perturbed."
+}

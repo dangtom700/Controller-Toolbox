@@ -1,0 +1,14 @@
+{
+    "id":           "s05_solar_ramp",
+    "description":  "G=400+400*sin(2pi/3600*t) simulating diurnal ramp; T_h_ref=60 C",
+    "T_h_ref":      60.0,
+    "T_h_init":     20.0,
+    "T_coll_init":  20.0,
+    "duration_s":   5400.0,
+    "g_type":       "sinusoidal",
+    "G_0":          400.0,
+    "G_amp":        400.0,
+    "G_freq":       0.001745329,
+    "T_amb_0":      20.0,
+    "T_c_0":        6.0
+}

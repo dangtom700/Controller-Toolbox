@@ -1,0 +1,9 @@
+{
+  "id":          "s05_earthquake",
+  "description": "Broadband chirp 0.5->15 Hz at 8 kN amplitude - hardware-in-loop fidelity test",
+  "T_sim":       3.0,
+  "ref_type":    "chirp",
+  "amplitude":   8000.0,
+  "f_start":     0.5,
+  "f_end":       15.0
+}

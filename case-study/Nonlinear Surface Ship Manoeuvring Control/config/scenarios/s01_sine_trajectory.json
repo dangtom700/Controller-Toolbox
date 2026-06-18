@@ -1,0 +1,12 @@
+{
+  "id": "s01",
+  "name": "Sine Trajectory (Paper Scenario)",
+  "description": "Exact paper trajectory: xd=20*sin(0.07*t), yd=t, x0=-10, y0=10",
+  "trajectory": "sine",
+  "xd_amp": 20.0,
+  "xd_omega": 0.07,
+  "yd_speed": 1.0,
+  "t_max": 100.0,
+  "disturbance_scale": 0.0,
+  "note": "Reproduces Fig. 7 of Meng et al. (2025); no added disturbances"
+}

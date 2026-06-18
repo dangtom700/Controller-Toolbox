@@ -1,0 +1,15 @@
+{
+  "id":          "s05_setpoint_step",
+  "description": "Reference-tracking test distinct from disturbance rejection: boundary conditions held at condition 1; air-outlet temperature setpoints step to a new (still physically achievable) target at t=400s.",
+  "T_sim":       900.0,
+  "profile":     "constant",
+  "Thin1":       723.0,
+  "Thin2":       633.0,
+  "mh1":         0.48,
+  "mh2":         0.37,
+  "ref_step": {
+    "t_step":          400.0,
+    "Thout1_ref_final": 435.0,
+    "Thout2_ref_final": 335.0
+  }
+}

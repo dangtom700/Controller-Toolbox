@@ -1,0 +1,14 @@
+{
+    "id":           "s02_irradiance_step",
+    "description":  "G steps 800->400 W/m^2 at t=1800s (cloud cover); tests rejection",
+    "T_h_ref":      63.0,
+    "T_h_init":     20.0,
+    "T_coll_init":  20.0,
+    "duration_s":   5400.0,
+    "g_type":       "step",
+    "G_0":          800.0,
+    "G_1":          400.0,
+    "t_G_step":     1800.0,
+    "T_amb_0":      20.0,
+    "T_c_0":        6.0
+}

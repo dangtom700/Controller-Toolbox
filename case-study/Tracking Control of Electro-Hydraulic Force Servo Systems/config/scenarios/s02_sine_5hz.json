@@ -1,0 +1,9 @@
+{
+  "id":          "s02_sine_5hz",
+  "description": "Sinusoidal force 5 kN amplitude at 5 Hz - high-amplitude, moderate-frequency test",
+  "T_sim":       2.0,
+  "ref_type":    "sine",
+  "amplitude":   5000.0,
+  "frequency":   5.0,
+  "phase_deg":   0.0
+}

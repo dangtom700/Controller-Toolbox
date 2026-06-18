@@ -1,0 +1,17 @@
+name: soft_robotics
+channels:
+  - defaults
+dependencies:
+  # Python runtime — 3.12 is the stable LTS choice; 3.11+ also works.
+  # NumPy/pandas/pybind11 wheels are published for 3.12 on all platforms.
+  - python=3.12
+
+  # NumPy and pandas are better installed via conda on Windows because
+  # conda manages the MKL BLAS backend and VC runtime compatibility.
+  - numpy>=1.24
+  - pandas>=2.0
+
+  # pip installs the rest (control, scipy, matplotlib, pybind11, plotly, …)
+  - pip
+  - pip:
+      - -r requirements.txt

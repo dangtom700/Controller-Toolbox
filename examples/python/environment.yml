@@ -1,0 +1,14 @@
+name: soft_robotics
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy=1.26.*
+  - scipy=1.12.*
+  - matplotlib=3.8.*
+  - pandas=2.2.*
+  - scikit-learn=1.4.*
+  - pip
+  - pip:
+      - control==0.9.*

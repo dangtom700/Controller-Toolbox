@@ -1,0 +1,8 @@
+{
+  "id":          "s01_5C_discharge",
+  "description": "Constant 5C discharge for 720 s (paper Section 4.1). Initial pattern J-type.",
+  "T_sim":       720.0,
+  "phi_profile": "constant_c_rate",
+  "c_rate":      5.0,
+  "init_pattern": "J"
+}

@@ -1,0 +1,15 @@
+{
+    "id":          "s02_wind_disturbance",
+    "description": "Wind gusts V=1->6 m/s at t=600s; tests weather disturbance rejection",
+    "T_ref":       95.0,
+    "T_abs_init":  30.0,
+    "T_pot_init":  30.0,
+    "duration_s":  5400.0,
+    "g_type":      "constant",
+    "G_0":         750.0,
+    "T_amb_0":     28.0,
+    "v_type":      "step",
+    "V_wind_0":    1.0,
+    "V_wind_1":    6.0,
+    "t_wind_step": 600.0
+}

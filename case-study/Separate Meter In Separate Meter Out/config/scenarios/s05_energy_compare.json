@@ -1,0 +1,12 @@
+{
+  "id": "s05_energy_compare",
+  "description": "3-cycle paper sine with resistive load; cumulative supply energy E = Int P_s*Q_s dt is the primary metric",
+  "duration_s": 12.0,
+  "x_init": 0.0,
+  "P1_init": 2.5e6,
+  "P2_init": 2.0e6,
+  "ref_type": "paper_sine",
+  "F_0": 300.0,
+  "F_1": 300.0,
+  "t_F_step": -1.0
+}

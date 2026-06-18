@@ -1,0 +1,11 @@
+{
+    "id":          "s04_turbulent",
+    "description": "Combined 3 m/s mean wind with high turbulence (sigma=3 m/s)",
+    "h_drop":      90.0,
+    "V_aircraft":  50.0,
+    "wx_mean":      2.0,
+    "wy_mean":      3.0,
+    "wind_sigma":   3.0,
+    "N_mc":        30,
+    "rng_seed":     4
+}

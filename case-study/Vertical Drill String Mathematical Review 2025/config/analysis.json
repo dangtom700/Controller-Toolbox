@@ -1,0 +1,12 @@
+{
+  "mc_n_samples": 30,
+  "mc_sigma": 0.10,
+  "mc_perturb_keys": ["J_b", "k_t", "c_t", "WOB", "R_b", "mu_s", "mu_k"],
+  "nominal_scenario_id": "s01_step_ref",
+  "fault_specs": [
+    {"kind": "sensor_bias",   "magnitudes": [0.5, 1.0, 2.0, 5.0]},
+    {"kind": "actuator_loss", "magnitudes": [0.05, 0.10, 0.20, 0.30]},
+    {"kind": "sensor_noise",  "magnitudes": [0.1, 0.5, 1.0]}
+  ],
+  "notes": "Perturbs identified torsional / friction parameters by ±10% (1-sigma). sensor = omega_b [rad/s]; actuator = omega_t [rad/s]."
+}

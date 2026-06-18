@@ -1,0 +1,11 @@
+{
+  "id": "s03",
+  "name": "Circular Trajectory",
+  "description": "Circular path of radius 25 m at 1.5 m/s tangential speed; tests turning performance",
+  "trajectory": "circle",
+  "radius": 25.0,
+  "omega": 0.06,
+  "t_max": 200.0,
+  "disturbance_scale": 0.0,
+  "note": "omega=0.06 rad/s -> tangential speed = R*omega = 1.5 m/s; 1.9 full circles in 200 s"
+}

@@ -1,0 +1,9 @@
+{
+    "id":          "S1",
+    "description": "25 mm step bump at t=0.5 s - tests settling time and overshoot",
+    "road_type":   "step",
+    "amplitude":   0.025,
+    "step_time":   0.5,
+    "duration_s":  5.0,
+    "seed":        42
+}

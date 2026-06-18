@@ -1,0 +1,9 @@
+{
+    "id":          "S2_boost",
+    "description": "Pure boost: V_ref = 15 V startup from 0 V (V_in = 10 V)",
+    "v_in":        10.0,
+    "duration_s":  0.060,
+    "steps": [
+        {"t_start": 0.0, "v_ref": 15.0}
+    ]
+}

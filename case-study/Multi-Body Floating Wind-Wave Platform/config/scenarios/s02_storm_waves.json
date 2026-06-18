@@ -1,0 +1,9 @@
+{
+  "id":          "s02_storm_waves",
+  "description": "Storm waves T=12s H=5m - off-resonant, high amplitude",
+  "T_sim":       300.0,
+  "wave_type":   "regular",
+  "T_wave":      12.0,
+  "H_wave":      5.0,
+  "A_ref_scale": 1.5
+}

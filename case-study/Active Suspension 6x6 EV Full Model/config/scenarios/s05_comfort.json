@@ -1,0 +1,8 @@
+{
+  "id"    : "s05_comfort",
+  "desc"  : "ISO 2631 comfort: sine sweep 1 to 10 Hz at 10 mm. Primary metric: weighted RMS seat acceleration.",
+  "T_sim" : 15.0,
+  "amp"   : 0.010,
+  "f_end" : 10.0,
+  "f_rate": 0.6
+}

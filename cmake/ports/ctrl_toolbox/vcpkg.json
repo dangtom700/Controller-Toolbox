@@ -1,0 +1,18 @@
+{
+  "name": "controller-toolbox",
+  "version": "1.0.0",
+  "description": "Production-grade discrete-time control library (C++20, Eigen3). Covers PID -> LQR -> MPC -> Hinf -> MRAC -> TubeMPC -> ParticleFilter -> DeePC -> ILC -> SINDy -> KoopmanEDMD -> L1Adaptive -> CBFSafetyFilter -> GaussianProcess -> EchoStateNetwork -> NeuralPID -> CEM-MPC -> BayesianOptimizer -> GeneticAlgorithm -> DifferentialEvolution (~85 algorithms). Full pybind11 Python bindings included.",
+  "homepage": "https://github.com/Azalea1047/Controller-Toolbox",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "eigen3"
+    }
+  ],
+  "features": {
+    "python-bindings": {
+      "description": "Build pybind11 Python bindings (ctrl_toolbox Python module)",
+      "dependencies": ["pybind11"]
+    }
+  }
+}

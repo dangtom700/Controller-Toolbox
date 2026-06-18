@@ -1,0 +1,10 @@
+{
+    "id":          "S4_crossing_down",
+    "description": "Mode transition: 15 V boost -> 4 V buck at t = 30 ms",
+    "v_in":        10.0,
+    "duration_s":  0.080,
+    "steps": [
+        {"t_start": 0.000, "v_ref": 15.0},
+        {"t_start": 0.030, "v_ref":  4.0}
+    ]
+}

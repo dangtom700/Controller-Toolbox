@@ -1,0 +1,64 @@
+name: Benchmarks
+
+# Latency benchmarks for the controller hot paths.
+# Runs on every push to main and on demand (workflow_dispatch).
+# Results are uploaded as a workflow artifact for trend tracking.
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.ref }}-benchmarks
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    runs-on: windows-2022
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Eigen3 and nlohmann-json via vcpkg
+        run: vcpkg install "eigen3:x64-windows-static" "nlohmann-json:x64-windows-static"
+
+      - name: Configure (MSVC x64 + benchmarks enabled)
+        run: |
+          cmake -B build `
+            -DCTRL_BUILD_BENCHMARKS=ON `
+            -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+            -DVCPKG_TARGET_TRIPLET="x64-windows-static" `
+            -A x64
+
+      - name: Build bench_controllers (Release config)
+        run: cmake --build build --config Release --target bench_controllers
+
+      - name: Locate and run benchmark
+        run: |
+          # MSVC multi-config generators place the binary in build/benchmark/Release/.
+          # Single-config (Ninja/MinGW) would place it in build/benchmark/.
+          # Get-ChildItem finds it robustly regardless of generator.
+          $exe = Get-ChildItem -Path build -Recurse -Filter "bench_controllers.exe" |
+                   Select-Object -First 1 -ExpandProperty FullName
+          if (-not $exe) {
+            Write-Error "bench_controllers.exe not found under build/"
+            exit 1
+          }
+          Write-Host "Found: $exe"
+          $ts  = (Get-Date -Format "yyyyMMdd_HHmmss")
+          $out = "benchmark_${ts}.txt"
+          & $exe | Tee-Object -FilePath $out
+          echo "BENCH_FILE=$out" >> $env:GITHUB_ENV
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ github.sha }}
+          path: ${{ env.BENCH_FILE }}
+          retention-days: 90

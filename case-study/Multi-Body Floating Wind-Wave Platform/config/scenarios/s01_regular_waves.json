@@ -1,0 +1,9 @@
+{
+  "id":          "s01_regular_waves",
+  "description": "Regular waves T=10s H=2m - design (resonant) condition",
+  "T_sim":       300.0,
+  "wave_type":   "regular",
+  "T_wave":      10.0,
+  "H_wave":      2.0,
+  "A_ref_scale": 1.0
+}

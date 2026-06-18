@@ -1,0 +1,15 @@
+{
+  "id": "s01_resistive_step",
+  "description": "Step extension against a resistive load (standard meter-in mode)",
+  "duration_s": 6.0,
+  "x_init": 0.05,
+  "P1_init": 2.5e6,
+  "P2_init": 2.0e6,
+  "ref_type": "step",
+  "x_ref_0": 0.05,
+  "x_ref_1": 0.25,
+  "t_step": 0.5,
+  "F_0": 500.0,
+  "F_1": 500.0,
+  "t_F_step": -1.0
+}

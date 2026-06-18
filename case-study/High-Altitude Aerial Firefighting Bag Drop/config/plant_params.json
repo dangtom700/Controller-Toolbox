@@ -1,0 +1,25 @@
+{
+    "bag_mass_kg":    15.0,
+    "bag_diameter_m":  0.45,
+    "Cd":              0.80,
+    "rho_air":         1.20,
+    "g":               9.81,
+    "Ts":              0.05,
+
+    "h_drop_nom":     90.0,
+    "V_aircraft":     50.0,
+
+    "N_mc":           30,
+
+    "_notes": {
+        "bag_mass_kg":    "Wet bag mass including water absorption [kg]",
+        "bag_diameter_m": "Effective frontal diameter of bag [m]",
+        "Cd":             "Drag coefficient; blunt-body approximation",
+        "rho_air":        "Air density at low altitude [kg/m^3]",
+        "g":              "Gravitational acceleration [m/s^2]",
+        "Ts":             "RK4 integration timestep [s]",
+        "h_drop_nom":     "Nominal release altitude AGL [m]",
+        "V_aircraft":     "Aircraft airspeed at release [m/s]",
+        "N_mc":           "Monte Carlo samples per (planner, scenario) run"
+    }
+}

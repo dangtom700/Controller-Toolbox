@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/ControllerToolboxTargets.cmake")
+
+# Propagate Eigen3 dependency so consumers don't need to find it themselves
+find_dependency(Eigen3 REQUIRED NO_MODULE)
+
+check_required_components(ControllerToolbox)

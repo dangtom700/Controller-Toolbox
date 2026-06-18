@@ -1,0 +1,20 @@
+{
+  "M_f":     1.5e7,
+  "B_f":     1.5e5,
+  "K_f":     1.5e6,
+  "M_w":     2.0e5,
+  "B_w":     2.0e4,
+  "K_w":     7.896e4,
+  "gamma":   0.15,
+  "F_max":   5.0e5,
+  "Ts":      0.5,
+  "T_sim_default": 300.0,
+  "_notes": {
+    "states":  "[z, zdot, x_rel, xrel_dot]",
+    "z":       "FOWT heave [m]",
+    "x_rel":   "WEC arm displacement relative to platform [m]",
+    "input":   "F_PTO - power take-off force [N]",
+    "K_w_calc": "K_w = (2*pi/10)^2 * M_w = 7.896e4 N/m (WEC resonant at T=10s)",
+    "gamma":   "fraction of wave force acting on WEC arm (coupling)"
+  }
+}

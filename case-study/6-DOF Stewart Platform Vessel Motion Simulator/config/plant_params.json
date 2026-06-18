@@ -1,0 +1,32 @@
+{
+  "Ra": 0.500,
+  "Rb": 0.350,
+  "delta_base_deg": 5.0,
+  "delta_platform_deg": 45.0,
+  "platform_phase_deg": 0.0,
+  "z0_mid": 0.803,
+  "m_rod": 15.0,
+  "k_spring": 2.0e4,
+  "b_damp": 800.0,
+  "F_rod_max": 6000.0,
+  "F_eq": 12000.0,
+  "m_platform": 500.0,
+  "comm_delay_samples": 1,
+  "Ts": 0.005,
+  "duration": 60.0,
+  "workspace": {
+    "surge_max": 0.366,
+    "sway_max": 0.422,
+    "heave_max": 0.182,
+    "roll_max_deg": 27.0,
+    "pitch_max_deg": 23.0,
+    "yaw_max_deg": 30.0
+  },
+  "_notes": {
+    "geometry": "Ra/Rb from paper Key Parameters table; hinge pair half-angles (delta_base/delta_platform) and platform_phase_deg=0 are an explicit assumption - paper does not specify exact hinge angles (decision #1, see README). phase=0 gives every leg the same neutral length l0_i (balanced load sharing) regardless of delta_base vs delta_platform; the two half-angles must differ substantially (~40 deg gap) to avoid a kinematic singularity that occurs when every leg is a pure rotation of the others (equal half-angles).",
+    "z0_mid": "(0.621+0.985)/2 m, exact midpoint of the paper Table 1 heave range",
+    "m_rod/k_spring/b_damp/F_rod_max": "not given numerically in the paper - engineering estimates for a ~1 m hydraulic actuator rod (decision #2: u is a direct force in N)",
+    "F_eq/m_platform": "shipboard equipment load and platform mass from paper Key Parameters table",
+    "comm_delay_samples": "1 ms UDP delay at Ts=5ms (paper sec. 4.2) modelled as a 1-sample held delay (decision #5)"
+  }
+}

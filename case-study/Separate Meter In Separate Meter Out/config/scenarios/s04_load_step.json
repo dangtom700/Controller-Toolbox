@@ -1,0 +1,13 @@
+{
+  "id": "s04_load_step",
+  "description": "Position hold with the Chen (2018) 500 N external disturbance at t = 9 s",
+  "duration_s": 16.0,
+  "x_init": 0.25,
+  "P1_init": 2.5e6,
+  "P2_init": 2.0e6,
+  "ref_type": "hold",
+  "x_ref_0": 0.25,
+  "F_0": 0.0,
+  "F_1": 500.0,
+  "t_F_step": 9.0
+}

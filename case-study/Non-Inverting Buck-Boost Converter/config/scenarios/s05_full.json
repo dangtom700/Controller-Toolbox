@@ -1,0 +1,11 @@
+{
+    "id":          "S5_full",
+    "description": "Full cycle: 8 V buck -> 15 V boost -> 4 V buck (paper experiment sequence)",
+    "v_in":        10.0,
+    "duration_s":  0.100,
+    "steps": [
+        {"t_start": 0.000, "v_ref":  8.0},
+        {"t_start": 0.030, "v_ref": 15.0},
+        {"t_start": 0.065, "v_ref":  4.0}
+    ]
+}

@@ -1,0 +1,38 @@
+{
+  "_comment": "Air-Cooled BTMS J-U-L plant parameters. Zhang et al. 2026, Appl. Therm. Eng. 298, 130921.",
+
+  "Ts":     1.0,
+  "T_in":   298.15,
+  "T_0":    298.15,
+  "Q_in":   0.015,
+  "I_1C":   7.0,
+
+  "_battery_geometry": {
+    "w_bat_m":    0.016,
+    "L_bat_m":    0.151,
+    "H_bat_m":    0.065,
+    "V_bat_m3":   1.5784e-4,
+    "rho_b":      1542.9,
+    "cp_b":       1337.0
+  },
+
+  "_air_properties": {
+    "rho_a":      1.165,
+    "cp_a":       1005.0,
+    "mu_a":       1.86e-5
+  },
+
+  "_flow_pattern_h_refs": {
+    "_comment": "h at minimum-flow channel for each pattern [W/m^2/K], from CFD (Table 3 / text)",
+    "J_h_ref":    43.4,
+    "U_h_ref":    34.2,
+    "L_h_ref":    32.6
+  },
+
+  "_control_thresholds": {
+    "DeltaT_lim":     1.0,
+    "DeltaT_activate": 0.3,
+    "delta_correction": 0.07,
+    "eps":            0.01
+  }
+}

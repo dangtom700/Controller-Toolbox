@@ -1,0 +1,9 @@
+{
+  "id":          "s03_step",
+  "description": "Step force command 0 -> 8 kN at t=0.05 s - transient response test",
+  "T_sim":       0.5,
+  "ref_type":    "step",
+  "F_init":      0.0,
+  "F_final":     8000.0,
+  "step_time":   0.05
+}

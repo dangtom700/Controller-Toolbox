@@ -1,0 +1,9 @@
+{
+  "id":          "s05_scenario",
+  "description": "TODO describe scenario 5",
+  "T_sim":       30.0,
+  "ref_type":    "step",
+  "ref_init":    0.0,
+  "ref_final":   1.0,
+  "step_time":   1.0
+}

@@ -1,0 +1,12 @@
+{
+  "mc_n_samples": 30,
+  "mc_sigma": 0.10,
+  "mc_perturb_keys": ["M_f", "B_f", "K_f", "M_w", "B_w", "K_w", "gamma"],
+  "nominal_scenario_id": "s01_regular_waves",
+  "fault_specs": [
+    {"kind": "sensor_bias",   "magnitudes": [0.05, 0.10, 0.20, 0.50]},
+    {"kind": "actuator_loss", "magnitudes": [0.05, 0.10, 0.20, 0.30]},
+    {"kind": "sensor_noise",  "magnitudes": [0.02, 0.05, 0.10]}
+  ],
+  "notes": "Perturbs FOWT+WEC mass/damping/stiffness parameters by ±10%. sensor = x_rel [m]; actuator = F_pto [N]."
+}

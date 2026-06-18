@@ -1,0 +1,9 @@
+{
+  "id":          "s01_step_ref",
+  "description": "Step reference from 0 to 10 rad/s at t=5s",
+  "T_sim":       60.0,
+  "ref_type":    "step",
+  "omega_init":  0.0,
+  "omega_final": 10.0,
+  "step_time":   5.0
+}

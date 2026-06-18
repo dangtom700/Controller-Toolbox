@@ -1,0 +1,13 @@
+{
+  "id":          "s03_thermal_ramp",
+  "description": "Smooth climb/acceleration heat-load ramp (complementary to s02's hard switches): AHE1/AHE2 air inlet temperatures and flow rates ramp up over the first half of the run and hold.",
+  "T_sim":       1200.0,
+  "profile":     "ramp",
+  "ramp": {
+    "t0": 200.0, "t1": 800.0,
+    "Thin1_0": 600.0, "Thin1_1": 750.0,
+    "Thin2_0": 550.0, "Thin2_1": 650.0,
+    "mh1_0":   0.35,  "mh1_1":   0.48,
+    "mh2_0":   0.28,  "mh2_1":   0.37
+  }
+}

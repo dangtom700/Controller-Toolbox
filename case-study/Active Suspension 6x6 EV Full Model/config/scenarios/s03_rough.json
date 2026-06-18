@@ -1,0 +1,7 @@
+{
+  "id"    : "s03_rough",
+  "desc"  : "High-frequency rough road 8 Hz, 5 mm amplitude. Primary metric: RMS(head_accel).",
+  "T_sim" : 10.0,
+  "amp"   : 0.005,
+  "freq"  : 8.0
+}

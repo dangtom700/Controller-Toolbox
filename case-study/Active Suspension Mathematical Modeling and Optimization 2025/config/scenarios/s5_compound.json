@@ -1,0 +1,11 @@
+{
+    "id":          "S5",
+    "description": "Compound: 10 mm sine at 1.3 Hz + 15 mm step at t=2 s - tests combined disturbance rejection",
+    "road_type":   "compound",
+    "amplitude":   0.010,
+    "frequency":   1.3,
+    "step_time":   2.0,
+    "step_height": 0.015,
+    "duration_s":  5.0,
+    "seed":        42
+}

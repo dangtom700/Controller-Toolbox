@@ -1,0 +1,12 @@
+{
+  "id": "s05",
+  "name": "Sine Trajectory with Full Disturbances",
+  "description": "Paper trajectory with du=0.008sin(0.2t), dv=0.008cos(0.5t), dr=0.005cos(0.5t); tests robustness",
+  "trajectory": "sine",
+  "xd_amp": 20.0,
+  "xd_omega": 0.07,
+  "yd_speed": 1.0,
+  "t_max": 100.0,
+  "disturbance_scale": 1.0,
+  "note": "disturbance_scale=1 enables paper disturbance model; validates controller robustness vs ASMC"
+}

@@ -1,0 +1,11 @@
+{
+  "id":          "s04_irregular_wave",
+  "description": "Irregular (bi-chromatic) wave: T1=10s + T2=6s, adaptive test",
+  "T_sim":       300.0,
+  "wave_type":   "bichromatic",
+  "T_wave":      10.0,
+  "T_wave2":     6.0,
+  "H_wave":      1.5,
+  "H_wave2":     0.8,
+  "A_ref_scale": 1.0
+}

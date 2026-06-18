@@ -1,0 +1,15 @@
+{
+  "id": "S1",
+  "description": "Zero disturbance calm water - zero-input stability test",
+  "wind_speed_ms": 0.0,
+  "wind_bearing_deg": 0.0,
+  "current_speed_ms": 0.0,
+  "current_bearing_deg": 0.0,
+  "Hs_m": 0.0,
+  "Tp_s": 0.0,
+  "ref_x": 0.0,
+  "ref_y": 0.0,
+  "ref_psi_deg": 0.0,
+  "duration_s": 300.0,
+  "seed": 1
+}
