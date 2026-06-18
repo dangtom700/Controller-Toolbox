@@ -126,6 +126,8 @@
 #include "BasicPID.h"                  ///< BasicPID<Scalar> - header-only template PID for embedded/float targets; no virtual dispatch, no Eigen (M4).
 #include "BasicSMC.h"                  ///< BasicSMC<Scalar> - header-only template SMC for embedded/float targets; no virtual dispatch, no Eigen (M4).
 #include "MismatchDetector.h"          ///< MismatchDetector - CUSUM on KF/MHE innovation for real-time model-plant mismatch detection (D1).
+#include "RobustnessAnalysis.h"        ///< RobustnessAnalysis - Monte-Carlo closed-loop robustness: spawn perturbed plants, aggregate stability/margin/sensitivity stats (Robustness Phase 1).
+#include "MuAnalysis.h"                ///< MuAnalysis - structured singular value (mu) D-scaling upper bound, peakMu, robustStabilityRadius (Robustness Phase 3).
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,

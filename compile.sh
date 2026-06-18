@@ -160,6 +160,9 @@ TARGETS=(
     ex80_grey_box_estimator
     ex81_hybrid_model_mpc
     ex82_metaheuristics
+    ex83_robustness_mc
+    ex84_gang_of_four
+    ex85_mu_analysis
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

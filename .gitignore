@@ -21,3 +21,5 @@ CLAUDE.md
 memory/
 /case-study/**/*.txt
 !/tools/*.py
+data/
+case-study/**/*.csv

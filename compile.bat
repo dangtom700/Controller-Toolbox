@@ -121,6 +121,9 @@ for %%T in (
     ex80_grey_box_estimator
     ex81_hybrid_model_mpc
     ex82_metaheuristics
+    ex83_robustness_mc
+    ex84_gang_of_four
+    ex85_mu_analysis
     test_autoscheduling
     test_stability_margins
     example_pid_feedback
@@ -140,6 +143,7 @@ for %%T in (
     solar_cooker_sim
     sotec_sim
     smismo_sim
+    stewart_sim
     toolbox_examples
     test_catch2_pilot
     test_catch2_advanced
@@ -153,6 +157,7 @@ for %%T in (
     test_solar_cooker_regression
     test_sotec_regression
     test_smismo_regression
+    test_stewart_regression
 ) do (
     echo.
     echo ----------------------------------------------------------

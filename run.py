@@ -749,9 +749,13 @@ def phase_bug_report(log_path):
         'jacobian relative errors',       # Python linearisation helper Jacobian errors
         'zero error after reset',         # NeuralPID reset test section header
         'leadlag',                        # LeadLag row in perf. dashboard (NaN rise_time is expected)
+        'gm[db]',                         # Robustness Phase 1 ex83/ex103: GM=nan is expected when the
+                                           # sampled |S|/|T| loop never crosses the classical gain-margin
+                                           # definition (monotonic loop shape) - documented GM-NaN semantics
         'retain residual periodic error', # Scenario: s08_periodic_load
         'dcamplitudeerror',               # ex59/ex60/ex75: dcAmplitudeError metric (lowercased match)
         'trial |  rms error',             # ILC C++ table header "trial |  RMS error"
+        'step         y         u     error',  # DeePC ex69/ex89 table header ("step  y  u  error  ok?")
         'model - mean position error:',
         'a1 errors by snr',               # ex05 SNR table row (was uppercase SNR — broken)
         'step |  error  |',               # DynaCtrl table header (was uppercase S — broken)
@@ -770,7 +774,7 @@ def phase_bug_report(log_path):
         'final p estimate',               # ex98 RecursiveGreyBox "Final p estimate : ... (error ...)" line
         'nan guard',                      # DiscreteHinf NaN-guard test-case name/header
         'h-inf synthesis infeasible',     # Catch2 WARN when H-inf synthesis can't converge (skipped gracefully)
-        'test_catch2_advanced.cpp:3718',  # Catch2 warning: source location line for H-inf NaN-guard WARN
+        'test_catch2_advanced.cpp:3726',  # Catch2 warning: source location line for H-inf NaN-guard WARN
         'all assertions passed',          # ex102 / other examples final pass line
 
         # --- Phase 7 report generation (benign) ---

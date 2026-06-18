@@ -103,6 +103,29 @@ TimeDomainMetrics
         .def_readonly("w_crossover_phase",   &ctrl::StabilityMargins::wCrossoverPhase,
                       "Phase crossover frequency [rad/s] (angle(L) = -180 deg).");
 
+    py::class_<ctrl::DiskMargin>(m, "DiskMargin",
+        "Simultaneous gain/phase disk margin from SystemAnalysis::calculate_disk_margin().")
+        .def_readonly("alpha",            &ctrl::DiskMargin::alpha,
+                      "Disk radius alpha = 1 / ||S||_inf.")
+        .def_readonly("gain_margin",      &ctrl::DiskMargin::gain_margin,
+                      "Simultaneous gain margin (linear, NOT dB).")
+        .def_readonly("phase_margin_deg", &ctrl::DiskMargin::phase_margin_deg,
+                      "Simultaneous phase margin [degrees].");
+
+    py::class_<ctrl::GangOfFour>(m, "GangOfFour",
+        "Closed-loop S/T/GS/KS state-space matrices from SystemAnalysis::gang_of_four().")
+        .def_readonly("S",  &ctrl::GangOfFour::S,  "Sensitivity (I + G*K)^-1.")
+        .def_readonly("T",  &ctrl::GangOfFour::T,  "Complementary sensitivity (= I - S).")
+        .def_readonly("GS", &ctrl::GangOfFour::GS, "Load-disturbance sensitivity S*G.")
+        .def_readonly("KS", &ctrl::GangOfFour::KS, "Control/noise sensitivity K*S.");
+
+    py::class_<ctrl::GangOfFourNorms>(m, "GangOfFourNorms",
+        "Peak H-infinity norms of the Gang-of-Four matrices.")
+        .def_readonly("norm_S",  &ctrl::GangOfFourNorms::norm_S)
+        .def_readonly("norm_T",  &ctrl::GangOfFourNorms::norm_T)
+        .def_readonly("norm_GS", &ctrl::GangOfFourNorms::norm_GS)
+        .def_readonly("norm_KS", &ctrl::GangOfFourNorms::norm_KS);
+
     py::class_<ctrl::SystemAnalysis>(m, "SystemAnalysis",
         "Frequency-domain and stability analysis utilities (all static methods).")
         .def_static("get_poles",        &ctrl::SystemAnalysis::getPoles,
@@ -126,7 +149,32 @@ TimeDomainMetrics
         .def_static("calculate_h_infinity_norm",
                     &ctrl::SystemAnalysis::calculateHInfinityNorm,
                     py::arg("sys"),
-                    "Grid approximation of the H-infinity norm (lower bound).");
+                    "Grid approximation of the H-infinity norm (lower bound).")
+        .def_static("series",
+                    &ctrl::SystemAnalysis::series,
+                    py::arg("g1"), py::arg("g2"),
+                    "Cascade connection: output of g1 feeds the input of g2 (matrix product g2*g1).")
+        .def_static("parallel",
+                    &ctrl::SystemAnalysis::parallel,
+                    py::arg("g1"), py::arg("g2"),
+                    "Parallel connection: sys_out = g1 + g2 (same input feeds both).")
+        .def_static("feedback",
+                    &ctrl::SystemAnalysis::feedback,
+                    py::arg("gk"),
+                    "Close a unity-negative-feedback loop around forward-path gk. "
+                    "Returns the complementary sensitivity T (reference -> output).")
+        .def_static("gang_of_four",
+                    &ctrl::SystemAnalysis::gangOfFour,
+                    py::arg("g"), py::arg("k"),
+                    "Build the Gang of Four (S, T, GS, KS) for plant g and controller k.")
+        .def_static("gang_of_four_norms",
+                    &ctrl::SystemAnalysis::gangOfFourNorms,
+                    py::arg("g4"),
+                    "Peak H-infinity norms of all four Gang-of-Four matrices.")
+        .def_static("calculate_disk_margin",
+                    &ctrl::SystemAnalysis::calculateDiskMargin,
+                    py::arg("open_loop_l"),
+                    "Simultaneous gain/phase disk margin of open-loop transfer open_loop_l.");
 
     // -----------------------------------------------------------------------
     // LinearisationHelper  (jacobian_x, jacobian_u, linearise_at_point)
@@ -587,4 +635,185 @@ u = sched.compute(error)
             &ctrl::VectorFitting::evalMagnitude,
             py::arg("sys"), py::arg("omega"),
             "Evaluate |H(e^{j*omega*Ts})| for a StateSpace at a given frequency.");
+
+    // -----------------------------------------------------------------------
+    // RobustnessAnalysis - Monte-Carlo closed-loop robustness (Phase 1)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::PerturbationSpec> perturb_spec(m, "PerturbationSpec",
+        "Per-parameter uncertainty description (distribution, relative sigma, bounds).");
+    py::enum_<ctrl::PerturbationSpec::Distribution>(perturb_spec, "Distribution")
+        .value("Uniform", ctrl::PerturbationSpec::Distribution::Uniform)
+        .value("Normal",  ctrl::PerturbationSpec::Distribution::Normal)
+        .export_values();
+    perturb_spec
+        .def(py::init<>())
+        .def_readwrite("dist",        &ctrl::PerturbationSpec::dist)
+        .def_readwrite("sigma",       &ctrl::PerturbationSpec::sigma)
+        .def_readwrite("lower_bound", &ctrl::PerturbationSpec::lower_bound)
+        .def_readwrite("upper_bound", &ctrl::PerturbationSpec::upper_bound);
+
+    py::class_<ctrl::RobustnessSample>(m, "RobustnessSample",
+        "Closed-loop robustness metrics from one perturbed plant sample.")
+        .def_readonly("sample_id",          &ctrl::RobustnessSample::sample_id)
+        .def_readonly("is_stable",          &ctrl::RobustnessSample::is_stable)
+        .def_readonly("gain_margin_db",     &ctrl::RobustnessSample::gain_margin_db)
+        .def_readonly("phase_margin_deg",   &ctrl::RobustnessSample::phase_margin_deg)
+        .def_readonly("hinf_sensitivity",   &ctrl::RobustnessSample::hinf_sensitivity)
+        .def_readonly("hinf_comp_sens",     &ctrl::RobustnessSample::hinf_comp_sens)
+        .def_readonly("iae",                &ctrl::RobustnessSample::iae)
+        .def_readonly("settling_time_s",    &ctrl::RobustnessSample::settling_time_s)
+        .def_readonly("overshoot_pct",      &ctrl::RobustnessSample::overshoot_pct)
+        .def_readonly("nu_gap_from_nominal",&ctrl::RobustnessSample::nu_gap_from_nominal);
+
+    py::class_<ctrl::MonteCarloResult::MetricStats>(m, "MetricStats",
+        "Summary statistics for one robustness metric (finite values only).")
+        .def_readonly("mean",    &ctrl::MonteCarloResult::MetricStats::mean)
+        .def_readonly("std_dev", &ctrl::MonteCarloResult::MetricStats::std_dev)
+        .def_readonly("p5",      &ctrl::MonteCarloResult::MetricStats::p5)
+        .def_readonly("p25",     &ctrl::MonteCarloResult::MetricStats::p25)
+        .def_readonly("p50",     &ctrl::MonteCarloResult::MetricStats::p50)
+        .def_readonly("p75",     &ctrl::MonteCarloResult::MetricStats::p75)
+        .def_readonly("p95",     &ctrl::MonteCarloResult::MetricStats::p95)
+        .def_readonly("worst",   &ctrl::MonteCarloResult::MetricStats::worst);
+
+    py::class_<ctrl::MonteCarloResult>(m, "MonteCarloResult",
+        "Aggregated robustness statistics over a perturbed-plant ensemble.")
+        .def_readonly("n_samples",                   &ctrl::MonteCarloResult::n_samples)
+        .def_readonly("n_unstable",                  &ctrl::MonteCarloResult::n_unstable)
+        .def_readonly("instability_probability",     &ctrl::MonteCarloResult::instability_probability)
+        .def_readonly("gm_stats",                    &ctrl::MonteCarloResult::gm_stats)
+        .def_readonly("pm_stats",                    &ctrl::MonteCarloResult::pm_stats)
+        .def_readonly("sensitivity_peak_stats",      &ctrl::MonteCarloResult::sensitivity_peak_stats)
+        .def_readonly("comp_sensitivity_peak_stats", &ctrl::MonteCarloResult::comp_sensitivity_peak_stats)
+        .def_readonly("iae_stats",                   &ctrl::MonteCarloResult::iae_stats)
+        .def_readonly("settling_stats",              &ctrl::MonteCarloResult::settling_stats)
+        .def_readonly("nu_gap_stats",                &ctrl::MonteCarloResult::nu_gap_stats)
+        .def_readonly("samples",                     &ctrl::MonteCarloResult::samples);
+
+    m.def("spawn_ss_samples", &ctrl::spawn_SS_samples,
+          py::arg("nominal"), py::arg("num_samples"), py::arg("sigma_A"),
+          py::arg("sigma_B") = 0.0, py::arg("sigma_C") = 0.0, py::arg("sigma_D") = 0.0,
+          py::arg("seed") = 42,
+          R"doc(
+Spawn an ensemble of perturbed state-space models.
+
+Each entry of A, B, C, D is scaled by (1 + sigma_M * N(0,1)) independently.
+sigma_B = sigma_C = sigma_D = 0 perturbs only A (state-matrix uncertainty).
+
+Returns
+-------
+list of ctrl.StateSpace
+)doc");
+
+    m.def("spawn_tf_samples", &ctrl::spawn_TF_samples,
+          py::arg("nominal"), py::arg("num_samples"),
+          py::arg("numerator_sigma"), py::arg("denominator_sigma"),
+          py::arg("seed") = 42,
+          R"doc(
+Spawn an ensemble of perturbed transfer functions.
+
+numerator_sigma / denominator_sigma are per-coefficient relative std-devs
+(length 1 = uniform). den[0] is held at 1 to keep the denominator monic.
+
+Returns
+-------
+list of ctrl.TransferFunction
+)doc");
+
+    m.def("evaluate_sample", &ctrl::evaluateSample,
+          py::arg("sample_id"), py::arg("plant"), py::arg("controller_ss"),
+          py::arg("nominal_plant"), py::arg("step_amplitude") = 1.0,
+          py::arg("sim_duration_s") = 50.0, py::arg("settling_band") = 0.05,
+          "Close the loop on one (plant, controller) pair and measure robustness. Returns RobustnessSample.");
+
+    m.def("run_monte_carlo", &ctrl::runMonteCarlo,
+          py::arg("ensemble"), py::arg("controller_ss"), py::arg("nominal_plant"),
+          py::arg("step_amplitude") = 1.0, py::arg("sim_duration_s") = 50.0,
+          "Evaluate an ensemble of plants against a fixed controller. Returns MonteCarloResult.");
+
+    m.def("monte_carlo_analysis", &ctrl::monteCarloAnalysis,
+          py::arg("nominal_plant"), py::arg("controller_ss"), py::arg("num_samples"),
+          py::arg("sigma_A"), py::arg("sigma_B") = 0.0, py::arg("sigma_C") = 0.0,
+          py::arg("sigma_D") = 0.0, py::arg("seed") = 42,
+          R"doc(
+Spawn a perturbed ensemble and run the full Monte-Carlo robustness analysis.
+
+The nominal plant is used as both the spawn centre and the nu-gap reference.
+
+Returns
+-------
+ctrl.MonteCarloResult
+)doc");
+
+    // -----------------------------------------------------------------------
+    // MuAnalysis - Structured Singular Value (Robustness Phase 3)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::UncertaintyBlock> uncertainty_block(m, "UncertaintyBlock",
+        "One block of a block-diagonal structured uncertainty Delta = blkdiag(blocks).");
+    py::enum_<ctrl::UncertaintyBlock::Type>(uncertainty_block, "Type")
+        .value("RealScalar",    ctrl::UncertaintyBlock::Type::RealScalar)
+        .value("ComplexScalar", ctrl::UncertaintyBlock::Type::ComplexScalar)
+        .value("ComplexFull",   ctrl::UncertaintyBlock::Type::ComplexFull)
+        .export_values();
+    uncertainty_block
+        .def(py::init<>())
+        .def_readwrite("type",  &ctrl::UncertaintyBlock::type)
+        .def_readwrite("r_out", &ctrl::UncertaintyBlock::r_out)
+        .def_readwrite("r_in",  &ctrl::UncertaintyBlock::r_in);
+
+    py::class_<ctrl::UncertaintyStructure>(m, "UncertaintyStructure",
+        "Full block-diagonal uncertainty structure Delta = blkdiag(blocks). "
+        "M passed to compute_mu/peak_mu must be square with rows == total_outputs() "
+        "and cols == total_inputs().")
+        .def(py::init<>())
+        .def_readwrite("blocks", &ctrl::UncertaintyStructure::blocks)
+        .def("total_inputs",  &ctrl::UncertaintyStructure::totalInputs)
+        .def("total_outputs", &ctrl::UncertaintyStructure::totalOutputs);
+
+    py::class_<ctrl::MuBound>(m, "MuBound",
+        "Upper (D-scaling) and optional lower (spectral-radius) bound on mu at one frequency.")
+        .def_readonly("upper", &ctrl::MuBound::upper)
+        .def_readonly("lower", &ctrl::MuBound::lower);
+
+    py::class_<ctrl::PeakMuResult>(m, "PeakMuResult",
+        "Peak structured singular value over a frequency grid, plus the full curve.")
+        .def_readonly("peak",             &ctrl::PeakMuResult::peak)
+        .def_readonly("peak_omega_rad_s", &ctrl::PeakMuResult::peak_omega_rad_s)
+        .def_readonly("mu_curve",         &ctrl::PeakMuResult::mu_curve);
+
+    m.def("compute_mu", &ctrl::computeMu,
+          py::arg("m_freq"), py::arg("struc"), py::arg("compute_lower_bound") = false,
+          R"doc(
+Compute the D-scaling upper bound (and optional spectral-radius lower bound) on the
+structured singular value mu_Delta(M) at each supplied frequency-response matrix.
+
+ComplexFull blocks are scaled exactly (textbook-tight); ComplexScalar blocks use a
+valid-but-possibly-loose single-scalar approximation (exact only for block size 1);
+RealScalar blocks raise ValueError (G-scaling not implemented).
+
+Returns
+-------
+list of ctrl.MuBound
+)doc");
+
+    m.def("peak_mu", &ctrl::peakMu,
+          py::arg("G"), py::arg("K"), py::arg("struc"),
+          py::arg("sigma_rel") = 0.1, py::arg("freq_points") = 200,
+          py::arg("omega_min") = 1e-2,
+          R"doc(
+Peak structured singular value of a unity-feedback loop (G, K) under scaled output
+multiplicative uncertainty M(jw) = sigma_rel * T(jw), where T is the complementary
+sensitivity (see SystemAnalysis.gang_of_four). The loop is robust to this uncertainty
+class iff the returned peak.upper < 1.
+
+Returns
+-------
+ctrl.PeakMuResult
+)doc");
+
+    m.def("robust_stability_radius", &ctrl::robustStabilityRadius,
+          py::arg("G"), py::arg("K"), py::arg("struc"),
+          py::arg("sigma_max") = 2.0, py::arg("bisect_iters") = 30,
+          "Largest sigma_rel for which peak_mu(...).peak.upper stays below 1 "
+          "(bisection search; returns sigma_max if even that bound is robust).");
 }

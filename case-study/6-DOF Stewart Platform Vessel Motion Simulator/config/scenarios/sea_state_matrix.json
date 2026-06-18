@@ -1,0 +1,19 @@
+{
+  "duration_min_s": 20.0,
+  "duration_max_s": 150.0,
+  "duration_period_multiplier": 10.0,
+  "workspace_margin": 0.90,
+  "swell_period_ratio": 1.8,
+  "swell_amplitude_ratio": 0.4,
+  "direction_weights": {
+    "head":      { "pitch": 1.0, "roll": 0.3, "surge": 1.0, "sway": 0.2, "yaw": 0.2 },
+    "following": { "pitch": 0.8, "roll": 0.3, "surge": 0.8, "sway": 0.2, "yaw": 0.3 },
+    "beam":      { "pitch": 0.3, "roll": 1.0, "surge": 0.2, "sway": 1.0, "yaw": 0.4 }
+  },
+  "_notes": {
+    "purpose": "Tunable knobs for the CFD-input stand-in (cfd_input_model.cpp). The 10 Douglas sea states and the paper's calibration anchor points (Hs,T)/(Hs,amplitude) are physical reference data hardcoded in cfd_input_model.cpp, not configured here.",
+    "matrix": "buildSeaStateMatrix() builds the 10 (Douglas state) x 3 (direction) x 2 (swell) = 60 cross-product entries at runtime - this file is NOT a per-scenario list.",
+    "duration_period_multiplier": "scenario duration = clamp(multiplier * T(Hs), duration_min_s, duration_max_s)",
+    "workspace_margin": "see README decision #8 - keeps every generated trajectory within 90% of the paper Table 1 workspace limits"
+  }
+}

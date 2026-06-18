@@ -306,4 +306,150 @@ namespace ctrl
         return std::max(peak_mag, refined); // take the best of grid and refined peak
     }
 
+    StateSpace SystemAnalysis::series(const StateSpace &G1, const StateSpace &G2)
+    {
+        if (G1.outputSize() != G2.inputSize())
+            throw std::invalid_argument(
+                "series: G1.outputSize() (" + std::to_string(G1.outputSize()) +
+                ") must equal G2.inputSize() (" + std::to_string(G2.inputSize()) + ").");
+        if (G1.Ts != G2.Ts)
+            throw std::invalid_argument("series: sample times must match.");
+
+        const int n1 = G1.stateSize();
+        const int n2 = G2.stateSize();
+        const int n  = n1 + n2;
+
+        Eigen::MatrixXd A(n, n);
+        A.topLeftCorner(n1, n1)     = G1.A;
+        A.topRightCorner(n1, n2).setZero();
+        A.bottomLeftCorner(n2, n1)  = G2.B * G1.C;
+        A.bottomRightCorner(n2, n2) = G2.A;
+
+        Eigen::MatrixXd B(n, G1.inputSize());
+        B.topRows(n1)    = G1.B;
+        B.bottomRows(n2) = G2.B * G1.D;
+
+        Eigen::MatrixXd C(G2.outputSize(), n);
+        C.leftCols(n1)  = G2.D * G1.C;
+        C.rightCols(n2) = G2.C;
+
+        Eigen::MatrixXd D = G2.D * G1.D;
+
+        return StateSpace(A, B, C, D, G1.Ts);
+    }
+
+    StateSpace SystemAnalysis::parallel(const StateSpace &G1, const StateSpace &G2)
+    {
+        if (G1.inputSize() != G2.inputSize() || G1.outputSize() != G2.outputSize())
+            throw std::invalid_argument("parallel: G1 and G2 must have matching input/output sizes.");
+        if (G1.Ts != G2.Ts)
+            throw std::invalid_argument("parallel: sample times must match.");
+
+        const int n1 = G1.stateSize();
+        const int n2 = G2.stateSize();
+        const int n  = n1 + n2;
+
+        Eigen::MatrixXd A = Eigen::MatrixXd::Zero(n, n);
+        A.topLeftCorner(n1, n1)     = G1.A;
+        A.bottomRightCorner(n2, n2) = G2.A;
+
+        Eigen::MatrixXd B(n, G1.inputSize());
+        B.topRows(n1)    = G1.B;
+        B.bottomRows(n2) = G2.B;
+
+        Eigen::MatrixXd C(G1.outputSize(), n);
+        C.leftCols(n1)  = G1.C;
+        C.rightCols(n2) = G2.C;
+
+        Eigen::MatrixXd D = G1.D + G2.D;
+
+        return StateSpace(A, B, C, D, G1.Ts);
+    }
+
+    StateSpace SystemAnalysis::feedback(const StateSpace &GK)
+    {
+        if (GK.inputSize() != GK.outputSize())
+            throw std::invalid_argument(
+                "feedback: forward-path system must be square (inputSize() == outputSize()) "
+                "for a unity-feedback loop.");
+
+        const int p = GK.outputSize();
+        // Tiny regularisation guards a singular (I + D_GK) for pure-integrator-plus-feedthrough
+        // algebraic loops (see docs/robust_implementation_plan.md caveats).
+        const double eps = 1e-12;
+        const Eigen::MatrixXd M =
+            (Eigen::MatrixXd::Identity(p, p) + GK.D + eps * Eigen::MatrixXd::Identity(p, p)).inverse();
+
+        const Eigen::MatrixXd Acl = GK.A - GK.B * M * GK.C;
+        const Eigen::MatrixXd Bcl = GK.B * M;
+        const Eigen::MatrixXd Ccl = M * GK.C;
+        const Eigen::MatrixXd Dcl = M * GK.D;
+
+        return StateSpace(Acl, Bcl, Ccl, Dcl, GK.Ts);
+    }
+
+    namespace
+    {
+        // S = I - T; shares (A, B) with T by the push-through identity
+        // (I+L)^-1 = I - L(I+L)^-1, so C_S = -C_T and D_S = I - D_T.
+        StateSpace complementToSensitivity(const StateSpace &T)
+        {
+            const Eigen::MatrixXd Cs = -T.C;
+            const Eigen::MatrixXd Ds = Eigen::MatrixXd::Identity(T.D.rows(), T.D.cols()) - T.D;
+            return StateSpace(T.A, T.B, Cs, Ds, T.Ts);
+        }
+    } // namespace
+
+    GangOfFour SystemAnalysis::gangOfFour(const StateSpace &G, const StateSpace &K)
+    {
+        if (K.outputSize() != G.inputSize())
+            throw std::invalid_argument(
+                "gangOfFour: K.outputSize() must equal G.inputSize() (controller drives plant input).");
+        if (G.outputSize() != K.inputSize())
+            throw std::invalid_argument(
+                "gangOfFour: G.outputSize() must equal K.inputSize() (plant output drives error).");
+
+        // Forward path e -> K -> u -> G -> y represents the matrix product G*K.
+        const StateSpace L = series(K, G);
+        const StateSpace T = feedback(L);
+        const StateSpace S = complementToSensitivity(T);
+
+        // GS = S*G (disturbance injected at the plant input, propagated through G then S).
+        // KS = K*S (noise injected at the plant output, propagated through S then K).
+        return GangOfFour{S, T, series(G, S), series(S, K)};
+    }
+
+    GangOfFourNorms SystemAnalysis::gangOfFourNorms(const GangOfFour &g4)
+    {
+        GangOfFourNorms n;
+        n.norm_S  = calculateHInfinityNorm(g4.S);
+        n.norm_T  = calculateHInfinityNorm(g4.T);
+        n.norm_GS = calculateHInfinityNorm(g4.GS);
+        n.norm_KS = calculateHInfinityNorm(g4.KS);
+        return n;
+    }
+
+    DiskMargin SystemAnalysis::calculateDiskMargin(const StateSpace &open_loop_L)
+    {
+        if (open_loop_L.inputSize() != open_loop_L.outputSize())
+            throw std::invalid_argument("calculateDiskMargin: open_loop_L must be square.");
+
+        const StateSpace T = feedback(open_loop_L);
+        const StateSpace S = complementToSensitivity(T);
+        const double hinfS = calculateHInfinityNorm(S);
+
+        DiskMargin dm;
+        dm.alpha = (hinfS > 0.0) ? 1.0 / hinfS : std::numeric_limits<double>::infinity();
+
+        dm.gain_margin = (dm.alpha < 1.0)
+                             ? (1.0 + dm.alpha) / (1.0 - dm.alpha)
+                             : std::numeric_limits<double>::infinity();
+
+        // asin domain requires |alpha/2| <= 1; clamp alpha at 2.0 (already a very robust loop).
+        const double a2 = std::min(dm.alpha, 2.0) / 2.0;
+        dm.phase_margin_deg = 2.0 * std::asin(a2) * 180.0 / kPi;
+
+        return dm;
+    }
+
 } // namespace ctrl

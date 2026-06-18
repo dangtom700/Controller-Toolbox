@@ -1,0 +1,11 @@
+{
+  "id":          "s04_high_heat_stress",
+  "description": "Above-Table-5 heat load combined with a hot fuel-side inlet (paper Section 4.1 notes the fuel inlet temperature can climb to 381K in practice; this scenario pushes it further as a stress case) - threatens the anti-boiling supervisor margin (T_boil_limit - T_boil_margin = 493K) since the OHE's high effectiveness otherwise always pulls the tank temperature toward the fuel inlet temperature.",
+  "T_sim":       1200.0,
+  "profile":     "constant",
+  "Thin1":       760.0,
+  "Thin2":       700.0,
+  "mh1":         0.60,
+  "mh2":         0.45,
+  "Tcin3":       485.0
+}

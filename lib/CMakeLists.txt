@@ -70,6 +70,8 @@ set(CTRL_CORE_SOURCES
     HybridMPC.cpp
     HybridModelTrainer.cpp
     VectorFitting.cpp
+    RobustnessAnalysis.cpp
+    MuAnalysis.cpp
 )
 
 # --- Optional sources --------------------------------------------------------

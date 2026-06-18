@@ -1053,4 +1053,78 @@ assert _dp.uMin <= _u0 <= _dp.uMax, "output must respect uMin/uMax bounds"
 _deepc.reset()
 print('DeePC smoke test passed.')
 
+# RobustnessAnalysis (Monte-Carlo, Phase 1) smoke test
+assert hasattr(ctrl, 'MonteCarloResult'), "MonteCarloResult not bound"
+assert hasattr(ctrl, 'RobustnessSample'), "RobustnessSample not bound"
+assert hasattr(ctrl, 'monte_carlo_analysis'), "monte_carlo_analysis not bound"
+assert ctrl.registry_has('robustness_analysis'), "robustness_analysis not registered"
+import numpy as _npra
+# Stable first-order plant x[k+1]=0.6 x + 0.4 u, y = x.
+_ra_plant = ctrl.StateSpace(_npra.array([[0.6]]), _npra.array([[0.4]]),
+                            _npra.array([[1.0]]), _npra.array([[0.0]]), 0.1)
+# Static proportional controller u = 0.5 e.
+_ra_ctrl = ctrl.StateSpace(_npra.zeros((1, 1)), _npra.zeros((1, 1)),
+                           _npra.zeros((1, 1)), _npra.array([[0.5]]), 0.1)
+_ra_ens = ctrl.spawn_ss_samples(_ra_plant, 8, 0.05, seed=7)
+assert len(_ra_ens) == 8, "spawn_ss_samples returned wrong count"
+_ra_res = ctrl.monte_carlo_analysis(_ra_plant, _ra_ctrl, 50, 0.05, seed=7)
+assert _ra_res.n_samples == 50, "monte_carlo_analysis n_samples wrong"
+assert 0.0 <= _ra_res.instability_probability <= 1.0, "instability_probability out of range"
+assert _npra.isfinite(_ra_res.sensitivity_peak_stats.mean), "sensitivity stats not finite"
+assert len(_ra_res.samples) == 50, "samples record wrong length"
+print('RobustnessAnalysis (Phase 1) smoke test passed.')
+
+# SystemAnalysis extensions (Gang of Four + Disk Margin, Phase 2) smoke test
+assert hasattr(ctrl, 'DiskMargin'), "DiskMargin not bound"
+assert hasattr(ctrl, 'GangOfFour'), "GangOfFour not bound"
+assert hasattr(ctrl, 'GangOfFourNorms'), "GangOfFourNorms not bound"
+_g4_G = ctrl.StateSpace(_npra.array([[0.6]]), _npra.array([[0.4]]),
+                        _npra.array([[1.0]]), _npra.array([[0.0]]), 0.1)
+_g4_K = ctrl.StateSpace(_npra.zeros((1, 1)), _npra.zeros((1, 1)),
+                        _npra.zeros((1, 1)), _npra.array([[0.5]]), 0.1)
+_g4 = ctrl.SystemAnalysis.gang_of_four(_g4_G, _g4_K)
+assert isinstance(_g4.S, ctrl.StateSpace), "GangOfFour.S not a StateSpace"
+_g4n = ctrl.SystemAnalysis.gang_of_four_norms(_g4)
+# Closed loop: x+ = 0.4x + 0.2r (e=r-y, u=0.5e, y=x) -> pole at 0.4, T(DC)=0.2/0.6=1/3.
+_g4_freqs = list(_npra.linspace(0.01, _npra.pi / 0.1 - 0.01, 200))
+_g4_S_resp = _npra.array(ctrl.SystemAnalysis.get_frequency_response(_g4.S, _g4_freqs))
+_g4_T_resp = _npra.array(ctrl.SystemAnalysis.get_frequency_response(_g4.T, _g4_freqs))
+assert _npra.max(_npra.abs(_g4_S_resp + _g4_T_resp - 1.0)) < 1e-9, "S + T != I"
+assert abs(_g4n.norm_T - 1.0 / 3.0) < 1e-3, "norm_T should equal T(DC)=1/3 (monotonic 1st-order loop)"
+assert _g4n.norm_S > 1.0, "norm_S should exceed 1 (waterbed effect for this loop)"
+_L = ctrl.SystemAnalysis.series(_g4_K, _g4_G)
+_dm = ctrl.SystemAnalysis.calculate_disk_margin(_L)
+assert _dm.alpha > 0.0, "disk margin alpha must be positive for a stable loop"
+assert abs(_dm.alpha - 1.0 / _g4n.norm_S) < 1e-9, "alpha must equal 1/||S||_inf"
+print('SystemAnalysis extensions (Phase 2) smoke test passed.')
+
+# MuAnalysis (Structured Singular Value, Phase 3) smoke test
+assert hasattr(ctrl, 'UncertaintyStructure'), "UncertaintyStructure not bound"
+assert hasattr(ctrl, 'UncertaintyBlock'), "UncertaintyBlock not bound"
+assert hasattr(ctrl, 'MuBound'), "MuBound not bound"
+assert hasattr(ctrl, 'PeakMuResult'), "PeakMuResult not bound"
+assert hasattr(ctrl, 'peak_mu'), "peak_mu not bound"
+assert hasattr(ctrl, 'compute_mu'), "compute_mu not bound"
+assert hasattr(ctrl, 'robust_stability_radius'), "robust_stability_radius not bound"
+assert ctrl.registry_has('mu_analysis'), "mu_analysis not registered"
+
+_mu_block = ctrl.UncertaintyBlock()
+_mu_block.type = ctrl.UncertaintyBlock.Type.ComplexFull
+_mu_block.r_out = 1
+_mu_block.r_in = 1
+_mu_struc = ctrl.UncertaintyStructure()
+_mu_struc.blocks = [_mu_block]
+assert _mu_struc.total_outputs() == 1, "total_outputs() wrong"
+assert _mu_struc.total_inputs() == 1, "total_inputs() wrong"
+
+# Reuse the gang-of-four fixture: norm_T = 1/3 (derived above), single ComplexFull
+# block spanning the SISO output -> peak.upper should equal sigma_rel * norm_T exactly.
+_mu_peak = ctrl.peak_mu(_g4_G, _g4_K, _mu_struc, sigma_rel=1.0, freq_points=50, omega_min=1e-4)
+assert abs(_mu_peak.peak.upper - 1.0 / 3.0) < 1e-3, "peak_mu should match norm_T=1/3"
+assert len(_mu_peak.mu_curve) == 50, "mu_curve wrong length"
+
+_mu_radius = ctrl.robust_stability_radius(_g4_G, _g4_K, _mu_struc, sigma_max=5.0)
+assert abs(_mu_radius - 3.0) < 1e-2, "robust_stability_radius should match 1/norm_T=3.0"
+print('MuAnalysis (Phase 3) smoke test passed.')
+
 print('\nAll smoke tests passed.')

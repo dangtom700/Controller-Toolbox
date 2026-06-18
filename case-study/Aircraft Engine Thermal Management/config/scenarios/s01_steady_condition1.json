@@ -1,0 +1,10 @@
+{
+  "id":          "s01_steady_condition1",
+  "description": "Steady flight condition 1/3 boundary values (paper Table 5): Thin1=723K @ mh1=0.48 kg/s, Thin2=633K @ mh2=0.37 kg/s. Regulation test at the nominal operating point.",
+  "T_sim":       1200.0,
+  "profile":     "constant",
+  "Thin1":       723.0,
+  "Thin2":       633.0,
+  "mh1":         0.48,
+  "mh2":         0.37
+}

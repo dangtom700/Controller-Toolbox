@@ -234,7 +234,7 @@ Control: `u[k] = -K · sat(s[k] / φ)` — saturation replaces discontinuous sig
 
 `c_de` absorbs Ts: to match continuous-time slope λ [rad/s], set `c_de = λ · Ts`.
 
-**Toolbox:** `DiscreteSMC` in `lib/DiscreteSMC.h`. See [Deployment Guide Section 1](DEPLOYMENT.md#discretesmc) for `c_de` sizing constraint.
+**Toolbox:** `DiscreteSMC` in `lib/DiscreteSMC.h`. See [Deployment Guide Section 1](deployment.md#1-parameter-constraints-by-controller) for `c_de` sizing constraint.
 
 **Self-contained?** Yes — but requires full state (or at least position and velocity). With an estimator: `DiscreteSMC` fed by `UnscentedKalmanFilter` (see `ex51_ukf_smc.cpp`).
 
@@ -422,7 +422,7 @@ MPC is not strictly a "model interference" technique, but it is the most model-d
 
 **Key design trade-off:** Unlike PID (model-free), MPC explicitly uses the model to predict future outputs. Model mismatch → prediction error → suboptimal or unsafe control. Adaptive MPC (RLS + `setPlant()`) closes this loop.
 
-**Toolbox:** `DiscreteMPC`, `GeneralizedPredictiveController`. See `lib/DiscreteMPC.h` and DEPLOYMENT.md Section 3 (MPC infeasibility/LDLT failure).
+**Toolbox:** `DiscreteMPC`, `GeneralizedPredictiveController`. See `lib/DiscreteMPC.h` and deployment.md Section 3 (MPC infeasibility/LDLT failure).
 
 ---
 
@@ -526,7 +526,7 @@ u  = -λ√|s| · sign(s) + ∫ u̇
 | Chattering | High-frequency switching at sensor noise level | Saturation boundary layer (φ > 0); super-twisting |
 | Actuator wear | Rapid sign reversals in u | Increase φ; filter u through low-pass |
 | Noise amplification | c_de multiplies the difference e[k]-e[k-1] (= numerical derivative) | Low-pass filter e before SMC; reduce c_de |
-| Surface non-invariance | Discretisation of sign function allows limit cycles | Use `c_de = λ·Ts` correctly (see DEPLOYMENT.md) |
+| Surface non-invariance | Discretisation of sign function allows limit cycles | Use `c_de = λ·Ts` correctly (see deployment.md) |
 
 **Wise use:** Robust position servo with bounded Coulomb friction and load variation — SMC guarantees invariance on the surface regardless of friction magnitude.
 
@@ -675,7 +675,7 @@ When constraints cannot be simultaneously satisfied with the objective, the QP r
 
 **Do NOT use:** When constraint limits are engineering preferences (soft), not physical hard limits — soft constraints via quadratic penalty (slack variables) are more numerically robust and avoid infeasibility.
 
-**Toolbox:** `DiscreteMPC` with `uMin/uMax` and `duMin/duMax`; solved via `GradientProjectionQP`. LDLT failure handling documented in `docs/DEPLOYMENT.md` Section 3.
+**Toolbox:** `DiscreteMPC` with `uMin/uMax` and `duMin/duMax`; solved via `GradientProjectionQP`. LDLT failure handling documented in `docs/deployment.md` Section 3.
 
 ---
 
@@ -1065,4 +1065,4 @@ All five are compatible with the existing `IController` interface, `StateSpace` 
 
 ---
 
-*End of document. Cross-reference: `docs/DOCUMENTATION.md` (Section 5 Class Reference), `docs/DEPLOYMENT.md` (parameter constraints), `cheatsheet/tuning_methods.md` (SOPDT IMC-PID), `cheatsheet/controller_categories.md` (implementation tiers).*
+*End of document. Cross-reference: `docs/DOCUMENTATION.md` (Section 5 Class Reference), `docs/deployment.md` (parameter constraints), `cheatsheet/tuning_methods.md` (SOPDT IMC-PID), `cheatsheet/controller_categories.md` (implementation tiers).*

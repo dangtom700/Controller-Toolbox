@@ -63,8 +63,11 @@ Eigen::Vector3d NeuralPID::forward(const Eigen::Vector3d& z,
     h_out = (W1_ * z + b1_).array().tanh();
 
     // Output layer: gains = softplus(W2*h + b2)
+    // Uses the overflow-safe two-branch form (matches the static softplus()
+    // helper) - a naive log1p(exp(x)) overflows to inf for large pre-activations
+    // (e.g. Kp0/Ki0 seeds in the thousands push b2_ itself past exp()'s range).
     Eigen::Vector3d pre = W2_ * h_out + b2_;
-    return pre.unaryExpr([](double x) { return std::log1p(std::exp(x)); });
+    return pre.unaryExpr([](double x) { return softplus(x); });
 }
 
 // ---------------------------------------------------------------------------

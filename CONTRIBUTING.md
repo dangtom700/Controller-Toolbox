@@ -20,7 +20,7 @@ This document covers the conventions, workflows, and checklists for adding to or
 
 ## Build and Test Workflow
 
-The project uses a six-phase runner managed by `run.py`:
+The project uses a seven-phase runner managed by `run.py`:
 
 | Phase | What happens |
 |---|---|
@@ -30,6 +30,7 @@ The project uses a six-phase runner managed by `run.py`:
 | 4 - Run C++ | Runs every `.exe` under `build/` (examples, tests, and case-study `*_sim` targets), prints pass/fail. |
 | 5 - Run Python | Runs every `exNN_*.py` under `examples/python/` via the `soft_robotics` conda environment. |
 | 6 - Python case studies | Discovers and runs `case-study/*/sim/main.py` (Python-only studies). |
+| 7 - Case-study status + report | Runs `tools/case_study_tracker.py` (refreshes `docs/case_study_status.md`) and `tools/generate_report.py` (writes `docs/report.html`). |
 
 **Always invoke via:**
 ```
@@ -101,8 +102,15 @@ Follow these steps in order. Check each off before declaring the work done.
 
 ## Adding a New Case Study
 
-Per-study status, rosters, and tribal knowledge live in `docs/CASE_STUDIES.md`. Use the
-newest C++ studies (S-OTEC, Solar Cooker, SMISMO) as templates.
+Per-study status and links are auto-tracked in `docs/case_study_status.md` (regenerate via
+`tools/case_study_tracker.py` - do not edit it by hand); rosters and tribal knowledge live in
+`CLAUDE.md`'s Case Studies section and in each study's own `README.md`. Use the newest C++
+studies (S-OTEC, Solar Cooker, SMISMO) as templates.
+
+Note: the tracker's "On-going" status only checks for `sim/` + `logs/` + `config/` presence,
+not real content. A few directories scaffolded by `tools/new_case_study.py` show as "On-going"
+while still containing only placeholder dynamics and a single `OpenLoop` controller - check the
+study's own `README.md` before treating it as a finished template.
 
 **C++ study** (runs in Phase 4 as a `*_sim` executable):
 
@@ -121,8 +129,8 @@ newest C++ studies (S-OTEC, Solar Cooker, SMISMO) as templates.
 7. `README.md` in the study folder: reference, plant equations, parameter table,
    controller roster, scenarios, CSV columns. Keep it reconciled with the actual sim source.
 8. `main.cpp` hard-codes its controller count (`N_CONTROLLERS` + `static_assert`) - bump it
-   when adding a controller. Update `docs/CASE_STUDIES.md` and the case-study tables in
-   `CLAUDE.md` / root `README.md`.
+   when adding a controller. Update the case-study tables in `CLAUDE.md` / root `README.md`
+   (re-run `tools/case_study_tracker.py` to refresh `docs/case_study_status.md`).
 
 **Python-only study** (runs in Phase 6): add `sim/main.py` following the Drill String
 pattern; no CMake/compile.bat registration. `sim/` locates the bindings 4 levels up

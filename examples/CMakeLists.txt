@@ -116,6 +116,15 @@ add_example(ex81_hybrid_model_mpc)
 # Metaheuristic optimisers (GA / PSO / DE)
 add_example(ex82_metaheuristics)
 
+# Robustness analysis Phase 1: Monte-Carlo closed-loop robustness
+add_example(ex83_robustness_mc)
+
+# Robustness analysis Phase 2: Gang of Four + Disk Margin
+add_example(ex84_gang_of_four)
+
+# Robustness analysis Phase 3: Structured Singular Value (mu) analysis
+add_example(ex85_mu_analysis)
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)

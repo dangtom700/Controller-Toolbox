@@ -4,7 +4,7 @@ A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H
 
 ~90 controller and estimation implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, an analysis pipeline (Monte Carlo, fault injection, ANOVA, WCET, mu-analysis, HTML reports), and a hardware abstraction layer for simulation.
 
-Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. C++ example programs and 100+ Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and algorithm extension. Sixteen end-to-end physics case studies (nine C++: boiler-turbine, tug boat, solar cooling, porous-plate humidification, active suspension 2-DOF, buck-boost converter, solar cooker, solar OTEC, hydraulic SMISMO; seven Python-only: drill string, wind-wave platform, electro-hydraulic force servo, aerial firefighting bag drop, battery thermal management, surface ship manoeuvring, active suspension 40-state 6x6 EV) exercise the full controller stack on nonlinear plants.
+Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. C++ example programs and 100+ Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and algorithm extension. Seventeen end-to-end physics case studies (nine C++: boiler-turbine, tug boat, solar cooling, porous-plate humidification, active suspension 2-DOF, buck-boost converter, solar cooker, solar OTEC, hydraulic SMISMO; eight Python-only: drill string, wind-wave platform, electro-hydraulic force servo, aerial firefighting bag drop, battery thermal management, surface ship manoeuvring, active suspension 40-state 6x6 EV, aircraft engine thermal management) exercise the full controller stack on nonlinear plants.
 
 ---
 
@@ -28,16 +28,6 @@ python run.py
 ```
 
 `run.py` compiles every C++ target sequentially, runs each executable, then runs all Python examples and reports a pass/fail summary.
-
-### Docker build
-
-```bash
-docker build -t controller-toolbox .
-docker run --rm controller-toolbox          # runs the test suite
-docker run --rm controller-toolbox ex02_ss_lqr   # runs a specific example
-```
-
-See [Docker Usage](#docker-usage) for more.
 
 ---
 
@@ -70,11 +60,11 @@ for (int k = 0; k < 500; ++k) {
 | Document | Purpose |
 |---|---|
 | [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md) | Full API reference, class-by-class breakdown, usage workflows |
-| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Parameter constraints, RT/RTOS integration, troubleshooting recipes |
-| [docs/TEST_UPDATE.md](docs/TEST_UPDATE.md) | Test suite history, regression coverage, sign-convention notes |
-| [docs/CONTROL_STRATEGIES_DEEP_DIVE.md](docs/CONTROL_STRATEGIES_DEEP_DIVE.md) | Taxonomy of strategy families, plant model interference, decision framework, proposed extensions |
+| [docs/deployment.md](docs/deployment.md) | Parameter constraints, RT/RTOS integration, troubleshooting recipes |
+| [docs/archived/test_update.md](docs/archived/test_update.md) | Test suite history, regression coverage, sign-convention notes |
+| [docs/control_strategies_deep_dive.md](docs/control_strategies_deep_dive.md) | Taxonomy of strategy families, plant model interference, decision framework, proposed extensions |
 | [cheatsheet/](cheatsheet/) | Tuning methods, controller categories, system identification notes |
-| [case-study/](case-study/) | Eleven full physics studies (9 C++ + 2 Python-only) -- see "Case Studies" below; per-study tracker in [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md) |
+| [case-study/](case-study/) | Seventeen full physics studies (10 C++ + 7 Python-only) -- see "Case Studies" below; auto-tracked status in [docs/case_study_status.md](docs/case_study_status.md) |
 
 ---
 
@@ -85,7 +75,7 @@ for (int k = 0; k < 500; ++k) {
 |-- lib/embedded/    # Header-only embedded subset (BasicPID, BasicSMC, DiscreteIntegrator, ...)
 |-- examples/        # ex01..ex82 single-file C++ demos
 |-- examples/python/ # ex01..ex102+ Python companion scripts and binding demos
-|-- case-study/      # 16 physics studies (9 C++ + 7 Python-only) + 12 spec-only stubs
+|-- case-study/      # 17 physics studies (10 C++ + 7 Python-only) + spec-only stubs
 |-- tests/           # CTest-driven unit + integration tests (Catch2 v3)
 |-- bindings/        # pybind11 binding source files + smoke_test.py
 |-- ros2/            # ROS 2 package: ctrl_toolbox_ros2 (ControllerNode<T> lifecycle adapter)
@@ -102,11 +92,13 @@ for (int k = 0; k < 500; ++k) {
 
 ## Case Studies
 
-Sixteen self-contained physics studies under [case-study/](case-study/) exercise the
+Seventeen self-contained physics studies under [case-study/](case-study/) exercise the
 library end-to-end. Each pairs a nonlinear plant simulator with a roster of
 controllers that wrap the `lib/` algorithms, then sweeps every controller across
-several scenarios and writes CSV telemetry for post-processing. Per-study status,
-rosters, and caveats are tracked in [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md).
+several scenarios and writes CSV telemetry for post-processing. Per-study status and
+links are auto-tracked in [docs/case_study_status.md](docs/case_study_status.md)
+(regenerate via `tools/case_study_tracker.py`); rosters and tribal knowledge live in
+`CLAUDE.md`'s Case Studies section and in each study's own `README.md`.
 
 **C++ studies (built by `compile.bat`/`compile.sh`, run in Phase 4):**
 
@@ -121,6 +113,7 @@ rosters, and caveats are tracked in [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md)
 | [Solar Cooker with Reflector and Absorber](case-study/Solar%20Cooker%20with%20Reflector%20and%20Absorber/) | 2-state absorber+pot ODE with PCM effective-C | 12 | 5 -> 60 |
 | [Solar Ocean Thermal Energy Conversion](case-study/Solar%20Ocean%20Thermal%20Energy%20Conversion%20System/) | 2-state collector+tank ODE + algebraic ORC map | 12 | 5 -> 60 |
 | [Separate Meter In Separate Meter Out](case-study/Separate%20Meter%20In%20Separate%20Meter%20Out/) | SMISMO hydraulic cylinder, 8-state RK4, dual PDCVs + Stribeck friction | 13 | 5 -> 65 |
+| [6-DOF Stewart Platform Vessel Motion Simulator](case-study/6-DOF%20Stewart%20Platform%20Vessel%20Motion%20Simulator/) | 6-UPU Stewart platform, 12-state per-rod spring-mass-damper, closed-form IK+Jacobian, Douglas sea-state CFD-input stand-in | 12 | 60 -> 720 |
 
 **Python-only studies (discovered by `run.py` Phase 6 via `sim/main.py`):**
 
@@ -139,8 +132,12 @@ Smith Predictor, MRAC, H-infinity, TubeMPC, ScenarioMPC, NonlinearMPC, Feedback
 Linearisation, EKF-LQR, MHE-LQR, SubspaceID-LQG, L1Adaptive, ILC, NeuralPID,
 DynaMBRL, CEM-MPC, Koopman-MPC, ESN, CBF safety filtering, ASMC, and gain-scheduled
 (manual, LPV, and automated gap-metric) variants, depending on the plant.
-Several spec-only stubs (README only, no `sim/`) remain as outstanding work --
-see [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md).
+Several spec-only stubs (README/PDF only, no real `sim/` content) remain as outstanding
+work -- see [docs/case_study_status.md](docs/case_study_status.md) for the live list and
+`CLAUDE.md`'s "Spec-only stubs" section for per-study notes. A few directories scaffolded
+by `tools/new_case_study.py` show a tracker status of "On-going" while still containing
+only placeholder dynamics and a single `OpenLoop` controller -- check the study's own
+`README.md` before treating it as complete.
 
 ---
 
@@ -166,51 +163,6 @@ see [docs/CASE_STUDIES.md](docs/CASE_STUDIES.md).
 
 ---
 
-## Docker Usage
-
-The included [`Dockerfile`](Dockerfile) uses a two-stage build:
-
-- **Stage 1 (builder)** - Debian Bookworm slim + CMake + g++ + libeigen3-dev, compiles every target with the root [`CMakeLists.txt`](CMakeLists.txt).
-- **Stage 2 (runtime)** - Slim image containing only the compiled binaries, ready to run examples, tests, or your own application.
-
-### Build the image
-
-```bash
-docker build -t controller-toolbox .
-```
-
-### Run the test suite (default `CMD`)
-
-```bash
-docker run --rm controller-toolbox
-```
-
-### Run any example or script
-
-```bash
-docker run --rm controller-toolbox ex07_lqg_kalman
-docker run --rm controller-toolbox boiler_turbine_case_study
-docker run --rm controller-toolbox simulate_all
-```
-
-### Interactive shell for development
-
-```bash
-docker run --rm -it --entrypoint /bin/bash controller-toolbox
-```
-
-### Mount your own source for in-container builds
-
-```bash
-docker run --rm -it -v "$(pwd):/work" -w /work \
-    --entrypoint /bin/bash controller-toolbox:builder \
-    -c "cmake -S . -B build && cmake --build build"
-```
-
-(Use the `builder` stage tag - see the Dockerfile for details.)
-
----
-
 ## Tested Compilers
 
 | Compiler | Version | Status |
@@ -223,12 +175,24 @@ docker run --rm -it -v "$(pwd):/work" -w /work \
 
 ## Project Status
 
-**Baseline (Part 60 - 2026-06-16, UNVERIFIED until next clean `run.py`):**
+**Baseline (Part 61 - 2026-06-18, UNVERIFIED until next clean `run.py`):**
 C++ case studies: Boiler 216/216 . Tug 72/72 . Solar 70/70 . Humidification 75/75 .
-ActiveSuspension 90/90 (18 ctrl) . BuckBoost 60/60 . SolarCooker 60/60 . SOTEC 60/60 . SMISMO 65/65 (13 ctrl).
+ActiveSuspension 90/90 (18 ctrl) . BuckBoost 60/60 . SolarCooker 60/60 . SOTEC 60/60 . SMISMO 65/65 (13 ctrl) .
+Stewart 720/720 (12 ctrl x 60 sea-state configs).
 Python-only (Phase 6): DrillString 85/85 . WindWave 80/80 . EHFS 70/70 (14 ctrl) .
 Firefighting 60/60 . BTMS 60/60 . SurfaceShip 60/60 . EV6x6 90/90 (18 ctrl).
 `bug_report.txt`: 0 blocks expected after a clean run.
+
+**Part 61 (2026-06-18) - 6-DOF Stewart Platform Vessel Motion Simulator (C++ case study):**
+- `stewart_sim` - closed-form inverse kinematics + velocity Jacobian for a 6-UPU hinge
+  layout; 12-state (6 rods) spring-mass-damper actuator dynamics, RK4 at Ts=5ms.
+- Standalone CFD-input stand-in (`cfd_input_model.{h,cpp}`), architecturally separated
+  from the plant: 10 Douglas Sea Scale states x 3 wave directions x 2 swell flags = 60
+  configs built at runtime, calibrated against the source paper's 3 actual (Hs,T)/(Hs,
+  amplitude) data points, with workspace-margin scaling to keep every trajectory within
+  the paper's Table 1 limits. 12 controllers x 60 configs = 720 runs.
+- Fixed a `lib/NeuralPID.cpp` overflow bug (naive softplus instead of the existing
+  numerically-stable helper) surfaced by this case study's larger gain seeds.
 
 **Part 60 (2026-06-16) - DIST-3 ROS 2 wrapper + CI/CD overhaul + cross-platform run.py:**
 - `ros2/ctrl_toolbox_ros2/` - ROS 2 Humble `ament_cmake` package; `ControllerNode<T>` lifecycle node template wrapping any `ctrl::IController`.
@@ -243,4 +207,4 @@ Firefighting 60/60 . BTMS 60/60 . SurfaceShip 60/60 . EV6x6 90/90 (18 ctrl).
 - EHFS expanded 12 -> 14 controllers (+ HinfODFCCtrl, HinfCascadeCtrl); 70 runs.
 - Active Suspension 6x6 EV Full Model added as a new Python-only study: 40-state 20-DOF, 18 controllers, 90 runs.
 
-Details in [docs/cumulative_bug_report.md](docs/cumulative_bug_report.md). Real-time deployment guidance in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+Details in [docs/cumulative_bug_report.md](docs/cumulative_bug_report.md). Real-time deployment guidance in [docs/deployment.md](docs/deployment.md).

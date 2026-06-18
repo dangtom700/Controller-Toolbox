@@ -201,6 +201,20 @@ target_link_libraries(test_sotec_regression PRIVATE
 )
 target_compile_features(test_sotec_regression PRIVATE cxx_std_20)
 
+# -- 6-DOF Stewart Platform regression tests (Part 61) -----------------------
+set(STEWART_SIM_ROOT "${CMAKE_SOURCE_DIR}/case-study/6-DOF Stewart Platform Vessel Motion Simulator")
+add_executable(test_stewart_regression
+    test_stewart_regression.cpp
+    ${STEWART_SIM_ROOT}/sim/src/stewart_plant.cpp
+    ${STEWART_SIM_ROOT}/sim/src/cfd_input_model.cpp
+    ${STEWART_SIM_ROOT}/sim/src/controllers.cpp
+)
+target_include_directories(test_stewart_regression PRIVATE ${STEWART_SIM_ROOT}/sim/include)
+target_link_libraries(test_stewart_regression PRIVATE
+    controller_toolbox Catch2::Catch2WithMain nlohmann_json::nlohmann_json
+)
+target_compile_features(test_stewart_regression PRIVATE cxx_std_20)
+
 # -- Embedded subset tests (DIST-2) ------------------------------------------
 # No Eigen dependency: links only Catch2. Verifies header-only embedded subset
 # compiles and behaves correctly with float and double instantiations.
@@ -223,6 +237,7 @@ catch_discover_tests(test_buck_boost_regression)
 catch_discover_tests(test_solar_cooker_regression)
 catch_discover_tests(test_sotec_regression)
 catch_discover_tests(test_smismo_regression)
+catch_discover_tests(test_stewart_regression)
 add_test(NAME controller_tests  COMMAND test_controllers)
 add_test(NAME tuner_tests       COMMAND test_tuners_extended)
 add_test(NAME integration_tests COMMAND test_integration)

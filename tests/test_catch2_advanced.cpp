@@ -5842,3 +5842,421 @@ TEST_CASE("ExtremumSeeker converges to minimum of quadratic J(theta)=(theta-2)^2
 
     REQUIRE_THAT(esc.currentEstimate(), WithinAbs(2.0, 0.5));
 }
+
+// -----------------------------------------------------------------------------
+// RobustnessAnalysis - Monte-Carlo closed-loop robustness (Phase 1)
+// -----------------------------------------------------------------------------
+
+// Helper: SISO state-space plant (n=1).
+static ctrl::StateSpace makeFirstOrderPlant(double a, double b, double ts)
+{
+    return ctrl::StateSpace((Eigen::MatrixXd(1, 1) << a).finished(),
+                            (Eigen::MatrixXd(1, 1) << b).finished(),
+                            (Eigen::MatrixXd(1, 1) << 1.0).finished(),
+                            (Eigen::MatrixXd(1, 1) << 0.0).finished(), ts);
+}
+
+// Helper: static-gain controller as a 1-state (uncontrollable) realisation of D = gain.
+static ctrl::StateSpace makeStaticController(double gain, double ts)
+{
+    return ctrl::StateSpace(Eigen::MatrixXd::Zero(1, 1),
+                            Eigen::MatrixXd::Zero(1, 1),
+                            Eigen::MatrixXd::Zero(1, 1),
+                            (Eigen::MatrixXd(1, 1) << gain).finished(), ts);
+}
+
+TEST_CASE("spawn_SS_samples perturbs A around the nominal value", "[robustness_mc]")
+{
+    const auto nominal = makeFirstOrderPlant(0.6, 0.4, 0.1);
+    const auto ens = ctrl::spawn_SS_samples(nominal, 400, /*sigma_A=*/0.1, 0.0, 0.0, 0.0, 123);
+
+    REQUIRE(ens.size() == 400u);
+
+    double sum = 0.0, sq = 0.0;
+    bool any_differ = false;
+    for (const auto& s : ens)
+    {
+        const double a = s.A(0, 0);
+        sum += a;
+        sq  += a * a;
+        if (std::abs(a - 0.6) > 1e-9) any_differ = true;
+        // B/C/D held fixed (sigma = 0).
+        REQUIRE_THAT(s.B(0, 0), WithinAbs(0.4, 1e-12));
+        REQUIRE_THAT(s.C(0, 0), WithinAbs(1.0, 1e-12));
+    }
+    const double mean = sum / ens.size();
+    const double sd   = std::sqrt(sq / ens.size() - mean * mean);
+
+    REQUIRE(any_differ);
+    REQUIRE_THAT(mean, WithinAbs(0.6, 0.02));   // unbiased around nominal
+    REQUIRE_THAT(sd,   WithinAbs(0.06, 0.02));  // ~ sigma * |a| = 0.1 * 0.6
+}
+
+TEST_CASE("Stable nominal plant + controller yields zero instability for small sigma",
+          "[robustness_mc]")
+{
+    const auto plant = makeFirstOrderPlant(0.6, 0.4, 0.1);   // open-loop stable
+    const auto ctl   = makeStaticController(0.5, 0.1);       // closed-loop pole 0.4
+
+    const auto res = ctrl::monteCarloAnalysis(plant, ctl, 200, /*sigma_A=*/0.02,
+                                              0.0, 0.0, 0.0, 7);
+
+    REQUIRE(res.n_samples == 200);
+    REQUIRE(res.n_unstable == 0);
+    REQUIRE_THAT(res.instability_probability, WithinAbs(0.0, 1e-12));
+    // Sensitivity peak is finite and positive for a stable loop.
+    REQUIRE(std::isfinite(res.sensitivity_peak_stats.mean));
+    REQUIRE(res.sensitivity_peak_stats.mean > 0.0);
+}
+
+TEST_CASE("Destabilising controller drives instability probability above zero",
+          "[robustness_mc]")
+{
+    const auto plant = makeFirstOrderPlant(0.5, 1.0, 0.1);
+    const auto ctl   = makeStaticController(5.0, 0.1);  // closed-loop pole -4.5 (unstable)
+
+    const auto res = ctrl::monteCarloAnalysis(plant, ctl, 100, /*sigma_A=*/0.05,
+                                              0.0, 0.0, 0.0, 11);
+
+    REQUIRE(res.n_samples == 100);
+    REQUIRE(res.instability_probability > 0.0);
+    // Unstable samples report infinite IAE; stats over finite values stay sane or NaN.
+    for (const auto& s : res.samples)
+        if (!s.is_stable)
+            REQUIRE(std::isinf(s.iae));
+}
+
+TEST_CASE("monteCarloAnalysis runs end-to-end on a second-order plant", "[robustness_mc]")
+{
+    // Damped 2nd-order plant (discrete), SISO.
+    Eigen::MatrixXd A(2, 2); A << 0.9, 0.05, -0.1, 0.85;
+    Eigen::MatrixXd B(2, 1); B << 0.0, 0.1;
+    Eigen::MatrixXd C(1, 2); C << 1.0, 0.0;
+    Eigen::MatrixXd D(1, 1); D << 0.0;
+    const ctrl::StateSpace plant(A, B, C, D, 0.1);
+    const auto ctl = makeStaticController(0.8, 0.1);
+
+    const auto res = ctrl::monteCarloAnalysis(plant, ctl, 60, /*sigma_A=*/0.03,
+                                              0.0, 0.0, 0.0, 42);
+
+    REQUIRE(res.n_samples == 60);
+    REQUIRE(static_cast<int>(res.samples.size()) == 60);
+    REQUIRE(res.instability_probability >= 0.0);
+    REQUIRE(res.instability_probability <= 1.0);
+    REQUIRE(std::isfinite(res.comp_sensitivity_peak_stats.p50));
+    REQUIRE(std::isfinite(res.nu_gap_stats.mean));
+    // SISO loop => gain/phase margins are populated (finite or +inf, never NaN).
+    REQUIRE_FALSE(std::isnan(res.samples.front().gain_margin_db));
+}
+
+TEST_CASE("nu-gap from nominal is near zero when sigma is zero", "[robustness_mc]")
+{
+    const auto plant = makeFirstOrderPlant(0.6, 0.4, 0.1);
+    const auto ctl   = makeStaticController(0.5, 0.1);
+
+    // sigma_A = 0 => every sample equals the nominal plant.
+    const auto res = ctrl::monteCarloAnalysis(plant, ctl, 10, 0.0, 0.0, 0.0, 0.0, 1);
+    REQUIRE(res.n_unstable == 0);
+    REQUIRE_THAT(res.nu_gap_stats.worst, WithinAbs(0.0, 1e-6));
+}
+
+// -----------------------------------------------------------------------------
+// SystemAnalysis extensions - Gang of Four + Disk Margin (Phase 2)
+// -----------------------------------------------------------------------------
+
+TEST_CASE("series() cascade matches pointwise product of frequency responses",
+          "[system_analysis_ext]")
+{
+    const auto G = makeFirstOrderPlant(0.6, 0.4, 0.1);
+    const auto K = makeStaticController(0.5, 0.1);
+
+    // series(K, G): output of K feeds G, i.e. apply K first then G (matrix product G*K).
+    const auto L = ctrl::SystemAnalysis::series(K, G);
+
+    const std::vector<double> freqs{1.0, 5.0, 15.0};
+    const auto L_resp = ctrl::SystemAnalysis::getFrequencyResponse(L, freqs);
+    const auto G_resp = ctrl::SystemAnalysis::getFrequencyResponse(G, freqs);
+    const auto K_resp = ctrl::SystemAnalysis::getFrequencyResponse(K, freqs);
+
+    for (std::size_t i = 0; i < freqs.size(); ++i)
+    {
+        const auto expected = G_resp[i] * K_resp[i];
+        REQUIRE_THAT(L_resp[i].real(), WithinAbs(expected.real(), 1e-9));
+        REQUIRE_THAT(L_resp[i].imag(), WithinAbs(expected.imag(), 1e-9));
+    }
+}
+
+TEST_CASE("parallel() sums D and pointwise frequency response of both systems",
+          "[system_analysis_ext]")
+{
+    const auto G1 = makeFirstOrderPlant(0.6, 0.4, 0.1);
+    const auto G2 = makeFirstOrderPlant(0.3, 0.2, 0.1);
+
+    const auto Gp = ctrl::SystemAnalysis::parallel(G1, G2);
+    REQUIRE_THAT(Gp.D(0, 0), WithinAbs(0.0, 1e-12));
+
+    const std::vector<double> freqs{2.0, 10.0};
+    const auto Gp_resp = ctrl::SystemAnalysis::getFrequencyResponse(Gp, freqs);
+    const auto G1_resp = ctrl::SystemAnalysis::getFrequencyResponse(G1, freqs);
+    const auto G2_resp = ctrl::SystemAnalysis::getFrequencyResponse(G2, freqs);
+
+    for (std::size_t i = 0; i < freqs.size(); ++i)
+    {
+        const auto expected = G1_resp[i] + G2_resp[i];
+        REQUIRE_THAT(Gp_resp[i].real(), WithinAbs(expected.real(), 1e-9));
+        REQUIRE_THAT(Gp_resp[i].imag(), WithinAbs(expected.imag(), 1e-9));
+    }
+}
+
+TEST_CASE("feedback() closes the loop at the analytically-known pole",
+          "[system_analysis_ext]")
+{
+    // x+ = 0.6x + 0.4u, y=x, u=0.5(r-y) => x+ = 0.4x + 0.2r => closed-loop pole at 0.4.
+    const auto G = makeFirstOrderPlant(0.6, 0.4, 0.1);
+    const auto K = makeStaticController(0.5, 0.1);
+    const auto L = ctrl::SystemAnalysis::series(K, G);
+
+    const auto T = ctrl::SystemAnalysis::feedback(L);
+    const auto poles = ctrl::SystemAnalysis::getPoles(T);
+
+    bool found_04 = false;
+    for (const auto &p : poles)
+        if (std::abs(p.real() - 0.4) < 1e-9 && std::abs(p.imag()) < 1e-12)
+            found_04 = true;
+    REQUIRE(found_04);
+}
+
+TEST_CASE("feedback() throws for a non-square forward-path system",
+          "[system_analysis_ext]")
+{
+    // 1 input, 2 outputs -> inputSize() != outputSize() -> non-square.
+    Eigen::MatrixXd A(1, 1); A << 0.5;
+    Eigen::MatrixXd B(1, 1); B << 0.1;
+    Eigen::MatrixXd C(2, 1); C << 1.0, 0.5;
+    Eigen::MatrixXd D(2, 1); D.setZero();
+    const ctrl::StateSpace non_square(A, B, C, D, 0.1);
+
+    REQUIRE_THROWS_AS(ctrl::SystemAnalysis::feedback(non_square), std::invalid_argument);
+}
+
+TEST_CASE("gangOfFour() satisfies S + T = I pointwise across frequency",
+          "[system_analysis_ext]")
+{
+    const auto G = makeFirstOrderPlant(0.6, 0.4, 0.1);
+    const auto K = makeStaticController(0.5, 0.1);
+
+    const auto g4 = ctrl::SystemAnalysis::gangOfFour(G, K);
+
+    const std::vector<double> freqs{0.5, 3.0, 10.0, 25.0};
+    const auto S_resp = ctrl::SystemAnalysis::getFrequencyResponse(g4.S, freqs);
+    const auto T_resp = ctrl::SystemAnalysis::getFrequencyResponse(g4.T, freqs);
+
+    for (std::size_t i = 0; i < freqs.size(); ++i)
+    {
+        const auto sum = S_resp[i] + T_resp[i];
+        REQUIRE_THAT(sum.real(), WithinAbs(1.0, 1e-9));
+        REQUIRE_THAT(sum.imag(), WithinAbs(0.0, 1e-9));
+    }
+}
+
+TEST_CASE("gangOfFourNorms() matches analytical DC value of T for a monotonic 1st-order loop",
+          "[system_analysis_ext]")
+{
+    // T(z) = 0.2/(z-0.4); |T| is monotonically decreasing from DC for this 1st-order
+    // lowpass loop, so the Hinf peak equals the DC value T(1) = 0.2/0.6 = 1/3.
+    const auto G = makeFirstOrderPlant(0.6, 0.4, 0.1);
+    const auto K = makeStaticController(0.5, 0.1);
+
+    const auto g4  = ctrl::SystemAnalysis::gangOfFour(G, K);
+    const auto g4n = ctrl::SystemAnalysis::gangOfFourNorms(g4);
+
+    REQUIRE_THAT(g4n.norm_T, WithinAbs(1.0 / 3.0, 1e-3));
+    // S peaks above 1 away from DC (waterbed effect) for this loop - not a bug.
+    REQUIRE(g4n.norm_S > 1.0);
+}
+
+TEST_CASE("gangOfFour() throws on plant/controller dimension mismatch",
+          "[system_analysis_ext]")
+{
+    const auto G = makeFirstOrderPlant(0.6, 0.4, 0.1);
+
+    Eigen::MatrixXd Ak(1, 1); Ak.setZero();
+    Eigen::MatrixXd Bk(1, 2); Bk.setZero();
+    Eigen::MatrixXd Ck(2, 1); Ck.setZero();
+    Eigen::MatrixXd Dk(2, 2); Dk.setZero(); // 2-input/2-output controller vs SISO plant
+    const ctrl::StateSpace K_mismatched(Ak, Bk, Ck, Dk, 0.1);
+
+    REQUIRE_THROWS_AS(ctrl::SystemAnalysis::gangOfFour(G, K_mismatched), std::invalid_argument);
+}
+
+TEST_CASE("calculateDiskMargin() alpha equals 1/||S||_inf and agrees with gangOfFour path",
+          "[system_analysis_ext]")
+{
+    const auto G = makeFirstOrderPlant(0.6, 0.4, 0.1);
+    const auto K = makeStaticController(0.5, 0.1);
+    const auto L = ctrl::SystemAnalysis::series(K, G);
+
+    const auto dm  = ctrl::SystemAnalysis::calculateDiskMargin(L);
+    const auto g4n = ctrl::SystemAnalysis::gangOfFourNorms(ctrl::SystemAnalysis::gangOfFour(G, K));
+
+    REQUIRE(dm.alpha > 0.0);
+    REQUIRE_THAT(dm.alpha, WithinAbs(1.0 / g4n.norm_S, 1e-6));
+    REQUIRE_THAT(dm.gain_margin, WithinAbs((1.0 + dm.alpha) / (1.0 - dm.alpha), 1e-9));
+    REQUIRE_THAT(dm.phase_margin_deg,
+                 WithinAbs(2.0 * std::asin(dm.alpha / 2.0) * 180.0 / std::numbers::pi, 1e-9));
+}
+
+TEST_CASE("calculateDiskMargin() throws for a non-square open-loop system",
+          "[system_analysis_ext]")
+{
+    // 1 input, 2 outputs -> inputSize() != outputSize() -> non-square.
+    Eigen::MatrixXd A(1, 1); A << 0.5;
+    Eigen::MatrixXd B(1, 1); B << 0.1;
+    Eigen::MatrixXd C(2, 1); C << 1.0, 0.5;
+    Eigen::MatrixXd D(2, 1); D.setZero();
+    const ctrl::StateSpace non_square(A, B, C, D, 0.1);
+
+    REQUIRE_THROWS_AS(ctrl::SystemAnalysis::calculateDiskMargin(non_square), std::invalid_argument);
+}
+
+// -----------------------------------------------------------------------------
+// MuAnalysis - Structured Singular Value (Phase 3)
+// -----------------------------------------------------------------------------
+
+TEST_CASE("UncertaintyStructure totalInputs()/totalOutputs() sum block dimensions",
+          "[mu_analysis]")
+{
+    ctrl::UncertaintyStructure struc;
+    struc.blocks = {
+        ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull,   2, 3},
+        ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexScalar, 1, 1},
+        ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull,   1, 1},
+    };
+
+    REQUIRE(struc.totalOutputs() == 4);
+    REQUIRE(struc.totalInputs()  == 5);
+}
+
+TEST_CASE("computeMu() upper bound is exactly sigma_max(M) for a single ComplexFull block",
+          "[mu_analysis]")
+{
+    // A single block spanning the whole space has no free D-scaling (any global scalar
+    // cancels in D*M*D^-1), so the upper bound must equal the plain sigma_max(M) exactly -
+    // and since M here is a real diagonal (hence normal) matrix, mu = sigma_max = rho too.
+    ctrl::UncertaintyStructure struc;
+    struc.blocks = {ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 2, 2}};
+
+    Eigen::MatrixXcd M = Eigen::MatrixXcd::Zero(2, 2);
+    M(0, 0) = 3.0;
+    M(1, 1) = 1.0;
+
+    const auto bounds = ctrl::computeMu({M}, struc, /*compute_lower_bound=*/true);
+    REQUIRE(bounds.size() == 1);
+    REQUIRE_THAT(bounds[0].upper, WithinAbs(3.0, 1e-9));
+    REQUIRE_THAT(bounds[0].lower, WithinAbs(3.0, 1e-9));
+}
+
+TEST_CASE("computeMu() returns zero bounds for a zero interconnection matrix",
+          "[mu_analysis]")
+{
+    ctrl::UncertaintyStructure struc;
+    struc.blocks = {ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 2, 2}};
+
+    const Eigen::MatrixXcd M = Eigen::MatrixXcd::Zero(2, 2);
+
+    const auto bounds = ctrl::computeMu({M}, struc, /*compute_lower_bound=*/true);
+    REQUIRE_THAT(bounds[0].upper, WithinAbs(0.0, 1e-12));
+    REQUIRE_THAT(bounds[0].lower, WithinAbs(0.0, 1e-12));
+}
+
+TEST_CASE("computeMu() throws on dimension mismatch and on unsupported RealScalar blocks",
+          "[mu_analysis]")
+{
+    ctrl::UncertaintyStructure struc;
+    struc.blocks = {ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 2, 2}};
+
+    const Eigen::MatrixXcd M_wrong = Eigen::MatrixXcd::Identity(3, 3);
+    REQUIRE_THROWS_AS(ctrl::computeMu({M_wrong}, struc), std::invalid_argument);
+
+    ctrl::UncertaintyStructure real_struc;
+    real_struc.blocks = {ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::RealScalar, 1, 1}};
+    const Eigen::MatrixXcd M_real = Eigen::MatrixXcd::Identity(1, 1);
+    REQUIRE_THROWS_AS(ctrl::computeMu({M_real}, real_struc), std::invalid_argument);
+}
+
+TEST_CASE("computeMu() coordinate-descent D-scaling recovers the textbook mu=1 "
+          "for a classic 2x2 off-diagonal example",
+          "[mu_analysis]")
+{
+    // Skogestad & Postlethwaite-style example: M = [[0,2],[0.5,0]] with Delta = diag(d1,d2)
+    // (two independent SISO complex full blocks). Analytically mu = sqrt(|m12*m21|) = 1,
+    // attained at d1/d2 = sqrt(m21/m12) = 0.5, while the unstructured sigma_max(M) = 2 and
+    // rho(M) = 1 (eigenvalues +/-1) - a case where the lower and upper bounds coincide.
+    ctrl::UncertaintyStructure struc;
+    struc.blocks = {
+        ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 1, 1},
+        ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 1, 1},
+    };
+
+    Eigen::MatrixXcd M(2, 2);
+    M << 0.0, 2.0,
+         0.5, 0.0;
+
+    const auto bounds = ctrl::computeMu({M}, struc, /*compute_lower_bound=*/true);
+    REQUIRE(bounds.size() == 1);
+    REQUIRE_THAT(bounds[0].upper, WithinAbs(1.0, 1e-3));
+    REQUIRE_THAT(bounds[0].lower, WithinAbs(1.0, 1e-9));
+    // The D-scaling upper bound must never exceed the unscaled sigma_max(M) baseline.
+    REQUIRE(bounds[0].upper <= 2.0 + 1e-9);
+}
+
+TEST_CASE("peakMu() matches sigma_rel * ||T||_inf for a single ComplexFull block "
+          "spanning a SISO output",
+          "[mu_analysis]")
+{
+    const auto G = makeFirstOrderPlant(0.6, 0.4, 0.1);
+    const auto K = makeStaticController(0.5, 0.1);
+
+    ctrl::UncertaintyStructure struc;
+    struc.blocks = {ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 1, 1}};
+
+    const auto result =
+        ctrl::peakMu(G, K, struc, /*sigma_rel=*/1.0, /*freq_points=*/50, /*omega_min=*/1e-4);
+
+    // norm_T = 1/3 (the same analytically-derived value as the Phase 2 gangOfFourNorms
+    // test); |T| is monotonically decreasing away from DC for this loop, so the peak
+    // occurs at the smallest grid frequency and converges to the exact Hinf norm as
+    // omega_min -> 0.
+    REQUIRE_THAT(result.peak.upper, WithinAbs(1.0 / 3.0, 1e-3));
+    REQUIRE(result.mu_curve.size() == 50);
+}
+
+TEST_CASE("robustStabilityRadius() recovers 1/||T||_inf for a single ComplexFull block",
+          "[mu_analysis]")
+{
+    const auto G = makeFirstOrderPlant(0.6, 0.4, 0.1);
+    const auto K = makeStaticController(0.5, 0.1);
+
+    ctrl::UncertaintyStructure struc;
+    struc.blocks = {ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 1, 1}};
+
+    const double radius =
+        ctrl::robustStabilityRadius(G, K, struc, /*sigma_max=*/5.0, /*bisect_iters=*/30);
+
+    REQUIRE_THAT(radius, WithinAbs(3.0, 1e-2));
+}
+
+TEST_CASE("peakMu() throws when the uncertainty structure size mismatches "
+          "the plant output dimension",
+          "[mu_analysis]")
+{
+    const auto G = makeFirstOrderPlant(0.6, 0.4, 0.1);
+    const auto K = makeStaticController(0.5, 0.1);
+
+    // Plant is SISO (1 output) but the structure declares a 2x2 block.
+    ctrl::UncertaintyStructure struc;
+    struc.blocks = {ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 2, 2}};
+
+    REQUIRE_THROWS_AS(ctrl::peakMu(G, K, struc), std::invalid_argument);
+}
+

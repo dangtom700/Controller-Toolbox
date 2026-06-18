@@ -213,7 +213,7 @@ Controller Toolbox/
 │   ├── cumulative_bug_report.md      (Part 51+ active issues)
 │   ├── ALGORITHM_ROADMAP_PHASE2.md   (Phase 2 implementation plan: E1-E4, H1-H4, D1-D2)
 │   ├── DOCUMENTATION.md              (API reference)
-│   └── CASE_STUDIES.md               (case study documentation)
+│   └── case_study_status.md          (auto-generated case-study status tracker)
 ├── prompt/prompt_enhanced.txt        Full session handoff
 ├── ros2/ctrl_toolbox_ros2/           ROS 2 Humble ament_cmake package (DIST-3, Part 60)
 │   ├── include/ctrl_toolbox_ros2/
@@ -221,7 +221,7 @@ Controller Toolbox/
 │   ├── example/pid_temperature_node.cpp
 │   ├── CMakeLists.txt + package.xml
 │   └── README.md
-├── run.py                            Master build + test runner (6 phases, cross-platform Part 60)
+├── run.py                            Master build + test runner (7 phases, cross-platform Part 60)
 ├── compile.bat                       Windows sequential build
 ├── compile.sh                        Linux/macOS sequential build (PLT-1, Part 59)
 ├── setup.ps1                         Windows bootstrap (conda env + bindings + smoke test)
