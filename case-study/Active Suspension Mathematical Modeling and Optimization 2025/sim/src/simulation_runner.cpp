@@ -30,7 +30,7 @@ void runSimulation(const PlantParams&    plant,
     std::ofstream csv(log_path);
     if (!csv.is_open())
         throw std::runtime_error("Cannot open log: " + log_path);
-    csv << "t,z_s,dz_s,z_u,dz_u,z_r,F_act,body_acc,susp_defl,tyre_defl\n";
+    csv << "t,z_s,dz_s,z_u,dz_u,z_r,F_act,body_acc,susp_defl,tyre_defl,error,iae_cumulative\n";
 
     // Metrics accumulators
     double iae_zs     = 0.0;   // integral |z_s| dt
@@ -58,6 +58,10 @@ void runSimulation(const PlantParams&    plant,
         const double susp_defl  = dyn.suspDeflection();
         const double tyre_defl  = dyn.tyreDeflection(z_r);
 
+        // Tracking error (ref = 0, y = z_s) and cumulative IAE through this sample
+        const double error = -x(0);
+        iae_zs += std::abs(error) * dt;
+
         // Log
         csv << std::fixed << std::setprecision(6)
             << t         << ','
@@ -69,10 +73,11 @@ void runSimulation(const PlantParams&    plant,
             << F_act     << ','
             << body_acc  << ','
             << susp_defl << ','
-            << tyre_defl << '\n';
+            << tyre_defl << ','
+            << error     << ','
+            << iae_zs    << '\n';
 
         // Accumulate metrics
-        iae_zs     += std::abs(x(0)) * dt;
         sum_acc2   += body_acc * body_acc;
         sum_force2 += F_act * F_act;
         max_defl    = std::max(max_defl, std::abs(susp_defl));

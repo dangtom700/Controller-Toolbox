@@ -1010,21 +1010,26 @@ def phase_report():
     else:
         print(f'  [SKIP] {tracker} not found\n')
 
-    # Step 2 (opt-in): MC + fault sweep analysis.
-    # Set env var CTRL_RUN_ANALYSIS=1 to enable; skipped by default because
-    # MC/fault runs can take many minutes (especially EV6x6 with GA/PSO/DE).
-    run_analysis_flag = os.environ.get('CTRL_RUN_ANALYSIS', '').strip()
+    # Step 2 (opt-out): MC + fault sweep + WCET + mu analysis.
+    # Runs by default so mc_summary.csv/fault_sweep.csv/wcet_summary.csv/
+    # mu_analysis.csv stay fresh every session. Set env var
+    # CTRL_SKIP_ANALYSIS=1 to skip (MC/fault runs can take several minutes,
+    # especially EV6x6 with its GA/PSO/DE-tuned controllers).
+    skip_analysis_flag = os.environ.get('CTRL_SKIP_ANALYSIS', '').strip()
     analyser = os.path.join('tools', 'run_analysis.py')
-    if run_analysis_flag == '1' and os.path.isfile(analyser):
-        print('  [INFO] CTRL_RUN_ANALYSIS=1 — running MC + fault sweep analysis\n')
+    if skip_analysis_flag == '1':
+        print('  [INFO] CTRL_SKIP_ANALYSIS=1 — skipping MC / fault sweep / '
+              'WCET / mu analysis (tools/run_analysis.py).\n')
+    elif os.path.isfile(analyser):
+        print('  [INFO] Running MC + fault sweep + WCET + mu analysis '
+              '(set CTRL_SKIP_ANALYSIS=1 to skip)\n')
         _run_cmd(
             ['conda', 'run', '-n', 'soft_robotics', '--',
              'python', analyser],
             'run_analysis.py'
         )
-    elif not run_analysis_flag:
-        print('  [INFO] Set CTRL_RUN_ANALYSIS=1 to run MC / fault sweep '
-              'analysis (tools/run_analysis.py).\n')
+    else:
+        print(f'  [SKIP] {analyser} not found\n')
 
     # Step 3: build the static HTML report from the freshly-written logs.
     # Run via conda so pandas/numpy/plotly (in soft_robotics) are available.

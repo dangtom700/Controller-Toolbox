@@ -12,7 +12,7 @@ static const char* kHeader =
     "u_fan_ms,Ta_sp_C,"
     "phi_room,phi_measured,omega_room_gkg,"
     "phi_in,H_gh,Tp_C,Re,Sh,hm,"
-    "ref_phi,error_pct\n";
+    "ref_phi,error_pct,error,iae_cumulative\n";
 
 TelemetryLogger::TelemetryLogger(const std::string& filepath)
     : file_(filepath)
@@ -51,7 +51,7 @@ void TelemetryLogger::log(const TickData& d)
         << o.phi_room << ',' << o.phi_measured << ',' << o.omega_room << ','
         << o.phi_in   << ',' << o.H_gh << ',' << (o.Tp_K - 273.15) << ','
         << o.Re << ',' << o.Sh << ',' << o.hm << ','
-        << d.ref_phi << ',' << err_pct
+        << d.ref_phi << ',' << err_pct << ',' << err_pct << ',' << IAE_
         << '\n';
 }
 

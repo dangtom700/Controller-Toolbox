@@ -15,7 +15,7 @@ static const char* kHeader =
     "Tc_C,eta_PV,W_PV_W,vi_ms,"
     "Q_op_ls,W_pump_W,eta_pump,"
     "EER_grid,W_net_kW,"
-    "ref_Tw1_C,error_Tw1_C\n";
+    "ref_Tw1_C,error_Tw1_C,error,iae_cumulative\n";
 
 TelemetryLogger::TelemetryLogger(const std::string& filepath)
     : file_(filepath)
@@ -60,7 +60,7 @@ void TelemetryLogger::log(const TickData& d)
         << o.Tc_C        << ',' << o.eta_PV   << ',' << o.W_PV_W  << ',' << o.vi_ms    << ','
         << o.Q_op_ls     << ',' << o.W_pump_W << ',' << o.eta_pump << ','
         << eer_grid      << ',' << o.W_net_kW << ','
-        << d.ref_Tw1     << ',' << err
+        << d.ref_Tw1     << ',' << err << ',' << err << ',' << IAE_
         << '\n';
 }
 

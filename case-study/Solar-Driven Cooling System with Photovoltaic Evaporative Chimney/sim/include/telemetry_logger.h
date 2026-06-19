@@ -14,7 +14,7 @@
 //   Tc_C, eta_PV, W_PV_W, vi_ms,
 //   Q_op_ls, W_pump_W, eta_pump,
 //   EER_grid, W_net_kW,
-//   ref_Tw1_C, error_Tw1_C
+//   ref_Tw1_C, error_Tw1_C, error, iae_cumulative
 
 namespace solar {
 

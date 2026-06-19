@@ -1,59 +1,128 @@
-Bug Report - generated from run_20260618_160720.log on 2026-06-18 16:33:10.081379
-Total failure indicators found: 2
-Merged into 2 block(s)
+Bug Report - generated from run_20260619_104014.log on 2026-06-19 11:31:32.798132
+Total failure indicators found: 9
+Merged into 4 block(s)
 ========================================================================
 
 --- FAILURE BLOCK #1 (keywords: warn) ---
-Lines 7418 - 7438
+Lines 7562 - 7582
 
-    7418: 
-    7419: === RelayAutoTuner Extended ===
-    7420:   [PASS] TC-RELAY-01: Relay loop converges (isDone() == true)
-    7421:   [PASS] TC-RELAY-01: Ku and Tu are positive
-    7422:   [PASS] TC-RELAY-02: ZN gains valid
-    7423:   [PASS] TC-RELAY-03: AMIGO gains valid
-    7424:   [PASS] TC-RELAY-04: IMC-from-relay yields PI (Kd=0)
-    7425:   [PASS] TC-RELAY-05: Works with zero hysteresis
-    7426: 
-    7427: === StepResponseTuner Extended ===
->>> 7428:   [WARN] Step response data not found. Run generate_test_data.py first.
-    7429:   [PASS] TC-STEP-06: theta=0 in ZN does not crash (no exception)
-    7430: 
-    7431: === Other Tuners Extended ===
-    7432:   [PASS] TC-POLE-01: Q and R are positive definite
-    7433:   [PASS] TC-POLE-04: Complex conjugate pairs handled correctly
-    7434:   [PASS] TC-KWT-01: Qf diagonal matches variance
-    7435:   [PASS] TC-KWT-02: Rf diagonal matches variance
-    7436: 
-    7437: --------------------------------------------
-    7438:   Results: 11 passed, 0 failed
+    7562: 
+    7563: === RelayAutoTuner Extended ===
+    7564:   [PASS] TC-RELAY-01: Relay loop converges (isDone() == true)
+    7565:   [PASS] TC-RELAY-01: Ku and Tu are positive
+    7566:   [PASS] TC-RELAY-02: ZN gains valid
+    7567:   [PASS] TC-RELAY-03: AMIGO gains valid
+    7568:   [PASS] TC-RELAY-04: IMC-from-relay yields PI (Kd=0)
+    7569:   [PASS] TC-RELAY-05: Works with zero hysteresis
+    7570: 
+    7571: === StepResponseTuner Extended ===
+>>> 7572:   [WARN] Step response data not found. Run generate_test_data.py first.
+    7573:   [PASS] TC-STEP-06: theta=0 in ZN does not crash (no exception)
+    7574: 
+    7575: === Other Tuners Extended ===
+    7576:   [PASS] TC-POLE-01: Q and R are positive definite
+    7577:   [PASS] TC-POLE-04: Complex conjugate pairs handled correctly
+    7578:   [PASS] TC-KWT-01: Qf diagonal matches variance
+    7579:   [PASS] TC-KWT-02: Rf diagonal matches variance
+    7580: 
+    7581: --------------------------------------------
+    7582:   Results: 11 passed, 0 failed
 
 ------------------------------------------------------------------------
 
 --- FAILURE BLOCK #2 (keywords: skip) ---
-Lines 7749 - 7769
+Lines 7896 - 7916
 
-    7749: ------------------------------------------------------------------------
-    7750: 
-    7751: ============================================================
-    7752: ex02 - Step Response Simulation
-    7753: ============================================================
-    7754: 
-    7755: Simulated 1500 steps at Ts=0.01 s
-    7756:   y[0]   = 0.000000000   (expected 0.0)
-    7757:   y[-1]  = 0.897737840  (expected approx = 1.0)
-    7758: 
->>> 7759:   [SKIP] CSV not found at tests\data\step_response.csv
-    7760:   Run: python scripts/generate_test_data.py  to generate it first.
-    7761:   [PASS] DC gain - measured=0.897758, expected=0.898000, rel_err=0.0270%
-    7762: 
-    7763:   FOPDT estimate (tangent method):
-    7764:     K     = 0.8977
-    7765:     tau   = 1.1400 s
-    7766:     theta = 0.5300 s
-    7767:   [PASS] assert_close (tau approx = 1.0 s): |1.14 - 1| = 1.400e-01  (tol=5.000e-01)
-    7768: 
-    7769: ================================================
+    7896: ------------------------------------------------------------------------
+    7897: 
+    7898: ============================================================
+    7899: ex02 - Step Response Simulation
+    7900: ============================================================
+    7901: 
+    7902: Simulated 1500 steps at Ts=0.01 s
+    7903:   y[0]   = 0.000000000   (expected 0.0)
+    7904:   y[-1]  = 0.897737840  (expected approx = 1.0)
+    7905: 
+>>> 7906:   [SKIP] CSV not found at tests\data\step_response.csv
+    7907:   Run: python scripts/generate_test_data.py  to generate it first.
+    7908:   [PASS] DC gain - measured=0.897758, expected=0.898000, rel_err=0.0270%
+    7909: 
+    7910:   FOPDT estimate (tangent method):
+    7911:     K     = 0.8977
+    7912:     tau   = 1.1400 s
+    7913:     theta = 0.5300 s
+    7914:   [PASS] assert_close (tau approx = 1.0 s): |1.14 - 1| = 1.400e-01  (tol=5.000e-01)
+    7915: 
+    7916: ================================================
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #3 (keywords: skip) ---
+Lines 11534 - 11554
+
+    11534:     [FAULT] ADRC                      2 fault types  elapsed 11.8s
+    11535:     [FAULT] SMC                       2 fault types  elapsed 15.0s
+    11536:     [FAULT] MPC                       2 fault types  elapsed 24.4s
+    11537:     [FAULT] LQR                       2 fault types  elapsed 28.0s
+    11538:     [FAULT] MRAC                      2 fault types  elapsed 31.1s
+    11539:     [FAULT] L1Adaptive                2 fault types  elapsed 34.0s
+    11540:     [FAULT] NeuralPID                 2 fault types  elapsed 37.3s
+    11541:     [FAULT] GainScheduled             2 fault types  elapsed 40.6s
+    11542:     [FAULT] ILC                       2 fault types  elapsed 43.7s
+    11543:     [FAULT] Written: case-study\Air-Cooled Battery Thermal Management System\fault_sweep.csv  (84 rows)
+>>> 11544:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
+    11545: 
+    11546: [High-Altitude Aerial Firefighting Bag Drop]
+    11547:     [MC] NominalDrop               30 samples  elapsed 0.7s
+    11548:     [MC] WindOffset                30 samples  elapsed 1.4s
+    11549:     [MC] IterativeRefine           30 samples  elapsed 2.1s
+    11550:     [MC] MCPredictor               30 samples  elapsed 3.2s
+    11551:     [MC] GPSurrogate               30 samples  elapsed 4.1s
+    11552:     [MC] BayesOptDrop              30 samples  elapsed 6.6s
+    11553:     [MC] SIRParticleFilter         30 samples  elapsed 7.4s
+    11554:     [MC] KalmanWind                30 samples  elapsed 8.1s
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #4 (keywords: skip) ---
+Lines 11801 - 11836
+
+    11801:      OpenLoop       3500     0.14       0.10     0.30     1.30     2.40
+    11802:     [WCET] Written: case-study\Vertical Drill String Mathematical Review 2025\wcet_summary.csv
+    11803: Analysing 24 (study, scenario) pairs ...
+    11804:   6-DOF Stewart Platform Vessel  ss01_beam_noswell     peak_S=1.000  peak_T=0.000
+    11805:   6-DOF Stewart Platform Vessel  ss01_beam_swell       peak_S=1.000  peak_T=0.000
+    11806:   6-DOF Stewart Platform Vessel  ss01_following_noswell  peak_S=1.000  peak_T=0.000
+    11807:   6-DOF Stewart Platform Vessel  ss01_following_swell  peak_S=1.000  peak_T=0.000
+    11808:   6-DOF Stewart Platform Vessel  ss01_head_noswell     peak_S=1.000  peak_T=0.000
+    11809:   6-DOF Stewart Platform Vessel  ss01_head_swell       peak_S=1.000  peak_T=0.000
+    11810:   Active Suspension 6x6 EV Full  s01_bump              peak_S=1.115  peak_T=0.507
+>>> 11811:   SKIP run_s01_5C_discharge_ADRC.csv: cannot identify y/u columns
+    11812:   SKIP run_s01_steady_condition1_ADRC.csv: cannot identify y/u columns
+    11813:   Boiler Control                 s01_lowload_regulation  peak_S=1.086  peak_T=2.086
+    11814:   SKIP run_s01_no_wind_AdaptiveRLS.csv: cannot identify y/u columns
+    11815:   SKIP run_s01_regular_waves_ADRC.csv: cannot identify y/u columns
+    11816:   Nonlinear Surface Ship Manoeuv s01                   peak_S=1.663  peak_T=1.706
+    11817:   PCM Thermal Energy Storage Con s01_scenario          peak_S=1.000  peak_T=0.000
+    11818:   Porous Fiber Plate Humidificat s01_design            peak_S=0.998  peak_T=0.298
+    11819:   Porous Fiber Plate Humidificat s01_design_GPC        peak_S=1.001  peak_T=0.293
+    11820:   Porous Fiber Plate Humidificat s01_design_PID        peak_S=1.050  peak_T=0.267
+    11821:   Satellite Launch Vehicle Syste s01_scenario          peak_S=1.000  peak_T=0.000
+    11822:   Separate Meter In Separate Met s01_resistive_step    peak_S=1.004  peak_T=0.060
+    11823:   Solar Cooker with Reflector an s01_clear_sky_tracking  peak_S=1.000  peak_T=0.000
+    11824:   SKIP run_s01_mppt_steady_ADRC.csv: cannot identify y/u columns
+    11825:   Solar-Driven Cooling System wi s01_design_steady     peak_S=0.004  peak_T=1.001
+    11826:   SKIP run_s01_sine_50hz_ADRC.csv: cannot identify y/u columns
+    11827:   Vertical Drill String Mathemat s01_step_ref          peak_S=1.028  peak_T=0.508
+    11828: 
+    11829: [6-DOF Stewart Platform Vessel Motion Simulator]  Mu analysis written to: case-study\6-DOF Stewart Platform Vessel Motion Simulator\mu_analysis.csv  (6 rows)
+    11830: 
+    11831: [Active Suspension 6x6 EV Full Model]  Mu analysis written to: case-study\Active Suspension 6x6 EV Full Model\mu_analysis.csv  (1 rows)
+    11832: 
+    11833: [Air-Cooled Battery Thermal Management System]  Mu analysis written to: case-study\Air-Cooled Battery Thermal Management System\mu_analysis.csv  (1 rows)
+    11834: 
+    11835: [Aircraft Engine Thermal Management]  Mu analysis written to: case-study\Aircraft Engine Thermal Management\mu_analysis.csv  (1 rows)
+    11836: 
 
 ------------------------------------------------------------------------
 

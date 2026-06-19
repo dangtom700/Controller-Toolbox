@@ -137,8 +137,11 @@ for %%T in (
     boiler_sim
     tug_sim
     solar_cooling_sim
+    solar_cooling_robustness
     humidification_sim
+    humidification_robustness
     susp_sim
+    susp_robustness
     buck_boost_sim
     solar_cooker_sim
     sotec_sim

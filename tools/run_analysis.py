@@ -82,8 +82,41 @@ def discover_studies(study_filter: str = "") -> list[dict]:
 # ---------------------------------------------------------------------------
 
 def load_sim_module(main_py: Path, study_dir: Path):
-    """Dynamically import sim/main.py and return the module."""
-    sys.path.insert(0, str(study_dir / "sim"))
+    """Dynamically import sim/main.py and return (module_or_None, cleanup_fn).
+
+    The caller MUST call cleanup_fn() once it is done with this study (after
+    MC/fault/WCET processing), even if module loading failed. Every case
+    study's sim/ package commonly reuses the same generic file names
+    (controllers.py, simulation_runner.py, ...); Python caches imports by
+    short module name in sys.modules, not by path, so without this cleanup
+    the *next* study's `from controllers import make_controllers` would
+    silently resolve to *this* study's already-cached controllers module
+    instead of its own (confirmed empirically: running multiple studies in
+    one process without this caused 5 of 7 to fail with the wrong study's
+    plant-params schema, surfacing as "CONTROLLER_NAMES empty or not found").
+    """
+    sim_dir = str(study_dir / "sim")
+    sim_dir_norm = os.path.normcase(os.path.normpath(sim_dir))
+    sys.path.insert(0, sim_dir)
+    pre_existing_modules = set(sys.modules.keys())
+
+    def cleanup():
+        if sim_dir in sys.path:
+            sys.path.remove(sim_dir)
+        # Only purge modules that actually live under *this* study's sim/
+        # directory (controllers.py, simulation_runner.py, ...) - NOT
+        # third-party packages like numpy/pandas that happened to be
+        # first-imported while loading this study; some C-extension
+        # packages (numpy in particular) cannot be re-imported into a
+        # fresh module object within the same process.
+        for name in list(sys.modules.keys()):
+            if name in pre_existing_modules:
+                continue
+            mod_obj  = sys.modules.get(name)
+            mod_file = getattr(mod_obj, "__file__", None) or ""
+            if os.path.normcase(os.path.normpath(mod_file)).startswith(sim_dir_norm):
+                del sys.modules[name]
+
     spec = importlib.util.spec_from_file_location("_analysis_sim", str(main_py))
     mod  = importlib.util.module_from_spec(spec)
     mod.__dict__["__file__"] = str(main_py)
@@ -91,8 +124,8 @@ def load_sim_module(main_py: Path, study_dir: Path):
         spec.loader.exec_module(mod)
     except SystemExit:
         # Some studies do sys.exit(0) when ctrl_toolbox is absent
-        return None
-    return mod
+        return None, cleanup
+    return mod, cleanup
 
 
 # ---------------------------------------------------------------------------
@@ -364,36 +397,41 @@ def main(argv=None) -> None:
         print(f"\n[{study['name']}]")
 
         # Load module
-        mod = load_sim_module(study["main_py"], study["dir"])
-        if mod is None:
-            print("  SKIP - module failed to load (ctrl_toolbox absent?)")
-            continue
+        mod, cleanup = load_sim_module(study["main_py"], study["dir"])
+        try:
+            if mod is None:
+                print("  SKIP - module failed to load (ctrl_toolbox absent?)")
+                continue
 
-        # MC
-        if "mc" not in skip:
-            n_samples = args.mc_n  or study["cfg"].get("mc_n_samples", 30)
-            sigma     = args.sigma or study["cfg"].get("mc_sigma", 0.10)
-            try:
-                run_mc(mod, study, n_samples, sigma, args.dry_run)
-            except Exception:
-                print("  [MC] ERROR:")
-                traceback.print_exc()
+            # MC
+            if "mc" not in skip:
+                n_samples = args.mc_n  or study["cfg"].get("mc_n_samples", 30)
+                sigma     = args.sigma or study["cfg"].get("mc_sigma", 0.10)
+                try:
+                    run_mc(mod, study, n_samples, sigma, args.dry_run)
+                except Exception:
+                    print("  [MC] ERROR:")
+                    traceback.print_exc()
 
-        # Fault sweep
-        if "fault" not in skip:
-            try:
-                run_fault_sweep(mod, study, args.dry_run)
-            except Exception:
-                print("  [FAULT] ERROR:")
-                traceback.print_exc()
+            # Fault sweep
+            if "fault" not in skip:
+                try:
+                    run_fault_sweep(mod, study, args.dry_run)
+                except Exception:
+                    print("  [FAULT] ERROR:")
+                    traceback.print_exc()
 
-        # WCET (only if the study already has raw timing data)
-        if "wcet" not in skip:
-            try:
-                run_wcet(study, args.dry_run)
-            except Exception:
-                print("  [WCET] ERROR:")
-                traceback.print_exc()
+            # WCET (only if the study already has raw timing data)
+            if "wcet" not in skip:
+                try:
+                    run_wcet(study, args.dry_run)
+                except Exception:
+                    print("  [WCET] ERROR:")
+                    traceback.print_exc()
+        finally:
+            # Purge this study's sim/ sys.path entry + freshly-cached modules
+            # before moving to the next study (see load_sim_module docstring).
+            cleanup()
 
     # Mu analysis works directly off logs/run_*.csv - no sim/main.py or
     # analysis.json needed, so it must run even when the hook-based loop
