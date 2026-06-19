@@ -1,27 +1,35 @@
 # Controller Toolbox -- Project Master State Document
 
 **Project:** Discrete-Time Controller Toolbox (C++20 / pybind11 / Catch2)
-**Current Part:** 60 (DIST-3 ROS2 wrapper + CI/CD overhaul + cross-platform run.py -- complete 2026-06-16)
+**Current Part:** 63 (Aircraft Engine Thermal Management promoted into the official case-study roster -- complete 2026-06-18)
 **Maintained by:** Claude Code (Senior Principal Engineer role)
 **Update cadence:** End of every major iteration (new algorithm, case study, or binding pass)
 
 ---
 
-## 1. Baseline Health (Part 60 Exit State)
+## 1. Baseline Health (Part 63 Exit State)
 
-| Suite | Passing | Failing | Notes |
-|-------|---------|---------|-------|
-| C++ (Catch2 + binaries) | ~174 UNVERIFIED | 0 | Await next clean `run.py`. test_embedded_subset API fixed Part 60 (7 sites). |
-| Python examples | ~103 UNVERIFIED | 0 | ex70–ex102+ through Part 55 |
-| Case studies C++ | 748 runs UNVERIFIED | 0 | 9 studies × scenarios; ActiveSuspension 90, SMISMO 65 (Part 55) |
-| Case studies Python | 565 runs UNVERIFIED | 0 | 7 Python-only studies × scenarios (Phase 6); EV6x6 90 runs added Part 55 |
-| Runtime warnings | ~0 in bug_report.txt | -- | safe_phrases list in run.py suppresses all known benign messages |
+These are **structural counts** (files / TEST_CASE() declarations / CSV runs on disk),
+verified directly against the working tree on 2026-06-18. They are NOT a verified
+pass/fail report -- run `conda run -n soft_robotics -- python run.py` for that. Treat
+every count below as **UNVERIFIED pass status** until a clean `run.py` confirms it.
+
+| Suite | Structural count | Notes |
+|-------|-------------------|-------|
+| C++ Catch2 TEST_CASE() | 332 across 16 files | `test_catch2_advanced.cpp` (main suite) alone has grown to 236 -- the long-standing "~95 main suite" / "~174 total" figures in CLAUDE.md and prior revisions of this doc are stale undercounts, not a regression. |
+| C++ example programs | 86 files (`examples/ex*.cpp`) | |
+| Python example scripts | 110 files (`examples/python/ex*.py`) | Numbering has intentional duplicates (e.g. two `ex23_*.py`, two `ex89_*.py`) from different feature batches; both run. |
+| Case studies C++ (10 studies) | 1488 runs | Boiler 216, Tug 72, Solar 70, Humidification 75, ActiveSuspension 90 (18 ctrl), BuckBoost 60, SolarCooker 60, SOTEC 60, SMISMO 65 (13 ctrl), Stewart 720 (12 ctrl x 60 sea-state configs, Part 61). |
+| Case studies Python-only (8 studies, official roster) | 565 runs | DrillString 85, WindWave 80, EHFS 70 (14 ctrl), Firefighting 60, BTMS 60, SurfaceShip 60, EV6x6 90 (18 ctrl), AircraftEngine 60 (12 ctrl, promoted Part 63). |
+| Case studies, remaining undocumented (Part 62 discovery) | see Section 6 / `docs/case_study_status.md` | 31 total directories under `case-study/`; 18 are reflected in CLAUDE.md's/README's roster tables (10 C++ + 8 Python-only, the 8th being `Aircraft Engine Thermal Management`, promoted Part 63). 7 are "Open placeholder" (scaffolded by `tools/new_case_study.py`, never implemented); 6 are "Not started" (PDF/README only, no `sim/`). |
+| Runtime warnings | `bug_report.txt` expected 0 blocks | `safe_phrases` list in `run.py` suppresses all known benign messages. |
 
 **Verify with:** `conda run -n soft_robotics -- python run.py`
+**Case-study status (auto-generated, do not hand-edit):** `docs/case_study_status.md`, regenerate via `python tools/case_study_tracker.py`.
 
 ---
 
-## 2. Algorithm Inventory (~90 `lib/` modules -- updated through Part 60)
+## 2. Algorithm Inventory (~90 `lib/` modules -- updated through Part 63)
 
 > Parts 26-33 added 13 new `lib/` algorithms (DeePC, ILC, SINDy, KoopmanEDMD, L1Adaptive,
 > CBFSafetyFilter, GaussianProcess, EchoStateNetwork, NeuralPID, CEMController, DynaController,
@@ -31,7 +39,15 @@
 > GPResidualModel (E3), MHE inequality constraints (E4), HybridModel/HybridMPC/HybridModelTrainer (H1-H4),
 > MismatchDetector (D1), BasicPID<Scalar>/BasicSMC<Scalar> (M4), GeneticAlgorithm, ParticleSwarmOptimizer,
 > DifferentialEvolution (C3 from Part 55). Parts 56-60 added CI/CD overhaul, cross-platform scripts,
-> case study tracker, and ROS2 adapter (no new lib/ algorithms).
+> case study tracker, and ROS2 adapter (no new lib/ algorithms). Part 61 added the 10th C++ case study
+> (6-DOF Stewart) and fixed a `NeuralPID` softplus overflow bug (no new lib/ algorithms). Part 62
+> upgraded `case_study_tracker.py` to 4-tier status detection and reconciled project documentation
+> (no new lib/ algorithms). Part 63 promoted `Aircraft Engine Thermal Management` into the
+> official case-study roster (documentation only - no new lib/ algorithms). Direct count:
+> `lib/*.h` = 84 headers, `lib/*.cpp` = 59 sources (flat, no
+> subdirectories except `lib/embedded/` and `lib/hal/`) -- the "~90 modules" figure used throughout
+> CLAUDE.md/README is an approximate module count (some headers bundle multiple param structs), not
+> a literal file count; the two are in the same ballpark and both are fine to use loosely.
 
 ### Core Controllers
 | Class | Header | Sign convention |
@@ -96,7 +112,7 @@
 | `CBFSafetyFilter` | CBFSafetyFilter.h | 1D analytical QP safety wrapper |
 | `GaussianProcess` | GaussianProcess.h | SE kernel + Cholesky; fixed-budget FIFO eviction |
 | `EchoStateNetwork` | EchoStateNetwork.h | `reset()` preserves `W_out_` / `fitted_` |
-| `NeuralPID` | NeuralPID.h | 3→n_h→3 online backprop; softplus gains |
+| `NeuralPID` | NeuralPID.h | 3→n_h→3 online backprop; softplus gains; numerically-stable two-branch softplus (Part 61 fix) |
 | `CEMController` | CEMController.h | Elite-sample stochastic MPC; `computeRef(x, y_ref)` |
 | `DynaController` | DynaController.h | Sutton Dyna MBRL; `modelRollout(e0, u_seq)` |
 | `ScenarioMPC` | ScenarioMPC.h | N_s-scenario noise-averaged QP; H constant per episode |
@@ -145,7 +161,8 @@
 
 ```
 Controller Toolbox/
-├── lib/                      Core library headers + sources (~85 modules)
+├── lib/                      Core library: 84 headers + 59 .cpp, FLAT (no lib/control/
+│   │                          or lib/estimation/ subdirectories -- one file per class)
 │   ├── ControllerToolbox.h   Umbrella include
 │   ├── IController.h         Abstract base (virtual name() + notifyObserverState())
 │   ├── IControllerObserver.h Observer (virtual onState(key, vec) since Part 33)
@@ -155,57 +172,47 @@ Controller Toolbox/
 │   ├── ControllerMonitor.h   CUSUM + EWMA SPC observer (Part 33)
 │   ├── ComputationalDelayWrapper.h  One-sample delay decorator (Part 34)
 │   ├── GradientProjectionQP.h FISTA (header-only)
+│   ├── embedded/              BasicPID, BasicSMC, DiscreteIntegrator, FixedRateFilter, RingBuffer
 │   └── hal/                  HAL: SimScheduler, FreeRTOS/Zephyr stubs
 ├── bindings/                 pybind11 C++ + smoke_test.py
-│   ├── controllers_bindings.cpp
-│   ├── estimation_bindings.cpp
+│   ├── module.cpp            PYBIND11_MODULE entry point; flat `ctrl_toolbox` module (no submodules)
+│   ├── plantmodel_bindings.cpp / controllers_bindings.cpp / estimation_bindings.cpp
+│   ├── advanced_bindings.cpp / analysis_bindings.cpp
 │   └── smoke_test.py
-├── tests/                    Catch2 + standalone test programs
-│   ├── test_catch2_advanced.cpp  (main suite, ~95 cases)
-│   ├── test_stability_margins.cpp (3 cases)
-│   ├── test_boiler_regression.cpp  (6 cases -- Part 33)
-│   ├── test_smismo_regression.cpp  (6 cases -- Part 44, RECREATED from scratch)
-│   ├── test_solar_regression.cpp   (6 cases -- Part 33)
-│   └── test_humid_regression.cpp   (6 cases -- Part 33)
-├── examples/                 C++ examples (ex01-ex79)
-│   └── python/               Python examples (ex01-ex102)
+├── tests/                    Catch2 + standalone test programs: 332 TEST_CASE() across 16 files
+│   ├── test_catch2_advanced.cpp   (main suite, 236 cases)
+│   ├── test_stability_margins.cpp, test_catch2_pilot.cpp, test_autoscheduling.cpp,
+│   │   test_humidification.cpp, test_embedded_subset.cpp
+│   └── test_{boiler,buck_boost,humid,smismo,solar,solar_cooker,sotec,stewart,susp,tugsim}_regression.cpp
+├── examples/                 86 C++ examples (ex01-ex82, some numbers reused across feature batches)
+│   └── python/               110 Python examples (ex01-ex102+, same reuse pattern)
+├── scripts/                  tune_all.cpp / simulate_all.cpp / realtime_all.cpp (generic example-plant
+│   │                          benchmarking, NOT case studies) + create_controller.py, deploy.py,
+│   │                          fix_examples_bindings.py, generate_test_data.py, visualize.py
+├── benchmark/                bench_controllers.cpp -- per-step latency microbenchmark for every
+│   │                          controller; opt-in via -DCTRL_BUILD_BENCHMARKS=ON, off by default
+├── cheatsheet/                Reference notes: controller_list.md, controller_categories.md,
+│   │                          controller-tuning-reference.md, tuning_methods.md,
+│   │                          control_design_pipeline.md, system_identification.md (+ armax.md/
+│   │                          fopdt.md/n4sid.md subfolder), advanced_model_estimation.md,
+│   │                          embedded_and_realtime.md, mismatch_detection.md, model_evaluation.md,
+│   │                          phase2_hybrid_modeling.md
 ├── tools/
-│   ├── metrics.py               compute_metrics / extract_final_iae (ANA-1)
-│   ├── compare_controllers.py   IAE/ISE/settle-time leaderboard across case-study CSVs
-│   ├── monte_carlo.py           MC sensitivity sweep (ANA-2)
-│   ├── mc_plots.py              violin + scatter PNGs for MC
-│   ├── fault_injector.py        FaultSpec / FaultInjector (sensor_bias/noise/actuator_loss)
-│   ├── fault_sweep.py           sweep fault severity per controller (ANA-3)
-│   ├── fault_plots.py           heatmap + degradation curves
-│   ├── anova.py                 one-way ANOVA + Tukey HSD (ANA-4)
-│   ├── wcet_report.py           WCET p99 bar chart (ANA-5)
-│   ├── model_validation.py      GreyBoxEstimator NRMSE fit + cross-val (ANA-6)
-│   ├── mu_analysis.py           mu upper bound on closed-loop (ANA-7)
-│   ├── mu_plots.py              mu(omega) Bode-like plots
-│   ├── generate_report.py       self-contained HTML report per study (RPT-1)
-│   └── case_study_tracker.py    auto-scans case-study/*/; writes docs/case_study_status.md (TRK-1)
-├── case-study/               Full physics case studies
-│   │
-│   ├── [C++ built -- registered in CMakeLists.txt + compile.bat]
-│   ├── Boiler Control/                    27 ctrl, boiler_sim, 216 runs
-│   ├── Tug Boat Numerical Simulation/     18 ctrl, tug_sim, 72 runs
-│   ├── Solar-Driven Cooling .../          14 ctrl, solar_cooling_sim, 70 runs
-│   ├── Porous Fiber Plate Humidification/ 15 ctrl, humidification_sim, 75 runs
-│   ├── Active Suspension .../             15 ctrl, susp_sim, 75 runs
-│   ├── Non-Inverting Buck-Boost Converter/ 12 ctrl, buck_boost_sim, 60 runs
-│   ├── Solar Cooker .../                  12 ctrl, solar_cooker_sim, 60 runs
-│   ├── Solar Ocean Thermal Energy .../    12 ctrl, sotec_sim, 60 runs
-│   ├── Separate Meter In Separate Meter Out/  12 ctrl, smismo_sim, 60 runs
-│   │
-│   ├── [Python-only -- discovered by Phase 6 via case-study/*/sim/main.py]
-│   ├── Vertical Drill String .../         17 ctrl, sim/main.py, 85 runs
-│   ├── Multi-Body Floating Wind-Wave .../  16 ctrl, sim/main.py, 80 runs
-│   ├── Tracking Control of EH Force .../   14 ctrl, sim/main.py, 70 runs  (Part 55)
-│   ├── High-Altitude Aerial Firefighting/  12 planners, sim/main.py, 60 runs
-│   ├── Air-Cooled Battery Thermal .../     12 ctrl, sim/main.py, 60 runs
-│   ├── Nonlinear Surface Ship .../         12 ctrl, sim/main.py, 60 runs
-│   └── Active Suspension 6x6 EV .../       18 ctrl, sim/main.py, 90 runs  (Part 55, C6)
-│
+│   ├── new_case_study.py        scaffolds a case-study framework (C++ or Python) from a source PDF
+│   ├── case_study_tracker.py    scans case-study/*/; writes docs/case_study_status.md (TRK-1, Part 62 rewrite)
+│   ├── metrics.py / compare_controllers.py / monte_carlo.py / mc_plots.py
+│   ├── fault_injector.py / fault_sweep.py / fault_plots.py
+│   ├── anova.py / wcet_report.py / model_validation.py / mu_analysis.py / mu_plots.py
+│   └── generate_report.py       self-contained HTML report per study (RPT-1)
+├── case-study/               31 directories total -- status is AUTO-TRACKED, do not hand-list here.
+│   │                          See docs/case_study_status.md (regenerate: `python tools/case_study_tracker.py`).
+│   │                          4-tier status: Complete / On-going / Open placeholder / Not started.
+│   │                          As of Part 63: 18 On-going (10 C++ + 8 Python-only, all reflected in
+│   │                          CLAUDE.md's/README's roster tables -- "Aircraft Engine Thermal
+│   │                          Management" promoted Part 63), 7 Open placeholder (scaffolded
+│   │                          by tools/new_case_study.py, never implemented), 6 Not started (PDF/README
+│   │                          only). Full roster + tribal knowledge per study: CLAUDE.md "Case Studies"
+│   │                          section and each study's own README.md.
 ├── docs/
 │   ├── PROJECT_MASTER_STATE.md       <- this file
 │   ├── compact_bug_report_parts_1-25.md   (archived: Parts 1-25 tribal knowledge)
@@ -213,19 +220,30 @@ Controller Toolbox/
 │   ├── cumulative_bug_report.md      (Part 51+ active issues)
 │   ├── ALGORITHM_ROADMAP_PHASE2.md   (Phase 2 implementation plan: E1-E4, H1-H4, D1-D2)
 │   ├── DOCUMENTATION.md              (API reference)
-│   └── case_study_status.md          (auto-generated case-study status tracker)
-├── prompt/prompt_enhanced.txt        Full session handoff
+│   ├── deployment.md                 (RT/RTOS integration, troubleshooting)
+│   ├── control_strategies_deep_dive.md
+│   ├── case_study_status.md          (auto-generated case-study status tracker, 4-tier as of Part 62)
+│   └── archived/                     audit_report.md, roadmap_deployment_frontend.md, test_update.md
+│                                      -- moved here from docs/ root; CLAUDE.md's "Done in Part 57/57B"
+│                                      narrative entries still cite the pre-move docs/ path, which was
+│                                      correct AT THE TIME (historical journal, not re-edited).
+├── prompt/                   Task-specific prompt TEMPLATES (not session history -- prompt_enhanced.txt
+│   │                          was removed Part 62, decluttering; it is not coming back):
+│   ├── make_case_study_cpp.md      step-by-step: PDF -> production C++ case study
+│   ├── make_case_study_python.md   step-by-step: PDF -> production Python-only case study
+│   ├── audit_project.md            structural-audit persona/procedure
+│   ├── project_enrichment.md       strategic-advisor persona for library evolution questions
+│   ├── fresh_restart.md            "case-study co-pilot" onboarding persona (NOTE: its directory-
+│   │                                layout assumptions, e.g. lib/control/, are WRONG for this repo --
+│   │                                see docs/case_study_copilot_reference.md for the corrected version)
+│   └── handoff_prompt61.md         most recent dated session handoff (supersedes earlier handoffs)
 ├── ros2/ctrl_toolbox_ros2/           ROS 2 Humble ament_cmake package (DIST-3, Part 60)
-│   ├── include/ctrl_toolbox_ros2/
-│   │   └── controller_node.hpp       ControllerNode<T> lifecycle node template
+│   ├── include/ctrl_toolbox_ros2/controller_node.hpp   ControllerNode<T> lifecycle node template
 │   ├── example/pid_temperature_node.cpp
-│   ├── CMakeLists.txt + package.xml
-│   └── README.md
+│   └── CMakeLists.txt + package.xml + README.md
 ├── run.py                            Master build + test runner (7 phases, cross-platform Part 60)
-├── compile.bat                       Windows sequential build
-├── compile.sh                        Linux/macOS sequential build (PLT-1, Part 59)
-├── setup.ps1                         Windows bootstrap (conda env + bindings + smoke test)
-├── setup.sh                          Linux/macOS bootstrap (PLT-1, Part 59)
+├── compile.bat / compile.sh          Windows / Linux-macOS sequential build
+├── setup.ps1 / setup.sh              Windows / Linux-macOS bootstrap
 ├── CMakeLists.txt
 └── CLAUDE.md                         Session guide (law of the project)
 ```
@@ -253,6 +271,7 @@ CTRL_HAS_SUBSPACE          # N4SID
 CTRL_HAS_FUZZY             # FuzzyLogic
 CTRL_HAS_HINF              # DiscreteHinf
 CTRL_HAS_FUNCTION_APPROX   # FunctionApproximator
+CTRL_BUILD_BENCHMARKS      # benchmark/bench_controllers.cpp; OFF by default
 ```
 
 ### Critical parameter constraints
@@ -279,30 +298,23 @@ Key non-virtual extras:
 
 Python binding rule: all `IController` subclasses need
 `py::class_<T, ctrl::IController, std::shared_ptr<T>>` (not bare `shared_ptr<T>`).
+Python import is flat: `import ctrl_toolbox as ctrl` -- no submodule hierarchy.
 
 ---
 
-## 6. Open Items (Part 49+)
+## 6. Open Items (Part 63+)
 
 | ID | Description | Priority | Status |
 |----|-------------|----------|--------|
-| **E1** | `GreyBoxEstimator` — Levenberg-Marquardt param estimation for user ODE | HIGH | Open |
-| **E2** | `RecursiveGreyBoxEstimator` — augmented-state UKF wrapper | HIGH | Open |
-| **E3** | GP Residual Model — `GaussianProcess` extension with uncertainty output | MED | Open |
-| **E4** | MHE Inequality Constraints — extend MHE with `C_ineq`/`d_ineq` | MED | Open |
-| **H1** | `HybridModel` base class — `IPlantModel` with `f_phys + f_data` | MED | Open |
-| **H2** | `HybridMPC` — `NonlinearMPC` using `HybridModel` for prediction | MED | Open |
-| **H3** | RL-MPC stitching Python example | LOW | Open |
-| **H4** | `HybridModelTrainer` — hyperopt for `f_data` component | LOW | Open |
-| **D1** | Mismatch Detector — CUSUM on KF/MHE innovation | LOW | Open |
-| **D2** | Digital Twin Lite Python app | LOW | Open |
-| **C2** | 6 spec-only stubs. BEMS + MEMS have no blocker. | MED | Open |
+| **D2** | Digital Twin Lite Python app (FastAPI/Streamlit, GreyBoxEstimator-backed) | LOW | Open |
+| **C2** | 11 spec-only/undocumented case studies, re-audited Part 62 via the new tracker: 7 are "Open placeholder" (`Bouyancy-Driven Airship in Vertical Plane`, `Differential Drive Robot Tracking`, `Dual-Arm IAUV Motion Planning`, `PCM Thermal Energy Storage Control`, `Residential Building Comfort SMPC`, `Satellite Launch Vehicle Systems`, `Underwater Glider Trajectory Tracking` -- scaffolded by `tools/new_case_study.py`, plant/controllers never implemented); 6 are "Not started" (`Building Energy Management System`, `Data-Driven Sliding Mode Control of Soft Robot 2024`, `Heavy-Duty Parallel-Serial Hydraulic Manipulator VDC`, `Hybrid-Driven Tendon-Pneumatic Soft Manipulator`, `Underwater Robotic Manipulator Trajectory Tracking`, `Unmanned Surface Vehicle Wave-Predictive Attitude Control` -- PDF/README only, no `sim/`). | MED | Open |
+| **C2-NEW** | `Aircraft Engine Thermal Management` -- **Done Part 63**: promoted into the official roster. Added to README.md's and CLAUDE.md's Python-only studies tables (17 -> 18 studies, 7 -> 8 Python-only); controller roster + 4 tribal-knowledge gotchas added to CLAUDE.md. No code changes needed -- already fully implemented and already auto-discovered by `run.py` Phase 6. | -- | Done |
+| **REL** | Rebuild `ctrl_toolbox.pyd` in Release to silence stale-.pyd QP warnings | LOW | Open |
 | **B36-3** | Unify NaN-guard across controller fleet | MED | Open |
-| R1 | Edge-case contract matrix tests for every controller family | MED | Open |
-| T3 | Full DK-iteration with vector-fitting rational D(jω) | LOW | Open |
-| B36-2 | `ex79_registry_monitor` monitors nothing (M3 telemetry mis-wired) | LOW | Open |
-| REL | Rebuild `ctrl_toolbox.pyd` in Release | LOW | Open |
-| M4 | `template<typename Scalar>` leaf algorithms for embedded float target | Backlog | Open |
+| **R1** | Edge-case contract matrix tests for every controller family | MED | Open |
+| **T3** | Full DK-iteration with vector-fitting rational D(jω) | LOW | Open |
+| **TRK-2** | `case_study_tracker.py` 4-tier status detection (Complete / On-going / Open placeholder / Not started) replacing the old file-existence-only 3-tier scheme, which mis-classified untouched `new_case_study.py` scaffolds as "On-going" because the placeholder plant+controller still run and produce real-looking `logs/*.csv` | MED | **DONE (Part 62)** |
+| **DOC-1** | Reconcile `docs/PROJECT_MASTER_STATE.md` (was 12 Parts behind CLAUDE.md) and fix stale references repo-wide: `prompt/prompt_enhanced.txt` (removed Part 62, doesn't exist), `docs/audit_report.md` / `docs/roadmap_deployment_frontend.md` (moved to `docs/archived/`), missing mentions of `scripts/`, `benchmark/`, `cheatsheet/` | MED | **DONE (Part 62)** |
 | **P26-CS** | Meter-in-meter-out hydraulic case study | HIGH | **DONE (Part 26)** |
 | **T1** | Case-study regression tests (Boiler/Solar/Humid) | HIGH | **DONE (Part 33)** |
 | **T1-SMISMO** | SMISMO regression tests | HIGH | **DONE (Part 44, recreated)** |
@@ -317,7 +329,8 @@ Python binding rule: all `IController` subclasses need
 | **T4** | MHE state constraints | LOW | **DONE (Part 34)** |
 | **T5** | LinearBlend bumpless transfer | LOW | **DONE (Part 34)** |
 | **T7** | `compare_controllers.py` IAE/ISE table | LOW | **DONE (Part 34)** |
-| **C2-partial** | Active Susp + BuckBoost + DrillString + WindWave + EHFS + Firefighting + BTMS + SurfaceShip case studies | HIGH | **DONE (Parts 37-49)** |
+| **C2-partial** | Active Susp + BuckBoost + DrillString + WindWave + EHFS + Firefighting + BTMS + SurfaceShip + EV6x6 + Stewart case studies | HIGH | **DONE (Parts 37-61)** |
+| **DIST-1..5, ANA-1..7, RPT-1, PLT-1, TRK-1, DIST-3** | Distribution/analysis/cross-platform/ROS2 tracks | -- | **DONE (Parts 57E-60)** -- see CLAUDE.md for the full breakdown |
 
 ---
 
@@ -347,33 +360,26 @@ Python binding rule: all `IController` subclasses need
 | Part 46 | CEP replaces IAE as primary metric for firefighting planner studies | IAE undefined for open-loop trajectory planners; CEP (50th-pctile radial error) is the engineering metric |
 | Part 46 | `_drift_sensitivity()` not `wy*t_fall` for lateral drift compensation | Forward-speed drag coupling reduces lateral drift to ~40% of linear estimate at V=50 m/s |
 | Part 49 | MMG model SRUKF-identified parameters used directly | Paper (Meng 2025 Table 5) provides 19 identified parameters; re-identification from scratch unnecessary |
+| Part 61 | Stewart Platform hinge geometry needs different base/platform half-angles | Equal half-angles make every leg a pure rotation of every other leg -- a genuine Jacobian singularity for vertical load at the home pose, verified empirically across phase/delta combinations |
+| Part 62 | `case_study_tracker.py` status detection keys off literal placeholder-template fingerprints, not file existence | A freshly-scaffolded study's placeholder plant (`x' = -a*x + b*u`) and `OpenLoop` controller actually run, producing real-looking `logs/*.csv` -- file-existence checks alone would misclassify an untouched scaffold as "On-going" |
+| Part 62 | `docs/PROJECT_MASTER_STATE.md`'s hand-maintained case-study tree (Section 3) replaced with a pointer to `docs/case_study_status.md` | The hand-maintained version had drifted 12 Parts out of date (missing the Stewart study, 8 undiscovered directories, stale controller/run counts); the auto-generated tracker is the single source of truth going forward |
+| Part 63 | Promoted `Aircraft Engine Thermal Management` into the official 18-study roster rather than leaving it as a flagged-but-uncounted discovery | It was already fully implemented (real plant + 12 controllers, no placeholder fingerprint) and already auto-discovered by `run.py` Phase 6 - the only gap was documentation, and README.md's intro paragraph had already half-promoted it before this reconciliation, suggesting the promotion was simply left unfinished rather than intentionally deferred |
 
 ---
 
-## 8. Next Immediate Steps (Phase 2)
+## 8. Next Immediate Steps
 
-The A1-A11 algorithm set is complete and the case-study roster has reached 9 C++ + 6 Python-only studies. Phase 2 targets model estimation and hybrid models. Priority order:
-
-1. **Verify baseline** before any work: `conda run -n soft_robotics -- python run.py`
-   → Establish current UNVERIFIED counts as the new baseline; write actual numbers here.
-
-2. **[E1] `GreyBoxEstimator`** — highest-value first, ~2-3 days.
-   - New `lib/GreyBoxEstimator.{h,cpp}` following the 8-step checklist.
-   - Reuse `AutoTuner` cost-fn pattern; use `LinearisationHelper::jacobianX` for sensitivity equations.
-   - Levenberg-Marquardt via Eigen `NumericalDiff`; bounded parameter support.
-   - Example: estimate R and C of a thermal model from step-response data.
-   - 2+ `[greybox_estimator]` Catch2 tests.
-
-3. **[E2] `RecursiveGreyBoxEstimator`** — ~1-2 days.
-   - Wraps existing `UnscentedKalmanFilter`; augmented state `[x; p]`.
-   - Provide `augmentStateAndParams(x, p)` helper.
-   - Example: track motor friction coefficient drift over lifetime.
-
-4. **[E4] MHE Inequality Constraints** — shortest path, ~1-2 days.
-   - Extend `MovingHorizonEstimator` with `MHEParams::C_ineq`, `d_ineq` (polytopic state constraints).
-   - Reuse existing FISTA box-projection mechanism.
-
-5. **[C2] BEMS Python-only study** — no blocker per CLAUDE.md.
+1. **Verify baseline** before any further work: `conda run -n soft_robotics -- python run.py`
+   -> Establish current pass/fail counts as the new baseline; the counts in Section 1 are
+   structural (file/CSV counts), not verified pass status.
+2. **Triage the 7 "Open placeholder" studies** (C2 above): for each, either implement real plant
+   dynamics + controller roster (follow `prompt/make_case_study_cpp.md` or
+   `prompt/make_case_study_python.md`), or decide to leave them as future work and note that
+   explicitly in CLAUDE.md's stub tracking instead of leaving them silently undocumented.
+3. **D2 Digital Twin Lite** remains the only LOW-priority item with no implementation yet.
+4. Re-run `python tools/case_study_tracker.py` after any case-study work to keep
+   `docs/case_study_status.md` current -- it is the authoritative, low-maintenance status source;
+   avoid re-introducing a hand-maintained case-study table anywhere else in the docs.
 
 ---
 
@@ -385,8 +391,11 @@ At the end of every major iteration, update **sections 1, 6, 7, and 8** of this 
 - Section 7: append new architectural decisions
 - Section 8: rewrite next steps for the current phase
 
-Also update `docs/cumulative_bug_report.md` (Part 45+ active log) and `prompt/prompt_enhanced.txt` (full session handoff).
+Also update `docs/cumulative_bug_report.md` (Part 45+ active log) and `CLAUDE.md` (the
+canonical session guide). `prompt/` holds task-specific templates (e.g. `make_case_study_cpp.md`,
+`audit_project.md`), not a running session-history file -- there is no single "full handoff" file
+to update; `prompt/handoff_prompt61.md` is a dated snapshot, not a living document.
 
 ---
 
-*Last updated: 2026-06-11 | Part 49 complete (Surface Ship Manoeuvring Python-only study)*
+*Last updated: 2026-06-18 | Part 63 complete (Aircraft Engine Thermal Management promoted into the official case-study roster)*

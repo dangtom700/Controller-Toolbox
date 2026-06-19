@@ -4,7 +4,7 @@ A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H
 
 ~90 controller and estimation implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, an analysis pipeline (Monte Carlo, fault injection, ANOVA, WCET, mu-analysis, HTML reports), and a hardware abstraction layer for simulation.
 
-Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. C++ example programs and 100+ Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and algorithm extension. Seventeen end-to-end physics case studies (nine C++: boiler-turbine, tug boat, solar cooling, porous-plate humidification, active suspension 2-DOF, buck-boost converter, solar cooker, solar OTEC, hydraulic SMISMO; eight Python-only: drill string, wind-wave platform, electro-hydraulic force servo, aerial firefighting bag drop, battery thermal management, surface ship manoeuvring, active suspension 40-state 6x6 EV, aircraft engine thermal management) exercise the full controller stack on nonlinear plants.
+Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. C++ example programs and 100+ Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and algorithm extension. Eighteen end-to-end physics case studies (ten C++: boiler-turbine, tug boat, solar cooling, porous-plate humidification, active suspension 2-DOF, buck-boost converter, solar cooker, solar OTEC, hydraulic SMISMO, 6-DOF Stewart platform; eight Python-only: drill string, wind-wave platform, electro-hydraulic force servo, aerial firefighting bag drop, battery thermal management, surface ship manoeuvring, active suspension 40-state 6x6 EV, aircraft engine thermal management) exercise the full controller stack on nonlinear plants.
 
 ---
 
@@ -64,7 +64,7 @@ for (int k = 0; k < 500; ++k) {
 | [docs/archived/test_update.md](docs/archived/test_update.md) | Test suite history, regression coverage, sign-convention notes |
 | [docs/control_strategies_deep_dive.md](docs/control_strategies_deep_dive.md) | Taxonomy of strategy families, plant model interference, decision framework, proposed extensions |
 | [cheatsheet/](cheatsheet/) | Tuning methods, controller categories, system identification notes |
-| [case-study/](case-study/) | Seventeen full physics studies (10 C++ + 7 Python-only) -- see "Case Studies" below; auto-tracked status in [docs/case_study_status.md](docs/case_study_status.md) |
+| [case-study/](case-study/) | Eighteen full physics studies (10 C++ + 8 Python-only) -- see "Case Studies" below; auto-tracked status in [docs/case_study_status.md](docs/case_study_status.md) |
 
 ---
 
@@ -75,7 +75,7 @@ for (int k = 0; k < 500; ++k) {
 |-- lib/embedded/    # Header-only embedded subset (BasicPID, BasicSMC, DiscreteIntegrator, ...)
 |-- examples/        # ex01..ex82 single-file C++ demos
 |-- examples/python/ # ex01..ex102+ Python companion scripts and binding demos
-|-- case-study/      # 17 physics studies (10 C++ + 7 Python-only) + spec-only stubs
+|-- case-study/      # 18 physics studies (10 C++ + 8 Python-only) + spec-only stubs
 |-- tests/           # CTest-driven unit + integration tests (Catch2 v3)
 |-- bindings/        # pybind11 binding source files + smoke_test.py
 |-- ros2/            # ROS 2 package: ctrl_toolbox_ros2 (ControllerNode<T> lifecycle adapter)
@@ -92,7 +92,7 @@ for (int k = 0; k < 500; ++k) {
 
 ## Case Studies
 
-Seventeen self-contained physics studies under [case-study/](case-study/) exercise the
+Eighteen self-contained physics studies under [case-study/](case-study/) exercise the
 library end-to-end. Each pairs a nonlinear plant simulator with a roster of
 controllers that wrap the `lib/` algorithms, then sweeps every controller across
 several scenarios and writes CSV telemetry for post-processing. Per-study status and
@@ -126,6 +126,7 @@ links are auto-tracked in [docs/case_study_status.md](docs/case_study_status.md)
 | [Air-Cooled Battery Thermal Management System](case-study/Air-Cooled%20Battery%20Thermal%20Management%20System/) | 1-D transient HX, N=9 cells, 10 channels, J/U/L flow-pattern switching, Euler Ts=1s | 12 | 5 -> 60 |
 | [Nonlinear Surface Ship Manoeuvring Control](case-study/Nonlinear%20Surface%20Ship%20Manoeuvring%20Control/) | 3-DOF MMG model, 19 SRUKF-identified params (Meng 2025), [u,v,r,ψ,x,y], RK4 Ts=0.08s | 12 | 5 -> 60 |
 | [Active Suspension 6x6 EV Full Model](case-study/Active%20Suspension%206x6%20EV%20Full%20Model/) | 40-state 20-DOF (body+wheels+motors+5-DOF human biodynamic), ZOH Ts=0.005s, 6 actuators | 18 | 5 -> 90 |
+| [Aircraft Engine Thermal Management](case-study/Aircraft%20Engine%20Thermal%20Management/) | 3-state FTMS intermediate circulation loop [TT, m1, m2], effectiveness-NTU heat exchangers, 60s lumped transport delay, RK4 Ts=0.5s | 12 | 5 -> 60 |
 
 Controllers span the full stack: PID, LQR, LQG, MPC, GPC-RLS, SMC, ADRC, Fuzzy-PID,
 Smith Predictor, MRAC, H-infinity, TubeMPC, ScenarioMPC, NonlinearMPC, Feedback
@@ -134,10 +135,11 @@ DynaMBRL, CEM-MPC, Koopman-MPC, ESN, CBF safety filtering, ASMC, and gain-schedu
 (manual, LPV, and automated gap-metric) variants, depending on the plant.
 Several spec-only stubs (README/PDF only, no real `sim/` content) remain as outstanding
 work -- see [docs/case_study_status.md](docs/case_study_status.md) for the live list and
-`CLAUDE.md`'s "Spec-only stubs" section for per-study notes. A few directories scaffolded
-by `tools/new_case_study.py` show a tracker status of "On-going" while still containing
-only placeholder dynamics and a single `OpenLoop` controller -- check the study's own
-`README.md` before treating it as complete.
+`CLAUDE.md`'s "Spec-only / placeholder stubs" section for per-study notes. A few directories
+scaffolded by `tools/new_case_study.py` still contain only placeholder dynamics and a single
+`OpenLoop` controller; `tools/case_study_tracker.py` reports these as "Open placeholder"
+(distinct from "On-going", which means real plant+controller code) -- check the study's own
+`README.md` before treating any study as complete.
 
 ---
 
@@ -175,13 +177,24 @@ only placeholder dynamics and a single `OpenLoop` controller -- check the study'
 
 ## Project Status
 
-**Baseline (Part 61 - 2026-06-18, UNVERIFIED until next clean `run.py`):**
+**Baseline (Part 63 - 2026-06-18, UNVERIFIED until next clean `run.py`):**
 C++ case studies: Boiler 216/216 . Tug 72/72 . Solar 70/70 . Humidification 75/75 .
 ActiveSuspension 90/90 (18 ctrl) . BuckBoost 60/60 . SolarCooker 60/60 . SOTEC 60/60 . SMISMO 65/65 (13 ctrl) .
 Stewart 720/720 (12 ctrl x 60 sea-state configs).
 Python-only (Phase 6): DrillString 85/85 . WindWave 80/80 . EHFS 70/70 (14 ctrl) .
-Firefighting 60/60 . BTMS 60/60 . SurfaceShip 60/60 . EV6x6 90/90 (18 ctrl).
+Firefighting 60/60 . BTMS 60/60 . SurfaceShip 60/60 . EV6x6 90/90 (18 ctrl) .
+AircraftEngine 60/60 (12 ctrl).
 `bug_report.txt`: 0 blocks expected after a clean run.
+
+**Part 63 (2026-06-18) - Aircraft Engine Thermal Management promoted into the official roster:**
+- `case-study/Aircraft Engine Thermal Management/` was already fully implemented (12
+  controllers x 5 scenarios, real FTMS intermediate-circulation-loop plant) but had never
+  been added to this README's tables or counts -- discovered via a `tools/case_study_tracker.py`
+  rewrite (Part 62) that re-scanned every `case-study/*/` directory. No code changes were
+  needed: it's a pure Python-only study already auto-discovered by `run.py` Phase 6.
+- Study roster (12): OpenLoop, PID, ADRC, SMC, LQR, MPC, MRAC, L1Adaptive, GainScheduled,
+  SmithPredictor, NeuralPID, ILC. Negative-static-gain plant (mirrors the documented Solar
+  Cooker sign-convention precedent) -- see the study's own README "Implementation Notes".
 
 **Part 61 (2026-06-18) - 6-DOF Stewart Platform Vessel Motion Simulator (C++ case study):**
 - `stewart_sim` - closed-form inverse kinematics + velocity Jacobian for a 6-UPU hinge

@@ -8,11 +8,19 @@ Language detection (in priority order):
      sim/ directory exists -> Python
   3. Count source file extensions across the whole study tree.
 
-Status detection:
-  Complete  - has sim/, logs/ with CSVs, config/, AND a .html report
-  On-going  - has sim/, logs/ with CSVs, and config/
-  Incomplete - has at least one PDF and a README.md (spec only)
-  Not started - default
+Status detection (4-tier):
+  Complete         - sim/ has real plant+controller code (placeholder signature
+                     gone), AND logs/*.csv AND config/ AND a *.html report exist
+                     -- plant model, controller, and performance analysis done.
+  On-going         - sim/ has real plant+controller code (placeholder signature
+                     gone) -- plant model and controller implemented, but no
+                     performance-analysis artifact yet.
+  Open placeholder - sim/ exists but the plant or controller file still matches
+                     the literal body tools/new_case_study.py writes (untouched
+                     scaffold). NOTE: a fresh scaffold's placeholder dynamics and
+                     OpenLoop controller actually run, so logs/*.csv may already
+                     exist here -- that is placeholder output, not real progress.
+  Not started      - no sim/ framework at all (just a PDF, or PDF + README spec).
 
 Output: docs/case_study_status.md  (Markdown table)
 """
@@ -88,24 +96,56 @@ def _has_sim(path: pathlib.Path) -> bool:
     return any(True for f in sim.rglob("main.*") if f.is_file())
 
 
-def detect_status(case_study_path: pathlib.Path) -> str:
-    has_sim    = _has_sim(case_study_path)
-    has_logs   = _has_logs(case_study_path)
+def _read_text(path: pathlib.Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return ""
+
+
+# Literal fingerprints copied from the templates in tools/new_case_study.py
+# (CPP_PLANT_CPP, CPP_CONTROLLERS_CPP, PY_PLANT, PY_CONTROLLERS). An untouched
+# scaffold still contains these exact lines verbatim.
+_PLACEHOLDER_PLANT_CPP = "-p_.param_a * x_(0) + p_.param_b * u"
+_PLACEHOLDER_PLANT_PY = "-self.a * self.x[0] + self.b * u"
+_PLACEHOLDER_CTRL_CPP = 'out.push_back({"OpenLoop", nullptr})'
+_PLACEHOLDER_CTRL_PY = 'roster = [("OpenLoop", OpenLoop())]'
+
+
+def _is_untouched_scaffold(case_study_path: pathlib.Path, language: str) -> bool:
+    """True if the plant or controller file still matches the literal
+    new_case_study.py placeholder body, i.e. nobody has implemented real
+    physics/controllers yet -- regardless of how many log files exist."""
+    sim = case_study_path / "sim"
+    if language == "C++":
+        plant_files = list(sim.rglob("*_plant.cpp"))
+        ctrl_files = list(sim.rglob("controllers.cpp"))
+        plant_sig, ctrl_sig = _PLACEHOLDER_PLANT_CPP, _PLACEHOLDER_CTRL_CPP
+    elif language == "Python":
+        plant_files = list(sim.glob("*_plant.py"))
+        ctrl_files = list(sim.glob("controllers.py"))
+        plant_sig, ctrl_sig = _PLACEHOLDER_PLANT_PY, _PLACEHOLDER_CTRL_PY
+    else:
+        return False
+    plant_untouched = any(plant_sig in _read_text(f) for f in plant_files)
+    ctrl_untouched = any(ctrl_sig in _read_text(f) for f in ctrl_files)
+    return plant_untouched or ctrl_untouched
+
+
+def detect_status(case_study_path: pathlib.Path, language: str) -> str:
+    if not _has_sim(case_study_path):
+        return "Not started"
+
+    if _is_untouched_scaffold(case_study_path, language):
+        return "Open placeholder"
+
+    has_logs = _has_logs(case_study_path)
     has_config = _has_config(case_study_path)
     has_report = any(case_study_path.rglob("*.html"))
-    has_pdf    = any(True for f in case_study_path.iterdir()
-                     if f.is_file() and f.suffix.lower() == ".pdf")
-    has_readme = (case_study_path / "README.md").exists()
 
-    if has_sim and has_logs and has_config and has_report:
+    if has_logs and has_config and has_report:
         return "Complete"
-    if has_sim and has_logs and has_config:
-        return "On-going"
-    if has_pdf and has_readme:
-        return "Incomplete"
-    if has_pdf or has_readme:
-        return "Incomplete"
-    return "Not started"
+    return "On-going"
 
 
 # -- Link helpers --------------------------------------------------------------
@@ -135,7 +175,7 @@ def main() -> None:
         if not name.is_dir() or name.name == "__pycache__":
             continue
         language  = detect_language(name)
-        status    = detect_status(name)
+        status    = detect_status(name, language)
         reference = find_pdf_link(name)
         link      = find_readme_link(name)
         entries.append((name.name, language, reference, status, link))

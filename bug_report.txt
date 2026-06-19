@@ -1,0 +1,59 @@
+Bug Report - generated from run_20260618_160720.log on 2026-06-18 16:33:10.081379
+Total failure indicators found: 2
+Merged into 2 block(s)
+========================================================================
+
+--- FAILURE BLOCK #1 (keywords: warn) ---
+Lines 7418 - 7438
+
+    7418: 
+    7419: === RelayAutoTuner Extended ===
+    7420:   [PASS] TC-RELAY-01: Relay loop converges (isDone() == true)
+    7421:   [PASS] TC-RELAY-01: Ku and Tu are positive
+    7422:   [PASS] TC-RELAY-02: ZN gains valid
+    7423:   [PASS] TC-RELAY-03: AMIGO gains valid
+    7424:   [PASS] TC-RELAY-04: IMC-from-relay yields PI (Kd=0)
+    7425:   [PASS] TC-RELAY-05: Works with zero hysteresis
+    7426: 
+    7427: === StepResponseTuner Extended ===
+>>> 7428:   [WARN] Step response data not found. Run generate_test_data.py first.
+    7429:   [PASS] TC-STEP-06: theta=0 in ZN does not crash (no exception)
+    7430: 
+    7431: === Other Tuners Extended ===
+    7432:   [PASS] TC-POLE-01: Q and R are positive definite
+    7433:   [PASS] TC-POLE-04: Complex conjugate pairs handled correctly
+    7434:   [PASS] TC-KWT-01: Qf diagonal matches variance
+    7435:   [PASS] TC-KWT-02: Rf diagonal matches variance
+    7436: 
+    7437: --------------------------------------------
+    7438:   Results: 11 passed, 0 failed
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #2 (keywords: skip) ---
+Lines 7749 - 7769
+
+    7749: ------------------------------------------------------------------------
+    7750: 
+    7751: ============================================================
+    7752: ex02 - Step Response Simulation
+    7753: ============================================================
+    7754: 
+    7755: Simulated 1500 steps at Ts=0.01 s
+    7756:   y[0]   = 0.000000000   (expected 0.0)
+    7757:   y[-1]  = 0.897737840  (expected approx = 1.0)
+    7758: 
+>>> 7759:   [SKIP] CSV not found at tests\data\step_response.csv
+    7760:   Run: python scripts/generate_test_data.py  to generate it first.
+    7761:   [PASS] DC gain - measured=0.897758, expected=0.898000, rel_err=0.0270%
+    7762: 
+    7763:   FOPDT estimate (tangent method):
+    7764:     K     = 0.8977
+    7765:     tau   = 1.1400 s
+    7766:     theta = 0.5300 s
+    7767:   [PASS] assert_close (tau approx = 1.0 s): |1.14 - 1| = 1.400e-01  (tol=5.000e-01)
+    7768: 
+    7769: ================================================
+
+------------------------------------------------------------------------
+

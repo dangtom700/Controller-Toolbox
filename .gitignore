@@ -20,6 +20,7 @@ run_corrector_check.txt
 CLAUDE.md
 memory/
 /case-study/**/*.txt
+!/case-study/**/CMakeLists.txt
 !/tools/*.py
 data/
 case-study/**/*.csv
