@@ -11,6 +11,7 @@ import csv
 import math
 import os
 import random
+import time
 
 from btms_plant import BTMSPlant
 
@@ -81,7 +82,8 @@ def run_simulation(plant_params: dict,
                    scenario:     dict,
                    controller,
                    log_dir:      str,
-                   fault_injector=None) -> dict:
+                   fault_injector=None,
+                   wcet_sink:    list = None) -> dict:
     """
     Simulate one (scenario, controller) pair.
     Returns summary dict: {name, scenario_id, IAE, max_delta_T, avg_delta_T,
@@ -89,6 +91,9 @@ def run_simulation(plant_params: dict,
     Optional fault_injector: tools.fault_injector.FaultInjector instance.
       - sensor fault: biases DeltaT reading seen by controller
       - actuator fault: not applied (output is discrete flow pattern string)
+    Optional wcet_sink: if a list is passed, one dict per step
+      {"controller": name, "step_time_us": float, "step_index": k} timing
+      controller.compute() is appended to it (see tools/wcet_report.py).
     """
     plant = BTMSPlant(plant_params)
     plant.set_pattern('J')        # always start with J-type (lowest DeltaT at 5C, per paper)
@@ -137,7 +142,13 @@ def run_simulation(plant_params: dict,
             DeltaT_obs = fi.inject_sensor(t, DeltaT) if fi else DeltaT
 
             # Controller decision (actuator output is discrete - no actuator fault)
-            new_pattern = controller.compute(DeltaT_obs, x_hot, soc, t)
+            if wcet_sink is not None:
+                t0 = time.perf_counter()
+                new_pattern = controller.compute(DeltaT_obs, x_hot, soc, t)
+                dt_us = (time.perf_counter() - t0) * 1e6
+                wcet_sink.append({"controller": ctrl_name, "step_time_us": dt_us, "step_index": k})
+            else:
+                new_pattern = controller.compute(DeltaT_obs, x_hot, soc, t)
             plant.set_pattern(new_pattern)
 
             # Metrics

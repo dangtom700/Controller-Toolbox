@@ -3,12 +3,13 @@ simulation_runner.py
 Run one (scenario, controller) pair for the FOWT+WEC case study.
 
 CSV columns:
-  time, x_ref, z, zdot, x_rel, xrel_dot, F_pto, power, fowt_rms_cumul
+  time, x_ref, z, zdot, x_rel, xrel_dot, F_pto, power, fowt_rms_cumul, iae_cumulative
 """
 
 import csv
 import math
 import os
+import time
 
 from wind_wave_plant import FOWTWECPlant, make_wave_fn
 
@@ -78,12 +79,16 @@ def run_simulation(plant_params: dict,
                    scenario:     dict,
                    controller,
                    log_dir:      str,
-                   fault_injector=None) -> dict:
+                   fault_injector=None,
+                   wcet_sink:    list = None) -> dict:
     """
     Simulate the FOWT+WEC for one scenario/controller pair.
 
     Returns summary dict: {name, scenario_id, mean_power, IAE, fowt_rms, csv}
     Optional fault_injector: tools.fault_injector.FaultInjector instance.
+    Optional wcet_sink: if a list is passed, one dict per step
+      {"controller": name, "step_time_us": float, "step_index": k} timing
+      controller.compute() is appended to it (see tools/wcet_report.py).
     """
     plant = FOWTWECPlant(plant_params)
     wave_fn  = make_wave_fn(scenario, plant_params)
@@ -107,7 +112,7 @@ def run_simulation(plant_params: dict,
     with open(csv_path, 'w', newline='') as fh:
         writer = csv.writer(fh)
         writer.writerow(['time', 'x_ref', 'z', 'zdot', 'x_rel', 'xrel_dot',
-                         'F_pto', 'power', 'fowt_rms_cumul'])
+                         'F_pto', 'power', 'fowt_rms_cumul', 'iae_cumulative'])
 
         for k in range(N):
             t       = k * Ts
@@ -121,7 +126,13 @@ def run_simulation(plant_params: dict,
             else:
                 ps_obs = ps
 
-            F_pto = controller.compute(x_ref, ps_obs, t)
+            if wcet_sink is not None:
+                t0 = time.perf_counter()
+                F_pto = controller.compute(x_ref, ps_obs, t)
+                dt_us = (time.perf_counter() - t0) * 1e6
+                wcet_sink.append({"controller": ctrl_name, "step_time_us": dt_us, "step_index": k})
+            else:
+                F_pto = controller.compute(x_ref, ps_obs, t)
             # Actuator fault: corrupt PTO force command
             F_pto = fi.inject_actuator(t, F_pto) if fi else F_pto
             F_pto = max(-plant_params['F_max'], min(plant_params['F_max'], F_pto))
@@ -137,7 +148,7 @@ def run_simulation(plant_params: dict,
                              f"{z:.4f}", f"{zd:.4f}",
                              f"{xr:.4f}", f"{xrd:.4f}",
                              f"{F_pto:.2f}", f"{power:.2f}",
-                             f"{fowt_rms:.4f}"])
+                             f"{fowt_rms:.4f}", f"{iae:.4f}"])
 
             plant.step(F_pto, t)
 

@@ -15,6 +15,7 @@ Reference:
   Results in Engineering, 27, 105940.
 """
 
+import csv as _csv
 import json
 import os
 import sys
@@ -163,3 +164,39 @@ def run_with_fault(ctrl_name, fault, scenario_id=None):
     with _tempfile.TemporaryDirectory() as tmp:
         return run_simulation(_p, sc, pl, tmp,
                               fault_injector=FaultInjector([fault]))
+
+
+def run_wcet_profile(log_dir=None):
+    """Time traj_plant.simulate() per Monte Carlo sample for every planner,
+    across every scenario (not just the nominal one).
+
+    planner.plan() itself runs once per scenario (not in a per-step loop
+    like the other case studies), so the repeated per-trajectory physics
+    call inside run_simulation()'s N_mc loop is timed instead.
+
+    Writes one logs/wcet_{scenario_id}.csv (controller, step_time_us,
+    step_index) per scenario for tools/wcet_report.py.
+    """
+    log_dir = log_dir or os.path.join(_H_BASE, 'logs')
+    os.makedirs(log_dir, exist_ok=True)
+
+    fnames = sorted(f for f in os.listdir(_H_SCEN) if f.endswith('.json'))
+    out_paths = []
+    for fn in fnames:
+        sc = _h_json(os.path.join(_H_SCEN, fn))
+        rows = []
+        for ctrl_name in CONTROLLER_NAMES:
+            pl_list = make_planners(_H_NOM)
+            pl = next((x for x in pl_list if x.name() == ctrl_name), None)
+            if pl is None:
+                continue
+            with _tempfile.TemporaryDirectory() as tmp:
+                run_simulation(_H_NOM, sc, pl, tmp, wcet_sink=rows)
+
+        out_path = os.path.join(log_dir, f"wcet_{sc['id']}.csv")
+        with open(out_path, 'w', newline='') as fh:
+            writer = _csv.DictWriter(fh, fieldnames=["controller", "step_time_us", "step_index"])
+            writer.writeheader()
+            writer.writerows(rows)
+        out_paths.append(out_path)
+    return out_paths

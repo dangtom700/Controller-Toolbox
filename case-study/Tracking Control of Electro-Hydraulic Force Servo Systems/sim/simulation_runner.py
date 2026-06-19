@@ -9,6 +9,7 @@ CSV columns:
 import csv
 import math
 import os
+import time
 
 from ehfs_plant import EHFSPlant
 
@@ -48,11 +49,15 @@ def run_simulation(plant_params: dict,
                    scenario:     dict,
                    controller,
                    log_dir:      str,
-                   fault_injector=None) -> dict:
+                   fault_injector=None,
+                   wcet_sink:    list = None) -> dict:
     """
     Simulate the EHFS for one scenario/controller pair.
     Returns summary: {name, scenario_id, IAE, max_error, settling_time, csv}
     Optional fault_injector: tools.fault_injector.FaultInjector instance.
+    Optional wcet_sink: if a list is passed, one dict per step
+      {"controller": name, "step_time_us": float, "step_index": k} timing
+      controller.compute() is appended to it (see tools/wcet_report.py).
     """
     # Clone params so per-scenario k_L changes don't leak
     params = dict(plant_params)
@@ -92,7 +97,13 @@ def run_simulation(plant_params: dict,
             # Sensor fault: corrupt force measurement seen by controller
             F_obs = fi.inject_sensor(t, F) if fi else F
 
-            u_v = controller.compute(F_ref, F_obs, vp, P_A, P_B, xv, t)
+            if wcet_sink is not None:
+                t0 = time.perf_counter()
+                u_v = controller.compute(F_ref, F_obs, vp, P_A, P_B, xv, t)
+                dt_us = (time.perf_counter() - t0) * 1e6
+                wcet_sink.append({"controller": ctrl_name, "step_time_us": dt_us, "step_index": k})
+            else:
+                u_v = controller.compute(F_ref, F_obs, vp, P_A, P_B, xv, t)
             # Actuator fault: corrupt valve command
             u_v = fi.inject_actuator(t, u_v) if fi else u_v
             u_v = max(-1.0, min(1.0, u_v))

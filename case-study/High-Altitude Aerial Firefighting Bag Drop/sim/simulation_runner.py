@@ -8,7 +8,12 @@ are collected and accuracy metrics are computed.
 
 CSV columns (one row per Monte Carlo sample):
   sample_id, x_impact, y_impact, t_flight,
-  wx_true, wy_true, error_x, error_y, radial_error
+  wx_true, wy_true, error_x, error_y, radial_error, iae
+
+iae is CEP repeated on every row (this run's primary metric, constant across
+trials) so shared tooling (tools/metrics.py::extract_final_iae) recognises a
+per-(scenario, controller) IAE-equivalent value for this study, alongside the
+trailing '# CEP' summary row below which carries the same value in that slot.
 
 Metrics returned:
   IAE          -- CEP [m] (50th-percentile radial error, used as primary metric)
@@ -21,6 +26,7 @@ import csv
 import math
 import os
 import random
+import time
 
 from bag_drop_plant import BagDropPlant
 from planners import IterativeRefinementDrop, AdaptiveRLSDrop
@@ -30,7 +36,8 @@ def run_simulation(plant_params: dict,
                    scenario:     dict,
                    planner,
                    log_dir:      str,
-                   fault_injector=None) -> dict:
+                   fault_injector=None,
+                   wcet_sink:    list = None) -> dict:
     """
     Evaluate planner on the given scenario using N_mc random wind realizations.
 
@@ -40,6 +47,12 @@ def run_simulation(plant_params: dict,
     Optional fault_injector: tools.fault_injector.FaultInjector instance.
       - sensor fault: biases the wind estimate (wx_mean, wy_mean) seen by planner
       - actuator fault: scales the planned release offsets (x_off, y_off)
+    Optional wcet_sink: if a list is passed, one dict per Monte Carlo sample
+      {"controller": name, "step_time_us": float, "step_index": k} timing
+      traj_plant.simulate() is appended to it (see tools/wcet_report.py).
+      planner.plan() itself runs once per scenario (not in a per-step loop
+      like the other case studies), so the repeated per-trajectory physics
+      call below is timed instead - see tools/study_protocol.py.
     """
     planner.reset()
     fi = fault_injector
@@ -77,12 +90,20 @@ def run_simulation(plant_params: dict,
     impacts   = []   # list of (x_i, y_i, t_i, wx_i, wy_i)
     traj_plant = BagDropPlant(plant_params)
 
-    for _ in range(N_mc):
+    for idx in range(N_mc):
         wx_s = wx_mean + sigma_w * rng.gauss(0, 1)
         wy_s = wy_mean + sigma_w * rng.gauss(0, 1)
-        xi, yi, ti, _ = traj_plant.simulate(
-            h_drop, V_aircraft, (wx_s, wy_s, 0.0),
-            x0=x_off, y0=y_off)
+        if wcet_sink is not None:
+            t0 = time.perf_counter()
+            xi, yi, ti, _ = traj_plant.simulate(
+                h_drop, V_aircraft, (wx_s, wy_s, 0.0),
+                x0=x_off, y0=y_off)
+            dt_us = (time.perf_counter() - t0) * 1e6
+            wcet_sink.append({"controller": ctrl_name, "step_time_us": dt_us, "step_index": idx})
+        else:
+            xi, yi, ti, _ = traj_plant.simulate(
+                h_drop, V_aircraft, (wx_s, wy_s, 0.0),
+                x0=x_off, y0=y_off)
         impacts.append((xi, yi, ti, wx_s, wy_s))
 
     # --- Metrics ----------------------------------------------------------
@@ -128,7 +149,7 @@ def run_simulation(plant_params: dict,
         writer = csv.writer(fh)
         writer.writerow(['sample_id', 'x_impact', 'y_impact', 't_flight',
                          'wx_true', 'wy_true', 'error_x', 'error_y',
-                         'radial_error'])
+                         'radial_error', 'iae'])
         for idx, (xi, yi, ti, wx_s, wy_s) in enumerate(impacts):
             ex = xi - x_nom
             ey = yi
@@ -143,11 +164,15 @@ def run_simulation(plant_params: dict,
                 f"{ex:.3f}",
                 f"{ey:.3f}",
                 f"{r:.3f}",
+                f"{cep:.3f}",
             ])
-        # Summary row
+        # Summary row - padded to the same 10-column width as the data rows
+        # above so the 'iae' column (index 9) still resolves to the CEP value
+        # for tools that read the file's last row (e.g. extract_final_iae).
         writer.writerow(['# CEP', f"{cep:.3f}", 'P95', f"{max_radial:.3f}",
                          'L_pat', f"{pattern_length:.3f}",
-                         'W_pat', f"{pattern_width:.3f}"])
+                         'W_pat', f"{pattern_width:.3f}",
+                         '', f"{cep:.3f}"])
 
     return {
         'name':           ctrl_name,

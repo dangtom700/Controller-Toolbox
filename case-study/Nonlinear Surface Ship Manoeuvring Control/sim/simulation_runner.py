@@ -5,12 +5,13 @@ Simulation runner for the Nonlinear Surface Ship Manoeuvring case study.
 import os
 import csv
 import math
+import time
 
 from ship_plant import ShipPlant, make_disturbance_fn, make_ref_fn
 
 
 def run_simulation(plant_params, scenario, controller, log_dir,
-                   fault_injector=None):
+                   fault_injector=None, wcet_sink: list = None):
     """
     Run one closed-loop simulation.
 
@@ -26,6 +27,9 @@ def run_simulation(plant_params, scenario, controller, log_dir,
     Optional fault_injector: tools.fault_injector.FaultInjector instance.
       - sensor fault: biases heading (psi) measurement seen by controller
       - actuator fault: corrupts rudder command (delta_cmd)
+    Optional wcet_sink: if a list is passed, one dict per step
+      {"controller": name, "step_time_us": float, "step_index": k} timing
+      controller.compute() is appended to it (see tools/wcet_report.py).
     """
     Ts      = plant_params["integration"]["Ts"]
     t_max   = scenario["t_max"]
@@ -73,7 +77,13 @@ def run_simulation(plant_params, scenario, controller, log_dir,
             else:
                 state_obs = state
 
-            n_cmd, delta_cmd = controller.compute(x_ref, state_obs, t)
+            if wcet_sink is not None:
+                t0 = time.perf_counter()
+                n_cmd, delta_cmd = controller.compute(x_ref, state_obs, t)
+                dt_us = (time.perf_counter() - t0) * 1e6
+                wcet_sink.append({"controller": safe_name, "step_time_us": dt_us, "step_index": k})
+            else:
+                n_cmd, delta_cmd = controller.compute(x_ref, state_obs, t)
             # Actuator fault: corrupt rudder angle command
             delta_cmd = fi.inject_actuator(t, delta_cmd) if fi else delta_cmd
 

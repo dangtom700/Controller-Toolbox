@@ -9,6 +9,7 @@ CSV columns:
 import csv
 import math
 import os
+import time
 
 from drill_string_plant import DrillStringPlant
 
@@ -49,12 +50,16 @@ def run_simulation(plant_params: dict,
                    scenario:     dict,
                    controller,
                    log_dir:      str,
-                   fault_injector=None) -> dict:
+                   fault_injector=None,
+                   wcet_sink:    list = None) -> dict:
     """
     Simulate the drill string for one scenario/controller pair.
 
     Returns a summary dict: {name, scenario_id, IAE, settling_time, max_error}
     Optional fault_injector: tools.fault_injector.FaultInjector instance.
+    Optional wcet_sink: if a list is passed, one dict per step
+      {"controller": name, "step_time_us": float, "step_index": k} timing
+      controller.compute() is appended to it (see tools/wcet_report.py).
     """
     plant = DrillStringPlant(plant_params)
     controller.reset()
@@ -88,7 +93,13 @@ def run_simulation(plant_params: dict,
             # Sensor fault: corrupt bit-speed measurement seen by controller
             omega_b_obs = fi.inject_sensor(t, omega_b) if fi else omega_b
 
-            omega_t = controller.compute(omega_ref, omega_b_obs, phi, t)
+            if wcet_sink is not None:
+                t0 = time.perf_counter()
+                omega_t = controller.compute(omega_ref, omega_b_obs, phi, t)
+                dt_us = (time.perf_counter() - t0) * 1e6
+                wcet_sink.append({"controller": ctrl_name, "step_time_us": dt_us, "step_index": k})
+            else:
+                omega_t = controller.compute(omega_ref, omega_b_obs, phi, t)
             # Actuator fault: corrupt top-drive speed command
             omega_t = fi.inject_actuator(t, omega_t) if fi else omega_t
             omega_t = max(-plant_params['omega_max'],
