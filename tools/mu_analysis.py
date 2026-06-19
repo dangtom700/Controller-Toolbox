@@ -17,7 +17,8 @@ Options:
     --study    NAME   filter by study (partial match)
     --scenario NAME   scenario to use (default: s01 or S1)
     --n_freq   INT    number of frequency points (default: 512)
-    --out      FILE   write results CSV (default: mu_summary.csv)
+    --out      FILE   override path; only valid when exactly one study matches
+                      (default: case-study/<study>/mu_analysis.csv per matching study)
     --plot           emit bode/sigma PNG per study
 
 The analysis is approximate: it identifies a discrete-time ARMA(2,2) model from the
@@ -135,7 +136,7 @@ def main(argv=None):
     ap.add_argument("--study",    default="")
     ap.add_argument("--scenario", default="s01")
     ap.add_argument("--n_freq",   type=int, default=512)
-    ap.add_argument("--out",      default="mu_summary.csv")
+    ap.add_argument("--out",      default="")
     ap.add_argument("--plot",     action="store_true")
     args = ap.parse_args(argv)
 
@@ -164,8 +165,10 @@ def main(argv=None):
         # Pick y and u columns
         cols = list(df.columns)
         from tools.metrics import compute_metrics_from_df  # just for column heuristics
-        y_candidates = ["y", "y1", "z_s", "omega_b", "T_h", "T_pot", "v_out", "x_p"]
-        u_candidates = ["u", "u1", "F_act", "m_dot_f", "f_shade", "omega_t", "d"]
+        # Z_body/F_act_1 (EV6x6): MIMO 6-actuator plant, no single SISO loop -
+        # front-right corner stands in as a representative channel (approximate).
+        y_candidates = ["y", "y1", "z_s", "omega_b", "T_h", "T_pot", "v_out", "x_p", "Z_body"]
+        u_candidates = ["u", "u1", "F_act", "m_dot_f", "f_shade", "omega_t", "d", "F_act_1"]
         e_candidates = ["error", "e1", "e"]
         y_col = next((c for c in y_candidates if c in cols), None)
         u_col = next((c for c in u_candidates if c in cols), None)
@@ -205,35 +208,49 @@ def main(argv=None):
                      "peak_S": peak_S, "peak_T": peak_T, "status": "ok"})
         print(f"  {study[:30]:30s} {scenario:20s}  peak_S={peak_S:.3f}  peak_T={peak_T:.3f}")
 
+    from collections import defaultdict
+    by_study: dict[str, list[dict]] = defaultdict(list)
+    for r in rows:
+        by_study[r["study"]].append(r)
+
+    if args.out and len(by_study) > 1:
+        print(f"ERROR: --out given but {len(by_study)} studies matched; "
+              f"omit --out or narrow with --study to use it.")
+        sys.exit(1)
+
     import csv as csv_mod
-    with open(args.out, "w", newline="") as fh:
-        w = csv_mod.DictWriter(fh, fieldnames=["study", "scenario", "peak_S", "peak_T", "status"])
-        w.writeheader()
-        w.writerows(rows)
-    print(f"\nMu summary written to: {args.out}  ({len(rows)} rows)")
+    for study_name, study_rows in sorted(by_study.items()):
+        out_path = Path(args.out) if args.out else (_ROOT / "case-study" / study_name / "mu_analysis.csv")
+        with open(out_path, "w", newline="") as fh:
+            w = csv_mod.DictWriter(fh, fieldnames=["study", "scenario", "peak_S", "peak_T", "status"])
+            w.writeheader()
+            w.writerows(study_rows)
+        print(f"\n[{study_name}]  Mu analysis written to: {out_path}  ({len(study_rows)} rows)")
 
-    if args.plot and rows:
-        try:
-            import matplotlib
-            matplotlib.use("Agg")
-            import matplotlib.pyplot as plt
+        if args.plot:
+            try:
+                import matplotlib
+                matplotlib.use("Agg")
+                import matplotlib.pyplot as plt
 
-            df_sum = pd.DataFrame(rows).dropna(subset=["peak_T"])
-            fig, ax = plt.subplots(figsize=(10, 5))
-            ax.barh(range(len(df_sum)), df_sum["peak_T"], color="steelblue")
-            ax.axvline(1.0, color="red", linestyle="--", label="||T||_inf = 1 (stability margin)")
-            ax.set_yticks(range(len(df_sum)))
-            ax.set_yticklabels([f"{r['study'][:25]}/{r['scenario']}" for _, r in df_sum.iterrows()], fontsize=7)
-            ax.set_xlabel("Peak |T(z)| (mu upper bound)")
-            ax.set_title("Unstructured mu upper bound per study/scenario")
-            ax.legend()
-            fig.tight_layout()
-            plot_path = Path(args.out).with_suffix(".png")
-            fig.savefig(plot_path, dpi=150)
-            plt.close(fig)
-            print(f"Plot saved: {plot_path}")
-        except ImportError:
-            print("WARN: matplotlib not found - skipping plot")
+                df_sum = pd.DataFrame(study_rows).dropna(subset=["peak_T"])
+                if df_sum.empty:
+                    continue
+                fig, ax = plt.subplots(figsize=(10, 5))
+                ax.barh(range(len(df_sum)), df_sum["peak_T"], color="steelblue")
+                ax.axvline(1.0, color="red", linestyle="--", label="||T||_inf = 1 (stability margin)")
+                ax.set_yticks(range(len(df_sum)))
+                ax.set_yticklabels(list(df_sum["scenario"]), fontsize=7)
+                ax.set_xlabel("Peak |T(z)| (mu upper bound)")
+                ax.set_title(f"{study_name} - unstructured mu upper bound per scenario")
+                ax.legend()
+                fig.tight_layout()
+                plot_path = out_path.with_suffix(".png")
+                fig.savefig(plot_path, dpi=150)
+                plt.close(fig)
+                print(f"Plot saved: {plot_path}")
+            except ImportError:
+                print("WARN: matplotlib not found - skipping plot")
 
 
 if __name__ == "__main__":

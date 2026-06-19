@@ -740,25 +740,49 @@ class ScenarioMPCCtrl(ControllerBase):
 # Factory
 # ======================================================================
 
-def make_controllers(params: dict, plant: EV6x6Plant):
+# (name, factory) pairs in the paper's roster order. Kept as data (not a plain
+# list-returning function) so a single controller can be built without paying
+# for the other 17 - GAOptPDCtrl/PSOOptPDCtrl/DEOptPDCtrl each run a ~10s
+# metaheuristic search in __init__, and LQRCtrl/LQGCtrl each solve a DARE on
+# the full 40-state system, so building all 18 costs ~30s (see
+# config/analysis.json's note); MC/fault sweeps need only one per call.
+_CONTROLLER_FACTORIES = [
+    ("PassiveCtrl",     lambda params, Ts, plant: PassiveCtrl()),
+    ("PDCtrl",          lambda params, Ts, plant: PDCtrl(params, Ts)),
+    ("GAOptPDCtrl",     lambda params, Ts, plant: GAOptPDCtrl(params, Ts)),   # paper core contribution
+    ("PSOOptPDCtrl",    lambda params, Ts, plant: PSOOptPDCtrl(params, Ts)),
+    ("DEOptPDCtrl",     lambda params, Ts, plant: DEOptPDCtrl(params, Ts)),
+    ("PIDCtrl",         lambda params, Ts, plant: PIDCtrl(params, Ts)),
+    ("LQRCtrl",         lambda params, Ts, plant: LQRCtrl(plant)),
+    ("LQGCtrl",         lambda params, Ts, plant: LQGCtrl(plant)),
+    ("MPCCtrl",         lambda params, Ts, plant: MPCCtrl(plant)),
+    ("ADRCCtrl",        lambda params, Ts, plant: ADRCCtrl(params, Ts)),
+    ("SMCCtrl",         lambda params, Ts, plant: SMCCtrl(params, Ts)),
+    ("MRACCtrl",        lambda params, Ts, plant: MRACCtrl(params, Ts)),
+    ("FuzzyPIDCtrl",    lambda params, Ts, plant: FuzzyPIDCtrl(params, Ts)),
+    ("TubeMPCCtrl",     lambda params, Ts, plant: TubeMPCCtrl(plant)),
+    ("ILCCtrl",         lambda params, Ts, plant: ILCCtrl(params, Ts)),
+    ("CBFCtrl",         lambda params, Ts, plant: CBFCtrl(params, Ts)),
+    ("L1AdaptiveCtrl",  lambda params, Ts, plant: L1AdaptiveCtrl(params, Ts)),
+    ("ScenarioMPCCtrl", lambda params, Ts, plant: ScenarioMPCCtrl(plant)),
+]
+
+
+def controller_names() -> list:
+    """Static roster of controller names - no construction, safe at import time."""
+    return [name for name, _ in _CONTROLLER_FACTORIES]
+
+
+def make_controllers(params: dict, plant: EV6x6Plant, only: Optional[str] = None):
+    """Build the full 18-controller roster, or just one if `only` is given.
+
+    `only` must match a name from controller_names(); building one controller
+    skips constructing the other 17 (see _CONTROLLER_FACTORIES docstring).
+    """
     Ts = params['Ts']
-    return [
-        PassiveCtrl(),                  # 1
-        PDCtrl(params, Ts),             # 2
-        GAOptPDCtrl(params, Ts),        # 3  (paper core contribution)
-        PSOOptPDCtrl(params, Ts),       # 4
-        DEOptPDCtrl(params, Ts),        # 5
-        PIDCtrl(params, Ts),            # 6
-        LQRCtrl(plant),                 # 7
-        LQGCtrl(plant),                 # 8
-        MPCCtrl(plant),                 # 9
-        ADRCCtrl(params, Ts),           # 10
-        SMCCtrl(params, Ts),            # 11
-        MRACCtrl(params, Ts),           # 12
-        FuzzyPIDCtrl(params, Ts),       # 13
-        TubeMPCCtrl(plant),             # 14
-        ILCCtrl(params, Ts),            # 15
-        CBFCtrl(params, Ts),            # 16
-        L1AdaptiveCtrl(params, Ts),     # 17
-        ScenarioMPCCtrl(plant),         # 18
-    ]
+    if only is not None:
+        for name, factory in _CONTROLLER_FACTORIES:
+            if name == only:
+                return [factory(params, Ts, plant)]
+        raise ValueError(f"Unknown controller {only!r}")
+    return [factory(params, Ts, plant) for _, factory in _CONTROLLER_FACTORIES]

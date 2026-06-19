@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Controller Toolbox Report - 2026-06-18 19:22</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 2em; color: #222; }
+h1   { color: #003366; }
+h2   { color: #005599; border-bottom: 2px solid #005599; padding-bottom: 4px; }
+.data-table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+.data-table th { background: #003366; color: white; padding: 6px 10px; }
+.data-table td { border: 1px solid #ddd; padding: 4px 8px; }
+.data-table tr:nth-child(even) { background: #f5f5f5; }
+.section { margin-bottom: 3em; }
+nav { background: #f0f0f0; padding: 1em; border-radius: 4px; margin-bottom: 2em; }
+nav a { margin-right: 1em; color: #005599; text-decoration: none; }
+.timestamp { color: #777; font-size: 0.85em; }
+</style>
+</head>
+<body>
+<h1>Controller Toolbox - Performance Report</h1>
+<p class="timestamp">Generated: 2026-06-18 19:22  &nbsp;|&nbsp;  720 runs across 1 studies</p>
+
+<nav>
+<a href="#summary">1. Summary</a>
+<a href="#comparison">2. Comparison</a>
+<a href="#heatmap">3. Heatmap</a>
+<a href="#mc">4. Monte Carlo</a>
+<a href="#fault">5. Fault Analysis</a>
+<a href="#anova">6. ANOVA</a>
+<a href="#wcet">7. WCET</a>
+<a href="#mu">8. Mu Analysis</a>
+</nav>
+
+<div class="section" id="summary">
+<h2>1. Summary - Best Controller per Study/Scenario</h2>
+<table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>study</th>
+      <th>scenario</th>
+      <th>controller</th>
+      <th>iae</th>
+      <th>rms_error</th>
+      <th>settle_time_s</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss00_beam_noswell</td>
+      <td>ADRC</td>
+      <td>0.2923</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss00_beam_swell</td>
+      <td>ADRC</td>
+      <td>0.2923</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss00_following_noswell</td>
+      <td>ADRC</td>
+      <td>0.2923</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss00_following_swell</td>
+      <td>ADRC</td>
+      <td>0.2923</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss00_head_noswell</td>
+      <td>ADRC</td>
+      <td>0.2923</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss00_head_swell</td>
+      <td>ADRC</td>
+      <td>0.2923</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss01_beam_noswell</td>
+      <td>PID</td>
+      <td>0.4779</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss01_beam_swell</td>
+      <td>PID</td>
+      <td>0.4796</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss01_following_noswell</td>
+      <td>PID</td>
+      <td>0.4779</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss01_following_swell</td>
+      <td>PID</td>
+      <td>0.4796</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss01_head_noswell</td>
+      <td>PID</td>
+      <td>0.4779</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss01_head_swell</td>
+      <td>PID</td>
+      <td>0.4796</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss02_beam_noswell</td>
+      <td>PID</td>
+      <td>0.6815</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss02_beam_swell</td>
+      <td>PID</td>
+      <td>0.6898</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss02_following_noswell</td>
+      <td>PID</td>
+      <td>0.6816</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss02_following_swell</td>
+      <td>PID</td>
+      <td>0.6899</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss02_head_noswell</td>
+      <td>PID</td>
+      <td>0.6817</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss02_head_swell</td>
+      <td>PID</td>
+      <td>0.6900</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss03_beam_noswell</td>
+      <td>NeuralPID</td>
+      <td>1.8546</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss03_beam_swell</td>
+      <td>NeuralPID</td>
+      <td>1.9021</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss03_following_noswell</td>
+      <td>NeuralPID</td>
+      <td>1.8545</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss03_following_swell</td>
+      <td>NeuralPID</td>
+      <td>1.9029</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss03_head_noswell</td>
+      <td>NeuralPID</td>
+      <td>1.8549</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss03_head_swell</td>
+      <td>NeuralPID</td>
+      <td>1.9037</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss04_beam_noswell</td>
+      <td>MRAC</td>
+      <td>3.8638</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss04_beam_swell</td>
+      <td>MRAC</td>
+      <td>3.1184</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss04_following_noswell</td>
+      <td>MRAC</td>
+      <td>3.9454</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss04_following_swell</td>
+      <td>MRAC</td>
+      <td>3.1433</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss04_head_noswell</td>
+      <td>MRAC</td>
+      <td>3.9997</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss04_head_swell</td>
+      <td>MRAC</td>
+      <td>3.1559</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss05_beam_noswell</td>
+      <td>MRAC</td>
+      <td>4.2000</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss05_beam_swell</td>
+      <td>MRAC</td>
+      <td>3.2990</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss05_following_noswell</td>
+      <td>MRAC</td>
+      <td>4.3383</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss05_following_swell</td>
+      <td>MRAC</td>
+      <td>3.3091</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss05_head_noswell</td>
+      <td>MRAC</td>
+      <td>4.3876</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss05_head_swell</td>
+      <td>MRAC</td>
+      <td>3.3091</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss06_beam_noswell</td>
+      <td>MRAC</td>
+      <td>4.6614</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss06_beam_swell</td>
+      <td>MRAC</td>
+      <td>3.5144</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss06_following_noswell</td>
+      <td>MRAC</td>
+      <td>4.7464</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss06_following_swell</td>
+      <td>MRAC</td>
+      <td>3.5153</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss06_head_noswell</td>
+      <td>MRAC</td>
+      <td>4.8044</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss06_head_swell</td>
+      <td>MRAC</td>
+      <td>3.5145</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss07_beam_noswell</td>
+      <td>MRAC</td>
+      <td>5.3911</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss07_beam_swell</td>
+      <td>MRAC</td>
+      <td>3.7682</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss07_following_noswell</td>
+      <td>MRAC</td>
+      <td>5.2664</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss07_following_swell</td>
+      <td>MRAC</td>
+      <td>3.7542</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss07_head_noswell</td>
+      <td>MRAC</td>
+      <td>5.3259</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss07_head_swell</td>
+      <td>MRAC</td>
+      <td>3.7528</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss08_beam_noswell</td>
+      <td>MRAC</td>
+      <td>6.3757</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss08_beam_swell</td>
+      <td>MRAC</td>
+      <td>4.0911</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss08_following_noswell</td>
+      <td>MRAC</td>
+      <td>5.9350</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss08_following_swell</td>
+      <td>MRAC</td>
+      <td>4.0292</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss08_head_noswell</td>
+      <td>MRAC</td>
+      <td>5.9926</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss08_head_swell</td>
+      <td>MRAC</td>
+      <td>4.0307</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss09_beam_noswell</td>
+      <td>MRAC</td>
+      <td>7.2271</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss09_beam_swell</td>
+      <td>MRAC</td>
+      <td>4.3631</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss09_following_noswell</td>
+      <td>MRAC</td>
+      <td>6.5213</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss09_following_swell</td>
+      <td>MRAC</td>
+      <td>4.2435</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss09_head_noswell</td>
+      <td>MRAC</td>
+      <td>6.5504</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+    <tr>
+      <td>6-DOF Stewart Platform Vessel Motion Simulator</td>
+      <td>ss09_head_swell</td>
+      <td>MRAC</td>
+      <td>4.2449</td>
+      <td>N/A</td>
+      <td>-1.0000</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="section" id="comparison">
+<h2>2. Controller Comparison (IAE by Study)</h2>
+<div style="height:400px; width:100%;">                        <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.6.0.min.js" integrity="sha256-QaOVwtVY0T02VaHrr6pnoHLCwayMJp4O5n4YyaE3rJk=" crossorigin="anonymous"></script>                <div id="fig_cmp_6-DOF_Stewart_Platfo" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("fig_cmp_6-DOF_Stewart_Platfo")) {                    Plotly.newPlot(                        "fig_cmp_6-DOF_Stewart_Platfo",                        [{"name":"ss00_beam_noswell","x":["ADRC","GainScheduled","PID","MRAC","NeuralPID","FuzzyPID","TubeMPC","LQR","ScenarioMPC","SMC","MPC","L1Adaptive"],"y":{"dtype":"f8","bdata":"kPY\u002fwFq10j+4rwPnjCjdP7ivA+eMKN0\u002fPIidKXRe7z9pkIKnkGvxP72MYrmlVfw\u002f6wHzkCl\u002fA0DrAfOQKX8DQNgPscHCCQRAEYyDS8f8CUCMv+0JEpsMQJFFmngHsCpA"},"type":"bar"},{"name":"ss00_beam_swell","x":["ADRC","GainScheduled","PID","MRAC","NeuralPID","FuzzyPID","TubeMPC","LQR","ScenarioMPC","SMC","MPC","L1Adaptive"],"y":{"dtype":"f8","bdata":"kPY\u002fwFq10j+4rwPnjCjdP7ivA+eMKN0\u002fPIidKXRe7z9pkIKnkGvxP72MYrmlVfw\u002f6wHzkCl\u002fA0DrAfOQKX8DQIfboWExCgRAEYyDS8f8CUCMv+0JEpsMQJFFmngHsCpA"},"type":"bar"},{"name":"ss00_following_noswell","x":["ADRC","GainScheduled","PID","MRAC","NeuralPID","FuzzyPID","TubeMPC","LQR","ScenarioMPC","SMC","MPC","L1Adaptive"],"y":{"dtype":"f8","bdata":"kPY\u002fwFq10j+4rwPnjCjdP7ivA+eMKN0\u002fPIidKXRe7z9pkIKnkGvxP72MYrmlVfw\u002f6wHzkCl\u002fA0DrAfOQKX8DQIIeatswCgRAEYyDS8f8CUCMv+0JEpsMQJFFmngHsCpA"},"type":"bar"},{"name":"ss00_following_swell","x":["ADRC","GainScheduled","PID","MRAC","NeuralPID","FuzzyPID","TubeMPC","LQR","ScenarioMPC","SMC","MPC","L1Adaptive"],"y":{"dtype":"f8","bdata":"kPY\u002fwFq10j+4rwPnjCjdP7ivA+eMKN0\u002fPIidKXRe7z9pkIKnkGvxP72MYrmlVfw\u002f6wHzkCl\u002fA0DrAfOQKX8DQDhLyXISCgRAEYyDS8f8CUCMv+0JEpsMQJFFmngHsCpA"},"type":"bar"},{"name":"ss00_head_noswell","x":["ADRC","GainScheduled","PID","MRAC","NeuralPID","FuzzyPID","TubeMPC","LQR","ScenarioMPC","SMC","MPC","L1Adaptive"],"y":{"dtype":"f8","bdata":"kPY\u002fwFq10j+4rwPnjCjdP7ivA+eMKN0\u002fPIidKXRe7z9pkIKnkGvxP72MYrmlVfw\u002f6wHzkCl\u002fA0DrAfOQKX8DQNiDSfHxCQRAEYyDS8f8CUCMv+0JEpsMQJFFmngHsCpA"},"type":"bar"},{"name":"ss00_head_swell","x":["ADRC","GainScheduled","PID","MRAC","NeuralPID","FuzzyPID","TubeMPC","LQR","ScenarioMPC","SMC","MPC","L1Adaptive"],"y":{"dtype":"f8","bdata":"kPY\u002fwFq10j+4rwPnjCjdP7ivA+eMKN0\u002fPIidKXRe7z9pkIKnkGvxP72MYrmlVfw\u002f6wHzkCl\u002fA0DrAfOQKX8DQO3T8ZiBCgRAEYyDS8f8CUCMv+0JEpsMQJFFmngHsCpA"},"type":"bar"},{"name":"ss01_beam_noswell","x":["PID","GainScheduled","ADRC","NeuralPID","MRAC","FuzzyPID","TubeMPC","LQR","ScenarioMPC","MPC","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"9b7xtWeW3j9cdLLUer\u002feP9qSVRFuMuI\u002fXFSLiGJy8T8b8WQ3MzryPx10CYfe4vw\u002fmu\u002fgJw6AA0DVXG4w1IEDQHYYk\u002f5eCgRAxEFClC9oDEBXXYdqSnIMQIBIv30dsCpA"},"type":"bar"},{"name":"ss01_beam_swell","x":["PID","GainScheduled","ADRC","NeuralPID","MRAC","FuzzyPID","TubeMPC","LQR","ScenarioMPC","MPC","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"8+Zwrfaw3j81f0xr09jeP8zSTs3lhuI\u002fHvtZLEVy8T9qbRrba0HyPy7kEdxIWf0\u002f3NWryOiAA0CWPQlszoEDQKkxIeaSCgRAdArys5FrDEC5isVvCgsNQIKq0asBsipA"},"type":"bar"},{"name":"ss01_following_noswell","x":["PID","GainScheduled","ADRC","NeuralPID","MRAC","FuzzyPID","LQR","TubeMPC","ScenarioMPC","MPC","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"u9Bcp5GW3j\u002fZJhWNtb\u002feP8Fu2LYoM+I\u002f8IY0KnBy8T92NXnKajryP16DvvT25\u002fw\u002fDvlnBvGBA0AkJxO3CoIDQGx8JvvnCQRAjSjtDb5wDEB0QBL27aQMQAMn28AdsCpA"},"type":"bar"},{"name":"ss01_following_swell","x":["PID","GainScheduled","ADRC","NeuralPID","MRAC","FuzzyPID","LQR","TubeMPC","ScenarioMPC","MPC","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"jBAebRyx3j9n0qbqHtneP0LqdvaVh+I\u002fkL+0qE9y8T\u002fQK556pEHyP+Ep5Eo9i\u002f0\u002fV3ptNlaCA0ApBkg0gYIDQCZw626eCgRA4j5ya9JtDEBQATCeQSMNQEZ4exACsipA"},"type":"bar"},{"name":"ss01_head_noswell","x":["PID","GainScheduled","ADRC","NeuralPID","MRAC","FuzzyPID","LQR","TubeMPC","ScenarioMPC","SMC","MPC","L1Adaptive"],"y":{"dtype":"f8","bdata":"+imOA6+W3j+gOIB+37\u002feP0OM17yqM+I\u002fKelhaHVy8T8PXyaKkDryPzLlQ1A1Ov0\u002ffNRfr7CAA0DK+s3EdIEDQCh+jLlrCQRAdsWM8PZADEAFpP0PsHYMQEQWaeIdsCpA"},"type":"bar"},{"name":"ss01_head_swell","x":["PID","GainScheduled","ADRC","NeuralPID","MRAC","FuzzyPID","LQR","TubeMPC","ScenarioMPC","MPC","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"nYGRlzWx3j+3nEtxVdneP2k3+pgPiOI\u002fsi0DzlJy8T9pVUs6ykHyP\u002fTBMjZ0c\u002f0\u002fUb01sFWCA0ARbjKqDIMDQJI9Qs2QCgRARWXDmspiDEBTd2UXDO4MQIhnCTICsipA"},"type":"bar"},{"name":"ss02_beam_noswell","x":["PID","GainScheduled","NeuralPID","MRAC","FuzzyPID","ADRC","ScenarioMPC","TubeMPC","LQR","MPC","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"6x7ZXDXP5T\u002fYSuguiTPmPzUIc7uXu\u002fE\u002fiZro81FG9z9s7X2qCk37P9Ju9DEf0Ps\u002f6e3PRUMGBEDfTiLCvwgEQJOpglFJHQRAJCu\u002fDMYIDECNDkjCvr0PQOhLb38u2ipA"},"type":"bar"},{"name":"ss02_beam_swell","x":["PID","GainScheduled","NeuralPID","MRAC","FuzzyPID","ADRC","ScenarioMPC","LQR","TubeMPC","MPC","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"KZfGL7wS5j9CJhk5C3vmP2iULv1L0vE\u002flSh7Szmf9z9SmPc40wT7P0FkkSbeQfw\u002fVWthFtr5A0Ab2gBsQAQEQPq0iv7QDARAGJY\u002f3xbsC0Agls0ckpoPQB\u002f4GKw43SpA"},"type":"bar"},{"name":"ss02_following_noswell","x":["PID","GainScheduled","NeuralPID","MRAC","FuzzyPID","ADRC","ScenarioMPC","TubeMPC","LQR","MPC","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"wono19bP5T8PCd\u002f7GzTmP0Z55uWwu\u002fE\u002f41KVtrhG9z\u002f6eyk8aDb7P9v8v+rI0fs\u002fV1wclZsIBECe7jzxnA0EQAn7dhIRHgRA7fXuj\u002ffqC0DKT6p9Or4PQBB39Soy2ipA"},"type":"bar"},{"name":"ss02_following_swell","x":["PID","GainScheduled","NeuralPID","MRAC","FuzzyPID","ADRC","ScenarioMPC","TubeMPC","LQR","MPC","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"k6gXfJoT5j\u002fDK0me63vmP4\u002fhsZ\u002fF0vE\u002fF0Z6Ubuf9z9krgyqDU77Pz547dKGQ\u002fw\u002f7nw\u002fNV76A0D6DKg3owYEQLDkKha\u002fCQRA+gj84effC0A\u002fcmvSbYkPQBCugEI93SpA"},"type":"bar"},{"name":"ss02_head_noswell","x":["PID","GainScheduled","NeuralPID","MRAC","FuzzyPID","ADRC","ScenarioMPC","LQR","TubeMPC","MPC","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"41MAjGfQ5T\u002fbheY6jTTmP1d2weCau\u002fE\u002fLJrOTgZH9z9tcY3PZH\u002f7P4Pb2sLz0vs\u002fQ3OdRloKBED9gt2wbREEQPxx++WTFQRATySYambtC0DkSdI1k68PQLXDX5M12ipA"},"type":"bar"},{"name":"ss02_head_swell","x":["PID","GainScheduled","NeuralPID","MRAC","FuzzyPID","ADRC","ScenarioMPC","TubeMPC","LQR","MPC","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"qWxYU1kU5j99Hw4SonzmPwG+27xx0vE\u002f6UXtfhWg9z8Xf9sTJHb7P\u002f1K58OzRPw\u002f5E7pYP3\u002fA0A7NCxGXQsEQIodjUP9DgRA5US7CinfC0Be86rOaoEPQHrIlA9B3SpA"},"type":"bar"},{"name":"ss03_beam_noswell","x":["NeuralPID","PID","GainScheduled","MRAC","FuzzyPID","TubeMPC","LQR","ScenarioMPC","SMC","MPC","ADRC","L1Adaptive"],"y":{"dtype":"f8","bdata":"NGlTdY+s\u002fT9ehZSfVLv+P1Wi7C3lfP8\u002fp3nHKTryA0BHdqVlpB4QQO3xQjo8ZBBA66pALQafEEBZxLDDmKQQQJ\u002fIk6RrZhRAskrpmV4CFkDTakjcY7kWQD4EVaNXozFA"},"type":"bar"},{"name":"ss03_beam_swell","x":["NeuralPID","PID","GainScheduled","MRAC","TubeMPC","LQR","ScenarioMPC","FuzzyPID","MPC","SMC","ADRC","L1Adaptive"],"y":{"dtype":"f8","bdata":"vfxOkxlv\u002fj9Z\u002fKawUiEAQKK4401+iwBAlsyxvKveA0CFeY8zTTgQQG5PkNjufhBA2zUhrTGYEEAYC0Pk9CURQHx\u002fg\u002fbqsxVAz2qBPSZyFkCR1a2ekz4XQPlM9s\u002fTMDJA"},"type":"bar"},{"name":"ss03_following_noswell","x":["NeuralPID","PID","GainScheduled","MRAC","FuzzyPID","TubeMPC","ScenarioMPC","LQR","SMC","MPC","ADRC","L1Adaptive"],"y":{"dtype":"f8","bdata":"QIf58gKs\u002fT\u002fSVE\u002fmH73+PxTpfk5Bfv8\u002fVdtN8E3zA0DuBzwwgCAQQHrjpDDvYRBASN3OvvKgEEAE5iFTPqQQQEYJ+gs9ghRA7Bfshm3rFUBqozodyLoWQMJsAgzLozFA"},"type":"bar"},{"name":"ss03_following_swell","x":["NeuralPID","PID","GainScheduled","MRAC","TubeMPC","LQR","ScenarioMPC","FuzzyPID","MPC","SMC","ADRC","L1Adaptive"],"y":{"dtype":"f8","bdata":"DYrmASxy\u002fj9ngXaHFCMAQEEo7+NojgBAstmR6jvfA0Bv1uB9VS4QQNaNd0fGehBAofgx5q6VEEAGuCBblg8RQJks7j8yrRVAPNnNjH50FkC8QEmBBUAXQFUxlX7CMTJA"},"type":"bar"},{"name":"ss03_head_noswell","x":["NeuralPID","PID","GainScheduled","MRAC","FuzzyPID","TubeMPC","LQR","ScenarioMPC","SMC","MPC","ADRC","L1Adaptive"],"y":{"dtype":"f8","bdata":"PQ\u002fuztqt\u002fT9BuW3fo77+P7fQlQhUf\u002f8\u002ffJxpwvbzA0DwpIXLKiwQQFbysbtAaRBA1xNdF36gEEBBn8iTpKsQQFXBqKROoBRAokEKnkLuFUBRLSKKybsWQKYLsfojpDFA"},"type":"bar"},{"name":"ss03_head_swell","x":["NeuralPID","PID","GainScheduled","MRAC","TubeMPC","LQR","ScenarioMPC","FuzzyPID","MPC","SMC","ADRC","L1Adaptive"],"y":{"dtype":"f8","bdata":"B7KeWn11\u002fj8YzF8hcyUAQEGBd\u002fLpkQBASiU8odffA0DqzD0kfB8QQB0CRwINdhBAYmngRzWcEEADmDJwQDsRQHcv98lRsBVAca32sBdqFkD+mqxRD0EXQNelRuhnMjJA"},"type":"bar"},{"name":"ss04_beam_noswell","x":["MRAC","NeuralPID","ScenarioMPC","LQR","PID","TubeMPC","GainScheduled","MPC","FuzzyPID","SMC","ADRC","L1Adaptive"],"y":{"dtype":"f8","bdata":"I9kj1AzpDkAlIvyLoIERQH8WS5F85RJASBXFq6ytFEC5bkp5reQUQLwgIjXtchVAzo5U3\u002flVFkAVOUTcnEoaQD0racU3xCZAYVERp5P0J0BGXtbEAj8pQJBmLJrOCj9A"},"type":"bar"},{"name":"ss04_beam_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ScenarioMPC","TubeMPC","LQR","MPC","FuzzyPID","ADRC","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"5QzFHW\u002fyCED8VYDvNk8LQEQ0uoPYSRBA4ZnQJLFEEUCTUtDtJe0VQDKQZ5dvTRZAIsfWM4STFkD8icqGNZUdQBu8r8qFsiJAHM9nQL0BI0BL5IIz+OsjQAwFbAcj5jpA"},"type":"bar"},{"name":"ss04_following_noswell","x":["MRAC","NeuralPID","ScenarioMPC","LQR","PID","TubeMPC","GainScheduled","MPC","FuzzyPID","SMC","ADRC","L1Adaptive"],"y":{"dtype":"f8","bdata":"MzZ0sz+QD0CKcmn8wosRQCx+U1ip8BJAa5kMx\u002fOpFEC1wYno1+YUQOjAcoQMlBVA7KaU10pYFkAShZZ1\u002f\u002fgZQOykviztzCZAu2HboswGKEBGCI82jkApQFInoImwDT9A"},"type":"bar"},{"name":"ss04_following_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ScenarioMPC","TubeMPC","LQR","MPC","FuzzyPID","ADRC","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"VyWRfZAlCUBxxjAnaFMLQB5rRga5SxBA3UPC9\u002f5GEUAmGTkLe\u002foVQM6I0t7gSxZADmjpCraBFkDSGK2jqpkdQAJ+jSRB0CJAQuxMofMCI0B+Oh4zUPkjQNW0i2mm5zpA"},"type":"bar"},{"name":"ss04_head_noswell","x":["MRAC","NeuralPID","ScenarioMPC","LQR","PID","TubeMPC","GainScheduled","MPC","FuzzyPID","SMC","ADRC","L1Adaptive"],"y":{"dtype":"f8","bdata":"iiKkbmf\u002fD0AbZ9MRwI0RQN154jlb8BJAXI3sSsuoFEDU8ZiByugUQPM9IxEaoRVAqRQ7GodaFkBMb38uGjIaQDgQkgVM6CZAlIjwL4L2J0CfkJ23sUEpQAqeQq7UDz9A"},"type":"bar"},{"name":"ss04_head_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ScenarioMPC","TubeMPC","LQR","MPC","FuzzyPID","ADRC","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"rBxaZDs\u002fCUA\u002f5C1XP1YLQATidf2CTRBAVDasqSxKEUAmV7H4TfEVQNnts8pMSRZAya1JtyWSFkDF5XgFoqcdQIqvdhTnmCJAYoGv6NYDI0DfFizVBfwjQDKvIw7Z6DpA"},"type":"bar"},{"name":"ss05_beam_noswell","x":["MRAC","NeuralPID","ScenarioMPC","LQR","PID","TubeMPC","GainScheduled","MPC","ADRC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"UMjO29jMEEAMkGgCRcwWQDogCft2IhhAZf1mYrrQGkCYa9ECtC0bQLPviuB\u002f+xxA2AxwQbZ8HUD2QCswZNUgQCvCTUaVIStA+G7zxkkVMEBB1H0AUkMwQN3u5T45zERA"},"type":"bar"},{"name":"ss05_beam_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ScenarioMPC","TubeMPC","LQR","MPC","ADRC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"BFq6gm1kCkAe3QiLiigRQFxZorPMkhRAVb\u002fS+fAsFkDLZg5JLdQcQO4+x0eLUx1AwJfCg2aXHUBV2XdF8GcjQGSWPQls7iNAbqZCPBLfKEAe4bTgRUcqQOwwJv29akFA"},"type":"bar"},{"name":"ss05_following_noswell","x":["MRAC","NeuralPID","ScenarioMPC","LQR","PID","TubeMPC","GainScheduled","MPC","ADRC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"TifZ6nJaEUAId2fttssWQMIwYMlVPBhALZW3I5zGGkBlUkMbgC0bQF\u002fTg4JSFB1APzVeukl8HUBZ94+F6MAgQCWzeofbIStAnDbjNEQZMEDYZmMl5i0wQCkjLgCNzERA"},"type":"bar"},{"name":"ss05_following_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ScenarioMPC","TubeMPC","LQR","MPC","ADRC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"1GUxsfl4CkB4CU59ICkRQLEVNC2xkhRASmJJufssFkAV4SajyuAcQD9VhQZiSR1AKO\u002fjaI6sHUAQd\u002fUqMlojQJbMsbyr7iNAxawXQznpKEC\u002f8bVnlkQqQPIJ2Xkba0FA"},"type":"bar"},{"name":"ss05_head_noswell","x":["MRAC","NeuralPID","ScenarioMPC","LQR","PID","TubeMPC","GainScheduled","MPC","ADRC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"Psvz4O6MEUB2\u002fYLdsM0WQHkfR3NkRRhAxvmbUIjAGkCj6lc6Hy4bQLoSgeofBB1Ad0oH6\u002f98HUAYCW05l8IgQMPwETElIitAOj\u002fFceAlMEDO4O8XszEwQLlQ+dfyzERA"},"type":"bar"},{"name":"ss05_head_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ScenarioMPC","TubeMPC","LQR","MPC","ADRC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"fsaFAyF5CkCVumQcIykRQOm2RC44kxRA+YTsvI0tFkCCWDZzSNocQPfJUYAoWB1AkPY\u002fwFq1HUCimSfXFGgjQLIOR1fp7iNAGqVL\u002f5L0KEB79fHQdz8qQAqCx7d3a0FA"},"type":"bar"},{"name":"ss06_beam_noswell","x":["MRAC","NeuralPID","ScenarioMPC","PID","LQR","TubeMPC","GainScheduled","MPC","ADRC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"kLxzKEOlEkAEc\u002fT4vT0bQE9ZTdcT3R1AVMiVehY0IEBn8PeL2ZogQG4T7pV5AyJAqz\u002fCMGApIkBeZAJ+jfQkQDkn9tA+1itA0NTrFoElNEDPwMjLmjA0QN1bkZigAktA"},"type":"bar"},{"name":"ss06_beam_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ScenarioMPC","TubeMPC","LQR","ADRC","MPC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"7rPKTGkdDEAmi\u002fuPTGcUQAgGED6UaBhAOpUMAFUsG0BivOZVneUhQApq+BbWLSJAuRluwOdvIkCd81McB24kQP34S4v6\u002fCdALXk8LT\u002f4LkAUlnhA2UgwQBDs+C8QHkdA"},"type":"bar"},{"name":"ss06_following_noswell","x":["MRAC","NeuralPID","ScenarioMPC","PID","LQR","TubeMPC","GainScheduled","MPC","ADRC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"S6\u002fNxkr8EkA0uRgD60gbQEiI8gUt5B1AyVcCKbEzIEDpuvCD85kgQKvsuyL4\u002fyFAc2n8wispIkA5RrJHqMEkQA4sR8hA1itAAySaQBEfNEALuOf50z40QPROBdzzAktA"},"type":"bar"},{"name":"ss06_following_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ScenarioMPC","TubeMPC","LQR","ADRC","MPC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"2XiwxW4fDEBWZHRAEmYUQJerH5vkZxhAtB8pIsMqG0Cb6PNRRtwhQFX6CWe3HiJA2jf3V49rIkC0BBkBFW4kQCWzeofbAShAPQrXo3D9LkAcRdYaSj0wQIlCy7p\u002fHkdA"},"type":"bar"},{"name":"ss06_head_noswell","x":["MRAC","NeuralPID","ScenarioMPC","PID","LQR","TubeMPC","GainScheduled","MPC","ADRC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"Cd\u002f7G7Q3E0C0OjlDcUcbQNpYiXlWAh5Ahe\u002f9DdozIEC6LCY2H5cgQPn2rkFf+iFA001iEFgpIkCOAkTBjKEkQI50BkZe1itAycovgzEiNEAGSgosgEk0QOW4UzpYA0tA"},"type":"bar"},{"name":"ss06_head_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ScenarioMPC","TubeMPC","LQR","ADRC","MPC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"Q3Vz8bcdDEAy422l12YUQNV46SYxaBhAotCy7h8rG0C0HVN3Zd8hQGh4swbvIyJATdnpB3VpIkAj+UogJW4kQL69a9CX\u002fidAYcPTK2XZLkALluoCXkYwQJxOstXlHkdA"},"type":"bar"},{"name":"ss07_beam_noswell","x":["MRAC","NeuralPID","ScenarioMPC","PID","LQR","TubeMPC","GainScheduled","MPC","ADRC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"zHwHP3GQFUBDqb2ItgMgQG3heanYMCJA7wG6L2feIkBJopdRLD8kQPT91Hjp\u002fiVAKSDtf4AlJkBwJNBgU5cpQLAcIQN5TixAfT1fs1yWOEDj++JSleo4QHxfXKrScFFA"},"type":"bar"},{"name":"ss07_beam_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ADRC","ScenarioMPC","TubeMPC","LQR","MPC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"MBLaci4lDkBM4xdeSdIXQEikbfyJShxAWMaGbvZPIEAg7X+AtcIkQHHJcad06CVAMT83NGVHJkDHnj2XqZkmQB4V\u002f3dERS1AwR4TKc0CM0B+kGXBxOszQFpHVRNE6U5A"},"type":"bar"},{"name":"ss07_following_noswell","x":["MRAC","NeuralPID","ScenarioMPC","PID","LQR","TubeMPC","GainScheduled","MPC","ADRC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"18HB3sQQFUDwiXWqfAcgQGu3XWiuQyJAgeuKGeHdIkAMk6mCUUkkQFotsMdE+iVAJlRweEEkJkCNCTGXVF0pQEWhZd0\u002fTixAbeF5qdiYOEBngAuyZek4QH\u002fBbti2cVFA"},"type":"bar"},{"name":"ss07_following_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ADRC","ScenarioMPC","TubeMPC","LQR","MPC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"2lcepKcIDkD430p2bNQXQGE3bFuUSRxABjBl4IBOIEDU1R2LbcIkQEM6PITx2yVATKq2m+BLJkCJC0CjdJkmQGVVhJuMSi1A6\u002f1GO24EM0Dku5S6ZPQzQCHOwwlM6U5A"},"type":"bar"},{"name":"ss07_head_noswell","x":["MRAC","NeuralPID","ScenarioMPC","PID","LQR","TubeMPC","GainScheduled","MPC","ADRC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"MVuyKsJNFUAKoYMu4QggQEMdVrjlWyJAZJEm3gHeIkCKlGbzOEwkQEM8Ei9PByZAtCCU93EkJkADste7P0YpQIdtizIbTCxAMA3DR8SIOECnzM03os84QITXLm04clFA"},"type":"bar"},{"name":"ss07_head_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ADRC","ScenarioMPC","TubeMPC","LQR","MPC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"AYblz7cFDkChoX+Ci9UXQNgsl43OSRxA9n8O8+VNIEA6AyMva8IkQE2giEUM4yVAMISc9\u002f9JJkDL2qZ4XJwmQD+nID8bYS1AMWE0K9v7MkB+U1ipoPozQDEL7Zxm6U5A"},"type":"bar"},{"name":"ss08_beam_noswell","x":["MRAC","NeuralPID","PID","ScenarioMPC","LQR","GainScheduled","TubeMPC","ADRC","MPC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"a524HK+AGUAy5UNQNcoiQOaRPxh4xiVASWQfZFlwJkC\u002fRLx1\u002fiUpQAhb7PZZ\u002fSpAZHWr56RHK0AuAI3SpacsQKW762zIly9AQQ5KmGlbPkCeKXReY8c+QAr3yrxViVZA"},"type":"bar"},{"name":"ss08_beam_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ADRC","ScenarioMPC","TubeMPC","LQR","MPC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"Q3Bcxk1dEEAfveE+cssbQKOP+YBAPyBASpUoe0txI0CVgJiECwElQNI6qpogIitATdpU3SObK0DOiT20j\u002fUrQGMnvASnFjJA3NRA8zl3N0A3+pgPCLQ4QNCaH39ppVRA"},"type":"bar"},{"name":"ss08_following_noswell","x":["MRAC","NeuralPID","PID","ScenarioMPC","LQR","GainScheduled","TubeMPC","ADRC","MPC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"cZLmj2m9F0Bv8fCeA8siQLSQgNHlxSVAjnObcK+kJkDe5LfoZDEpQBEbLJyk+SpA9+l4zEBFK0Dm5hvRPaMsQBPwayQJWi9Aiq92FOdQPkA9SE+RQ9Q+QBhcc0f\u002filZA"},"type":"bar"},{"name":"ss08_following_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ADRC","ScenarioMPC","TubeMPC","LQR","MPC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"FQFO7+IdEEAKE0azss0bQKoNTkS\u002fPiBAoyHjUSpxI0A90uC2tgAlQHtP5bSnHCtAYRvxZDebK0C4BrZKsAAsQI2ACkeQFjJAwOyePCyEN0Asn+V5cK84QD2CGylbpVRA"},"type":"bar"},{"name":"ss08_head_noswell","x":["MRAC","NeuralPID","PID","ScenarioMPC","LQR","GainScheduled","TubeMPC","ADRC","MPC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"TFEujV\u002f4F0CyEB0CR8oiQDTZP08DxiVA8UdRZ+65JkBmvoOfOCgpQGIUBI9v9ypAf6FHjJ5DK0BO7QxTW6IsQNJWJZF9QC9A+PpalxpZPkBa1v1jIdI+QNEksaTci1ZA"},"type":"bar"},{"name":"ss08_head_swell","x":["MRAC","NeuralPID","PID","GainScheduled","ADRC","ScenarioMPC","TubeMPC","LQR","MPC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"iiKkbmcfEECWI2Qgz84bQBkfZi\u002fbPiBA7fSDukhxI0DfiO5Z1wAlQKuYSj\u002fhFCtAAdpWs86gK0Dj4T0HlgMsQNwtyQG7GjJApyA\u002fG7mKN0Dnw7MEGbk4QJJe1O5XpVRA"},"type":"bar"},{"name":"ss09_beam_noswell","x":["MRAC","NeuralPID","PID","ScenarioMPC","ADRC","LQR","GainScheduled","TubeMPC","MPC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"O44fKo3oHEAFiIIZUwglQF67tOGw\u002fCdAl8gFZ\u002fB3KkAuBDkoYdYsQFw9J71vvC1As7W+SGgLL0D7ljldFhcwQA6\u002fm27ZmTJANBKhEWzoQUAjgnFw6R5CQHAnEeFfTVtA"},"type":"bar"},{"name":"ss09_beam_swell","x":["MRAC","NeuralPID","PID","ADRC","GainScheduled","ScenarioMPC","TubeMPC","LQR","MPC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"1\u002fhM9s9zEUDEew4sRxgfQOm4GtmV1iFA06V\u002fSSojJUBKs3kcBvMlQMQj8fJ07i9A+dhdoKRQMEBC6Qsh55EwQCR7hJohUTVACvfKvFWfO0DThVj9ESI9QJfIBWfwcVlA"},"type":"bar"},{"name":"ss09_following_noswell","x":["MRAC","NeuralPID","PID","ScenarioMPC","ADRC","LQR","GainScheduled","TubeMPC","MPC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"SzygbMoVGkCbApmdRQclQNxj6UMX\u002fCdAo5QQrKqvKkCzsRLzrNQsQDPhl\u002fp5sy1AzSIUW0ELL0AoRMAhVBkwQG76sx8pejJA4j\u002fdQIH5QUDzcth9xyxCQLzmVZ3VT1tA"},"type":"bar"},{"name":"ss09_following_swell","x":["MRAC","NeuralPID","PID","ADRC","GainScheduled","ScenarioMPC","TubeMPC","LQR","MPC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"csCuJk\u002f5EECa6zTSUhkfQP6d7dEb1iFA1SMNbmsjJUCS66aU1\u002fIlQLMMcayL8y9AJgD\u002flCpVMEBR24ZREIQwQB6lEp7QPzVAbeLkfoe+O0AL1c3F3yo9QJxOstXlcVlA"},"type":"bar"},{"name":"ss09_head_noswell","x":["MRAC","NeuralPID","PID","ScenarioMPC","ADRC","LQR","GainScheduled","TubeMPC","MPC","SMC","FuzzyPID","L1Adaptive"],"y":{"dtype":"f8","bdata":"EMr7OJozGkCE2QQYlgclQNQQVfgz\u002fCdAkEyHTs+zKkCMn8a9+dUsQIYBS65iwS1AbEPFOH8LL0DRzmkWaBcwQHY4ukp3bzJAH0sfuqDuQUA1Jy8yAS1CQLJ\u002fngYMUVtA"},"type":"bar"},{"name":"ss09_head_swell","x":["MRAC","NeuralPID","PID","ADRC","GainScheduled","ScenarioMPC","TubeMPC","LQR","MPC","FuzzyPID","SMC","L1Adaptive"],"y":{"dtype":"f8","bdata":"v7Z++s\u002f6EED4GKw41RofQMpPqn061iFADVGFP8MjJUBKlpNQ+vIlQOq0boPa9y9A4SnkSj1bMEAs2EY82YEwQNP2r6w0OTVAO44fKo3AO0CzsRLzrCA9QBUBTu\u002ficVlA"},"type":"bar"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"title":{"text":"6-DOF Stewart Platform Vessel Motion Simulator"},"barmode":"group","xaxis":{"title":{"text":"Controller"}},"yaxis":{"title":{"text":"IAE"}},"height":400,"legend":{"title":{"text":"Scenario"}}},                        {"responsive": true}                    )                };            </script>        </div>
+</div>
+
+<div class="section" id="heatmap">
+<h2>3. Scenario Breakdown Heatmap</h2>
+<div style="height:400px; width:100%;">                        <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.6.0.min.js" integrity="sha256-QaOVwtVY0T02VaHrr6pnoHLCwayMJp4O5n4YyaE3rJk=" crossorigin="anonymous"></script>                <div id="fig_heat_6-DOF_Stewart_Platfo" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("fig_heat_6-DOF_Stewart_Platfo")) {                    Plotly.newPlot(                        "fig_heat_6-DOF_Stewart_Platfo",                        [{"colorbar":{"title":{"text":"IAE"}},"colorscale":[[0.0,"rgb(0,104,55)"],[0.1,"rgb(26,152,80)"],[0.2,"rgb(102,189,99)"],[0.3,"rgb(166,217,106)"],[0.4,"rgb(217,239,139)"],[0.5,"rgb(255,255,191)"],[0.6,"rgb(254,224,139)"],[0.7,"rgb(253,174,97)"],[0.8,"rgb(244,109,67)"],[0.9,"rgb(215,48,39)"],[1.0,"rgb(165,0,38)"]],"x":["ss00_beam_noswell","ss00_beam_swell","ss00_following_noswell","ss00_following_swell","ss00_head_noswell","ss00_head_swell","ss01_beam_noswell","ss01_beam_swell","ss01_following_noswell","ss01_following_swell","ss01_head_noswell","ss01_head_swell","ss02_beam_noswell","ss02_beam_swell","ss02_following_noswell","ss02_following_swell","ss02_head_noswell","ss02_head_swell","ss03_beam_noswell","ss03_beam_swell","ss03_following_noswell","ss03_following_swell","ss03_head_noswell","ss03_head_swell","ss04_beam_noswell","ss04_beam_swell","ss04_following_noswell","ss04_following_swell","ss04_head_noswell","ss04_head_swell","ss05_beam_noswell","ss05_beam_swell","ss05_following_noswell","ss05_following_swell","ss05_head_noswell","ss05_head_swell","ss06_beam_noswell","ss06_beam_swell","ss06_following_noswell","ss06_following_swell","ss06_head_noswell","ss06_head_swell","ss07_beam_noswell","ss07_beam_swell","ss07_following_noswell","ss07_following_swell","ss07_head_noswell","ss07_head_swell","ss08_beam_noswell","ss08_beam_swell","ss08_following_noswell","ss08_following_swell","ss08_head_noswell","ss08_head_swell","ss09_beam_noswell","ss09_beam_swell","ss09_following_noswell","ss09_following_swell","ss09_head_noswell","ss09_head_swell"],"y":["ADRC","FuzzyPID","GainScheduled","L1Adaptive","LQR","MPC","MRAC","NeuralPID","PID","SMC","ScenarioMPC","TubeMPC"],"z":{"dtype":"f8","bdata":"kPY\u002fwFq10j+Q9j\u002fAWrXSP5D2P8BatdI\u002fkPY\u002fwFq10j+Q9j\u002fAWrXSP5D2P8BatdI\u002f2pJVEW4y4j\u002fM0k7N5YbiP8Fu2LYoM+I\u002fQup29pWH4j9DjNe8qjPiP2k3+pgPiOI\u002f0m70MR\u002fQ+z9BZJEm3kH8P9v8v+rI0fs\u002fPnjt0oZD\u002fD+D29rC89L7P\u002f1K58OzRPw\u002f02pI3GO5FkCR1a2ekz4XQGqjOh3IuhZAvEBJgQVAF0BRLSKKybsWQP6arFEPQRdARl7WxAI\u002fKUAcz2dAvQEjQEYIjzaOQClAQuxMofMCI0CfkJ23sUEpQGKBr+jWAyNAK8JNRpUhK0Bklj0JbO4jQCWzeofbIStAlsyxvKvuI0DD8BExJSIrQLIOR1fp7iNAOSf20D7WK0Cd81McB24kQA4sR8hA1itAtAQZARVuJECOdAZGXtYrQCP5SiAlbiRAsBwhA3lOLEAg7X+AtcIkQEWhZd0\u002fTixA1NUdi23CJECHbYsyG0wsQDoDIy9rwiRALgCN0qWnLECVgJiECwElQObmG9E9oyxAPdLgtrYAJUBO7QxTW6IsQN+I7lnXACVALgQ5KGHWLEDTpX9JKiMlQLOxEvOs1CxA1SMNbmsjJUCMn8a9+dUsQA1RhT\u002fDIyVAvYxiuaVV\u002fD+9jGK5pVX8P72MYrmlVfw\u002fvYxiuaVV\u002fD+9jGK5pVX8P72MYrmlVfw\u002fHXQJh97i\u002fD8u5BHcSFn9P16DvvT25\u002fw\u002f4SnkSj2L\u002fT8y5UNQNTr9P\u002fTBMjZ0c\u002f0\u002fbO19qgpN+z9SmPc40wT7P\u002fp7KTxoNvs\u002fZK4Mqg1O+z9tcY3PZH\u002f7Pxd\u002f2xMkdvs\u002fR3alZaQeEEAYC0Pk9CURQO4HPDCAIBBABrggW5YPEUDwpIXLKiwQQAOYMnBAOxFAPStpxTfEJkAbvK\u002fKhbIiQOykviztzCZAAn6NJEHQIkA4EJIFTOgmQIqvdhTnmCJAQdR9AFJDMEBupkI8Et8oQNhmYyXmLTBAxawXQznpKEDO4O8XszEwQBqlS\u002f+S9ChAz8DIy5owNEAteTwtP\u002fguQAu45\u002fnTPjRAPQrXo3D9LkAGSgosgEk0QGHD0ytl2S5A4\u002fviUpXqOEDBHhMpzQIzQGeAC7Jl6ThA6\u002f1GO24EM0CnzM03os84QDFhNCvb+zJAnil0XmPHPkDc1EDzOXc3QD1IT5FD1D5AwOyePCyEN0Ba1v1jIdI+QKcgPxu5ijdAI4JxcOkeQkAK98q8VZ87QPNy2H3HLEJAbeLkfoe+O0A1Jy8yAS1CQDuOHyqNwDtAuK8D54wo3T+4rwPnjCjdP7ivA+eMKN0\u002fuK8D54wo3T+4rwPnjCjdP7ivA+eMKN0\u002fXHSy1Hq\u002f3j81f0xr09jeP9kmFY21v94\u002fZ9Km6h7Z3j+gOIB+37\u002feP7ecS3FV2d4\u002f2EroLokz5j9CJhk5C3vmPw8J3\u002fsbNOY\u002fwytJnut75j\u002fbheY6jTTmP30fDhKifOY\u002fVaLsLeV8\u002fz+iuONNfosAQBTpfk5Bfv8\u002fQSjv42iOAEC30JUIVH\u002f\u002fP0GBd\u002fLpkQBAzo5U3\u002flVFkDhmdAksUQRQOymlNdKWBZA3UPC9\u002f5GEUCpFDsah1oWQFQ2rKksShFA2AxwQbZ8HUBVv9L58CwWQD81XrpJfB1ASmJJufssFkB3Sgfr\u002f3wdQPmE7LyNLRZAqz\u002fCMGApIkA6lQwAVSwbQHNp\u002fMIrKSJAtB8pIsMqG0DTTWIQWCkiQKLQsu4fKxtAKSDtf4AlJkBYxoZu9k8gQCZUcHhBJCZABjBl4IBOIEC0IJT3cSQmQPZ\u002fDvPlTSBACFvs9ln9KkBKlSh7S3EjQBEbLJyk+SpAoyHjUSpxI0BiFASPb\u002fcqQO30g7pIcSNAs7W+SGgLL0BKs3kcBvMlQM0iFFtBCy9AkuumlNfyJUBsQ8U4fwsvQEqWk1D68iVAkUWaeAewKkCRRZp4B7AqQJFFmngHsCpAkUWaeAewKkCRRZp4B7AqQJFFmngHsCpAgEi\u002ffR2wKkCCqtGrAbIqQAMn28AdsCpARnh7EAKyKkBEFmniHbAqQIhnCTICsipA6Etvfy7aKkAf+BisON0qQBB39Soy2ipAEK6AQj3dKkC1w1+TNdoqQHrIlA9B3SpAPgRVo1ejMUD5TPbP0zAyQMJsAgzLozFAVTGVfsIxMkCmC7H6I6QxQNelRuhnMjJAkGYsms4KP0AMBWwHI+Y6QFInoImwDT9A1bSLaabnOkAKnkKu1A8\u002fQDKvIw7Z6DpA3e7lPjnMREDsMCb9vWpBQCkjLgCNzERA8gnZeRtrQUC5UPnX8sxEQAqCx7d3a0FA3VuRmKACS0AQ7PgvEB5HQPROBdzzAktAiULLun8eR0DluFM6WANLQJxOstXlHkdAfF9cqtJwUUBaR1UTROlOQH\u002fBbti2cVFAIc7DCUzpTkCE1y5tOHJRQDEL7Zxm6U5ACvfKvFWJVkDQmh9\u002faaVUQBhcc0f\u002filZAPYIbKVulVEDRJLGk3ItWQJJe1O5XpVRAcCcR4V9NW0CXyAVn8HFZQLzmVZ3VT1tAnE6y1eVxWUCyf54GDFFbQBUBTu\u002ficVlA6wHzkCl\u002fA0DrAfOQKX8DQOsB85ApfwNA6wHzkCl\u002fA0DrAfOQKX8DQOsB85ApfwNA1VxuMNSBA0CWPQlszoEDQA75ZwbxgQNAV3ptNlaCA0B81F+vsIADQFG9NbBVggNAk6mCUUkdBEAb2gBsQAQEQAn7dhIRHgRAsOQqFr8JBED9gt2wbREEQIodjUP9DgRA66pALQafEEBuT5DY7n4QQATmIVM+pBBA1o13R8Z6EEDXE10XfqAQQB0CRwINdhBASBXFq6ytFEAix9YzhJMWQGuZDMfzqRRADmjpCraBFkBcjexKy6gUQMmtSbclkhZAZf1mYrrQGkDAl8KDZpcdQC2VtyOcxhpAKO\u002fjaI6sHUDG+ZtQiMAaQJD2P8BatR1AZ\u002fD3i9maIEC5GW7A528iQOm68IPzmSBA2jf3V49rIkC6LCY2H5cgQE3Z6Qd1aSJASaKXUSw\u002fJEDHnj2XqZkmQAyTqYJRSSRAiQtAo3SZJkCKlGbzOEwkQMvapnhcnCZAv0S8df4lKUDOiT20j\u002fUrQN7kt+hkMSlAuAa2SrAALEBmvoOfOCgpQOPhPQeWAyxAXD0nvW+8LUBC6Qsh55EwQDPhl\u002fp5sy1AUduGURCEMECGAUuuYsEtQCzYRjzZgTBAjL\u002ftCRKbDECMv+0JEpsMQIy\u002f7QkSmwxAjL\u002ftCRKbDECMv+0JEpsMQIy\u002f7QkSmwxAxEFClC9oDEB0CvKzkWsMQI0o7Q2+cAxA4j5ya9JtDEAFpP0PsHYMQEVlw5rKYgxAJCu\u002fDMYIDEAYlj\u002ffFuwLQO317o\u002f36gtA+gj84effC0BPJJhqZu0LQOVEuwop3wtAskrpmV4CFkB8f4P26rMVQOwX7IZt6xVAmSzuPzKtFUCiQQqeQu4VQHcv98lRsBVAFTlE3JxKGkD8icqGNZUdQBKFlnX\u002f+BlA0hito6qZHUBMb38uGjIaQMXleAWipx1A9kArMGTVIEBV2XdF8GcjQFn3j4XowCBAEHf1KjJaI0AYCW05l8IgQKKZJ9cUaCNAXmQCfo30JED9+EuL+vwnQDlGskeowSRAJbN6h9sBKECOAkTBjKEkQL69a9CX\u002fidAcCTQYFOXKUAeFf93REUtQI0JMZdUXSlAZVWEm4xKLUADste7P0YpQD+nID8bYS1ApbvrbMiXL0BjJ7wEpxYyQBPwayQJWi9AjYAKR5AWMkDSViWRfUAvQNwtyQG7GjJADr+bbtmZMkAke4SaIVE1QG76sx8pejJAHqUSntA\u002fNUB2OLpKd28yQNP2r6w0OTVAPIidKXRe7z88iJ0pdF7vPzyInSl0Xu8\u002fPIidKXRe7z88iJ0pdF7vPzyInSl0Xu8\u002fG\u002fFkNzM68j9qbRrba0HyP3Y1ecpqOvI\u002f0CueeqRB8j8PXyaKkDryP2lVSzrKQfI\u002fiZro81FG9z+VKHtLOZ\u002f3P+NSlba4Rvc\u002fF0Z6Ubuf9z8sms5OBkf3P+lF7X4VoPc\u002fp3nHKTryA0CWzLG8q94DQFXbTfBN8wNAstmR6jvfA0B8nGnC9vMDQEolPKHX3wNAI9kj1AzpDkDlDMUdb\u002fIIQDM2dLM\u002fkA9AVyWRfZAlCUCKIqRuZ\u002f8PQKwcWmQ7PwlAUMjO29jMEEAEWrqCbWQKQE4n2epyWhFA1GUxsfl4CkA+y\u002fPg7owRQH7GhQMheQpAkLxzKEOlEkDus8pMaR0MQEuvzcZK\u002fBJA2XiwxW4fDEAJ3\u002fsbtDcTQEN1c\u002fG3HQxAzHwHP3GQFUAwEtpyLiUOQNfBwd7EEBVA2lcepKcIDkAxW7Iqwk0VQAGG5c+3BQ5Aa524HK+AGUBDcFzGTV0QQHGS5o9pvRdAFQFO7+IdEEBMUS6NX\u002fgXQIoipG5nHxBAO44fKo3oHEDX+Ez2z3MRQEs8oGzKFRpAcsCuJk\u002f5EEAQyvs4mjMaQL+2fvrP+hBAaZCCp5Br8T9pkIKnkGvxP2mQgqeQa\u002fE\u002faZCCp5Br8T9pkIKnkGvxP2mQgqeQa\u002fE\u002fXFSLiGJy8T8e+1ksRXLxP\u002fCGNCpwcvE\u002fkL+0qE9y8T8p6WFodXLxP7ItA85ScvE\u002fNQhzu5e78T9olC79S9LxP0Z55uWwu\u002fE\u002fj+Gxn8XS8T9XdsHgmrvxPwG+27xx0vE\u002fNGlTdY+s\u002fT+9\u002fE6TGW\u002f+P0CH+fICrP0\u002fDYrmASxy\u002fj89D+7O2q39Pweynlp9df4\u002fJSL8i6CBEUD8VYDvNk8LQIpyafzCixFAccYwJ2hTC0AbZ9MRwI0RQD\u002fkLVc\u002fVgtADJBoAkXMFkAe3QiLiigRQAh3Z+22yxZAeAlOfSApEUB2\u002fYLdsM0WQJW6ZBwjKRFABHP0+L09G0Ami\u002fuPTGcUQDS5GAPrSBtAVmR0QBJmFEC0OjlDcUcbQDLjbaXXZhRAQ6m9iLYDIEBM4xdeSdIXQPCJdap8ByBA+N9KdmzUF0AKoYMu4QggQKGhf4KL1RdAMuVDUDXKIkAfveE+cssbQG\u002fx8J4DyyJAChNGs7LNG0CyEB0CR8oiQJYjZCDPzhtABYiCGVMIJUDEew4sRxgfQJsCmZ1FByVAmus00lIZH0CE2QQYlgclQPgYrDjVGh9AuK8D54wo3T+4rwPnjCjdP7ivA+eMKN0\u002fuK8D54wo3T+4rwPnjCjdP7ivA+eMKN0\u002f9b7xtWeW3j\u002fz5nCt9rDeP7vQXKeRlt4\u002fjBAebRyx3j\u002f6KY4Dr5beP52BkZc1sd4\u002f6x7ZXDXP5T8pl8YvvBLmP8KJ6NfWz+U\u002fk6gXfJoT5j\u002fjUwCMZ9DlP6lsWFNZFOY\u002fXoWUn1S7\u002fj9Z\u002fKawUiEAQNJUT+Yfvf4\u002fZ4F2hxQjAEBBuW3fo77+PxjMXyFzJQBAuW5Kea3kFEBENLqD2EkQQLXBiejX5hRAHmtGBrlLEEDU8ZiByugUQATidf2CTRBAmGvRArQtG0BcWaKzzJIUQGVSQxuALRtAsRU0LbGSFECj6lc6Hy4bQOm2RC44kxRAVMiVehY0IEAIBhA+lGgYQMlXAimxMyBAl6sfm+RnGECF7\u002f0N2jMgQNV46SYxaBhA7wG6L2feIkBIpG38iUocQIHrihnh3SJAYTdsW5RJHEBkkSbeAd4iQNgsl43OSRxA5pE\u002fGHjGJUCjj\u002fmAQD8gQLSQgNHlxSVAqg1ORL8+IEA02T9PA8YlQBkfZi\u002fbPiBAXru04bD8J0DpuBrZldYhQNxj6UMX\u002fCdA\u002fp3t0RvWIUDUEFX4M\u002fwnQMpPqn061iFAEYyDS8f8CUARjINLx\u002fwJQBGMg0vH\u002fAlAEYyDS8f8CUARjINLx\u002fwJQBGMg0vH\u002fAlAV12HakpyDEC5isVvCgsNQHRAEvbtpAxAUAEwnkEjDUB2xYzw9kAMQFN3ZRcM7gxAjQ5Iwr69D0Agls0ckpoPQMpPqn06vg9AP3Jr0m2JD0DkSdI1k68PQF7zqs5qgQ9An8iTpGtmFEDPaoE9JnIWQEYJ+gs9ghRAPNnNjH50FkBVwaikTqAUQHGt9rAXahZAYVERp5P0J0BL5IIz+OsjQLth26LMBihAfjoeM1D5I0CUiPAvgvYnQN8WLNUF\u002fCNA+G7zxkkVMEAe4bTgRUcqQJw24zREGTBAv\u002fG1Z5ZEKkA6P8Vx4CUwQHv18dB3PypA0NTrFoElNEAUlnhA2UgwQAMkmkARHzRAHEXWGko9MEDJyi+DMSI0QAuW6gJeRjBAfT1fs1yWOEB+kGXBxOszQG3heanYmDhA5LuUumT0M0AwDcNHxIg4QH5TWKmg+jNAQQ5KmGlbPkA3+pgPCLQ4QIqvdhTnUD5ALJ\u002fleXCvOED4+lqXGlk+QOfDswQZuThANBKhEWzoQUDThVj9ESI9QOI\u002f3UCB+UFAC9XNxd8qPUAfSx+6oO5BQLOxEvOsID1A2A+xwcIJBECH26FhMQoEQIIeatswCgRAOEvJchIKBEDYg0nx8QkEQO3T8ZiBCgRAdhiT\u002fl4KBECpMSHmkgoEQGx8JvvnCQRAJnDrbp4KBEAofoy5awkEQJI9Qs2QCgRA6e3PRUMGBEBVa2EW2vkDQFdcHJWbCARA7nw\u002fNV76A0BDc51GWgoEQORO6WD9\u002fwNAWcSww5ikEEDbNSGtMZgQQEjdzr7yoBBAofgx5q6VEEBBn8iTpKsQQGJp4Ec1nBBAfxZLkXzlEkCTUtDtJe0VQCx+U1ip8BJAJhk5C3v6FUDdeeI5W\u002fASQCZXsfhN8RVAOiAJ+3YiGEDLZg5JLdQcQMIwYMlVPBhAFeEmo8rgHEB5H0dzZEUYQIJYNnNI2hxAT1lN1xPdHUBivOZVneUhQEiI8gUt5B1Am+jzUUbcIUDaWIl5VgIeQLQdU3dl3yFAbeF5qdgwIkBxyXGndOglQGu3XWiuQyJAQzo8hPHbJUBDHVa45VsiQE2giEUM4yVASWQfZFlwJkDSOqqaICIrQI5zm3CvpCZAe0\u002fltKccK0DxR1Fn7rkmQKuYSj\u002fhFCtAl8gFZ\u002fB3KkDEI\u002fHydO4vQKOUEKyqrypAswxxrIvzL0CQTIdOz7MqQOq0boPa9y9A6wHzkCl\u002fA0DrAfOQKX8DQOsB85ApfwNA6wHzkCl\u002fA0DrAfOQKX8DQOsB85ApfwNAmu\u002fgJw6AA0Dc1avI6IADQCQnE7cKggNAKQZINIGCA0DK+s3EdIEDQBFuMqoMgwNA304iwr8IBED6tIr+0AwEQJ7uPPGcDQRA+gyoN6MGBED8cfvlkxUEQDs0LEZdCwRA7fFCOjxkEECFeY8zTTgQQHrjpDDvYRBAb9bgfVUuEEBW8rG7QGkQQOrMPSR8HxBAvCAiNe1yFUAykGeXb00WQOjAcoQMlBVAzojS3uBLFkDzPSMRGqEVQNnts8pMSRZAs++K4H\u002f7HEDuPsdHi1MdQF\u002fTg4JSFB1AP1WFBmJJHUC6EoHqHwQdQPfJUYAoWB1AbhPulXkDIkAKavgW1i0iQKvsuyL4\u002fyFAVfoJZ7ceIkD59q5BX\u002fohQGh4swbvIyJA9P3UeOn+JUAxPzc0ZUcmQFotsMdE+iVATKq2m+BLJkBDPBIvTwcmQDCEnPf\u002fSSZAZHWr56RHK0BN2lTdI5srQPfpeMxARStAYRvxZDebK0B\u002foUeMnkMrQAHaVrPOoCtA+5Y5XRYXMED52F2gpFAwQChEwCFUGTBAJgD\u002flCpVMEDRzmkWaBcwQOEp5Eo9WzBA","shape":"12, 60"},"type":"heatmap"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"title":{"text":"6-DOF Stewart Platform Vessel Motion Simulator - IAE heatmap"},"height":400},                        {"responsive": true}                    )                };            </script>        </div>
+</div>
+
+<div class="section" id="mc">
+<h2>4. Monte Carlo Robustness</h2>
+<p>No MC data found.</p>
+</div>
+
+<div class="section" id="fault">
+<h2>5. Fault Injection Analysis</h2>
+<p>No fault sweep data found.</p>
+</div>
+
+<div class="section" id="anova">
+<h2>6. ANOVA - Statistical Significance</h2>
+<p>No MC data available for ANOVA.</p>
+</div>
+
+<div class="section" id="wcet">
+<h2>7. WCET Profiling</h2>
+<p>No WCET data found.</p>
+</div>
+
+<div class="section" id="mu">
+<h2>8. Mu / Robustness Margins</h2>
+<div style="height:100%; width:100%;">                        <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.6.0.min.js" integrity="sha256-QaOVwtVY0T02VaHrr6pnoHLCwayMJp4O5n4YyaE3rJk=" crossorigin="anonymous"></script>                <div id="fig_mu" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("fig_mu")) {                    Plotly.newPlot(                        "fig_mu",                        [{"marker":{"color":["steelblue"]},"x":["6-DOF Stewart Platform Vessel Motion Simulator"],"y":{"dtype":"f8","bdata":"x0qGkt7lYD4="},"type":"bar"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"shapes":[{"line":{"dash":"dash"},"type":"line","x0":0,"x1":1,"xref":"x domain","y0":1.0,"y1":1.0,"yref":"y"}],"annotations":[{"showarrow":false,"text":"Stability margin","x":1,"xanchor":"right","xref":"x domain","y":1.0,"yanchor":"bottom","yref":"y"}],"title":{"text":"Mu upper bound (peak |T(z)|) per study"},"yaxis":{"title":{"text":"peak |T(z)|"}}},                        {"responsive": true}                    )                };            </script>        </div>
+</div>
+
+</body>
+</html>

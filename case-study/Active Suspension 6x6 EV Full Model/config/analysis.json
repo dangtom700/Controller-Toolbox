@@ -2,10 +2,10 @@
   "mc_n_samples": 10,
   "mc_sigma": 0.10,
   "mc_perturb_keys": ["M", "I_x", "I_y", "k_s", "c_s", "k_t", "M_w"],
-  "nominal_scenario_id": "s01_smooth_road",
+  "nominal_scenario_id": "s01_bump",
   "fault_specs": [
     {"kind": "sensor_bias",   "magnitudes": [0.002, 0.005, 0.010, 0.020]},
     {"kind": "actuator_loss", "magnitudes": [0.05, 0.10, 0.20, 0.30]}
   ],
-  "notes": "mc_n_samples=10 because GA/PSO/DE controllers rebuild on each run (each call to make_controllers takes ~30 s). Perturbs body + suspension mechanical params by ±10%. sensor = body_Z [m]; actuator = all 6 F_act forces (scaled uniformly)."
+  "notes": "mc_n_samples=10 since GA/PSO/DE controllers each run their own metaheuristic search (~1-35s) regardless of sample count. make_controllers(only=name) now builds just the requested controller instead of all 18, so a full 18-controller sweep is ~1 min/sample (was ~30s/call before that fix). Perturbs body + suspension mechanical params by +/-10%. sensor = body_Z [m]; actuator = all 6 F_act forces (scaled uniformly). nominal_scenario_id corrected 2026-06-18: 's01_smooth_road' never existed (actual ids: s01_bump/s02_resonance/s03_rough/s04_speedbump/s05_comfort) - every run_single/run_with_fault call would have raised ValueError before this fix."
 }

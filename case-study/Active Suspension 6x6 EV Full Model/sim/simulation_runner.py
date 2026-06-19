@@ -9,6 +9,7 @@ Writes one CSV file to log_dir.
 import csv
 import os
 import math
+import time
 import numpy as np
 
 from ev6x6_plant import EV6x6Plant, N_DOF
@@ -20,7 +21,8 @@ def run_simulation(plant_params: dict,
                    scenario:      dict,
                    controller:    ControllerBase,
                    log_dir:       str,
-                   fault_injector=None) -> dict:
+                   fault_injector=None,
+                   wcet_sink:     list = None) -> dict:
     """
     Simulate one (controller, scenario) pair.
 
@@ -31,6 +33,9 @@ def run_simulation(plant_params: dict,
     Optional fault_injector: tools.fault_injector.FaultInjector instance.
       - sensor fault: biases body vertical displacement (state[0])
       - actuator fault: scales all 6 actuator forces uniformly
+    Optional wcet_sink: if a list is passed, one dict per step
+      {"controller": name, "step_time_us": float, "step_index": k} timing
+      controller.compute() is appended to it (see tools/wcet_report.py).
     """
     Ts        = plant_params['Ts']
     T_sim     = float(scenario.get('T_sim', 5.0))
@@ -73,7 +78,13 @@ def run_simulation(plant_params: dict,
         else:
             x_obs = x
 
-        F_act = controller.compute(x_obs, z_r, t)
+        if wcet_sink is not None:
+            t0 = time.perf_counter()
+            F_act = controller.compute(x_obs, z_r, t)
+            dt_us = (time.perf_counter() - t0) * 1e6
+            wcet_sink.append({"controller": ctrl_name, "step_time_us": dt_us, "step_index": k})
+        else:
+            F_act = controller.compute(x_obs, z_r, t)
 
         # Actuator fault: scale all forces uniformly
         if fi:

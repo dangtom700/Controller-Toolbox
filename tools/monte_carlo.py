@@ -12,7 +12,7 @@ Options:
     --n       INT     number of MC samples per controller (default 50)
     --sigma   FLOAT   fractional standard deviation of each parameter (default 0.10  i.e. +/-10 %)
     --seed    INT     random seed (default 42)
-    --out     FILE    output CSV path (default: mc_summary_{study}.csv)
+    --out     FILE    output CSV path (default: case-study/<study>/mc_summary.csv)
     --workers INT     parallel worker processes (default 1 - use higher for long sims)
 
 The script imports the study's sim/ package and calls its run_single() function
@@ -109,7 +109,15 @@ def _run_single(sim_mod, controller_name: str, perturbed_params: dict | None,
             result = sim_mod.run_single(controller_name, perturbed_params)
             # result should be a dict or a pandas DataFrame
             if isinstance(result, dict):
-                return {k: float(v) for k, v in result.items() if isinstance(v, (int, float))}
+                out = {k: float(v) for k, v in result.items() if isinstance(v, (int, float))}
+                # generate_report.py/anova.py expect a lowercase 'iae' key; study
+                # dicts commonly use 'IAE' (see study_protocol.py's minimal contract)
+                if "iae" not in out:
+                    for k, v in result.items():
+                        if k.lower() == "iae" and isinstance(v, (int, float)):
+                            out["iae"] = float(v)
+                            break
+                return out
             if isinstance(result, pd.DataFrame):
                 iae = extract_final_iae(result)
                 m   = compute_metrics_from_df(result)
@@ -144,7 +152,7 @@ def main(argv=None):
     study_name = study_dir.name
     print(f"Study: {study_name}")
 
-    out_path = args.out or f"mc_summary_{study_name[:40].replace(' ', '_')}.csv"
+    out_path = args.out or str(study_dir / "mc_summary.csv")
 
     # Load nominal params from config/plant_params.json if it exists
     nominal_params: dict = {}

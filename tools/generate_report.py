@@ -1,22 +1,38 @@
 """
 tools/generate_report.py  -- RPT-1: static HTML report for Controller Toolbox results.
 
-Generates a single self-contained HTML file with 8 sections:
+Reads each case study's own analysis artifacts and writes a self-contained HTML
+report with 8 sections. Expected per-study layout (see tools/study_protocol.py):
+
+    case-study/<Study>/
+      config/
+      logs/                 run_*.csv (required), wcet_*.csv (optional, raw)
+      sim/
+      mc_summary.csv        (optional - from tools/monte_carlo.py)
+      fault_sweep.csv       (optional - from tools/fault_sweep.py)
+      wcet_summary.csv      (optional - from tools/wcet_report.py)
+      mu_analysis.csv       (optional - from tools/mu_analysis.py)
+      report.html           (written by this script)
+      README.md
+      <PDF>                 (optional)
+
+Sections:
   1. Summary table: best controller per study (by IAE)
   2. Controller comparison: interactive IAE bar charts per study
   3. Scenario breakdown: per-scenario performance heatmap
-  4. Monte Carlo: robustness violin plots (if mc_summary*.csv present)
-  5. Fault analysis: degradation curves (if fault_sweep*.csv present)
-  6. ANOVA: significant pairs table (if mc_summary*.csv present)
+  4. Monte Carlo: robustness violin plots (if mc_summary.csv present)
+  5. Fault analysis: degradation curves (if fault_sweep.csv present)
+  6. ANOVA: significant pairs table (if mc_summary.csv present)
   7. WCET: timing bar chart (if wcet_summary.csv present)
-  8. Mu analysis: robustness margin bar chart (if mu_summary.csv present)
+  8. Mu analysis: robustness margin bar chart (if mu_analysis.csv present)
 
 Usage:
     python tools/generate_report.py [options]
 
 Options:
-    --out     FILE   output HTML path (default: report.html)
-    --study   NAME   filter by study (partial match)
+    --study   NAME   filter to one study (partial match); also picks the default --out
+    --out     FILE   output HTML path (default: case-study/<study>/report.html if
+                      --study matches exactly one study, else report.html in cwd)
     --open           open the report in the default browser after generation
 
 Dependencies: pandas, numpy, plotly (pip install plotly)
@@ -58,6 +74,14 @@ from tools.metrics import extract_final_iae
 # Data loading helpers
 # ---------------------------------------------------------------------------
 
+def _resolve_study_dirs(root: Path, study_filter: str) -> list[Path]:
+    case_root = root / "case-study"
+    dirs = sorted(d for d in case_root.iterdir() if d.is_dir())
+    if study_filter:
+        dirs = [d for d in dirs if study_filter.lower() in d.name.lower()]
+    return dirs
+
+
 def _load_run_data(root: Path, study_filter: str) -> pd.DataFrame:
     csvs = _discover_csvs(root)
     if study_filter:
@@ -66,14 +90,20 @@ def _load_run_data(root: Path, study_filter: str) -> pd.DataFrame:
     return pd.DataFrame(rows) if rows else pd.DataFrame()
 
 
-def _load_extra(root: Path, pattern: str) -> pd.DataFrame:
-    found = sorted(root.glob(pattern))
+def _load_extra(root: Path, filename: str, study_filter: str = "") -> pd.DataFrame:
+    """Load <filename> from every case-study/<Study>/ folder (e.g. mc_summary.csv)."""
+    found = sorted((root / "case-study").glob(f"*/{filename}"))
+    if study_filter:
+        found = [p for p in found if study_filter.lower() in p.parent.name.lower()]
     if not found:
         return pd.DataFrame()
     frames = []
     for p in found:
         try:
-            frames.append(pd.read_csv(p))
+            df = pd.read_csv(p)
+            if "study" not in df.columns:
+                df["study"] = p.parent.name
+            frames.append(df)
         except Exception:
             pass
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
@@ -210,13 +240,18 @@ def _section_anova(mc_df: pd.DataFrame) -> str:
 
 
 def _section_wcet(wcet_df: pd.DataFrame) -> str:
-    if not _HAS_PLOTLY or wcet_df.empty:
-        return _df_to_html_table(wcet_df) if not wcet_df.empty else "<p>No WCET data found.</p>"
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=wcet_df["controller"], y=wcet_df["wcet_us"], name="WCET"))
-    fig.add_trace(go.Bar(x=wcet_df["controller"], y=wcet_df["mean_us"], name="Mean", opacity=0.7))
-    fig.update_layout(barmode="overlay", title="WCET per controller", yaxis_title="Time [us]")
-    return _fig_to_html(fig, "fig_wcet")
+    if wcet_df.empty:
+        return "<p>No WCET data found.</p>"
+    if not _HAS_PLOTLY:
+        return _df_to_html_table(wcet_df)
+    figs_html = []
+    for study, sdf in wcet_df.groupby("study"):
+        fig = go.Figure()
+        fig.add_trace(go.Bar(x=sdf["controller"], y=sdf["wcet_us"], name="WCET"))
+        fig.add_trace(go.Bar(x=sdf["controller"], y=sdf["mean_us"], name="Mean", opacity=0.7))
+        fig.update_layout(barmode="overlay", title=f"{study} - WCET per controller", yaxis_title="Time [us]")
+        figs_html.append(_fig_to_html(fig, f"fig_wcet_{study[:20].replace(' ', '_')}"))
+    return "\n".join(figs_html)
 
 
 def _section_mu(mu_df: pd.DataFrame) -> str:
@@ -320,17 +355,26 @@ nav a {{ margin-right: 1em; color: #005599; text-decoration: none; }}
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--out",   default="report.html")
+    ap.add_argument("--out",   default="", help="default: case-study/<study>/report.html if --study "
+                                                 "matches exactly one study, else report.html in cwd")
     ap.add_argument("--study", default="")
     ap.add_argument("--open",  action="store_true")
     args = ap.parse_args(argv)
 
+    matched_dirs = _resolve_study_dirs(_ROOT, args.study)
+    if args.out:
+        out_path = Path(args.out)
+    elif len(matched_dirs) == 1:
+        out_path = matched_dirs[0] / "report.html"
+    else:
+        out_path = Path("report.html")
+
     print("Loading run data ...")
     run_df   = _load_run_data(_ROOT, args.study)
-    mc_df    = _load_extra(_ROOT, "mc_summary*.csv")
-    fault_df = _load_extra(_ROOT, "fault_sweep*.csv")
-    wcet_df  = _load_extra(_ROOT, "wcet_summary.csv") if Path(_ROOT / "wcet_summary.csv").exists() else pd.DataFrame()
-    mu_df    = _load_extra(_ROOT, "mu_summary.csv") if Path(_ROOT / "mu_summary.csv").exists() else pd.DataFrame()
+    mc_df    = _load_extra(_ROOT, "mc_summary.csv", args.study)
+    fault_df = _load_extra(_ROOT, "fault_sweep.csv", args.study)
+    wcet_df  = _load_extra(_ROOT, "wcet_summary.csv", args.study)
+    mu_df    = _load_extra(_ROOT, "mu_analysis.csv", args.study)
 
     n_runs    = len(run_df)
     n_studies = run_df["study"].nunique() if not run_df.empty else 0
@@ -350,7 +394,6 @@ def main(argv=None):
         section_mu       = _section_mu(mu_df),
     )
 
-    out_path = Path(args.out)
     out_path.write_text(html, encoding="utf-8")
     print(f"Report written to: {out_path}  ({out_path.stat().st_size // 1024} KB)")
 

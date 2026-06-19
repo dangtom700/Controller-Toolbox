@@ -2,24 +2,28 @@
 tools/run_analysis.py  --  Batch analysis runner for Python case studies.
 
 Discovers every Python case study that has config/analysis.json, imports its
-sim/main.py module, then runs three analyses for every controller:
+sim/main.py module, then runs analyses for every controller:
 
   1. Monte Carlo     -- parameter robustness sweep using run_single()
   2. Fault sweep     -- sensor / actuator fault injection using run_with_fault()
-  3. Mu analysis     -- ARMA-based robustness margins from existing run_*.csv logs
+  3. WCET            -- per-step compute() timing, only if the study already has
+                       raw case-study/<study>/logs/wcet_*.csv (needs a study-specific
+                       run_wcet_profile() hook in sim/main.py; skipped otherwise)
+  4. Mu analysis     -- ARMA-based robustness margins from existing run_*.csv logs
 
-Output files written to the project root directory (same location that
-generate_report.py discovers them):
-  mc_summary_{study_slug}.csv
-  fault_sweep_{study_slug}.csv
-  mu_summary.csv  (appended across all studies)
+Each study's output files are written inside its own case-study/<study>/ folder
+(same place generate_report.py reads them from):
+  mc_summary.csv
+  fault_sweep.csv
+  wcet_summary.csv  (only if raw wcet_*.csv data exists)
+  mu_analysis.csv
 
 Usage (from project root):
     conda run -n soft_robotics python tools/run_analysis.py [options]
 
 Options:
     --study   NAME   run only this study (partial-match on folder name; default: all)
-    --skip    LIST   comma-separated analyses to skip: mc, fault, mu
+    --skip    LIST   comma-separated analyses to skip: mc, fault, wcet, mu
     --mc-n    INT    override mc_n_samples from analysis.json
     --sigma   FLOAT  override mc_sigma from analysis.json
     --dry-run        print what would run without actually running
@@ -170,9 +174,9 @@ def run_mc(mod, study: dict, n_samples: int, sigma: float, dry_run: bool) -> Pat
               f"elapsed {elapsed:.1f}s")
 
     # Write CSV
-    out = _ROOT / f"mc_summary_{study['slug']}.csv"
+    out = study["dir"] / "mc_summary.csv"
     _write_csv(out, rows)
-    print(f"    [MC] Written: {out.name}  ({len(rows)} rows)")
+    print(f"    [MC] Written: {out.relative_to(_ROOT)}  ({len(rows)} rows)")
     return out
 
 
@@ -238,10 +242,45 @@ def run_fault_sweep(mod, study: dict, dry_run: bool) -> Path | None:
         print(f"    [FAULT] {ctrl_name:<24}  {len(fault_specs)} fault types  "
               f"elapsed {elapsed:.1f}s")
 
-    out = _ROOT / f"fault_sweep_{study['slug']}.csv"
+    out = study["dir"] / "fault_sweep.csv"
     _write_csv(out, rows)
-    print(f"    [FAULT] Written: {out.name}  ({len(rows)} rows)")
+    print(f"    [FAULT] Written: {out.relative_to(_ROOT)}  ({len(rows)} rows)")
     return out
+
+
+# ---------------------------------------------------------------------------
+# WCET (CSV-based; only runs for studies that already have raw wcet_*.csv
+# data under their logs/ - that data comes from a study-specific
+# run_wcet_profile()-style hook in sim/main.py, which this script does not
+# generate on its own)
+# ---------------------------------------------------------------------------
+
+def run_wcet(study: dict, dry_run: bool) -> Path | None:
+    has_raw = any(study["dir"].joinpath("logs").glob("wcet_*.csv"))
+    if not has_raw:
+        print(f"    [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)")
+        return None
+    if dry_run:
+        print(f"    [WCET] DRY RUN  (would aggregate existing logs/wcet_*.csv)")
+        return None
+    try:
+        from tools.wcet_report import main as wcet_main
+        wcet_main(["--study", study["name"]])
+        out = study["dir"] / "wcet_summary.csv"
+        print(f"    [WCET] Written: {out.relative_to(_ROOT)}")
+        return out
+    except SystemExit as exc:
+        # wcet_report.py calls sys.exit() on "no data" - not an Exception
+        # subclass, so it would otherwise escape uncaught and abort the
+        # whole batch run.
+        if exc.code in (0, None):
+            print("    [WCET] SKIP - no data after filtering")
+        else:
+            print(f"    [WCET] WARN: tool exited with code {exc.code}")
+        return None
+    except Exception as exc:
+        print(f"    [WCET] WARN: {exc}")
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -249,17 +288,21 @@ def run_fault_sweep(mod, study: dict, dry_run: bool) -> Path | None:
 # ---------------------------------------------------------------------------
 
 def run_mu_all(study_filter: str, dry_run: bool) -> None:
-    """Run mu_analysis across all case-study CSVs; writes mu_summary.csv once."""
+    """Run mu_analysis across all case-study CSVs; writes mu_analysis.csv per study."""
     if dry_run:
         print(f"\n  [MU] DRY RUN  (would read all logs/run_*.csv)")
         return
     try:
         from tools.mu_analysis import main as mu_main
-        mu_args = ["--out", str(_ROOT / "mu_summary.csv")]
-        if study_filter:
-            mu_args += ["--study", study_filter]
+        mu_args = ["--study", study_filter] if study_filter else []
         mu_main(mu_args)
-        print(f"  [MU] Written: mu_summary.csv")
+    except SystemExit as exc:
+        # mu_analysis.py calls sys.exit() on "no CSVs found" - same
+        # uncaught-by-Exception hazard as wcet_main() above.
+        if exc.code in (0, None):
+            print("  [MU] SKIP - no run_*.csv data found")
+        else:
+            print(f"  [MU] WARN: tool exited with code {exc.code}")
     except Exception as exc:
         print(f"  [MU] WARN: {exc}")
 
@@ -296,7 +339,7 @@ def main(argv=None) -> None:
     ap.add_argument("--study",   default="",
                     help="Partial-match filter on study folder name")
     ap.add_argument("--skip",    default="",
-                    help="Comma-separated analyses to skip: mc, fault, mu")
+                    help="Comma-separated analyses to skip: mc, fault, wcet, mu")
     ap.add_argument("--mc-n",    type=int, default=None,
                     help="Override mc_n_samples from analysis.json")
     ap.add_argument("--sigma",   type=float, default=None,
@@ -308,14 +351,14 @@ def main(argv=None) -> None:
     skip = {s.strip().lower() for s in args.skip.split(",") if s.strip()}
     studies = discover_studies(args.study)
 
+    print(f"\n{'='*60}")
+    print(f"  run_analysis.py  -  {len(studies)} study/studies with MC/fault hooks found")
+    print(f"{'='*60}\n")
+
     if not studies:
         print(f"No Python studies with config/analysis.json found"
-              + (f" matching '{args.study}'" if args.study else ""))
-        return
-
-    print(f"\n{'='*60}")
-    print(f"  run_analysis.py  -  {len(studies)} study/studies found")
-    print(f"{'='*60}\n")
+              + (f" matching '{args.study}'" if args.study else "")
+              + " - skipping MC/fault/WCET (mu analysis runs regardless, below).")
 
     for study in studies:
         print(f"\n[{study['name']}]")
@@ -344,7 +387,18 @@ def main(argv=None) -> None:
                 print("  [FAULT] ERROR:")
                 traceback.print_exc()
 
-    # Mu analysis runs once over all studies' CSVs (mu_analysis.py overwrites per call)
+        # WCET (only if the study already has raw timing data)
+        if "wcet" not in skip:
+            try:
+                run_wcet(study, args.dry_run)
+            except Exception:
+                print("  [WCET] ERROR:")
+                traceback.print_exc()
+
+    # Mu analysis works directly off logs/run_*.csv - no sim/main.py or
+    # analysis.json needed, so it must run even when the hook-based loop
+    # above found nothing (e.g. a C++ study, or a Python study missing
+    # config/analysis.json).
     if "mu" not in skip:
         run_mu_all(args.study, args.dry_run)
 

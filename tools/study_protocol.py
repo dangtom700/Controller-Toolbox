@@ -89,7 +89,9 @@ Each study should have config/analysis.json with:
         "mc_n_samples"    : int,       # Monte Carlo samples per controller
         "mc_sigma"        : float,     # relative std of parameter perturbation
         "mc_perturb_keys" : [str, ...],# which plant_params keys to perturb
-        "nominal_scenario_id": str,    # scenario used for MC and fault sweep
+        "nominal_scenario_id": str,    # scenario used for MC and fault sweep -
+                                        # must match a real scenario 'id' in
+                                        # config/scenarios/*.json
         "fault_specs": [
             { "kind": str, "magnitudes": [float, ...] },
             ...
@@ -98,5 +100,36 @@ Each study should have config/analysis.json with:
     }
 
 tools/run_analysis.py reads this file to configure its sweep.
+
+OUTPUT FILE LAYOUT
+------------------
+Every analysis tool writes its result inside the study's own folder, not the
+project root, so each case study is self-contained:
+
+    case-study/<Study>/
+      config/
+      logs/                 run_*.csv (required); wcet_*.csv (optional, raw -
+                             only if sim/main.py has a run_wcet_profile()-style
+                             hook; see Active Suspension 6x6 EV Full Model for
+                             a worked example)
+      sim/
+      mc_summary.csv         <- tools/monte_carlo.py        (--out overrides)
+      fault_sweep.csv        <- tools/fault_sweep.py         (--out overrides)
+      wcet_summary.csv       <- tools/wcet_report.py         (--out overrides;
+                                only written if logs/wcet_*.csv exists)
+      mu_analysis.csv        <- tools/mu_analysis.py         (--out overrides)
+      report.html            <- tools/generate_report.py     (--out overrides)
+      README.md
+      <PDF>                  (optional)
+
+tools/generate_report.py discovers these with
+(root / "case-study").glob("*/<filename>") and tags each row with a 'study'
+column (the folder name) if the CSV doesn't already have one - this is what
+lets one report.html span multiple studies when --study is omitted.
+
+Every result dict returned by run_single()/run_with_fault() must expose its
+IAE value under a key whose lowercased form is "iae" (e.g. "IAE" is fine -
+tools/monte_carlo.py and tools/fault_sweep.py normalise it); generate_report.py
+and tools/anova.py both key off the lowercase "iae" column name.
 """
 # (This module exports no symbols at runtime; it exists as documentation.)

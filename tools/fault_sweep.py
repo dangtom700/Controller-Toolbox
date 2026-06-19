@@ -12,7 +12,7 @@ Options:
     --faults  LIST    comma-separated fault kinds to sweep (default: sensor_bias,actuator_loss)
     --magnitudes LIST comma-separated list of magnitudes to try per fault kind
                      (default: 0,0.05,0.10,0.20,0.30,0.50)
-    --out     FILE    output CSV path (default: fault_sweep_{study}.csv)
+    --out     FILE    output CSV path (default: case-study/<study>/fault_sweep.csv)
 
 Output CSV columns:
     study, controller, fault_kind, magnitude, iae, rms_error, settle_time_s,
@@ -64,7 +64,15 @@ def _run_with_fault(sim_mod, ctrl_name: str, fault: FaultSpec) -> dict[str, floa
         try:
             result = sim_mod.run_with_fault(ctrl_name, fault)
             if isinstance(result, dict):
-                return {k: float(v) for k, v in result.items() if isinstance(v, (int, float))}
+                out = {k: float(v) for k, v in result.items() if isinstance(v, (int, float))}
+                # generate_report.py/anova.py expect a lowercase 'iae' key; study
+                # dicts commonly use 'IAE' (see study_protocol.py's minimal contract)
+                if "iae" not in out:
+                    for k, v in result.items():
+                        if k.lower() == "iae" and isinstance(v, (int, float)):
+                            out["iae"] = float(v)
+                            break
+                return out
             if isinstance(result, pd.DataFrame):
                 iae = extract_final_iae(result)
                 m   = compute_metrics_from_df(result)
@@ -89,7 +97,7 @@ def main(argv=None):
     study_name  = study_dir.name
     fault_kinds = [f.strip() for f in args.faults.split(",")]
     magnitudes  = [float(m.strip()) for m in args.magnitudes.split(",")]
-    out_path    = args.out or f"fault_sweep_{study_name[:40].replace(' ', '_')}.csv"
+    out_path    = args.out or str(study_dir / "fault_sweep.csv")
 
     print(f"Study: {study_name}")
     print(f"Faults: {fault_kinds}  Magnitudes: {magnitudes}")

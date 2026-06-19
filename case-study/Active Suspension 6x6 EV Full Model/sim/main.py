@@ -9,6 +9,7 @@ Usage (from project root):
   conda run -n soft_robotics -- python "case-study/Active Suspension 6x6 EV Full Model/sim/main.py"
 """
 
+import csv as _csv
 import json
 import os
 import sys
@@ -33,7 +34,7 @@ except (ImportError, AttributeError) as _e:
     _CTRL_ERR = str(_e)
 
 from ev6x6_plant      import EV6x6Plant, DEFAULT_PARAMS
-from controllers      import make_controllers
+from controllers      import make_controllers, controller_names
 from simulation_runner import run_simulation
 
 
@@ -154,15 +155,11 @@ def _h_scenario(sid=None):
     raise ValueError(f"Scenario {sid!r} not found")
 
 
-# CONTROLLER_NAMES: EV6x6 make_controllers runs GA/PSO/DE - evaluated lazily
-# to avoid long computation on module import by analysis tools.
+# CONTROLLER_NAMES: static roster, no controller construction at import time
+# (controller_names() just reads _CONTROLLER_FACTORIES - instant).
 try:
     _H_NOM = _h_nom()
-    if _CTRL_AVAILABLE:
-        _plant_ref_h = EV6x6Plant(_H_NOM)
-        CONTROLLER_NAMES = [c.name() for c in make_controllers(_H_NOM, _plant_ref_h)]
-    else:
-        CONTROLLER_NAMES = []
+    CONTROLLER_NAMES = controller_names() if _CTRL_AVAILABLE else []
 except Exception:
     _H_NOM = dict(DEFAULT_PARAMS)
     CONTROLLER_NAMES = []
@@ -175,10 +172,7 @@ def run_single(ctrl_name, params=None, scenario_id=None):
     _p = {**_copy.deepcopy(_H_NOM), **(params or {})}
     sc = _h_scenario(scenario_id)
     plant_ref = EV6x6Plant(_p)
-    ctrls = make_controllers(_p, plant_ref)
-    ctrl_obj = next((c for c in ctrls if c.name() == ctrl_name), None)
-    if ctrl_obj is None:
-        raise ValueError(f"Unknown controller {ctrl_name!r}")
+    ctrl_obj = make_controllers(_p, plant_ref, only=ctrl_name)[0]
     with _tempfile.TemporaryDirectory() as tmp:
         return run_simulation(_p, sc, ctrl_obj, tmp)
 
@@ -191,10 +185,36 @@ def run_with_fault(ctrl_name, fault, scenario_id=None):
     _p = _copy.deepcopy(_H_NOM)
     sc = _h_scenario(scenario_id)
     plant_ref = EV6x6Plant(_p)
-    ctrls = make_controllers(_p, plant_ref)
-    ctrl_obj = next((c for c in ctrls if c.name() == ctrl_name), None)
-    if ctrl_obj is None:
-        raise ValueError(f"Unknown controller {ctrl_name!r}")
+    ctrl_obj = make_controllers(_p, plant_ref, only=ctrl_name)[0]
     with _tempfile.TemporaryDirectory() as tmp:
         return run_simulation(_p, sc, ctrl_obj, tmp,
                               fault_injector=FaultInjector([fault]))
+
+
+def run_wcet_profile(scenario_id=None, log_dir=None):
+    """Time controller.compute() per step for every controller on one scenario.
+
+    Writes logs/wcet_{scenario_id}.csv (controller, step_time_us, step_index)
+    for tools/wcet_report.py. Uses make_controllers(only=name) so each
+    controller is built in isolation - construction cost is excluded from
+    the per-step compute() timing.
+    """
+    if not _CTRL_AVAILABLE:
+        raise ImportError(f"ctrl_toolbox not available: {_CTRL_ERR}")
+    sc = _h_scenario(scenario_id)
+    log_dir = log_dir or os.path.join(_BASE_DIR, 'logs')
+    os.makedirs(log_dir, exist_ok=True)
+
+    rows = []
+    for ctrl_name in CONTROLLER_NAMES:
+        plant_ref = EV6x6Plant(_H_NOM)
+        ctrl_obj = make_controllers(_H_NOM, plant_ref, only=ctrl_name)[0]
+        with _tempfile.TemporaryDirectory() as tmp:
+            run_simulation(_H_NOM, sc, ctrl_obj, tmp, wcet_sink=rows)
+
+    out_path = os.path.join(log_dir, f"wcet_{sc['id']}.csv")
+    with open(out_path, 'w', newline='') as fh:
+        writer = _csv.DictWriter(fh, fieldnames=["controller", "step_time_us", "step_index"])
+        writer.writeheader()
+        writer.writerows(rows)
+    return out_path
