@@ -1127,4 +1127,59 @@ _mu_radius = ctrl.robust_stability_radius(_g4_G, _g4_K, _mu_struc, sigma_max=5.0
 assert abs(_mu_radius - 3.0) < 1e-2, "robust_stability_radius should match 1/norm_T=3.0"
 print('MuAnalysis (Phase 3) smoke test passed.')
 
+# WorstCaseSearch (CMA-ES worst-case parameter search, Phase 4) smoke test
+assert hasattr(ctrl, 'WorstCaseResult'), "WorstCaseResult not bound"
+assert hasattr(ctrl, 'WorstCaseSearchParams'), "WorstCaseSearchParams not bound"
+assert hasattr(ctrl, 'find_worst_case_sensitivity'), "find_worst_case_sensitivity not bound"
+assert hasattr(ctrl, 'find_worst_case_iae'), "find_worst_case_iae not bound"
+assert hasattr(ctrl, 'find_worst_case'), "find_worst_case not bound"
+assert ctrl.registry_has('worst_case_search'), "worst_case_search not registered"
+
+
+def _wc_plant_factory(params):
+    a = float(params[0])
+    return ctrl.StateSpace(_npra.array([[a]]), _npra.array([[0.4]]),
+                            _npra.array([[1.0]]), _npra.array([[0.0]]), 0.1)
+
+
+_wc_ctrl = ctrl.StateSpace(_npra.zeros((1, 1)), _npra.zeros((1, 1)),
+                           _npra.zeros((1, 1)), _npra.array([[0.5]]), 0.1)
+_wc_p = ctrl.WorstCaseSearchParams()
+_wc_p.max_evals = 80
+_wc_res = ctrl.find_worst_case_sensitivity(_wc_plant_factory, _wc_ctrl,
+                                            _npra.array([0.6]), _npra.array([0.3]),
+                                            params=_wc_p)
+assert isinstance(_wc_res, ctrl.WorstCaseResult), "find_worst_case_sensitivity wrong return type"
+assert _npra.isfinite(_wc_res.worst_cost), "worst_cost should be finite for a stable search box"
+assert _wc_res.n_evals > 0, "n_evals should be positive"
+
+_wc_res_generic = ctrl.find_worst_case(_wc_plant_factory,
+                                        lambda ss: abs(ss.A[0, 0]),
+                                        _npra.array([0.6]), _npra.array([0.3]),
+                                        params=_wc_p)
+assert _wc_res_generic.worst_cost >= abs(0.6) - 1e-9, "generic find_worst_case should find |a| >= |nominal a|"
+print('WorstCaseSearch (Phase 4) smoke test passed.')
+
+# LyapunovRobustness (common quadratic Lyapunov function, Phase 5) smoke test
+assert hasattr(ctrl, 'LyapunovResult'), "LyapunovResult not bound"
+assert hasattr(ctrl, 'LyapunovSearchParams'), "LyapunovSearchParams not bound"
+assert hasattr(ctrl, 'find_common_lyapunov'), "find_common_lyapunov not bound"
+assert hasattr(ctrl, 'is_quadratically_stable'), "is_quadratically_stable not bound"
+assert hasattr(ctrl, 'build_box_vertices'), "build_box_vertices not bound"
+assert ctrl.registry_has('lyapunov_robustness'), "lyapunov_robustness not registered"
+
+_lyap_A = _npra.array([[0.5]])
+_lyap_res = ctrl.find_common_lyapunov([_lyap_A])
+assert _lyap_res.found, "single stable vertex should always admit a common Lyapunov function"
+assert _lyap_res.P[0, 0] > 0.0, "P must be positive definite"
+
+_lyap_delta = _npra.array([[0.05]])  # n*n x m = 1x1, single direction
+_lyap_vertices = ctrl.build_box_vertices(_lyap_A, _lyap_delta)
+assert len(_lyap_vertices) == 2, "build_box_vertices should return 2^1 = 2 vertices"
+assert _npra.isclose(_lyap_vertices[0][0, 0], 0.45) or _npra.isclose(_lyap_vertices[0][0, 0], 0.55)
+
+assert ctrl.is_quadratically_stable(_lyap_vertices), "small box around a stable vertex should be quadratically stable"
+assert not ctrl.is_quadratically_stable([_npra.array([[1.5]])]), "unstable vertex must fail"
+print('LyapunovRobustness (Phase 5) smoke test passed.')
+
 print('\nAll smoke tests passed.')

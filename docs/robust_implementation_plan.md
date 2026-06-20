@@ -4,11 +4,20 @@ Generated 2026-06-17. Authored against codebase state at Part 60.
 
 **Status update (Part 66, 2026-06-20): Phases 1-3 are done** (built shortly after this plan
 was authored — confirmed complete and documented in `CLAUDE.md`'s ROB-1 entry by Part 63).
-**Phases 4 and 5 were never built** and remain open. The sections below are kept as the
-original design rationale for Phases 1-3 and the still-current proposal for Phases 4-5 —
-treat the Phase 1-3 write-ups as historical design notes, not a "to do" list. **Important:**
-the "Integration with Existing Case Studies" section near the end of this document describes
-a path that was **not** the one actually taken for case-study integration — see the
+
+**Status update (Part 67, 2026-06-20): Phases 4 and 5 are also done.** Built as
+`lib/WorstCaseSearch.h` (CMA-ES worst-case parameter search, wraps `AutoTuner`) and
+`lib/LyapunovRobustness.h` (common quadratic Lyapunov function for polytopic uncertainty,
+wraps `SystemAnalysis::solveDiscreteLyapunov`) — both header-only, both bound in
+`bindings/analysis_bindings.cpp`, both exercised by `bindings/smoke_test.py` and dedicated
+`[worst_case_search]`/`[lyapunov_robustness]` Catch2 tests, both with a runnable example
+(`ex86_worst_case.cpp`, `ex87_lyapunov_robust.cpp`). All five phases of this plan are now
+complete — see `CLAUDE.md`'s ROB-1 entry for the consolidated status and the "Part 67"
+non-obvious-facts note for two real deviations from the literal pseudocode below (Phase 5's
+sum-vs-average fix, and Phase 4's normalised-search-space construction). The sections below
+are kept as the original design rationale, not a "to do" list. **Important:** the
+"Integration with Existing Case Studies" section near the end of this document describes a
+path that was **not** the one actually taken for case-study integration — see the
 correction inserted there for what was actually built instead (Part 64 + 66) and why.
 
 ---
@@ -436,8 +445,19 @@ and can be referenced but need not be duplicated.
 
 ## Phase 4 — `lib/WorstCaseSearch.h` (CMA-ES Worst-Case Parameter Search)
 
-**Status: Open.** Never built — confirmed still absent as of Part 66. This phase is still
-an accurate, current proposal.
+**Status: Done (Part 67).** Built as `lib/WorstCaseSearch.h`, header-only, wrapping
+`AutoTuner`. One real deviation from the API sketch below: the search runs internally in
+*normalised* coordinates (`z`), where physical parameter `i` is
+`param_nominal(i) + z(i) * search_width(i)` and `search_width(i) = param_sigma(i) *
+max(|param_nominal(i)|, 1)`. This lets `AutoTuner`'s single scalar `sigma0` (no
+per-parameter step size) still explore every parameter at its own relative scale, and lets
+hard bounds be supplied in physical units while CMA-ES itself only ever sees `z`-space
+bounds. `WorstCaseSearchParams::population` is kept for API-shape compatibility with the
+original sketch below but has no effect — `AutoTuner` derives its CMA-ES population size
+internally from the dimension (`4 + floor(3*ln(n))`, Hansen 2006) and does not expose an
+override; `max_evals` is honoured by dividing it by that same derived population size to
+get `AutoTunerParams::maxIter`. The write-up below is otherwise unchanged from the original
+design.
 
 **Priority: MEDIUM — uses existing `AutoTuner`, low incremental code.**
 
@@ -548,8 +568,24 @@ findWorstCase(
 
 ## Phase 5 — `lib/LyapunovRobustness.h` (Common Lyapunov Function for Polytopic Uncertainty)
 
-**Status: Open.** Never built — confirmed still absent as of Part 66. This phase is still
-an accurate, current proposal.
+**Status: Done (Part 67).** Built as `lib/LyapunovRobustness.h`, header-only, wrapping
+`SystemAnalysis::solveDiscreteLyapunov`. **One real deviation from the algorithm in section
+5.3 below: the aggregation step sums the per-vertex exact solutions `X_i`, it does not
+average them** (the pseudocode's `P_new = P_new / L` line was dropped). This is not a
+style choice — averaging is provably insufficient even for simple, clustered vertex sets.
+Worked counterexample (`A_1=0.45, A_2=0.55, Q=1`, both individually stable): the exact
+per-vertex solutions are `X_1 = 1.2539`, `X_2 = 1.4337`; their *average* `P=1.3438` fails
+vertex 2's own decrease condition (`A_2^2*P - P + Q = +0.0627 > 0`, a violation), while
+their *sum* `P=2.6876` satisfies both vertices comfortably (`-1.1434` and `-0.8746`). The
+reason: for a candidate `P = sum_i X_i`, checking vertex `k` reduces algebraically to
+`A_k^T P A_k - P + Q = sum_{i != k} (A_k^T X_i A_k - X_i)` — the `i = k` term cancels
+exactly against `Q` by construction, so summing preserves every vertex's own exact margin
+and only adds the (for nearby vertices, typically small and same-signed) cross terms on
+top; dividing by `L` instead shrinks the very term that vertex `k` needs to stay negative.
+This is still a heuristic, not a true SDP solver (per the scope note below), but the sum
+form is the one that actually works for the intended use case (vertices clustered around a
+common nominal, e.g. from `buildBoxVertices`) and is confirmed by both a dedicated unit
+test and the worked example above.
 
 **Priority: LOW — requires internal iterative solver; no external SDP dependency.**
 
@@ -654,15 +690,16 @@ The existing `SystemAnalysis::solveDiscreteLyapunov` handles each vertex step.
 
 ## Summary Table
 
-| Phase | File(s) | New API | Est. C++ lines | Priority | Depends on |
-|-------|---------|---------|----------------|----------|------------|
-| 1 | `lib/RobustnessAnalysis.{h,cpp}` | `spawn_*`, `MonteCarloResult`, `runMonteCarlo` | ~420 | HIGH | `GapMetric`, `SystemAnalysis` |
-| 2 | `lib/SystemAnalysis.{h,cpp}` | `gangOfFour`, `diskMargin`, `series`, `parallel`, `feedback` | ~280 | HIGH | `SystemAnalysis` (extension) |
-| 3 | `lib/MuAnalysis.{h,cpp}` | `computeMu`, `peakMu`, `robustStabilityRadius` | ~450 | MEDIUM | Phase 1, `GapMetric` |
-| 4 | `lib/WorstCaseSearch.h` | `findWorstCase*` | ~150 | MEDIUM | Phase 1, `AutoTuner` |
-| 5 | `lib/LyapunovRobustness.h` | `findCommonLyapunov`, `buildBoxVertices` | ~200 | LOW | `SystemAnalysis` |
+| Phase | File(s) | New API | Est. C++ lines | Priority | Depends on | Status |
+|-------|---------|---------|----------------|----------|------------|--------|
+| 1 | `lib/RobustnessAnalysis.{h,cpp}` | `spawn_*`, `MonteCarloResult`, `runMonteCarlo` | ~420 | HIGH | `GapMetric`, `SystemAnalysis` | Done (Part 63) |
+| 2 | `lib/SystemAnalysis.{h,cpp}` | `gangOfFour`, `diskMargin`, `series`, `parallel`, `feedback` | ~280 | HIGH | `SystemAnalysis` (extension) | Done (Part 63) |
+| 3 | `lib/MuAnalysis.{h,cpp}` | `computeMu`, `peakMu`, `robustStabilityRadius` | ~450 | MEDIUM | Phase 1, `GapMetric` | Done (Part 63) |
+| 4 | `lib/WorstCaseSearch.h` | `findWorstCase*` | ~150 | MEDIUM | Phase 1, `AutoTuner` | Done (Part 67) |
+| 5 | `lib/LyapunovRobustness.h` | `findCommonLyapunov`, `buildBoxVertices` | ~200 | LOW | `SystemAnalysis` | Done (Part 67) |
 
-**Total new code:** ~1500 lines C++ + ~300 lines bindings.
+**Total new code:** ~1500 lines C++ + ~300 lines bindings. All five phases are complete —
+the table above is kept for traceability, not as an outstanding work plan.
 All five phases follow the standard 8-step checklist from CLAUDE.md.
 
 ---
@@ -696,6 +733,27 @@ spawn_SS_samples sigma_B = sigma_C = 0  -> perturbs only A (most common use case
                                             state-matrix uncertainty in robust control).
 LyapunovRobustness buildBoxVertices     -> 2^m vertices; m > 12 is impractical.
                                            For high-dimensional uncertainty use MC instead.
+WorstCaseSearch search_width            -> param_sigma(i) * max(|param_nominal(i)|, 1), NOT
+                                           param_sigma(i) * |param_nominal(i)| alone - the
+                                           floor at 1 keeps small-magnitude nominal parameters
+                                           (e.g. nominal = 0.01) from collapsing to a useless
+                                           near-zero search width.
+WorstCaseSearchParams::population       -> reserved field, currently has NO effect; AutoTuner
+                                           derives CMA-ES population internally from n and does
+                                           not expose an override (Part 67).
+findCommonLyapunov aggregation          -> SUMS per-vertex exact solutions, does NOT average
+                                           (Part 67 deviation from section 5.3's pseudocode -
+                                           averaging fails simple clustered-vertex cases; see
+                                           the Phase 5 status note above for the worked example).
+findCommonLyapunov residual sign        -> negative = vertex satisfied with margin, non-negative
+                                           = violated; `found = (residual < sqrt(tol))`, where
+                                           residual is the worst-case (max over vertices) largest
+                                           eigenvalue of `A_i^T P A_i - P + Q` (an eigenvalue
+                                           check, not the Frobenius-norm reading a literal pass
+                                           over section 5.3 might suggest - the Frobenius norm of
+                                           a comfortably-satisfied, very negative-definite matrix
+                                           would itself be large, which is backwards from what
+                                           "small residual = good" should mean).
 ```
 
 ---

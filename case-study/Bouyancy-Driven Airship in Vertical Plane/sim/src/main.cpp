@@ -1,4 +1,5 @@
-// main.cpp - entry point for Bouyancy-Driven Airship in Vertical Plane (TEMPLATE). Target: bouyancy_driven_airship_in_vertical_plan_sim
+// main.cpp - entry point for the Bouyancy-Driven Airship in Vertical Plane case study.
+// Target: bouyancy_driven_airship_in_vertical_plan_sim. 12 controllers x 5 scenarios = 60 runs.
 #include "bouyancy_driven_airship_in_vertical_plan_plant.h"
 #include "controllers.h"
 #include "simulation_runner.h"
@@ -6,6 +7,7 @@
 #include <filesystem>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 int main(int argc, char* argv[]) {
 #ifndef BOUYANCY_DRIVEN_AIRSHIP_IN_VERTICAL_PLAN_SIM_SOURCE_DIR
@@ -17,29 +19,63 @@ int main(int argc, char* argv[]) {
     std::string log_dir    = base_dir + "/logs";
     std::filesystem::create_directories(log_dir);
 
-    bouyancydrivenairshipinverticalplan::PlantParams plant;
+    using namespace bouyancydrivenairshipinverticalplan;
+
+    std::cout << "Loading plant parameters from: " << plant_json << '\n';
+    PlantParams plant;
     try {
-        plant = bouyancydrivenairshipinverticalplan::PlantParams::fromJson(plant_json);
+        plant = PlantParams::fromJson(plant_json);
     } catch (const std::exception& e) {
         std::cerr << "ERROR loading plant: " << e.what() << '\n';
         return 1;
     }
+    std::cout << "Airship parameters: m_bar=" << plant.m_bar << " kg  ms=" << plant.ms
+              << " kg  J=" << plant.J << " kg m^2  rp3=" << plant.rp3
+              << " m  Ts=" << plant.Ts << " s\n\n";
 
-    std::vector<bouyancydrivenairshipinverticalplan::Scenario> scenarios;
-    for (const auto& entry : std::filesystem::directory_iterator(scen_dir)) {
+    std::vector<std::string> scen_files;
+    for (const auto& entry : std::filesystem::directory_iterator(scen_dir))
         if (entry.path().extension() == ".json")
-            scenarios.push_back(bouyancydrivenairshipinverticalplan::Scenario::fromJson(entry.path().string()));
+            scen_files.push_back(entry.path().string());
+    std::sort(scen_files.begin(), scen_files.end());
+
+    if (scen_files.empty()) {
+        std::cerr << "No scenario JSON files found in: " << scen_dir << '\n';
+        return 1;
     }
 
-    auto controllers = bouyancydrivenairshipinverticalplan::makeControllers(plant.Ts);
-    std::cout << "Bouyancy-Driven Airship in Vertical Plane: " << controllers.size() << " controllers x "
-              << scenarios.size() << " scenarios\n";
+    auto controllers = makeControllers(plant);
+    static constexpr int N_CONTROLLERS = 12;
+    if (static_cast<int>(controllers.size()) != N_CONTROLLERS) {
+        std::cerr << "ERROR: expected " << N_CONTROLLERS << " controllers, got "
+                  << controllers.size() << '\n';
+        return 1;
+    }
 
-    for (const auto& scen : scenarios)
-        for (const auto& nc : controllers) {
-            double iae = bouyancydrivenairshipinverticalplan::runSimulation(plant, scen, nc, log_dir);
-            std::cout << "  " << scen.id << " / " << nc.name
-                      << "  IAE=" << iae << '\n';
+    const int total = static_cast<int>(scen_files.size() * controllers.size());
+    int done = 0;
+    std::cout << "Running " << total << " simulations (" << scen_files.size()
+              << " scenarios x " << controllers.size() << " controllers)...\n\n";
+
+    for (const auto& sf : scen_files) {
+        Scenario scen;
+        try {
+            scen = Scenario::fromJson(sf);
+        } catch (const std::exception& e) {
+            std::cerr << "Skipping " << sf << ": " << e.what() << '\n';
+            continue;
         }
+
+        for (auto& ctrl : controllers) {
+            try {
+                runSimulation(plant, scen, *ctrl, log_dir);
+            } catch (const std::exception& e) {
+                std::cerr << "ERROR [" << scen.id << " | " << ctrl->name() << "]: " << e.what() << '\n';
+            }
+            ++done;
+        }
+    }
+
+    std::cout << "\nDone. " << done << '/' << total << " runs completed. Results in: " << log_dir << '\n';
     return 0;
 }

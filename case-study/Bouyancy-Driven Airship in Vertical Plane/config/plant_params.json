@@ -1,8 +1,14 @@
 {
-  "_comment": "TODO: real plant parameters for Bouyancy-Driven Airship in Vertical Plane",
-  "Ts":        0.01,
-  "param_a":   1.0,
-  "param_b":   1.0,
-  "u_max":     1.0,
-  "u_min":    -1.0
+  "_comment": "Table 1 (Wu et al. 2013) + assumed engineering limits - see README 'Model simplifications'",
+  "m_bar":    30.0,
+  "ms":       269.0,
+  "J":        8000.0,
+  "rp3":      2.0,
+  "g":        9.81,
+  "u_max":    400.0,
+  "u_min":   -400.0,
+  "rp1_max":  1.5,
+  "rp1_min": -1.5,
+  "Ts":       0.05,
+  "duration": 60.0
 }

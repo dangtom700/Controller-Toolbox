@@ -1,0 +1,13 @@
+{
+  "id":             "s01_calm_step",
+  "description":    "Paper's own Sec. 4.2.3 validation case (no initial translation): 41.5 -> 30 deg step",
+  "T_sim":          60.0,
+  "theta0_deg":     41.5,
+  "rp1_ref":       -1.15,
+  "v1_0":           0.0,
+  "v3_0":           0.0,
+  "m0_initial":     1.0,
+  "ref_type":      "step",
+  "theta_ref_deg":  30.0,
+  "step_time":      5.0
+}

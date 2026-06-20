@@ -816,4 +816,165 @@ ctrl.PeakMuResult
           py::arg("sigma_max") = 2.0, py::arg("bisect_iters") = 30,
           "Largest sigma_rel for which peak_mu(...).peak.upper stays below 1 "
           "(bisection search; returns sigma_max if even that bound is robust).");
+
+    // -----------------------------------------------------------------------
+    // WorstCaseSearch - CMA-ES worst-case parameter search (Robustness Phase 4)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::WorstCaseSearchParams>(m, "WorstCaseSearchParams",
+        "Parameters for the CMA-ES worst-case parameter search.")
+        .def(py::init<>())
+        .def_readwrite("max_evals",  &ctrl::WorstCaseSearchParams::max_evals,
+                       "Approximate cost-function evaluation budget.")
+        .def_readwrite("sigma_init", &ctrl::WorstCaseSearchParams::sigma_init,
+                       "Initial CMA-ES step size, in relative (search_width) units.")
+        .def_readwrite("population", &ctrl::WorstCaseSearchParams::population,
+                       "Reserved; AutoTuner does not currently expose a population override.")
+        .def_readwrite("seed",       &ctrl::WorstCaseSearchParams::seed);
+
+    py::class_<ctrl::WorstCaseResult>(m, "WorstCaseResult",
+        "Result of a findWorstCase* search.")
+        .def_readonly("worst_params", &ctrl::WorstCaseResult::worst_params)
+        .def_readonly("worst_cost",   &ctrl::WorstCaseResult::worst_cost,
+                      "Metric value at worst_params (the actual metric, not negated).")
+        .def_readonly("converged",    &ctrl::WorstCaseResult::converged)
+        .def_readonly("n_evals",      &ctrl::WorstCaseResult::n_evals);
+
+    m.def("find_worst_case_sensitivity",
+          [](py::object plant_factory_py,
+             const ctrl::StateSpace& controller_ss,
+             const Eigen::VectorXd& param_nominal,
+             const Eigen::VectorXd& param_sigma,
+             const Eigen::VectorXd& lower_bounds,
+             const Eigen::VectorXd& upper_bounds,
+             const ctrl::WorstCaseSearchParams& p) {
+              auto plant_factory = [plant_factory_py](const Eigen::VectorXd& params) -> ctrl::StateSpace {
+                  return plant_factory_py(params).cast<ctrl::StateSpace>();
+              };
+              return ctrl::findWorstCaseSensitivity(plant_factory, controller_ss, param_nominal,
+                                                     param_sigma, lower_bounds, upper_bounds, p);
+          },
+          py::arg("plant_factory"), py::arg("controller_ss"),
+          py::arg("param_nominal"), py::arg("param_sigma"),
+          py::arg("lower_bounds") = Eigen::VectorXd(),
+          py::arg("upper_bounds") = Eigen::VectorXd(),
+          py::arg("params") = ctrl::WorstCaseSearchParams{},
+          R"doc(
+Find the uncertain plant (plant_factory(params) -> StateSpace) that maximises the
+closed-loop peak sensitivity ||S||_inf against the fixed controller_ss.
+
+Returns
+-------
+ctrl.WorstCaseResult
+)doc");
+
+    m.def("find_worst_case_iae",
+          [](py::object plant_factory_py,
+             const ctrl::StateSpace& controller_ss,
+             const Eigen::VectorXd& param_nominal,
+             const Eigen::VectorXd& param_sigma,
+             const Eigen::VectorXd& lower_bounds,
+             const Eigen::VectorXd& upper_bounds,
+             double sim_duration_s,
+             const ctrl::WorstCaseSearchParams& p) {
+              auto plant_factory = [plant_factory_py](const Eigen::VectorXd& params) -> ctrl::StateSpace {
+                  return plant_factory_py(params).cast<ctrl::StateSpace>();
+              };
+              return ctrl::findWorstCaseIAE(plant_factory, controller_ss, param_nominal,
+                                            param_sigma, lower_bounds, upper_bounds,
+                                            sim_duration_s, p);
+          },
+          py::arg("plant_factory"), py::arg("controller_ss"),
+          py::arg("param_nominal"), py::arg("param_sigma"),
+          py::arg("lower_bounds") = Eigen::VectorXd(),
+          py::arg("upper_bounds") = Eigen::VectorXd(),
+          py::arg("sim_duration_s") = 50.0,
+          py::arg("params") = ctrl::WorstCaseSearchParams{},
+          R"doc(
+Find the uncertain plant that maximises closed-loop step-response IAE against the
+fixed controller_ss. An unstable sample reports iae = +inf, which the search
+correctly treats as the worst possible outcome.
+
+Returns
+-------
+ctrl.WorstCaseResult
+)doc");
+
+    m.def("find_worst_case",
+          [](py::object plant_factory_py,
+             py::object metric_fn_py,
+             const Eigen::VectorXd& param_nominal,
+             const Eigen::VectorXd& param_sigma,
+             const Eigen::VectorXd& lower_bounds,
+             const Eigen::VectorXd& upper_bounds,
+             const ctrl::WorstCaseSearchParams& p) {
+              auto plant_factory = [plant_factory_py](const Eigen::VectorXd& params) -> ctrl::StateSpace {
+                  return plant_factory_py(params).cast<ctrl::StateSpace>();
+              };
+              auto metric_fn = [metric_fn_py](const ctrl::StateSpace& ss) -> double {
+                  return metric_fn_py(ss).cast<double>();
+              };
+              return ctrl::findWorstCase(plant_factory, metric_fn, param_nominal,
+                                         param_sigma, lower_bounds, upper_bounds, p);
+          },
+          py::arg("plant_factory"), py::arg("metric_fn"),
+          py::arg("param_nominal"), py::arg("param_sigma"),
+          py::arg("lower_bounds") = Eigen::VectorXd(),
+          py::arg("upper_bounds") = Eigen::VectorXd(),
+          py::arg("params") = ctrl::WorstCaseSearchParams{},
+          R"doc(
+Generic worst-case search: maximise metric_fn(plant_factory(params)) over the relative
+search box around param_nominal. metric_fn is free to close its own loop via capture.
+
+Returns
+-------
+ctrl.WorstCaseResult
+)doc");
+
+    // -----------------------------------------------------------------------
+    // LyapunovRobustness - common quadratic Lyapunov function (Robustness Phase 5)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::LyapunovSearchParams>(m, "LyapunovSearchParams",
+        "Parameters for the common-Lyapunov search.")
+        .def(py::init<>())
+        .def_readwrite("max_iter",   &ctrl::LyapunovSearchParams::max_iter)
+        .def_readwrite("tol",        &ctrl::LyapunovSearchParams::tol)
+        .def_readwrite("regularise", &ctrl::LyapunovSearchParams::regularise);
+
+    py::class_<ctrl::LyapunovResult>(m, "LyapunovResult",
+        "Result of findCommonLyapunov().")
+        .def_readonly("found",      &ctrl::LyapunovResult::found)
+        .def_readonly("P",          &ctrl::LyapunovResult::P)
+        .def_readonly("residual",   &ctrl::LyapunovResult::residual,
+                      "Worst-case (max over vertices) largest eigenvalue of A_i^T P A_i - P + Q; "
+                      "negative means satisfied with margin.")
+        .def_readonly("iterations", &ctrl::LyapunovResult::iterations);
+
+    m.def("find_common_lyapunov", &ctrl::findCommonLyapunov,
+          py::arg("vertices"), py::arg("Q") = Eigen::MatrixXd(),
+          py::arg("params") = ctrl::LyapunovSearchParams{},
+          R"doc(
+Search for a common quadratic Lyapunov function V(x) = x'Px over a polytope of vertex
+state matrices (vertices = conv hull of A_1..A_L). Q defaults to the identity.
+
+Returns
+-------
+ctrl.LyapunovResult
+)doc");
+
+    m.def("is_quadratically_stable", &ctrl::isQuadraticallyStable,
+          py::arg("vertices"), py::arg("params") = ctrl::LyapunovSearchParams{},
+          "True iff every vertex is individually Schur-stable AND a common Lyapunov "
+          "function is found across the whole polytope.");
+
+    m.def("build_box_vertices", &ctrl::buildBoxVertices,
+          py::arg("A_nominal"), py::arg("uncertainty_cols"),
+          R"doc(
+Build the 2^m vertex matrices of a box uncertainty around A_nominal. uncertainty_cols
+is n*n x m; column j is a flattened n x n perturbation direction delta_j. Returns
+{A_nominal + sum_j (+-1)*delta_j} for every sign combination (2^m matrices).
+
+Returns
+-------
+list of numpy.ndarray
+)doc");
 }

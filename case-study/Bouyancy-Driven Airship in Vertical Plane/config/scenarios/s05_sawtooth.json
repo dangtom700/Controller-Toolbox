@@ -1,0 +1,14 @@
+{
+  "id":               "s05_sawtooth",
+  "description":      "Sec. 4.6 trajectory-tracking flight: 2 ascend/descend cycles, m0 bang-bang +-34.66 kg synchronized with the theta_ref half-cycle switch",
+  "T_sim":            150.0,
+  "theta0_deg":       25.0,
+  "rp1_ref":         -1.15,
+  "v1_0":             0.0,
+  "v3_0":             0.0,
+  "ref_type":        "sawtooth",
+  "theta_ref_a_deg":  25.0,
+  "theta_ref_b_deg": -15.0,
+  "half_period":      37.5,
+  "m0_switch_kg":     34.66
+}

@@ -50,6 +50,8 @@
 #include "ZeroPhaseTrackingFilter.h"
 #include "FunctionApproximator.h"
 #include "DeePC.h"
+#include "WorstCaseSearch.h"
+#include "LyapunovRobustness.h"
 #include "hal/HAL.h"   // SimScheduler, StdTimer (HAL not in umbrella by default)
 #include <cmath>
 #include <cstdlib>
@@ -6258,5 +6260,159 @@ TEST_CASE("peakMu() throws when the uncertainty structure size mismatches "
     struc.blocks = {ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 2, 2}};
 
     REQUIRE_THROWS_AS(ctrl::peakMu(G, K, struc), std::invalid_argument);
+}
+
+// -----------------------------------------------------------------------------
+// WorstCaseSearch - CMA-ES worst-case parameter search (Robustness Phase 4)
+// -----------------------------------------------------------------------------
+
+TEST_CASE("findWorstCaseSensitivity finds a plant at least as sensitive as the nominal",
+          "[worst_case_search]")
+{
+    const auto ctl = makeStaticController(0.5, 0.1);
+    auto plant_factory = [](const Eigen::VectorXd& p) {
+        return makeFirstOrderPlant(p(0), 0.4, 0.1);
+    };
+    const Eigen::VectorXd nominal = (Eigen::VectorXd(1) << 0.6).finished();
+    const Eigen::VectorXd sigma   = (Eigen::VectorXd(1) << 0.3).finished();
+
+    const auto nominal_sample =
+        ctrl::evaluateSample(0, plant_factory(nominal), ctl, plant_factory(nominal));
+
+    ctrl::WorstCaseSearchParams wp;
+    wp.max_evals = 300;
+    wp.seed = 7;
+    const auto res = ctrl::findWorstCaseSensitivity(plant_factory, ctl, nominal, sigma, {}, {}, wp);
+
+    REQUIRE(res.n_evals > 0);
+    REQUIRE(std::isfinite(res.worst_cost));
+    REQUIRE(res.worst_cost >= nominal_sample.hinf_sensitivity - 1e-9);
+}
+
+TEST_CASE("findWorstCase with an epsilon-small search box returns close to the nominal metric",
+          "[worst_case_search]")
+{
+    auto plant_factory = [](const Eigen::VectorXd& p) {
+        return makeFirstOrderPlant(p(0), 0.4, 0.1);
+    };
+    auto metric_fn = [](const ctrl::StateSpace& ss) { return std::abs(ss.A(0, 0)); };
+
+    const Eigen::VectorXd nominal = (Eigen::VectorXd(1) << 0.6).finished();
+    const Eigen::VectorXd sigma   = (Eigen::VectorXd(1) << 1e-6).finished();
+
+    ctrl::WorstCaseSearchParams wp;
+    wp.max_evals = 80;
+    const auto res = ctrl::findWorstCase(plant_factory, metric_fn, nominal, sigma, {}, {}, wp);
+
+    REQUIRE_THAT(res.worst_cost, WithinAbs(0.6, 1e-3));
+}
+
+TEST_CASE("findWorstCaseIAE returns an IAE no better than the nominal for a perturbable loop",
+          "[worst_case_search]")
+{
+    const auto ctl = makeStaticController(0.5, 0.1);
+    auto plant_factory = [](const Eigen::VectorXd& p) {
+        return makeFirstOrderPlant(p(0), 0.4, 0.1);
+    };
+    const Eigen::VectorXd nominal = (Eigen::VectorXd(1) << 0.6).finished();
+    const Eigen::VectorXd sigma   = (Eigen::VectorXd(1) << 0.3).finished();
+
+    const auto nominal_plant  = plant_factory(nominal);
+    const auto nominal_sample = ctrl::evaluateSample(0, nominal_plant, ctl, nominal_plant);
+
+    ctrl::WorstCaseSearchParams wp;
+    wp.max_evals = 300;
+    wp.seed = 3;
+    const auto res = ctrl::findWorstCaseIAE(plant_factory, ctl, nominal, sigma, {}, {},
+                                            /*sim_duration_s=*/20.0, wp);
+
+    REQUIRE(res.worst_cost >= nominal_sample.iae - 1e-9);
+}
+
+TEST_CASE("findWorstCaseSensitivity respects hard parameter bounds", "[worst_case_search]")
+{
+    const auto ctl = makeStaticController(0.5, 0.1);
+    auto plant_factory = [](const Eigen::VectorXd& p) {
+        return makeFirstOrderPlant(p(0), 0.4, 0.1);
+    };
+    const Eigen::VectorXd nominal = (Eigen::VectorXd(1) << 0.6).finished();
+    const Eigen::VectorXd sigma   = (Eigen::VectorXd(1) << 0.5).finished();
+    const Eigen::VectorXd lower   = (Eigen::VectorXd(1) << 0.55).finished();
+    const Eigen::VectorXd upper   = (Eigen::VectorXd(1) << 0.65).finished();
+
+    ctrl::WorstCaseSearchParams wp;
+    wp.max_evals = 300;
+    wp.seed = 5;
+    const auto res = ctrl::findWorstCaseSensitivity(plant_factory, ctl, nominal, sigma, lower, upper, wp);
+
+    REQUIRE(res.worst_params(0) >= lower(0) - 1e-9);
+    REQUIRE(res.worst_params(0) <= upper(0) + 1e-9);
+}
+
+// -----------------------------------------------------------------------------
+// LyapunovRobustness - common quadratic Lyapunov function (Robustness Phase 5)
+// -----------------------------------------------------------------------------
+
+TEST_CASE("findCommonLyapunov recovers the analytic solution for a single stable scalar vertex",
+          "[lyapunov_robustness]")
+{
+    Eigen::MatrixXd A(1, 1); A << 0.5;
+    const auto res = ctrl::findCommonLyapunov({A});
+
+    REQUIRE(res.found);
+    // Analytic scalar solution: P = Q / (1 - A^2) = 1 / 0.75.
+    REQUIRE_THAT(res.P(0, 0), WithinAbs(1.0 / 0.75, 1e-4));
+    REQUIRE(res.residual < 0.0);
+}
+
+TEST_CASE("findCommonLyapunov succeeds for a tight cluster of stable vertices around a nominal",
+          "[lyapunov_robustness]")
+{
+    Eigen::MatrixXd A_nom(1, 1); A_nom << 0.5;
+    Eigen::MatrixXd dirs(1, 1);  dirs << 0.05;
+    const auto vertices = ctrl::buildBoxVertices(A_nom, dirs);
+    REQUIRE(vertices.size() == 2u);
+
+    const auto res = ctrl::findCommonLyapunov(vertices);
+    REQUIRE(res.found);
+    REQUIRE(res.residual < 0.0);
+}
+
+TEST_CASE("isQuadraticallyStable returns false when any vertex is individually unstable",
+          "[lyapunov_robustness]")
+{
+    Eigen::MatrixXd stable(1, 1);   stable   << 0.5;
+    Eigen::MatrixXd unstable(1, 1); unstable << 1.5;
+
+    REQUIRE(ctrl::isQuadraticallyStable({stable}));
+    REQUIRE_FALSE(ctrl::isQuadraticallyStable({stable, unstable}));
+}
+
+TEST_CASE("buildBoxVertices produces 2^m vertices with every +/- sign combination",
+          "[lyapunov_robustness]")
+{
+    const Eigen::MatrixXd A_nom = Eigen::MatrixXd::Identity(2, 2) * 0.5;
+
+    Eigen::MatrixXd dirs(4, 2);
+    dirs.col(0) = (Eigen::VectorXd(4) << 0.05, 0.0, 0.0, 0.0).finished(); // perturbs (0,0)
+    dirs.col(1) = (Eigen::VectorXd(4) << 0.0, 0.0, 0.0, 0.05).finished(); // perturbs (1,1)
+
+    const auto vertices = ctrl::buildBoxVertices(A_nom, dirs);
+    REQUIRE(vertices.size() == 4u);
+
+    REQUIRE_THAT(vertices[0](0, 0), WithinAbs(0.45, 1e-12));
+    REQUIRE_THAT(vertices[0](1, 1), WithinAbs(0.45, 1e-12));
+    REQUIRE_THAT(vertices[3](0, 0), WithinAbs(0.55, 1e-12));
+    REQUIRE_THAT(vertices[3](1, 1), WithinAbs(0.55, 1e-12));
+}
+
+TEST_CASE("findCommonLyapunov throws on empty vertices or a dimension mismatch",
+          "[lyapunov_robustness]")
+{
+    REQUIRE_THROWS_AS(ctrl::findCommonLyapunov({}), std::invalid_argument);
+
+    Eigen::MatrixXd A1(1, 1); A1 << 0.5;
+    Eigen::MatrixXd A2(2, 2); A2 << 0.5, 0.0, 0.0, 0.5;
+    REQUIRE_THROWS_AS(ctrl::findCommonLyapunov({A1, A2}), std::invalid_argument);
 }
 

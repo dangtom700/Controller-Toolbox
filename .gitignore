@@ -24,3 +24,4 @@ memory/
 !/tools/*.py
 data/
 case-study/**/*.csv
+case-study/**/HANDOFF_PROMPT.md

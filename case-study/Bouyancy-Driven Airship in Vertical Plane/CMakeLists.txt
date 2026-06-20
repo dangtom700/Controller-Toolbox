@@ -12,7 +12,7 @@ target_include_directories(bouyancy_driven_airship_in_vertical_plan_sim PRIVATE
     sim/include
     ${CMAKE_SOURCE_DIR}/lib
 )
-target_link_libraries(bouyancy_driven_airship_in_vertical_plan_sim PRIVATE controller_toolbox Eigen3::Eigen nlohmann_json::nlohmann_json)
+target_link_libraries(bouyancy_driven_airship_in_vertical_plan_sim PRIVATE controller_toolbox nlohmann_json::nlohmann_json)
 target_compile_definitions(bouyancy_driven_airship_in_vertical_plan_sim PRIVATE
     BOUYANCY_DRIVEN_AIRSHIP_IN_VERTICAL_PLAN_SIM_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 target_compile_features(bouyancy_driven_airship_in_vertical_plan_sim PRIVATE cxx_std_20)

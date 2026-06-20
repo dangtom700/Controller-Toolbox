@@ -84,7 +84,7 @@ SimSummary runOnce(const conv::PlantParams& plant_params,
         final_ref            = v_ref;
 
         // Mode hysteresis computed externally, using the FAULTED setpoint
-        // (mirrors simulation_runner.cpp:50-54 — a real controller only ever
+        // (mirrors simulation_runner.cpp:50-54 - a real controller only ever
         // sees the setpoint it was given, faulted or not).
         if (v_ref > V_in + plant_params.hysteresis)      mode = conv::ConvMode::BOOST;
         else if (v_ref < V_in - plant_params.hysteresis) mode = conv::ConvMode::BUCK;

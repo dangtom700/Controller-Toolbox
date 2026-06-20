@@ -125,6 +125,12 @@ add_example(ex84_gang_of_four)
 # Robustness analysis Phase 3: Structured Singular Value (mu) analysis
 add_example(ex85_mu_analysis)
 
+# Robustness analysis Phase 4: CMA-ES worst-case parameter search
+add_example(ex86_worst_case)
+
+# Robustness analysis Phase 5: Common Lyapunov function for polytopic uncertainty
+add_example(ex87_lyapunov_robust)
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)

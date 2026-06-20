@@ -10,9 +10,8 @@
 | Air-Cooled Battery Thermal Management System | Python | Yes | Complete | Fine | _ | [README](../case-study/Air-Cooled Battery Thermal Management System/README.md) | Yes | Yes | Yes | Yes |
 | Aircraft Engine Thermal Management | Python | Yes | Complete | Fine | _ | [README](../case-study/Aircraft Engine Thermal Management/README.md) | Yes | Yes | Yes | Yes |
 | Boiler Control | C++ | Yes | Complete | Fine | _ | [README](../case-study/Boiler Control/README.md) | Yes | Yes | Yes | Yes |
-| Bouyancy-Driven Airship in Vertical Plane | C++ | Yes | Open placeholder | No data | _ | [README](../case-study/Bouyancy-Driven Airship in Vertical Plane/README.md) | _ | _ | _ | _ |
+| Bouyancy-Driven Airship in Vertical Plane | C++ | Yes | On-going | Fine | _ | [README](../case-study/Bouyancy-Driven Airship in Vertical Plane/README.md) | _ | _ | _ | _ |
 | Building Energy Management System | undetermined | Yes | Not started | No data | _ | - | _ | _ | _ | _ |
-| common | C++ | _ | Not started | No data | _ | - | _ | _ | _ | _ |
 | Data-Driven Sliding Mode Control of Soft Robot 2024 | undetermined | Yes | Not started | No data | _ | [README](../case-study/Data-Driven Sliding Mode Control of Soft Robot 2024/README.md) | _ | _ | _ | _ |
 | Differential Drive Robot Tracking | C++ | Yes | Open placeholder | No data | _ | [README](../case-study/Differential Drive Robot Tracking/README.md) | _ | _ | _ | _ |
 | Dual-Arm IAUV Motion Planning | C++ | Yes | Open placeholder | No data | _ | [README](../case-study/Dual-Arm IAUV Motion Planning/README.md) | _ | _ | _ | _ |

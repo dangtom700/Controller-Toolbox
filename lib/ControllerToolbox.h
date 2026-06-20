@@ -128,6 +128,8 @@
 #include "MismatchDetector.h"          ///< MismatchDetector - CUSUM on KF/MHE innovation for real-time model-plant mismatch detection (D1).
 #include "RobustnessAnalysis.h"        ///< RobustnessAnalysis - Monte-Carlo closed-loop robustness: spawn perturbed plants, aggregate stability/margin/sensitivity stats (Robustness Phase 1).
 #include "MuAnalysis.h"                ///< MuAnalysis - structured singular value (mu) D-scaling upper bound, peakMu, robustStabilityRadius (Robustness Phase 3).
+#include "WorstCaseSearch.h"           ///< WorstCaseSearch - CMA-ES worst-case parameter search over plant uncertainty (Robustness Phase 4).
+#include "LyapunovRobustness.h"        ///< LyapunovRobustness - common quadratic Lyapunov function for polytopic uncertainty (Robustness Phase 5).
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,

@@ -7,10 +7,9 @@ of a buoyancy-driven airship and its control in the vertical plane." *Aerospace 
 Technology* 26, 138-152. (Verified directly against the PDF's own text extraction,
 `extracted_text.txt`, in this folder - lines 8-17 give the exact author list and venue.)
 
-> This replaces the `tools/new_case_study.py` scaffold placeholder (every section below was
-> a `TODO`). See `HANDOFF_PROMPT.md` in this folder for the full implementation plan -
-> `sim/`, `config/`, and `CMakeLists.txt` are not built yet; this README documents the plant
-> model and roster design that plan is written against.
+> Implemented from the `tools/new_case_study.py` scaffold per `HANDOFF_PROMPT.md`'s plan -
+> see "Status" at the bottom of this file for what was built and a few real deviations from
+> that plan discovered during implementation (gain signs, tuning, one MPC redesign).
 
 ---
 
@@ -74,7 +73,8 @@ scenario).
 | `y = theta` | Regulated output | rad |
 
 Sign convention (standard for this repo): `compute(theta_ref - theta)`, like
-`DiscretePID`/`DiscreteADRC` elsewhere in this project.
+`DiscretePID`/`DiscreteADRC` elsewhere in this project - except SMC and NeuralPID, which need
+the opposite (`theta - theta_ref`); see "Implementation Notes" below for why.
 
 `rp1` is **not** independently commanded - it is an internal state coupled to `theta`
 through the single shared actuator `u` (the system is genuinely underactuated: one input,
@@ -230,24 +230,34 @@ controllers are generic comparison baselines that only see `theta` error.
 
 ---
 
-## Proposed Controller Roster (12)
+## Controller Roster (12)
 
-The paper's method must be one of them - here, controller #12.
+The paper's method is included as controller #12. Every wrapper class lives in this study's
+own `sim/include/controllers.h` / `sim/src/controllers.cpp` (`ClassNameAirshipCtrl`), and
+encapsulates its own sign handling internally - the simulation runner just calls
+`compute(x, theta_ref, rp1_ref, m0)` uniformly on whichever `ControllerBase` is active.
 
-| # | Name | lib/ Algorithm | Sign / Interface | Design Notes |
+| # | Name | lib/ Algorithm | Sign / Interface | Tuning notes (final, after empirical retuning) |
 |---|------|----------------|-------------------|--------------|
 | 1 | OpenLoop | - | `u = 0` | Baseline |
-| 2 | PID | `DiscretePID` | `compute(theta_ref - theta)` | Standard |
-| 3 | ADRC | `DiscreteADRC` | `compute(theta_ref - theta)` | `b0` negative (sign convention above); verify `omega_o*Ts < 0.5` |
-| 4 | SMC | `DiscreteSMC` | `compute(theta - theta_ref)` | Per this repo's SMC sign convention |
-| 5 | LQR | `makeLQRController` factory | state feedback | Linearize the fixed-center model at trim `u_ss(theta_ref, rp1_ref)`; 4-state design model `[theta, q, rp1, w]`, Bryson weights as a starting point |
-| 6 | MPC | `DiscreteMPC` | state feedback | Same 4-state linearized design model as LQR, ZOH at `Ts` |
-| 7 | MRAC | `MRACController` | `set_reference(theta_ref)` then `compute(theta)` | Negative `gamma_r`/`gamma_y` (negative-gain plant) |
-| 8 | GainScheduled | `GainScheduledController(Ts)` | 2-3 point PID schedule on `abs(theta_ref - theta)` | Mirrors Solar Cooker / S-OTEC pattern |
-| 9 | L1Adaptive | `L1AdaptiveController` | `set_reference`/`compute` | Negative `Gamma`; expect a steady-state-error plateau (relative-degree-1 law on a relative-degree-2 plant - same architectural ceiling noted for Stewart Platform's rod tracking elsewhere in this repo, not a bug) |
-| 10 | NeuralPID | `NeuralPID` | `compute(theta_ref - theta)` | Negative `plant_gain` (mirrors Solar Cooker's `-0.002*Ts` pattern) |
-| 11 | ILC | `IterativeLearningControl` (P-type) | `compute(theta_ref - theta)` | Natural fit for the sawtooth scenario's repeated ascend/descend cycles; runs as a 1-trial case on the step scenarios |
-| 12 | **AirshipFBLCtrl** (new local class, the paper's headline method) | n/a - case-study-local, same pattern as SMISMO's `DOBEnergyCtrl` | full state | Implements the `phi1_tilde + k_tilde*phi2_tilde` law above; gets `alpha`/`beta` **numerically** (finite differences on the plant's own known closed-form dynamics) rather than the paper's unpublished Appendix-A symbolic expressions - see Implementation Notes |
+| 2 | PID | `DiscretePID` | `compute(theta_ref - theta)` | **Negative** `Kp=-251, Ki=-6, Kd=-1808` (negative-gain plant - positive gains are positive feedback here, see "Sign convention" above); `pid_.bumplessInit(lastOutput, newError)` called on every `theta_ref` change (defensive re-init, see Implementation Notes); explicit trim feedforward `u_ss = trimInput(theta_ref, rp1_ref)` added on top |
+| 3 | ADRC | `DiscreteADRC` | `compute(theta_ref - theta)` | `b0` negative, evaluated at a representative `rp1=-1.15` m; `omega_o=3.0, omega_c=0.3` (`omega_o*Ts=0.15<0.5`, check); trim feedforward added on top |
+| 4 | SMC | `DiscreteSMC` | `compute(theta - theta_ref)` | Per this repo's SMC sign convention; **negative** `K=-220`; `c_de=15` (much larger than `SMCParams`' own "lambda*Ts" rule of thumb - see Implementation Notes); trim feedforward added on top |
+| 5 | LQR | `makeLQRController` factory | state feedback | 4-state design model `[theta, q, rp1, w]` (Eq. 24), numerically linearized + re-trimmed whenever `(theta_ref, rp1_ref)` changes; Bryson weights `Q=diag(1/0.3^2, 1/0.3^2, 1/0.5^2, 1/0.3^2)`, `R=1/400^2` |
+| 6 | MPC | `DiscreteMPC` | state feedback | Same 4-state design model as LQR, deviation form; `Np=20, Nc=5`, and **the same Bryson `rho_y`/`rho_u` weights as LQR** rather than hand-picked MPC weights - see Implementation Notes for why several longer-horizon attempts diverged first |
+| 7 | MRAC | `MRACController` | `set_reference(theta_ref)` then `compute(theta)` | **Negative** `gamma_r=gamma_y=-2` (gentle - the trim feedforward already supplies most of the load, see Implementation Notes); trim feedforward added on top |
+| 8 | GainScheduled | `GainScheduledController(Ts)` | 3-point PID schedule on `abs(theta_ref - theta)` (`0.05/0.30/0.80` rad breakpoints) | All 3 inner PIDs **defensively `bumplessInit()`'d on every `theta_ref` change** (not just whichever one `GainScheduledController` itself would protect - see Implementation Notes); negative gains; trim feedforward added on top |
+| 9 | L1Adaptive | `L1AdaptiveController` | `set_reference`/`compute` | **Positive** `Gamma=200` (L1's `sigma_hat` law does not need MRAC's gamma-negation rule); `omega_c=1.5`; trim feedforward added on top; expect a steady-state-error plateau on the harder scenarios (relative-degree-1 law on a relative-degree-2 plant - same architectural ceiling noted for Stewart Platform's rod tracking elsewhere in this repo, not a bug) |
+| 10 | NeuralPID | `NeuralPID` | `compute(theta - theta_ref)` (**y - ref**, mirroring Solar Cooker - see Implementation Notes) | `Kd0=0` (NeuralPID has no derivative-on-measurement option - see Implementation Notes); `Kp0=251, Ki0=6` seeded to match PID #2; negative `plant_gain`; trim feedforward added on top |
+| 11 | ILC | `IterativeLearningControl` (P-type, two-phase) | `compute(theta_ref - theta)` | `N_TRIAL=600` (30 s): PID feedback while learning (phase 1), PID + learned feedforward after (phase 2); inner PID defensively `bumplessInit()`'d on `theta_ref` change, same as PID #2; trim feedforward added on top |
+| 12 | **AirshipFBLCtrl** (new local class, the paper's headline method) | n/a - case-study-local, same pattern as SMISMO's `DOBEnergyCtrl` | full state | Implements the `phi1_tilde + k_tilde*phi2_tilde` law above; gets `alpha`/`beta` **numerically** (finite differences on the plant's own known closed-form dynamics) rather than the paper's unpublished Appendix-A symbolic expressions - see Implementation Notes. `k_tilde=50, lambda0=1, lambda1=2, lambda2=2` (paper's Sec. 4.2.3 starting values, unchanged - already converges well) |
+
+All 12 controllers run cleanly (no NaN/divergence) across all 5 scenarios; PID, ADRC, LQR,
+MPC, and AirshipFBLCtrl converge well within `theta0_deg -> theta_ref_deg` step scenarios.
+SMC/MRAC/GainScheduled/L1Adaptive/NeuralPID/ILC are functional but track noticeably less
+tightly on the larger commanded swings (`s03`) and especially the sawtooth flight (`s05`,
+the hardest scenario - alternating reference + bang-bang `m0` every 37.5 s) - a normal first
+tuning pass, not a defect; see Implementation Notes and `HANDOFF_PROMPT.md`'s Open Risks.
 
 ---
 
@@ -264,12 +274,13 @@ and `m0` differ. Suggested `T_sim`: 60 s for s01-s04, 150 s for s05.
 | `s04_disturbance` | Hold `theta_ref` constant; inject a transient pitch-moment disturbance mid-run to test rejection | 30 deg -> 30 deg | -1.15 m | 1.0 m/s, 0 | 1 kg |
 | `s05_sawtooth` | Sec. 4.6 trajectory-tracking flight: 2 ascend/descend cycles, `m0` bang-bang switches +-34.66 kg at each cycle's midpoint, `theta_ref` alternates ascent/descent pitch each half-cycle | alternating, e.g. 25 deg / -15 deg | -1.15 m | 0, 0 | +-34.66 kg (switched) |
 
-**Total runs:** 12 controllers x 5 scenarios = 60.
+**Total runs:** 12 controllers x 5 scenarios = 60 (all complete cleanly, no NaN/divergence).
 
-The exact `s04` disturbance mechanism and `s05` half-cycle timing are left to be hand-tuned
-during implementation (so responses are visually interesting, neither trivial nor
-saturating) - the same way every other case study's scenario set in this repo was tuned, not
-algorithmically derived.
+The `s04` disturbance is a one-shot pitch-rate impulse (`+0.05 rad/s` added directly to `q`
+via `Plant::setState()`) at `t=20 s`; `s05`'s half-cycle length is 37.5 s (2 full
+ascend/descend cycles over the 150 s run). Both were hand-tuned during implementation so the
+responses are visually interesting (neither trivial nor saturating), the same way every other
+case study's scenario set in this repo was tuned, not algorithmically derived.
 
 ---
 
@@ -279,25 +290,105 @@ algorithmically derived.
   terms.** The paper computed them via computer algebra and only published the result in an
   Appendix A that is not present in this case study's PDF text extraction. Since the plant's
   full closed-form vector field `f(x,u)` is already known exactly (Governing Equations
-  above), get `alpha`/`beta` **numerically** each control step via finite differences on
-  that known dynamics (`alpha ~= y_dddot(u=0)`, `beta ~= (y_dddot(eps) - y_dddot(0))/eps`)
-  rather than re-deriving the symbolic algebra by hand - this is exact (the dynamics are
-  exact), just numerical instead of symbolic differentiation, and is far less error-prone.
+  above), `alpha`/`beta` are obtained **numerically**: a short (`H=1e-3 s`) constant-input RK4
+  rollout from the current state, with `xi1/xi2/xi3/alpha` read off via the standard forward
+  finite-difference stencils for the 0th-3rd derivatives, and `beta` from a second rollout at
+  a probe input `eps=1.0 N`. This is exact (the dynamics are exact, only the *differentiation*
+  is numerical), self-correcting by construction (the control law's `-(1/beta)` factor
+  automatically accounts for whatever sign `beta` comes out to be), and far less error-prone
+  than re-deriving the symbolic algebra by hand. `AirshipFBLCtrl::normalForm()` is exposed
+  (not just used internally) specifically so `tests/test_bouyancy_driven_airship_regression.cpp`
+  can sanity-check it two ways without re-deriving the closed-form algebra: (1) at the trivial
+  all-zero drift equilibrium, every rollout sample is exactly 0 by construction, so
+  `xi1=xi2=xi3=alpha=0` to floating-point precision; (2) away from that point, `beta` must be
+  independent of the probe magnitude `eps` since the plant is provably affine in `u` (every
+  term containing `u` in the governing equations above is linear in `u`, with no `u^2` or
+  `trig(u)` terms) - a differencing bug would generically break that invariance.
 - **CSV columns:** `t, theta_ref, theta, rp1, v1, v3, u, m0, error, iae_cumulative` - the
   trailing two names are required verbatim for `tools/metrics.py` auto-detection (per the
   Part 64 lesson already in CLAUDE.md).
-- **Per-controller sign handling, not one global convention:** SMC needs `compute(theta -
-  theta_ref)` while everything else needs `compute(theta_ref - theta)` - branch by
-  controller type in the simulation runner, the same way other case studies in this repo
-  (e.g. SMISMO, Solar Cooker) do.
+- **Per-controller sign handling is encapsulated in each wrapper class, not branched in the
+  simulation runner.** SMC needs `compute(theta - theta_ref)`, NeuralPID needs
+  `compute(theta - theta_ref)` too (despite the roster table's general "compute(theta_ref -
+  theta)" convention - NeuralPID's `[Kp,Ki,Kd]` are softplus-activated and therefore always
+  positive, so the negative-gain plant has to be handled through the error sign instead, the
+  same way Solar Cooker's `NeuralPIDCookerCtrl` does), and everything else uses
+  `compute(theta_ref - theta)` - each `ClassNameAirshipCtrl::compute()` in `controllers.cpp`
+  decides its own convention internally; `simulation_runner.cpp` just calls
+  `ctrl.compute(x, theta_ref, rp1_ref, m0)` uniformly on whichever `ControllerBase` is active.
+- **A large, roughly constant trim torque dominates this plant.** Holding any pitch angle
+  needs `u_ss = trimInput(theta_ref, rp1_ref)` approx= 120-150 N just to counteract the
+  slider's own gravity moment - confirmed directly from the governing equations (the
+  fixed-center `rho1=0` condition at `q=w=0` reduces exactly to the trim formula above).
+  ADRC's ESO and `AirshipFBLCtrl`'s `alpha` term estimate/cancel this automatically; LQR/MPC
+  feed it forward through their own design-model trim; the remaining controllers
+  (PID/SMC/MRAC/GainScheduled/L1Adaptive/NeuralPID/ILC) do not have an equivalent built-in
+  mechanism and were given an explicit `u_ss` feedforward on top of their normal feedback
+  output - without it, every one of them converged far too slowly against this disturbance
+  using integral action alone (confirmed empirically: this was the single most impactful fix
+  applied during tuning).
+- **Large `theta_ref` steps (10-40 deg, every scenario) create a derivative "kick" wherever a
+  controller's derivative term is computed on the tracking error rather than the
+  measurement.** The error jumps instantly on the step; `DiscretePID`'s filtered derivative
+  amplifies that single-step jump into a huge transient, which saturates `u` and then the
+  resulting anti-windup back-calculation slams the integrator the wrong way for 1-2 s -
+  confirmed empirically (the first build of PID/ILC/GainScheduled ran straight to the
+  actuator rail after every reference step and took 10s of seconds to recover, or never did).
+  `computeDoM()` (derivative-on-measurement) looked like the fix but has the *same* problem
+  at `k=0`, since `DiscretePID::reset()` zeroes its internal `y_prev_` rather than seeding it
+  from the plant's actual initial measurement. The robust fix needs no library change:
+  `pid_.bumplessInit(pid_.lastOutput(), newError)` is called explicitly on every detected
+  `theta_ref` change (including the implicit "change" from an initial NaN sentinel), which
+  re-seeds `e_prev_`/`deriv_`/`integral_` so the very next `compute()` call starts smoothly -
+  the same mechanism `GainScheduledController` already uses internally for bracket switches,
+  just invoked manually here since these are single fixed controllers, not a schedule.
+  `GainScheduledController`'s own bumplessInit-on-switch protection only fires for a
+  controller *newly entering* the active bracket pair (LinearBlend mode) - a controller that
+  stays part of the pair across the jump (e.g. the "mid" bracket, which is "hi" just below
+  the jump and "lo" just above it) is not re-initialised by that built-in mechanism, so
+  `GainScheduledAirshipCtrl` defensively calls `bumplessInit()` on *all three* inner PIDs
+  itself rather than relying on it. `NeuralPID` has no equivalent re-init hook at all (no
+  `bumplessInit` override), so its seed `Kd0` is `0` instead - a real, if blunt, accepted
+  workaround.
+- **`DiscreteSMC`'s sliding-surface derivative term needs an unusually large `c_de` on this
+  plant.** Inside the boundary layer, SMC's law reduces to a PD form with **no `1/Ts`
+  scaling** on the derivative-like `(e - e_prev)` term, unlike `DiscretePID`'s filtered
+  derivative (effective multiplier approx= `Kd*N*alpha/(1-alpha)` approx= `Kd*20` for this
+  `Ts`/`N`). Matching comparable damping to the well-tuned PID above therefore needs `c_de`
+  roughly 20x larger than the "`c_de = lambda*Ts`" rule of thumb in `SMCParams`' own
+  docstring would suggest (`c_de=15` here, vs. the docstring's typical `0.01-1` range) -
+  confirmed empirically: smaller `c_de` left SMC critically under-damped, overshooting
+  straight through `theta_ref` into the far negative range.
+- **MPC needed the *same* Bryson weights as LQR, not independently hand-picked MPC weights.**
+  Several longer-horizon / differently-weighted attempts (`Np` from 40 to 150, various
+  `rho_y`/`rho_u` ratios) all diverged the same way: theta sails straight through `theta_ref`
+  and keeps accelerating past it. Root cause: the shared 4-state design model excludes
+  `v1`/`v3` entirely, so the QP's own prediction has no way to "see" the growing ballistic
+  coupling that eventually arrests/reverses `theta` in the real plant (confirmed empirically:
+  `v3` grows monotonically through every divergent run). LQR uses the *same* mismatched
+  design model yet stays robust because it commits to nothing beyond a single proportional
+  reaction to the current real state every step, not an open-loop-optimal sequence; setting
+  `rho_y = 1/theta_max^2` and `rho_u = 1/u_max^2` (LQR's own Bryson `Q`/`R`, see roster table)
+  with a short `Np=20` reproduced that same robustness almost exactly (IAE dropped from
+  25-47 down to 5.4 on `s01`).
 
 ---
 
 ## Status
 
-Spec only - `sim/` is the `tools/new_case_study.py` scaffold placeholder
-(`x' = -a*x + b*u`, single `OpenLoop` entry), not registered with a real build target beyond
-the scaffold's own. See `HANDOFF_PROMPT.md` in this folder for the full implementation plan:
-plant code (with the 2x2 coupling solve above), the 12-controller roster in
-implementation-level detail, file-by-file checklist against the existing scaffold, and
-registration steps (`CMakeLists.txt`, `compile.bat`, regression tests, `CLAUDE.md`).
+**Implemented and registered.** `sim/` is the real liberated-center-model plant + 12
+controllers described above (no longer the scaffold placeholder); built as
+`bouyancy_driven_airship_in_vertical_plan_sim` (60 runs, registered in
+`case-study/CMakeLists.txt` and `compile.bat`/`compile.sh`); regression-tested by
+`tests/test_bouyancy_driven_airship_regression.cpp` (8 `[airship]` Catch2 test cases -
+PID/ADRC/LQR/MPC/AirshipFBLCtrl convergence checks, 2 `AirshipFBLCtrl::normalForm()` sanity
+checks, and an all-12-controller smoke test - registered in `tests/CMakeLists.txt` and
+`compile.bat`/`compile.sh`). See `HANDOFF_PROMPT.md` for the original implementation plan -
+the plant equations, trim formula, and 12-controller roster were all implemented exactly as
+planned there; the real deviations discovered along the way (controller gain signs, the MPC
+weight redesign, the trim-feedforward and bumplessInit fixes) are documented in
+"Implementation Notes" above rather than in that file, since they were tuning/empirical
+findings rather than plan-level decisions.
+
+Not implemented (deferred per "Model simplifications" above, consistent with the original
+plan): the paper's Sec. 4.4 added-mass and Sec. 4.5 aerodynamic-force model extensions.

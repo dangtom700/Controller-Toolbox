@@ -1,0 +1,15 @@
+{
+  "id":              "s04_disturbance",
+  "description":     "Hold theta_ref=30 deg; inject a transient pitch-rate impulse at t=20s to test rejection",
+  "T_sim":           60.0,
+  "theta0_deg":      30.0,
+  "rp1_ref":        -1.15,
+  "v1_0":            1.0,
+  "v3_0":            0.0,
+  "m0_initial":      1.0,
+  "ref_type":       "step",
+  "theta_ref_deg":   30.0,
+  "step_time":       0.0,
+  "dist_time":       20.0,
+  "dist_q_impulse":  0.05
+}

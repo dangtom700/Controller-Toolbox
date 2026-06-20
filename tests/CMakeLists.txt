@@ -215,6 +215,19 @@ target_link_libraries(test_stewart_regression PRIVATE
 )
 target_compile_features(test_stewart_regression PRIVATE cxx_std_20)
 
+# -- Bouyancy-Driven Airship in Vertical Plane regression tests -------------
+set(AIRSHIP_SIM_ROOT "${CMAKE_SOURCE_DIR}/case-study/Bouyancy-Driven Airship in Vertical Plane")
+add_executable(test_bouyancy_driven_airship_regression
+    test_bouyancy_driven_airship_regression.cpp
+    ${AIRSHIP_SIM_ROOT}/sim/src/bouyancy_driven_airship_in_vertical_plan_plant.cpp
+    ${AIRSHIP_SIM_ROOT}/sim/src/controllers.cpp
+)
+target_include_directories(test_bouyancy_driven_airship_regression PRIVATE ${AIRSHIP_SIM_ROOT}/sim/include)
+target_link_libraries(test_bouyancy_driven_airship_regression PRIVATE
+    controller_toolbox Catch2::Catch2WithMain nlohmann_json::nlohmann_json
+)
+target_compile_features(test_bouyancy_driven_airship_regression PRIVATE cxx_std_20)
+
 # -- Embedded subset tests (DIST-2) ------------------------------------------
 # No Eigen dependency: links only Catch2. Verifies header-only embedded subset
 # compiles and behaves correctly with float and double instantiations.
@@ -238,6 +251,7 @@ catch_discover_tests(test_solar_cooker_regression)
 catch_discover_tests(test_sotec_regression)
 catch_discover_tests(test_smismo_regression)
 catch_discover_tests(test_stewart_regression)
+catch_discover_tests(test_bouyancy_driven_airship_regression)
 add_test(NAME controller_tests  COMMAND test_controllers)
 add_test(NAME tuner_tests       COMMAND test_tuners_extended)
 add_test(NAME integration_tests COMMAND test_integration)

@@ -1,0 +1,13 @@
+{
+  "id":             "s03_large_maneuver",
+  "description":    "Bigger commanded swing (55 -> 15 deg), stresses saturation/nonlinearity",
+  "T_sim":          60.0,
+  "theta0_deg":     55.0,
+  "rp1_ref":       -1.0,
+  "v1_0":           1.8,
+  "v3_0":           0.0,
+  "m0_initial":     1.0,
+  "ref_type":      "step",
+  "theta_ref_deg":  15.0,
+  "step_time":      5.0
+}
