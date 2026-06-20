@@ -1,0 +1,13 @@
+{
+  "mc_n_samples": 30,
+  "mc_sigma": 0.10,
+  "mc_perturb_keys": ["KA1", "KA2", "KA3", "mT", "tau_d"],
+  "nominal_scenario_id": "s01_steady_condition1",
+  "fault_specs": [
+    {"kind": "sensor_bias",    "magnitudes": [2.0, 5.0, 10.0, 20.0]},
+    {"kind": "sensor_noise",   "magnitudes": [1.0, 2.0, 5.0]},
+    {"kind": "actuator_loss",  "magnitudes": [0.10, 0.20, 0.30]},
+    {"kind": "actuator_stuck", "magnitudes": [0.0, 0.01, 0.02]}
+  ],
+  "notes": "Perturbs identified heat-exchanger conductances (KA1/KA2/KA3, paper Table 2), tank dynamic capacity (mT), and transport delay (tau_d) by +/-10% (1-sigma). sensor = TT [K] (tank temperature, state[0]); actuator = u1/u2 [kg/s^2] (branch flow-rate-of-change commands). setpoint_step omitted: simulation_runner.py's FaultInjector has no setpoint injection call site for this study."
+}

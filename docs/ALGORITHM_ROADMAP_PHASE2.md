@@ -1,8 +1,29 @@
 # Controller Toolbox — Algorithm Roadmap: Phase 2
 
 **Created:** 2026-06-11 (Part 50 planning)
-**Status:** Planning — no code written yet
+**Status (updated Part 66, 2026-06-20):** 12 of 13 items shipped. Only **D2 (Digital Twin
+Lite)** remains open (LOW priority, no implementation yet) — see `CLAUDE.md`'s Open Items
+table for current status. This document is kept below as the original design rationale/API
+sketches for each item; treat the per-item write-ups as historical design notes, not an
+indication that the work is still pending. See the status table immediately below for what
+shipped where.
 **Scope:** DAE Representation (P1-P3) → Model Estimation (E1-E4) → Hybrid Models (H1-H4) → Deployment (D1-D2)
+
+| ID | Name | Status |
+|----|------|--------|
+| P1 | `DAESystem` struct + `dae2ode()` | **Done Part 51** |
+| P2 | `c2d()` overload for DAE | **Done Part 51** |
+| P3 | DAE-aware EKF | **Done Part 51** |
+| E1 | `GreyBoxEstimator` | **Done Part 52** |
+| E2 | `RecursiveGreyBoxEstimator` | **Done Part 52** |
+| E3 | GP Residual Model (`GPResidualModel`) | **Done Part 52** |
+| E4 | MHE inequality constraints | **Done Part 53** |
+| H1 | `HybridModel` base class | **Done Part 53** |
+| H2 | `HybridMPC` | **Done Part 53** |
+| H3 | RL-MPC stitching (Python example) | **Done Part 53** |
+| H4 | `HybridModelTrainer` | **Done Part 53** |
+| D1 | Mismatch Detector (`MismatchDetector`) | **Done Part 54** |
+| D2 | Digital Twin Lite (Python app) | Open - LOW priority |
 
 ---
 
@@ -583,4 +604,6 @@ the existing `TransferFunction` and `StateSpace` — no new lib/ file needed.
 
 ---
 
-*This document is the planning reference for Part 50+. Update it as items are implemented.*
+*This document was the planning reference for Part 50+. 12 of 13 items are now built (see the
+status table at the top); only D2 remains open. Superseded as a living/forward-looking
+document - for current status, see `CLAUDE.md`'s Open Items table and `docs/PROJECT_MASTER_STATE.md`.*

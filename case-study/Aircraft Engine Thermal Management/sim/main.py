@@ -92,6 +92,7 @@ if __name__ == "__main__":
 # See tools/study_protocol.py for the full contract.
 # ===========================================================================
 import copy as _copy
+import csv as _csv
 import tempfile as _tempfile
 
 _H_SIM = os.path.dirname(os.path.abspath(__file__))
@@ -154,3 +155,35 @@ def run_with_fault(ctrl_name, fault, scenario_id=None):
     with _tempfile.TemporaryDirectory() as tmp:
         return run_simulation(_p, sc, ctrl_obj, tmp,
                                fault_injector=FaultInjector([fault]))
+
+
+def run_wcet_profile(log_dir=None):
+    """Time controller.compute() per step for every controller, across every
+    scenario (not just the nominal one).
+
+    Writes one logs/wcet_{scenario_id}.csv (controller, step_time_us,
+    step_index) per scenario for tools/wcet_report.py.
+    """
+    log_dir = log_dir or os.path.join(_H_BASE, "logs")
+    os.makedirs(log_dir, exist_ok=True)
+
+    fnames = sorted(f for f in os.listdir(_H_SCEN) if f.endswith(".json"))
+    out_paths = []
+    for fn in fnames:
+        sc = _h_json(os.path.join(_H_SCEN, fn))
+        rows = []
+        for ctrl_name in CONTROLLER_NAMES:
+            ctrls = make_controllers(_H_NOM)
+            ctrl_obj = next((c for c in ctrls if c.name() == ctrl_name), None)
+            if ctrl_obj is None:
+                continue
+            with _tempfile.TemporaryDirectory() as tmp:
+                run_simulation(_H_NOM, sc, ctrl_obj, tmp, wcet_sink=rows)
+
+        out_path = os.path.join(log_dir, f"wcet_{sc['id']}.csv")
+        with open(out_path, "w", newline="") as fh:
+            writer = _csv.DictWriter(fh, fieldnames=["controller", "step_time_us", "step_index"])
+            writer.writeheader()
+            writer.writerows(rows)
+        out_paths.append(out_path)
+    return out_paths

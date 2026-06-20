@@ -21,3 +21,22 @@ target_compile_features(smismo_sim PRIVATE cxx_std_20)
 target_compile_definitions(smismo_sim PRIVATE
     SMISMO_SIM_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
 )
+
+# -- Robustness analysis (fault sweep, Monte Carlo, WCET) --------------------
+add_executable(smismo_robustness
+    ${SIM_SRC}/smismo_plant.cpp
+    ${SIM_SRC}/controllers.cpp
+    ${SIM_SRC}/robustness_main.cpp
+)
+target_include_directories(smismo_robustness PRIVATE
+    ${SIM_INC}
+    ${CMAKE_SOURCE_DIR}/case-study/common
+)
+target_link_libraries(smismo_robustness PRIVATE
+    controller_toolbox
+    nlohmann_json::nlohmann_json
+)
+target_compile_features(smismo_robustness PRIVATE cxx_std_20)
+target_compile_definitions(smismo_robustness PRIVATE
+    SMISMO_SIM_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+)

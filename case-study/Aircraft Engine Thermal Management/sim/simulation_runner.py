@@ -18,6 +18,7 @@ critical limit."
 
 import csv
 import os
+import time
 
 from aircraft_engine_thermal_management_plant import AETMPlant, make_boundary_fn
 
@@ -26,9 +27,14 @@ def run_simulation(plant_params: dict,
                     scenario: dict,
                     controller,
                     log_dir: str,
-                    fault_injector=None) -> dict:
+                    fault_injector=None,
+                    wcet_sink: list = None) -> dict:
     """Simulate the Intermediate Circulation Loop for one (scenario,
-    controller) pair. Returns a summary dict and writes CSV telemetry."""
+    controller) pair. Returns a summary dict and writes CSV telemetry.
+
+    Optional wcet_sink: if a list is passed, one dict per step
+      {"controller": name, "step_time_us": float, "step_index": k} timing
+      controller.compute() is appended to it (see tools/wcet_report.py)."""
     run_params = plant_params
     if "mh3" in scenario or "Tcin3" in scenario:
         run_params = {**plant_params,
@@ -87,7 +93,14 @@ def run_simulation(plant_params: dict,
             Thout1, Thout2, m0, Tmix, TTi = plant.outputs(t, x_obs)
             outs = (Thout1, Thout2, m0, Tmix, TTi)
 
-            u1, u2 = controller.compute(refs, x_obs, t, outs)
+            if wcet_sink is not None:
+                _t0 = time.perf_counter()
+                u1, u2 = controller.compute(refs, x_obs, t, outs)
+                wcet_sink.append({"controller": ctrl_name,
+                                   "step_time_us": (time.perf_counter() - _t0) * 1e6,
+                                   "step_index": k})
+            else:
+                u1, u2 = controller.compute(refs, x_obs, t, outs)
 
             override_active = 0
             if x[0] > boil_trigger:

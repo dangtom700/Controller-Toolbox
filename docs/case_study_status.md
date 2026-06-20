@@ -4,12 +4,12 @@
 
 | Case Study Name | Language | Reference? | Status | IAE | IAE Notes | Link | fault_sweep | mc_summary | mu_analysis | wcet_summary |
 |---|---|---|---|---|---|---|---|---|---|--- |
-| 6-DOF Stewart Platform Vessel Motion Simulator | C++ | Yes | On-going | Fine | _ | [README](../case-study/6-DOF Stewart Platform Vessel Motion Simulator/README.md) | _ | _ | Yes | _ |
+| 6-DOF Stewart Platform Vessel Motion Simulator | C++ | Yes | Complete | Fine | _ | [README](../case-study/6-DOF Stewart Platform Vessel Motion Simulator/README.md) | Yes | Yes | Yes | Yes |
 | Active Suspension 6x6 EV Full Model | Python | _ | Complete | Fine | _ | [README](../case-study/Active Suspension 6x6 EV Full Model/README.md) | Yes | Yes | Yes | Yes |
 | Active Suspension Mathematical Modeling and Optimization 2025 | C++ | Yes | Complete | Fine | _ | [README](../case-study/Active Suspension Mathematical Modeling and Optimization 2025/README.md) | Yes | Yes | Yes | Yes |
 | Air-Cooled Battery Thermal Management System | Python | Yes | Complete | Fine | _ | [README](../case-study/Air-Cooled Battery Thermal Management System/README.md) | Yes | Yes | Yes | Yes |
-| Aircraft Engine Thermal Management | Python | Yes | On-going | Fine | _ | [README](../case-study/Aircraft Engine Thermal Management/README.md) | _ | _ | Yes | _ |
-| Boiler Control | C++ | Yes | On-going | Fine | _ | [README](../case-study/Boiler Control/README.md) | _ | _ | Yes | _ |
+| Aircraft Engine Thermal Management | Python | Yes | Complete | Fine | _ | [README](../case-study/Aircraft Engine Thermal Management/README.md) | Yes | Yes | Yes | Yes |
+| Boiler Control | C++ | Yes | Complete | Fine | _ | [README](../case-study/Boiler Control/README.md) | Yes | Yes | Yes | Yes |
 | Bouyancy-Driven Airship in Vertical Plane | C++ | Yes | Open placeholder | No data | _ | [README](../case-study/Bouyancy-Driven Airship in Vertical Plane/README.md) | _ | _ | _ | _ |
 | Building Energy Management System | undetermined | Yes | Not started | No data | _ | - | _ | _ | _ | _ |
 | common | C++ | _ | Not started | No data | _ | - | _ | _ | _ | _ |
@@ -20,18 +20,18 @@
 | High-Altitude Aerial Firefighting Bag Drop | Python | Yes | Complete | Fine | _ | [README](../case-study/High-Altitude Aerial Firefighting Bag Drop/README.md) | Yes | Yes | Yes | Yes |
 | Hybrid-Driven Tendon-Pneumatic Soft Manipulator | undetermined | Yes | Not started | No data | _ | [README](../case-study/Hybrid-Driven Tendon-Pneumatic Soft Manipulator/README.md) | _ | _ | _ | _ |
 | Multi-Body Floating Wind-Wave Platform | Python | Yes | Complete | Fine | _ | [README](../case-study/Multi-Body Floating Wind-Wave Platform/README.md) | Yes | Yes | Yes | Yes |
-| Non-Inverting Buck-Boost Converter | C++ | Yes | On-going | Fine | _ | [README](../case-study/Non-Inverting Buck-Boost Converter/README.md) | _ | _ | _ | _ |
+| Non-Inverting Buck-Boost Converter | C++ | Yes | Complete | Fine | _ | [README](../case-study/Non-Inverting Buck-Boost Converter/README.md) | Yes | Yes | Yes | Yes |
 | Nonlinear Surface Ship Manoeuvring Control | Python | Yes | Complete | Fine | _ | [README](../case-study/Nonlinear Surface Ship Manoeuvring Control/README.md) | Yes | Yes | Yes | Yes |
 | PCM Thermal Energy Storage Control | Python | Yes | Open placeholder | Fine | _ | [README](../case-study/PCM Thermal Energy Storage Control/README.md) | _ | _ | Yes | _ |
 | Porous Fiber Plate Humidification System | C++ | Yes | Complete | Fine | _ | [README](../case-study/Porous Fiber Plate Humidification System/README.md) | Yes | Yes | Yes | Yes |
 | Residential Building Comfort SMPC | C++ | Yes | Open placeholder | No data | _ | [README](../case-study/Residential Building Comfort SMPC/README.md) | _ | _ | _ | _ |
 | Satellite Launch Vehicle Systems | Python | Yes | Open placeholder | Fine | _ | [README](../case-study/Satellite Launch Vehicle Systems/README.md) | _ | _ | Yes | _ |
-| Separate Meter In Separate Meter Out | C++ | Yes | On-going | Fine | _ | [README](../case-study/Separate Meter In Separate Meter Out/README.md) | _ | _ | Yes | _ |
-| Solar Cooker with Reflector and Absorber | C++ | Yes | On-going | Fine | _ | [README](../case-study/Solar Cooker with Reflector and Absorber/README.md) | _ | _ | Yes | _ |
-| Solar Ocean Thermal Energy Conversion System | C++ | Yes | On-going | Fine | _ | [README](../case-study/Solar Ocean Thermal Energy Conversion System/README.md) | _ | _ | Yes | _ |
+| Separate Meter In Separate Meter Out | C++ | Yes | Complete | Fine | _ | [README](../case-study/Separate Meter In Separate Meter Out/README.md) | Yes | Yes | Yes | Yes |
+| Solar Cooker with Reflector and Absorber | C++ | Yes | Complete | Fine | _ | [README](../case-study/Solar Cooker with Reflector and Absorber/README.md) | Yes | Yes | Yes | Yes |
+| Solar Ocean Thermal Energy Conversion System | C++ | Yes | Complete | Fine | _ | [README](../case-study/Solar Ocean Thermal Energy Conversion System/README.md) | Yes | Yes | Yes | Yes |
 | Solar-Driven Cooling System with Photovoltaic Evaporative Chimney | C++ | Yes | Complete | Fine | _ | [README](../case-study/Solar-Driven Cooling System with Photovoltaic Evaporative Chimney/README.md) | Yes | Yes | Yes | Yes |
 | Tracking Control of Electro-Hydraulic Force Servo Systems | Python | Yes | Complete | Fine | _ | [README](../case-study/Tracking Control of Electro-Hydraulic Force Servo Systems/README.md) | Yes | Yes | Yes | Yes |
-| Tug Boat Numerical Simulation | C++ | Yes | On-going | Fine | _ | [README](../case-study/Tug Boat Numerical Simulation/README.md) | _ | _ | _ | _ |
+| Tug Boat Numerical Simulation | C++ | Yes | Complete | Fine | _ | [README](../case-study/Tug Boat Numerical Simulation/README.md) | Yes | Yes | Yes | Yes |
 | Underwater Glider Trajectory Tracking | C++ | Yes | Open placeholder | No data | _ | [README](../case-study/Underwater Glider Trajectory Tracking/README.md) | _ | _ | _ | _ |
 | Underwater Robotic Manipulator Trajectory Tracking | undetermined | Yes | Not started | No data | _ | [README](../case-study/Underwater Robotic Manipulator Trajectory Tracking/README.md) | _ | _ | _ | _ |
 | Unmanned Surface Vehicle Wave-Predictive Attitude Control | undetermined | Yes | Not started | No data | _ | [README](../case-study/Unmanned Surface Vehicle Wave-Predictive Attitude Control/README.md) | _ | _ | _ | _ |

@@ -135,7 +135,9 @@ for %%T in (
     simulate_all
     realtime_all
     boiler_sim
+    boiler_robustness
     tug_sim
+    tug_robustness
     solar_cooling_sim
     solar_cooling_robustness
     humidification_sim
@@ -143,10 +145,15 @@ for %%T in (
     susp_sim
     susp_robustness
     buck_boost_sim
+    buck_boost_robustness
     solar_cooker_sim
+    solar_cooker_robustness
     sotec_sim
+    sotec_robustness
     smismo_sim
+    smismo_robustness
     stewart_sim
+    stewart_robustness
     toolbox_examples
     test_catch2_pilot
     test_catch2_advanced

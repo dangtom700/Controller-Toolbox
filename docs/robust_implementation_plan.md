@@ -2,14 +2,23 @@
 
 Generated 2026-06-17. Authored against codebase state at Part 60.
 
+**Status update (Part 66, 2026-06-20): Phases 1-3 are done** (built shortly after this plan
+was authored — confirmed complete and documented in `CLAUDE.md`'s ROB-1 entry by Part 63).
+**Phases 4 and 5 were never built** and remain open. The sections below are kept as the
+original design rationale for Phases 1-3 and the still-current proposal for Phases 4-5 —
+treat the Phase 1-3 write-ups as historical design notes, not a "to do" list. **Important:**
+the "Integration with Existing Case Studies" section near the end of this document describes
+a path that was **not** the one actually taken for case-study integration — see the
+correction inserted there for what was actually built instead (Part 64 + 66) and why.
+
 ---
 
 ## Existing Foundation
 
 | File | What it provides |
 |------|-----------------|
-| `lib/RobustnessAnalysis.h` | Stub only — broken syntax, no implementation |
-| `lib/SystemAnalysis.h` | `getPoles`, `isDiscreteStable`, `solveDiscreteLyapunov`, `getFrequencyResponse`, `calculateMargins`, `calculateHInfinityNorm` |
+| `lib/RobustnessAnalysis.h` / `.cpp` | **Built (Phase 1, done by Part 63).** `spawn_SS_samples`/`spawn_TF_samples`, `monteCarloAnalysis()` -> `MonteCarloResult` (stability probability, gain/phase margins, peak S/T, IAE, nu-gap). Bound as `ctrl.monte_carlo_analysis`/`ctrl.MonteCarloResult`/`ctrl.spawn_SS_samples`. Was a stub with broken syntax when this plan was authored (Part 60) — that description below is the *original* motivation for Phase 1, not the current state. |
+| `lib/SystemAnalysis.h` | `getPoles`, `isDiscreteStable`, `solveDiscreteLyapunov`, `getFrequencyResponse`, `calculateMargins`, `calculateHInfinityNorm`. **Gang-of-Four + Disk Margin extensions (Phase 2) also done** (`gang_of_four`, `calculate_disk_margin`). |
 | `lib/GapMetric.h` | `nuGap`, `nuGapMatrix`, `freqResponseGrid`, `chordalDist`, `subspaceDist` |
 | `lib/DiscreteHinf.h` | Full DGKF Hinfty synthesis, `GeneralisedPlant`, `MixedSensitivity`, gamma-bisection |
 | `lib/PlantModel.h` | `TransferFunction`, `StateSpace`, `tf2ss`, `ss2tf`, `c2d`, `ssStep`, `minreal`, `DAESystem`, `consistentInit` |
@@ -22,6 +31,10 @@ Each phase is independent and can be merged separately.
 ---
 
 ## Phase 1 — Fix and Complete `RobustnessAnalysis.h` (Model Spawning + Monte Carlo)
+
+**Status: Done.** Built as `lib/RobustnessAnalysis.{h,cpp}`; bound, tested (`[robustness_mc]`),
+and exampled (`ex83_robustness_mc.cpp`). The write-up below is the original design plan kept
+for reference, not an outstanding task.
 
 **Priority: HIGH — unblocks everything else.**
 
@@ -196,6 +209,10 @@ monteCarloAnalysis(const StateSpace& nominal_plant,
 
 ## Phase 2 — `SystemAnalysis` Extensions (Gang of Four + Disk Margin)
 
+**Status: Done.** Built directly in `lib/SystemAnalysis.h`/`.cpp` (`gang_of_four`,
+`calculate_disk_margin`). The write-up below is the original design plan kept for
+reference, not an outstanding task.
+
 **Priority: HIGH — frequency-domain robustness visualisation.**
 
 ### 2.1 Add to `lib/SystemAnalysis.h` / `lib/SystemAnalysis.cpp`
@@ -284,6 +301,13 @@ static StateSpace feedback(const StateSpace& GK);
 ---
 
 ## Phase 3 — `lib/MuAnalysis.h` (Structured Singular Value)
+
+**Status: Done.** Built as `lib/MuAnalysis.{h,cpp}` (`compute_mu`/`peak_mu`/
+`robust_stability_radius`). **Note the naming collision documented in `CLAUDE.md`'s
+"Non-obvious API facts":** this is unrelated to `tools/mu_analysis.py`, which is an
+ARMA(2,2)-identification heuristic over logged nonlinear closed-loop CSVs, not the real
+structured singular value computed here. The write-up below is the original design plan
+kept for reference, not an outstanding task.
 
 **Priority: MEDIUM — most powerful deterministic robustness tool; highest effort.**
 
@@ -412,6 +436,9 @@ and can be referenced but need not be duplicated.
 
 ## Phase 4 — `lib/WorstCaseSearch.h` (CMA-ES Worst-Case Parameter Search)
 
+**Status: Open.** Never built — confirmed still absent as of Part 66. This phase is still
+an accurate, current proposal.
+
 **Priority: MEDIUM — uses existing `AutoTuner`, low incremental code.**
 
 ### 4.1 Concept
@@ -520,6 +547,9 @@ findWorstCase(
 ---
 
 ## Phase 5 — `lib/LyapunovRobustness.h` (Common Lyapunov Function for Polytopic Uncertainty)
+
+**Status: Open.** Never built — confirmed still absent as of Part 66. This phase is still
+an accurate, current proposal.
 
 **Priority: LOW — requires internal iterative solver; no external SDP dependency.**
 
@@ -671,6 +701,24 @@ LyapunovRobustness buildBoxVertices     -> 2^m vertices; m > 12 is impractical.
 ---
 
 ## Integration with Existing Case Studies
+
+**Correction (Part 66): this is not the path that was actually taken.** Phase 1 has been
+complete since Part 63, but case-study integration did **not** go through
+`ctrl.monteCarloAnalysis`/`grey_box_model()`/`run_robustness()` as originally proposed
+below. Part 64 deliberately built a separate, independent mechanism instead —
+`case-study/common/RobustnessStats.h` + a per-study `robustness_main.cpp`/`*_robustness`
+CMake target that perturbs real physical plant parameters and reruns the actual nonlinear
+closed-loop C++ simulation — because `ctrl.monteCarloAnalysis`'s linearized-`StateSpace`
+Monte Carlo isn't meaningful for the SMC/ADRC/Fuzzy/GA-tuned nonlinear controllers most
+case studies actually use. This pattern now covers all 10 C++ case studies (3 in Part 64,
+the remaining 7 in Part 66; see `CLAUDE.md`'s ROB-1 entry). It remains unused (and the
+paragraph below remains a live, unexecuted proposal) for the ~21 case studies that are
+Python-only or not yet implemented — those would need either an equivalent Python-side
+nonlinear-perturbation helper, or the original `ctrl.monteCarloAnalysis`-based approach
+below if a future session judges a linearized-model check sufficient for a particular
+study's controller roster.
+
+Original proposal (not executed as written — see correction above):
 
 Once Phase 1 is complete, any Python-only case study can add a
 `grey_box_model() -> (ode, h, x0, names, lb, ub)` hook (already used by

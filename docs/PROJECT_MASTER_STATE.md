@@ -1,27 +1,29 @@
 # Controller Toolbox -- Project Master State Document
 
 **Project:** Discrete-Time Controller Toolbox (C++20 / pybind11 / Catch2)
-**Current Part:** 63 (Aircraft Engine Thermal Management promoted into the official case-study roster -- complete 2026-06-18)
+**Current Part:** 66 (ROB-1 robustness analysis extended to all 10 C++ case studies + `generate_report.py` empty-data crash fix -- complete 2026-06-20)
 **Maintained by:** Claude Code (Senior Principal Engineer role)
 **Update cadence:** End of every major iteration (new algorithm, case study, or binding pass)
 
 ---
 
-## 1. Baseline Health (Part 63 Exit State)
+## 1. Baseline Health (Part 66 Exit State)
 
 These are **structural counts** (files / TEST_CASE() declarations / CSV runs on disk),
-verified directly against the working tree on 2026-06-18. They are NOT a verified
-pass/fail report -- run `conda run -n soft_robotics -- python run.py` for that. Treat
-every count below as **UNVERIFIED pass status** until a clean `run.py` confirms it.
+verified directly against the working tree on 2026-06-18 (Catch2/example/Python counts
+have not been re-verified since; no new `lib/` files were added in Parts 64-66, so they
+should be unchanged). They are NOT a verified pass/fail report -- run
+`conda run -n soft_robotics -- python run.py` for that. Treat every count below as
+**UNVERIFIED pass status** until a clean `run.py` confirms it.
 
 | Suite | Structural count | Notes |
 |-------|-------------------|-------|
 | C++ Catch2 TEST_CASE() | 332 across 16 files | `test_catch2_advanced.cpp` (main suite) alone has grown to 236 -- the long-standing "~95 main suite" / "~174 total" figures in CLAUDE.md and prior revisions of this doc are stale undercounts, not a regression. |
 | C++ example programs | 86 files (`examples/ex*.cpp`) | |
 | Python example scripts | 110 files (`examples/python/ex*.py`) | Numbering has intentional duplicates (e.g. two `ex23_*.py`, two `ex89_*.py`) from different feature batches; both run. |
-| Case studies C++ (10 studies) | 1488 runs | Boiler 216, Tug 72, Solar 70, Humidification 75, ActiveSuspension 90 (18 ctrl), BuckBoost 60, SolarCooker 60, SOTEC 60, SMISMO 65 (13 ctrl), Stewart 720 (12 ctrl x 60 sea-state configs, Part 61). |
-| Case studies Python-only (8 studies, official roster) | 565 runs | DrillString 85, WindWave 80, EHFS 70 (14 ctrl), Firefighting 60, BTMS 60, SurfaceShip 60, EV6x6 90 (18 ctrl), AircraftEngine 60 (12 ctrl, promoted Part 63). |
-| Case studies, remaining undocumented (Part 62 discovery) | see Section 6 / `docs/case_study_status.md` | 31 total directories under `case-study/`; 18 are reflected in CLAUDE.md's/README's roster tables (10 C++ + 8 Python-only, the 8th being `Aircraft Engine Thermal Management`, promoted Part 63). 7 are "Open placeholder" (scaffolded by `tools/new_case_study.py`, never implemented); 6 are "Not started" (PDF/README only, no `sim/`). |
+| Case studies C++ (10 studies) | 1488 runs | Boiler 216, Tug 72, Solar 70, Humidification 75, ActiveSuspension 90 (18 ctrl), BuckBoost 60, SolarCooker 60, SOTEC 60, SMISMO 65 (13 ctrl), Stewart 720 (12 ctrl x 60 sea-state configs, Part 61). **All 10 now also have a `*_robustness` target** (fault sweep + Monte Carlo + WCET over the real nonlinear sim) -- 3 since Part 64 (ActiveSuspension, Humidification, Solar Cooling), the other 7 since Part 66 (Boiler, Tug, BuckBoost, SolarCooker, SOTEC, SMISMO, Stewart). `docs/case_study_status.md` now shows all 10 as `Complete` (was `On-going` for 7 of them pre-Part-66). |
+| Case studies Python-only (8 studies, official roster) | 565 runs | DrillString 85, WindWave 80, EHFS 70 (14 ctrl), Firefighting 60, BTMS 60, SurfaceShip 60, EV6x6 90 (18 ctrl), AircraftEngine 60 (12 ctrl, promoted Part 63; gained a `run_wcet_profile()` hook + `config/analysis.json` in Part 66). |
+| Case studies, remaining undocumented (Part 62 discovery) | see Section 6 / `docs/case_study_status.md` | 31 total directories under `case-study/`; 18 are reflected in CLAUDE.md's/README's roster tables (10 C++ + 8 Python-only, the 8th being `Aircraft Engine Thermal Management`, promoted Part 63). 7 are "Open placeholder" (scaffolded by `tools/new_case_study.py`, never implemented; one of these -- `Bouyancy-Driven Airship in Vertical Plane` -- gained a `HANDOFF_PROMPT.md` implementation plan in Part 66, still no code); 6 are "Not started" (PDF/README only, no `sim/`; one of these -- `Hybrid-Driven Tendon-Pneumatic Soft Manipulator` -- also gained a `HANDOFF_PROMPT.md` implementation plan in Part 66, still no `sim/`). |
 | Runtime warnings | `bug_report.txt` expected 0 blocks | `safe_phrases` list in `run.py` suppresses all known benign messages. |
 
 **Verify with:** `conda run -n soft_robotics -- python run.py`
@@ -29,7 +31,9 @@ every count below as **UNVERIFIED pass status** until a clean `run.py` confirms 
 
 ---
 
-## 2. Algorithm Inventory (~90 `lib/` modules -- updated through Part 63)
+## 2. Algorithm Inventory (~90 `lib/` modules -- updated through Part 63; no new `lib/`
+algorithms in Parts 64-66, which were case-study-level robustness/analysis/documentation
+work only -- see Section 6)
 
 > Parts 26-33 added 13 new `lib/` algorithms (DeePC, ILC, SINDy, KoopmanEDMD, L1Adaptive,
 > CBFSafetyFilter, GaussianProcess, EchoStateNetwork, NeuralPID, CEMController, DynaController,
@@ -199,20 +203,31 @@ Controller Toolbox/
 │   │                          phase2_hybrid_modeling.md
 ├── tools/
 │   ├── new_case_study.py        scaffolds a case-study framework (C++ or Python) from a source PDF
-│   ├── case_study_tracker.py    scans case-study/*/; writes docs/case_study_status.md (TRK-1, Part 62 rewrite)
+│   ├── case_study_tracker.py    scans case-study/*/ (skips case-study/common/, Part 66); writes
+│   │                             docs/case_study_status.md (TRK-1, Part 62 rewrite)
 │   ├── metrics.py / compare_controllers.py / monte_carlo.py / mc_plots.py
 │   ├── fault_injector.py / fault_sweep.py / fault_plots.py
 │   ├── anova.py / wcet_report.py / model_validation.py / mu_analysis.py / mu_plots.py
-│   └── generate_report.py       self-contained HTML report per study (RPT-1)
+│   ├── generate_report.py       self-contained HTML report per study (RPT-1)
+│   ├── generate_all_reports.bat drives run_analysis.py + generate_report.py across every
+│   │                             case-study/*/ with a logs/ dir, then refreshes case_study_tracker.py;
+│   │                             logs to tools/generate_all_reports.log (gitignored)
+│   └── study_protocol.py        documentation-as-code: the run_single/run_with_fault/grey_box_model
+│                                  hook contract every Python case study's sim/main.py must honour
 ├── case-study/               31 directories total -- status is AUTO-TRACKED, do not hand-list here.
+│   │                          common/RobustnessStats.h (Part 64): header-only FaultSpec/MetricStats
+│   │                          shared by every C++ study's robustness_main.cpp; not a case study
+│   │                          itself (excluded from the tracker, see tools/case_study_tracker.py above).
 │   │                          See docs/case_study_status.md (regenerate: `python tools/case_study_tracker.py`).
 │   │                          4-tier status: Complete / On-going / Open placeholder / Not started.
-│   │                          As of Part 63: 18 On-going (10 C++ + 8 Python-only, all reflected in
-│   │                          CLAUDE.md's/README's roster tables -- "Aircraft Engine Thermal
-│   │                          Management" promoted Part 63), 7 Open placeholder (scaffolded
-│   │                          by tools/new_case_study.py, never implemented), 6 Not started (PDF/README
-│   │                          only). Full roster + tribal knowledge per study: CLAUDE.md "Case Studies"
-│   │                          section and each study's own README.md.
+│   │                          As of Part 66: 18 official-roster studies (10 C++ + 8 Python-only, all
+│   │                          reflected in CLAUDE.md's/README's roster tables), of which all 10 C++
+│   │                          studies now show as Complete (gained fault_sweep/mc_summary/wcet_summary
+│   │                          coverage Part 64+66 -- see Section 1); the 8 Python-only studies remain
+│   │                          On-going. 7 Open placeholder (scaffolded by tools/new_case_study.py,
+│   │                          never implemented), 6 Not started (PDF/README only). Full roster +
+│   │                          tribal knowledge per study: CLAUDE.md "Case Studies" section and each
+│   │                          study's own README.md.
 ├── docs/
 │   ├── PROJECT_MASTER_STATE.md       <- this file
 │   ├── compact_bug_report_parts_1-25.md   (archived: Parts 1-25 tribal knowledge)
@@ -302,10 +317,13 @@ Python import is flat: `import ctrl_toolbox as ctrl` -- no submodule hierarchy.
 
 ---
 
-## 6. Open Items (Part 63+)
+## 6. Open Items (Part 66+)
 
 | ID | Description | Priority | Status |
 |----|-------------|----------|--------|
+| **ROB-1** | Robustness analysis (fault sweep + Monte Carlo + WCET via `case-study/common/RobustnessStats.h`) for all 10 C++ case studies | MED | **DONE for C++ (Part 64 + 66)** -- still open for the ~21 Python-only/not-yet-implemented studies |
+| **GR-1** | `tools/generate_report.py` `_section_comparison()` raised `KeyError` on any study with zero parseable run rows (every Open-placeholder/Not-started scaffold) -- indexed `df[[...]]` before the `df.empty` guard it fell through to | LOW | **DONE (Part 66)** |
+| **AE-WCET** | Aircraft Engine Thermal Management `run_wcet_profile()` + `config/analysis.json`, bringing it in line with every other Python study's `tools/run_analysis.py` hook contract | LOW | **DONE (Part 66)** |
 | **D2** | Digital Twin Lite Python app (FastAPI/Streamlit, GreyBoxEstimator-backed) | LOW | Open |
 | **C2** | 11 spec-only/undocumented case studies, re-audited Part 62 via the new tracker: 7 are "Open placeholder" (`Bouyancy-Driven Airship in Vertical Plane`, `Differential Drive Robot Tracking`, `Dual-Arm IAUV Motion Planning`, `PCM Thermal Energy Storage Control`, `Residential Building Comfort SMPC`, `Satellite Launch Vehicle Systems`, `Underwater Glider Trajectory Tracking` -- scaffolded by `tools/new_case_study.py`, plant/controllers never implemented); 6 are "Not started" (`Building Energy Management System`, `Data-Driven Sliding Mode Control of Soft Robot 2024`, `Heavy-Duty Parallel-Serial Hydraulic Manipulator VDC`, `Hybrid-Driven Tendon-Pneumatic Soft Manipulator`, `Underwater Robotic Manipulator Trajectory Tracking`, `Unmanned Surface Vehicle Wave-Predictive Attitude Control` -- PDF/README only, no `sim/`). | MED | Open |
 | **C2-NEW** | `Aircraft Engine Thermal Management` -- **Done Part 63**: promoted into the official roster. Added to README.md's and CLAUDE.md's Python-only studies tables (17 -> 18 studies, 7 -> 8 Python-only); controller roster + 4 tribal-knowledge gotchas added to CLAUDE.md. No code changes needed -- already fully implemented and already auto-discovered by `run.py` Phase 6. | -- | Done |
@@ -364,6 +382,8 @@ Python import is flat: `import ctrl_toolbox as ctrl` -- no submodule hierarchy.
 | Part 62 | `case_study_tracker.py` status detection keys off literal placeholder-template fingerprints, not file existence | A freshly-scaffolded study's placeholder plant (`x' = -a*x + b*u`) and `OpenLoop` controller actually run, producing real-looking `logs/*.csv` -- file-existence checks alone would misclassify an untouched scaffold as "On-going" |
 | Part 62 | `docs/PROJECT_MASTER_STATE.md`'s hand-maintained case-study tree (Section 3) replaced with a pointer to `docs/case_study_status.md` | The hand-maintained version had drifted 12 Parts out of date (missing the Stewart study, 8 undiscovered directories, stale controller/run counts); the auto-generated tracker is the single source of truth going forward |
 | Part 63 | Promoted `Aircraft Engine Thermal Management` into the official 18-study roster rather than leaving it as a flagged-but-uncounted discovery | It was already fully implemented (real plant + 12 controllers, no placeholder fingerprint) and already auto-discovered by `run.py` Phase 6 - the only gap was documentation, and README.md's intro paragraph had already half-promoted it before this reconciliation, suggesting the promotion was simply left unfinished rather than intentionally deferred |
+| Part 64 | Case-study robustness coverage uses a new, independent `case-study/common/RobustnessStats.h` (perturbs real physical plant parameters, reruns the actual nonlinear closed-loop sim) instead of wiring in the existing `lib/RobustnessAnalysis.h` (linearized `StateSpace` Monte Carlo) | `lib/RobustnessAnalysis.h`'s linearized-model Monte Carlo isn't meaningful for the SMC/ADRC/Fuzzy/GA-tuned nonlinear controllers most case studies actually use; `docs/robust_implementation_plan.md`'s own proposed case-study integration path (via `ctrl.monteCarloAnalysis` + a `grey_box_model()` hook) was deliberately not followed for this reason |
+| Part 66 | `tools/case_study_tracker.py` excludes `case-study/common/` from its directory scan | `common/` is a shared header-only tooling directory (Part 64's `RobustnessStats.h`), not a case study -- it has no `sim/` and was being mis-classified as "Not started" |
 
 ---
 
@@ -372,12 +392,19 @@ Python import is flat: `import ctrl_toolbox as ctrl` -- no submodule hierarchy.
 1. **Verify baseline** before any further work: `conda run -n soft_robotics -- python run.py`
    -> Establish current pass/fail counts as the new baseline; the counts in Section 1 are
    structural (file/CSV counts), not verified pass status.
-2. **Triage the 7 "Open placeholder" studies** (C2 above): for each, either implement real plant
-   dynamics + controller roster (follow `prompt/make_case_study_cpp.md` or
+2. **Extend ROB-1 to the Python-only studies** (now done for all 10 C++ studies as of Part 66):
+   the 8 official-roster Python-only studies and any of the placeholder/not-started studies
+   that get implemented next still have no fault-sweep/Monte-Carlo/WCET coverage beyond what
+   `tools/run_analysis.py`'s existing `config/analysis.json` hook already provides per study.
+3. **Triage the 7 "Open placeholder" + 6 "Not started" studies** (C2 above): for each, either
+   implement real plant dynamics + controller roster (follow `prompt/make_case_study_cpp.md` or
    `prompt/make_case_study_python.md`), or decide to leave them as future work and note that
    explicitly in CLAUDE.md's stub tracking instead of leaving them silently undocumented.
-3. **D2 Digital Twin Lite** remains the only LOW-priority item with no implementation yet.
-4. Re-run `python tools/case_study_tracker.py` after any case-study work to keep
+   `Bouyancy-Driven Airship in Vertical Plane` and `Hybrid-Driven Tendon-Pneumatic Soft
+   Manipulator` each have a fully-resolved `HANDOFF_PROMPT.md` plan (Part 66) ready to execute --
+   start there before re-deriving anything from their PDFs.
+4. **D2 Digital Twin Lite** remains the only LOW-priority item with no implementation yet.
+5. Re-run `python tools/case_study_tracker.py` after any case-study work to keep
    `docs/case_study_status.md` current -- it is the authoritative, low-maintenance status source;
    avoid re-introducing a hand-maintained case-study table anywhere else in the docs.
 
@@ -398,4 +425,4 @@ to update; `prompt/handoff_prompt61.md` is a dated snapshot, not a living docume
 
 ---
 
-*Last updated: 2026-06-18 | Part 63 complete (Aircraft Engine Thermal Management promoted into the official case-study roster)*
+*Last updated: 2026-06-20 | Part 66 complete (ROB-1 robustness analysis extended to all 10 C++ case studies; `generate_report.py` empty-data crash fixed; Aircraft Engine WCET hook added)*

@@ -38,6 +38,20 @@ Read both compact files for tribal knowledge before making any changes to contro
 | B36-2 | `ex79_registry_monitor` monitors nothing (M3 telemetry mis-wired) | LOW | **Done (Part 39, confirmed Part 53)** |
 | REL | Rebuild `ctrl_toolbox.pyd` in Release | LOW | Open |
 | M4 | `template<typename Scalar>` leaf algorithms for embedded float target | Backlog | **Done (Part 54)** |
+| **Iter E** | Audit Iteration E — final batch (13 code changes + 29 verified/deferred); audit complete (84/84 findings addressed across Iter A-E) | MIXED | **Done (Part 57E)** |
+| **DIST-1/2/4/5** | CMake install target + vcpkg port / embedded header-only subset / PyPI wheels (cibuildwheel) / GitHub Release workflow | MED | **Done (Part 57E)** |
+| **ANA-1..7** | `tools/metrics.py`, `compare_controllers.py`, `monte_carlo.py`/`mc_plots.py`, `fault_injector.py`/`fault_sweep.py`/`fault_plots.py`, `anova.py`, `wcet_report.py`, `model_validation.py`, `mu_analysis.py`/`mu_plots.py` | MED | **Done (Part 58)** |
+| **RPT-1** | `tools/generate_report.py` — self-contained per-study HTML report, 8 sections, Plotly CDN charts | MED | **Done (Part 58)** |
+| **PLT-1** | `setup.sh` + `compile.sh` — Linux/macOS bootstrap + full-build scripts mirroring `setup.ps1`/`compile.bat` | MED | **Done (Part 59)** |
+| **TRK-1** | `tools/case_study_tracker.py` + `docs/case_study_status.md` — auto-generated case-study status table | MED | **Done (Part 59)** |
+| **DIST-3** | ROS2 thin wrapper package (`ros2/ctrl_toolbox_ros2/`, `ControllerNode<T>` lifecycle template) | MED | **Done (Part 60)** |
+| **C2-Stewart** | 6-DOF Stewart Platform Vessel Motion Simulator — new C++ case study (12 ctrl x 60 sea-state configs = 720 runs) | HIGH | **Done (Part 61)** |
+| **TRK-2** | `case_study_tracker.py` rewritten to 4-tier status (Complete/On-going/Open placeholder/Not started); old 3-tier scheme mis-classified untouched `new_case_study.py` scaffolds as "On-going" | MED | **Done (Part 62)** |
+| **DOC-1** | Reconciled `docs/PROJECT_MASTER_STATE.md` (was 12 Parts behind) + fixed stale repo-wide references | MED | **Done (Part 62)** |
+| **C2-NEW** | `Aircraft Engine Thermal Management` promoted into the official 18-study roster (documentation only — already fully implemented) | — | **Done (Part 63)** |
+| **ROB-1** | Robustness analysis (fault sweep + Monte Carlo + WCET via `case-study/common/RobustnessStats.h`) for C++ case studies — 3 studies Part 64 (ActiveSuspension/Humidification/SolarCooling), remaining 7 Part 66 (Boiler/Tug/BuckBoost/SolarCooker/SOTEC/SMISMO/Stewart) | MED | **Done for all 10 C++ studies (Part 64 + 66)** — open for ~21 Python-only/not-yet-implemented studies |
+| **GR-1** | `tools/generate_report.py` `_section_comparison()` raised `KeyError` on any study with zero parseable run rows (every Open-placeholder/Not-started scaffold) | LOW | **Done (Part 66)** |
+| **AE-WCET** | Aircraft Engine Thermal Management `run_wcet_profile()` + `config/analysis.json` hook | LOW | **Done (Part 66)** |
 
 ---
 
@@ -783,3 +797,280 @@ DiscreteADRC #58 deferred  -> runtime assert for "setReference() never called"
 
 **Audit progress:** 51 total findings closed across Iterations A–D. 42 remain (Iter E).
 **Docs updated:** `docs/audit_report.md` Part 57D table appended; this section added.
+
+---
+
+## Part 57E — Audit Iteration E (Final Batch) + Distribution Track — 2026-06-14
+
+**Audit Iterations A-E complete: all 84 findings addressed.** Iteration E closed the
+remaining 42 findings: 13 required code changes, 29 verified already-resolved or
+deliberately deferred (documented, not silently dropped).
+
+**Distribution track (DIST-1/2/4/5) shipped in the same part:**
+- **DIST-1** — CMake install target: `controller_toolbox` exports as
+  `ctrl::controller_toolbox` after `find_package(ControllerToolbox)`; vcpkg portfile added
+  (SHA512 placeholder until first tagged release).
+- **DIST-2** — Embedded header-only subset: `lib/embedded/` (`BasicPID.h`, `BasicSMC.h` +
+  the Part 54 templates) builds with zero Eigen dependency via
+  `CTRL_BUILD_EMBEDDED_ONLY`; `test_embedded_subset` links only Catch2.
+- **DIST-4** — PyPI wheels via `cibuildwheel`; `CTRL_FETCH_EIGEN_IF_MISSING` gates Eigen
+  auto-fetch (OFF by default, ON only in CI wheel builds).
+- **DIST-5** — GitHub Release workflow (`release.yml`, softprops action pinned to a SHA).
+- **publish.yml** requires PyPI "Trusted Publisher" configured for the repo.
+
+**Docs updated:** `docs/audit_report.md` Part 57E table appended; `CLAUDE.md` Open Items.
+
+---
+
+## Part 58 — Analysis Pipeline (ANA-1..7 + RPT-1) + Test Fixes — 2026-06-15
+
+**New `tools/` analysis pipeline, 7 modules + 1 report generator:**
+- **ANA-1** `tools/metrics.py` (`compute_metrics`, `extract_final_iae`) + `compare_controllers.py`.
+- **ANA-2** `tools/monte_carlo.py` (calls `sim.run_single(ctrl, params)`) + `mc_plots.py`.
+- **ANA-3** `tools/fault_injector.py` (`FaultSpec`/`FaultInjector`) + `fault_sweep.py`
+  (calls `sim.run_with_fault(ctrl, FaultSpec)`) + `fault_plots.py`.
+- **ANA-4** `tools/anova.py` (one-way ANOVA + Tukey HSD via scipy/statsmodels).
+- **ANA-5** `tools/wcet_report.py` (aggregates `wcet_*.csv`; p99 + WCET-at-99.9th-percentile).
+- **ANA-6** `tools/model_validation.py` (`GreyBoxEstimator` fit + NRMSE; requires a study's
+  own `grey_box_model()` hook).
+- **ANA-7** `tools/mu_analysis.py` + `mu_plots.py` (ARMA(2,2) ID from logged closed-loop CSV;
+  peak |S(z)|/|T(z)|).
+- **RPT-1** `tools/generate_report.py` — self-contained HTML report, 8 sections, Plotly CDN
+  interactive charts, degrades to plain tables without `plotly` installed.
+
+**Bug fixes in the same part:**
+- `RepetitiveController::setParams()` didn't reset `v_now_` when `periodSteps` changed —
+  `correction()` kept returning a stale value across a period change.
+- A `computeDoM` test measured the wrong signal (plant output `y` instead of peak control
+  signal `u`); renamed and corrected.
+
+**Non-obvious caveats:** `monte_carlo.py`/`fault_sweep.py`/`model_validation.py` each
+require a specific hook in the study's `sim/main.py` (`run_single`, `run_with_fault`,
+`grey_box_model` respectively) — see `tools/study_protocol.py` for the full contract.
+`wcet_report.py` prints an instrumentation guide when no `wcet_*.csv` is found instead of
+failing silently.
+
+**Docs updated:** `CLAUDE.md` Open Items.
+
+---
+
+## Part 59 — Cross-Platform Scripts + Case Study Tracker — 2026-06-15
+
+- **PLT-1** `setup.sh` (Linux/macOS bootstrap mirroring `setup.ps1`) + `compile.sh`
+  (sequential full build mirroring `compile.bat`, same 120-target order). Both staged
+  `git update-index --chmod=+x` so they land executable on a Linux clone.
+- **TRK-1** `tools/case_study_tracker.py` completed from a stub: fixed `detect_language()`
+  (extension-comparison bug, division-by-zero), added `detect_status()`
+  (Complete/On-going/Incomplete/Not started — the 3-tier predecessor to Part 62's 4-tier
+  rewrite), added `find_pdf_link()`/`find_readme_link()`, added `main()` writing
+  `docs/case_study_status.md`. First run found 23 studies (16 On-going, 7 Incomplete) and
+  **discovered 5 previously undocumented stubs** with PDF+README but no `sim/`: 6-DOF
+  Stewart, Heavy-Duty Hydraulic VDC, Hybrid Tendon-Pneumatic, Underwater Manipulator, USV
+  Wave-Predictive.
+
+**Non-obvious caveats:** `setup.sh`'s eigen3 check is a non-fatal warning (falls back to
+`CTRL_FETCH_EIGEN_IF_MISSING=ON`); `compile.sh --no-config` skips cmake re-configure and
+assumes `build/` already exists; `case_study_tracker.py` must be run from the repo root
+(`ROOT = "case-study"` is a relative path).
+
+**Docs updated:** `docs/case_study_status.md` generated; `CLAUDE.md` stub tables updated.
+
+---
+
+## Part 60 — ROS2 Thin Wrapper + CI/CD Overhaul + Cross-Platform `run.py` — 2026-06-16
+
+- **DIST-3** `ros2/ctrl_toolbox_ros2/` — `ament_cmake` package; `ControllerNode<T>`
+  lifecycle-node template (header-only) wrapping any `ctrl::IController`. Topics:
+  `~/setpoint`, `~/measurement`, `~/control_output` (all `std_msgs/Float64`); parameter
+  `sample_time_s` (default 0.01s). Example: `pid_temperature_node.cpp`.
+- **CI/CD overhaul:** 8 workflow files consolidated to 3 (`documentation.yml`,
+  `benchmarks.yml`, `cross-platform-cicd.yml` covering linux/windows/macos/wheels/publish).
+  Tag-triggered jobs gated on `startsWith(github.ref, 'refs/tags/v')`.
+- **Bug fix:** `tests/test_embedded_subset.cpp` had 7 stale API calls against the Part 54
+  `BasicPID`/`BasicSMC` API (single-arg constructor, `Ts` in Params, `sp.K` not `sp.eta`).
+- **`run.py` made cross-platform:** bash on Linux for Phase 2, `conda run` for cmake in
+  Phase 3, executable-detection in Phase 4 now handles no-extension + executable-bit
+  binaries on Linux.
+
+**Non-obvious caveats:** `ControllerNode<T>` uses `compute(setpoint - measurement)` — MRAC/
+L1 controllers need an adapter; declared ROS params must come after `sample_time_s` is
+already read in `on_configure`; `ros2/ctrl_toolbox_ros2` colcon build needs
+`CMAKE_PREFIX_PATH` pointing at the `ctrl_toolbox` install prefix; no `.so`/`.dll` — header-
+only, `ControllerNode<T>` instantiates in the user's own translation unit.
+
+**Docs updated:** `CLAUDE.md` Open Items.
+
+---
+
+## Part 61 — 6-DOF Stewart Platform Vessel Motion Simulator — 2026-06-18
+
+**New C++ case study** (`case-study/6-DOF Stewart Platform Vessel Motion Simulator/`,
+target `stewart_sim`): 6-UPU hexagonal-hinge Stewart platform, closed-form inverse
+kinematics + velocity Jacobian, 12-state per-rod spring-mass-damper actuator dynamics
+(RK4, Ts=5ms). 12 controllers x 60 Douglas sea-state configs = 720 runs (largest run
+count of any case study in the repo).
+
+- **Architecture finding:** hinge geometry needs different base/platform half-angles
+  (`delta_base=5°`, `delta_platform=45°`) — equal half-angles make every leg a pure
+  rotation of every other leg, a genuine Jacobian singularity for vertical load at the
+  home pose (`det(J^T)` collapsed to ~1e-49 for every phase/delta combination tried with
+  equal half-angles, verified empirically).
+- **Load-coupling sign bug caught before merge:** `F_load = -J^T.solve(wrench)`, not
+  `+J^T.solve(wrench)` — verified against a vertical 1-rod example. Getting this backwards
+  silently doubles the effective disturbance, producing 250-750mm tracking error that looks
+  like a tuning problem but isn't.
+- **Library bug fix** (`lib/NeuralPID.cpp`): `forward()` used a naive `log1p(exp(x))`
+  softplus instead of the class's own numerically-stable two-branch `softplus()` helper —
+  large `Kp0`/`Ki0` seeds (needed to match the other controllers' gain scale) overflowed to
+  `inf`/`NaN`. One-line fix; zero behavioural change elsewhere in the repo.
+- **L1AdaptiveController architectural ceiling documented, not chased:** `L1Adaptive` (like
+  `MRACController`) is a relative-degree-1 SISO law; the rod plant is relative-degree-2
+  (force -> position through a spring-mass-damper). An extensive gain sweep plateaus around
+  115-190mm steady-state rod error regardless of tuning — accepted as architectural. MRAC
+  reaches ~10mm with high gain via its direct algebraic law.
+
+**Docs updated:** `tests/test_stewart_regression.cpp` added; `CLAUDE.md` roster + gotchas.
+
+---
+
+## Part 62 — `case_study_tracker.py` 4-Tier Rewrite + Documentation Reconciliation — 2026-06-18
+
+- **TRK-2:** `detect_status()` rewritten from the Part 59 3-tier scheme (gated on file
+  existence only) to 4-tier (Complete/On-going/Open placeholder/Not started). Root cause: a
+  freshly-scaffolded `tools/new_case_study.py` study's placeholder plant (`x' = -a*x + b*u`)
+  and `OpenLoop` controller actually run and write real `logs/*.csv`, so file-existence
+  checks alone mis-classified untouched scaffolds as "On-going." New
+  `_is_untouched_scaffold()` matches literal template strings from the generator against
+  the study's actual plant/controller files. Re-scanning all 31 `case-study/*/` directories
+  (up from 23 in Part 59) produced 18 On-going, 7 Open placeholder, 6 Not started.
+- **C2-NEW finding:** of 8 newly-discovered directories, `Aircraft Engine Thermal
+  Management` turned out to be a real, substantially-implemented study (not a placeholder),
+  flagged for promotion in Part 63. The other 7 are untouched scaffolds.
+- **DOC-1:** `docs/PROJECT_MASTER_STATE.md` reconciled — had drifted ~12 Parts behind
+  CLAUDE.md. Stale references fixed: `prompt/prompt_enhanced.txt` (removed, doesn't exist),
+  `docs/audit_report.md`/`docs/roadmap_deployment_frontend.md` (moved to `docs/archived/`),
+  missing mentions of `scripts/`/`benchmark/`/`cheatsheet/`.
+
+**Docs updated:** `docs/case_study_status.md` regenerated; `docs/PROJECT_MASTER_STATE.md`
+Section 3 replaced with a pointer to the auto-generated tracker instead of a hand-
+maintained case-study tree; `CLAUDE.md` Open Items.
+
+---
+
+## Part 63 — Aircraft Engine Thermal Management Promoted into Official Roster — 2026-06-18
+
+**C2-NEW closed.** `Aircraft Engine Thermal Management` (discovered Part 62) added to
+`README.md`'s and `CLAUDE.md`'s Python-only roster tables (17 -> 18 studies, 7 -> 8
+Python-only). Pure documentation change — the study was already fully implemented (real
+FTMS plant + 12 controllers + 5 scenarios) and already auto-discovered by `run.py` Phase 6;
+no `lib/` or binding changes needed.
+
+Four tribal-knowledge gotchas added to `CLAUDE.md` from this study's implementation:
+state-choice `(m1, m2)` (not the paper's own `(m0, m1)`, which traps every SISO controller
+at a shared-resource lock once both loops saturate simultaneously), negative-static-gain
+sign convention, the safety-supervisor wrapper pattern (overrides `(u1, u2)` around the
+controller rather than inside the plant), and `m1_min`/`m2_min` crossover-flow margins.
+
+**Docs updated:** `CLAUDE.md` roster tables + gotchas; `README.md` intro/status baseline.
+
+---
+
+## Part 64 — CSV `error`/`iae_cumulative` Columns + C++ Robustness Analysis for 3 Case
+Studies — 2026-06-19
+
+- **CSV schema:** `Active Suspension Mathematical Modeling and Optimization 2025`,
+  `Porous Fiber Plate Humidification System`, and `Solar-Driven Cooling System with
+  Photovoltaic Evaporative Chimney` each gained trailing `error`/`iae_cumulative` columns —
+  the exact names `tools/metrics.py`'s `extract_final_iae` already searches for.
+- **New `case-study/common/RobustnessStats.h`** (header-only, shared by all three, the
+  first file under a new `case-study/common/` directory): `FaultSpec`/`FaultKind` mirroring
+  `tools/fault_injector.py`'s `FAULT_KINDS` 1:1, `MetricStats`/`computeStats()` (mean/std/
+  percentiles/worst, no Eigen dependency), `SimSummary` common per-trial result type.
+- **New `robustness_main.cpp` + `*_robustness` CMake target per study** (`susp_robustness`,
+  `humidification_robustness`, `solar_cooling_robustness`), purely additive. Each runs WCET
+  (per-step `std::chrono` timing -> `wcet_summary.csv`), Monte Carlo (30 samples/controller,
+  +-15% Gaussian perturbation of real physical plant params, rerunning the actual nonlinear
+  closed-loop sim — deliberately NOT `lib/RobustnessAnalysis.h`'s linearized-`StateSpace`
+  approach, since that "isn't meaningful for the SMC/ADRC/Fuzzy/GA-tuned nonlinear
+  controllers most case studies actually use"), and a fault sweep (3 magnitudes per
+  applicable `FaultKind`, injected at 40% through a truncated analysis window). Output
+  files (`mc_summary.csv`/`fault_sweep.csv`/`wcet_summary.csv`) land at the study root,
+  matching the exact filenames `tools/generate_report.py` already reads.
+- **`tools/mu_analysis.py` fix:** added `phi_measured`/`Tw1_C` to `y_candidates` and
+  `u_fan_ms`/`m_dot_w_kgs` to `u_candidates` — these 3 studies' real column names weren't in
+  the hardcoded candidate lists, so mu analysis silently fell back to a degenerate
+  error-as-proxy path (or `status=no_columns` before this part added the `error` column).
+
+**Docs updated:** `CLAUDE.md` ROB-1 entry + Open Items; this report's header table.
+
+---
+
+## Part 65 — Enabled `run_analysis.py` by Default + Fixed Multi-Study Analysis Bugs —
+2026-06-19
+
+- **`run.py` Phase 7 Step 2 flipped from opt-in to opt-out:** previously required
+  `CTRL_RUN_ANALYSIS=1` to run `tools/run_analysis.py`; now runs by default every session,
+  set `CTRL_SKIP_ANALYSIS=1` to opt back out.
+- **Real bug found while turning this on:** `tools/run_analysis.py`'s `load_sim_module()`
+  had a `sys.modules` cross-study collision, only surfaced once analysis ran across
+  multiple studies in one process. Every case study's `sim/` package reuses the same
+  generic file names (`controllers.py`, `simulation_runner.py`, ...); Python caches imports
+  by short module name, not path, so the *second* study processed would silently get the
+  *first* study's already-cached `controllers` module — wrong physics, usually surfacing as
+  a `KeyError` swallowed by each study's own defensive fallback (looked like "no hooks
+  found," not an import bug). Confirmed empirically: 5 of 7 studies failed this way
+  depending on processing order. Fixed via a `cleanup()` closure that removes the study's
+  `sim/` `sys.path` entry and purges only `sys.modules` entries whose `__file__` lives under
+  that study's `sim/` directory (not third-party packages — an indiscriminate first attempt
+  broke numpy's C-extension reload guard).
+- **3 stale `nominal_scenario_id` values fixed** in `config/analysis.json` (Air-Cooled BTMS,
+  Nonlinear Surface Ship, EHFS) — same root-cause pattern as a prior EV6x6 fix: a scenario
+  got renamed and the analysis config was never updated, so every analysis call raised
+  `ValueError` and filled `mc_summary.csv`/`fault_sweep.csv` with `iae=nan` rows.
+
+**Docs updated:** `CLAUDE.md` Part 65 entry + non-obvious facts.
+
+---
+
+## Part 66 — ROB-1 Extended to All 10 C++ Case Studies + `generate_report.py` Empty-Data
+Crash Fix — 2026-06-20
+
+- **ROB-1 extended from 3 to 10 C++ case studies.** The Part 64 `RobustnessStats.h` /
+  `robustness_main.cpp` / `*_robustness` CMake-target pattern replicated for `Boiler
+  Control`, `Tug Boat Numerical Simulation`, `Non-Inverting Buck-Boost Converter`,
+  `Solar Cooker with Reflector and Absorber`, `Solar Ocean Thermal Energy Conversion
+  System`, `Separate Meter In Separate Meter Out`, and `6-DOF Stewart Platform Vessel
+  Motion Simulator`. All 7 new targets built and run — `docs/case_study_status.md` now
+  shows all 10 C++ studies as `Complete`.
+- **Bug found and fixed — `tools/generate_report.py:148-150` `_section_comparison()`
+  raised `KeyError`** on any study with zero parseable run rows (every "Open placeholder"/
+  "Not started" scaffold: Bouyancy-Driven Airship, Differential Drive Robot Tracking,
+  Dual-Arm IAUV Motion Planning, Residential Building Comfort SMPC, Underwater Glider
+  Trajectory Tracking). The function checked `if not _HAS_PLOTLY or df.empty:` but then
+  still indexed `df[["study","scenario","controller","iae"]]` on that same line before ever
+  reaching `_df_to_html_table`'s own correct `df.empty` guard. Confirmed firing identically
+  across two independent `generate_all_reports.bat` runs (2026-06-18 and 2026-06-19, logged
+  in the gitignored `tools/generate_all_reports.log` — silent every time because the `.bat`
+  loop continues past a failed `generate_report.py --study ...` call and the log has no
+  tracked trace). Fixed by returning `_df_to_html_table(df)` immediately when `df.empty`,
+  before any column selection. Verified with a direct repro against an empty `DataFrame`.
+- **Aircraft Engine Thermal Management wired into the WCET pipeline:** `sim/main.py`
+  gained `run_wcet_profile()`; `sim/simulation_runner.py`'s `run_simulation()` gained an
+  optional `wcet_sink: list` parameter. New `config/analysis.json` brings this study in
+  line with every other Python study's `tools/run_analysis.py` hook contract.
+- **`tools/case_study_tracker.py`** excludes the new `case-study/common/` directory from
+  being scanned as a case study.
+- **`tools/mu_analysis.py`** reordered `y_candidates`/`u_candidates` so specific column
+  names are checked before short generic fallbacks (`y`/`u`/`y1`/`u1`) — Tug Boat's own
+  state variables are literally named `u`/`v` (surge/sway velocity), which was shadowing
+  the real output/actuator columns under the old ordering.
+- **Stray `docs/report.html`** (1653 lines, tracked since the initial commit) removed — a
+  misplaced combined report from a `generate_report.py` run where `--study` didn't resolve
+  to exactly one study (falls back to writing `report.html` into the cwd).
+- **Two case-study-local hand-off planning docs added** (plans only, no implementation):
+  `case-study/Bouyancy-Driven Airship in Vertical Plane/HANDOFF_PROMPT.md` and
+  `case-study/Hybrid-Driven Tendon-Pneumatic Soft Manipulator/HANDOFF_PROMPT.md`.
+
+**Docs updated:** `CLAUDE.md` Part 66 entry + Open Items; `docs/PROJECT_MASTER_STATE.md`
+reconciled to Part 66; `docs/ALGORITHM_ROADMAP_PHASE2.md` status line corrected; this
+report's header table + section.

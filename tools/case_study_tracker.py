@@ -344,7 +344,8 @@ def get_iae_notes(case_study_path: pathlib.Path, status: int, sample_n: int = 6)
 def main() -> None:
     entries = []
     for name in sorted(ROOT.iterdir(), key=lambda p: p.name.lower()):
-        if not name.is_dir() or name.name == "__pycache__":
+        # common/ is the C++ header
+        if not name.is_dir() or name.name == "__pycache__" or name.name == "common":
             continue
         language  = detect_language(name)
         status    = detect_status(name, language)

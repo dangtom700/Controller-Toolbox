@@ -167,10 +167,14 @@ def main(argv=None):
         from tools.metrics import compute_metrics_from_df  # just for column heuristics
         # Z_body/F_act_1 (EV6x6): MIMO 6-actuator plant, no single SISO loop -
         # front-right corner stands in as a representative channel (approximate).
-        y_candidates = ["y", "y1", "z_s", "omega_b", "T_h", "T_pot", "v_out", "x_p", "Z_body",
-                        "phi_measured", "Tw1_C"]
-        u_candidates = ["u", "u1", "F_act", "m_dot_f", "f_shade", "omega_t", "d", "F_act_1",
-                        "u_fan_ms", "m_dot_w_kgs"]
+        # More specific names are listed before short generic fallbacks ("y"/"u"/
+        # "y1"/"u1") so a study whose CSV happens to also contain a same-named
+        # state column (e.g. Tug Boat's surge/sway velocity states "u"/"v") can't
+        # shadow its real output/actuator column ("x" position / "tau_x" force).
+        y_candidates = ["z_s", "omega_b", "T_h", "T_pot", "v_out", "x_p", "Z_body",
+                        "phi_measured", "Tw1_C", "TT", "x", "y", "y1"]
+        u_candidates = ["F_act", "m_dot_f_cmd", "m_dot_f", "f_shade", "omega_t", "d",
+                        "F_act_1", "u_fan_ms", "m_dot_w_kgs", "tau_x", "u", "u1"]
         e_candidates = ["error", "e1", "e"]
         y_col = next((c for c in y_candidates if c in cols), None)
         u_col = next((c for c in u_candidates if c in cols), None)

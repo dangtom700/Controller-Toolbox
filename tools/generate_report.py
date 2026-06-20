@@ -146,7 +146,9 @@ def _section_summary(df: pd.DataFrame) -> str:
 
 
 def _section_comparison(df: pd.DataFrame) -> str:
-    if not _HAS_PLOTLY or df.empty:
+    if df.empty:
+        return _df_to_html_table(df)
+    if not _HAS_PLOTLY:
         return _df_to_html_table(df[["study", "scenario", "controller", "iae"]].sort_values(["study", "iae"]))
 
     figs_html = []

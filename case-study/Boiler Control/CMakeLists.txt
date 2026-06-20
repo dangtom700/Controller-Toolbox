@@ -23,3 +23,23 @@ target_compile_features(boiler_sim PRIVATE cxx_std_20)
 target_compile_definitions(boiler_sim PRIVATE
     BOILER_SIM_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
 )
+
+# -- Robustness analysis (fault sweep, Monte Carlo, WCET) --------------------
+add_executable(boiler_robustness
+    ${SIM_SRC}/boiler_plant.cpp
+    ${SIM_SRC}/linearizer.cpp
+    ${SIM_SRC}/controllers.cpp
+    ${SIM_SRC}/robustness_main.cpp
+)
+target_include_directories(boiler_robustness PRIVATE
+    ${SIM_INC}
+    ${CMAKE_SOURCE_DIR}/case-study/common
+)
+target_link_libraries(boiler_robustness PRIVATE
+    controller_toolbox
+    nlohmann_json::nlohmann_json
+)
+target_compile_features(boiler_robustness PRIVATE cxx_std_20)
+target_compile_definitions(boiler_robustness PRIVATE
+    BOILER_SIM_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+)
