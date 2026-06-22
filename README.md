@@ -59,6 +59,8 @@ for (int k = 0; k < 500; ++k) {
 
 | Document | Purpose |
 |---|---|
+| [docs/index.md](docs/index.md) | Full documentation map -- every committed doc, organized by task |
+| [docs/handoff.md](docs/handoff.md) | Onboarding tribal knowledge -- current, verified; read before trusting any status doc |
 | [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md) | Full API reference, class-by-class breakdown, usage workflows |
 | [docs/deployment.md](docs/deployment.md) | Parameter constraints, RT/RTOS integration, troubleshooting recipes |
 | [docs/archived/test_update.md](docs/archived/test_update.md) | Test suite history, regression coverage, sign-convention notes |
