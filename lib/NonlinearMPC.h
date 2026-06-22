@@ -105,6 +105,8 @@ public:
      */
     double compute(double error) override;
 
+    SignConvention signConvention() const override { return SignConvention::TrackingErrorRMinusY; }
+
     /** @brief Reset warm-started input sequence, state, and reference to zero. */
     void reset() override;
 

@@ -37,7 +37,11 @@ The project uses a seven-phase runner managed by `run.py`:
 conda run -n soft_robotics -- python run.py
 ```
 
-**Never use** `cmake --build build --parallel` - sequential compilation per `compile.bat` is required.
+**Avoid `cmake --build build --parallel` on local/dev machines** - `compile.bat`/`compile.sh` build
+~140 targets sequentially specifically to avoid pegging every core on a dev machine for the whole
+run. This is a local resource-stress mitigation, not a build-correctness requirement - CI
+(`.github/workflows/cross-platform-cicd.yml`) intentionally builds with `--parallel $(nproc)`,
+and that's fine there.
 
 **Expected baseline (as of Part 60, 2026-06-16, UNVERIFIED):** `C++ ~174 passed | Python ~100 passed`,
 nine C++ case studies (Boiler 216, Tug 72, Solar 70, Humid 75, ActiveSuspension **90**, BuckBoost 60,
@@ -52,6 +56,9 @@ A log file `run_YYYYMMDD_HHMMSS.log` is written to the project root after every 
 ## Adding a New Controller
 
 Follow these steps in order. Check each off before declaring the work done.
+`tools/new_controller.py <ClassName>` scaffolds `lib/ClassName.{h,cpp}` and the C++/Python
+example stubs for Steps 1 and 3 (TODOs left for the real control law); it prints the
+remaining manual steps below since they touch shared files the script doesn't own.
 
 ### Step 1 - Implement the class
 

@@ -115,6 +115,10 @@ namespace ctrl
          */
         double compute(double error) override;
 
+        // Other: compute(error) is a convenience wrapper over a stored setpoint;
+        // computeRef(y, r) is the preferred interface (see above).
+        SignConvention signConvention() const override { return SignConvention::Other; }
+
         /**
          * @brief Full interface - supply plant output y and setpoint r separately.
          *

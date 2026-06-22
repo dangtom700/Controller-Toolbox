@@ -25,6 +25,14 @@ if(NOT MSVC)
     add_compile_definitions(M_PI=3.14159265358979323846)
 endif()
 
+# MinGW (MSYS2 UCRT64/MINGW64) dynamically links libgcc/libstdc++/libwinpthread by default.
+# Those DLLs live under msys64/<env>/bin, which isn't on PATH outside an MSYS2 shell --
+# and Python's loader for .pyd extensions ignores PATH entirely since 3.8. Link them
+# statically so every binary (executables and ctrl_toolbox.pyd) is self-contained.
+if(MINGW)
+    add_link_options(-static-libgcc -static-libstdc++ -static)
+endif()
+
 # --- DIST-2: embedded-only build shortcut ------------------------------------
 option(CTRL_BUILD_EMBEDDED_ONLY "Build only the header-only embedded subset (no Eigen)" OFF)
 if(CTRL_BUILD_EMBEDDED_ONLY)

@@ -5,7 +5,7 @@
 
 .DESCRIPTION
     Sets up a complete development environment from scratch:
-      1. Validates MSYS2 MinGW64 (build toolchain: cmake, ninja, g++, eigen3)
+      1. Validates MSYS2 UCRT64 (build toolchain: cmake, ninja, g++, eigen3)
       2. Creates or updates the 'soft_robotics' conda env from environment.yml
       3. Builds ctrl_toolbox.pyd (Python bindings) against the conda Python
       4. Runs bindings/smoke_test.py to verify the binding loads correctly
@@ -23,10 +23,10 @@
     One-time prerequisites (not automated — install manually if missing):
 
       MSYS2 (https://www.msys2.org):
-        Install to C:\msys64 (default), then run in MSYS2 MinGW64 terminal:
+        Install to C:\msys64 (default), then run in MSYS2 UCRT64 terminal:
           pacman -Syu
-          pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake ^
-                    mingw-w64-x86_64-ninja mingw-w64-x86_64-eigen3
+          pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake ^
+                    mingw-w64-ucrt-x86_64-ninja mingw-w64-ucrt-x86_64-eigen3
 
       Miniconda / Anaconda (https://docs.conda.io/en/latest/miniconda.html):
         Install and ensure 'conda' is on PATH (tick "Add to PATH" during install,
@@ -66,19 +66,19 @@ function Write-Fail([string]$msg) {
     exit 1
 }
 
-# ── 1. MSYS2 MinGW64 ─────────────────────────────────────────────────────────
-Write-Step "Checking MSYS2 MinGW64 build toolchain"
+# ── 1. MSYS2 UCRT64 ─────────────────────────────────────────────────────────
+Write-Step "Checking MSYS2 UCRT64 build toolchain"
 
-$Msys2Bin = "C:\msys64\mingw64\bin"
+$Msys2Bin = "C:\msys64\ucrt64\bin"
 if (-not (Test-Path $Msys2Bin)) {
     Write-Host @"
 
     MSYS2 not found at C:\msys64.
-    Install it from https://www.msys2.org, then run in the MSYS2 MinGW64 terminal:
+    Install it from https://www.msys2.org, then run in the MSYS2 UCRT64 terminal:
 
         pacman -Syu
-        pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake `
-                  mingw-w64-x86_64-ninja mingw-w64-x86_64-eigen3
+        pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake `
+                  mingw-w64-ucrt-x86_64-ninja mingw-w64-ucrt-x86_64-eigen3
 "@ -ForegroundColor Red
     exit 1
 }
@@ -89,7 +89,7 @@ $env:PATH = "$Msys2Bin;$env:PATH"
 foreach ($tool in @('cmake', 'ninja', 'gcc')) {
     $cmd = Get-Command $tool -ErrorAction SilentlyContinue
     if (-not $cmd) {
-        Write-Fail "$tool not found. In MSYS2 MinGW64: pacman -S mingw-w64-x86_64-$tool"
+        Write-Fail "$tool not found. In MSYS2 UCRT64: pacman -S mingw-w64-ucrt-x86_64-$tool"
     }
     Write-OK "$tool → $($cmd.Source)"
 }

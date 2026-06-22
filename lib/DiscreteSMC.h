@@ -86,11 +86,15 @@ public:
     explicit DiscreteSMC(const SMCParams &params, double sampleTime);
 
     /**
-     * @brief Compute u[k] from tracking error e[k] = r[k] - y[k].
-     * @param error Current tracking error.
+     * @brief Compute u[k] from tracking error e[k] = y[k] - r[k] (sign reversed from PID -
+     *        see CONTRIBUTING.md#sign-conventions). The sliding law u = -K*sat(s/phi) requires
+     *        s, and therefore @p error, to grow with y - r for a positive-gain plant.
+     * @param error Current tracking error, e = y - r.
      * @return Saturated control output u[k].
      */
     double compute(double error) override;
+
+    SignConvention signConvention() const override { return SignConvention::TrackingErrorYMinusR; }
 
     /** @brief Reset previous error, sliding surface, and output. */
     void reset() override;
@@ -175,11 +179,14 @@ public:
     explicit SuperTwistingSMC(const SuperTwistingParams &params, double sampleTime);
 
     /**
-     * @brief Compute u[k] from tracking error e[k] = r[k] - y[k].
-     * @param error Current tracking error.
+     * @brief Compute u[k] from tracking error e[k] = y[k] - r[k] (sign reversed from PID -
+     *        same convention as DiscreteSMC, see CONTRIBUTING.md#sign-conventions).
+     * @param error Current tracking error, e = y - r.
      * @return Saturated control output u[k].
      */
     double compute(double error) override;
+
+    SignConvention signConvention() const override { return SignConvention::TrackingErrorYMinusR; }
 
     /** @brief Reset previous error, sliding surface, and integrator state v. */
     void reset() override;

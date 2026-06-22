@@ -79,6 +79,8 @@ public:
      */
     double compute(double signal) override;
 
+    SignConvention signConvention() const override { return SignConvention::CostSignal; }
+
     /** @brief Reset phase, integrator, filter states, and previous output. */
     void reset() override;
 

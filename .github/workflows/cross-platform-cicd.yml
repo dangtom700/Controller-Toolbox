@@ -45,6 +45,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check compile.bat / compile.sh target-list drift
+        run: python3 tools/check_build_target_drift.py
+
+      - name: Check compute() NaN-guard convention
+        run: python3 tools/check_nan_guard.py
+
       - name: Install Eigen3 and nlohmann-json
         run: sudo apt-get update && sudo apt-get install -y libeigen3-dev nlohmann-json3-dev
 

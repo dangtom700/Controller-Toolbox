@@ -1,4 +1,5 @@
 #include "DiscreteLQG.h"
+#include <cmath>
 #include <iostream>
 
 namespace ctrl
@@ -59,6 +60,9 @@ namespace ctrl
     // Requires setReference() and setUPrev() to be called first if needed.
     double DiscreteLQG::compute(double y_scalar)
     {
+        if (!std::isfinite(y_scalar))
+            return u_prev_.size() > 0 ? u_prev_(0) : 0.0;
+
         Eigen::VectorXd y(plant_.outputSize());
         y.fill(y_scalar);
         Eigen::VectorXd u = step(y, u_prev_, x_ref_);

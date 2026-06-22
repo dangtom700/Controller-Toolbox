@@ -1,5 +1,12 @@
 # Controller Toolbox -- Project Master State Document
 
+> **Known stale as of 2026-06-22:** this document described Bouyancy-Driven Airship in
+> Vertical Plane as scaffolded-only/never-implemented; it now has a full `sim/`
+> implementation (verified directly against the filesystem and `case-study/CMakeLists.txt`/
+> `compile.bat`). Treat structural counts below as a snapshot, not current truth -- see
+> `docs/handoff.md` for verified current state and `docs/case_study_status.md` (auto-generated)
+> for actual case-study status.
+
 **Project:** Discrete-Time Controller Toolbox (C++20 / pybind11 / Catch2)
 **Current Part:** 66 (ROB-1 robustness analysis extended to all 10 C++ case studies + `generate_report.py` empty-data crash fix -- complete 2026-06-20)
 **Maintained by:** Claude Code (Senior Principal Engineer role)

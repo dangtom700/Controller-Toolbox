@@ -177,6 +177,10 @@ public:
      * @param signal Unused (inherited interface).
      * @return u[0] from the LQR control vector.
      */
+    // Other: signal is unused (see @param note above) - state and reference come from
+    // the stateFn_/refFn_ providers, not from the IController scalar interface at all.
+    SignConvention signConvention() const override { return SignConvention::Other; }
+
     double compute(double /*signal*/) override
     {
         Eigen::VectorXd x_ref;

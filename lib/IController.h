@@ -26,10 +26,37 @@ namespace ctrl
  *
  * @see MATLAB Control System Toolbox discrete controller pattern.
  */
+/**
+ * @brief compute()'s `signal` parameter convention - see CONTRIBUTING.md#sign-conventions.
+ *
+ * lib/ deliberately does not enforce one convention across controllers (a tracking
+ * error needs a sign convention; a cost-extremising controller doesn't have one at all).
+ * This lets a caller query the convention at runtime instead of only finding out from
+ * documentation. Additive, optional: the default is Unspecified, not a guess - override
+ * it only once a class's convention has actually been audited.
+ */
+enum class SignConvention
+{
+    Unspecified,          ///< Not yet audited via this API - check CONTRIBUTING.md/class docs.
+    TrackingErrorRMinusY, ///< signal = e = r - y (most common: PID, MPC, SmithPredictor, ...).
+    TrackingErrorYMinusR, ///< signal = e = y - r (reversed - e.g. DiscreteSMC).
+    PlantOutput,          ///< signal = raw plant output y, not an error (e.g. MRACController).
+    CostSignal,           ///< signal = cost/objective value to extremize, not an error (ExtremumSeeker).
+    Other                 ///< Doesn't fit the above (e.g. signal ignored, reference set out-of-band)
+                           ///< - see the class's own header docs.
+};
+
 class IController
 {
 public:
     virtual ~IController() = default;
+
+    /**
+     * @brief Query this controller's compute()/computeVec() signal convention.
+     * @return Unspecified by default; overridden in classes audited per
+     *         CONTRIBUTING.md#sign-conventions.
+     */
+    virtual SignConvention signConvention() const { return SignConvention::Unspecified; }
 
     /**
      * @brief Advance one sample step - scalar SISO interface.

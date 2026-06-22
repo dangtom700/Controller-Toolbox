@@ -96,6 +96,8 @@ public:
      */
     double compute(double error) override;
 
+    SignConvention signConvention() const override { return SignConvention::TrackingErrorRMinusY; }
+
     /**
      * @brief Full MIMO interface - optimise u[k] given state and reference vector.
      * @param x_current Current state vector x[k] (n * 1).

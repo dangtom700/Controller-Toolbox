@@ -113,6 +113,8 @@ public:
      */
     double compute(double error) override;
 
+    SignConvention signConvention() const override { return SignConvention::TrackingErrorRMinusY; }
+
     /**
      * @brief Derivative-on-Measurement variant - avoids derivative kick on setpoint steps.
      *

@@ -208,10 +208,16 @@ class ASMCCtrl:
         d = plant_params["disturbance"]
         self._d_u_amp=d["d_u_amp"]; self._d_u_freq=d["d_u_freq"]
         self._d_v_amp=d["d_v_amp"]; self._d_v_freq=d["d_v_freq"]
+        self._dist_scale = 1.0
 
         self.reset()
 
     def name(self): return "ASMC"
+
+    def set_disturbance_scale(self, scale):
+        """Match ship_plant.make_disturbance_fn's scenario-level scale, so the
+        feedforward term doesn't cancel a disturbance the plant never injected."""
+        self._dist_scale = scale
 
     def reset(self):
         self._int_ve=0.0; self._int_ue=0.0
@@ -227,8 +233,8 @@ class ASMCCtrl:
     def compute(self, x_ref, plant_state, t):
         xd, yd, xd_d, yd_d, xd_dd, yd_dd = x_ref
         u, v, r, psi, x, y = plant_state
-        d_u = self._d_u_amp * math.sin(self._d_u_freq * t)
-        d_v = self._d_v_amp * math.cos(self._d_v_freq * t)
+        d_u = self._dist_scale * self._d_u_amp * math.sin(self._d_u_freq * t)
+        d_v = self._dist_scale * self._d_v_amp * math.cos(self._d_v_freq * t)
 
         xe = x - xd; ye = y - yd
         w  = math.sqrt(xe*xe + ye*ye + self.C)

@@ -1,5 +1,10 @@
 # Test Suite Update - Controller Toolbox
 
+> **Stale:** this snapshot is dated 2026-05-31 (Part 26); the project is at Part 66+ as of
+> 2026-06-22, roughly 40 Parts later. Test/coverage counts here (e.g. "90 C++ executables")
+> are historical, not current -- run `conda run -n soft_robotics -- python run.py` for
+> current counts, and see `docs/handoff.md` for verified cross-cutting caveats.
+
 **Date:** 2026-05-31 (Rev 6)
 **Scope:** `tests/test_catch2_advanced.cpp`, `tests/test_catch2_pilot.cpp`, `tests/test_controllers.cpp`, case-study sims
 

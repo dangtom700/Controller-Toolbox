@@ -38,6 +38,8 @@ def run_simulation(plant_params, scenario, controller, log_dir,
 
     plant = ShipPlant(plant_params)
     plant.set_disturbance_fn(make_disturbance_fn(scenario, plant_params))
+    if hasattr(controller, "set_disturbance_scale"):
+        controller.set_disturbance_scale(scenario.get("disturbance_scale", 0.0))
     controller.reset()
 
     ref_fn = make_ref_fn(scenario)

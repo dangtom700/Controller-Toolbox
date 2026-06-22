@@ -113,6 +113,8 @@ public:
      */
     double compute(double y_plant) override;
 
+    SignConvention signConvention() const override { return SignConvention::PlantOutput; }
+
     /** @brief Reset theta to initial values, y_m to 0, e_m to 0. */
     void reset() override;
 

@@ -108,6 +108,8 @@ public:
      */
     double compute(double error) override;
 
+    SignConvention signConvention() const override { return SignConvention::Other; }
+
     /**
      * @brief Set the reference for the next compute(error) call.
      * @param r Setpoint r[k].

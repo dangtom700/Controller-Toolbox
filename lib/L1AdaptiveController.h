@@ -83,6 +83,8 @@ public:
      */
     double compute(double y_plant) override;
 
+    SignConvention signConvention() const override { return SignConvention::PlantOutput; }
+
     void        reset()             override;
     double      sampleTime() const  override { return Ts_; }
     std::string name()        const override { return "L1Adaptive"; }

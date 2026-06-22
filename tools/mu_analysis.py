@@ -171,10 +171,18 @@ def main(argv=None):
         # "y1"/"u1") so a study whose CSV happens to also contain a same-named
         # state column (e.g. Tug Boat's surge/sway velocity states "u"/"v") can't
         # shadow its real output/actuator column ("x" position / "tau_x" force).
+        # "z" (Multi-Body Floating Wind-Wave Platform heave position) and "F"
+        # (Electro-Hydraulic Force Servo tracked force) checked for collisions against
+        # every other study's documented CSV columns before being added - no other study
+        # uses either name. Note: not every study's CSV has a fixable y/u pair - Air-Cooled
+        # BTMS switches between discrete flow patterns (no continuous actuator signal) and
+        # the Firefighting Bag Drop study logs one row per Monte Carlo trial (not a time
+        # series) - both are correctly skipped below, not column-naming bugs.
         y_candidates = ["z_s", "omega_b", "T_h", "T_pot", "v_out", "x_p", "Z_body",
-                        "phi_measured", "Tw1_C", "TT", "x", "y", "y1"]
+                        "phi_measured", "Tw1_C", "TT", "z", "F", "x", "y", "y1"]
         u_candidates = ["F_act", "m_dot_f_cmd", "m_dot_f", "f_shade", "omega_t", "d",
-                        "F_act_1", "u_fan_ms", "m_dot_w_kgs", "tau_x", "u", "u1"]
+                        "F_act_1", "u_fan_ms", "m_dot_w_kgs", "tau_x", "F_pto", "u_v",
+                        "u", "u1"]
         e_candidates = ["error", "e1", "e"]
         y_col = next((c for c in y_candidates if c in cols), None)
         u_col = next((c for c in u_candidates if c in cols), None)

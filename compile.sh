@@ -2,7 +2,9 @@
 # compile.sh  -- Sequential full build for Linux / macOS (mirrors compile.bat).
 #
 # Runs cmake --build one target at a time in dependency order.
-# Do NOT use --parallel; the build system is designed to be sequential.
+# Avoid --parallel here -- ~140 targets built in parallel can peg every core on a dev
+# machine for the whole run. Not a correctness requirement (CI builds the same targets
+# with --parallel deliberately and that's fine there).
 #
 # Usage:
 #   ./compile.sh              # configure (Release) + build all targets
@@ -176,14 +178,25 @@ TARGETS=(
     simulate_all
     realtime_all
     boiler_sim
+    boiler_robustness
     tug_sim
+    tug_robustness
     solar_cooling_sim
+    solar_cooling_robustness
     humidification_sim
+    humidification_robustness
     susp_sim
+    susp_robustness
     buck_boost_sim
+    buck_boost_robustness
     solar_cooker_sim
+    solar_cooker_robustness
     sotec_sim
+    sotec_robustness
     smismo_sim
+    smismo_robustness
+    stewart_sim
+    stewart_robustness
     bouyancy_driven_airship_in_vertical_plan_sim
     toolbox_examples
     test_catch2_pilot
@@ -198,6 +211,7 @@ TARGETS=(
     test_solar_cooker_regression
     test_sotec_regression
     test_smismo_regression
+    test_stewart_regression
     test_bouyancy_driven_airship_regression
 )
 

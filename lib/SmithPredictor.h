@@ -90,6 +90,8 @@ public:
      */
     double compute(double error) override;
 
+    SignConvention signConvention() const override { return SignConvention::TrackingErrorRMinusY; }
+
     /** @brief Reset model state, output buffer, and inner controller. */
     void reset() override;
 

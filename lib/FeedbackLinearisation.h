@@ -117,6 +117,10 @@ public:
      */
     double compute(double error) override;
 
+    // Other, not TrackingErrorRMinusY: the note above documents that the sign flips to
+    // y - r for systems where g < 0 - it's plant-dependent, not a fixed class convention.
+    SignConvention signConvention() const override { return SignConvention::Other; }
+
     /**
      * @brief Reset inner controller and clear u_last_.
      */

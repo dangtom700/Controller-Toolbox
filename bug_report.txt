@@ -1,128 +1,342 @@
-Bug Report - generated from run_20260619_104014.log on 2026-06-19 11:31:32.798132
-Total failure indicators found: 9
-Merged into 4 block(s)
+Bug Report - generated from run_20260622_112807.log on 2026-06-22 12:33:03.367326
+Total failure indicators found: 14
+Merged into 12 block(s)
 ========================================================================
 
---- FAILURE BLOCK #1 (keywords: warn) ---
-Lines 7562 - 7582
+--- FAILURE BLOCK #1 (keywords: skip) ---
+Lines 1204 - 1224
 
-    7562: 
-    7563: === RelayAutoTuner Extended ===
-    7564:   [PASS] TC-RELAY-01: Relay loop converges (isDone() == true)
-    7565:   [PASS] TC-RELAY-01: Ku and Tu are positive
-    7566:   [PASS] TC-RELAY-02: ZN gains valid
-    7567:   [PASS] TC-RELAY-03: AMIGO gains valid
-    7568:   [PASS] TC-RELAY-04: IMC-from-relay yields PI (Kd=0)
-    7569:   [PASS] TC-RELAY-05: Works with zero hysteresis
-    7570: 
-    7571: === StepResponseTuner Extended ===
->>> 7572:   [WARN] Step response data not found. Run generate_test_data.py first.
-    7573:   [PASS] TC-STEP-06: theta=0 in ZN does not crash (no exception)
-    7574: 
-    7575: === Other Tuners Extended ===
-    7576:   [PASS] TC-POLE-01: Q and R are positive definite
-    7577:   [PASS] TC-POLE-04: Complex conjugate pairs handled correctly
-    7578:   [PASS] TC-KWT-01: Qf diagonal matches variance
-    7579:   [PASS] TC-KWT-02: Rf diagonal matches variance
-    7580: 
-    7581: --------------------------------------------
-    7582:   Results: 11 passed, 0 failed
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #2 (keywords: skip) ---
-Lines 7896 - 7916
-
-    7896: ------------------------------------------------------------------------
-    7897: 
-    7898: ============================================================
-    7899: ex02 - Step Response Simulation
-    7900: ============================================================
-    7901: 
-    7902: Simulated 1500 steps at Ts=0.01 s
-    7903:   y[0]   = 0.000000000   (expected 0.0)
-    7904:   y[-1]  = 0.897737840  (expected approx = 1.0)
-    7905: 
->>> 7906:   [SKIP] CSV not found at tests\data\step_response.csv
-    7907:   Run: python scripts/generate_test_data.py  to generate it first.
-    7908:   [PASS] DC gain - measured=0.897758, expected=0.898000, rel_err=0.0270%
-    7909: 
-    7910:   FOPDT estimate (tangent method):
-    7911:     K     = 0.8977
-    7912:     tau   = 1.1400 s
-    7913:     theta = 0.5300 s
-    7914:   [PASS] assert_close (tau approx = 1.0 s): |1.14 - 1| = 1.400e-01  (tol=5.000e-01)
-    7915: 
-    7916: ================================================
+    1204: 
+    1205: ============================================================
+    1206:   Controller Toolbox  -  Sequential Build  (no benchmarks)
+    1207: ============================================================
+    1208: 
+    1209: [CONFIG] Configuring CMake...
+    1210: -- Building for: Ninja
+    1211: -- The CXX compiler identification is GNU 16.1.0
+    1212: -- Detecting CXX compiler ABI info
+    1213: -- Detecting CXX compiler ABI info - done
+>>> 1214: -- Check for working CXX compiler: C:/msys64/ucrt64/bin/c++.exe - skipped
+    1215: -- Detecting CXX compile features
+    1216: -- Detecting CXX compile features - done
+    1217: -- Performing Test HAVE_FLAG__ffile_prefix_map_C__Users_dangs_Desktop_project_Controller_Toolbox_build__deps_catch2_src__
+    1218: -- Performing Test HAVE_FLAG__ffile_prefix_map_C__Users_dangs_Desktop_project_Controller_Toolbox_build__deps_catch2_src__ - Success
+    1219: -- Configuring done (2.4s)
+    1220: -- Generating done (0.3s)
+    1221: -- Build files have been written to: build
+    1222: 
+    1223: 
+    1224: ----------------------------------------------------------
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #3 (keywords: skip) ---
-Lines 11534 - 11554
+--- FAILURE BLOCK #2 (keywords: warn) ---
+Lines 7791 - 7811
 
-    11534:     [FAULT] ADRC                      2 fault types  elapsed 11.8s
-    11535:     [FAULT] SMC                       2 fault types  elapsed 15.0s
-    11536:     [FAULT] MPC                       2 fault types  elapsed 24.4s
-    11537:     [FAULT] LQR                       2 fault types  elapsed 28.0s
-    11538:     [FAULT] MRAC                      2 fault types  elapsed 31.1s
-    11539:     [FAULT] L1Adaptive                2 fault types  elapsed 34.0s
-    11540:     [FAULT] NeuralPID                 2 fault types  elapsed 37.3s
-    11541:     [FAULT] GainScheduled             2 fault types  elapsed 40.6s
-    11542:     [FAULT] ILC                       2 fault types  elapsed 43.7s
-    11543:     [FAULT] Written: case-study\Air-Cooled Battery Thermal Management System\fault_sweep.csv  (84 rows)
->>> 11544:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
-    11545: 
-    11546: [High-Altitude Aerial Firefighting Bag Drop]
-    11547:     [MC] NominalDrop               30 samples  elapsed 0.7s
-    11548:     [MC] WindOffset                30 samples  elapsed 1.4s
-    11549:     [MC] IterativeRefine           30 samples  elapsed 2.1s
-    11550:     [MC] MCPredictor               30 samples  elapsed 3.2s
-    11551:     [MC] GPSurrogate               30 samples  elapsed 4.1s
-    11552:     [MC] BayesOptDrop              30 samples  elapsed 6.6s
-    11553:     [MC] SIRParticleFilter         30 samples  elapsed 7.4s
-    11554:     [MC] KalmanWind                30 samples  elapsed 8.1s
+    7791: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    7792: test_catch2_advanced.exe is a Catch2 v3.5.4 host application.
+    7793: Run with -? for options
+    7794: 
+    7795: -------------------------------------------------------------------------------
+    7796: DiscreteHinf NaN guard returns last finite output, state not corrupted
+    7797: -------------------------------------------------------------------------------
+    7798: tests/test_catch2_advanced.cpp:3713
+    7799: ...............................................................................
+    7800: 
+>>> 7801: tests/test_catch2_advanced.cpp:3728: warning:
+    7802:   H-inf synthesis infeasible - NaN-guard test skipped
+    7803: 
+    7804: ===============================================================================
+    7805: All tests passed (3908 assertions in 245 test cases)
+    7806: 
+    7807: 
+    7808:   EXIT 0 - PASSED
+    7809: 
+    7810: ------------------------------------------------------------------------
+    7811:   [123/136]  build\tests\test_catch2_pilot.exe
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #3 (keywords: warn) ---
+Lines 8423 - 8443
+
+    8423: 
+    8424: === RelayAutoTuner Extended ===
+    8425:   [PASS] TC-RELAY-01: Relay loop converges (isDone() == true)
+    8426:   [PASS] TC-RELAY-01: Ku and Tu are positive
+    8427:   [PASS] TC-RELAY-02: ZN gains valid
+    8428:   [PASS] TC-RELAY-03: AMIGO gains valid
+    8429:   [PASS] TC-RELAY-04: IMC-from-relay yields PI (Kd=0)
+    8430:   [PASS] TC-RELAY-05: Works with zero hysteresis
+    8431: 
+    8432: === StepResponseTuner Extended ===
+>>> 8433:   [WARN] Step response data not found. Run generate_test_data.py first.
+    8434:   [PASS] TC-STEP-06: theta=0 in ZN does not crash (no exception)
+    8435: 
+    8436: === Other Tuners Extended ===
+    8437:   [PASS] TC-POLE-01: Q and R are positive definite
+    8438:   [PASS] TC-POLE-04: Complex conjugate pairs handled correctly
+    8439:   [PASS] TC-KWT-01: Qf diagonal matches variance
+    8440:   [PASS] TC-KWT-02: Rf diagonal matches variance
+    8441: 
+    8442: --------------------------------------------
+    8443:   Results: 11 passed, 0 failed
 
 ------------------------------------------------------------------------
 
 --- FAILURE BLOCK #4 (keywords: skip) ---
-Lines 11801 - 11836
+Lines 8768 - 8788
 
-    11801:      OpenLoop       3500     0.14       0.10     0.30     1.30     2.40
-    11802:     [WCET] Written: case-study\Vertical Drill String Mathematical Review 2025\wcet_summary.csv
-    11803: Analysing 24 (study, scenario) pairs ...
-    11804:   6-DOF Stewart Platform Vessel  ss01_beam_noswell     peak_S=1.000  peak_T=0.000
-    11805:   6-DOF Stewart Platform Vessel  ss01_beam_swell       peak_S=1.000  peak_T=0.000
-    11806:   6-DOF Stewart Platform Vessel  ss01_following_noswell  peak_S=1.000  peak_T=0.000
-    11807:   6-DOF Stewart Platform Vessel  ss01_following_swell  peak_S=1.000  peak_T=0.000
-    11808:   6-DOF Stewart Platform Vessel  ss01_head_noswell     peak_S=1.000  peak_T=0.000
-    11809:   6-DOF Stewart Platform Vessel  ss01_head_swell       peak_S=1.000  peak_T=0.000
-    11810:   Active Suspension 6x6 EV Full  s01_bump              peak_S=1.115  peak_T=0.507
->>> 11811:   SKIP run_s01_5C_discharge_ADRC.csv: cannot identify y/u columns
-    11812:   SKIP run_s01_steady_condition1_ADRC.csv: cannot identify y/u columns
-    11813:   Boiler Control                 s01_lowload_regulation  peak_S=1.086  peak_T=2.086
-    11814:   SKIP run_s01_no_wind_AdaptiveRLS.csv: cannot identify y/u columns
-    11815:   SKIP run_s01_regular_waves_ADRC.csv: cannot identify y/u columns
-    11816:   Nonlinear Surface Ship Manoeuv s01                   peak_S=1.663  peak_T=1.706
-    11817:   PCM Thermal Energy Storage Con s01_scenario          peak_S=1.000  peak_T=0.000
-    11818:   Porous Fiber Plate Humidificat s01_design            peak_S=0.998  peak_T=0.298
-    11819:   Porous Fiber Plate Humidificat s01_design_GPC        peak_S=1.001  peak_T=0.293
-    11820:   Porous Fiber Plate Humidificat s01_design_PID        peak_S=1.050  peak_T=0.267
-    11821:   Satellite Launch Vehicle Syste s01_scenario          peak_S=1.000  peak_T=0.000
-    11822:   Separate Meter In Separate Met s01_resistive_step    peak_S=1.004  peak_T=0.060
-    11823:   Solar Cooker with Reflector an s01_clear_sky_tracking  peak_S=1.000  peak_T=0.000
-    11824:   SKIP run_s01_mppt_steady_ADRC.csv: cannot identify y/u columns
-    11825:   Solar-Driven Cooling System wi s01_design_steady     peak_S=0.004  peak_T=1.001
-    11826:   SKIP run_s01_sine_50hz_ADRC.csv: cannot identify y/u columns
-    11827:   Vertical Drill String Mathemat s01_step_ref          peak_S=1.028  peak_T=0.508
-    11828: 
-    11829: [6-DOF Stewart Platform Vessel Motion Simulator]  Mu analysis written to: case-study\6-DOF Stewart Platform Vessel Motion Simulator\mu_analysis.csv  (6 rows)
-    11830: 
-    11831: [Active Suspension 6x6 EV Full Model]  Mu analysis written to: case-study\Active Suspension 6x6 EV Full Model\mu_analysis.csv  (1 rows)
-    11832: 
-    11833: [Air-Cooled Battery Thermal Management System]  Mu analysis written to: case-study\Air-Cooled Battery Thermal Management System\mu_analysis.csv  (1 rows)
-    11834: 
-    11835: [Aircraft Engine Thermal Management]  Mu analysis written to: case-study\Aircraft Engine Thermal Management\mu_analysis.csv  (1 rows)
-    11836: 
+    8768: ------------------------------------------------------------------------
+    8769: 
+    8770: ============================================================
+    8771: ex02 - Step Response Simulation
+    8772: ============================================================
+    8773: 
+    8774: Simulated 1500 steps at Ts=0.01 s
+    8775:   y[0]   = 0.000000000   (expected 0.0)
+    8776:   y[-1]  = 0.897737840  (expected approx = 1.0)
+    8777: 
+>>> 8778:   [SKIP] CSV not found at tests\data\step_response.csv
+    8779:   Run: python scripts/generate_test_data.py  to generate it first.
+    8780:   [PASS] DC gain - measured=0.897758, expected=0.898000, rel_err=0.0270%
+    8781: 
+    8782:   FOPDT estimate (tangent method):
+    8783:     K     = 0.8977
+    8784:     tau   = 1.1400 s
+    8785:     theta = 0.5300 s
+    8786:   [PASS] assert_close (tau approx = 1.0 s): |1.14 - 1| = 1.400e-01  (tol=5.000e-01)
+    8787: 
+    8788: ================================================
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #5 (keywords: skip) ---
+Lines 12355 - 12375
+
+    12355:     [FAULT] ADRCCtrl                  2 fault types  elapsed 79.1s
+    12356:     [FAULT] SMCCtrl                   2 fault types  elapsed 79.5s
+    12357:     [FAULT] MRACCtrl                  2 fault types  elapsed 79.9s
+    12358:     [FAULT] FuzzyPIDCtrl              2 fault types  elapsed 80.5s
+    12359:     [FAULT] TubeMPCCtrl               2 fault types  elapsed 80.9s
+    12360:     [FAULT] ILCCtrl                   2 fault types  elapsed 81.6s
+    12361:     [FAULT] CBFCtrl                   2 fault types  elapsed 82.2s
+    12362:     [FAULT] L1AdaptiveCtrl            2 fault types  elapsed 82.6s
+    12363:     [FAULT] ScenarioMPCCtrl           2 fault types  elapsed 83.0s
+    12364:     [FAULT] Written: case-study\Active Suspension 6x6 EV Full Model\fault_sweep.csv  (144 rows)
+>>> 12365:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
+    12366: 
+    12367: [Air-Cooled Battery Thermal Management System]
+    12368:     [MC] OpenLoop                  30 samples  elapsed 6.9s
+    12369:     [MC] SelfAdaptive              30 samples  elapsed 13.2s
+    12370:     [MC] PID                       30 samples  elapsed 18.9s
+    12371:     [MC] ADRC                      30 samples  elapsed 25.6s
+    12372:     [MC] SMC                       30 samples  elapsed 31.6s
+    12373:     [MC] MPC                       30 samples  elapsed 46.1s
+    12374:     [MC] LQR                       30 samples  elapsed 52.3s
+    12375:     [MC] MRAC                      30 samples  elapsed 57.6s
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #6 (keywords: skip) ---
+Lines 12384 - 12404
+
+    12384:     [FAULT] ADRC                      2 fault types  elapsed 9.1s
+    12385:     [FAULT] SMC                       2 fault types  elapsed 11.2s
+    12386:     [FAULT] MPC                       2 fault types  elapsed 17.1s
+    12387:     [FAULT] LQR                       2 fault types  elapsed 19.2s
+    12388:     [FAULT] MRAC                      2 fault types  elapsed 21.4s
+    12389:     [FAULT] L1Adaptive                2 fault types  elapsed 24.4s
+    12390:     [FAULT] NeuralPID                 2 fault types  elapsed 26.6s
+    12391:     [FAULT] GainScheduled             2 fault types  elapsed 28.8s
+    12392:     [FAULT] ILC                       2 fault types  elapsed 30.9s
+    12393:     [FAULT] Written: case-study\Air-Cooled Battery Thermal Management System\fault_sweep.csv  (84 rows)
+>>> 12394:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
+    12395: 
+    12396: [Aircraft Engine Thermal Management]
+    12397:     [MC] OpenLoop                  30 samples  elapsed 2.7s
+    12398:     [MC] PID                       30 samples  elapsed 5.4s
+    12399:     [MC] ADRC                      30 samples  elapsed 8.2s
+    12400:     [MC] SMC                       30 samples  elapsed 10.9s
+    12401:     [MC] LQR                       30 samples  elapsed 13.8s
+    12402:     [MC] MPC                       30 samples  elapsed 17.1s
+    12403:     [MC] MRAC                      30 samples  elapsed 19.9s
+    12404:     [MC] L1Adaptive                30 samples  elapsed 22.7s
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #7 (keywords: skip) ---
+Lines 12413 - 12433
+
+    12413:     [FAULT] SMC                       4 fault types  elapsed 5.6s
+    12414:     [FAULT] LQR                       4 fault types  elapsed 7.1s
+    12415:     [FAULT] MPC                       4 fault types  elapsed 8.9s
+    12416:     [FAULT] MRAC                      4 fault types  elapsed 10.1s
+    12417:     [FAULT] L1Adaptive                4 fault types  elapsed 11.4s
+    12418:     [FAULT] GainScheduled             4 fault types  elapsed 13.2s
+    12419:     [FAULT] SmithPredictor            4 fault types  elapsed 14.5s
+    12420:     [FAULT] NeuralPID                 4 fault types  elapsed 15.8s
+    12421:     [FAULT] ILC                       4 fault types  elapsed 17.2s
+    12422:     [FAULT] Written: case-study\Aircraft Engine Thermal Management\fault_sweep.csv  (156 rows)
+>>> 12423:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
+    12424: 
+    12425: [High-Altitude Aerial Firefighting Bag Drop]
+    12426:     [MC] NominalDrop               30 samples  elapsed 0.5s
+    12427:     [MC] WindOffset                30 samples  elapsed 1.0s
+    12428:     [MC] IterativeRefine           30 samples  elapsed 1.6s
+    12429:     [MC] MCPredictor               30 samples  elapsed 2.4s
+    12430:     [MC] GPSurrogate               30 samples  elapsed 3.0s
+    12431:     [MC] BayesOptDrop              30 samples  elapsed 5.0s
+    12432:     [MC] SIRParticleFilter         30 samples  elapsed 5.7s
+    12433:     [MC] KalmanWind                30 samples  elapsed 6.4s
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #8 (keywords: skip) ---
+Lines 12442 - 12462
+
+    12442:     [FAULT] MCPredictor               2 fault types  elapsed 0.6s
+    12443:     [FAULT] GPSurrogate               2 fault types  elapsed 0.8s
+    12444:     [FAULT] BayesOptDrop              2 fault types  elapsed 1.2s
+    12445:     [FAULT] SIRParticleFilter         2 fault types  elapsed 1.4s
+    12446:     [FAULT] KalmanWind                2 fault types  elapsed 1.5s
+    12447:     [FAULT] RobustMinMax              2 fault types  elapsed 1.6s
+    12448:     [FAULT] AdaptiveRLS               2 fault types  elapsed 1.8s
+    12449:     [FAULT] EnsembleConsensus         2 fault types  elapsed 2.0s
+    12450:     [FAULT] ProfileAdaptive           2 fault types  elapsed 2.1s
+    12451:     [FAULT] Written: case-study\High-Altitude Aerial Firefighting Bag Drop\fault_sweep.csv  (96 rows)
+>>> 12452:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
+    12453: 
+    12454: [Multi-Body Floating Wind-Wave Platform]
+    12455:     [MC] Passive                   30 samples  elapsed 0.3s
+    12456:     [MC] Reactive                  30 samples  elapsed 0.6s
+    12457:     [MC] PID                       30 samples  elapsed 1.0s
+    12458:     [MC] ADRC                      30 samples  elapsed 1.4s
+    12459:     [MC] SMC                       30 samples  elapsed 1.8s
+    12460:     [MC] LQR                       30 samples  elapsed 2.2s
+    12461:     [MC] MPC                       30 samples  elapsed 2.7s
+    12462:     [MC] MRAC                      30 samples  elapsed 3.0s
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #9 (keywords: skip) ---
+Lines 12479 - 12499
+
+    12479:     [FAULT] MRAC                      3 fault types  elapsed 1.5s
+    12480:     [FAULT] L1Adaptive                3 fault types  elapsed 1.8s
+    12481:     [FAULT] ILC                       3 fault types  elapsed 2.0s
+    12482:     [FAULT] DynaCtrl                  3 fault types  elapsed 2.2s
+    12483:     [FAULT] CEMCtrl                   3 fault types  elapsed 34.5s
+    12484:     [FAULT] ScenarioMPC               3 fault types  elapsed 34.9s
+    12485:     [FAULT] KoopmanMPC                3 fault types  elapsed 35.0s
+    12486:     [FAULT] ESNCtrl                   3 fault types  elapsed 35.2s
+    12487:     [FAULT] CBFSafety                 3 fault types  elapsed 35.4s
+    12488:     [FAULT] Written: case-study\Multi-Body Floating Wind-Wave Platform\fault_sweep.csv  (176 rows)
+>>> 12489:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
+    12490: 
+    12491: [Nonlinear Surface Ship Manoeuvring Control]
+    12492:     [MC] OpenLoop                  20 samples  elapsed 0.4s
+    12493:     [MC] PID                       20 samples  elapsed 0.9s
+    12494:     [MC] SMC                       20 samples  elapsed 1.5s
+    12495:     [MC] ASMC                      20 samples  elapsed 2.0s
+    12496:     [MC] MPC                       20 samples  elapsed 3.0s
+    12497:     [MC] LQR                       20 samples  elapsed 3.6s
+    12498:     [MC] MRAC                      20 samples  elapsed 4.1s
+    12499:     [MC] L1Adaptive                20 samples  elapsed 4.6s
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #10 (keywords: skip) ---
+Lines 12508 - 12528
+
+    12508:     [FAULT] ASMC                      3 fault types  elapsed 1.2s
+    12509:     [FAULT] MPC                       3 fault types  elapsed 1.6s
+    12510:     [FAULT] LQR                       3 fault types  elapsed 1.9s
+    12511:     [FAULT] MRAC                      3 fault types  elapsed 2.2s
+    12512:     [FAULT] L1Adaptive                3 fault types  elapsed 2.5s
+    12513:     [FAULT] GainScheduled             3 fault types  elapsed 2.8s
+    12514:     [FAULT] ADRC                      3 fault types  elapsed 3.1s
+    12515:     [FAULT] NeuralPID                 3 fault types  elapsed 3.3s
+    12516:     [FAULT] ILC                       3 fault types  elapsed 3.6s
+    12517:     [FAULT] Written: case-study\Nonlinear Surface Ship Manoeuvring Control\fault_sweep.csv  (132 rows)
+>>> 12518:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
+    12519: 
+    12520: [Tracking Control of Electro-Hydraulic Force Servo Systems]
+    12521:     [MC] OpenLoop                  30 samples  elapsed 1.5s
+    12522:     [MC] PID                       30 samples  elapsed 3.1s
+    12523:     [MC] ADRC                      30 samples  elapsed 4.6s
+    12524:     [MC] SMC                       30 samples  elapsed 5.9s
+    12525:     [MC] MPC                       30 samples  elapsed 7.5s
+    12526:     [MC] LQR                       30 samples  elapsed 9.0s
+    12527:     [MC] MRAC                      30 samples  elapsed 10.3s
+    12528:     [MC] L1Adaptive                30 samples  elapsed 11.8s
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #11 (keywords: skip) ---
+Lines 12541 - 12561
+
+    12541:     [FAULT] LQR                       3 fault types  elapsed 5.8s
+    12542:     [FAULT] MRAC                      3 fault types  elapsed 6.6s
+    12543:     [FAULT] L1Adaptive                3 fault types  elapsed 7.1s
+    12544:     [FAULT] FeedbackLin               3 fault types  elapsed 7.7s
+    12545:     [FAULT] NeuralPID                 3 fault types  elapsed 8.2s
+    12546:     [FAULT] ILC                       3 fault types  elapsed 8.7s
+    12547:     [FAULT] GainScheduled             3 fault types  elapsed 9.2s
+    12548:     [FAULT] HinfODFC                  3 fault types  elapsed 9.7s
+    12549:     [FAULT] HinfCascade               3 fault types  elapsed 10.3s
+    12550:     [FAULT] Written: case-study\Tracking Control of Electro-Hydraulic Force Servo Systems\fault_sweep.csv  (154 rows)
+>>> 12551:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
+    12552: 
+    12553: [Vertical Drill String Mathematical Review 2025]
+    12554:     [MC] OpenLoop                  30 samples  elapsed 0.2s
+    12555:     [MC] PID                       30 samples  elapsed 0.5s
+    12556:     [MC] ADRC                      30 samples  elapsed 0.7s
+    12557:     [MC] SMC                       30 samples  elapsed 1.0s
+    12558:     [MC] LQR                       30 samples  elapsed 1.4s
+    12559:     [MC] MPC                       30 samples  elapsed 1.9s
+    12560:     [MC] MRAC                      30 samples  elapsed 2.1s
+    12561:     [MC] GainScheduled             30 samples  elapsed 2.4s
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #12 (keywords: skip) ---
+Lines 12580 - 12613
+
+    12580:     [FAULT] L1Adaptive                3 fault types  elapsed 1.0s
+    12581:     [FAULT] NeuralPID                 3 fault types  elapsed 1.2s
+    12582:     [FAULT] ILC                       3 fault types  elapsed 1.3s
+    12583:     [FAULT] DynaCtrl                  3 fault types  elapsed 1.5s
+    12584:     [FAULT] CEMCtrl                   3 fault types  elapsed 41.7s
+    12585:     [FAULT] ScenarioMPC               3 fault types  elapsed 42.2s
+    12586:     [FAULT] KoopmanMPC                3 fault types  elapsed 42.3s
+    12587:     [FAULT] ESNCtrl                   3 fault types  elapsed 42.5s
+    12588:     [FAULT] CBFSafety                 3 fault types  elapsed 42.6s
+    12589:     [FAULT] Written: case-study\Vertical Drill String Mathematical Review 2025\fault_sweep.csv  (187 rows)
+>>> 12590:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
+    12591: Analysing 25 (study, scenario) pairs ...
+    12592:   6-DOF Stewart Platform Vessel  ss01_beam_noswell     peak_S=1.000  peak_T=0.000
+    12593:   6-DOF Stewart Platform Vessel  ss01_beam_swell       peak_S=1.000  peak_T=0.000
+    12594:   6-DOF Stewart Platform Vessel  ss01_following_noswell  peak_S=1.000  peak_T=0.000
+    12595:   6-DOF Stewart Platform Vessel  ss01_following_swell  peak_S=1.000  peak_T=0.000
+    12596:   6-DOF Stewart Platform Vessel  ss01_head_noswell     peak_S=1.000  peak_T=0.000
+    12597:   6-DOF Stewart Platform Vessel  ss01_head_swell       peak_S=1.000  peak_T=0.000
+    12598:   Active Suspension 6x6 EV Full  s01_bump              peak_S=1.115  peak_T=0.507
+    12599:   SKIP run_s01_5C_discharge_ADRC.csv: cannot identify y/u columns
+    12600:   Aircraft Engine Thermal Manage s01_steady_condition1  peak_S=0.942  peak_T=1.000
+    12601:   Boiler Control                 s01_lowload_regulation  peak_S=1.086  peak_T=2.086
+    12602:   Bouyancy-Driven Airship in Ver s01_calm_step         peak_S=1.000  peak_T=0.000
+    12603:   SKIP run_s01_no_wind_AdaptiveRLS.csv: cannot identify y/u columns
+    12604:   Multi-Body Floating Wind-Wave  s01_regular_waves     peak_S=1.000  peak_T=0.000
+    12605:   Nonlinear Surface Ship Manoeuv s01                   peak_S=9.514  peak_T=10.514
+    12606:   PCM Thermal Energy Storage Con s01_scenario          peak_S=1.000  peak_T=0.000
+    12607:   Porous Fiber Plate Humidificat s01_design            peak_S=0.998  peak_T=0.298
+    12608:   Porous Fiber Plate Humidificat s01_design_GPC        peak_S=1.001  peak_T=0.293
+    12609:   Porous Fiber Plate Humidificat s01_design_PID        peak_S=1.050  peak_T=0.267
+    12610:   Satellite Launch Vehicle Syste s01_scenario          peak_S=1.000  peak_T=0.000
+    12611:   Separate Meter In Separate Met s01_resistive_step    peak_S=1.004  peak_T=0.060
+    12612:   Solar Cooker with Reflector an s01_clear_sky_tracking  peak_S=1.000  peak_T=0.000
+    12613:   Solar Ocean Thermal Energy Con s01_mppt_steady       peak_S=4.759  peak_T=5.759
 
 ------------------------------------------------------------------------
 

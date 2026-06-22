@@ -1,5 +1,9 @@
 # Controller Toolbox — AI-Guided Code Audit
 
+> See also `docs/handoff.md` for a synthesized, verified-against-current-source set of
+> cross-cutting caveats (added 2026-06-22) -- this report's findings were current as of its
+> own audit date below and aren't re-verified there.
+
 **Date:** 2026-06-13  
 **Auditor:** Claude Sonnet 4.6 — read-only structural audit, five parallel agent passes  
 **Branch:** `main`  
