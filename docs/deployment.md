@@ -1,11 +1,15 @@
 # Controller Toolbox - Deployment Guide
 
-*Version 1.4 - 2026-06-15*
+*Version 1.5 - 2026-06-23*
 
 This document covers three areas required before deploying this library to a production control
 system: (1) per-controller parameter constraints and stability conditions; (2) real-time
 integration guidelines (zero-allocation checklist, stack-size estimates, RTOS considerations);
 and (3) a troubleshooting section for the most common runtime failure modes.
+
+For a source-only architectural reconstruction and the v1 -> v2 breaking-changes log, see
+[forensic_reconstruction.md](forensic_reconstruction.md); for the full API reference, see
+[DOCUMENTATION.md](DOCUMENTATION.md).
 
 ---
 
@@ -226,6 +230,25 @@ The internal delay buffer is a fixed-size circular buffer allocated at construct
 ```cpp
 // If |theta[k] - theta[k-W]| < eps for W samples, optimum is found.
 ```
+
+---
+
+### DiscreteHinf / DiscreteH2
+
+These are **offline synthesis** tools (require `CTRL_HAS_HINF`): run `solve()` once at
+configuration time, then deploy the resulting fixed dynamic controller `K(z)` in the loop. Do not
+call `solve()` inside a real-time loop.
+
+| Requirement | Constraint | Consequence if violated |
+|-------------|-----------|------------------------|
+| Generalised-plant regularity | `D12` full column rank, `D21` full row rank | `solve()` throws (`invalid_argument`); synthesis aborts |
+| `DiscreteH2`: `D11 = 0`, `D22 = 0` | Strict (enforced by throw) | Use a hand-built generalised plant; most `MixedSensitivity::build()` plants have `D11 != 0` |
+| Feasibility | Check `result.feasible` before constructing the controller | Constructing from an infeasible result throws |
+| Riccati convergence | Check `dareConvX` / `dareConvY` (H2) before trusting the controller | Non-converged DARE may yield an unstable closed loop |
+
+**Sign convention:** the deployed `compute(signal)` takes the plant **measurement `y`**, not the
+tracking error (`signConvention()` returns `Other`/measurement-based output feedback). Both honour
+the hold-last-on-NaN contract.
 
 ---
 
@@ -507,8 +530,10 @@ Or build the fractional filter explicitly via `ctrl::padeDelayFilter(theta_frac,
 
 ### NaN / Inf Propagation
 
-All scalar-input controllers (`DiscretePID`, `DiscreteLeadLag`, `DiscreteSMC`, `DiscreteADRC`)
-now return the last valid output on `NaN` or `Inf` input rather than propagating the corruption.
+All scalar-input controllers (`DiscretePID`, `DiscreteLeadLag`, `DiscreteSMC`, `DiscreteADRC`,
+`DiscreteLQG`, and the synthesis controllers `DiscreteHinf` / `DiscreteH2`) return the last valid
+output on `NaN` or `Inf` input rather than propagating the corruption. (`DiscreteLQG`'s guard was
+added in v2 - see [forensic_reconstruction.md Phase 0.4](forensic_reconstruction.md#phase-0).)
 
 If you observe the output "freezing" at an unexpected value, check upstream:
 1. Sensor: `sensor.isValid()` - `SimSensor` always returns `true`; real sensors should override this.

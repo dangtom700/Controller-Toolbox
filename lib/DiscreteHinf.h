@@ -1,7 +1,10 @@
 #pragma once
 #include "IController.h"
 #include "PlantModel.h"
+#include "AutoTuner.h"
+#include "SystemAnalysis.h"
 #include <Eigen/Dense>
+#include <functional>
 #include <optional>
 
 /**
@@ -203,6 +206,65 @@ struct MuSynResult
     std::vector<double> muHistory;
 };
 
+// -----------------------------------------------------------------------------
+
+/**
+ * @brief Caller-supplied controller structure for solveStructured().
+ *
+ * Maps a free parameter vector @p theta to a fixed-order/fixed-structure controller
+ * (Ak, Bk, Ck, Dk). The controller order @c nk (= Ak.rows()) is determined entirely by what
+ * this function produces - e.g. a static-gain controller (nk = 0, Ak/Bk/Ck all 0x*) or a
+ * PID-like/lead-lag-shaped fixed-order controller. solveStructured() validates the produced
+ * matrices' dimensions against the plant's ny/nu once before starting the search.
+ */
+using StructureFn = std::function<void(const Eigen::VectorXd &theta,
+                                        Eigen::MatrixXd &Ak, Eigen::MatrixXd &Bk,
+                                        Eigen::MatrixXd &Ck, Eigen::MatrixXd &Dk)>;
+
+/**
+ * @brief Parameters for structured Hinf synthesis via solveStructured().
+ */
+struct StructuredHinfParams
+{
+    Eigen::VectorXd lower; ///< Optional box lower bound on theta (empty = unbounded).
+    Eigen::VectorXd upper; ///< Optional box upper bound on theta (empty = unbounded).
+    int      maxEvals               = 2000; ///< Approximate CMA-ES cost-function evaluation budget.
+    double   sigma0                 = 0.3;  ///< Initial CMA-ES step size.
+    unsigned seed                   = 42;   ///< RNG seed forwarded to AutoTuner.
+    /**
+     * @brief Smooth instability penalty: @c instabilityPenaltyBase +
+     *        @c instabilityPenaltySlope * max(0, maxPoleMagnitude - 1).
+     *
+     * A hard +infinity penalty for unstable candidates gives CMA-ES no gradient back toward
+     * stability once the population drifts into the unstable region (unlike WorstCaseSearch's
+     * use of +inf, which is a *maximisation* search where any unstable point is equally
+     * "good"). This smooth penalty still strongly dominates any feasible candidate's cost
+     * (calculateHInfinityNorm is rarely above 1e3 for realistic stable designs) while
+     * remaining differentiable-in-effect for the search.
+     * @see Apkarian & Noll, "Nonsmooth H-infinity Synthesis", IEEE TAC 51(1), 2006.
+     */
+    double   instabilityPenaltyBase  = 1e6;
+    double   instabilityPenaltySlope = 1e3; ///< @see instabilityPenaltyBase.
+};
+
+/**
+ * @brief Result of structured Hinf synthesis via solveStructured().
+ */
+struct StructuredHinfResult
+{
+    /**
+     * @brief Controller matrices/gamma at the best theta found.
+     *
+     * Only Ak/Bk/Ck/Dk/Ts/feasible/achievedGamma are populated; X_inf/Y_inf/dareConvX/
+     * dareConvY/dareItersX/dareItersY/spectralRadius are left at their default values since
+     * solveStructured() does not solve a Riccati equation (no DARE diagnostics exist).
+     */
+    HinfResult       hinfResult;
+    Eigen::VectorXd  theta;          ///< Best parameter vector found.
+    bool             converged = false; ///< CMA-ES internal convergence flag.
+    int              nEvals    = 0;     ///< Total cost-function evaluations used.
+};
+
 /**
  * @brief Discrete-time dynamic output-feedback Hinf controller.
  *
@@ -267,6 +329,34 @@ public:
      */
     static MuSynResult solveMuSyn(const GeneralisedPlant &P,
                                    const MuSynParams &params = {});
+
+    /**
+     * @brief Structured (fixed-order/fixed-structure) Hinf synthesis via direct search.
+     *
+     * A third synthesis mode alongside solve() (DGKF two-Riccati) and solveMuSyn()
+     * (DK-iteration): rather than solving Riccati equations, parameterises the controller
+     * via a caller-supplied @ref StructureFn and searches over the free parameter vector
+     * theta with CMA-ES (AutoTuner) to minimise the closed-loop Hinf norm. This is the
+     * non-commercial analogue of MATLAB's hinfstruct() - useful when a fixed controller
+     * order/structure (e.g. PID, lead-lag, or a reduced-order observer) is required and the
+     * full-order DGKF central controller from solve() is not acceptable.
+     *
+     * Unstable candidates are penalised smoothly (see StructuredHinfParams::
+     * instabilityPenaltyBase), not with a hard +infinity wall - see that struct's docs.
+     *
+     * @param P           Generalised plant (same format as for solve()).
+     * @param structureFn Caller-defined theta -> (Ak,Bk,Ck,Dk) controller parameterisation.
+     * @param theta0      Initial parameter vector (also used to validate structureFn's
+     *                    output dimensions against P.ny()/P.nu() before the search starts).
+     * @param params      Search parameters.
+     * @return StructuredHinfResult with the best controller found and its achieved gamma.
+     * @throws std::invalid_argument If theta0 is empty, params.lower/upper have the wrong
+     *         size, or structureFn(theta0, ...) produces matrices with the wrong dimensions.
+     */
+    static StructuredHinfResult solveStructured(const GeneralisedPlant &P,
+                                                  StructureFn structureFn,
+                                                  const Eigen::VectorXd &theta0,
+                                                  const StructuredHinfParams &params = {});
 
     /**
      * @brief Compute u[k] - SISO interface (ny = 1, nu = 1).

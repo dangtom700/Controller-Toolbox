@@ -347,6 +347,39 @@ else:
     print('Skipping Hinf: not compiled in.')
 
 # ---------------------------------------------------------------------------
+# 17b. DiscreteH2 (Phase 4 Iteration 3 - discrete H2/LQG synthesis)
+# ---------------------------------------------------------------------------
+if feats.get('h2_synthesis', False):
+    # Hand-built D11=0 generalised plant (MixedSensitivity-built plants have D11 != 0
+    # from their W1/W3 weight gains and are rejected by DiscreteH2 - see lib/DiscreteH2.h).
+    # nw=2 deliberately - a single noise channel (nw=1) is a degenerate case for the filter
+    # Riccati (S2^2 == Q2*R2 always for a scalar B1/D21), forcing Y=0 and an overly
+    # aggressive, destabilising observer gain.
+    P_h2 = ctrl.GeneralisedPlant()
+    P_h2.Ts  = 0.1
+    P_h2.A   = np.array([[0.9]])
+    P_h2.B1  = np.array([[0.3, 0.1]])
+    P_h2.B2  = np.array([[1.0]])
+    P_h2.C1  = np.array([[1.0], [0.3]])
+    P_h2.C2  = np.array([[1.0]])
+    P_h2.D11 = np.zeros((2, 2))
+    P_h2.D12 = np.array([[0.2], [1.0]])
+    P_h2.D21 = np.array([[0.1, 0.4]])
+    P_h2.D22 = np.zeros((1, 1))
+
+    result_h2 = ctrl.DiscreteH2.solve(P_h2)
+    print(f'H2: feasible={result_h2.feasible}  achieved_h2_norm={result_h2.achieved_h2_norm:.3f}')
+    if result_h2.feasible:
+        h2 = ctrl.DiscreteH2(result_h2)
+        u_h2 = h2.compute(0.1)
+        print(f'DiscreteH2 compute(0.1) = {u_h2:.4f}')
+        assert isinstance(u_h2, float)
+        assert h2.achieved_h2_norm() > 0
+    print('DiscreteH2 smoke tests passed.')
+else:
+    print('Skipping DiscreteH2: not compiled in.')
+
+# ---------------------------------------------------------------------------
 # Part 18: SOPDTIdentifier
 # ---------------------------------------------------------------------------
 import math

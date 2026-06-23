@@ -1,145 +1,145 @@
-# CLAUDE.md
+# CLAUDE.md - Controller-Toolbox
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> This file IS git-tracked and committed (it is **not** gitignored - a prior version of this
+> header wrongly claimed it was; `git check-ignore CLAUDE.md` returns nothing and
+> `git ls-files` lists it). So it survives a fresh clone - keep it accurate. Companions:
+> `CONTRIBUTING.md` (conventions, sign-convention table, checklists, numerical-safety rules),
+> `docs/DOCUMENTATION.md` (full API), `docs/deployment.md` (RT constraints), `docs/handoff.md`
+> (cross-cutting caveats), `docs/forensic_reconstruction.md` (source-only architecture + v1->v2
+> diff), `docs/cumulative_bug_report.md` (Part-numbered history). Read those for depth; this file
+> is the 2-minute map.
 
-> **Note on this file:** `CLAUDE.md` is gitignored (local-only, never committed). A prior
-> session maintained an extensive version of this file with accumulated "tribal knowledge"
-> (a session-start checklist, sign-convention table, per-controller gotchas, Part-by-part
-> history) that several committed docs (`README.md`, `CONTRIBUTING.md`,
-> `docs/case_study_copilot_reference.md`) still reference as "see CLAUDE.md" - but that
-> content was never committed to git and is not recoverable on a fresh clone. This rewrite
-> reconstructs the durable, verifiable parts from committed sources. The durable long-form
-> history lives in `docs/cumulative_bug_report.md` (Part-numbered, currently up to Part 66);
-> a synthesized, committed set of cross-cutting caveats (verified against current source, not
-> just copied from historical prose) lives in `docs/handoff.md` - **read that file too**, since
-> it captures exactly the kind of tribal knowledge that keeps getting lost when this file
-> doesn't survive a clone.
+## 1. High-Level Project Philosophy
 
-## Commands
+Discrete-time control library: a flat C++20/Eigen core (~90 controller/estimator/identification
+classes) exposed through one flat `pybind11` module and exercised by ~89 examples + ~31 case
+studies. Almost every algorithm implements both its math and a single base interface
+(`IController`) in one class; the only deliberate split is the stateless `DiscreteLQR` +
+`LQRAdapter`. Cross-cutting behaviour (anti-windup, delay, gain scheduling, dead-time, multi-loop
+supervision) is added by **composition wrappers that are themselves `IController`s**, so they
+nest. Conventions (especially `compute()` sign) are intentionally *not* uniform across
+controllers - they are made queryable, not homogenised. Production readiness is first-class: a
+header-only no-Eigen embedded subset, a lock-free param buffer, HAL + RTOS schedulers, a ROS 2
+lifecycle node, and WCET tooling all exist to move the same controllers to hardware.
+**Scope discipline:** treat `lib/*.{h,cpp}` as a stable public API to *consume*; adding a new
+controller is a heavier checklist (impl + build wiring + examples + Catch2 + bindings + smoke
+test), not a quick edit `[Ref: CONTRIBUTING.md#adding-a-new-controller]`.
 
-### One-time environment setup
-
-- Windows: `.\setup.ps1` (requires PowerShell 7). Validates the MSYS2 **UCRT64** toolchain
-  (`C:\msys64\ucrt64\bin` - not `mingw64`; the project switched from MinGW64 to UCRT64),
-  creates the `soft_robotics` conda env from `environment.yml`, builds the Python bindings,
-  and runs the smoke test. Add `-FullBuild` to also build every C++ target. Add
-  `-SkipCondaCreate` to skip env creation on re-runs.
-- Linux/macOS: `./setup.sh`.
-- MinGW/UCRT64 builds **statically link** `libgcc`/`libstdc++`/`libwinpthread`
-  (`if(MINGW) add_link_options(-static-libgcc -static-libstdc++ -static)` in root
-  `CMakeLists.txt`) so every executable and `ctrl_toolbox*.pyd` runs without MSYS2's
-  `bin/` on `PATH`. Python's loader for `.pyd` extensions ignores `PATH` for dependent DLLs
-  since 3.8 - without static linking, `import ctrl_toolbox` fails outside an MSYS2 shell
-  even when the build itself succeeds.
-
-### Build
+## 2. Essential Build & Environment Commands
 
 ```bash
+# Canonical "is everything passing" (7 phases: ASCII scan, compile, bindings+smoke,
+# run all .exe, run all python examples, run python case studies, regen status/report):
+conda run -n soft_robotics -- python run.py        # writes run_*.log; bug_report.txt ONLY on failure
+
+# Full sequential C++ build of every target (~120; hand-maintained list - keep .bat/.sh in sync):
+./compile.sh          # Windows: compile.bat   (do NOT add --parallel locally; CI does that)
+
+# Manual CMake (Release):
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build          # avoid --parallel locally (see note below); fine in CI
+cmake --build build
 ctest --test-dir build --output-on-failure
+
+# With Python bindings:
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCTRL_BUILD_PYTHON_BINDINGS=ON
+cmake --build build --target ctrl_toolbox
+conda run -n soft_robotics -- python bindings/smoke_test.py
+
+# One-time env setup: .\setup.ps1 (Win, PowerShell 7) | ./setup.sh (Linux/macOS)
+# Single test: ctest --test-dir build -R test_catch2_advanced  | build/tests/test_catch2_advanced.exe [smc]
 ```
 
-With Python bindings: add `-DCTRL_BUILD_PYTHON_BINDINGS=ON` to the configure step, then
-`cmake --build build --target ctrl_toolbox`, then `conda run -n soft_robotics -- python bindings/smoke_test.py`.
+- **Toolchain (Windows):** MSYS2 **UCRT64** (`C:\msys64\ucrt64\bin`), *not* mingw64. MinGW builds
+  statically link `libgcc`/`libstdc++`/`libwinpthread` so executables and `ctrl_toolbox*.pyd` run
+  without MSYS2 on `PATH` - without it, `import ctrl_toolbox` fails outside an MSYS2 shell even
+  when the build succeeds. `[Ref: CMakeLists.txt - if(MINGW) add_link_options(-static-*)]`
+- **`lib/` feature flags** (all **ON** by default), each defines a `CTRL_HAS_*` macro:
+  `CTRL_ENABLE_HINF`, `CTRL_ENABLE_SUBSPACE`, `CTRL_ENABLE_FUZZY`, `CTRL_ENABLE_FUNCTION_APPROX`,
+  `CTRL_ENABLE_ADVANCED_KALMAN`. Build-mode flags (root): `CTRL_BUILD_EMBEDDED_ONLY`,
+  `CTRL_FETCH_EIGEN_IF_MISSING`, `CTRL_BUILD_PYTHON_BINDINGS`, `CTRL_BUILD_BENCHMARKS`.
+- **Deps (pinned):** Eigen >=3.4.0, Catch2 v3.5.4, pybind11 v2.13.6, nlohmann/json v3.11.3.
+- **Never claim "passing" without a clean `run.py`** - README/CONTRIBUTING pass counts are stale until then.
 
-On Windows, `compile.bat` (or `compile.sh` on Linux/macOS) builds every C++ target
-(examples, tests, case studies) **sequentially in an explicit, hand-maintained list** - a
-target not listed there silently never builds, and a stale `.exe` from a previous build can
-mask that. The two files must be kept in sync by hand (verified in sync as of this writing,
-but nothing automated catches future drift between them). Sequential building here is to
-avoid pegging every core on a dev machine for ~140 targets, not a build-correctness
-requirement - CI builds the same targets with `--parallel` deliberately, and that's fine.
+## 3. Repository Topography & Physical Layering
 
-### Full verification (the canonical "is everything still passing" command)
+**WARNING - the conventional `include/`, `src/`, `python/` directories do NOT exist here.** Map:
 
-```bash
-conda run -n soft_robotics -- python run.py
-```
+- `lib/` - **flat** core engine; every class is `lib/ClassName.{h,cpp}` (no subpackages, ~145 files). `[Ref: lib/]`
+  - `lib/embedded/` - header-only, no-Eigen, no-virtual MCU subset (`BasicPID`, `BasicSMC`, `DiscreteIntegrator`, `FixedRateFilter`, `RingBuffer`).
+  - `lib/hal/` - hardware abstraction (`ISensor`/`IActuator`/`ITimer`/`IScheduler`, Sim*/Safe*, FreeRTOS/Zephyr schedulers).
+  - `lib/ControllerToolbox.h` - umbrella include; `lib/Features.h` - runtime feature registry (`ctrl.features()`).
+- `bindings/` - the **C++<->Python boundary** (NOT `python/`): one flat `pybind11` module `ctrl_toolbox`. Entry `bindings/module.cpp`; dispatch to `plantmodel/controllers/estimation/advanced/analysis_bindings.cpp`. `[Ref: bindings/module.cpp:18]`
+- `examples/` - ~89 single-file C++ demos `exNN_*.cpp` (print PASS/FAIL); `examples/python/`; `examples/embedded/`.
+- `tests/` - Catch2 suites + legacy hand-rolled + per-study regressions (21 executables). `[Ref: tests/CMakeLists.txt]`
+- `case-study/<Study>/` - C++ (`*_sim` exe, run by `run.py` Phase 4) or Python-only (`sim/main.py`, Phase 6).
+- `tools/` - post-hoc analysis pipeline only (metrics, compare_controllers, monte_carlo, fault_sweep, wcet_report, generate_report, case_study_tracker - never hand-edit `docs/case_study_status.md`).
+- `ros2/`, `docs/`, `cheatsheet/`, `scripts/`, `benchmark/`, `data/`, `cmake/` (minimal - just a config template).
 
-This is the only command that exercises all 7 phases: ASCII-only source scan, sequential
-C++ compile, Python binding build + smoke test, run every built `.exe`, run every
-`examples/python/exNN_*.py`, discover and run every Python-only case study's `sim/main.py`,
-then regenerate `docs/case_study_status.md` and `docs/report.html`. It writes
-`run_YYYYMMDD_HHMMSS.log` to the repo root and, if any failures are detected, `bug_report.txt`
-(absence of `bug_report.txt` after a run means a clean pass). **Don't claim something is
-"verified" or "passing" without having just run this** - stale pass counts in README/CONTRIBUTING
-are explicitly marked UNVERIFIED until the next clean run.
+## 4. Critical Architectural Backbone (The "Mental Model")
 
-### Running a single test / example
+**Base interfaces** (there is **no** `DiscreteController`/`Estimator`/`Model` base - the template's
+assumed names do not exist):
+- `IController` `[Ref: lib/IController.h]` - the one controller base. Pure-virtual: `compute(double) -> double`, `reset()`, `sampleTime() const`. Virtual-with-default: `computeVec(VectorXd)`, `signConvention()`, `bumplessInit()`, `isHealthy()`, `hasInternalAntiWindup()`, `name()`.
+- `IControllerObserver` `[Ref: lib/IControllerObserver.h]` - telemetry sink: `onCompute/onComputeVec/onReset/onState`.
+- **Estimators and plant models share no base** - `KalmanFilter`/`EKF`/`UKF`/`MovingHorizonEstimator` and `PlantModel.h`'s `StateSpace`/`TransferFunction` each expose a purpose-fit API. `[Inferred from: lib/KalmanFilter.h, lib/PlantModel.h]`
+- **Stateless exception:** `DiscreteLQR` is pure math (gain via `solveDARE`), wrapped by `LQRAdapter` (the `IController`). Do not copy this split for stateful controllers. `[Ref: lib/DiscreteLQR.h]`
 
-- Single Catch2 suite: `ctest --test-dir build -R test_catch2_advanced --output-on-failure`
-  (each `add_executable` in `tests/CMakeLists.txt` is registered via `catch_discover_tests`,
-  so `ctest -R <name>` or `-R [tag]` filters by executable or Catch2 tag).
-- Or run the built test executable directly with a Catch2 tag filter, e.g.
-  `build/tests/test_catch2_advanced.exe [smc]`.
-- Single C++ example: build then run `build/examples/exNN_name.exe` directly - it prints
-  `PASS`/`FAIL` and sets exit code accordingly.
-- Single Python example: `conda run -n soft_robotics -- python examples/python/exNN_name.py`.
-- Single Python-only case study: `conda run -n soft_robotics -- python "case-study/<Study>/sim/main.py"`.
+**The Corrector-Pattern Suite** - these are **`ControllerStack` modes + one manual pattern**, NOT
+standalone classes (no `Cascade`/`Additive`/`ObserverSF`/`Supervisory` types exist) `[Ref: lib/ControllerStack.h]`:
+- **Cascade** = `ControllerStack` **Additive** mode, inner fast / outer setpoint. `[Ref: examples/ex42_pid_inner_mpc_outer.cpp]`
+- **Additive** = Additive mode, `u = u_primary + u_corrector`. `[Ref: examples/ex47_esc_additive_pid.cpp]`
+- **Supervisory** = **Supervisory** mode, first entry whose activation condition fires wins (health-aware fallback + bumpless transfer). `[Ref: examples/ex54_bumpless_transfer.cpp]`
+- **Observer + state feedback (ObserverSF)** is **wired by hand**, not a class - estimator -> `setState()` -> feedback law:
+  ```cpp
+  kf.step(y, u_prev);  lqr_adapter.setState(kf.state());  u = lqr_adapter.compute(0);
+  ```
+  `[Ref: examples/ex50_ekf_mpc.cpp]`
+- Other wrappers (all `IController`): `AntiWindupWrapper`, `ComputationalDelayWrapper`, `GainScheduledController`, `SmithPredictor`/`AdaptiveSmithPredictor`.
 
-## Architecture
+**Data flow:** `Eigen::VectorXd`/`MatrixXd` are the universal carriers. In `lib/` inputs are passed
+by **`const&`**, results returned **by value**; predictive controllers pre-allocate work vectors at
+construction and use `.noalias()` in the hot loop. The in-place stepper `ssStep` takes
+`Eigen::Ref<VectorXd> x` (mutates `x`); `ssStepCopy` is non-mutating (Python-preferred).
+`[Ref: lib/PlantModel.h]` `[Inferred from: lib/SystemAnalysis.h:144 return-by-value]`
 
-**`lib/` is flat** - no `lib/control/`/`lib/estimation/` subdirectories; every class is
-`lib/ClassName.{h,cpp}` (145 files, ~90 controller/estimator/identification implementations).
-Two real subdirectories: `lib/embedded/` (header-only, no-Eigen, MCU-safe subset -
-`BasicPID`, `BasicSMC`, `DiscreteIntegrator`, `FixedRateFilter`, `RingBuffer`) and `lib/hal/`
-(scheduler/sensor/actuator interfaces for deployment). `lib/Features.h` is a build-time
-feature-flag registry consumed by `ctrl_toolbox.features()` in Python.
+## 5. Instantiation-to-Execution Lifecycle (The "Golden Path")
 
-**`IController` (`lib/IController.h`) is the base interface**: `compute(double)`, `reset()`,
-`sampleTime()`. Almost every controller implements algorithm + `IController` interface in one
-class. The one deliberate exception is `DiscreteLQR`/`LQRAdapter`: `DiscreteLQR` is pure
-stateless math (a gain matrix computed once, shareable across adapters); `LQRAdapter` is a
-thin `IController` shim wiring it to state/reference callbacks. This split exists *because*
-`DiscreteLQR` is genuinely stateless - don't introduce an `Adapter` class for other
-controllers "for consistency" (see `CONTRIBUTING.md#architecture-pattern`).
-Composition wrappers (`ControllerStack`, `AntiWindupWrapper`, `ComputationalDelayWrapper`,
-`GainScheduledController`, `SmithPredictor`/`AdaptiveSmithPredictor`) wrap an `IController`
-rather than subclassing it.
+Every study/example follows this shape `[Ref: examples/ex01_tf_pid.cpp]` `[Inferred from: shared case-study/*/sim/main.* structure]`:
 
-Sign conventions are **not uniform across controllers** (e.g. `DiscreteSMC.compute()` takes
-`e = y - r`, the reverse of `DiscretePID`'s `e = r - y`; `MRACController.compute()` takes the
-plant output directly, not an error) - see the full table in `CONTRIBUTING.md#sign-conventions`
-before wiring up a new controller in a case study.
+1. **Model:** `TransferFunction G({b...},{1,a...}, Ts); StateSpace sys = tf2ss(G);` (or hand-built `StateSpace`).
+2. **Controller/estimator:** `DiscretePID pid(PIDParams{...}, Ts);` (tuning struct + `Ts`).
+3. **Composition (optional):** wrap with stack/observer/Smith predictor - e.g. `auto s = make_shared<ControllerStack>(StackMode::Supervisory, Ts); s->addController(pid, "PID");`
+4. **Step loop:** controllers use **`compute()`**, estimators use **`step()`/`update()`**, plant via `ssStep`/`SimPlant`. Mind the per-controller sign (CONTRIBUTING.md):
+   ```cpp
+   for (int k=0;k<N;++k){ double u = pid.compute(r - y);              // PID: e = r - y
+                          Eigen::VectorXd uv(1); uv<<u; y = ssStep(sys, x, uv)(0); }
+   ```
+   For runtime param swaps from another thread, read via `AtomicParamBuffer::read()` (section 7).
+5. **Termination:** no teardown - controllers/estimators are RAII value types; flush CSV/log buffers; `reset()` to reuse an instance across scenarios.
 
-**`bindings/`** exposes one flat pybind11 module, `ctrl_toolbox` (no submodules).
-`bindings/module.cpp` is the `PYBIND11_MODULE` entry point dispatching to
-`plantmodel_bindings.cpp`, `controllers_bindings.cpp`, `estimation_bindings.cpp`,
-`advanced_bindings.cpp`, `analysis_bindings.cpp`. Binding new `IController` subclasses
-requires `std::shared_ptr<T>` as the third `py::class_` template argument or
-`ControllerStack.add_controller()` throws at runtime - see `CONTRIBUTING.md#python-binding-conventions`
-for this and other hard-won pybind11 v2.13 + NumPy 2.x rules.
+## 6. Python Bindings Mapping & Nuance
 
-**`case-study/<Study>/`** studies all share one shape regardless of language: instantiate
-plant -> instantiate controller roster -> for each scenario, reset, step (error -> `compute()`
--> `plant.step(u)` -> accumulate IAE -> write a CSV row) -> next controller -> next scenario.
-C++ studies have their own `CMakeLists.txt` (registered in `case-study/CMakeLists.txt` *and*
-listed explicitly in `compile.bat`/`compile.sh`, or the target silently doesn't build) and are
-run by `run.py` Phase 4 as a built `*_sim` executable. Python-only studies have just
-`sim/main.py` (no CMake registration), are auto-discovered by `run.py` Phase 6, and locate the
-bindings build 4 directories up. Scaffold new studies with `tools/new_case_study.py` rather
-than hand-rolling boilerplate - its placeholder plant actually runs and produces real-looking
-CSVs before any real implementation exists, so use `tools/case_study_tracker.py`'s "Open
-placeholder" status (not the presence of log files) to tell whether a study has real content.
-Per-study optional analysis hooks (`run_single`, `run_with_fault`, `grey_box_model`) consumed
-by `tools/monte_carlo.py`/`tools/fault_sweep.py`/`tools/wcet_report.py` are documented in
-`tools/study_protocol.py`.
+- **Import:** `import ctrl_toolbox as ctrl` - **one flat module, no submodules.** `[Ref: bindings/module.cpp:18]`
+- **Naming:** C++ `ctrl::DiscretePID::computeDoM` -> Python `ctrl.DiscretePID.compute_dom` (CamelCase class, **snake_case methods**). `[Ref: bindings/controllers_bindings.cpp:47-61]`
+- **Binding rule:** every `IController` subclass is bound with `std::shared_ptr<T>` as the 3rd `py::class_` template arg + `ctrl::IController` base, or `ControllerStack.add_controller()` throws at runtime. `[Ref: bindings/controllers_bindings.cpp:47-48]`
+- **Eigen pitfall:** `pybind11/eigen.h` auto-converts NumPy <-> Eigen **by copy** at the boundary (`[Ref: bindings/module.cpp:2]`) - array in is copied, result copied out; fine per-call, but do not assume zero-copy or in-place mutation. `Eigen::Ref<>` out-params (e.g. `ssStep`) are not bindable - use `ss_step_copy`. Python subclassing works via trampolines (`PyIController`). `[Inferred from: bindings/trampoline.h]`
 
-**`tools/`** is a post-hoc analysis pipeline (not simulation-time code): `metrics.py`
-(shared IAE/RMS/settle-time/overshoot computation), `compare_controllers.py`, `monte_carlo.py`,
-`fault_injector.py`/`fault_sweep.py`, `anova.py`, `wcet_report.py`, `mu_analysis.py`,
-`generate_report.py` (writes `docs/report.html`, degrades gracefully without Plotly), and
-`case_study_tracker.py` (regenerates `docs/case_study_status.md` - never hand-edit that file).
+## 7. Real-Time & Deployment Constraints (Recovered Gotchas)
 
-For the full API surface and per-class constructor/sign-convention quick reference when
-writing new case-study code, see `docs/case_study_copilot_reference.md` (condensed,
-verified-only API map) and `docs/DOCUMENTATION.md` (full reference). For conventions,
-checklists, and the numerical-safety/documentation rules, see `CONTRIBUTING.md` - it is the
-durable source of record for everything this file would otherwise duplicate.
+- **Zero-allocation in `compute()`/`step()`:** no `std::vector` `push_back`/`resize`, no `std::deque`, no STL streams, no `std::cout`/`cerr` in the hot path; pre-build MPC/QP matrices at construction; use `.noalias()`; for `n<=4` prefer fixed-size `Eigen::Matrix<double,N,N>`. `[Ref: docs/deployment.md - Zero-Allocation Checklist]`
+- **Lock-free params:** the buffer is **`ctrl::AtomicParamBuffer<Params>`** (NOT `LockFreeParameterBuffer` - that name does not exist). Seqlock, single-writer/single-reader, `Params` must be trivially copyable. RT thread: `Params p = buf.read();` (copy under seqlock, ~0 retries). Background thread: `buf.publish(p);`. **Do NOT** use it for `DiscreteMPC`/`GPC` `setPlant()`/`setParams()` (non-trivial matrix rebuilds - double-buffer the whole controller or pause the loop). `[Ref: lib/AtomicParamBuffer.h:58]` `[Ref: docs/deployment.md - AtomicParamBuffer]`
+- **NaN contract:** scalar controllers hold last output on non-finite input (PID, LeadLag, SMC, ADRC, LQG, Hinf/H2). Check `isHealthy()` / DARE-QP convergence flags after construction. `[Ref: lib/DiscreteLQG.cpp:63-64]`
+- **HAL/RTOS:** implement `ISensor/IActuator/IScheduler`; RTOS schedulers `FreeRTOSScheduler` (`FREERTOS_VERSION`) / `ZephyrScheduler` (`CONFIG_ZEPHYR`). RT build flags `-O2 -fno-exceptions -fno-rtti -fstack-usage` (NaN guards use early-return, not exceptions). `[Ref: lib/hal/]`
+- **ROS 2:** templated lifecycle node `ControllerNode<T>` (file is `controller_node.hpp`, **not** `ros2_lifecycle_node.hpp`): `on_configure -> on_activate -> on_deactivate -> on_cleanup/on_shutdown`; topics `~/setpoint`, `~/measurement`, `~/control_output`; applies `u = compute(r - y)`. `[Ref: ros2/ctrl_toolbox_ros2/include/ctrl_toolbox_ros2/controller_node.hpp]`
 
-**Scope discipline:** treat `lib/*.{h,cpp}` as a stable public API to *consume* from
-case-study work, not edit. A genuinely new controller class goes through the full
-checklist in `CONTRIBUTING.md#adding-a-new-controller` (implementation + build wiring +
-examples + Catch2 tests + Python bindings + smoke test) - that's a different, heavier review
-bar than case-study work, not a quick edit.
+## 8. Recovered Deprecations & Migration Notes (from `version_1` diff)
+
+`origin/version_1` is the archived **v1 snapshot**; `main` is the **v2 continuation** (no
+merge-base - history was re-rooted to drop bloated CSV commits; diff via tree, not log). The
+`lib/` delta is **small and entirely additive** (~735+/4-; **0 files deleted -> no removed
+classes/methods -> nothing is deprecated**). `[Ref: docs/forensic_reconstruction.md - Phase 0]`
+
+- **New in v2:** `signConvention()` + `SignConvention` enum on `IController` `[Ref: lib/IController.h:29-66]`; `SystemAnalysis::getSingularValues` `[Ref: lib/SystemAnalysis.h:144]`; files `FreqDomainIdentifier`, `LyapunovRobustness`, `WorstCaseSearch`; `DiscreteLQG::compute` NaN-guard.
+- **Working-tree-only (newer than both branches):** `DiscreteH2` `[Ref: lib/DiscreteH2.h:101-179]`, modified `DiscreteHinf`.
+- **Doc-bug fixed in v2:** `DiscreteSMC` takes `e = y - r` (v1 docs wrongly said `e = r - y`; the code was always `y - r`). `[Ref: lib/DiscreteSMC.h:97]`
+- **Do NOT suggest** (never existed / template fictions): `include/`/`src/`/`python/` dirs; base classes `DiscreteController`/`Estimator`/`Model`; an `ObserverSF`/`Cascade`/`Supervisory` *class* (use `ControllerStack` modes / manual wiring); `LockFreeParameterBuffer` (use `AtomicParamBuffer`); `ros2_lifecycle_node.hpp` (use `controller_node.hpp`).

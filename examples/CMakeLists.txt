@@ -131,6 +131,9 @@ add_example(ex86_worst_case)
 # Robustness analysis Phase 5: Common Lyapunov function for polytopic uncertainty
 add_example(ex87_lyapunov_robust)
 
+# Robust Control Phase 4 Iteration 3: discrete H2/LQG synthesis
+add_example(ex88_h2_synthesis)
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)

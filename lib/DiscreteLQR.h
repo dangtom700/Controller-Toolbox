@@ -106,6 +106,20 @@ public:
     /** @brief Sample time Ts [s]. */
     double sampleTime()      const { return Ts_; }
 
+    /**
+     * @brief Doubling-algorithm DARE solver (Pappas-Laub-Sandell) - never throws;
+     *        convergence indicated in the returned DareResult.
+     *
+     * Public so DiscreteH2 (lib/DiscreteH2.h) can reuse it for the H2/LQG control and
+     * filter Riccati equations rather than duplicating the doubling iteration. Assumes
+     * @p R is invertible (positive-definite for the standard LQR/H2 use case); callers
+     * are responsible for checking the returned DareResult::converged before trusting P.
+     */
+    static DareResult solveDARE(const Eigen::MatrixXd &A,
+                                const Eigen::MatrixXd &B,
+                                const Eigen::MatrixXd &Q,
+                                const Eigen::MatrixXd &R);
+
 private:
     Eigen::MatrixXd K_; ///< Optimal feedback gain (m * n).
     Eigen::MatrixXd P_; ///< DARE stabilising solution (n * n).
@@ -113,12 +127,6 @@ private:
     int n_states_, n_inputs_;
     bool dare_converged_;
     int  dare_iterations_;
-
-    /** @brief Value-iteration DARE solver - never throws; convergence indicated in result. */
-    static DareResult solveDARE(const Eigen::MatrixXd &A,
-                                const Eigen::MatrixXd &B,
-                                const Eigen::MatrixXd &Q,
-                                const Eigen::MatrixXd &R);
 };
 
 /**

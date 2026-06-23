@@ -167,6 +167,7 @@ TARGETS=(
     ex85_mu_analysis
     ex86_worst_case
     ex87_lyapunov_robust
+    ex88_h2_synthesis
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

@@ -20,6 +20,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 #include "ControllerToolbox.h"
 #include "IterativeLearningControl.h"
 #include "SINDy.h"
@@ -1183,6 +1184,158 @@ TEST_CASE("DiscreteHinf::solveMuSyn runs DK-iteration without crashing",
     }
 }
 #endif
+
+// =============================================================================
+// Phase 4 Iteration 3: DiscreteH2 (discrete H2/LQG output-feedback synthesis)
+// =============================================================================
+
+#if defined(CTRL_HAS_HINF)
+
+namespace
+{
+// Hand-built D11=0 generalised plant with nonzero control/filter cross terms (S1, S2),
+// so the cross-term-elimination code path is genuinely exercised (not the degenerate
+// S1=S2=0 case). nw=2 in the exogenous channel specifically avoids the scalar
+// Cauchy-Schwarz degeneracy S2^2 == Q2*R2 that occurs for any SISO single-noise-channel
+// (n=1, nw=1) plant and would force the filter Riccati solution Y to be exactly zero.
+ctrl::GeneralisedPlant makeH2CrossTermPlant()
+{
+    ctrl::GeneralisedPlant P;
+    P.Ts  = 0.1;
+    P.A   = Eigen::MatrixXd::Constant(1, 1, 0.9);
+    P.B1  = (Eigen::MatrixXd(1, 2) << 0.3, 0.1).finished();
+    P.B2  = Eigen::MatrixXd::Constant(1, 1, 1.0);
+    P.C1  = (Eigen::MatrixXd(2, 1) << 1.0, 0.3).finished();
+    P.C2  = Eigen::MatrixXd::Constant(1, 1, 1.0);
+    P.D11 = Eigen::MatrixXd::Zero(2, 2);
+    P.D12 = (Eigen::MatrixXd(2, 1) << 0.2, 1.0).finished();
+    P.D21 = (Eigen::MatrixXd(1, 2) << 0.1, 0.4).finished();
+    P.D22 = Eigen::MatrixXd::Zero(1, 1);
+    return P;
+}
+} // namespace
+
+TEST_CASE("DiscreteH2::solve matches independent scipy DARE/Lyapunov reference", "[h2][hinf]")
+{
+    // Reference computed 2026-06-22 via scipy.linalg.solve_discrete_are (cross-term `s`
+    // argument) + solve_discrete_lyapunov for the exact plant built by
+    // makeH2CrossTermPlant() above:
+    //   X = 0.93620768, Y = 0.08464685
+    //   F = -0.67937541, L(=-Bk) = -0.57405840
+    //   Ak = -0.35343382, Bk = 0.57405840
+    //   achievedH2Norm = 0.41331452
+    //   closed-loop [x;xk] eigenvalues = {0.32594160, 0.22062459} (both stable, matching
+    //   the separation principle: eig(A+B2F) union eig(A - (-L)*C2))
+    // Tolerance 1e-4: tight enough to catch a sign error in F/L/Bk (which would otherwise
+    // flip a result that still happens to converge, e.g. an unstable-but-finite Ak), loose
+    // enough for the doubling-iteration DARE solver's own internal tolerance (1e-12 on the
+    // Riccati residual, but compounded through several matrix products before comparison).
+    const ctrl::GeneralisedPlant P = makeH2CrossTermPlant();
+    const ctrl::H2Result result = ctrl::DiscreteH2::solve(P);
+
+    REQUIRE(result.feasible);
+    REQUIRE(result.dareConvX);
+    REQUIRE(result.dareConvY);
+
+    REQUIRE_THAT(result.X(0, 0),              WithinAbs(0.93620768, 1e-4));
+    REQUIRE_THAT(result.Y(0, 0),              WithinAbs(0.08464685, 1e-4));
+    REQUIRE_THAT(result.Ck(0, 0),              WithinAbs(-0.67937541, 1e-4)); // Ck == F
+    REQUIRE_THAT(result.Ak(0, 0),              WithinAbs(-0.35343382, 1e-4));
+    REQUIRE_THAT(result.Bk(0, 0),              WithinAbs( 0.57405840, 1e-4));
+    REQUIRE(result.Dk(0, 0) == 0.0);
+    REQUIRE_THAT(result.achievedH2Norm,        WithinAbs(0.41331452, 1e-4));
+
+    // Separation-principle check: the full [x;xk] closed loop's eigenvalues must be the
+    // union of eig(A+B2*F) and eig(A - Lobs*C2) where Lobs = -Bk (see DiscreteH2.cpp's
+    // assembly comment) - not just "Ak alone is stable", which a sign bug in Bk could
+    // satisfy by coincidence while still leaving the full closed loop unstable (this is
+    // exactly the failure mode the scipy reference computation above caught during
+    // development: Bk = +L gave a stable Ak but an unstable full closed loop).
+    Eigen::MatrixXd A_cl(2, 2);
+    A_cl << P.A(0,0),                         P.B2(0,0) * result.Ck(0,0),
+            result.Bk(0,0) * P.C2(0,0),       result.Ak(0,0);
+    Eigen::EigenSolver<Eigen::MatrixXd> esAcl(A_cl, /*computeEigenvectors=*/false);
+    for (int i = 0; i < esAcl.eigenvalues().size(); ++i)
+        REQUIRE(std::abs(esAcl.eigenvalues()(i)) < 1.0);
+}
+
+TEST_CASE("DiscreteH2::solve throws on nonzero D11 (MixedSensitivity-built plant)", "[h2][hinf]")
+{
+    // MixedSensitivity-built plants have D11 != 0 by construction (W1/W3 weight gains feed
+    // straight through to z) - this is the real-world rejection case, not a contrived one.
+    const double Ts = 0.1;
+    const ctrl::StateSpace G = ctrl::c2d(
+        ctrl::StateSpace(Eigen::MatrixXd::Constant(1,1,-1.0), Eigen::MatrixXd::Constant(1,1,1.0),
+                          Eigen::MatrixXd::Constant(1,1,1.0), Eigen::MatrixXd::Zero(1,1), 0.0),
+        Ts, ctrl::C2dMethod::ZOH);
+    const auto W1 = ctrl::MixedSensitivity::makeW1(2.0, 2.0, 0.01, Ts);
+    const auto W2 = ctrl::MixedSensitivity::makeW2constant(0.1, Ts);
+    const auto W3 = ctrl::MixedSensitivity::makeW3(30.0, 1.5, 0.01, Ts);
+    const auto P  = ctrl::MixedSensitivity::build(G, W1, W2, W3);
+
+    REQUIRE(!P.D11.isZero(1e-12)); // sanity: confirms this is the real rejection case
+    REQUIRE_THROWS_WITH(ctrl::DiscreteH2::solve(P), Catch::Matchers::ContainsSubstring("D11"));
+}
+
+TEST_CASE("DiscreteH2::solve throws on rank-deficient D12/D21", "[h2][hinf]")
+{
+    ctrl::GeneralisedPlant P = makeH2CrossTermPlant();
+    P.D12 = Eigen::MatrixXd::Zero(2, 1); // rank 0, nu = 1 -> not full column rank
+    REQUIRE_THROWS_AS(ctrl::DiscreteH2::solve(P), std::invalid_argument);
+
+    ctrl::GeneralisedPlant P2 = makeH2CrossTermPlant();
+    P2.D21 = Eigen::MatrixXd::Zero(1, 2); // rank 0, ny = 1 -> not full row rank
+    REQUIRE_THROWS_AS(ctrl::DiscreteH2::solve(P2), std::invalid_argument);
+}
+
+TEST_CASE("DiscreteH2::solve throws on nonzero D22", "[h2][hinf]")
+{
+    ctrl::GeneralisedPlant P = makeH2CrossTermPlant();
+    P.D22 = Eigen::MatrixXd::Constant(1, 1, 0.1);
+    REQUIRE_THROWS_WITH(ctrl::DiscreteH2::solve(P), Catch::Matchers::ContainsSubstring("D22"));
+}
+
+TEST_CASE("DiscreteH2 closed-loop compute() stays bounded under a unit-impulse disturbance",
+          "[h2][hinf]")
+{
+    const ctrl::GeneralisedPlant P = makeH2CrossTermPlant();
+    const ctrl::H2Result result = ctrl::DiscreteH2::solve(P);
+    REQUIRE(result.feasible);
+
+    ctrl::DiscreteH2 h2(result);
+    double y = 1.0; // unit-impulse-like initial measurement
+    bool all_finite = true;
+    for (int k = 0; k < 200; ++k)
+    {
+        const double u = h2.compute(y);
+        all_finite = all_finite && std::isfinite(u);
+        // Simple scalar plant response under the synthesised control, feeding back y = x:
+        y = P.A(0,0) * y + P.B2(0,0) * u;
+    }
+    REQUIRE(all_finite);
+    REQUIRE(std::abs(y) < 1e-3); // closed loop is stable -> decays to ~0 in 200 steps
+}
+
+TEST_CASE("DiscreteLQR::solveDARE visibility change is a pure no-op (regression)", "[h2][lqr]")
+{
+    // DiscreteLQR::solveDARE was made public so DiscreteH2 could reuse it (lib/DiscreteLQR.h).
+    // This confirms the externally-called result matches what DiscreteLQR computes
+    // internally for the same (A,B,Q,R) - i.e. the visibility edit changed zero behaviour.
+    const Eigen::MatrixXd A = Eigen::MatrixXd::Constant(1, 1, 0.9);
+    const Eigen::MatrixXd B = Eigen::MatrixXd::Constant(1, 1, 1.0);
+    const Eigen::MatrixXd Q = Eigen::MatrixXd::Constant(1, 1, 1.0);
+    const Eigen::MatrixXd R = Eigen::MatrixXd::Constant(1, 1, 0.5);
+
+    const ctrl::DareResult direct = ctrl::DiscreteLQR::solveDARE(A, B, Q, R);
+    REQUIRE(direct.converged);
+
+    ctrl::LQRParams lp; lp.Q = Q; lp.R = R;
+    const ctrl::DiscreteLQR lqr(ctrl::StateSpace(A, B, Eigen::MatrixXd::Identity(1,1),
+                                                  Eigen::MatrixXd::Zero(1,1), 0.1), lp);
+    REQUIRE_THAT(direct.P(0, 0), WithinAbs(lqr.riccatiSolution()(0, 0), 1e-12));
+}
+
+#endif // CTRL_HAS_HINF
 
 // =============================================================================
 // SCIPY / python-control cross-validation (reference values computed 2026-05-28)

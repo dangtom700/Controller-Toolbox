@@ -1308,4 +1308,123 @@ MuSynResult DiscreteHinf::solveMuSyn(const GeneralisedPlant &P,
     return best;
 }
 
+// =============================================================================
+// solveStructured - fixed-order/fixed-structure Hinf synthesis via CMA-ES direct search
+//
+// Non-commercial analogue of MATLAB's hinfstruct(): parameterise the controller via a
+// caller-supplied StructureFn and minimise the closed-loop Hinf norm over theta using
+// AutoTuner (CMA-ES). Unstable candidates get a smooth penalty (see StructuredHinfParams
+// docs) rather than a hard +infinity wall, since CMA-ES needs gradient information to climb
+// back toward stability when minimising (unlike WorstCaseSearch's maximisation searches,
+// where a flat +inf wall is fine because any unstable point is equally "good" there).
+//
+// Ref: Apkarian & Noll, "Nonsmooth H-infinity Synthesis", IEEE TAC 51(1), 2006.
+// =============================================================================
+StructuredHinfResult DiscreteHinf::solveStructured(const GeneralisedPlant &P,
+                                                    StructureFn structureFn,
+                                                    const Eigen::VectorXd &theta0,
+                                                    const StructuredHinfParams &params)
+{
+    if (theta0.size() == 0)
+        throw std::invalid_argument("DiscreteHinf::solveStructured: theta0 must be non-empty.");
+    if (params.lower.size() != 0 && params.lower.size() != theta0.size())
+        throw std::invalid_argument(
+            "DiscreteHinf::solveStructured: params.lower must be empty or match theta0 size.");
+    if (params.upper.size() != 0 && params.upper.size() != theta0.size())
+        throw std::invalid_argument(
+            "DiscreteHinf::solveStructured: params.upper must be empty or match theta0 size.");
+
+    // Validate structureFn's output dimensions once, up front - buildClosedLoop() will only
+    // give a confusing Eigen dimension-mismatch assertion/crash on a mismatch, not a clean
+    // error, and this check runs once rather than inside the CMA-ES inner loop.
+    {
+        Eigen::MatrixXd Ak0, Bk0, Ck0, Dk0;
+        structureFn(theta0, Ak0, Bk0, Ck0, Dk0);
+        const int nk0 = static_cast<int>(Ak0.rows());
+        if (Ak0.cols() != nk0)
+            throw std::invalid_argument("DiscreteHinf::solveStructured: structureFn's Ak must be square.");
+        if (Bk0.rows() != nk0 || Bk0.cols() != P.ny())
+            throw std::invalid_argument(
+                "DiscreteHinf::solveStructured: structureFn's Bk has the wrong shape (expected nk x ny).");
+        if (Ck0.rows() != P.nu() || Ck0.cols() != nk0)
+            throw std::invalid_argument(
+                "DiscreteHinf::solveStructured: structureFn's Ck has the wrong shape (expected nu x nk).");
+        if (Dk0.rows() != P.nu() || Dk0.cols() != P.ny())
+            throw std::invalid_argument(
+                "DiscreteHinf::solveStructured: structureFn's Dk has the wrong shape (expected nu x ny).");
+    }
+
+    // -------------------------------------------------------------------------
+    // CMA-ES cost function: build the candidate controller, guard the (I-Dk*D22)
+    // invertibility buildClosedLoop() needs, check stability, return the Hinf norm (or a
+    // smooth instability penalty).
+    // -------------------------------------------------------------------------
+    auto cost = [&](const Eigen::VectorXd &theta) -> double
+    {
+        Eigen::MatrixXd Ak, Bk, Ck, Dk;
+        structureFn(theta, Ak, Bk, Ck, Dk);
+
+        const Eigen::MatrixXd M = Eigen::MatrixXd::Identity(P.nu(), P.nu()) - Dk * P.D22;
+        Eigen::FullPivLU<Eigen::MatrixXd> luM(M);
+        if (!luM.isInvertible())
+            return params.instabilityPenaltyBase;
+
+        Eigen::MatrixXd A_cl, B_cl, C_cl, D_cl;
+        buildClosedLoop(P, Ak, Bk, Ck, Dk, A_cl, B_cl, C_cl, D_cl);
+        const StateSpace cl(A_cl, B_cl, C_cl, D_cl, P.Ts);
+
+        if (!SystemAnalysis::isDiscreteStable(cl))
+        {
+            const auto poles = SystemAnalysis::getPoles(cl);
+            double maxMag = 0.0;
+            for (const auto &p : poles) maxMag = std::max(maxMag, std::abs(p));
+            return params.instabilityPenaltyBase
+                 + params.instabilityPenaltySlope * std::max(0.0, maxMag - 1.0);
+        }
+        return SystemAnalysis::calculateHInfinityNorm(cl);
+    };
+
+    // -------------------------------------------------------------------------
+    // CMA-ES search (same lambda-derivation pattern as WorstCaseSearch::runWorstCaseSearch)
+    // -------------------------------------------------------------------------
+    const int n = static_cast<int>(theta0.size());
+    AutoTunerParams atp;
+    atp.n      = n;
+    atp.sigma0 = params.sigma0;
+    atp.lower  = params.lower;
+    atp.upper  = params.upper;
+    const int lambda = 4 + static_cast<int>(std::floor(3.0 * std::log(static_cast<double>(std::max(n, 1)))));
+    atp.maxIter = std::max(1, params.maxEvals / std::max(lambda, 1));
+
+    AutoTuner tuner(atp, params.seed);
+    const TunerResult tr = tuner.tune(cost, theta0);
+
+    // -------------------------------------------------------------------------
+    // Re-materialise the best controller and populate the result.
+    // -------------------------------------------------------------------------
+    StructuredHinfResult out;
+    out.theta     = tr.params;
+    out.converged = tr.converged;
+    out.nEvals    = tr.nEvals;
+
+    Eigen::MatrixXd Ak, Bk, Ck, Dk;
+    structureFn(tr.params, Ak, Bk, Ck, Dk);
+
+    out.hinfResult.Ak = Ak;
+    out.hinfResult.Bk = Bk;
+    out.hinfResult.Ck = Ck;
+    out.hinfResult.Dk = Dk;
+    out.hinfResult.Ts = P.Ts;
+
+    Eigen::MatrixXd A_cl, B_cl, C_cl, D_cl;
+    buildClosedLoop(P, Ak, Bk, Ck, Dk, A_cl, B_cl, C_cl, D_cl);
+    const StateSpace cl(A_cl, B_cl, C_cl, D_cl, P.Ts);
+    out.hinfResult.feasible      = SystemAnalysis::isDiscreteStable(cl);
+    out.hinfResult.achievedGamma = out.hinfResult.feasible
+        ? SystemAnalysis::calculateHInfinityNorm(cl)
+        : std::numeric_limits<double>::infinity();
+
+    return out;
+}
+
 } // namespace ctrl

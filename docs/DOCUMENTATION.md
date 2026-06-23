@@ -56,7 +56,7 @@ This installs `python=3.11`, `numpy`, `scipy`, `matplotlib`, `pandas`, `scikit-l
 controller/
 |-- CMakeLists.txt          # Root build, subdir aggregator
 |-- lib/                    # Library sources (build target: controller_toolbox)
-|-- examples/               # Single-file demos (ex01..ex82 C++) + examples/python/ (ex01..ex102 Python)
+|-- examples/               # Single-file demos (ex01..ex88 C++) + examples/python/ (Python)
 |-- case-study/             # 9 C++ built + 7 Python-only implemented studies, plus spec-only
 |--                          #   stubs/scaffolds tracked in docs/case_study_status.md
 |-- tests/                  # CTest-driven unit + integration tests
@@ -103,7 +103,7 @@ This produces the static library `build/lib/libcontroller_toolbox.a` (or `.lib` 
 cd build && ctest --output-on-failure
 ```
 
-Three test targets are registered in [tests/CMakeLists.txt](../tests/CMakeLists.txt): `controller_tests`, `tuner_tests`, `integration_tests`.
+Many test executables are registered in [tests/CMakeLists.txt](../tests/CMakeLists.txt) (21 `add_executable` targets as of this writing): the Catch2 suites (`test_catch2_advanced`, `test_catch2_pilot`, `test_stability_margins`, `test_autoscheduling`), the legacy hand-rolled suites (`test_controllers`, `test_tuners_extended`, `test_integration`), the embedded-subset suite (`test_embedded_subset`), and the per-study regression suites. Filter by name or Catch2 tag, e.g. `ctest -R test_catch2_advanced` or `build/tests/test_catch2_advanced.exe [smc]`. Run `conda run -n soft_robotics -- python run.py` for the canonical full pass.
 
 ### 2.3 Linking Against the Library
 
@@ -180,7 +180,7 @@ cmake --build build --target docs
 
 ### 3.2 Examples (`examples/`)
 
-82 single-file C++ programs (`ex01_*` through `ex82_*`) plus `example_pid_feedback`. Each demonstrates one controller, composition pattern, identification method, or corrector architecture. See [examples/CMakeLists.txt](../examples/CMakeLists.txt) for the full enumeration.
+~89 single-file C++ programs (`ex01_*` through `ex88_*`) plus `example_pid_feedback`. Each demonstrates one controller, composition pattern, identification method, or corrector architecture. See [examples/CMakeLists.txt](../examples/CMakeLists.txt) for the full enumeration. The most recent additions cover the robustness/synthesis growth in v2 (e.g. `ex88_h2_synthesis.cpp` for `DiscreteH2`).
 
 **C++ example groups:**
 
@@ -465,6 +465,7 @@ SISO TF -> controllable canonical SS conversion.
 - **Purpose:** Abstract base for all SISO controllers; uniform interface for stacking and tuning.
 - **Pure-virtual:** `compute(double signal) -> double`, `reset()`, `sampleTime() const -> double`.
 - **Convention:** `signal` is the **error** `e = r - y` for tracking controllers, the **plant output** for optimisation controllers (ESC) and observer-based controllers (ADRC, LQG).
+- **Sign-convention introspection (`signConvention()`):** Virtual, returns a `SignConvention` enum (`Unspecified` by default; audited overrides return `TrackingErrorRMinusY`, `TrackingErrorYMinusR`, `PlantOutput`, `CostSignal`, or `Other`). Lets a caller query a controller's `compute()` convention at runtime instead of only from docs - the library intentionally does **not** enforce one convention across controllers. See [forensic_reconstruction.md Phase 0.3](forensic_reconstruction.md#phase-0) for the full per-controller mapping.
 - **Observer (telemetry):** `attachObserver(IControllerObserver*)` stores a non-owning raw pointer -- caller must ensure the observer outlives the controller. `attachObserver(std::shared_ptr<IControllerObserver>)` co-owns the observer, safe for Python bindings and dynamically-allocated observers. `detachObserver()` releases both.
 
 ---
@@ -499,15 +500,16 @@ SISO TF -> controllable canonical SS conversion.
 #### `DiscreteLQG` ([DiscreteLQG.h](../lib/DiscreteLQG.h))
 - **Purpose:** LQR on Kalman-estimated state - output-feedback optimal control (separation principle).
 - **Constructor:** `(plant, LQRParams, Q_noise, R_noise, P0 = I)`.
-- **Inputs:** `step(y, u_prev, x_ref) -> u[k]` for MIMO; SISO scalar overload `compute(double y_scalar)` needs prior `setReference()` + `setUPrev()`.
+- **Inputs:** `step(y, u_prev, x_ref) -> u[k]` for MIMO; SISO scalar overload `compute(double y_scalar)` needs prior `setReference()` + `setUPrev()`. `compute()` honours the hold-last-on-NaN contract (returns the previous `u` on non-finite input).
 - **Returns:** Control vector `u[k]`. Internal state estimate via `stateEstimate()`.
 - **Methods:** `step(...)`, `compute(...)`, `setReference(x_ref)`, `setUPrev(u)`, `reset()`, `gainMatrix()`.
 - **D != 0 note:** If the plant's D matrix is non-zero, a `std::cerr` warning is printed at construction. The Kalman innovation `y - C.x^ - D.u` must use `u[k-1]` (one step stale) because `u[k]` has not yet been computed at update time. Accuracy degrades proportionally to D's magnitude. Set D = 0 in the model for accurate filtering.
 
 #### `DiscreteSMC` ([DiscreteSMC.h](../lib/DiscreteSMC.h))
 - **Purpose:** First-order SMC with sliding surface `s = c_e.e + c_de.(e - e_prev)` and saturation `sat(s/phi)` to reduce chattering.
+- **Sign convention (IMPORTANT):** `compute()` takes `e = y - r` (the **reverse** of DiscretePID's `e = r - y`). The sliding law `u = -K.sat(s/phi)` requires `s`, and therefore the error, to grow with `y - r` for a positive-gain plant. `signConvention()` returns `TrackingErrorYMinusR`. (Same convention for `SuperTwistingSMC`.) See `CONTRIBUTING.md#sign-conventions`.
 - **Parameters (`SMCParams`):** `c_e`, `c_de`, `K` (switching gain), `phi` (boundary layer thickness), `uMin/uMax`.
-- **Inputs:** `compute(error)`.
+- **Inputs:** `compute(error)` with `error = y - r`.
 - **Returns:** Saturated control `u[k]`.
 - **Methods:** `compute(e)`, `slidingSurface()`, `setParams(p)`, `reset()`.
 - **`c_de` sizing:** `c_de` absorbs the sample time `Ts`. To match a continuous-time slope `lambda` [1/s], set `c_de = lambda . Ts`. Passing a continuous-time `lambda` directly as `c_de` over-weights the rate term by a factor of `1/Ts`.
@@ -570,6 +572,12 @@ SISO TF -> controllable canonical SS conversion.
 - **`solve(plant, W1, W2, W3)` -> `HinfResult`:** Solves the standard weighted H-infinity problem. `HinfResult` fields: `controller` (`StateSpace`), `achievedGamma` (actual H-infinity norm), `converged`.
 - **`mixedSensitivity(plant, W1, W2, W3)` -> `HinfResult`:** Convenience wrapper for `[W1*S; W2*KS; W3*T]` mixed-sensitivity design.
 - **`solveMuSyn(plant, params)` -> `MuSynResult`:** Full DK-iteration mu-synthesis. `MuSynParams` fields: `maxDKIter`, `useRationalD` (if true, fits first-order rational D_j(z) per frequency channel). `MuSynResult` includes `controller`, `dFilters_L`, `dFilters_R` (rational D filters per channel), `muHistory` (mu upper bound per iteration).
+
+#### `DiscreteH2` ([DiscreteH2.h](../lib/DiscreteH2.h)) *(requires `CTRL_HAS_HINF`)*
+- **Purpose:** Discrete-time H2-optimal (LQG) dynamic output-feedback synthesis. Minimises the closed-loop H2 norm `||F_l(P, K)||_2` via the LQG separation principle (a control DARE + a dual filter DARE, each reduced to a no-cross-term DARE and solved by `DiscreteLQR::solveDARE`).
+- **Plant format:** Reuses `GeneralisedPlant` from [DiscreteHinf.h](../lib/DiscreteHinf.h). **Regularity assumptions (enforced by throwing):** `D11 = 0`, `D22 = 0`, `D12` full column rank, `D21` full row rank. Because most `MixedSensitivity::build()` plants have `D11 != 0`, pair `DiscreteH2` with a hand-built generalised plant (see [examples/ex88_h2_synthesis.cpp](../examples/ex88_h2_synthesis.cpp)).
+- **`solve(P, params = {}) -> H2Result`:** Fields `feasible`, `achievedH2Norm`, `Ts`, controller matrices `Ak/Bk/Ck/Dk` (Dk always 0), Riccati diagnostics `X/Y`, `dareConvX/dareConvY`. Check `feasible` before constructing.
+- **Controller:** `DiscreteH2(result)` implements `IController`: `compute(y)` (SISO; `signal` is the measurement `y`, **not** the tracking error - same convention as DiscreteHinf), `computeVec(y)` (MIMO), `reset()`, plus read-only accessors `Ak()/Bk()/Ck()/Dk()`, `controllerState()`, `achievedH2Norm()`. Honours the hold-last-on-NaN contract.
 
 #### Fuzzy Logic Module ([FuzzyLogic.h](../lib/FuzzyLogic.h))
 
@@ -728,6 +736,12 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 - **Methods:** `n4sid(y, u, n, i)` -> `StateSpace`; `suggestOrder(y, u, maxOrder)` -> recommended model order from singular value elbow detection.
 - **Inputs:** `y` (p x N output data matrix), `u` (m x N input data matrix), `n` (model order), `i` (block-row factor, typically n <= i <= 2n).
 
+#### `FreqDomainIdentifier` ([FreqDomainIdentifier.h](../lib/FreqDomainIdentifier.h))
+- **Purpose:** Frequency-domain SISO identification via Levy's method (1959) - fits a discrete `TransferFunction` directly to complex frequency-response samples (the inverse of `SystemAnalysis::getFrequencyResponse`). This is the classical single-shot fit behind MATLAB `invfreqz`.
+- **Method:** `static fitLevy(freqs, response, num_order, den_order, Ts) -> FreqDomainFitResult { tf, rmse, full_rank }`.
+- **Inputs:** `freqs` [rad/s] and complex `response` `H(e^{j.omega.Ts})` (same length); numerator/denominator orders; `Ts`. Throws if lengths differ or the system is underdetermined (`freqs.size() < num_order + 1 + den_order`).
+- **Note:** Levy's fit carries a known high-frequency bias; for SK-iteration / real-pole magnitude fitting see [VectorFitting.h](../lib/VectorFitting.h).
+
 #### `GainScheduledController` ([GainScheduledController.h](../lib/GainScheduledController.h)) *Part 20+23*
 - **Purpose:** IController wrapper that interpolates between a sorted list of (p, IController) schedule points.
 - **Modes:** `NearestNeighbor` (hard-switch; calls `bumplessInit` on the incoming controller when the active index changes -- Part 23 fix); `LinearBlend` (weighted average of adjacent controllers).
@@ -851,7 +865,13 @@ Standalone heuristics; each exposes `tuneImpl(...)` (unchecked) and `tuneFor<C>(
 
 #### `SystemAnalysis` ([SystemAnalysis.h](../lib/SystemAnalysis.h))
 - **Purpose:** Frequency-domain and stability analysis utilities (static methods).
-- **Methods:** `getPoles(sys)`, `isDiscreteStable(sys)`, `solveDiscreteLyapunov(A, Q)`, `getFrequencyResponse(sys, freqs)`, `calculateMargins(sys) -> StabilityMargins { gainMarginDb, phaseMarginDeg, wCrossoverGain, wCrossoverPhase }`, `calculateHInfinityNorm(sys)` (grid approximation - treat as lower bound).
+- **Methods:** `getPoles(sys)`, `isDiscreteStable(sys)`, `solveDiscreteLyapunov(A, Q)`, `getFrequencyResponse(sys, freqs)`, `getSingularValues(sys, freqs)` (singular values of `G(e^{j.omega.Ts})` per frequency, descending; SISO and MIMO - for SISO equals `|getFrequencyResponse()|`), `calculateMargins(sys) -> StabilityMargins { gainMarginDb, phaseMarginDeg, wCrossoverGain, wCrossoverPhase }`, `calculateHInfinityNorm(sys)` (grid approximation - treat as lower bound).
+
+#### Robustness analysis ([RobustnessAnalysis.h](../lib/RobustnessAnalysis.h), [MuAnalysis.h](../lib/MuAnalysis.h), [WorstCaseSearch.h](../lib/WorstCaseSearch.h), [LyapunovRobustness.h](../lib/LyapunovRobustness.h))
+- **`RobustnessAnalysis`:** Monte-Carlo closed-loop robustness - spawns perturbed plants and aggregates stability / margin / sensitivity statistics. (Roadmap Phase 1.)
+- **`MuAnalysis`:** Structured singular value (mu) D-scaling upper bound; `peakMu`, `robustStabilityRadius`. (Phase 3.)
+- **`WorstCaseSearch`:** CMA-ES worst-case parameter search over plant uncertainty. Free functions `findWorstCaseSensitivity(...)` (maximise `||S||_inf`), `findWorstCaseIAE(...)` (maximise step IAE), and generic `findWorstCase(plant_factory, metric_fn, ...)`. Search runs in normalised coordinates; returns `WorstCaseResult { worst_params, worst_cost, converged, n_evals }`. (Phase 4.)
+- **`LyapunovRobustness`:** `findCommonLyapunov(vertices, Q = {}, params = {}) -> LyapunovResult { found, P, residual, iterations }` - searches for a single `P > 0` proving quadratic stability of a polytopic system over arbitrary switching. Heuristic sum-and-project (no SDP solver); `found` is the authoritative pass/fail. (Phase 5.)
 
 ---
 
@@ -965,6 +985,8 @@ For production deployment, parameter-stability constraints, RTOS integration, an
 - **Section 4** Quick-start parameter tables for an unknown SISO plant.
 
 For tuning workflow choices and history, see [cheatsheet/tuning_methods.md](../cheatsheet/tuning_methods.md) and [cheatsheet/controller-tuning-reference.md](../cheatsheet/controller-tuning-reference.md). For system identification, see [cheatsheet/system_identification.md](../cheatsheet/system_identification.md) and the FOPDT / ARMAX / N4SID sub-notes.
+
+For a source-only architectural reconstruction, the v1 -> v2 breaking-changes / deprecation log, and the full per-controller sign-convention mapping, see [forensic_reconstruction.md](forensic_reconstruction.md).
 
 ---
 

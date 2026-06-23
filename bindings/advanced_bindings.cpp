@@ -509,6 +509,73 @@ Example (mixed-sensitivity design)
         .def("Ck", &ctrl::DiscreteHinf::Ck, py::return_value_policy::copy)
         .def("Dk", &ctrl::DiscreteHinf::Dk, py::return_value_policy::copy);
 
+    // --- H2Params --------------------------------------------------------------
+    py::class_<ctrl::H2Params>(m, "H2Params",
+        "H2 synthesis parameters (currently empty - see DiscreteH2 docs).")
+        .def(py::init<>());
+
+    // --- H2Result --------------------------------------------------------------
+    py::class_<ctrl::H2Result>(m, "H2Result", R"doc(
+Result returned by DiscreteH2.solve().
+
+Check feasible before constructing a DiscreteH2 controller.
+Controller matrices: xk[k+1] = Ak*xk + Bk*y,  u = Ck*xk + Dk*y.
+)doc")
+        .def_readonly("feasible",         &ctrl::H2Result::feasible)
+        .def_readonly("achieved_h2_norm", &ctrl::H2Result::achievedH2Norm)
+        .def_readonly("Ts",               &ctrl::H2Result::Ts)
+        .def_readonly("Ak",               &ctrl::H2Result::Ak)
+        .def_readonly("Bk",               &ctrl::H2Result::Bk)
+        .def_readonly("Ck",               &ctrl::H2Result::Ck)
+        .def_readonly("Dk",               &ctrl::H2Result::Dk)
+        .def_readonly("X",                &ctrl::H2Result::X,
+                      "Control Riccati solution (diagnostics).")
+        .def_readonly("Y",                &ctrl::H2Result::Y,
+                      "Filter Riccati solution (diagnostics).")
+        .def_readonly("dare_conv_x",       &ctrl::H2Result::dareConvX)
+        .def_readonly("dare_conv_y",       &ctrl::H2Result::dareConvY);
+
+    // --- DiscreteH2 --------------------------------------------------------------
+    py::class_<ctrl::DiscreteH2, ctrl::IController,
+               std::shared_ptr<ctrl::DiscreteH2>>(m, "DiscreteH2", R"doc(
+Discrete-time dynamic output-feedback H2-optimal (LQG) controller.
+
+Use DiscreteH2.solve() to synthesise, then construct with the H2Result. Requires a
+GeneralisedPlant with D11 = 0 and D22 = 0 (see class docs) - most MixedSensitivity-built
+plants are not usable here since their W1/W3 weights give D11 != 0.
+
+Example
+-------
+>>> P = ctrl.GeneralisedPlant()  # hand-built, D11 = D22 = 0
+>>> result = ctrl.DiscreteH2.solve(P)
+>>> if result.feasible:
+...     h2 = ctrl.DiscreteH2(result)
+...     u = h2.compute(y_measurement)
+)doc")
+        .def(py::init<const ctrl::H2Result &>(),
+             py::arg("result"),
+             "Construct from a completed synthesis result (result.feasible must be True).")
+        .def_static("solve",
+                    &ctrl::DiscreteH2::solve,
+                    py::arg("P"), py::arg("params") = ctrl::H2Params{},
+                    "Solve the discrete-time H2-optimal output-feedback control problem.")
+        .def("compute",          &ctrl::DiscreteH2::compute,        py::arg("signal"),
+             "SISO interface: signal = measurement y[k] (NOT the error).")
+        .def("compute_vec",      &ctrl::DiscreteH2::computeVec,     py::arg("y"),
+             py::return_value_policy::copy,
+             "MIMO interface: y = measurement vector (ny,); returns u (nu,).")
+        .def("reset",            &ctrl::DiscreteH2::reset)
+        .def("sample_time",      &ctrl::DiscreteH2::sampleTime)
+        .def("controller_state", &ctrl::DiscreteH2::controllerState,
+             py::return_value_policy::copy,
+             "Current internal controller state xk (n,).")
+        .def("achieved_h2_norm", &ctrl::DiscreteH2::achievedH2Norm,
+             "Achieved H2 norm from synthesis.")
+        .def("Ak", &ctrl::DiscreteH2::Ak, py::return_value_policy::copy)
+        .def("Bk", &ctrl::DiscreteH2::Bk, py::return_value_policy::copy)
+        .def("Ck", &ctrl::DiscreteH2::Ck, py::return_value_policy::copy)
+        .def("Dk", &ctrl::DiscreteH2::Dk, py::return_value_policy::copy);
+
     // --- MixedSensitivity ----------------------------------------------------
     py::class_<ctrl::MixedSensitivity>(m, "MixedSensitivity", R"doc(
 Helper that assembles a GeneralisedPlant for S/KS/T mixed-sensitivity design.

@@ -6,9 +6,11 @@ sim/main.py module, then runs analyses for every controller:
 
   1. Monte Carlo     -- parameter robustness sweep using run_single()
   2. Fault sweep     -- sensor / actuator fault injection using run_with_fault()
-  3. WCET            -- per-step compute() timing, only if the study already has
-                       raw case-study/<study>/logs/wcet_*.csv (needs a study-specific
-                       run_wcet_profile() hook in sim/main.py; skipped otherwise)
+  3. WCET            -- per-step compute() timing. Calls the study's
+                       run_wcet_profile() hook in sim/main.py to generate raw
+                       case-study/<study>/logs/wcet_*.csv, then aggregates them
+                       (skipped only if the study has neither the hook nor
+                       pre-existing raw CSVs)
   4. Mu analysis     -- ARMA-based robustness margins from existing run_*.csv logs
 
 Each study's output files are written inside its own case-study/<study>/ folder
@@ -282,19 +284,44 @@ def run_fault_sweep(mod, study: dict, dry_run: bool) -> Path | None:
 
 
 # ---------------------------------------------------------------------------
-# WCET (CSV-based; only runs for studies that already have raw wcet_*.csv
-# data under their logs/ - that data comes from a study-specific
-# run_wcet_profile()-style hook in sim/main.py, which this script does not
-# generate on its own)
+# WCET: if the study's sim/main.py exposes a run_wcet_profile() hook, call it
+# to generate raw logs/wcet_*.csv (per-step compute() timing), then aggregate
+# those into wcet_summary.csv. Studies without the hook (and without
+# pre-existing raw CSVs) are skipped.
 # ---------------------------------------------------------------------------
 
-def run_wcet(study: dict, dry_run: bool) -> Path | None:
-    has_raw = any(study["dir"].joinpath("logs").glob("wcet_*.csv"))
-    if not has_raw:
-        print(f"    [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)")
+def run_wcet(mod, study: dict, dry_run: bool) -> Path | None:
+    logs_dir = study["dir"].joinpath("logs")
+    has_raw = any(logs_dir.glob("wcet_*.csv"))
+    hook = getattr(mod, "run_wcet_profile", None) if mod is not None else None
+
+    if not has_raw and not callable(hook):
+        print(f"    [WCET] SKIP - no logs/wcet_*.csv and no run_wcet_profile() hook in sim/main.py")
         return None
+
     if dry_run:
-        print(f"    [WCET] DRY RUN  (would aggregate existing logs/wcet_*.csv)")
+        if not has_raw:
+            print(f"    [WCET] DRY RUN  (would call run_wcet_profile() then aggregate)")
+        else:
+            print(f"    [WCET] DRY RUN  (would aggregate existing logs/wcet_*.csv)")
+        return None
+
+    # Generate raw timing data from the hook when none exists yet. The hook
+    # signature varies across studies (some take scenario_id, all take an
+    # optional log_dir), so call it with no arguments - every study defaults
+    # to its nominal/first scenario.
+    if not has_raw and callable(hook):
+        try:
+            hook()  # return type varies (str / list of paths); re-glob instead
+            raw = sorted(logs_dir.glob("wcet_*.csv"))
+            has_raw = bool(raw)
+            print(f"    [WCET] Profiled via run_wcet_profile() -> "
+                  f"{len(raw)} raw wcet_*.csv")
+        except Exception as exc:
+            print(f"    [WCET] WARN: run_wcet_profile() failed: {exc}")
+
+    if not has_raw:
+        print(f"    [WCET] SKIP - run_wcet_profile() produced no logs/wcet_*.csv")
         return None
     try:
         from tools.wcet_report import main as wcet_main
@@ -421,10 +448,11 @@ def main(argv=None) -> None:
                     print("  [FAULT] ERROR:")
                     traceback.print_exc()
 
-            # WCET (only if the study already has raw timing data)
+            # WCET (calls the study's run_wcet_profile() hook if present,
+            # then aggregates the raw logs/wcet_*.csv it produces)
             if "wcet" not in skip:
                 try:
-                    run_wcet(study, args.dry_run)
+                    run_wcet(mod, study, args.dry_run)
                 except Exception:
                     print("  [WCET] ERROR:")
                     traceback.print_exc()

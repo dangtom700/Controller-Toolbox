@@ -153,6 +153,7 @@
 // Hinf - honour both legacy CTRL_DISABLE_HINF and new CTRL_HAS_HINF / CTRL_DISABLE_HINF2.
 #if (defined(CTRL_HAS_HINF) || !defined(CTRL_DISABLE_HINF))
 #include "DiscreteHinf.h" ///< Hinf - DGKF 2-Riccati synthesis, Mixed-Sensitivity S/KS/T design.
+#include "DiscreteH2.h"   ///< H2 - discrete LQG/H2 synthesis via cross-term elimination (Phase 4 Iteration 3).
 #endif
 
 #if defined(CTRL_HAS_FUNCTION_APPROX) || (!defined(CTRL_DISABLE_FUNCTION_APPROX))
