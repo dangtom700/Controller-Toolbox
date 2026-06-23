@@ -131,6 +131,20 @@ public:
                                                                    const std::vector<double> &freqs);
 
     /**
+     * @brief Compute singular values of G(e^{jomegaTs}) at each frequency in @p freqs.
+     *
+     * Evaluates the full matrix G(z) = C.(z.I - A)^-^1.B + D (not just a SISO scalar) at
+     * z = e^{jomegaTs}, then takes singular values via Eigen::JacobiSVD. Works for SISO and
+     * MIMO plants alike; for SISO, the single singular value equals |getFrequencyResponse()|.
+     *
+     * @param sys   Discrete-time state-space model (SISO or MIMO).
+     * @param freqs Frequency vector [rad/s].
+     * @return Singular values at each frequency, descending order (same length as freqs).
+     */
+    static std::vector<Eigen::VectorXd> getSingularValues(const StateSpace &sys,
+                                                           const std::vector<double> &freqs);
+
+    /**
      * @brief Compute gain and phase margins for a SISO open-loop plant.
      *
      * Algorithm: coarse logarithmic grid (200 points) to bracket crossings, followed by

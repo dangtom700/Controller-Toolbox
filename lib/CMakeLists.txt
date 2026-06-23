@@ -72,6 +72,7 @@ set(CTRL_CORE_SOURCES
     VectorFitting.cpp
     RobustnessAnalysis.cpp
     MuAnalysis.cpp
+    FreqDomainIdentifier.cpp
 )
 
 # --- Optional sources --------------------------------------------------------

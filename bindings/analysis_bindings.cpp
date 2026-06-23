@@ -142,6 +142,10 @@ TimeDomainMetrics
                     &ctrl::SystemAnalysis::getFrequencyResponse,
                     py::arg("sys"), py::arg("frequencies"),
                     "Evaluate complex frequency response H(e^{j*omega*Ts}) at each frequency.")
+        .def_static("get_singular_values",
+                    &ctrl::SystemAnalysis::getSingularValues,
+                    py::arg("sys"), py::arg("frequencies"),
+                    "Singular values of G(e^{j*omega*Ts}) at each frequency (descending order).")
         .def_static("calculate_margins",
                     &ctrl::SystemAnalysis::calculateMargins,
                     py::arg("sys"),

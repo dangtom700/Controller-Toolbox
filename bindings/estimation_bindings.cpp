@@ -672,4 +672,40 @@ Example
         .def("is_initialized", &ctrl::RecursiveGreyBoxEstimator::isInitialized,
              "True after initialize() has been called.");
 #endif
+
+    // -----------------------------------------------------------------------
+    // FreqDomainIdentifier - Levy's method frequency-domain identification
+    // (Phase 4 Iteration 2)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::FreqDomainFitResult>(m, "FreqDomainFitResult",
+        "Result from FreqDomainIdentifier.fit_levy().")
+        .def_readonly("tf",        &ctrl::FreqDomainFitResult::tf,
+                      "Fitted discrete-time model (TransferFunction).")
+        .def_readonly("rmse",      &ctrl::FreqDomainFitResult::rmse,
+                      "RMS of |H_data - H_fit| across the sample frequencies.")
+        .def_readonly("full_rank", &ctrl::FreqDomainFitResult::full_rank,
+                      "False if the linear least-squares system was rank-deficient "
+                      "(still solved via the least-norm solution, but the fit may be unreliable).");
+
+    py::class_<ctrl::FreqDomainIdentifier>(m, "FreqDomainIdentifier", R"doc(
+Frequency-domain system identification via Levy's method.
+
+Fits a SISO discrete-time TransferFunction directly to complex frequency-response
+samples (freqs, response) - the inverse direction of
+SystemAnalysis.get_frequency_response().
+
+Example
+-------
+>>> tf_true = ctrl.TransferFunction([0.0, 0.2], [1.0, -0.8], 0.1)
+>>> sys = ctrl.tf2ss(tf_true)
+>>> freqs = list(np.linspace(0.5, 20.0, 50))
+>>> response = ctrl.SystemAnalysis.get_frequency_response(sys, freqs)
+>>> result = ctrl.FreqDomainIdentifier.fit_levy(freqs, response, num_order=1, den_order=1, Ts=0.1)
+>>> print(result.tf.num, result.tf.den, result.rmse)
+)doc")
+        .def_static("fit_levy", &ctrl::FreqDomainIdentifier::fitLevy,
+             py::arg("freqs"), py::arg("response"),
+             py::arg("num_order"), py::arg("den_order"), py::arg("Ts"),
+             "Fit a num_order/den_order TransferFunction to (freqs, response) via Levy's "
+             "method (linear least squares). den's constant term is fixed to 1.");
 }

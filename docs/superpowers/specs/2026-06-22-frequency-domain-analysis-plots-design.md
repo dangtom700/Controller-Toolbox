@@ -1,7 +1,7 @@
 # Design: Classical Frequency-Domain Analysis & Plotting
 
 **Date:** 2026-06-22
-**Status:** Approved, not yet implemented
+**Status:** Implemented — see [2026-06-22-frequency-domain-analysis-plots-handoff.md](2026-06-22-frequency-domain-analysis-plots-handoff.md)
 
 ## Motivation
 

@@ -117,6 +117,28 @@ namespace ctrl
         return response;
     }
 
+    std::vector<Eigen::VectorXd> SystemAnalysis::getSingularValues(const StateSpace &sys,
+                                                                     const std::vector<double> &freqs)
+    {
+        std::vector<Eigen::VectorXd> result(freqs.size());
+        const int n = sys.A.rows();
+        Eigen::MatrixXcd I = Eigen::MatrixXcd::Identity(n, n);
+
+        const Eigen::MatrixXcd Ac = sys.A.cast<std::complex<double>>();
+        const Eigen::MatrixXcd Bc = sys.B.cast<std::complex<double>>();
+        const Eigen::MatrixXcd Cc = sys.C.cast<std::complex<double>>();
+        const Eigen::MatrixXcd Dc = sys.D.cast<std::complex<double>>();
+
+        for (size_t i = 0; i < freqs.size(); ++i)
+        {
+            const std::complex<double> z = std::polar(1.0, freqs[i] * sys.Ts);
+            const Eigen::MatrixXcd G = Cc * (z * I - Ac).inverse() * Bc + Dc;
+            Eigen::JacobiSVD<Eigen::MatrixXcd> svd(G);
+            result[i] = svd.singularValues();
+        }
+        return result;
+    }
+
     StabilityMargins SystemAnalysis::calculateMargins(const StateSpace &sys)
     {
         // Precompute complex matrices once for all frequency evaluations

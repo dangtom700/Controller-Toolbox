@@ -1096,7 +1096,31 @@ _L = ctrl.SystemAnalysis.series(_g4_K, _g4_G)
 _dm = ctrl.SystemAnalysis.calculate_disk_margin(_L)
 assert _dm.alpha > 0.0, "disk margin alpha must be positive for a stable loop"
 assert abs(_dm.alpha - 1.0 / _g4n.norm_S) < 1e-9, "alpha must equal 1/||S||_inf"
+assert hasattr(ctrl.SystemAnalysis, 'get_singular_values'), "get_singular_values not bound"
+_sv_freqs = [1.0, 5.0, 10.0]
+_sv = ctrl.SystemAnalysis.get_singular_values(_g4_G, _sv_freqs)
+assert len(_sv) == len(_sv_freqs), "get_singular_values: wrong number of frequency points"
+_sv_resp = _npra.array(ctrl.SystemAnalysis.get_frequency_response(_g4_G, _sv_freqs))
+for _i, _s in enumerate(_sv):
+    assert len(_s) == 1, "SISO get_singular_values should return one value per frequency"
+    assert abs(_s[0] - abs(_sv_resp[_i])) < 1e-9, "SISO singular value must equal |frequency response|"
 print('SystemAnalysis extensions (Phase 2) smoke test passed.')
+
+# FreqDomainIdentifier - Levy's method (Phase 4 Iteration 2) smoke test
+assert hasattr(ctrl, 'FreqDomainIdentifier'), "FreqDomainIdentifier not bound"
+assert hasattr(ctrl, 'FreqDomainFitResult'), "FreqDomainFitResult not bound"
+_fdi_tf = ctrl.TransferFunction([0.0, 0.2], [1.0, -0.8], 0.1)
+_fdi_sys = ctrl.tf2ss(_fdi_tf)
+_fdi_freqs = list(_npra.linspace(0.5, 20.0, 50))
+_fdi_response = ctrl.SystemAnalysis.get_frequency_response(_fdi_sys, _fdi_freqs)
+_fdi_result = ctrl.FreqDomainIdentifier.fit_levy(_fdi_freqs, _fdi_response,
+                                                  num_order=1, den_order=1, Ts=0.1)
+assert _fdi_result.full_rank, "fit_levy: expected a full-rank system for this fixture"
+assert abs(_fdi_result.tf.num[0] - 0.0) < 1e-9, "fit_levy: num[0] should recover 0.0"
+assert abs(_fdi_result.tf.num[1] - 0.2) < 1e-9, "fit_levy: num[1] should recover 0.2"
+assert abs(_fdi_result.tf.den[1] - (-0.8)) < 1e-9, "fit_levy: den[1] should recover -0.8"
+assert _fdi_result.rmse < 1e-9, "fit_levy: rmse should be ~0 for noiseless exact-order data"
+print('FreqDomainIdentifier smoke test passed.')
 
 # MuAnalysis (Structured Singular Value, Phase 3) smoke test
 assert hasattr(ctrl, 'UncertaintyStructure'), "UncertaintyStructure not bound"

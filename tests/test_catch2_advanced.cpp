@@ -52,6 +52,7 @@
 #include "DeePC.h"
 #include "WorstCaseSearch.h"
 #include "LyapunovRobustness.h"
+#include "FreqDomainIdentifier.h"
 #include "hal/HAL.h"   // SimScheduler, StdTimer (HAL not in umbrella by default)
 #include <cmath>
 #include <cstdlib>
@@ -6121,6 +6122,55 @@ TEST_CASE("calculateDiskMargin() throws for a non-square open-loop system",
     REQUIRE_THROWS_AS(ctrl::SystemAnalysis::calculateDiskMargin(non_square), std::invalid_argument);
 }
 
+TEST_CASE("getSingularValues() on a SISO system matches |getFrequencyResponse()|",
+          "[system_analysis_ext]")
+{
+    const auto G = makeFirstOrderPlant(0.6, 0.4, 0.1);
+
+    const std::vector<double> freqs{1.0, 5.0, 15.0};
+    const auto resp = ctrl::SystemAnalysis::getFrequencyResponse(G, freqs);
+    const auto svs  = ctrl::SystemAnalysis::getSingularValues(G, freqs);
+
+    REQUIRE(svs.size() == freqs.size());
+    for (std::size_t i = 0; i < freqs.size(); ++i)
+    {
+        REQUIRE(svs[i].size() == 1);
+        REQUIRE_THAT(svs[i](0), WithinAbs(std::abs(resp[i]), 1e-9));
+    }
+}
+
+TEST_CASE("getSingularValues() on a diagonal 2x2 MIMO system matches sorted SISO channel magnitudes",
+          "[system_analysis_ext]")
+{
+    // Two decoupled first-order channels stacked block-diagonally:
+    //   channel 1: x1+ = 0.6 x1 + 0.4 u1, y1 = x1
+    //   channel 2: x2+ = 0.3 x2 + 0.2 u2, y2 = x2
+    const auto G1 = makeFirstOrderPlant(0.6, 0.4, 0.1);
+    const auto G2 = makeFirstOrderPlant(0.3, 0.2, 0.1);
+
+    Eigen::MatrixXd A(2, 2); A.setZero();
+    A(0, 0) = 0.6; A(1, 1) = 0.3;
+    Eigen::MatrixXd B(2, 2); B.setZero();
+    B(0, 0) = 0.4; B(1, 1) = 0.2;
+    Eigen::MatrixXd C = Eigen::MatrixXd::Identity(2, 2);
+    Eigen::MatrixXd D = Eigen::MatrixXd::Zero(2, 2);
+    const ctrl::StateSpace G_mimo(A, B, C, D, 0.1);
+
+    const std::vector<double> freqs{1.0, 8.0};
+    const auto resp1 = ctrl::SystemAnalysis::getFrequencyResponse(G1, freqs);
+    const auto resp2 = ctrl::SystemAnalysis::getFrequencyResponse(G2, freqs);
+    const auto svs   = ctrl::SystemAnalysis::getSingularValues(G_mimo, freqs);
+
+    for (std::size_t i = 0; i < freqs.size(); ++i)
+    {
+        REQUIRE(svs[i].size() == 2);
+        const double m1 = std::abs(resp1[i]);
+        const double m2 = std::abs(resp2[i]);
+        REQUIRE_THAT(svs[i](0), WithinAbs(std::max(m1, m2), 1e-9));
+        REQUIRE_THAT(svs[i](1), WithinAbs(std::min(m1, m2), 1e-9));
+    }
+}
+
 // -----------------------------------------------------------------------------
 // MuAnalysis - Structured Singular Value (Phase 3)
 // -----------------------------------------------------------------------------
@@ -6414,5 +6464,76 @@ TEST_CASE("findCommonLyapunov throws on empty vertices or a dimension mismatch",
     Eigen::MatrixXd A1(1, 1); A1 << 0.5;
     Eigen::MatrixXd A2(2, 2); A2 << 0.5, 0.0, 0.0, 0.5;
     REQUIRE_THROWS_AS(ctrl::findCommonLyapunov({A1, A2}), std::invalid_argument);
+}
+
+// -----------------------------------------------------------------------------
+// FreqDomainIdentifier - Levy's method (Phase 4 Iteration 2)
+// -----------------------------------------------------------------------------
+
+TEST_CASE("fitLevy recovers exact coefficients of a known 1st-order system from noiseless response",
+          "[freq_domain_id]")
+{
+    // True plant: H(z^-1) = 0.2 z^-1 / (1 - 0.8 z^-1)  (the smoke_test.py minimal example,
+    // written with the leading b0=0 term explicit so tf2ss doesn't have to right-pad it).
+    const ctrl::TransferFunction tf({0.0, 0.2}, {1.0, -0.8}, 0.1);
+    const auto sys = ctrl::tf2ss(tf);
+
+    const std::vector<double> freqs{0.5, 1.0, 2.0, 5.0, 10.0, 15.0, 20.0};
+    const auto response = ctrl::SystemAnalysis::getFrequencyResponse(sys, freqs);
+
+    const auto result = ctrl::FreqDomainIdentifier::fitLevy(freqs, response,
+                                                            /*num_order=*/1,
+                                                            /*den_order=*/1,
+                                                            /*Ts=*/0.1);
+
+    REQUIRE(result.full_rank);
+    REQUIRE(result.tf.num.size() == 2u);
+    REQUIRE(result.tf.den.size() == 2u);
+    REQUIRE_THAT(result.tf.num[0], WithinAbs(0.0, 1e-9));
+    REQUIRE_THAT(result.tf.num[1], WithinAbs(0.2, 1e-9));
+    REQUIRE_THAT(result.tf.den[0], WithinAbs(1.0, 1e-12));
+    REQUIRE_THAT(result.tf.den[1], WithinAbs(-0.8, 1e-9));
+    REQUIRE_THAT(result.rmse, WithinAbs(0.0, 1e-9));
+}
+
+TEST_CASE("fitLevy recovers exact coefficients of the README's 2nd-order plant from noiseless response",
+          "[freq_domain_id]")
+{
+    // True plant: H(z^-1) = (0.0048 z^-1 + 0.0047 z^-2) / (1 - 1.81 z^-1 + 0.819 z^-2)
+    // (the README's plant, written with the leading b0=0 term explicit - see the 1st-order
+    // test above for why).
+    const ctrl::TransferFunction tf({0.0, 0.0048, 0.0047}, {1.0, -1.81, 0.819}, 0.01);
+    const auto sys = ctrl::tf2ss(tf);
+
+    const std::vector<double> freqs{1.0, 5.0, 10.0, 25.0, 50.0, 75.0, 100.0, 150.0};
+    const auto response = ctrl::SystemAnalysis::getFrequencyResponse(sys, freqs);
+
+    const auto result = ctrl::FreqDomainIdentifier::fitLevy(freqs, response,
+                                                            /*num_order=*/2,
+                                                            /*den_order=*/2,
+                                                            /*Ts=*/0.01);
+
+    REQUIRE(result.full_rank);
+    REQUIRE(result.tf.num.size() == 3u);
+    REQUIRE(result.tf.den.size() == 3u);
+    REQUIRE_THAT(result.tf.num[0], WithinAbs(0.0, 1e-7));
+    REQUIRE_THAT(result.tf.num[1], WithinAbs(0.0048, 1e-7));
+    REQUIRE_THAT(result.tf.num[2], WithinAbs(0.0047, 1e-7));
+    REQUIRE_THAT(result.tf.den[0], WithinAbs(1.0, 1e-12));
+    REQUIRE_THAT(result.tf.den[1], WithinAbs(-1.81, 1e-6));
+    REQUIRE_THAT(result.tf.den[2], WithinAbs(0.819, 1e-6));
+    REQUIRE_THAT(result.rmse, WithinAbs(0.0, 1e-7));
+}
+
+TEST_CASE("fitLevy throws when there are fewer frequency samples than unknown coefficients",
+          "[freq_domain_id]")
+{
+    // num_order=1, den_order=2 -> 1+1+2 = 4 unknowns, but only 2 samples provided.
+    const std::vector<double> freqs{1.0, 5.0};
+    const std::vector<std::complex<double>> response{{0.1, 0.0}, {0.2, -0.1}};
+
+    REQUIRE_THROWS_AS(
+        ctrl::FreqDomainIdentifier::fitLevy(freqs, response, 1, 2, 0.01),
+        std::invalid_argument);
 }
 

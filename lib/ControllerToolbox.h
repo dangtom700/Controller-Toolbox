@@ -130,6 +130,7 @@
 #include "MuAnalysis.h"                ///< MuAnalysis - structured singular value (mu) D-scaling upper bound, peakMu, robustStabilityRadius (Robustness Phase 3).
 #include "WorstCaseSearch.h"           ///< WorstCaseSearch - CMA-ES worst-case parameter search over plant uncertainty (Robustness Phase 4).
 #include "LyapunovRobustness.h"        ///< LyapunovRobustness - common quadratic Lyapunov function for polytopic uncertainty (Robustness Phase 5).
+#include "FreqDomainIdentifier.h"      ///< FreqDomainIdentifier - Levy's method frequency-domain system identification (Phase 4 Iteration 2).
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,
