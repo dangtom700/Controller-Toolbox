@@ -54,6 +54,7 @@
 #include "WorstCaseSearch.h"
 #include "LyapunovRobustness.h"
 #include "FreqDomainIdentifier.h"
+#include "ResonantController.h"
 #include "hal/HAL.h"   // SimScheduler, StdTimer (HAL not in umbrella by default)
 #include <cmath>
 #include <cstdlib>
@@ -3866,31 +3867,53 @@ TEST_CASE("TubeMPC scalar compute holds last output on NaN", "[nan_guard]")
 
 TEST_CASE("DiscreteHinf NaN guard returns last finite output, state not corrupted", "[nan_guard]")
 {
-    // Minimal 1-state H-inf synthesis to get a constructable K(z).
+    // The hold-last NaN/Inf contract is a property of DiscreteHinf::compute(),
+    // which depends only on the synthesised controller matrices (Ak/Bk/Ck/Dk) -
+    // not on whether DGKF synthesis converged for any particular plant. Build a
+    // known-stable controller directly from a HinfResult so the guard is always
+    // exercised deterministically. (The previous version ran DiscreteHinf::solve()
+    // on a mixed-sensitivity plant and silently skipped every assertion via WARN
+    // whenever that synthesis happened to be infeasible - so the guard could go
+    // entirely untested. Synthesis itself is covered separately by the
+    // solve()/solveMuSyn() cases above.)
     const double Ts = 0.05;
-    Eigen::MatrixXd Ag(1,1), Bg(1,1), Cg(1,1), Dg(1,1);
-    Ag << 0.9; Bg << 0.1; Cg << 1.0; Dg << 0.0;
-    ctrl::StateSpace G(Ag, Bg, Cg, Dg, Ts);
 
-    const auto W1 = ctrl::MixedSensitivity::makeW1(5.0,  1.0, 1e-3, Ts);
-    const auto W2 = ctrl::MixedSensitivity::makeW2constant(0.3, Ts);
-    const auto W3 = ctrl::MixedSensitivity::makeW3(20.0, 1.5, 1e-3, Ts);
-    const auto P  = ctrl::MixedSensitivity::build(G, W1, W2, W3);
-
-    ctrl::HinfParams hp; hp.gammaInit = 20.0; hp.gammaTol = 0.1;
-    const auto result = ctrl::DiscreteHinf::solve(P, hp);
-    if (!result.feasible) { WARN("H-inf synthesis infeasible - NaN-guard test skipped"); return; }
+    ctrl::HinfResult result;
+    result.feasible      = true;
+    result.Ts            = Ts;
+    result.achievedGamma = 1.5;
+    // 2-state SISO controller K(z): stable Ak (|eig| < 1) and a non-zero Dk so a
+    // valid step yields a non-trivial output we can compare against on hold-last.
+    result.Ak = (Eigen::MatrixXd(2, 2) <<  0.5,  0.0,
+                                           0.0, -0.3).finished();
+    result.Bk = (Eigen::MatrixXd(2, 1) <<  0.2,
+                                           0.1).finished();
+    result.Ck = (Eigen::MatrixXd(1, 2) <<  1.0, -0.5).finished();
+    result.Dk = (Eigen::MatrixXd(1, 1) <<  0.4).finished();
 
     ctrl::DiscreteHinf K(result);
-    // One valid step - populates u_prev_
+
+    // One valid step populates the internal state and the last-output cache.
     const double u_valid = K.compute(0.1);
     REQUIRE(std::isfinite(u_valid));
-    // NaN input -> hold last, xk_ must not be corrupted
-    const double u_held = K.compute(std::numeric_limits<double>::quiet_NaN());
-    REQUIRE(std::isfinite(u_held));
-    REQUIRE_THAT(u_held, WithinAbs(u_valid, 1e-12));
-    // Recovery: next valid call should produce finite output
-    REQUIRE(std::isfinite(K.compute(0.1)));
+    REQUIRE(u_valid != 0.0);                                  // Dk != 0 -> non-trivial
+    const Eigen::VectorXd state_before = K.controllerState();
+
+    // NaN input: hold the last finite output AND leave the controller state untouched.
+    const double u_nan = K.compute(std::numeric_limits<double>::quiet_NaN());
+    REQUIRE(std::isfinite(u_nan));
+    REQUIRE_THAT(u_nan, WithinAbs(u_valid, 1e-12));
+    REQUIRE(K.controllerState().isApprox(state_before));      // state not corrupted
+
+    // +Inf input: same hold-last behaviour, still no state advance.
+    const double u_inf = K.compute(std::numeric_limits<double>::infinity());
+    REQUIRE_THAT(u_inf, WithinAbs(u_valid, 1e-12));
+    REQUIRE(K.controllerState().isApprox(state_before));
+
+    // Recovery: a finite input after NaN/Inf advances the state and stays finite.
+    const double u_recover = K.compute(0.1);
+    REQUIRE(std::isfinite(u_recover));
+    REQUIRE_FALSE(K.controllerState().isApprox(state_before));
 }
 
 TEST_CASE("AntiWindupWrapper integral stays bounded under saturation", "[anti_windup_contract]")
@@ -6688,5 +6711,105 @@ TEST_CASE("fitLevy throws when there are fewer frequency samples than unknown co
     REQUIRE_THROWS_AS(
         ctrl::FreqDomainIdentifier::fitLevy(freqs, response, 1, 2, 0.01),
         std::invalid_argument);
+}
+
+TEST_CASE("ResonantController steady-state gain at the target frequency equals Kr exactly",
+          "[resonant_controller]")
+{
+    const double Ts = 1e-4;
+    ctrl::ResonantParams p;
+    p.targetFreqHz = 50.0;
+    p.dampingRadPerSec = 5.0;
+    p.Kr = 2.0;
+    ctrl::ResonantController rc(p, Ts);
+
+    const int N = 30000; // 3s = 150 cycles @ 50Hz, ample settling margin
+    double maxAbsLastCycle = 0.0;
+    for (int k = 0; k < N; ++k)
+    {
+        const double e = std::sin(2.0 * M_PI * p.targetFreqHz * k * Ts);
+        const double u = rc.compute(e);
+        if (k >= N - 200)
+            maxAbsLastCycle = std::max(maxAbsLastCycle, std::fabs(u));
+    }
+    REQUIRE_THAT(maxAbsLastCycle, WithinRel(p.Kr, 0.001));
+}
+
+TEST_CASE("ResonantController attenuates strongly away from the target frequency",
+          "[resonant_controller]")
+{
+    const double Ts = 1e-4;
+    ctrl::ResonantParams p;
+    p.targetFreqHz = 50.0;
+    p.dampingRadPerSec = 5.0;
+    p.Kr = 2.0;
+    ctrl::ResonantController rc(p, Ts);
+
+    const int N = 30000;
+    double maxAbsLastCycle = 0.0;
+    const double fOff = 150.0;
+    for (int k = 0; k < N; ++k)
+    {
+        const double e = std::sin(2.0 * M_PI * fOff * k * Ts);
+        const double u = rc.compute(e);
+        if (k >= N - 200)
+            maxAbsLastCycle = std::max(maxAbsLastCycle, std::fabs(u));
+    }
+    REQUIRE(maxAbsLastCycle < 0.1); // << Kr=2.0 at resonance
+}
+
+TEST_CASE("ResonantController holds last output on a non-finite input and leaves state unchanged",
+          "[resonant_controller]")
+{
+    ctrl::ResonantParams p;
+    p.targetFreqHz = 50.0; p.dampingRadPerSec = 5.0; p.Kr = 2.0;
+    ctrl::ResonantController rc(p, 1e-4);
+
+    const double u1 = rc.compute(1.0);
+    const double u_nan = rc.compute(std::numeric_limits<double>::quiet_NaN());
+    REQUIRE(u_nan == u1);
+
+    const double u2 = rc.compute(1.0);
+    ctrl::ResonantController rc_ref(p, 1e-4);
+    rc_ref.compute(1.0);
+    const double u2_ref = rc_ref.compute(1.0);
+    REQUIRE_THAT(u2, WithinAbs(u2_ref, 1e-12));
+}
+
+TEST_CASE("ResonantController reset() clears internal state", "[resonant_controller]")
+{
+    ctrl::ResonantParams p;
+    p.targetFreqHz = 50.0; p.dampingRadPerSec = 5.0; p.Kr = 2.0;
+    ctrl::ResonantController rc(p, 1e-4);
+
+    for (int k = 0; k < 100; ++k)
+        rc.compute(std::sin(2.0 * M_PI * 50.0 * k * 1e-4));
+    rc.reset();
+
+    ctrl::ResonantController rc_fresh(p, 1e-4);
+    REQUIRE_THAT(rc.compute(1.0), WithinAbs(rc_fresh.compute(1.0), 1e-12));
+}
+
+TEST_CASE("ResonantController throws on invalid construction parameters", "[resonant_controller]")
+{
+    ctrl::ResonantParams p;
+    p.targetFreqHz = 50.0; p.dampingRadPerSec = 5.0; p.Kr = 2.0;
+
+    ctrl::ResonantParams bad1 = p; bad1.targetFreqHz = 0.0;
+    REQUIRE_THROWS_AS(ctrl::ResonantController(bad1, 1e-4), std::invalid_argument);
+
+    ctrl::ResonantParams bad2 = p; bad2.dampingRadPerSec = -1.0;
+    REQUIRE_THROWS_AS(ctrl::ResonantController(bad2, 1e-4), std::invalid_argument);
+
+    ctrl::ResonantParams bad3 = p; bad3.targetFreqHz = 6000.0; // Nyquist = 5000Hz at Ts=1e-4
+    REQUIRE_THROWS_AS(ctrl::ResonantController(bad3, 1e-4), std::invalid_argument);
+}
+
+TEST_CASE("ResonantController reports TrackingErrorRMinusY as its sign convention",
+          "[resonant_controller]")
+{
+    ctrl::ResonantParams p; p.targetFreqHz = 50.0; p.dampingRadPerSec = 5.0; p.Kr = 2.0;
+    ctrl::ResonantController rc(p, 1e-4);
+    REQUIRE(rc.signConvention() == ctrl::SignConvention::TrackingErrorRMinusY);
 }
 

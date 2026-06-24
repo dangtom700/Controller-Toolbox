@@ -73,6 +73,7 @@ set(CTRL_CORE_SOURCES
     RobustnessAnalysis.cpp
     MuAnalysis.cpp
     FreqDomainIdentifier.cpp
+    ResonantController.cpp
 )
 
 # --- Optional sources --------------------------------------------------------
