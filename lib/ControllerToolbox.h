@@ -132,6 +132,8 @@
 #include "LyapunovRobustness.h"        ///< LyapunovRobustness - common quadratic Lyapunov function for polytopic uncertainty (Robustness Phase 5).
 #include "FreqDomainIdentifier.h"      ///< FreqDomainIdentifier - Levy's method frequency-domain system identification (Phase 4 Iteration 2).
 #include "ResonantController.h"       ///< ResonantController - single-harmonic internal-model corrector; composes via ControllerStack(Additive).
+#include "NotchFilter.h"              ///< NotchFilter - fixed-design biquad notch filter (Bristow-Johnson cookbook); no IController base.
+#include "PhaseLockedLoop.h"          ///< PhaseLockedLoop - single-input SOGI-PLL phase/frequency estimator; no IController base.
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,

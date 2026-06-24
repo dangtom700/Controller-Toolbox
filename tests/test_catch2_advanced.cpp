@@ -6813,3 +6813,174 @@ TEST_CASE("ResonantController reports TrackingErrorRMinusY as its sign conventio
     REQUIRE(rc.signConvention() == ctrl::SignConvention::TrackingErrorRMinusY);
 }
 
+TEST_CASE("NotchFilter attenuates a sinusoid exactly at the center frequency to near zero",
+          "[notch_filter]")
+{
+    const double Ts = 1e-4;
+    ctrl::NotchFilterParams p;
+    p.centerFreqHz = 50.0;
+    p.Q = 10.0;
+    ctrl::NotchFilter nf(p, Ts);
+
+    const int N = 6000; // 30 cycles - enough for the near-unit-circle poles (Q=10) to settle
+    double maxAbsLastCycle = 0.0;
+    for (int k = 0; k < N; ++k)
+    {
+        const double x = std::sin(2.0 * M_PI * p.centerFreqHz * k * Ts);
+        const double y = nf.apply(x);
+        if (k >= N - 200)
+            maxAbsLastCycle = std::max(maxAbsLastCycle, std::fabs(y));
+    }
+    REQUIRE(maxAbsLastCycle < 0.01);
+}
+
+TEST_CASE("NotchFilter passes a sinusoid far from the center frequency through largely unchanged",
+          "[notch_filter]")
+{
+    const double Ts = 1e-4;
+    ctrl::NotchFilterParams p;
+    p.centerFreqHz = 50.0;
+    p.Q = 10.0;
+    ctrl::NotchFilter nf(p, Ts);
+
+    const int N = 3000;
+    double maxAbsLastCycle = 0.0;
+    const double fFar = 200.0;
+    for (int k = 0; k < N; ++k)
+    {
+        const double x = std::sin(2.0 * M_PI * fFar * k * Ts);
+        const double y = nf.apply(x);
+        if (k >= N - 200)
+            maxAbsLastCycle = std::max(maxAbsLastCycle, std::fabs(y));
+    }
+    REQUIRE(maxAbsLastCycle > 0.9);
+    REQUIRE(maxAbsLastCycle < 1.1);
+}
+
+TEST_CASE("NotchFilter holds last output on a non-finite input", "[notch_filter]")
+{
+    ctrl::NotchFilterParams p; p.centerFreqHz = 50.0; p.Q = 10.0;
+    ctrl::NotchFilter nf(p, 1e-4);
+
+    const double y1 = nf.apply(1.0);
+    const double y_nan = nf.apply(std::numeric_limits<double>::quiet_NaN());
+    REQUIRE(y_nan == y1);
+}
+
+TEST_CASE("NotchFilter reset() clears internal state", "[notch_filter]")
+{
+    ctrl::NotchFilterParams p; p.centerFreqHz = 50.0; p.Q = 10.0;
+    ctrl::NotchFilter nf(p, 1e-4);
+
+    for (int k = 0; k < 100; ++k)
+        nf.apply(std::sin(2.0 * M_PI * 50.0 * k * 1e-4));
+    nf.reset();
+
+    ctrl::NotchFilter nf_fresh(p, 1e-4);
+    REQUIRE_THAT(nf.apply(1.0), WithinAbs(nf_fresh.apply(1.0), 1e-12));
+}
+
+TEST_CASE("NotchFilter throws on invalid construction parameters", "[notch_filter]")
+{
+    ctrl::NotchFilterParams p; p.centerFreqHz = 50.0; p.Q = 10.0;
+
+    ctrl::NotchFilterParams bad1 = p; bad1.centerFreqHz = 0.0;
+    REQUIRE_THROWS_AS(ctrl::NotchFilter(bad1, 1e-4), std::invalid_argument);
+
+    ctrl::NotchFilterParams bad2 = p; bad2.Q = -1.0;
+    REQUIRE_THROWS_AS(ctrl::NotchFilter(bad2, 1e-4), std::invalid_argument);
+
+    ctrl::NotchFilterParams bad3 = p; bad3.centerFreqHz = 6000.0;
+    REQUIRE_THROWS_AS(ctrl::NotchFilter(bad3, 1e-4), std::invalid_argument);
+}
+
+TEST_CASE("PhaseLockedLoop converges to the true phase and frequency of a synthetic sinusoid",
+          "[pll]")
+{
+    const double Ts = 1e-4;
+    ctrl::PLLParams p;
+    p.nominalFreqHz = 50.0;
+    p.Kp = 90.0;
+    p.Ki = 4000.0;
+    ctrl::PhaseLockedLoop pll(p, Ts);
+
+    const int N = 20000; // 2s, ~22x the ~90ms loop settling time
+    double phaseTrue = 0.7; // nonzero initial offset to exercise convergence
+    for (int k = 0; k < N; ++k)
+    {
+        pll.step(std::sin(phaseTrue));
+        phaseTrue += 2.0 * M_PI * 50.0 * Ts;
+    }
+    const double trueWrapped = std::atan2(std::sin(phaseTrue), std::cos(phaseTrue));
+    const double diff = std::atan2(std::sin(pll.phase() - trueWrapped),
+                                    std::cos(pll.phase() - trueWrapped));
+
+    REQUIRE(pll.locked());
+    REQUIRE_THAT(pll.frequencyHz(), WithinAbs(50.0, 0.5));
+    REQUIRE(std::fabs(diff) < 0.1);
+}
+
+TEST_CASE("PhaseLockedLoop re-converges after a step change in the true input frequency", "[pll]")
+{
+    const double Ts = 1e-4;
+    ctrl::PLLParams p;
+    p.nominalFreqHz = 50.0;
+    p.Kp = 90.0;
+    p.Ki = 4000.0;
+    ctrl::PhaseLockedLoop pll(p, Ts);
+
+    const int N = 20000; // 2s total, 1s at 50Hz then 1s at 53Hz
+    double phaseTrue = 0.0;
+    double fTrue = 50.0;
+    for (int k = 0; k < N; ++k)
+    {
+        if (k == N / 2) fTrue = 53.0;
+        pll.step(std::sin(phaseTrue));
+        phaseTrue += 2.0 * M_PI * fTrue * Ts;
+    }
+
+    REQUIRE(pll.locked());
+    REQUIRE_THAT(pll.frequencyHz(), WithinAbs(53.0, 0.5));
+}
+
+TEST_CASE("PhaseLockedLoop holds its estimate on a non-finite sample", "[pll]")
+{
+    ctrl::PLLParams p; p.nominalFreqHz = 50.0; p.Kp = 90.0; p.Ki = 4000.0;
+    ctrl::PhaseLockedLoop pll(p, 1e-4);
+
+    for (int k = 0; k < 100; ++k)
+        pll.step(std::sin(2.0 * M_PI * 50.0 * k * 1e-4));
+    const double freqBefore = pll.frequencyHz();
+    const double phaseBefore = pll.phase();
+
+    pll.step(std::numeric_limits<double>::quiet_NaN());
+
+    REQUIRE(pll.frequencyHz() == freqBefore);
+    REQUIRE(pll.phase() == phaseBefore);
+}
+
+TEST_CASE("PhaseLockedLoop reset() returns the frequency estimate to nominal", "[pll]")
+{
+    ctrl::PLLParams p; p.nominalFreqHz = 50.0; p.Kp = 90.0; p.Ki = 4000.0;
+    ctrl::PhaseLockedLoop pll(p, 1e-4);
+
+    for (int k = 0; k < 1000; ++k)
+        pll.step(std::sin(2.0 * M_PI * 53.0 * k * 1e-4)); // off-nominal input
+    pll.reset();
+
+    REQUIRE_THAT(pll.frequencyHz(), WithinAbs(50.0, 1e-9));
+    REQUIRE_THAT(pll.phase(), WithinAbs(0.0, 1e-9));
+    REQUIRE(!pll.locked());
+}
+
+TEST_CASE("PhaseLockedLoop throws on invalid construction parameters", "[pll]")
+{
+    ctrl::PLLParams p; p.nominalFreqHz = 50.0; p.Kp = 90.0; p.Ki = 4000.0;
+
+    ctrl::PLLParams bad1 = p; bad1.nominalFreqHz = 0.0;
+    REQUIRE_THROWS_AS(ctrl::PhaseLockedLoop(bad1, 1e-4), std::invalid_argument);
+
+    ctrl::PLLParams bad2 = p; bad2.nominalFreqHz = 6000.0;
+    REQUIRE_THROWS_AS(ctrl::PhaseLockedLoop(bad2, 1e-4), std::invalid_argument);
+}
+

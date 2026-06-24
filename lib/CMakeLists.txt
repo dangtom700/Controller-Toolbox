@@ -74,6 +74,8 @@ set(CTRL_CORE_SOURCES
     MuAnalysis.cpp
     FreqDomainIdentifier.cpp
     ResonantController.cpp
+    NotchFilter.cpp
+    PhaseLockedLoop.cpp
 )
 
 # --- Optional sources --------------------------------------------------------
