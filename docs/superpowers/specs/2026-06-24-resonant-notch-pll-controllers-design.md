@@ -173,8 +173,12 @@ same defensive posture as above). Constructor throws `std::invalid_argument` for
 4. `bindings/controllers_bindings.cpp` — bind as `shared_ptr<ResonantController>` + `IController`
    base (required for `ControllerStack.add_controller()` from Python)
 5. `bindings/smoke_test.py` — construct, call `compute()`, confirm callable
-6. `examples/ex89_resonant_controller.cpp` — base PID + resonant correction via
-   `ControllerStack(Additive)` rejecting a sinusoidal disturbance, PASS/FAIL print
+6. `examples/ex89_resonant_controller.cpp` — demonstrates the multi-harmonic composition
+   pattern from the Components section explicitly: a `ControllerStack(StackMode::Additive)`
+   holding a base PID plus two `ResonantController` instances (e.g. 5th + 7th harmonic),
+   rejecting a multi-harmonic sinusoidal disturbance that the PID alone leaves a steady-state
+   ripple on. PASS/FAIL based on residual ripple amplitude after convergence, confirming the
+   stack — not a one-off manual summation — is what's doing the composition.
 7. `tests/test_catch2_advanced.cpp` — tests under `[resonant_controller]` (see Testing plan)
 8. `CONTRIBUTING.md` sign-convention table — add `ResonantController` -> `TrackingErrorRMinusY`
 
