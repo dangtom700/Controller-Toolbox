@@ -24,3 +24,4 @@ data/
 case-study/**/*.csv
 case-study/**/HANDOFF_PROMPT.md
 .claude/settings.local.json
+build_debug/

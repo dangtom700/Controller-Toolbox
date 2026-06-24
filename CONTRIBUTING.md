@@ -160,6 +160,7 @@ These conventions are tribal knowledge. They **must** be respected when implemen
 | `MRACController` | plant output `y_plant` | Call `setReference(r)` before each `compute(y_plant)` |
 | `FeedbackLinearisationController` | `e = r - y` | Call `setState(x)` before each compute() |
 | `NonlinearMPC` | `e = r - y` or set via `setReference()` | Call `setState(x)` before each compute() |
+| `ResonantController` | `e = r - y` (tracking error) | Composes via `ControllerStack(Additive)`; one instance per target harmonic |
 
 ---
 

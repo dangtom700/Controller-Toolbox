@@ -502,6 +502,66 @@ Usage
              "Reset particles and weights; requires re-initialisation.");
 
     // -----------------------------------------------------------------------
+    // NotchFilter
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::NotchFilterParams>(m, "NotchFilterParams",
+        "Tuning parameters for NotchFilter.")
+        .def(py::init<>())
+        .def_readwrite("centerFreqHz", &ctrl::NotchFilterParams::centerFreqHz,
+                       "Center frequency to attenuate [Hz].")
+        .def_readwrite("Q",            &ctrl::NotchFilterParams::Q,
+                       "Quality factor = centerFreqHz / bandwidth.");
+
+    py::class_<ctrl::NotchFilter>(m, "NotchFilter", R"doc(
+Discrete biquad notch filter (Bristow-Johnson "Audio EQ Cookbook" formulation).
+
+No setpoint/error semantics - applies to any sampled signal.
+
+Example
+-------
+>>> p = ctrl.NotchFilterParams(); p.centerFreqHz = 50.0; p.Q = 10.0
+>>> nf = ctrl.NotchFilter(p, Ts=1e-4)
+>>> y = nf.apply(x)
+)doc")
+        .def(py::init<const ctrl::NotchFilterParams &, double>(),
+             py::arg("params"), py::arg("Ts"))
+        .def("apply",      &ctrl::NotchFilter::apply, py::arg("x"))
+        .def("reset",      &ctrl::NotchFilter::reset)
+        .def("set_params", &ctrl::NotchFilter::setParams, py::arg("params"))
+        .def("params",     &ctrl::NotchFilter::params, py::return_value_policy::copy);
+
+    // -----------------------------------------------------------------------
+    // PhaseLockedLoop
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::PLLParams>(m, "PLLParams",
+        "Tuning parameters for PhaseLockedLoop.")
+        .def(py::init<>())
+        .def_readwrite("nominalFreqHz", &ctrl::PLLParams::nominalFreqHz, "Expected/center frequency [Hz].")
+        .def_readwrite("Kp",            &ctrl::PLLParams::Kp, "PI loop-filter proportional gain.")
+        .def_readwrite("Ki",            &ctrl::PLLParams::Ki, "PI loop-filter integral gain.")
+        .def_readwrite("sogiK",         &ctrl::PLLParams::sogiK, "SOGI damping gain (default sqrt(2)).");
+
+    py::class_<ctrl::PhaseLockedLoop>(m, "PhaseLockedLoop", R"doc(
+Single-input SOGI-PLL: tracks the phase and frequency of one sampled sinusoid.
+
+Example
+-------
+>>> p = ctrl.PLLParams(); p.nominalFreqHz = 50.0; p.Kp = 90.0; p.Ki = 4000.0
+>>> pll = ctrl.PhaseLockedLoop(p, Ts=1e-4)
+>>> pll.step(sample)
+>>> pll.frequency_hz(), pll.phase(), pll.locked()
+)doc")
+        .def(py::init<const ctrl::PLLParams &, double>(),
+             py::arg("params"), py::arg("Ts"))
+        .def("step",         &ctrl::PhaseLockedLoop::step, py::arg("sample"))
+        .def("phase",        &ctrl::PhaseLockedLoop::phase)
+        .def("frequency_hz", &ctrl::PhaseLockedLoop::frequencyHz)
+        .def("amplitude",    &ctrl::PhaseLockedLoop::amplitude)
+        .def("locked",       &ctrl::PhaseLockedLoop::locked)
+        .def("reset",        &ctrl::PhaseLockedLoop::reset)
+        .def("params",       &ctrl::PhaseLockedLoop::params, py::return_value_policy::copy);
+
+    // -----------------------------------------------------------------------
     // GreyBoxEstimator (E1) - LM parameter estimation for ODE f(x,u,p)
     // -----------------------------------------------------------------------
     py::class_<ctrl::GreyBoxEstimator::Params>(m, "GreyBoxParams",

@@ -127,6 +127,9 @@ for %%T in (
     ex86_worst_case
     ex87_lyapunov_robust
     ex88_h2_synthesis
+    ex89_resonant_controller
+    ex90_notch_filter
+    ex91_phase_locked_loop
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

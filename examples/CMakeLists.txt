@@ -134,6 +134,15 @@ add_example(ex87_lyapunov_robust)
 # Robust Control Phase 4 Iteration 3: discrete H2/LQG synthesis
 add_example(ex88_h2_synthesis)
 
+# Additional Controller Types: ResonantController multi-harmonic disturbance rejection
+add_example(ex89_resonant_controller)
+
+# Additional Controller Types: NotchFilter removing a known resonance
+add_example(ex90_notch_filter)
+
+# Additional Controller Types: PhaseLockedLoop tracking a synthetic AC signal
+add_example(ex91_phase_locked_loop)
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)

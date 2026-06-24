@@ -70,6 +70,42 @@ Example
              py::arg("u_target"), py::arg("error"));
 
     // -----------------------------------------------------------------------
+    // ResonantController
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::ResonantParams>(m, "ResonantParams",
+        "Tuning parameters for ResonantController (single-harmonic internal-model corrector).")
+        .def(py::init<>())
+        .def_readwrite("targetFreqHz",     &ctrl::ResonantParams::targetFreqHz,
+                       "Harmonic frequency to reject/track [Hz].")
+        .def_readwrite("dampingRadPerSec", &ctrl::ResonantParams::dampingRadPerSec,
+                       "Bandwidth/peak-width parameter wc [rad/s].")
+        .def_readwrite("Kr",               &ctrl::ResonantParams::Kr,
+                       "Resonant gain - the exact steady-state gain at targetFreqHz.")
+        .def_readwrite("uMin",             &ctrl::ResonantParams::uMin, "Output saturation lower limit.")
+        .def_readwrite("uMax",             &ctrl::ResonantParams::uMax, "Output saturation upper limit.");
+
+    py::class_<ctrl::ResonantController, ctrl::IController,
+               std::shared_ptr<ctrl::ResonantController>>(m, "ResonantController", R"doc(
+Discrete-time non-ideal (finite-Q) resonant controller for single-harmonic rejection.
+
+Composes through ControllerStack(Additive) alongside a base controller, one instance per
+target harmonic.
+
+Example
+-------
+>>> rp = ctrl.ResonantParams(); rp.targetFreqHz = 50.0; rp.dampingRadPerSec = 5.0; rp.Kr = 2.0
+>>> rc = ctrl.ResonantController(rp, Ts=1e-4)
+>>> u = rc.compute(error)
+)doc")
+        .def(py::init<const ctrl::ResonantParams &, double>(),
+             py::arg("params"), py::arg("Ts"))
+        .def("compute",     &ctrl::ResonantController::compute, py::arg("error"))
+        .def("reset",       &ctrl::ResonantController::reset)
+        .def("sample_time", &ctrl::ResonantController::sampleTime)
+        .def("set_params",  &ctrl::ResonantController::setParams, py::arg("params"))
+        .def("params",      &ctrl::ResonantController::params, py::return_value_policy::copy);
+
+    // -----------------------------------------------------------------------
     // DiscreteLeadLag
     // -----------------------------------------------------------------------
     py::class_<ctrl::LeadLagParams>(m, "LeadLagParams",

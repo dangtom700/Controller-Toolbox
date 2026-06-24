@@ -1239,4 +1239,39 @@ assert ctrl.is_quadratically_stable(_lyap_vertices), "small box around a stable 
 assert not ctrl.is_quadratically_stable([_npra.array([[1.5]])]), "unstable vertex must fail"
 print('LyapunovRobustness (Phase 5) smoke test passed.')
 
+# ---------------------------------------------------------------------------
+# Additional Controller Types: ResonantController
+# ---------------------------------------------------------------------------
+rp = ctrl.ResonantParams()
+rp.targetFreqHz = 50.0
+rp.dampingRadPerSec = 5.0
+rp.Kr = 2.0
+rc = ctrl.ResonantController(rp, 1e-4)
+u_rc = rc.compute(1.0)
+assert math.isfinite(u_rc)
+print(f'ResonantController compute(1.0) = {u_rc:.4f}')
+
+# ---------------------------------------------------------------------------
+# Additional Controller Types: NotchFilter
+# ---------------------------------------------------------------------------
+nfp = ctrl.NotchFilterParams()
+nfp.centerFreqHz = 50.0
+nfp.Q = 10.0
+nf = ctrl.NotchFilter(nfp, 1e-4)
+y_nf = nf.apply(1.0)
+assert math.isfinite(y_nf)
+print(f'NotchFilter apply(1.0) = {y_nf:.4f}')
+
+# ---------------------------------------------------------------------------
+# Additional Controller Types: PhaseLockedLoop
+# ---------------------------------------------------------------------------
+pllp = ctrl.PLLParams()
+pllp.nominalFreqHz = 50.0
+pllp.Kp = 90.0
+pllp.Ki = 4000.0
+pll = ctrl.PhaseLockedLoop(pllp, 1e-4)
+pll.step(1.0)
+assert math.isfinite(pll.frequency_hz())
+print(f'PhaseLockedLoop frequency_hz() after one step = {pll.frequency_hz():.4f}')
+
 print('\nAll smoke tests passed.')

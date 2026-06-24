@@ -52,6 +52,8 @@ Read both compact files for tribal knowledge before making any changes to contro
 | **ROB-1** | Robustness analysis (fault sweep + Monte Carlo + WCET via `case-study/common/RobustnessStats.h`) for C++ case studies — 3 studies Part 64 (ActiveSuspension/Humidification/SolarCooling), remaining 7 Part 66 (Boiler/Tug/BuckBoost/SolarCooker/SOTEC/SMISMO/Stewart) | MED | **Done for all 10 C++ studies (Part 64 + 66)** — open for ~21 Python-only/not-yet-implemented studies |
 | **GR-1** | `tools/generate_report.py` `_section_comparison()` raised `KeyError` on any study with zero parseable run rows (every Open-placeholder/Not-started scaffold) | LOW | **Done (Part 66)** |
 | **AE-WCET** | Aircraft Engine Thermal Management `run_wcet_profile()` + `config/analysis.json` hook | LOW | **Done (Part 66)** |
+| **ACT-1** | Added `ResonantController`/`NotchFilter`/`PhaseLockedLoop` ("Additional Controller Types" backlog category) | MED | **Done (Part 67)** |
+| **DBG-1** | `-DCMAKE_BUILD_TYPE=Debug` (`-g`) fails on pre-existing Eigen-heavy TUs (`DiscreteHinf.cpp`, `test_catch2_advanced.cpp`); root cause not fixed, workaround documented | LOW | Open |
 
 ---
 
@@ -1074,3 +1076,47 @@ Crash Fix — 2026-06-20
 **Docs updated:** `CLAUDE.md` Part 66 entry + Open Items; `docs/PROJECT_MASTER_STATE.md`
 reconciled to Part 66; `docs/ALGORITHM_ROADMAP_PHASE2.md` status line corrected; this
 report's header table + section.
+
+---
+
+## Part 67 — Debug-Build (`-g`) Toolchain Limitation Found While Adding ResonantController/
+NotchFilter/PhaseLockedLoop — 2026-06-24
+
+While verifying the new `ResonantController`/`NotchFilter`/`PhaseLockedLoop` classes
+(`docs/superpowers/specs/2026-06-24-resonant-notch-pll-controllers-design.md`) under
+`-DCMAKE_BUILD_TYPE=Debug`, two **pre-existing, unrelated** failures surfaced — confirmed
+not caused by the new code:
+
+- **`lib/DiscreteHinf.cpp` fails to compile with `-g`** (any level, including `-g1`) on this
+  MSYS2 UCRT64 `g++` toolchain. `-O0` alone (no `-g`) compiles fine. The compiler exits 1
+  with **no diagnostic text on stderr** — consistent with the GCC/MinGW DWARF debug-info
+  emission pass choking on heavy Eigen template instantiation in a large translation unit,
+  not a real code defect. Confirmed pre-existing by directly recompiling the file in
+  isolation; the file was not touched by this session's changes.
+- **`tests/test_catch2_advanced.cpp` fails the same way under `-g`.** Confirmed pre-existing
+  (not caused by the 16 new test cases added this session) by extracting the file's content
+  from immediately before this session's changes (commit `ccc1134`) and recompiling that
+  exact pre-change version with the same flags — it fails identically.
+- **Separately, linking `test_catch2_advanced.exe` under Debug (`-O0`, no `-g`) intermittently
+  fails with `collect2.exe: error: ld returned 5 exit status`.** Windows error code 5 is
+  `ERROR_ACCESS_DENIED` — consistent with a transient antivirus/file-lock race on the
+  freshly-written `.exe`, not a real link error: the output binary is present at the correct
+  size immediately after the reported "failure," and simply re-running the link (or just
+  running the already-produced executable) succeeds.
+
+**Net effect:** none of this blocks the new classes — all three compile cleanly individually
+under `-g`, and the full Release build (`-DCMAKE_BUILD_TYPE=Release`) is unaffected (368/368
+`ctest` cases pass, smoke test passes, all three new examples PASS). `CLAUDE.md`'s canonical
+build/test commands are Release-only already; this is the first session to have exercised
+`-DCMAKE_BUILD_TYPE=Debug` against this codebase, surfacing a toolchain limitation that
+predates this work and was simply never triggered before.
+
+**Not fixed — flagged for a future design iteration, not this session:** root-causing GCC's
+`-g` DWARF-emission failure on Eigen-heavy translation units (likely requires a GCC version
+change, splitting `DiscreteHinf.cpp`/`test_catch2_advanced.cpp` into smaller TUs, or different
+debug-info flags) is a separate, materially larger investigation than the scope of adding
+three new `lib/` classes. Workaround for anyone who needs a Debug build meanwhile: configure
+with `-DCMAKE_CXX_FLAGS_DEBUG=-O0` to get Debug optimization semantics without `-g`, and retry
+the link step if it hits a transient `ld returned 5`.
+
+**Docs updated:** this report's header table + new Part 67 section.
