@@ -134,6 +134,47 @@ Example
              "Number of samples processed since construction or last reset.");
 
     // -----------------------------------------------------------------------
+    // HammersteinWienerIdentifier (Phase 3 SI5)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::HammersteinWienerParams>(m, "HammersteinWienerParams",
+        "Parameters for HammersteinWienerIdentifier.")
+        .def(py::init<>())
+        .def_readwrite("na",        &ctrl::HammersteinWienerParams::na)
+        .def_readwrite("nb",        &ctrl::HammersteinWienerParams::nb)
+        .def_readwrite("nl_degree", &ctrl::HammersteinWienerParams::nl_degree)
+        .def_readwrite("max_iter",  &ctrl::HammersteinWienerParams::max_iter)
+        .def_readwrite("tol",       &ctrl::HammersteinWienerParams::tol);
+
+    py::class_<ctrl::HammersteinWienerResult>(m, "HammersteinWienerResult",
+        "Result from HammersteinWienerIdentifier.fit_hammerstein()/fit_wiener().")
+        .def_readonly("nl_input_coeffs",  &ctrl::HammersteinWienerResult::nl_input_coeffs,
+                      "Hammerstein static map [c0..c_d], c1 fixed = 1.0.")
+        .def_readonly("nl_output_coeffs", &ctrl::HammersteinWienerResult::nl_output_coeffs,
+                      "Wiener static map [d0..d_d], d1 fixed = 1.0 (empty for fit_hammerstein).")
+        .def_readonly("linear_part",      &ctrl::HammersteinWienerResult::linear_part)
+        .def_readonly("converged",        &ctrl::HammersteinWienerResult::converged)
+        .def_readonly("iters",            &ctrl::HammersteinWienerResult::iters);
+
+    py::class_<ctrl::HammersteinWienerIdentifier>(m, "HammersteinWienerIdentifier", R"doc(
+Hammerstein (static input nonlinearity -> linear dynamics) and Wiener (linear dynamics ->
+static output nonlinearity) structured nonlinear identification via alternating
+linear/nonlinear least squares.
+
+Example
+-------
+>>> result = ctrl.HammersteinWienerIdentifier.fit_hammerstein(u, y, Ts=0.1)
+>>> print(result.nl_input_coeffs, result.linear_part.num, result.linear_part.den)
+)doc")
+        .def_static("fit_hammerstein", &ctrl::HammersteinWienerIdentifier::fitHammerstein,
+             py::arg("u"), py::arg("y"), py::arg("Ts"),
+             py::arg("params") = ctrl::HammersteinWienerParams(),
+             "Fit a Hammerstein model: v[k] = poly(u[k]), then linear ARX(v -> y).")
+        .def_static("fit_wiener", &ctrl::HammersteinWienerIdentifier::fitWiener,
+             py::arg("u"), py::arg("y"), py::arg("Ts"),
+             py::arg("params") = ctrl::HammersteinWienerParams(),
+             "Fit a Wiener model: linear ARX(u -> w), then y[k] = poly(w[k]).");
+
+    // -----------------------------------------------------------------------
     // ExtendedKalmanFilter  (optional - CTRL_HAS_ADVANCED_KALMAN)
     // -----------------------------------------------------------------------
 #if defined(CTRL_HAS_ADVANCED_KALMAN)
@@ -768,4 +809,81 @@ Example
              py::arg("num_order"), py::arg("den_order"), py::arg("Ts"),
              "Fit a num_order/den_order TransferFunction to (freqs, response) via Levy's "
              "method (linear least squares). den's constant term is fixed to 1.");
+
+    // -----------------------------------------------------------------------
+    // CorrelationID - cross-correlation impulse-response identification
+    // (Phase 3 SI2)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::CorrelationIDParams>(m, "CorrelationIDParams",
+        "Parameters for CorrelationID.identify().")
+        .def(py::init<>())
+        .def_readwrite("max_lag",      &ctrl::CorrelationIDParams::max_lag,
+                       "Impulse-response length to estimate (lags 0..max_lag).")
+        .def_readwrite("whiten_input", &ctrl::CorrelationIDParams::whiten_input,
+                       "Apply a first-order AR pre-whitening pass before correlating "
+                       "(default False).");
+
+    py::class_<ctrl::CorrelationIDResult>(m, "CorrelationIDResult",
+        "Result from CorrelationID.identify().")
+        .def_readonly("impulse_response", &ctrl::CorrelationIDResult::impulse_response,
+                      "Estimated impulse response g_hat(0..max_lag).")
+        .def_readonly("autocorr_u",       &ctrl::CorrelationIDResult::autocorr_u,
+                      "Autocorrelation of the input R_uu(0..max_lag).")
+        .def_readonly("crosscorr_uy",     &ctrl::CorrelationIDResult::crosscorr_uy,
+                      "Cross-correlation of input/output R_uy(0..max_lag).");
+
+    py::class_<ctrl::CorrelationID>(m, "CorrelationID", R"doc(
+Cross-correlation impulse-response identification.
+
+Estimates the impulse response g_hat(k) = R_uy(k) / R_uu(0) from sampled I/O data -
+the classical non-parametric first step in a system-ID workflow, before committing
+to a parametric ARX/state-space structure.
+
+Example
+-------
+>>> u = ctrl.CorrelationID.generate_prbs(200, 6, seed=42)
+>>> result = ctrl.CorrelationID.identify(u, y, Ts=0.01)
+>>> print(result.impulse_response)
+)doc")
+        .def_static("identify", &ctrl::CorrelationID::identify,
+             py::arg("u"), py::arg("y"), py::arg("Ts"),
+             py::arg("params") = ctrl::CorrelationIDParams(),
+             "Estimate the impulse response via cross-correlation. u, y: 1D input/output "
+             "arrays of equal length. Returns a CorrelationIDResult.")
+        .def_static("generate_prbs", &ctrl::CorrelationID::generatePRBS,
+             py::arg("length"), py::arg("n_bits"), py::arg("seed") = 42U,
+             "Generate a maximal-length PRBS test signal (period 2^n_bits - 1, "
+             "values in {-1, +1}, n_bits in [2, 20]).");
+
+    // -----------------------------------------------------------------------
+    // SKFit - Sanathanan-Koerner-reweighted complex-response fitting
+    // (Phase 3 FD1)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::SKFitResult>(m, "SKFitResult",
+        "Result from SKFit.fit_sk().")
+        .def_readonly("model",     &ctrl::SKFitResult::model,
+                      "Fitted discrete-time model (TransferFunction) after the final iteration.")
+        .def_readonly("iter_cost", &ctrl::SKFitResult::iterCost,
+                      "RMSE per SK iteration (index 0 = unweighted Levy baseline).")
+        .def_readonly("converged", &ctrl::SKFitResult::converged,
+                      "True if coefficient displacement dropped below tol.");
+
+    py::class_<ctrl::SKFit>(m, "SKFit", R"doc(
+Sanathanan-Koerner-reweighted complex-response fitting.
+
+Generalizes FreqDomainIdentifier.fit_levy()'s one-shot fit into an iteratively-reweighted
+fit, removing most of Levy's high-frequency bias on lightly-damped responses.
+
+Example
+-------
+>>> result = ctrl.SKFit.fit_sk(freqs, response, num_order=1, den_order=2, Ts=0.1)
+>>> print(result.model.num, result.model.den, result.iter_cost)
+)doc")
+        .def_static("fit_sk", &ctrl::SKFit::fitSK,
+             py::arg("freqs"), py::arg("response"),
+             py::arg("num_order"), py::arg("den_order"), py::arg("Ts"),
+             py::arg("max_iter") = 20, py::arg("tol") = 1e-4,
+             "Fit a num_order/den_order TransferFunction via SK-reweighted least squares. "
+             "Iteration 0 is equivalent to fit_levy(); each subsequent iteration reweights "
+             "by 1/|D_prev|.");
 }

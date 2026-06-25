@@ -69,6 +69,42 @@ public:
     static FreqDomainFitResult fitLevy(const std::vector<double> &freqs,
                                         const std::vector<std::complex<double>> &response,
                                         int num_order, int den_order, double Ts);
+
+    /**
+     * @brief Build the real-stacked Levy linear system Phi*x = y, optionally row-weighted.
+     *
+     * Extracted from @ref fitLevy so @ref SKFit can reuse the same linear-system-build step
+     * inside an outer Sanathanan-Koerner reweighting loop. @p weights defaults to empty
+     * (unweighted, i.e. identical to @ref fitLevy's own system) - passing an empty vector
+     * reproduces @ref fitLevy's behavior exactly, with zero change for existing callers.
+     *
+     * @param freqs     Frequency vector [rad/s].
+     * @param response  Complex frequency response at each frequency in @p freqs.
+     * @param num_order Numerator order m.
+     * @param den_order Denominator order n.
+     * @param Ts        Sample time [s].
+     * @param weights   Per-sample weight (size 0 = unweighted, size `freqs.size()` otherwise);
+     *                  each sample's stacked real/imaginary row pair is scaled by its weight.
+     * @param[out] Phi  Real-stacked system matrix (2*freqs.size() x (num_order+1+den_order)).
+     * @param[out] y    Real-stacked right-hand side (2*freqs.size()).
+     * @throws std::invalid_argument If @p freqs/@p response/@p weights have mismatched
+     *         lengths (when @p weights is non-empty), or if the system is underdetermined.
+     */
+    static void buildLevySystem(const std::vector<double> &freqs,
+                                 const std::vector<std::complex<double>> &response,
+                                 int num_order, int den_order, double Ts,
+                                 const std::vector<double> &weights,
+                                 Eigen::MatrixXd &Phi, Eigen::VectorXd &y);
+
+    /**
+     * @brief RMS of |H_data - N/D| across the sample frequencies for a fitted num/den pair.
+     *
+     * Shared scoring step used by both @ref fitLevy and @ref SKFit::fitSK.
+     */
+    static double fitRMSE(const std::vector<double> &freqs,
+                           const std::vector<std::complex<double>> &response,
+                           const std::vector<double> &num, const std::vector<double> &den,
+                           double Ts);
 };
 
 } // namespace ctrl

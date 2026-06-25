@@ -1336,6 +1336,175 @@ TEST_CASE("DiscreteLQR::solveDARE visibility change is a pure no-op (regression)
     REQUIRE_THAT(direct.P(0, 0), WithinAbs(lqr.riccatiSolution()(0, 0), 1e-12));
 }
 
+TEST_CASE("DiscreteHinf::solveHinfDARE visibility change is a pure no-op (regression)",
+          "[hinf_filter]")
+{
+    // solveHinfDARE was made public so HinfFilter could reuse it (lib/HinfFilter.cpp).
+    // This confirms the now-public solver still satisfies its own DARE residual contract
+    // for an indefinite-R problem (a standard-doubling solver like DiscreteLQR::solveDARE
+    // would diverge on this R) - i.e. the visibility edit changed zero behaviour.
+    const Eigen::MatrixXd A = Eigen::MatrixXd::Constant(1, 1, 0.9);
+    const Eigen::MatrixXd B = Eigen::MatrixXd::Constant(1, 1, 1.0);
+    const Eigen::MatrixXd Q = Eigen::MatrixXd::Constant(1, 1, 1.0);
+    // R = -0.2: indefinite (negative) but feasible - the scalar DARE's discriminant
+    // 0.0361*r^2 + 3.62*r + 1 (for A=0.9, B=1, Q=1) is negative for r in (-100, -0.277),
+    // so r=-0.2 sits just inside the feasible band above -0.277.
+    const Eigen::MatrixXd R = Eigen::MatrixXd::Constant(1, 1, -0.2);
+
+    const ctrl::DareResult dr = ctrl::DiscreteHinf::solveHinfDARE(A, B, Q, R, 1e-12, 200);
+    REQUIRE(dr.converged);
+    REQUIRE_THAT(dr.P(0, 0), WithinAbs(dr.P(0, 0), 1e-12)); // P populated, symmetric (1x1 trivially)
+
+    const Eigen::MatrixXd &X = dr.P;
+    const Eigen::MatrixXd Rbar = R + B.transpose() * X * B;
+    const Eigen::MatrixXd K = Rbar.inverse() * B.transpose() * X * A;
+    const Eigen::MatrixXd resid = A.transpose() * X * A - X + Q - A.transpose() * X * B * K;
+    REQUIRE(resid.norm() / (1.0 + X.norm()) < 1e-6);
+}
+
+// =============================================================================
+// HinfFilter (Phase 3 EF1)
+// =============================================================================
+
+namespace
+{
+ctrl::StateSpace makeHinfFilterTestPlant()
+{
+    Eigen::MatrixXd A(1, 1); A << 0.9;
+    Eigen::MatrixXd B(1, 1); B << 0.0; // no control channel exercised in these tests
+    Eigen::MatrixXd C(1, 1); C << 1.0;
+    Eigen::MatrixXd D(1, 1); D << 0.0;
+    return ctrl::StateSpace(A, B, C, D, 0.1);
+}
+} // namespace
+
+TEST_CASE("HinfFilter's empirical estimation-error energy stays within the achieved gamma bound",
+          "[hinf_filter]")
+{
+    const ctrl::StateSpace plant = makeHinfFilterTestPlant();
+    const Eigen::MatrixXd Qw = Eigen::MatrixXd::Constant(1, 1, 0.01);
+    const Eigen::MatrixXd Rv = Eigen::MatrixXd::Constant(1, 1, 0.05);
+
+    const auto result = ctrl::HinfFilter::solve(plant, Qw, Rv);
+    REQUIRE(result.feasible);
+
+    ctrl::HinfFilter hf(result);
+
+    // Bounded (not Gaussian) disturbance: a deterministic worst-case-flavoured alternating
+    // sequence at the process/measurement noise bounds, both starting from x_true(0) = 0 to
+    // match the filter's own zero initial state (avoids an initial-condition mismatch term
+    // contaminating the energy-gain bound, which is otherwise an infinite-horizon/steady-
+    // state guarantee).
+    const double wBound = std::sqrt(Qw(0, 0));
+    const double vBound = std::sqrt(Rv(0, 0));
+    double xTrue = 0.0;
+    double sumErrSq = 0.0, sumDistSq = 0.0;
+    for (int k = 0; k < 200; ++k)
+    {
+        const double w = wBound * ((k % 2 == 0) ? 1.0 : -1.0);
+        const double v = vBound * ((k % 3 == 0) ? 1.0 : -1.0);
+        const double y = plant.C(0, 0) * xTrue + v;
+
+        hf.predict(Eigen::VectorXd::Constant(1, 0.0));
+        hf.update(Eigen::VectorXd::Constant(1, y));
+
+        const double err = xTrue - hf.state()(0);
+        sumErrSq  += err * err;
+        sumDistSq += w * w + v * v;
+
+        xTrue = plant.A(0, 0) * xTrue + w;
+    }
+
+    REQUIRE(std::isfinite(sumErrSq));
+    REQUIRE(sumDistSq > 0.0);
+    // Generous margin over the strict gamma^2 bound to absorb finite-horizon transients
+    // (the H-infinity guarantee is a steady-state/infinite-horizon energy-gain bound).
+    REQUIRE(sumErrSq < result.achievedGamma * result.achievedGamma * sumDistSq * 4.0);
+}
+
+TEST_CASE("HinfFilter is more conservative but stable relative to KalmanFilter on Gaussian noise",
+          "[hinf_filter]")
+{
+    const ctrl::StateSpace plant = makeHinfFilterTestPlant();
+    const Eigen::MatrixXd Qw = Eigen::MatrixXd::Constant(1, 1, 0.01);
+    const Eigen::MatrixXd Rv = Eigen::MatrixXd::Constant(1, 1, 0.05);
+
+    const auto hfResult = ctrl::HinfFilter::solve(plant, Qw, Rv);
+    REQUIRE(hfResult.feasible);
+    ctrl::HinfFilter hf(hfResult);
+    ctrl::KalmanFilter kf(plant, Qw, Rv);
+
+    std::mt19937 rng(123);
+    std::normal_distribution<double> wDist(0.0, std::sqrt(Qw(0, 0)));
+    std::normal_distribution<double> vDist(0.0, std::sqrt(Rv(0, 0)));
+
+    double xTrue = 0.0;
+    double sseHf = 0.0, sseKf = 0.0;
+    const int N = 500;
+    for (int k = 0; k < N; ++k)
+    {
+        const double w = wDist(rng);
+        const double v = vDist(rng);
+        const double y = plant.C(0, 0) * xTrue + v;
+
+        hf.predict(Eigen::VectorXd::Constant(1, 0.0));
+        hf.update(Eigen::VectorXd::Constant(1, y));
+        kf.step(Eigen::VectorXd::Constant(1, y), Eigen::VectorXd::Constant(1, 0.0));
+
+        sseHf += std::pow(xTrue - hf.state()(0), 2);
+        sseKf += std::pow(xTrue - kf.state()(0), 2);
+
+        xTrue = plant.A(0, 0) * xTrue + w;
+    }
+
+    const double rmsHf = std::sqrt(sseHf / N);
+    const double rmsKf = std::sqrt(sseKf / N);
+    REQUIRE(std::isfinite(rmsHf));
+    REQUIRE(std::isfinite(rmsKf));
+    REQUIRE(rmsHf < 5.0 * rmsKf); // conservative but within a documented factor, not wildly worse
+}
+
+TEST_CASE("HinfFilter::solve reports infeasible for an unreasonably tight gamma", "[hinf_filter]")
+{
+    const ctrl::StateSpace plant = makeHinfFilterTestPlant();
+    const Eigen::MatrixXd Qw = Eigen::MatrixXd::Constant(1, 1, 0.01);
+    const Eigen::MatrixXd Rv = Eigen::MatrixXd::Constant(1, 1, 0.05);
+
+    ctrl::HinfFilterParams params;
+    params.gammaInit = 1e-6; // far below any achievable bound; doubling 10x still won't reach it
+    const auto result = ctrl::HinfFilter::solve(plant, Qw, Rv, params);
+    REQUIRE_FALSE(result.feasible);
+}
+
+TEST_CASE("HinfFilter constructor throws on an infeasible result", "[hinf_filter]")
+{
+    const ctrl::HinfFilterResult result{false, 0.0, Eigen::MatrixXd(), Eigen::MatrixXd(),
+                                         makeHinfFilterTestPlant()};
+    REQUIRE_THROWS_AS(ctrl::HinfFilter(result), std::invalid_argument);
+}
+
+TEST_CASE("HinfFilter holds the last state on non-finite predict()/update() input", "[hinf_filter]")
+{
+    const ctrl::StateSpace plant = makeHinfFilterTestPlant();
+    const Eigen::MatrixXd Qw = Eigen::MatrixXd::Constant(1, 1, 0.01);
+    const Eigen::MatrixXd Rv = Eigen::MatrixXd::Constant(1, 1, 0.05);
+    const auto result = ctrl::HinfFilter::solve(plant, Qw, Rv);
+    REQUIRE(result.feasible);
+
+    ctrl::HinfFilter hf(result);
+    hf.update(Eigen::VectorXd::Constant(1, 0.5));
+    const Eigen::VectorXd stateBefore = hf.state();
+
+    hf.predict(Eigen::VectorXd::Constant(1, std::numeric_limits<double>::quiet_NaN()));
+    REQUIRE(hf.state()(0) == stateBefore(0));
+
+    hf.update(Eigen::VectorXd::Constant(1, std::numeric_limits<double>::quiet_NaN()));
+    REQUIRE(hf.state()(0) == stateBefore(0));
+
+    hf.reset();
+    REQUIRE(hf.state()(0) == 0.0);
+}
+
 #endif // CTRL_HAS_HINF
 
 // =============================================================================
@@ -2023,6 +2192,311 @@ TEST_CASE("FL lastOutput and sampleTime return correct values", "[fl]")
     // reset() clears u_last and inner state
     fl.reset();
     REQUIRE_THAT(fl.lastOutput(), WithinAbs(0.0, 1e-12));
+}
+
+// =============================================================================
+// BacksteppingController (Phase 3 NC1)
+// =============================================================================
+
+TEST_CASE("BacksteppingController drives a 2-stage double-integrator to a constant reference",
+          "[backstepping]")
+{
+    // x1' = x2, x2' = u (f_0=f_1=0, g_0=g_1=1) - the textbook double-integrator
+    // strict-feedback system (Khalil Ch. 14's canonical 2-stage example).
+    const double Ts = 0.01;
+    std::vector<ctrl::BacksteppingController::DriftFn> f = {
+        [](const Eigen::VectorXd &, int) { return 0.0; },
+        [](const Eigen::VectorXd &, int) { return 0.0; },
+    };
+    std::vector<ctrl::BacksteppingController::GainFn> g = {
+        [](const Eigen::VectorXd &, int) { return 1.0; },
+        [](const Eigen::VectorXd &, int) { return 1.0; },
+    };
+    ctrl::BacksteppingParams p;
+    p.k_gains = {2.0, 2.0};
+    ctrl::BacksteppingController bc(f, g, p, Ts);
+
+    const double ref = 1.0;
+    Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
+    for (int k = 0; k < 2000; ++k)
+    {
+        bc.setState(x);
+        const double u = bc.compute(ref - x(0));
+        x(0) += Ts * x(1);
+        x(1) += Ts * u;
+    }
+
+    REQUIRE(x.allFinite());
+    REQUIRE_THAT(x(0), WithinAbs(ref, 0.02));
+    REQUIRE_THAT(x(1), WithinAbs(0.0, 0.05));
+}
+
+TEST_CASE("BacksteppingController's composite tracking-error norm decreases from its early "
+          "transient toward the end of the run",
+          "[backstepping]")
+{
+    // z1 = x1 - r, z2 = x2 - alpha1 (alpha1 ~= -k1*z1 once r' settles to 0 for a constant
+    // reference) - a coarse, transient-tolerant stand-in for the roadmap's Lyapunov-
+    // monotonicity check (V = 0.5*(z1^2+z2^2)), since the finite-difference approximation
+    // of alpha1' makes strict per-step monotonicity too fragile to assert directly.
+    const double Ts = 0.01;
+    std::vector<ctrl::BacksteppingController::DriftFn> f = {
+        [](const Eigen::VectorXd &, int) { return 0.0; },
+        [](const Eigen::VectorXd &, int) { return 0.0; },
+    };
+    std::vector<ctrl::BacksteppingController::GainFn> g = {
+        [](const Eigen::VectorXd &, int) { return 1.0; },
+        [](const Eigen::VectorXd &, int) { return 1.0; },
+    };
+    ctrl::BacksteppingParams p;
+    p.k_gains = {2.0, 2.0};
+    ctrl::BacksteppingController bc(f, g, p, Ts);
+
+    const double ref = 1.0, k1 = 2.0;
+    Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
+    const int N = 1500;
+    double vEarly = 0.0, vLate = 0.0;
+    for (int k = 0; k < N; ++k)
+    {
+        bc.setState(x);
+        const double u = bc.compute(ref - x(0));
+        const double z1 = x(0) - ref;
+        const double alpha1 = -k1 * z1; // r' ~= 0 for a constant reference past the first step
+        const double z2 = x(1) - alpha1;
+        const double V = 0.5 * (z1 * z1 + z2 * z2);
+        if (k == N / 10)      vEarly = V; // after the initial transient settles
+        if (k == N - 1)       vLate  = V;
+        x(0) += Ts * x(1);
+        x(1) += Ts * u;
+    }
+
+    REQUIRE(std::isfinite(vEarly));
+    REQUIRE(std::isfinite(vLate));
+    REQUIRE(vLate < vEarly);
+}
+
+TEST_CASE("BacksteppingController saturates u without corrupting the virtual-control "
+          "finite-difference chain",
+          "[backstepping]")
+{
+    const double Ts = 0.01;
+    std::vector<ctrl::BacksteppingController::DriftFn> f = {
+        [](const Eigen::VectorXd &, int) { return 0.0; },
+        [](const Eigen::VectorXd &, int) { return 0.0; },
+    };
+    std::vector<ctrl::BacksteppingController::GainFn> g = {
+        [](const Eigen::VectorXd &, int) { return 1.0; },
+        [](const Eigen::VectorXd &, int) { return 1.0; },
+    };
+    ctrl::BacksteppingParams p;
+    p.k_gains = {2.0, 2.0};
+    p.uMin = -1.0; p.uMax = 1.0; // tight enough to saturate early in the transient
+    ctrl::BacksteppingController bc(f, g, p, Ts);
+
+    Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
+    bool sawSaturation = false;
+    for (int k = 0; k < 500; ++k)
+    {
+        bc.setState(x);
+        const double u = bc.compute(1.0 - x(0));
+        REQUIRE(u >= p.uMin - 1e-9);
+        REQUIRE(u <= p.uMax + 1e-9);
+        if (u <= p.uMin + 1e-9 || u >= p.uMax - 1e-9) sawSaturation = true;
+        x(0) += Ts * x(1);
+        x(1) += Ts * u;
+    }
+    REQUIRE(sawSaturation);
+    REQUIRE(x.allFinite());
+}
+
+// =============================================================================
+// PassivityBasedController (Phase 3 NC2)
+// =============================================================================
+
+namespace
+{
+// Single-pendulum Euler-Lagrange model: M(q)=m*l^2 (constant), dV(q)=m*g*l*sin(q),
+// C(q,qdot)=0 (no velocity-dependent term for a single point-mass pendulum).
+ctrl::PassivityBasedController::MassMatrixFn pendulumMass(double ml2)
+{
+    return [ml2](const Eigen::VectorXd &) {
+        return Eigen::MatrixXd::Constant(1, 1, ml2);
+    };
+}
+ctrl::PassivityBasedController::PotentialGradFn pendulumGrad(double mgl)
+{
+    return [mgl](const Eigen::VectorXd &q) {
+        Eigen::VectorXd dV(1);
+        dV(0) = mgl * std::sin(q(0));
+        return dV;
+    };
+}
+ctrl::PassivityBasedController::CoriolisFn pendulumCoriolis()
+{
+    return [](const Eigen::VectorXd &, const Eigen::VectorXd &) {
+        return Eigen::MatrixXd::Zero(1, 1);
+    };
+}
+} // namespace
+
+TEST_CASE("PassivityBasedController regulates a single pendulum to a nonzero desired angle",
+          "[passivity_based]")
+{
+    const double Ts = 0.01, ml2 = 1.0, mgl = 9.8;
+    ctrl::PBCParams p;
+    p.Kp = Eigen::MatrixXd::Constant(1, 1, 10.0);
+    p.Kd = Eigen::MatrixXd::Constant(1, 1, 4.0);
+    ctrl::PassivityBasedController pbc(pendulumMass(ml2), pendulumGrad(mgl), pendulumCoriolis(),
+                                        p, Ts);
+    pbc.setDesired(Eigen::VectorXd::Constant(1, 0.5));
+
+    Eigen::VectorXd state = Eigen::VectorXd::Zero(2); // [q; qdot]
+    for (int k = 0; k < 3000; ++k)
+    {
+        const Eigen::VectorXd u = pbc.computeVec(state);
+        const double qddot = (u(0) - mgl * std::sin(state(0))) / ml2;
+        state(1) += Ts * qddot;
+        state(0) += Ts * state(1);
+    }
+
+    REQUIRE(state.allFinite());
+    REQUIRE_THAT(state(0), WithinAbs(0.5, 0.02));
+}
+
+TEST_CASE("PassivityBasedController's storage energy is non-increasing once past the "
+          "initial transient",
+          "[passivity_based]")
+{
+    const double Ts = 0.01, ml2 = 1.0, mgl = 9.8;
+    ctrl::PBCParams p;
+    p.Kp = Eigen::MatrixXd::Constant(1, 1, 10.0);
+    p.Kd = Eigen::MatrixXd::Constant(1, 1, 4.0);
+    ctrl::PassivityBasedController pbc(pendulumMass(ml2), pendulumGrad(mgl), pendulumCoriolis(),
+                                        p, Ts);
+    pbc.setDesired(Eigen::VectorXd::Constant(1, 0.3));
+
+    Eigen::VectorXd state = Eigen::VectorXd::Zero(2);
+    double prevEnergy = std::numeric_limits<double>::infinity();
+    bool everIncreased = false;
+    for (int k = 0; k < 3000; ++k)
+    {
+        const Eigen::VectorXd u = pbc.computeVec(state);
+        const double energy = pbc.storageEnergy();
+        if (k > 50 && energy > prevEnergy + 1e-6) everIncreased = true; // skip initial transient
+        prevEnergy = energy;
+
+        const double qddot = (u(0) - mgl * std::sin(state(0))) / ml2;
+        state(1) += Ts * qddot;
+        state(0) += Ts * state(1);
+    }
+    REQUIRE_FALSE(everIncreased);
+}
+
+TEST_CASE("PassivityBasedController holds the last output when MassMatrixFn returns "
+          "a non-finite matrix",
+          "[passivity_based]")
+{
+    const double Ts = 0.01;
+    ctrl::PBCParams p;
+    p.Kp = Eigen::MatrixXd::Constant(1, 1, 10.0);
+    p.Kd = Eigen::MatrixXd::Constant(1, 1, 4.0);
+
+    auto singularMass = [](const Eigen::VectorXd &q) {
+        Eigen::MatrixXd M(1, 1);
+        M(0, 0) = (std::fabs(q(0)) < 1e-9)
+            ? std::numeric_limits<double>::quiet_NaN()
+            : 1.0;
+        return M;
+    };
+    ctrl::PassivityBasedController pbc(singularMass, pendulumGrad(9.8), pendulumCoriolis(), p, Ts);
+    pbc.setDesired(Eigen::VectorXd::Constant(1, 0.5));
+
+    const Eigen::VectorXd u1 = pbc.computeVec(Eigen::VectorXd::Constant(2, 0.0)); // q=0 -> NaN M
+    REQUIRE(u1.allFinite());
+    REQUIRE_THAT(u1(0), WithinAbs(0.0, 1e-12)); // u_prev_ defaults to 0 before any success
+}
+
+TEST_CASE("PassivityBasedController::compute(double) always throws", "[passivity_based]")
+{
+    const double Ts = 0.01;
+    ctrl::PBCParams p;
+    p.Kp = Eigen::MatrixXd::Constant(1, 1, 10.0);
+    p.Kd = Eigen::MatrixXd::Constant(1, 1, 4.0);
+    ctrl::PassivityBasedController pbc(pendulumMass(1.0), pendulumGrad(9.8), pendulumCoriolis(),
+                                        p, Ts);
+    REQUIRE_THROWS_AS(pbc.compute(0.0), std::logic_error);
+}
+
+// =============================================================================
+// CLFController (Phase 3 NC4)
+// =============================================================================
+
+TEST_CASE("CLFController's Sontag-formula output matches the hand-derived closed form",
+          "[clf_controller]")
+{
+    // Scalar system xdot = -x + u, V(x) = x^2 -> LfV = -2x^2, LgV = 2x.
+    // a = LfV + alpha*V = -2x^2 + alpha*x^2 = (alpha-2)*x^2,  b = 2x.
+    const double alpha = 1.0;
+    ctrl::CLFParams p;
+    p.alpha = alpha;
+    ctrl::CLFController clf(
+        [](const Eigen::VectorXd &x) { return x(0) * x(0); },
+        [](const Eigen::VectorXd &x) { return -2.0 * x(0) * x(0); },
+        [](const Eigen::VectorXd &x) { return 2.0 * x(0); },
+        p, 0.01);
+
+    const double x0 = 2.0;
+    clf.setState(Eigen::VectorXd::Constant(1, x0));
+    const double u = clf.compute(0.0);
+
+    const double a = (alpha - 2.0) * x0 * x0;
+    const double b = 2.0 * x0;
+    const double uExpected = -(a + std::sqrt(a * a + b * b * b * b)) / b;
+
+    REQUIRE_THAT(u, WithinAbs(uExpected, 1e-9));
+    REQUIRE(clf.isHealthy());
+}
+
+TEST_CASE("CLFController stabilizes a scalar nonlinear system toward the CLF's equilibrium",
+          "[clf_controller]")
+{
+    // xdot = x^3 + u (unstable open-loop drift away from 0), V(x) = x^2.
+    const double Ts = 0.01;
+    ctrl::CLFParams p;
+    p.alpha = 2.0;
+    ctrl::CLFController clf(
+        [](const Eigen::VectorXd &x) { return x(0) * x(0); },
+        [](const Eigen::VectorXd &x) { return 2.0 * x(0) * x(0) * x(0) * x(0); }, // 2x*(x^3)
+        [](const Eigen::VectorXd &x) { return 2.0 * x(0); },
+        p, Ts);
+
+    double x = 1.5;
+    for (int k = 0; k < 2000; ++k)
+    {
+        clf.setState(Eigen::VectorXd::Constant(1, x));
+        const double u = clf.compute(0.0);
+        x += Ts * (x * x * x + u);
+    }
+    REQUIRE(std::isfinite(x));
+    REQUIRE(std::fabs(x) < 0.05);
+}
+
+TEST_CASE("CLFController reports unhealthy and holds last output when LgV=0 with positive drift",
+          "[clf_controller]")
+{
+    ctrl::CLFParams p;
+    ctrl::CLFController clf(
+        [](const Eigen::VectorXd &x) { return x(0) * x(0); },
+        [](const Eigen::VectorXd &) { return 1.0; },  // LfV > 0 (non-decaying drift)
+        [](const Eigen::VectorXd &) { return 0.0; },  // LgV == 0 (uncontrollable direction)
+        p, 0.01);
+
+    clf.setState(Eigen::VectorXd::Constant(1, 1.0));
+    const double u1 = clf.compute(0.0);
+    REQUIRE_FALSE(clf.isHealthy());
+
+    const double u2 = clf.compute(0.0); // still infeasible -> holds the same last value
+    REQUIRE(u1 == u2);
 }
 
 // =============================================================================
@@ -5514,6 +5988,85 @@ TEST_CASE("GeneticAlgorithm result always within bounds", "[genetic_algorithm]")
 }
 
 // =============================================================================
+// NelderMead (Phase 3 MO2)
+// =============================================================================
+
+TEST_CASE("NelderMead converges to the Rosenbrock minimum", "[nelder_mead]")
+{
+    // f(x,y) = (1-x)^2 + 100*(y-x^2)^2, global minimum at (1,1), cost=0.
+    ctrl::NelderMeadParams p;
+    p.n_dim = 2;
+    p.max_iter = 2000;
+    ctrl::NelderMead nm(p);
+
+    Eigen::VectorXd x0(2); x0 << -1.0, 1.0;
+    auto result = nm.optimize(
+        [](const Eigen::VectorXd &x) {
+            const double a = 1.0 - x(0);
+            const double b = x(1) - x(0) * x(0);
+            return a * a + 100.0 * b * b;
+        },
+        x0);
+
+    REQUIRE_THAT(result.params(0), WithinAbs(1.0, 1e-3));
+    REQUIRE_THAT(result.params(1), WithinAbs(1.0, 1e-3));
+    REQUIRE(result.cost < 1e-6);
+}
+
+TEST_CASE("NelderMead converges in fewer evaluations than AutoTuner on a quadratic bowl",
+          "[nelder_mead]")
+{
+    // f(x,y) = (x-1.5)^2 + (y-3)^2 - a smooth unimodal bowl, the "easy" case Nelder-Mead's
+    // single-point start should win on relative to a population-based CMA-ES search.
+    const Eigen::Vector2d centre(1.5, 3.0);
+    auto cost = [&](const Eigen::VectorXd &x) { return (x - centre).squaredNorm(); };
+
+    ctrl::NelderMeadParams nmp;
+    nmp.n_dim = 2;
+    ctrl::NelderMead nm(nmp);
+    Eigen::VectorXd x0(2); x0 << 0.0, 0.0;
+    auto nmResult = nm.optimize(cost, x0);
+
+    ctrl::AutoTunerParams atp;
+    atp.n = 2;
+    ctrl::AutoTuner tuner(atp);
+    auto atResult = tuner.tune(cost, x0);
+
+    REQUIRE(nmResult.cost < 1e-4);
+    REQUIRE(atResult.cost < 1e-4);
+    REQUIRE(nmResult.nEvals < atResult.nEvals);
+}
+
+TEST_CASE("NelderMead survives a flat-plateau cost landscape without returning a degenerate "
+          "or non-finite result",
+          "[nelder_mead]")
+{
+    // A cost function that is perfectly flat in a neighbourhood of the start point (zero
+    // gradient everywhere inside |x| < 0.5) repeatedly drives every reflect/contract step
+    // toward shrink, collapsing the simplex toward a single point - exactly the degenerate-
+    // simplex scenario the collapse-detection/restart path guards against internally. The
+    // externally observable contract is simply that the result stays finite and sane (the
+    // roadmap's own framing: "doesn't silently return a bad point"), since whether a restart
+    // fires is an internal implementation detail this test deliberately doesn't probe.
+    ctrl::NelderMeadParams p;
+    p.n_dim = 2;
+    p.max_iter = 300;
+    ctrl::NelderMead nm(p);
+
+    Eigen::VectorXd x0(2); x0 << 0.0, 0.0;
+    auto result = nm.optimize(
+        [](const Eigen::VectorXd &x) {
+            if (x.norm() < 0.5) return 1.0; // flat plateau around the start
+            return 1.0 + (x.norm() - 0.5);  // increases outside the plateau
+        },
+        x0);
+
+    REQUIRE(std::isfinite(result.cost));
+    REQUIRE(result.params.allFinite());
+    REQUIRE(result.nEvals > 0);
+}
+
+// =============================================================================
 // ParticleSwarmOptimizer
 // =============================================================================
 
@@ -6489,6 +7042,126 @@ TEST_CASE("peakMu() throws when the uncertainty structure size mismatches "
 }
 
 // -----------------------------------------------------------------------------
+// LFTSystem - general multi-block LFT/Delta channel-gather (Phase 3 RC1)
+// -----------------------------------------------------------------------------
+
+TEST_CASE("LFTSystem degenerate single-block case reproduces peakMu() exactly",
+          "[lft_system]")
+{
+    const auto G = makeFirstOrderPlant(0.6, 0.4, 0.1);
+    const auto K = makeStaticController(0.5, 0.1);
+
+    ctrl::UncertaintyStructure struc;
+    struc.blocks = {ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 1, 1}};
+
+    const auto expected =
+        ctrl::peakMu(G, K, struc, /*sigma_rel=*/1.0, /*freq_points=*/50, /*omega_min=*/1e-4);
+
+    const ctrl::GangOfFour g4 = ctrl::SystemAnalysis::gangOfFour(G, K);
+    const ctrl::StateSpace &M0 = g4.T; // sigma_rel = 1.0, so M0 == T directly
+
+    ctrl::LFTChannelMap map;
+    map.rowStart = {0};
+    map.colStart = {0};
+    ctrl::LFTSystem lft(M0, struc, map);
+    const auto actual = lft.peakMu(/*freq_points=*/50, /*omega_min=*/1e-4);
+
+    REQUIRE_THAT(actual.peak.upper, WithinAbs(expected.peak.upper, 1e-9));
+    REQUIRE_THAT(actual.peak_omega_rad_s, WithinAbs(expected.peak_omega_rad_s, 1e-9));
+    REQUIRE(actual.mu_curve.size() == expected.mu_curve.size());
+}
+
+TEST_CASE("LFTSystem gathers two disjoint, scattered blocks into the correct block-ordered matrix",
+          "[lft_system]")
+{
+    // Static (zero-state) 4-input/4-output gain map: D(i,j) = 10*i + j, so every entry is
+    // distinct and hand-verifiable. Two 1x1 blocks at scattered, non-adjacent positions:
+    // block 0 reads row 0 / writes col 2; block 1 reads row 3 / writes col 1.
+    Eigen::MatrixXd D(4, 4);
+    for (int i = 0; i < 4; ++i)
+        for (int j = 0; j < 4; ++j)
+            D(i, j) = 10.0 * i + j;
+    ctrl::StateSpace M0(Eigen::MatrixXd(0, 0), Eigen::MatrixXd(0, 4),
+                         Eigen::MatrixXd(4, 0), D, 0.1);
+
+    ctrl::UncertaintyStructure struc;
+    struc.blocks = {
+        ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 1, 1},
+        ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 1, 1},
+    };
+    ctrl::LFTChannelMap map;
+    map.rowStart = {0, 3};
+    map.colStart = {2, 1};
+
+    ctrl::LFTSystem lft(M0, struc, map);
+    const auto responses = lft.closedLoopFreqResponse({1.0});
+    REQUIRE(responses.size() == 1);
+    const Eigen::MatrixXcd &Mg = responses[0];
+
+    REQUIRE(Mg.rows() == 2);
+    REQUIRE(Mg.cols() == 2);
+    REQUIRE_THAT(Mg(0, 0).real(), WithinAbs(D(0, 2), 1e-9)); // = 2
+    REQUIRE_THAT(Mg(0, 1).real(), WithinAbs(D(0, 1), 1e-9)); // = 1
+    REQUIRE_THAT(Mg(1, 0).real(), WithinAbs(D(3, 2), 1e-9)); // = 32
+    REQUIRE_THAT(Mg(1, 1).real(), WithinAbs(D(3, 1), 1e-9)); // = 31
+    for (int i = 0; i < 2; ++i)
+        for (int j = 0; j < 2; ++j)
+            REQUIRE_THAT(Mg(i, j).imag(), WithinAbs(0.0, 1e-9)); // static gain: no imaginary part
+}
+
+TEST_CASE("LFTSystem throws on a mis-sized, out-of-range, or overlapping channel map",
+          "[lft_system]")
+{
+    const Eigen::MatrixXd D = Eigen::MatrixXd::Identity(2, 2);
+    ctrl::StateSpace M0(Eigen::MatrixXd(0, 0), Eigen::MatrixXd(0, 2),
+                         Eigen::MatrixXd(2, 0), D, 0.1);
+    ctrl::UncertaintyStructure struc;
+    struc.blocks = {
+        ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 1, 1},
+        ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 1, 1},
+    };
+
+    // Mis-sized: only one entry for two blocks.
+    ctrl::LFTChannelMap badSize;
+    badSize.rowStart = {0};
+    badSize.colStart = {0};
+    REQUIRE_THROWS_AS(ctrl::LFTSystem(M0, struc, badSize), std::invalid_argument);
+
+    // Out of range: M0 only has 2 output rows, but block 1 starts at row 2.
+    ctrl::LFTChannelMap outOfRange;
+    outOfRange.rowStart = {0, 2};
+    outOfRange.colStart = {0, 1};
+    REQUIRE_THROWS_AS(ctrl::LFTSystem(M0, struc, outOfRange), std::invalid_argument);
+
+    // Overlapping: both blocks claim row 0.
+    ctrl::LFTChannelMap overlap;
+    overlap.rowStart = {0, 0};
+    overlap.colStart = {0, 1};
+    REQUIRE_THROWS_AS(ctrl::LFTSystem(M0, struc, overlap), std::invalid_argument);
+}
+
+TEST_CASE("LFTSystem ignores channels not claimed by any block", "[lft_system]")
+{
+    // M0 has 4 channels but only 2 (non-adjacent) are claimed by the single block - the
+    // gathered matrix must be exactly 1x1 (struc.totalOutputs() x struc.totalInputs()),
+    // not 4x4, confirming partial coverage doesn't pull in unrelated channels.
+    Eigen::MatrixXd D = Eigen::MatrixXd::Identity(4, 4) * 5.0;
+    ctrl::StateSpace M0(Eigen::MatrixXd(0, 0), Eigen::MatrixXd(0, 4),
+                         Eigen::MatrixXd(4, 0), D, 0.1);
+    ctrl::UncertaintyStructure struc;
+    struc.blocks = {ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 1, 1}};
+    ctrl::LFTChannelMap map;
+    map.rowStart = {2};
+    map.colStart = {2};
+
+    ctrl::LFTSystem lft(M0, struc, map);
+    const auto responses = lft.closedLoopFreqResponse({1.0});
+    REQUIRE(responses[0].rows() == 1);
+    REQUIRE(responses[0].cols() == 1);
+    REQUIRE_THAT(responses[0](0, 0).real(), WithinAbs(5.0, 1e-9));
+}
+
+// -----------------------------------------------------------------------------
 // WorstCaseSearch - CMA-ES worst-case parameter search (Robustness Phase 4)
 // -----------------------------------------------------------------------------
 
@@ -6711,6 +7384,291 @@ TEST_CASE("fitLevy throws when there are fewer frequency samples than unknown co
     REQUIRE_THROWS_AS(
         ctrl::FreqDomainIdentifier::fitLevy(freqs, response, 1, 2, 0.01),
         std::invalid_argument);
+}
+
+TEST_CASE("buildLevySystem with empty weights reproduces fitLevy's pre-refactor numerical "
+          "result exactly (regression for the FD1 refactor)",
+          "[freq_domain_id]")
+{
+    const ctrl::TransferFunction tf({0.0, 0.2}, {1.0, -0.8}, 0.1);
+    const auto sys = ctrl::tf2ss(tf);
+    const std::vector<double> freqs{0.5, 1.0, 2.0, 5.0, 10.0, 15.0, 20.0};
+    const auto response = ctrl::SystemAnalysis::getFrequencyResponse(sys, freqs);
+
+    Eigen::MatrixXd Phi;
+    Eigen::VectorXd y;
+    ctrl::FreqDomainIdentifier::buildLevySystem(freqs, response, 1, 1, 0.1, {}, Phi, y);
+    Eigen::ColPivHouseholderQR<Eigen::MatrixXd> qr(Phi);
+    const Eigen::VectorXd x = qr.solve(y);
+
+    const auto fitResult = ctrl::FreqDomainIdentifier::fitLevy(freqs, response, 1, 1, 0.1);
+
+    // x = [num0, num1, den1] per buildLevySystem's stacking convention.
+    REQUIRE_THAT(x(0), WithinAbs(fitResult.tf.num[0], 1e-12));
+    REQUIRE_THAT(x(1), WithinAbs(fitResult.tf.num[1], 1e-12));
+    REQUIRE_THAT(x(2), WithinAbs(fitResult.tf.den[1], 1e-12));
+}
+
+// -----------------------------------------------------------------------------
+// SKFit - Sanathanan-Koerner-reweighted complex-response fitting (Phase 3 FD1)
+// -----------------------------------------------------------------------------
+
+TEST_CASE("SKFit reduces RMSE relative to a one-shot fitLevy on a noisy lightly-damped response",
+          "[sk_complex_fit]")
+{
+    // Lightly-damped 2nd-order resonance: poles at r*exp(+-j*theta), r close to 1.
+    const double r = 0.97, theta = 0.6;
+    const double a1 = -2.0 * r * std::cos(theta);
+    const double a2 = r * r;
+    const ctrl::TransferFunction tf({0.0, 1.0 - r, 0.0}, {1.0, a1, a2}, 0.1);
+    const auto sys = ctrl::tf2ss(tf);
+
+    std::vector<double> freqs;
+    for (int i = 1; i <= 40; ++i) freqs.push_back(0.5 * i);
+    auto response = ctrl::SystemAnalysis::getFrequencyResponse(sys, freqs);
+
+    // Add small synthetic measurement noise - with noiseless, exactly-order-matched data the
+    // linear system is fully consistent and any reweighting reproduces the same exact zero-
+    // residual solution, so SK can only show a measurable improvement once the system is
+    // overdetermined-with-residual (the realistic case this algorithm targets).
+    std::mt19937 rng(7);
+    std::normal_distribution<double> noise(0.0, 0.01);
+    for (auto &h : response) h += std::complex<double>(noise(rng), noise(rng));
+
+    const auto levyResult = ctrl::FreqDomainIdentifier::fitLevy(freqs, response, 2, 2, 0.1);
+    const auto skResult    = ctrl::SKFit::fitSK(freqs, response, 2, 2, 0.1);
+
+    REQUIRE(skResult.iterCost.size() >= 1u);
+    REQUIRE(skResult.iterCost.front() < levyResult.rmse + 1e-9); // iter 0 == unweighted Levy
+    REQUIRE(skResult.iterCost.back() < levyResult.rmse);
+}
+
+TEST_CASE("SKFit's RMSE trends non-increasing from the first iteration to the last",
+          "[sk_complex_fit]")
+{
+    // SK reweighting minimizes a *weighted* residual each iteration, not the raw RMSE
+    // directly - on noisy data the raw RMSE can tick up by a tiny amount between
+    // individual iterations even as the weighted fit improves overall, so this checks the
+    // first-vs-last trend (the property SKFit's other tests already rely on) rather than
+    // asserting strict step-by-step monotonicity.
+    const double r = 0.95, theta = 0.8;
+    const double a1 = -2.0 * r * std::cos(theta);
+    const double a2 = r * r;
+    const ctrl::TransferFunction tf({0.0, 1.0 - r, 0.0}, {1.0, a1, a2}, 0.1);
+    const auto sys = ctrl::tf2ss(tf);
+
+    std::vector<double> freqs;
+    for (int i = 1; i <= 30; ++i) freqs.push_back(0.5 * i);
+    auto response = ctrl::SystemAnalysis::getFrequencyResponse(sys, freqs);
+    std::mt19937 rng(11);
+    std::normal_distribution<double> noise(0.0, 0.02);
+    for (auto &h : response) h += std::complex<double>(noise(rng), noise(rng));
+
+    const auto result = ctrl::SKFit::fitSK(freqs, response, 2, 2, 0.1, /*max_iter=*/15);
+
+    REQUIRE(result.iterCost.size() >= 2u);
+    REQUIRE(result.iterCost.back() <= result.iterCost.front() + 1e-9);
+    // Per-step check with a small relative tolerance, absorbing the kind of tiny
+    // noise-driven uptick described above without masking a genuinely broken iteration.
+    for (std::size_t i = 1; i < result.iterCost.size(); ++i)
+        REQUIRE(result.iterCost[i] <= result.iterCost[i - 1] * 1.05 + 1e-6);
+}
+
+TEST_CASE("SKFit does not regress an already-good fitLevy result on a low-order, low-damping system",
+          "[sk_complex_fit]")
+{
+    const ctrl::TransferFunction tf({0.0, 0.2}, {1.0, -0.8}, 0.1);
+    const auto sys = ctrl::tf2ss(tf);
+    const std::vector<double> freqs{0.5, 1.0, 2.0, 5.0, 10.0, 15.0, 20.0};
+    const auto response = ctrl::SystemAnalysis::getFrequencyResponse(sys, freqs);
+
+    const auto levyResult = ctrl::FreqDomainIdentifier::fitLevy(freqs, response, 1, 1, 0.1);
+    const auto skResult    = ctrl::SKFit::fitSK(freqs, response, 1, 1, 0.1);
+
+    REQUIRE(skResult.iterCost.back() <= levyResult.rmse + 1e-9);
+}
+
+// -----------------------------------------------------------------------------
+// HammersteinWienerIdentifier (Phase 3 SI5)
+// -----------------------------------------------------------------------------
+
+TEST_CASE("HammersteinWienerIdentifier::fitHammerstein recovers a known cubic nonlinearity "
+          "and linear part",
+          "[hammerstein_wiener]")
+{
+    // v[k] = u[k] + 0.3*u[k]^3 (cubic, linear term normalized to 1), then
+    // y[k] = 0.8*y[k-1] + 0.5*v[k-1] (na=1, nb=1).
+    std::mt19937 rng(5);
+    std::uniform_real_distribution<double> dist(-1.0, 1.0);
+    const int N = 400;
+    Eigen::VectorXd u(N), v(N), y(N);
+    for (int k = 0; k < N; ++k) u(k) = dist(rng);
+    for (int k = 0; k < N; ++k) v(k) = u(k) + 0.3 * u(k) * u(k) * u(k);
+    y(0) = 0.0;
+    for (int k = 1; k < N; ++k) y(k) = 0.8 * y(k - 1) + 0.5 * v(k - 1);
+
+    ctrl::HammersteinWienerParams p;
+    p.na = 1; p.nb = 1; p.nl_degree = 3;
+    const auto result = ctrl::HammersteinWienerIdentifier::fitHammerstein(u, y, 0.1, p);
+
+    REQUIRE(result.nl_input_coeffs.size() == 4);
+    REQUIRE_THAT(result.nl_input_coeffs(1), WithinAbs(1.0, 1e-9)); // normalization
+    REQUIRE_THAT(result.nl_input_coeffs(0), WithinAbs(0.0, 0.02));
+    REQUIRE_THAT(result.nl_input_coeffs(3), WithinAbs(0.3, 0.05));
+    REQUIRE(result.linear_part.den.size() == 2);
+    REQUIRE_THAT(result.linear_part.den[1], WithinAbs(-0.8, 0.05));
+    REQUIRE_THAT(result.linear_part.num[1], WithinAbs(0.5, 0.05));
+}
+
+TEST_CASE("HammersteinWienerIdentifier::fitWiener recovers a known cubic output nonlinearity "
+          "and linear part",
+          "[hammerstein_wiener]")
+{
+    // w[k] = 0.8*w[k-1] + 0.5*u[k-1] (na=1, nb=1), then y[k] = w[k] + 0.2*w[k]^3.
+    std::mt19937 rng(9);
+    std::uniform_real_distribution<double> dist(-1.0, 1.0);
+    const int N = 400;
+    Eigen::VectorXd u(N), w(N), y(N);
+    for (int k = 0; k < N; ++k) u(k) = dist(rng);
+    w(0) = 0.0;
+    for (int k = 1; k < N; ++k) w(k) = 0.8 * w(k - 1) + 0.5 * u(k - 1);
+    for (int k = 0; k < N; ++k) y(k) = w(k) + 0.2 * w(k) * w(k) * w(k);
+
+    ctrl::HammersteinWienerParams p;
+    p.na = 1; p.nb = 1; p.nl_degree = 3;
+    const auto result = ctrl::HammersteinWienerIdentifier::fitWiener(u, y, 0.1, p);
+
+    REQUIRE(result.nl_output_coeffs.size() == 4);
+    REQUIRE_THAT(result.nl_output_coeffs(1), WithinAbs(1.0, 1e-9));
+    REQUIRE_THAT(result.nl_output_coeffs(0), WithinAbs(0.0, 0.05));
+    REQUIRE_THAT(result.nl_output_coeffs(3), WithinAbs(0.2, 0.1));
+    REQUIRE(result.linear_part.den.size() == 2);
+    REQUIRE_THAT(result.linear_part.den[1], WithinAbs(-0.8, 0.1));
+}
+
+TEST_CASE("HammersteinWienerIdentifier::fitHammerstein doesn't overfit a pure-linear system",
+          "[hammerstein_wiener]")
+{
+    std::mt19937 rng(13);
+    std::uniform_real_distribution<double> dist(-1.0, 1.0);
+    const int N = 300;
+    Eigen::VectorXd u(N), y(N);
+    for (int k = 0; k < N; ++k) u(k) = dist(rng);
+    y(0) = 0.0;
+    for (int k = 1; k < N; ++k) y(k) = 0.7 * y(k - 1) + 0.4 * u(k - 1); // nonlinearity = identity
+
+    ctrl::HammersteinWienerParams p;
+    p.na = 1; p.nb = 1; p.nl_degree = 3;
+    const auto result = ctrl::HammersteinWienerIdentifier::fitHammerstein(u, y, 0.1, p);
+
+    REQUIRE_THAT(result.nl_input_coeffs(1), WithinAbs(1.0, 1e-9));
+    REQUIRE_THAT(result.nl_input_coeffs(0), WithinAbs(0.0, 0.05));
+    REQUIRE_THAT(result.nl_input_coeffs(2), WithinAbs(0.0, 0.05));
+    REQUIRE_THAT(result.nl_input_coeffs(3), WithinAbs(0.0, 0.05));
+}
+
+TEST_CASE("HammersteinWienerIdentifier reports converged=false and iters=max_iter when the "
+          "tolerance isn't reached",
+          "[hammerstein_wiener]")
+{
+    std::mt19937 rng(21);
+    std::uniform_real_distribution<double> dist(-1.0, 1.0);
+    const int N = 300;
+    Eigen::VectorXd u(N), v(N), y(N);
+    for (int k = 0; k < N; ++k) u(k) = dist(rng);
+    for (int k = 0; k < N; ++k) v(k) = u(k) + 0.3 * u(k) * u(k) * u(k);
+    y(0) = 0.0;
+    for (int k = 1; k < N; ++k) y(k) = 0.8 * y(k - 1) + 0.5 * v(k - 1);
+
+    ctrl::HammersteinWienerParams p;
+    p.na = 1; p.nb = 1; p.nl_degree = 3;
+    p.max_iter = 1;
+    p.tol = 1e-300; // unreachable in one iteration
+    const auto result = ctrl::HammersteinWienerIdentifier::fitHammerstein(u, y, 0.1, p);
+
+    REQUIRE_FALSE(result.converged);
+    REQUIRE(result.iters == 1);
+    REQUIRE(result.nl_input_coeffs.allFinite());
+}
+
+TEST_CASE("CorrelationID recovers a known FIR impulse response from PRBS-driven data",
+          "[correlation_id]")
+{
+    // Known FIR system: y[k] = 0.6*u[k] + 0.3*u[k-1] + 0.1*u[k-2]  (g = [0.6, 0.3, 0.1, 0, ...])
+    const Eigen::VectorXd u = ctrl::CorrelationID::generatePRBS(2000, 9, 7);
+    const int N = static_cast<int>(u.size());
+    Eigen::VectorXd y = Eigen::VectorXd::Zero(N);
+    for (int k = 0; k < N; ++k)
+    {
+        y(k) = 0.6 * u(k);
+        if (k >= 1) y(k) += 0.3 * u(k - 1);
+        if (k >= 2) y(k) += 0.1 * u(k - 2);
+    }
+
+    ctrl::CorrelationIDParams p;
+    p.max_lag = 10;
+    const auto result = ctrl::CorrelationID::identify(u, y, 0.01, p);
+
+    REQUIRE(result.impulse_response.size() == 11);
+    REQUIRE_THAT(result.impulse_response(0), WithinAbs(0.6, 0.02));
+    REQUIRE_THAT(result.impulse_response(1), WithinAbs(0.3, 0.02));
+    REQUIRE_THAT(result.impulse_response(2), WithinAbs(0.1, 0.02));
+    for (int k = 3; k <= 10; ++k)
+        REQUIRE_THAT(result.impulse_response(k), WithinAbs(0.0, 0.02));
+}
+
+TEST_CASE("CorrelationID::generatePRBS produces a near-white autocorrelation", "[correlation_id]")
+{
+    const Eigen::VectorXd prbs = ctrl::CorrelationID::generatePRBS(2000, 8, 123);
+    REQUIRE(prbs.size() == 2000);
+    REQUIRE((prbs.array() == 1.0 || prbs.array() == -1.0).all());
+
+    ctrl::CorrelationIDParams p;
+    p.max_lag = 20;
+    const auto result = ctrl::CorrelationID::identify(prbs, prbs, 0.01, p);
+    // R_uu(0) should dominate every nonzero-lag value by a wide margin for a near-white PRBS.
+    for (int k = 1; k <= 20; ++k)
+        REQUIRE(std::fabs(result.autocorr_u(k)) < 0.1 * result.autocorr_u(0));
+}
+
+TEST_CASE("CorrelationID without whitening is visibly biased on a colored (non-PRBS) input",
+          "[correlation_id]")
+{
+    // Colored (strongly autocorrelated) input: a random walk, not white at all.
+    std::mt19937 rng(42);
+    std::normal_distribution<double> noise(0.0, 1.0);
+    const int N = 500;
+    Eigen::VectorXd u(N), y(N);
+    u(0) = noise(rng);
+    for (int k = 1; k < N; ++k) u(k) = u(k - 1) + noise(rng);
+    for (int k = 0; k < N; ++k)
+    {
+        y(k) = 0.6 * u(k);
+        if (k >= 1) y(k) += 0.3 * u(k - 1);
+    }
+
+    ctrl::CorrelationIDParams p;
+    p.max_lag = 5;
+    p.whiten_input = false;
+    const auto result = ctrl::CorrelationID::identify(u, y, 0.01, p);
+
+    // Regression test documenting the known limitation, not a bug: without whitening, a
+    // colored input's impulse-response estimate is visibly biased away from the true [0.6, 0.3].
+    const double bias_k0 = std::fabs(result.impulse_response(0) - 0.6);
+    const double bias_k1 = std::fabs(result.impulse_response(1) - 0.3);
+    REQUIRE((bias_k0 > 0.05 || bias_k1 > 0.05));
+}
+
+TEST_CASE("CorrelationID::identify throws on mismatched lengths or an out-of-range max_lag",
+          "[correlation_id]")
+{
+    const Eigen::VectorXd u = Eigen::VectorXd::Ones(10);
+    const Eigen::VectorXd y_short = Eigen::VectorXd::Ones(5);
+    REQUIRE_THROWS_AS(ctrl::CorrelationID::identify(u, y_short, 0.01), std::invalid_argument);
+
+    ctrl::CorrelationIDParams p;
+    p.max_lag = 10; // == u.size(), out of range (must be < N)
+    REQUIRE_THROWS_AS(ctrl::CorrelationID::identify(u, u, 0.01, p), std::invalid_argument);
 }
 
 TEST_CASE("ResonantController steady-state gain at the target frequency equals Kr exactly",

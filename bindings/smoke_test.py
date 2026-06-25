@@ -343,6 +343,22 @@ if feats.get('hinf', False):
         assert isinstance(u_h, float)
         assert hinf.achieved_gamma() > 0
     print('Hinf smoke tests passed.')
+
+    # HinfFilter - H-infinity-optimal state filter (Phase 3 EF1)
+    assert hasattr(ctrl, 'HinfFilter'), "HinfFilter not bound"
+    assert ctrl.registry_has('hinf_filter'), "hinf_filter not registered"
+    Qw_h = np.eye(1) * 0.01
+    Rv_h = np.eye(1) * 0.1
+    hf_result = ctrl.HinfFilter.solve(G_h, Qw_h, Rv_h)
+    print(f'HinfFilter: feasible={hf_result.feasible}  gamma={hf_result.achieved_gamma:.3f}')
+    if hf_result.feasible:
+        hf = ctrl.HinfFilter(hf_result)
+        hf.predict(np.array([0.0]))
+        hf.update(np.array([0.1]))
+        x_hat = hf.state()
+        assert np.all(np.isfinite(x_hat)), "HinfFilter state not finite"
+        assert hf.achieved_gamma() > 0
+    print('HinfFilter smoke test passed.')
 else:
     print('Skipping Hinf: not compiled in.')
 
@@ -746,6 +762,17 @@ assert _npga.isfinite(_ga_result.cost), f"GA result cost not finite"
 assert _ga_result.cost < 2.0, f"GA should converge near min: cost={_ga_result.cost}"
 assert 'genetic_algorithm' in ctrl.features()
 print('GeneticAlgorithm smoke test passed.')
+
+# ---- NelderMead (Phase 3 MO2) -----------------------------------------------
+_nmp = ctrl.NelderMeadParams()
+_nmp.n_dim = 2
+_nm = ctrl.NelderMead(_nmp)
+_nm_result = _nm.optimize(lambda x: float((x[0] - 2.0) ** 2 + (x[1] - 3.0) ** 2),
+                           np.array([0.0, 0.0]))
+assert np.isfinite(_nm_result.cost), "NelderMead result cost not finite"
+assert _nm_result.cost < 1e-3, f"NelderMead should converge near min: cost={_nm_result.cost}"
+assert 'nelder_mead' in ctrl.features()
+print('NelderMead smoke test passed.')
 
 # ---- ParticleSwarmOptimizer -------------------------------------------------
 import numpy as _nppso
@@ -1155,6 +1182,62 @@ assert abs(_fdi_result.tf.den[1] - (-0.8)) < 1e-9, "fit_levy: den[1] should reco
 assert _fdi_result.rmse < 1e-9, "fit_levy: rmse should be ~0 for noiseless exact-order data"
 print('FreqDomainIdentifier smoke test passed.')
 
+# CorrelationID - cross-correlation impulse-response identification (Phase 3 SI2) smoke test
+assert hasattr(ctrl, 'CorrelationID'), "CorrelationID not bound"
+assert hasattr(ctrl, 'CorrelationIDParams'), "CorrelationIDParams not bound"
+assert hasattr(ctrl, 'CorrelationIDResult'), "CorrelationIDResult not bound"
+assert ctrl.registry_has('correlation_id'), "correlation_id not registered"
+
+_ci_u = ctrl.CorrelationID.generate_prbs(100, 5, seed=99)
+assert len(_ci_u) == 100, "generate_prbs: wrong length"
+assert np.all((_ci_u == 1.0) | (_ci_u == -1.0)), "generate_prbs: values must be +-1"
+_ci_y = _ci_u * 0.5
+_ci_params = ctrl.CorrelationIDParams()
+_ci_params.max_lag = 20
+_ci_result = ctrl.CorrelationID.identify(_ci_u, _ci_y, Ts=0.01, params=_ci_params)
+assert len(_ci_result.impulse_response) == 21, "identify: impulse_response length mismatch"
+assert len(_ci_result.autocorr_u) == 21, "identify: autocorr_u length mismatch"
+assert len(_ci_result.crosscorr_uy) == 21, "identify: crosscorr_uy length mismatch"
+assert abs(_ci_result.impulse_response[0] - 0.5) < 1e-9, \
+    "identify: g_hat(0) should recover the static gain 0.5"
+print('CorrelationID smoke test passed.')
+
+# SKFit - Sanathanan-Koerner-reweighted complex-response fitting (Phase 3 FD1) smoke test
+assert hasattr(ctrl, 'SKFit'), "SKFit not bound"
+assert hasattr(ctrl, 'SKFitResult'), "SKFitResult not bound"
+assert ctrl.registry_has('sk_fit'), "sk_fit not registered"
+
+_sk_tf = ctrl.TransferFunction([0.0, 0.2], [1.0, -0.8], 0.1)
+_sk_sys = ctrl.tf2ss(_sk_tf)
+_sk_freqs = list(np.linspace(0.5, 20.0, 50))
+_sk_response = ctrl.SystemAnalysis.get_frequency_response(_sk_sys, _sk_freqs)
+_sk_result = ctrl.SKFit.fit_sk(_sk_freqs, _sk_response, num_order=1, den_order=1, Ts=0.1)
+assert len(_sk_result.iter_cost) >= 1, "fit_sk: expected at least one iteration"
+assert abs(_sk_result.model.den[1] - (-0.8)) < 1e-6, "fit_sk: den[1] should recover -0.8"
+print('SKFit smoke test passed.')
+
+# HammersteinWienerIdentifier - Hammerstein/Wiener structured nonlinear ID (Phase 3 SI5)
+# smoke test
+assert hasattr(ctrl, 'HammersteinWienerIdentifier'), "HammersteinWienerIdentifier not bound"
+assert hasattr(ctrl, 'HammersteinWienerParams'), "HammersteinWienerParams not bound"
+assert hasattr(ctrl, 'HammersteinWienerResult'), "HammersteinWienerResult not bound"
+assert ctrl.registry_has('hammerstein_wiener'), "hammerstein_wiener not registered"
+
+_hw_rng = np.random.default_rng(3)
+_hw_u = _hw_rng.uniform(-1.0, 1.0, 300)
+_hw_v = _hw_u + 0.3 * _hw_u ** 3  # known cubic static nonlinearity, linear term = 1
+_hw_y = np.zeros(300)
+for _k in range(1, 300):
+    _hw_y[_k] = 0.8 * _hw_y[_k - 1] + 0.5 * _hw_v[_k - 1]
+_hw_params = ctrl.HammersteinWienerParams()
+_hw_params.na = 1
+_hw_params.nb = 1
+_hw_result = ctrl.HammersteinWienerIdentifier.fit_hammerstein(_hw_u, _hw_y, Ts=0.1, params=_hw_params)
+assert len(_hw_result.nl_input_coeffs) == _hw_params.nl_degree + 1, "nl_input_coeffs wrong length"
+assert abs(_hw_result.nl_input_coeffs[1] - 1.0) < 1e-9, \
+    "nl_input_coeffs[1] should be normalized to 1.0"
+print('HammersteinWienerIdentifier smoke test passed.')
+
 # MuAnalysis (Structured Singular Value, Phase 3) smoke test
 assert hasattr(ctrl, 'UncertaintyStructure'), "UncertaintyStructure not bound"
 assert hasattr(ctrl, 'UncertaintyBlock'), "UncertaintyBlock not bound"
@@ -1183,6 +1266,74 @@ assert len(_mu_peak.mu_curve) == 50, "mu_curve wrong length"
 _mu_radius = ctrl.robust_stability_radius(_g4_G, _g4_K, _mu_struc, sigma_max=5.0)
 assert abs(_mu_radius - 3.0) < 1e-2, "robust_stability_radius should match 1/norm_T=3.0"
 print('MuAnalysis (Phase 3) smoke test passed.')
+
+# LFTSystem - general multi-block LFT/Delta channel-gather (Phase 3 RC1) smoke test
+assert hasattr(ctrl, 'LFTSystem'), "LFTSystem not bound"
+assert hasattr(ctrl, 'LFTChannelMap'), "LFTChannelMap not bound"
+assert ctrl.registry_has('lft_system'), "lft_system not registered"
+
+# Degenerate single-block case: M0 = sigma_rel * T should reproduce peak_mu()'s result.
+_lft_T = _g4.T
+_lft_M0 = ctrl.StateSpace(_lft_T.A, _lft_T.B, _lft_T.C, _lft_T.D, _lft_T.Ts)
+_lft_map = ctrl.LFTChannelMap()
+_lft_map.row_start = [0]
+_lft_map.col_start = [0]
+_lft_system = ctrl.LFTSystem(_lft_M0, _mu_struc, _lft_map)
+_lft_peak = _lft_system.peak_mu(freq_points=50, omega_min=1e-4)
+assert abs(_lft_peak.peak.upper - _mu_peak.peak.upper) < 1e-9, \
+    "LFTSystem degenerate single-block case should reproduce peak_mu() exactly"
+print('LFTSystem smoke test passed.')
+
+# BacksteppingController (Phase 3 NC1) smoke test
+assert hasattr(ctrl, 'BacksteppingController'), "BacksteppingController not bound"
+assert ctrl.registry_has('backstepping_controller'), "backstepping_controller not registered"
+_bc_params = ctrl.BacksteppingParams()
+_bc_params.k_gains = [2.0, 2.0]
+_bc = ctrl.BacksteppingController(
+    [lambda x, s: 0.0, lambda x, s: 0.0],
+    [lambda x, s: 1.0, lambda x, s: 1.0],
+    _bc_params, 0.01)
+_bc.set_state(np.array([0.0, 0.0]))
+_u_bc = _bc.compute(1.0)
+assert np.isfinite(_u_bc), "BacksteppingController output not finite"
+print('BacksteppingController smoke test passed.')
+
+# PassivityBasedController (Phase 3 NC2) smoke test
+assert hasattr(ctrl, 'PassivityBasedController'), "PassivityBasedController not bound"
+assert ctrl.registry_has('passivity_based_controller'), "passivity_based_controller not registered"
+_pbc_params = ctrl.PBCParams()
+_pbc_params.Kp = np.array([[5.0]])
+_pbc_params.Kd = np.array([[1.0]])
+_pbc = ctrl.PassivityBasedController(
+    lambda q: np.array([[1.0]]),
+    lambda q: np.array([9.8 * np.sin(q[0])]),
+    lambda q, qdot: np.array([[0.0]]),
+    _pbc_params, 0.01)
+_pbc.set_desired(np.array([0.5]))
+_u_pbc = _pbc.compute_vec(np.array([0.0, 0.0]))
+assert np.all(np.isfinite(_u_pbc)), "PassivityBasedController output not finite"
+assert np.isfinite(_pbc.storage_energy()), "storage_energy not finite"
+try:
+    _pbc.compute(0.0)
+    assert False, "PassivityBasedController.compute() should raise"
+except RuntimeError:
+    pass
+print('PassivityBasedController smoke test passed.')
+
+# CLFController (Phase 3 NC4) smoke test
+assert hasattr(ctrl, 'CLFController'), "CLFController not bound"
+assert ctrl.registry_has('clf_controller'), "clf_controller not registered"
+_clf_params = ctrl.CLFParams()
+_clf = ctrl.CLFController(
+    lambda x: float(x[0] ** 2),
+    lambda x: 0.0,
+    lambda x: 2.0 * float(x[0]),
+    _clf_params, 0.01)
+_clf.set_state(np.array([1.0]))
+_u_clf = _clf.compute(0.0)
+assert np.isfinite(_u_clf), "CLFController output not finite"
+assert _clf.is_healthy()
+print('CLFController smoke test passed.')
 
 # WorstCaseSearch (CMA-ES worst-case parameter search, Phase 4) smoke test
 assert hasattr(ctrl, 'WorstCaseResult'), "WorstCaseResult not bound"

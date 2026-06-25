@@ -130,6 +130,15 @@ for %%T in (
     ex89_resonant_controller
     ex90_notch_filter
     ex91_phase_locked_loop
+    ex92_correlation_id
+    ex93_nelder_mead
+    ex94_sk_complex_fit
+    ex95_hinf_filter
+    ex96_lft_system
+    ex97_backstepping
+    ex98_passivity_based
+    ex99_clf_controller
+    ex100_hammerstein_wiener
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

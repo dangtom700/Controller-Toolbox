@@ -85,6 +85,10 @@
 #include "MovingHorizonEstimator.h"       ///< MHE - moving horizon state estimator (condensed QP, box constraints on process noise).
 #include "LinearisationHelper.h"         ///< jacobianX/U, lineariseAtPoint - numerical Jacobians and ZOH linearisation at operating point.
 #include "FeedbackLinearisation.h"       ///< FeedbackLinearisationController - exact FL for affine-in-control SISO systems (relative degree 1).
+#include "BacksteppingController.h"      ///< BacksteppingController - recursive Lyapunov design for N-stage strict-feedback systems (Phase 3 NC1).
+#include "PassivityBasedController.h"    ///< PassivityBasedController - PD+ energy-shaping/damping-injection regulation for Euler-Lagrange systems (Phase 3 NC2).
+#include "CLFController.h"               ///< CLFController - CLF synthesis via Sontag's universal formula (Phase 3 NC4).
+#include "HammersteinWienerIdentifier.h" ///< HammersteinWienerIdentifier - Hammerstein/Wiener structured nonlinear ID (Phase 3 SI5).
 #include "MRACController.h"              ///< MRAC - Lyapunov-based MRAC with sigma-modification and parameter projection.
 #include "BalancedTruncation.h"          ///< balancedTruncate, suggestOrder - H-infinity-bounded model order reduction.
 #include "ZeroPhaseTrackingFilter.h"     ///< designZPETC, transmissionZeros - causal zero-phase feedforward prefilter.
@@ -115,6 +119,7 @@
 #include "GeneticAlgorithm.h"           ///< GeneticAlgorithm - real-valued GA: BLX-alpha crossover, tournament selection, elitism (Storn & Price 1997).
 #include "ParticleSwarmOptimizer.h"     ///< ParticleSwarmOptimizer - Clerc-Kennedy PSO with velocity clamping (Clerc & Kennedy 2002).
 #include "DifferentialEvolution.h"      ///< DifferentialEvolution - DE/rand/1/bin with boundary reflection (Storn & Price 1997).
+#include "NelderMead.h"                 ///< NelderMead - reflect/expand/contract/shrink simplex search, no bounds/population needed (Phase 3 MO2).
 #include "ControllerMonitor.h"          ///< ControllerMonitor - CUSUM + EWMA SPC charts on live controller output or onState channels (M3/SPC).
 #include "ComputationalDelayWrapper.h"  ///< ComputationalDelayWrapper - one-sample actuator delay decorator for realistic digital loop simulation (G3).
 #include "GreyBoxEstimator.h"           ///< GreyBoxEstimator - nonlinear param estimation via Levenberg-Marquardt for user-supplied ODE f(x,u,p) (E1).
@@ -128,12 +133,15 @@
 #include "MismatchDetector.h"          ///< MismatchDetector - CUSUM on KF/MHE innovation for real-time model-plant mismatch detection (D1).
 #include "RobustnessAnalysis.h"        ///< RobustnessAnalysis - Monte-Carlo closed-loop robustness: spawn perturbed plants, aggregate stability/margin/sensitivity stats (Robustness Phase 1).
 #include "MuAnalysis.h"                ///< MuAnalysis - structured singular value (mu) D-scaling upper bound, peakMu, robustStabilityRadius (Robustness Phase 3).
+#include "LFTSystem.h"                 ///< LFTSystem - general multi-block LFT/Delta channel-gather for mu-analysis (Phase 3 RC1).
 #include "WorstCaseSearch.h"           ///< WorstCaseSearch - CMA-ES worst-case parameter search over plant uncertainty (Robustness Phase 4).
 #include "LyapunovRobustness.h"        ///< LyapunovRobustness - common quadratic Lyapunov function for polytopic uncertainty (Robustness Phase 5).
 #include "FreqDomainIdentifier.h"      ///< FreqDomainIdentifier - Levy's method frequency-domain system identification (Phase 4 Iteration 2).
 #include "ResonantController.h"       ///< ResonantController - single-harmonic internal-model corrector; composes via ControllerStack(Additive).
 #include "NotchFilter.h"              ///< NotchFilter - fixed-design biquad notch filter (Bristow-Johnson cookbook); no IController base.
 #include "PhaseLockedLoop.h"          ///< PhaseLockedLoop - single-input SOGI-PLL phase/frequency estimator; no IController base.
+#include "CorrelationID.h"            ///< CorrelationID - cross-correlation impulse-response identification (Phase 3 SI2).
+#include "SKFit.h"                    ///< SKFit - Sanathanan-Koerner-reweighted complex-response fitting (Phase 3 FD1).
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,
@@ -157,6 +165,7 @@
 #if (defined(CTRL_HAS_HINF) || !defined(CTRL_DISABLE_HINF))
 #include "DiscreteHinf.h" ///< Hinf - DGKF 2-Riccati synthesis, Mixed-Sensitivity S/KS/T design.
 #include "DiscreteH2.h"   ///< H2 - discrete LQG/H2 synthesis via cross-term elimination (Phase 4 Iteration 3).
+#include "HinfFilter.h"   ///< HinfFilter - H-infinity-optimal state filter, the estimation dual of DiscreteHinf (Phase 3 EF1).
 #endif
 
 #if defined(CTRL_HAS_FUNCTION_APPROX) || (!defined(CTRL_DISABLE_FUNCTION_APPROX))

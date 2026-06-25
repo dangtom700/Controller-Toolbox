@@ -604,5 +604,55 @@ All static factory methods. Call build() to assemble the plant.
                     &ctrl::MixedSensitivity::build,
                     py::arg("G"), py::arg("W1"), py::arg("W2"), py::arg("W3"),
                     "Assemble GeneralisedPlant from G + W1 + W2 + W3 (all SISO, same Ts).");
+
+    // -----------------------------------------------------------------------
+    // HinfFilter - H-infinity-optimal state filter (Phase 3 EF1)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::HinfFilterParams>(m, "HinfFilterParams",
+        "Parameters for HinfFilter.solve()'s gamma bisection.")
+        .def(py::init<>())
+        .def_readwrite("gamma_init",    &ctrl::HinfFilterParams::gammaInit)
+        .def_readwrite("gamma_tol",     &ctrl::HinfFilterParams::gammaTol)
+        .def_readwrite("max_iter",      &ctrl::HinfFilterParams::maxIter)
+        .def_readwrite("dare_tol",      &ctrl::HinfFilterParams::dareTol)
+        .def_readwrite("dare_max_iter", &ctrl::HinfFilterParams::dareMaxIter);
+
+    py::class_<ctrl::HinfFilterResult>(m, "HinfFilterResult",
+        "Result of HinfFilter.solve().")
+        .def_readonly("feasible",       &ctrl::HinfFilterResult::feasible)
+        .def_readonly("achieved_gamma", &ctrl::HinfFilterResult::achievedGamma)
+        .def_readonly("L",              &ctrl::HinfFilterResult::L)
+        .def_readonly("P",              &ctrl::HinfFilterResult::P)
+        .def_readonly("plant",          &ctrl::HinfFilterResult::plant);
+
+    py::class_<ctrl::HinfFilter>(m, "HinfFilter", R"doc(
+Discrete-time H-infinity-optimal state filter - the estimation dual of DiscreteHinf.
+
+Bounds the worst-case ratio of estimation-error energy to disturbance/noise energy for
+any bounded disturbance, instead of assuming Gaussian noise the way KalmanFilter does.
+
+Example
+-------
+>>> result = ctrl.HinfFilter.solve(plant, Qw, Rv)
+>>> if result.feasible:
+...     hf = ctrl.HinfFilter(result)
+...     hf.predict(u_prev)
+...     hf.update(y)
+...     x_hat = hf.state()
+)doc")
+        .def(py::init<const ctrl::HinfFilterResult &>(), py::arg("result"))
+        .def_static("solve", &ctrl::HinfFilter::solve,
+             py::arg("plant"), py::arg("Qw"), py::arg("Rv"),
+             py::arg("params") = ctrl::HinfFilterParams(),
+             "Solve the discrete-time H-infinity filtering problem via gamma bisection.")
+        .def("predict", &ctrl::HinfFilter::predict, py::arg("u"),
+             "Prediction step: x_hat = A*x_hat + B*u.")
+        .def("update", &ctrl::HinfFilter::update, py::arg("y"),
+             "Update step: x_hat += L*(y - C*x_hat).")
+        .def("state", &ctrl::HinfFilter::state, py::return_value_policy::copy,
+             "Current state estimate.")
+        .def("reset", &ctrl::HinfFilter::reset, "Reset the state estimate to zero.")
+        .def("achieved_gamma", &ctrl::HinfFilter::achievedGamma,
+             "Achieved H-infinity bound gamma from synthesis.");
 #endif  // CTRL_HAS_HINF
 }

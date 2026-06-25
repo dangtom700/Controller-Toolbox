@@ -59,6 +59,7 @@ source of truth.
 | Doc | What it's for |
 |---|---|
 | [docs/algorithm_backlog.md](algorithm_backlog.md) | Candidate algorithm list for future phases, deduped against current `lib/` contents |
+| [docs/ALGORITHM_ROADMAP_PHASE3.md](ALGORITHM_ROADMAP_PHASE3.md) | Phase-3 roadmap — 32 designs sequencing every open `algorithm_backlog.md` item by value/ROI into 5 phases |
 | [docs/superpowers/specs/](superpowers/specs/) | Approved design specs awaiting or under implementation |
 
 ## Historical / internal records

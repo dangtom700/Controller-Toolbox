@@ -161,6 +161,9 @@ These conventions are tribal knowledge. They **must** be respected when implemen
 | `FeedbackLinearisationController` | `e = r - y` | Call `setState(x)` before each compute() |
 | `NonlinearMPC` | `e = r - y` or set via `setReference()` | Call `setState(x)` before each compute() |
 | `ResonantController` | `e = r - y` (tracking error) | Composes via `ControllerStack(Additive)`; one instance per target harmonic |
+| `BacksteppingController` | `e = r - x1` (tracking error) | Call `setState(x)` before each compute(); `error` reconstructs the reference internally |
+| `PassivityBasedController` | raw stacked state `[q; qdot]` (MIMO only) | `compute(double)` always throws - call `computeVec()`; call `setDesired(q_d)` once before use |
+| `CLFController` | unused (`Other`) | Regulates toward V's equilibrium using `setState(x)`, not the scalar argument |
 
 ---
 

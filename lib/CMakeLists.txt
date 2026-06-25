@@ -76,6 +76,13 @@ set(CTRL_CORE_SOURCES
     ResonantController.cpp
     NotchFilter.cpp
     PhaseLockedLoop.cpp
+    CorrelationID.cpp
+    SKFit.cpp
+    LFTSystem.cpp
+    BacksteppingController.cpp
+    PassivityBasedController.cpp
+    CLFController.cpp
+    HammersteinWienerIdentifier.cpp
 )
 
 # --- Optional sources --------------------------------------------------------
@@ -98,6 +105,7 @@ endif()
 if(CTRL_ENABLE_HINF)
     list(APPEND CTRL_CORE_SOURCES DiscreteHinf.cpp)
     list(APPEND CTRL_CORE_SOURCES DiscreteH2.cpp)
+    list(APPEND CTRL_CORE_SOURCES HinfFilter.cpp)
 endif()
 
 if(CTRL_ENABLE_FUNCTION_APPROX)

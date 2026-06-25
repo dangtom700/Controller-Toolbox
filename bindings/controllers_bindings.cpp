@@ -777,6 +777,117 @@ Feasibility conditions
              "Current FLParams.");
 
     // -----------------------------------------------------------------------
+    // BacksteppingController (Phase 3 NC1)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::BacksteppingParams>(m, "BacksteppingParams",
+        "Parameters for BacksteppingController.")
+        .def(py::init<>())
+        .def_readwrite("k_gains", &ctrl::BacksteppingParams::k_gains,
+                       "One stabilizing gain per recursion stage (size N).")
+        .def_readwrite("uMin",    &ctrl::BacksteppingParams::uMin)
+        .def_readwrite("uMax",    &ctrl::BacksteppingParams::uMax);
+
+    py::class_<ctrl::BacksteppingController, ctrl::IController,
+               std::shared_ptr<ctrl::BacksteppingController>>(
+        m, "BacksteppingController", R"doc(
+Recursive Lyapunov design for N-stage strict-feedback systems
+(x1' = f_0(x)+g_0(x)*x2, ..., xN' = f_{N-1}(x)+g_{N-1}(x)*u).
+
+Usage
+-----
+>>> f = [lambda x, s: ..., lambda x, s: ...]
+>>> g = [lambda x, s: ..., lambda x, s: ...]
+>>> bc = ctrl.BacksteppingController(f, g, params, Ts)
+>>> bc.set_state(x)
+>>> u = bc.compute(r - x[0])
+)doc")
+        .def(py::init<std::vector<ctrl::BacksteppingController::DriftFn>,
+                      std::vector<ctrl::BacksteppingController::GainFn>,
+                      const ctrl::BacksteppingParams &, double>(),
+             py::arg("f"), py::arg("g"), py::arg("params"), py::arg("Ts"))
+        .def("compute",     &ctrl::BacksteppingController::compute, py::arg("error"))
+        .def("reset",       &ctrl::BacksteppingController::reset)
+        .def("sample_time", &ctrl::BacksteppingController::sampleTime)
+        .def("set_state",   &ctrl::BacksteppingController::setState, py::arg("x"))
+        .def("state",       &ctrl::BacksteppingController::state);
+
+    // -----------------------------------------------------------------------
+    // PassivityBasedController (Phase 3 NC2)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::PBCParams>(m, "PBCParams",
+        "Parameters for PassivityBasedController.")
+        .def(py::init<>())
+        .def_readwrite("Kp",   &ctrl::PBCParams::Kp,
+                       "Energy-shaping (stiffness) injection gain, PSD (n x n).")
+        .def_readwrite("Kd",   &ctrl::PBCParams::Kd,
+                       "Damping injection gain, PSD (n x n).")
+        .def_readwrite("uMin", &ctrl::PBCParams::uMin)
+        .def_readwrite("uMax", &ctrl::PBCParams::uMax);
+
+    py::class_<ctrl::PassivityBasedController, ctrl::IController,
+               std::shared_ptr<ctrl::PassivityBasedController>>(
+        m, "PassivityBasedController", R"doc(
+PD+ energy-shaping / damping-injection regulation for Euler-Lagrange systems
+(M(q)*qddot + C(q,qdot)*qdot + dV(q) = u). Regulates a constant desired configuration q_d.
+
+Usage
+-----
+>>> pbc = ctrl.PassivityBasedController(M, dV, C, params, Ts)
+>>> pbc.set_desired(q_d)
+>>> u = pbc.compute_vec(np.concatenate([q, qdot]))
+)doc")
+        .def(py::init<ctrl::PassivityBasedController::MassMatrixFn,
+                      ctrl::PassivityBasedController::PotentialGradFn,
+                      ctrl::PassivityBasedController::CoriolisFn,
+                      const ctrl::PBCParams &, double>(),
+             py::arg("M"), py::arg("dV"), py::arg("C"), py::arg("params"), py::arg("Ts"))
+        .def("compute_vec",     &ctrl::PassivityBasedController::computeVec, py::arg("state"),
+             "Compute u[k] from the raw stacked state [q; qdot].")
+        .def("compute",         &ctrl::PassivityBasedController::compute, py::arg("signal"),
+             "Always raises - PassivityBasedController is MIMO-only, call compute_vec().")
+        .def("reset",           &ctrl::PassivityBasedController::reset)
+        .def("sample_time",     &ctrl::PassivityBasedController::sampleTime)
+        .def("set_desired",     &ctrl::PassivityBasedController::setDesired, py::arg("q_d"))
+        .def("storage_energy",  &ctrl::PassivityBasedController::storageEnergy,
+             "Shaped total-energy storage function from the last successful compute_vec() call.");
+
+    // -----------------------------------------------------------------------
+    // CLFController (Phase 3 NC4)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::CLFParams>(m, "CLFParams",
+        "Parameters for CLFController.")
+        .def(py::init<>())
+        .def_readwrite("alpha", &ctrl::CLFParams::alpha, "Decay rate in LfV + LgV*u <= -alpha*V.")
+        .def_readwrite("uMin",  &ctrl::CLFParams::uMin)
+        .def_readwrite("uMax",  &ctrl::CLFParams::uMax)
+        .def_readwrite("useQP", &ctrl::CLFParams::useQP,
+                       "No behavioral effect in v1 (SISO closed-form only).");
+
+    py::class_<ctrl::CLFController, ctrl::IController,
+               std::shared_ptr<ctrl::CLFController>>(
+        m, "CLFController", R"doc(
+CLF synthesis via Sontag's universal formula (SISO).
+
+Given a candidate Lyapunov function V(x) and its Lie derivatives LfV/LgV, synthesizes a
+stabilizing law toward V's equilibrium.
+
+Usage
+-----
+>>> clf = ctrl.CLFController(V, LfV, LgV, params, Ts)
+>>> clf.set_state(x)
+>>> u = clf.compute(0.0)   # the argument is unused, see class docs
+)doc")
+        .def(py::init<ctrl::CLFController::VFn, ctrl::CLFController::LfVFn,
+                      ctrl::CLFController::LgVFn, const ctrl::CLFParams &, double>(),
+             py::arg("V"), py::arg("LfV"), py::arg("LgV"), py::arg("params"), py::arg("Ts"))
+        .def("compute",     &ctrl::CLFController::compute, py::arg("error"))
+        .def("reset",       &ctrl::CLFController::reset)
+        .def("sample_time", &ctrl::CLFController::sampleTime)
+        .def("set_state",   &ctrl::CLFController::setState, py::arg("x"))
+        .def("state",       &ctrl::CLFController::state)
+        .def("is_healthy",  &ctrl::CLFController::isHealthy);
+
+    // -----------------------------------------------------------------------
     // NMPCParams + NonlinearMPC
     // -----------------------------------------------------------------------
     py::class_<ctrl::NMPCParams>(m, "NMPCParams",
@@ -1019,6 +1130,43 @@ Usage
              },
              py::arg("cost"),
              "Minimise cost(params) over the box [lower, upper]. Returns TunerResult.");
+
+    // -----------------------------------------------------------------------
+    // NelderMead (Phase 3 MO2)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::NelderMeadParams>(m, "NelderMeadParams", "Parameters for NelderMead.")
+        .def(py::init<>())
+        .def_readwrite("n_dim",    &ctrl::NelderMeadParams::n_dim)
+        .def_readwrite("max_iter", &ctrl::NelderMeadParams::max_iter)
+        .def_readwrite("tol",      &ctrl::NelderMeadParams::tol)
+        .def_readwrite("alpha",    &ctrl::NelderMeadParams::alpha)
+        .def_readwrite("gamma",    &ctrl::NelderMeadParams::gamma)
+        .def_readwrite("rho",      &ctrl::NelderMeadParams::rho)
+        .def_readwrite("sigma",    &ctrl::NelderMeadParams::sigma)
+        .def_readwrite("seed",     &ctrl::NelderMeadParams::seed);
+
+    py::class_<ctrl::NelderMead, std::shared_ptr<ctrl::NelderMead>>(m, "NelderMead", R"doc(
+Derivative-free Nelder-Mead simplex search - no bounds, no population sizing, just an
+initial point. A lighter-weight alternative to GeneticAlgorithm/AutoTuner for quick
+low-dimensional (n < 10) tuning.
+
+Usage
+-----
+>>> p = ctrl.NelderMeadParams(); p.n_dim = 2
+>>> nm = ctrl.NelderMead(p)
+>>> r = nm.optimize(lambda x: (x[0]-2.)**2 + (x[1]-3.)**2, np.array([0., 0.]))
+>>> print(r.params, r.cost)
+)doc")
+        .def(py::init<const ctrl::NelderMeadParams&>(), py::arg("params"))
+        .def("optimize",
+             [](ctrl::NelderMead& self, py::object cost_py, const Eigen::VectorXd& x0) {
+                 auto fn = [cost_py](const Eigen::VectorXd& p) -> double {
+                     return cost_py(p).cast<double>();
+                 };
+                 return self.optimize(fn, x0);
+             },
+             py::arg("cost"), py::arg("x0"),
+             "Minimise cost(params) starting from x0. Returns TunerResult.");
 
     // -----------------------------------------------------------------------
     // ParticleSwarmOptimizer

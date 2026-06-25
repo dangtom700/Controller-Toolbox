@@ -1,342 +1,451 @@
-Bug Report - generated from run_20260622_112807.log on 2026-06-22 12:33:03.367326
-Total failure indicators found: 14
-Merged into 12 block(s)
+Bug Report - generated from run_20260624_200327.log on 2026-06-24 22:09:14.382419
+Total failure indicators found: 71
+Merged into 14 block(s)
 ========================================================================
 
---- FAILURE BLOCK #1 (keywords: skip) ---
-Lines 1204 - 1224
+--- FAILURE BLOCK #1 (keywords: nan) ---
+Lines 1416 - 1452
 
-    1204: 
-    1205: ============================================================
-    1206:   Controller Toolbox  -  Sequential Build  (no benchmarks)
-    1207: ============================================================
-    1208: 
-    1209: [CONFIG] Configuring CMake...
-    1210: -- Building for: Ninja
-    1211: -- The CXX compiler identification is GNU 16.1.0
-    1212: -- Detecting CXX compiler ABI info
-    1213: -- Detecting CXX compiler ABI info - done
->>> 1214: -- Check for working CXX compiler: C:/msys64/ucrt64/bin/c++.exe - skipped
-    1215: -- Detecting CXX compile features
-    1216: -- Detecting CXX compile features - done
-    1217: -- Performing Test HAVE_FLAG__ffile_prefix_map_C__Users_dangs_Desktop_project_Controller_Toolbox_build__deps_catch2_src__
-    1218: -- Performing Test HAVE_FLAG__ffile_prefix_map_C__Users_dangs_Desktop_project_Controller_Toolbox_build__deps_catch2_src__ - Success
-    1219: -- Configuring done (2.4s)
-    1220: -- Generating done (0.3s)
-    1221: -- Build files have been written to: build
-    1222: 
-    1223: 
-    1224: ----------------------------------------------------------
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #2 (keywords: warn) ---
-Lines 7791 - 7811
-
-    7791: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    7792: test_catch2_advanced.exe is a Catch2 v3.5.4 host application.
-    7793: Run with -? for options
-    7794: 
-    7795: -------------------------------------------------------------------------------
-    7796: DiscreteHinf NaN guard returns last finite output, state not corrupted
-    7797: -------------------------------------------------------------------------------
-    7798: tests/test_catch2_advanced.cpp:3713
-    7799: ...............................................................................
-    7800: 
->>> 7801: tests/test_catch2_advanced.cpp:3728: warning:
-    7802:   H-inf synthesis infeasible - NaN-guard test skipped
-    7803: 
-    7804: ===============================================================================
-    7805: All tests passed (3908 assertions in 245 test cases)
-    7806: 
-    7807: 
-    7808:   EXIT 0 - PASSED
-    7809: 
-    7810: ------------------------------------------------------------------------
-    7811:   [123/136]  build\tests\test_catch2_pilot.exe
+    1416:   docs\archived\roadmap_deployment_frontend.md:566  [U+2713 '\u2713']
+    1417:   docs\archived\roadmap_deployment_frontend.md:608  [U+2713 '\u2713']
+    1418:   docs\archived\roadmap_deployment_frontend.md:657  [U+2713 '\u2713']
+    1419:   docs\archived\roadmap_deployment_frontend.md:750  [U+2190 '\u2190']
+    1420:   docs\archived\roadmap_deployment_frontend.md:753  [U+2190 '\u2190']
+    1421:   docs\archived\roadmap_deployment_frontend.md:855  [U+2192 '\u2192']
+    1422:   docs\archived\roadmap_deployment_frontend.md:859  [U+00A7 '\xa7']
+    1423:   docs\archived\test_update.md:72  [U+2016 '\u2016']
+    1424:   docs\archived\test_update.md:92  [U+2265 '\u2265']
+    1425:   docs\archived\test_update.md:93  [U+221E '\u221e', U+2264 '\u2264']
+>>> 1426:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:5  [U+2014 '\u2014']
+    1427:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:7  [U+2014 '\u2014']
+    1428:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:13  [U+2014 '\u2014']
+    1429:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:18  [U+2014 '\u2014']
+    1430:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:19  [U+2014 '\u2014']
+    1431:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:359  [U+2014 '\u2014']
+    1432:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:369  [U+2014 '\u2014']
+    1433:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:558  [U+2248 '\u2248']
+    1434:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:613  [U+2014 '\u2014']
+    1435:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:884  [U+2248 '\u2248']
+    1436:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:1022  [U+2248 '\u2248']
+    1437:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:1063  [U+2014 '\u2014']
+    1438:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:1066  [U+2014 '\u2014', U+2248 '\u2248']
+    1439:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:1363  [U+2248 '\u2248']
+    1440:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:1493  [U+2248 '\u2248']
+    1441:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:1531  [U+2014 '\u2014']
+    1442:   docs\superpowers\plans\2026-06-24-resonant-notch-pll-controllers.md:1532  [U+2014 '\u2014']
+    1443:   docs\superpowers\specs\2026-06-22-frequency-domain-analysis-plots-design.md:4  [U+2014 '\u2014']
+    1444:   docs\superpowers\specs\2026-06-22-frequency-domain-analysis-plots-design.md:13  [U+2014 '\u2014']
+    1445:   docs\superpowers\specs\2026-06-22-frequency-domain-analysis-plots-design.md:17  [U+2014 '\u2014']
+    1446:   docs\superpowers\specs\2026-06-22-frequency-domain-analysis-plots-design.md:26  [U+2014 '\u2014']
+    1447:   docs\superpowers\specs\2026-06-22-frequency-domain-analysis-plots-design.md:29  [U+2014 '\u2014']
+    1448:   docs\superpowers\specs\2026-06-22-frequency-domain-analysis-plots-design.md:30  [U+2014 '\u2014']
+    1449:   docs\superpowers\specs\2026-06-22-frequency-domain-analysis-plots-design.md:33  [U+2014 '\u2014']
+    1450:   docs\superpowers\specs\2026-06-22-frequency-domain-analysis-plots-design.md:38  [U+2014 '\u2014']
+    1451:   docs\superpowers\specs\2026-06-22-frequency-domain-analysis-plots-design.md:47  [U+2014 '\u2014']
+    1452:   docs\superpowers\specs\2026-06-22-frequency-domain-analysis-plots-design.md:50  [U+2014 '\u2014']
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #3 (keywords: warn) ---
-Lines 8423 - 8443
+--- FAILURE BLOCK #2 (keywords: nan) ---
+Lines 1632 - 1684
 
-    8423: 
-    8424: === RelayAutoTuner Extended ===
-    8425:   [PASS] TC-RELAY-01: Relay loop converges (isDone() == true)
-    8426:   [PASS] TC-RELAY-01: Ku and Tu are positive
-    8427:   [PASS] TC-RELAY-02: ZN gains valid
-    8428:   [PASS] TC-RELAY-03: AMIGO gains valid
-    8429:   [PASS] TC-RELAY-04: IMC-from-relay yields PI (Kd=0)
-    8430:   [PASS] TC-RELAY-05: Works with zero hysteresis
-    8431: 
-    8432: === StepResponseTuner Extended ===
->>> 8433:   [WARN] Step response data not found. Run generate_test_data.py first.
-    8434:   [PASS] TC-STEP-06: theta=0 in ZN does not crash (no exception)
-    8435: 
-    8436: === Other Tuners Extended ===
-    8437:   [PASS] TC-POLE-01: Q and R are positive definite
-    8438:   [PASS] TC-POLE-04: Complex conjugate pairs handled correctly
-    8439:   [PASS] TC-KWT-01: Qf diagonal matches variance
-    8440:   [PASS] TC-KWT-02: Rf diagonal matches variance
-    8441: 
-    8442: --------------------------------------------
-    8443:   Results: 11 passed, 0 failed
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #4 (keywords: skip) ---
-Lines 8768 - 8788
-
-    8768: ------------------------------------------------------------------------
-    8769: 
-    8770: ============================================================
-    8771: ex02 - Step Response Simulation
-    8772: ============================================================
-    8773: 
-    8774: Simulated 1500 steps at Ts=0.01 s
-    8775:   y[0]   = 0.000000000   (expected 0.0)
-    8776:   y[-1]  = 0.897737840  (expected approx = 1.0)
-    8777: 
->>> 8778:   [SKIP] CSV not found at tests\data\step_response.csv
-    8779:   Run: python scripts/generate_test_data.py  to generate it first.
-    8780:   [PASS] DC gain - measured=0.897758, expected=0.898000, rel_err=0.0270%
-    8781: 
-    8782:   FOPDT estimate (tangent method):
-    8783:     K     = 0.8977
-    8784:     tau   = 1.1400 s
-    8785:     theta = 0.5300 s
-    8786:   [PASS] assert_close (tau approx = 1.0 s): |1.14 - 1| = 1.400e-01  (tol=5.000e-01)
-    8787: 
-    8788: ================================================
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #5 (keywords: skip) ---
-Lines 12355 - 12375
-
-    12355:     [FAULT] ADRCCtrl                  2 fault types  elapsed 79.1s
-    12356:     [FAULT] SMCCtrl                   2 fault types  elapsed 79.5s
-    12357:     [FAULT] MRACCtrl                  2 fault types  elapsed 79.9s
-    12358:     [FAULT] FuzzyPIDCtrl              2 fault types  elapsed 80.5s
-    12359:     [FAULT] TubeMPCCtrl               2 fault types  elapsed 80.9s
-    12360:     [FAULT] ILCCtrl                   2 fault types  elapsed 81.6s
-    12361:     [FAULT] CBFCtrl                   2 fault types  elapsed 82.2s
-    12362:     [FAULT] L1AdaptiveCtrl            2 fault types  elapsed 82.6s
-    12363:     [FAULT] ScenarioMPCCtrl           2 fault types  elapsed 83.0s
-    12364:     [FAULT] Written: case-study\Active Suspension 6x6 EV Full Model\fault_sweep.csv  (144 rows)
->>> 12365:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
-    12366: 
-    12367: [Air-Cooled Battery Thermal Management System]
-    12368:     [MC] OpenLoop                  30 samples  elapsed 6.9s
-    12369:     [MC] SelfAdaptive              30 samples  elapsed 13.2s
-    12370:     [MC] PID                       30 samples  elapsed 18.9s
-    12371:     [MC] ADRC                      30 samples  elapsed 25.6s
-    12372:     [MC] SMC                       30 samples  elapsed 31.6s
-    12373:     [MC] MPC                       30 samples  elapsed 46.1s
-    12374:     [MC] LQR                       30 samples  elapsed 52.3s
-    12375:     [MC] MRAC                      30 samples  elapsed 57.6s
+    1632:   docs\superpowers\specs\2026-06-24-nonlinear-control-trio-design.md:265  [U+2014 '\u2014']
+    1633:   docs\superpowers\specs\2026-06-24-nonlinear-control-trio-design.md:267  [U+2014 '\u2014']
+    1634:   docs\superpowers\specs\2026-06-24-nonlinear-control-trio-design.md:273  [U+2014 '\u2014']
+    1635:   docs\superpowers\specs\2026-06-24-nonlinear-control-trio-design.md:276  [U+2014 '\u2014']
+    1636:   docs\superpowers\specs\2026-06-24-nonlinear-control-trio-design.md:277  [U+2014 '\u2014']
+    1637:   docs\superpowers\specs\2026-06-24-nonlinear-control-trio-design.md:282  [U+2014 '\u2014']
+    1638:   docs\superpowers\specs\2026-06-24-nonlinear-control-trio-design.md:287  [U+2014 '\u2014']
+    1639:   docs\superpowers\specs\2026-06-24-nonlinear-control-trio-design.md:293  [U+2014 '\u2014']
+    1640:   docs\superpowers\specs\2026-06-24-nonlinear-control-trio-design.md:296  [U+2014 '\u2014']
+    1641:   docs\superpowers\specs\2026-06-24-nonlinear-control-trio-design.md:297  [U+2014 '\u2014']
+>>> 1642:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:9  [U+2014 '\u2014']
+    1643:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:16  [U+2014 '\u2014']
+    1644:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:17  [U+2014 '\u2014']
+    1645:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:20  [U+2014 '\u2014']
+    1646:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:21  [U+2014 '\u2014']
+    1647:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:25  [U+2014 '\u2014']
+    1648:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:31  [U+2014 '\u2014']
+    1649:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:37  [U+2014 '\u2014']
+    1650:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:42  [U+2014 '\u2014']
+    1651:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:86  [U+2014 '\u2014']
+    1652:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:89  [U+2014 '\u2014']
+    1653:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:112  [U+2014 '\u2014']
+    1654:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:117  [U+2014 '\u2014']
+    1655:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:151  [U+2014 '\u2014']
+    1656:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:154  [U+2014 '\u2014']
+    1657:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:157  [U+2014 '\u2014']
+    1658:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:160  [U+2014 '\u2014']
+    1659:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:162  [U+2014 '\u2014']
+    1660:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:171  [U+2014 '\u2014']
+    1661:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:172  [U+2014 '\u2014']
+    1662:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:173  [U+2014 '\u2014']
+    1663:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:175  [U+2014 '\u2014']
+    1664:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:176  [U+2014 '\u2014']
+    1665:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:181  [U+2014 '\u2014']
+    1666:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:182  [U+2014 '\u2014']
+    1667:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:183  [U+2014 '\u2014']
+    1668:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:189  [U+2014 '\u2014']
+    1669:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:190  [U+2014 '\u2014']
+    1670:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:191  [U+2014 '\u2014']
+    1671:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:193  [U+2014 '\u2014']
+    1672:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:194  [U+2014 '\u2014']
+    1673:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:195  [U+2014 '\u2014']
+    1674:   docs\superpowers\specs\2026-06-24-resonant-notch-pll-controllers-design.md:196  [U+2014 '\u2014']
+    1675:   docs\superpowers\specs\2026-06-24-small-foundational-utilities-design.md:11  [U+2014 '\u2014']
+    1676:   docs\superpowers\specs\2026-06-24-small-foundational-utilities-design.md:18  [U+2014 '\u2014']
+    1677:   docs\superpowers\specs\2026-06-24-small-foundational-utilities-design.md:21  [U+2014 '\u2014']
+    1678:   docs\superpowers\specs\2026-06-24-small-foundational-utilities-design.md:28  [U+2014 '\u2014']
+    1679:   docs\superpowers\specs\2026-06-24-small-foundational-utilities-design.md:33  [U+2014 '\u2014']
+    1680:   docs\superpowers\specs\2026-06-24-small-foundational-utilities-design.md:60  [U+2014 '\u2014']
+    1681:   docs\superpowers\specs\2026-06-24-small-foundational-utilities-design.md:63  [U+2014 '\u2014']
+    1682:   docs\superpowers\specs\2026-06-24-small-foundational-utilities-design.md:66  [U+2014 '\u2014']
+    1683:   docs\superpowers\specs\2026-06-24-small-foundational-utilities-design.md:94  [U+2014 '\u2014']
+    1684:   docs\superpowers\specs\2026-06-24-small-foundational-utilities-design.md:97  [U+2014 '\u2014']
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #6 (keywords: skip) ---
-Lines 12384 - 12404
+--- FAILURE BLOCK #3 (keywords: nan) ---
+Lines 2653 - 2679
 
-    12384:     [FAULT] ADRC                      2 fault types  elapsed 9.1s
-    12385:     [FAULT] SMC                       2 fault types  elapsed 11.2s
-    12386:     [FAULT] MPC                       2 fault types  elapsed 17.1s
-    12387:     [FAULT] LQR                       2 fault types  elapsed 19.2s
-    12388:     [FAULT] MRAC                      2 fault types  elapsed 21.4s
-    12389:     [FAULT] L1Adaptive                2 fault types  elapsed 24.4s
-    12390:     [FAULT] NeuralPID                 2 fault types  elapsed 26.6s
-    12391:     [FAULT] GainScheduled             2 fault types  elapsed 28.8s
-    12392:     [FAULT] ILC                       2 fault types  elapsed 30.9s
-    12393:     [FAULT] Written: case-study\Air-Cooled Battery Thermal Management System\fault_sweep.csv  (84 rows)
->>> 12394:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
-    12395: 
-    12396: [Aircraft Engine Thermal Management]
-    12397:     [MC] OpenLoop                  30 samples  elapsed 2.7s
-    12398:     [MC] PID                       30 samples  elapsed 5.4s
-    12399:     [MC] ADRC                      30 samples  elapsed 8.2s
-    12400:     [MC] SMC                       30 samples  elapsed 10.9s
-    12401:     [MC] LQR                       30 samples  elapsed 13.8s
-    12402:     [MC] MPC                       30 samples  elapsed 17.1s
-    12403:     [MC] MRAC                      30 samples  elapsed 19.9s
-    12404:     [MC] L1Adaptive                30 samples  elapsed 22.7s
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #7 (keywords: skip) ---
-Lines 12413 - 12433
-
-    12413:     [FAULT] SMC                       4 fault types  elapsed 5.6s
-    12414:     [FAULT] LQR                       4 fault types  elapsed 7.1s
-    12415:     [FAULT] MPC                       4 fault types  elapsed 8.9s
-    12416:     [FAULT] MRAC                      4 fault types  elapsed 10.1s
-    12417:     [FAULT] L1Adaptive                4 fault types  elapsed 11.4s
-    12418:     [FAULT] GainScheduled             4 fault types  elapsed 13.2s
-    12419:     [FAULT] SmithPredictor            4 fault types  elapsed 14.5s
-    12420:     [FAULT] NeuralPID                 4 fault types  elapsed 15.8s
-    12421:     [FAULT] ILC                       4 fault types  elapsed 17.2s
-    12422:     [FAULT] Written: case-study\Aircraft Engine Thermal Management\fault_sweep.csv  (156 rows)
->>> 12423:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
-    12424: 
-    12425: [High-Altitude Aerial Firefighting Bag Drop]
-    12426:     [MC] NominalDrop               30 samples  elapsed 0.5s
-    12427:     [MC] WindOffset                30 samples  elapsed 1.0s
-    12428:     [MC] IterativeRefine           30 samples  elapsed 1.6s
-    12429:     [MC] MCPredictor               30 samples  elapsed 2.4s
-    12430:     [MC] GPSurrogate               30 samples  elapsed 3.0s
-    12431:     [MC] BayesOptDrop              30 samples  elapsed 5.0s
-    12432:     [MC] SIRParticleFilter         30 samples  elapsed 5.7s
-    12433:     [MC] KalmanWind                30 samples  elapsed 6.4s
+    2653: ----------------------------------------------------------
+    2654: [BUILD] ex88_h2_synthesis
+    2655: ----------------------------------------------------------
+    2656: [100%] Built target controller_toolbox
+    2657: [100%] Building CXX object examples/CMakeFiles/ex88_h2_synthesis.dir/ex88_h2_synthesis.cpp.obj
+    2658: [100%] Linking CXX executable ex88_h2_synthesis.exe
+    2659: [100%] Built target ex88_h2_synthesis
+    2660: [OK] ex88_h2_synthesis
+    2661: 
+    2662: ----------------------------------------------------------
+>>> 2663: [BUILD] ex89_resonant_controller
+    2664: ----------------------------------------------------------
+    2665: [100%] Built target controller_toolbox
+    2666: [100%] Building CXX object examples/CMakeFiles/ex89_resonant_controller.dir/ex89_resonant_controller.cpp.obj
+    2667: [100%] Linking CXX executable ex89_resonant_controller.exe
+    2668: [100%] Built target ex89_resonant_controller
+    2669: [OK] ex89_resonant_controller
+    2670: 
+    2671: ----------------------------------------------------------
+    2672: [BUILD] ex90_notch_filter
+    2673: ----------------------------------------------------------
+    2674: [ 92%] Built target controller_toolbox
+    2675: [100%] Building CXX object examples/CMakeFiles/ex90_notch_filter.dir/ex90_notch_filter.cpp.obj
+    2676: [100%] Linking CXX executable ex90_notch_filter.exe
+    2677: [100%] Built target ex90_notch_filter
+    2678: [OK] ex90_notch_filter
+    2679: 
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #8 (keywords: skip) ---
-Lines 12442 - 12462
+--- FAILURE BLOCK #4 (keywords: error, fail) ---
+Lines 3331 - 3356
 
-    12442:     [FAULT] MCPredictor               2 fault types  elapsed 0.6s
-    12443:     [FAULT] GPSurrogate               2 fault types  elapsed 0.8s
-    12444:     [FAULT] BayesOptDrop              2 fault types  elapsed 1.2s
-    12445:     [FAULT] SIRParticleFilter         2 fault types  elapsed 1.4s
-    12446:     [FAULT] KalmanWind                2 fault types  elapsed 1.5s
-    12447:     [FAULT] RobustMinMax              2 fault types  elapsed 1.6s
-    12448:     [FAULT] AdaptiveRLS               2 fault types  elapsed 1.8s
-    12449:     [FAULT] EnsembleConsensus         2 fault types  elapsed 2.0s
-    12450:     [FAULT] ProfileAdaptive           2 fault types  elapsed 2.1s
-    12451:     [FAULT] Written: case-study\High-Altitude Aerial Firefighting Bag Drop\fault_sweep.csv  (96 rows)
->>> 12452:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
-    12453: 
-    12454: [Multi-Body Floating Wind-Wave Platform]
-    12455:     [MC] Passive                   30 samples  elapsed 0.3s
-    12456:     [MC] Reactive                  30 samples  elapsed 0.6s
-    12457:     [MC] PID                       30 samples  elapsed 1.0s
-    12458:     [MC] ADRC                      30 samples  elapsed 1.4s
-    12459:     [MC] SMC                       30 samples  elapsed 1.8s
-    12460:     [MC] LQR                       30 samples  elapsed 2.2s
-    12461:     [MC] MPC                       30 samples  elapsed 2.7s
-    12462:     [MC] MRAC                      30 samples  elapsed 3.0s
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #9 (keywords: skip) ---
-Lines 12479 - 12499
-
-    12479:     [FAULT] MRAC                      3 fault types  elapsed 1.5s
-    12480:     [FAULT] L1Adaptive                3 fault types  elapsed 1.8s
-    12481:     [FAULT] ILC                       3 fault types  elapsed 2.0s
-    12482:     [FAULT] DynaCtrl                  3 fault types  elapsed 2.2s
-    12483:     [FAULT] CEMCtrl                   3 fault types  elapsed 34.5s
-    12484:     [FAULT] ScenarioMPC               3 fault types  elapsed 34.9s
-    12485:     [FAULT] KoopmanMPC                3 fault types  elapsed 35.0s
-    12486:     [FAULT] ESNCtrl                   3 fault types  elapsed 35.2s
-    12487:     [FAULT] CBFSafety                 3 fault types  elapsed 35.4s
-    12488:     [FAULT] Written: case-study\Multi-Body Floating Wind-Wave Platform\fault_sweep.csv  (176 rows)
->>> 12489:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
-    12490: 
-    12491: [Nonlinear Surface Ship Manoeuvring Control]
-    12492:     [MC] OpenLoop                  20 samples  elapsed 0.4s
-    12493:     [MC] PID                       20 samples  elapsed 0.9s
-    12494:     [MC] SMC                       20 samples  elapsed 1.5s
-    12495:     [MC] ASMC                      20 samples  elapsed 2.0s
-    12496:     [MC] MPC                       20 samples  elapsed 3.0s
-    12497:     [MC] LQR                       20 samples  elapsed 3.6s
-    12498:     [MC] MRAC                      20 samples  elapsed 4.1s
-    12499:     [MC] L1Adaptive                20 samples  elapsed 4.6s
+    3331: -- Build files have been written to: build
+    3332: 
+    3333: Compile succeeded.
+    3334: 
+    3335: ========================================================================
+    3336:   Phase 3 - Python bindings build + smoke test
+    3337: ========================================================================
+    3338: 
+    3339:   [cmake configure (bindings)]
+    3340: 
+>>> 3341: CMake Error: Error: generator : Ninja
+    3342: Does not match the generator used previously: MinGW Makefiles
+    3343: Either remove the CMakeCache.txt file and CMakeFiles directory or choose a different binary directory.
+    3344: ERROR conda.cli.main_run:execute(148): `conda run cmake -S . -B build -DCTRL_BUILD_PYTHON_BINDINGS=ON -DCMAKE_BUILD_TYPE=Release -G Ninja` failed. (See above for error)
+    3345: 
+    3346:   cmake configure FAILED (exit 1). Skipping binding build.
+    3347: 
+    3348: ========================================================================
+    3349:   Phase 4 - Run executables
+    3350: ========================================================================
+    3351: 
+    3352: Found 151 executable(s):
+    3353:   [ 1] build\case-study\6-DOF Stewart Platform Vessel Motion Simulator\stewart_robustness.exe
+    3354:   [ 2] build\case-study\6-DOF Stewart Platform Vessel Motion Simulator\stewart_sim.exe
+    3355:   [ 3] build\case-study\Active Suspension Mathematical Modeling and Optimization 2025\susp_robustness.exe
+    3356:   [ 4] build\case-study\Active Suspension Mathematical Modeling and Optimization 2025\susp_sim.exe
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #10 (keywords: skip) ---
-Lines 12508 - 12528
+--- FAILURE BLOCK #5 (keywords: nan) ---
+Lines 3454 - 3474
 
-    12508:     [FAULT] ASMC                      3 fault types  elapsed 1.2s
-    12509:     [FAULT] MPC                       3 fault types  elapsed 1.6s
-    12510:     [FAULT] LQR                       3 fault types  elapsed 1.9s
-    12511:     [FAULT] MRAC                      3 fault types  elapsed 2.2s
-    12512:     [FAULT] L1Adaptive                3 fault types  elapsed 2.5s
-    12513:     [FAULT] GainScheduled             3 fault types  elapsed 2.8s
-    12514:     [FAULT] ADRC                      3 fault types  elapsed 3.1s
-    12515:     [FAULT] NeuralPID                 3 fault types  elapsed 3.3s
-    12516:     [FAULT] ILC                       3 fault types  elapsed 3.6s
-    12517:     [FAULT] Written: case-study\Nonlinear Surface Ship Manoeuvring Control\fault_sweep.csv  (132 rows)
->>> 12518:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
-    12519: 
-    12520: [Tracking Control of Electro-Hydraulic Force Servo Systems]
-    12521:     [MC] OpenLoop                  30 samples  elapsed 1.5s
-    12522:     [MC] PID                       30 samples  elapsed 3.1s
-    12523:     [MC] ADRC                      30 samples  elapsed 4.6s
-    12524:     [MC] SMC                       30 samples  elapsed 5.9s
-    12525:     [MC] MPC                       30 samples  elapsed 7.5s
-    12526:     [MC] LQR                       30 samples  elapsed 9.0s
-    12527:     [MC] MRAC                      30 samples  elapsed 10.3s
-    12528:     [MC] L1Adaptive                30 samples  elapsed 11.8s
-
-------------------------------------------------------------------------
-
---- FAILURE BLOCK #11 (keywords: skip) ---
-Lines 12541 - 12561
-
-    12541:     [FAULT] LQR                       3 fault types  elapsed 5.8s
-    12542:     [FAULT] MRAC                      3 fault types  elapsed 6.6s
-    12543:     [FAULT] L1Adaptive                3 fault types  elapsed 7.1s
-    12544:     [FAULT] FeedbackLin               3 fault types  elapsed 7.7s
-    12545:     [FAULT] NeuralPID                 3 fault types  elapsed 8.2s
-    12546:     [FAULT] ILC                       3 fault types  elapsed 8.7s
-    12547:     [FAULT] GainScheduled             3 fault types  elapsed 9.2s
-    12548:     [FAULT] HinfODFC                  3 fault types  elapsed 9.7s
-    12549:     [FAULT] HinfCascade               3 fault types  elapsed 10.3s
-    12550:     [FAULT] Written: case-study\Tracking Control of Electro-Hydraulic Force Servo Systems\fault_sweep.csv  (154 rows)
->>> 12551:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
-    12552: 
-    12553: [Vertical Drill String Mathematical Review 2025]
-    12554:     [MC] OpenLoop                  30 samples  elapsed 0.2s
-    12555:     [MC] PID                       30 samples  elapsed 0.5s
-    12556:     [MC] ADRC                      30 samples  elapsed 0.7s
-    12557:     [MC] SMC                       30 samples  elapsed 1.0s
-    12558:     [MC] LQR                       30 samples  elapsed 1.4s
-    12559:     [MC] MPC                       30 samples  elapsed 1.9s
-    12560:     [MC] MRAC                      30 samples  elapsed 2.1s
-    12561:     [MC] GainScheduled             30 samples  elapsed 2.4s
+    3454:   [102] build\examples\ex79_registry_monitor.exe
+    3455:   [103] build\examples\ex80_grey_box_estimator.exe
+    3456:   [104] build\examples\ex81_hybrid_model_mpc.exe
+    3457:   [105] build\examples\ex82_metaheuristics.exe
+    3458:   [106] build\examples\ex83_robustness_mc.exe
+    3459:   [107] build\examples\ex84_gang_of_four.exe
+    3460:   [108] build\examples\ex85_mu_analysis.exe
+    3461:   [109] build\examples\ex86_worst_case.exe
+    3462:   [110] build\examples\ex87_lyapunov_robust.exe
+    3463:   [111] build\examples\ex88_h2_synthesis.exe
+>>> 3464:   [112] build\examples\ex89_resonant_controller.exe
+    3465:   [113] build\examples\ex90_notch_filter.exe
+    3466:   [114] build\examples\ex91_phase_locked_loop.exe
+    3467:   [115] build\examples\ex92_correlation_id.exe
+    3468:   [116] build\examples\ex93_nelder_mead.exe
+    3469:   [117] build\examples\ex94_sk_complex_fit.exe
+    3470:   [118] build\examples\ex95_hinf_filter.exe
+    3471:   [119] build\examples\ex96_lft_system.exe
+    3472:   [120] build\examples\ex97_backstepping.exe
+    3473:   [121] build\examples\ex98_passivity_based.exe
+    3474:   [122] build\examples\ex99_clf_controller.exe
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #12 (keywords: skip) ---
-Lines 12580 - 12613
+--- FAILURE BLOCK #6 (keywords: nan) ---
+Lines 7538 - 7558
 
-    12580:     [FAULT] L1Adaptive                3 fault types  elapsed 1.0s
-    12581:     [FAULT] NeuralPID                 3 fault types  elapsed 1.2s
-    12582:     [FAULT] ILC                       3 fault types  elapsed 1.3s
-    12583:     [FAULT] DynaCtrl                  3 fault types  elapsed 1.5s
-    12584:     [FAULT] CEMCtrl                   3 fault types  elapsed 41.7s
-    12585:     [FAULT] ScenarioMPC               3 fault types  elapsed 42.2s
-    12586:     [FAULT] KoopmanMPC                3 fault types  elapsed 42.3s
-    12587:     [FAULT] ESNCtrl                   3 fault types  elapsed 42.5s
-    12588:     [FAULT] CBFSafety                 3 fault types  elapsed 42.6s
-    12589:     [FAULT] Written: case-study\Vertical Drill String Mathematical Review 2025\fault_sweep.csv  (187 rows)
->>> 12590:     [WCET] SKIP - no logs/wcet_*.csv (needs a run_wcet_profile() hook in sim/main.py)
-    12591: Analysing 25 (study, scenario) pairs ...
-    12592:   6-DOF Stewart Platform Vessel  ss01_beam_noswell     peak_S=1.000  peak_T=0.000
-    12593:   6-DOF Stewart Platform Vessel  ss01_beam_swell       peak_S=1.000  peak_T=0.000
-    12594:   6-DOF Stewart Platform Vessel  ss01_following_noswell  peak_S=1.000  peak_T=0.000
-    12595:   6-DOF Stewart Platform Vessel  ss01_following_swell  peak_S=1.000  peak_T=0.000
-    12596:   6-DOF Stewart Platform Vessel  ss01_head_noswell     peak_S=1.000  peak_T=0.000
-    12597:   6-DOF Stewart Platform Vessel  ss01_head_swell       peak_S=1.000  peak_T=0.000
-    12598:   Active Suspension 6x6 EV Full  s01_bump              peak_S=1.115  peak_T=0.507
-    12599:   SKIP run_s01_5C_discharge_ADRC.csv: cannot identify y/u columns
-    12600:   Aircraft Engine Thermal Manage s01_steady_condition1  peak_S=0.942  peak_T=1.000
-    12601:   Boiler Control                 s01_lowload_regulation  peak_S=1.086  peak_T=2.086
-    12602:   Bouyancy-Driven Airship in Ver s01_calm_step         peak_S=1.000  peak_T=0.000
-    12603:   SKIP run_s01_no_wind_AdaptiveRLS.csv: cannot identify y/u columns
-    12604:   Multi-Body Floating Wind-Wave  s01_regular_waves     peak_S=1.000  peak_T=0.000
-    12605:   Nonlinear Surface Ship Manoeuv s01                   peak_S=9.514  peak_T=10.514
-    12606:   PCM Thermal Energy Storage Con s01_scenario          peak_S=1.000  peak_T=0.000
-    12607:   Porous Fiber Plate Humidificat s01_design            peak_S=0.998  peak_T=0.298
-    12608:   Porous Fiber Plate Humidificat s01_design_GPC        peak_S=1.001  peak_T=0.293
-    12609:   Porous Fiber Plate Humidificat s01_design_PID        peak_S=1.050  peak_T=0.267
-    12610:   Satellite Launch Vehicle Syste s01_scenario          peak_S=1.000  peak_T=0.000
-    12611:   Separate Meter In Separate Met s01_resistive_step    peak_S=1.004  peak_T=0.060
-    12612:   Solar Cooker with Reflector an s01_clear_sky_tracking  peak_S=1.000  peak_T=0.000
-    12613:   Solar Ocean Thermal Energy Con s01_mppt_steady       peak_S=4.759  peak_T=5.759
+    7538:   backstepping_controller  yes
+    7539:   mpc                      yes
+    7540:   clf_controller           yes
+    7541:   dyna                     yes
+    7542:   phase_locked_loop        yes
+    7543:   lft_system               yes
+    7544:   mu_analysis              yes
+    7545:   hammerstein_wiener       yes
+    7546:   smc                      yes
+    7547:   freq_domain_identifier   yes
+>>> 7548:   resonant_controller      yes
+    7549:   genetic_algorithm        yes
+    7550:   sk_fit                   yes
+    7551:   h2_synthesis             yes
+    7552:   hinf_filter              yes
+    7553:   koopman_edmd             yes
+    7554:   notch_filter             yes
+    7555:   lqr                      yes
+    7556:   pid                      yes
+    7557:   subspace                 yes
+    7558:   fuzzy                    yes
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #7 (keywords: nan) ---
+Lines 7963 - 7987
+
+    7963:   [111/151]  build\examples\ex88_h2_synthesis.exe
+    7964: ------------------------------------------------------------------------
+    7965: 
+    7966: H2: feasible=1  achievedH2Norm=0.413315
+    7967: DiscreteH2 compute(0.1) = 0
+    7968: PASS
+    7969: 
+    7970:   EXIT 0 - PASSED
+    7971: 
+    7972: ------------------------------------------------------------------------
+>>> 7973:   [112/151]  build\examples\ex89_resonant_controller.exe
+    7974: ------------------------------------------------------------------------
+    7975: 
+    7976: PID-only steady-state ripple:     0.028281
+    7977: PID+resonant steady-state ripple: 0.00182805
+    7978: ratio (with/without):              0.0646387
+    7979: PASS
+    7980: 
+    7981:   EXIT 0 - PASSED
+    7982: 
+    7983: ------------------------------------------------------------------------
+    7984:   [113/151]  build\examples\ex90_notch_filter.exe
+    7985: ------------------------------------------------------------------------
+    7986: 
+    7987: Unwanted 50Hz resonance: amplitude 1.0 before, 0.000101375 after notch
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #8 (keywords: error) ---
+Lines 8023 - 8043
+
+    8023:   6   0.0634969   0.065536
+    8024:   7   0.0497722   0.0524288
+    8025:   8   0.0392402   0.041943
+    8026:   9   0.0315366   0.0335544
+    8027:   10   0.0246479   0.0268435
+    8028:   11   0.0187844   0.0214748
+    8029:   12   0.0147166   0.0171799
+    8030:   13   0.0107091   0.0137439
+    8031:   14   0.00788071   0.0109951
+    8032:   15   0.00594106   0.00879609
+>>> 8033: Max abs error vs. true impulse response: 0.00335351
+    8034: PASS
+    8035: 
+    8036:   EXIT 0 - PASSED
+    8037: 
+    8038: ------------------------------------------------------------------------
+    8039:   [116/151]  build\examples\ex93_nelder_mead.exe
+    8040: ------------------------------------------------------------------------
+    8041: 
+    8042: Default gains  Kp=1.00 Ki=0.10 Kd=0.00  IAE=2.7252
+    8043: Tuned  gains   Kp=12.670 Ki=26.274 Kd=1.446  IAE=0.5969
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #9 (keywords: error) ---
+Lines 8057 - 8077
+
+    8057: Per-iteration RMSE: 0.03536 0.01399 0.01398 0.01398 
+    8058: PASS
+    8059: 
+    8060:   EXIT 0 - PASSED
+    8061: 
+    8062: ------------------------------------------------------------------------
+    8063:   [118/151]  build\examples\ex95_hinf_filter.exe
+    8064: ------------------------------------------------------------------------
+    8065: 
+    8066: HinfFilter achieved gamma = 0.2253
+>>> 8067: RMS error under impulsive disturbance:  HinfFilter=0.1478  KalmanFilter=0.1449
+    8068: PASS
+    8069: 
+    8070:   EXIT 0 - PASSED
+    8071: 
+    8072: ------------------------------------------------------------------------
+    8073:   [119/151]  build\examples\ex96_lft_system.exe
+    8074: ------------------------------------------------------------------------
+    8075: 
+    8076: Combined (coupled) peak mu upper bound = 2.8172 at omega = 0.0100 rad/s
+    8077: Independent-channel comparison: channel1=1.7042  channel2=2.5333  worst=2.5333
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #10 (keywords: nan) ---
+Lines 9715 - 9735
+
+    9715:     build\examples\ex79_registry_monitor.exe
+    9716:     build\examples\ex80_grey_box_estimator.exe
+    9717:     build\examples\ex81_hybrid_model_mpc.exe
+    9718:     build\examples\ex82_metaheuristics.exe
+    9719:     build\examples\ex83_robustness_mc.exe
+    9720:     build\examples\ex84_gang_of_four.exe
+    9721:     build\examples\ex85_mu_analysis.exe
+    9722:     build\examples\ex86_worst_case.exe
+    9723:     build\examples\ex87_lyapunov_robust.exe
+    9724:     build\examples\ex88_h2_synthesis.exe
+>>> 9725:     build\examples\ex89_resonant_controller.exe
+    9726:     build\examples\ex90_notch_filter.exe
+    9727:     build\examples\ex91_phase_locked_loop.exe
+    9728:     build\examples\ex92_correlation_id.exe
+    9729:     build\examples\ex93_nelder_mead.exe
+    9730:     build\examples\ex94_sk_complex_fit.exe
+    9731:     build\examples\ex95_hinf_filter.exe
+    9732:     build\examples\ex96_lft_system.exe
+    9733:     build\examples\ex97_backstepping.exe
+    9734:     build\examples\ex98_passivity_based.exe
+    9735:     build\examples\ex99_clf_controller.exe
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #11 (keywords: error) ---
+Lines 10379 - 10400
+
+    10379:   root_locus: OK (1 axes)
+    10380:   sigma_plot: OK (1 axes)
+    10381: [PASS] All checks passed.
+    10382: 
+    10383:   EXIT 0 - PASSED
+    10384: 
+    10385: ------------------------------------------------------------------------
+    10386:   [17/122]  examples\python\ex107_frequency_domain_identification.py
+    10387: ------------------------------------------------------------------------
+    10388: 
+>>> 10389:   recovered num: [2.3582554024385327e-17, 0.004800000000000024, 0.0046999999999999984] (max error 2.43e-17)
+    10390:   recovered den: [1.0, -1.8099999999999994, 0.8189999999999992] (max error 7.77e-16)
+    10391:   rmse: 1.55e-15
+    10392: [PASS] All checks passed.
+    10393: 
+    10394:   EXIT 0 - PASSED
+    10395: 
+    10396: ------------------------------------------------------------------------
+    10397:   [18/122]  examples\python\ex108_h2_synthesis.py
+    10398: ------------------------------------------------------------------------
+    10399: 
+    10400: H2: feasible=True  achieved_h2_norm=0.4133
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #12 (keywords: error) ---
+Lines 10417 - 10437
+
+    10417:   6   0.06350   0.06554
+    10418:   7   0.04977   0.05243
+    10419:   8   0.03924   0.04194
+    10420:   9   0.03154   0.03355
+    10421:   10   0.02465   0.02684
+    10422:   11   0.01878   0.02147
+    10423:   12   0.01472   0.01718
+    10424:   13   0.01071   0.01374
+    10425:   14   0.00788   0.01100
+    10426:   15   0.00594   0.00880
+>>> 10427: Max abs error vs. true impulse response: 3.3535e-03
+    10428: [PASS] All checks passed.
+    10429: 
+    10430:   EXIT 0 - PASSED
+    10431: 
+    10432: ------------------------------------------------------------------------
+    10433:   [20/122]  examples\python\ex10_imc_pid_tuning.py
+    10434: ------------------------------------------------------------------------
+    10435: 
+    10436: ============================================================
+    10437: ex10 - IMC-PID Tuning
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #13 (keywords: error) ---
+Lines 10481 - 10501
+
+    10481: Per-iteration RMSE: ['0.02908', '0.01176', '0.01176']
+    10482: [PASS] All checks passed.
+    10483: 
+    10484:   EXIT 0 - PASSED
+    10485: 
+    10486: ------------------------------------------------------------------------
+    10487:   [23/122]  examples\python\ex112_hinf_filter.py
+    10488: ------------------------------------------------------------------------
+    10489: 
+    10490: HinfFilter achieved gamma = 0.2253
+>>> 10491: RMS error under impulsive disturbance:  HinfFilter=0.1280  KalmanFilter=0.1286
+    10492: [PASS] All checks passed.
+    10493: 
+    10494:   EXIT 0 - PASSED
+    10495: 
+    10496: ------------------------------------------------------------------------
+    10497:   [24/122]  examples\python\ex113_lft_system.py
+    10498: ------------------------------------------------------------------------
+    10499: 
+    10500: Combined (coupled) peak mu upper bound = 2.8172 at omega = 0.0100 rad/s
+    10501: Independent-channel comparison: channel1=1.7042  channel2=2.5333  worst=2.5333
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #14 (keywords: skip) ---
+Lines 14068 - 14092
+
+    14068:      OpenLoop       3500     0.27       0.20     0.70     1.85   145.50
+    14069:     [WCET] Written: case-study\Vertical Drill String Mathematical Review 2025\wcet_summary.csv
+    14070: Analysing 25 (study, scenario) pairs ...
+    14071:   6-DOF Stewart Platform Vessel  ss01_beam_noswell     peak_S=1.000  peak_T=0.000
+    14072:   6-DOF Stewart Platform Vessel  ss01_beam_swell       peak_S=1.000  peak_T=0.000
+    14073:   6-DOF Stewart Platform Vessel  ss01_following_noswell  peak_S=1.000  peak_T=0.000
+    14074:   6-DOF Stewart Platform Vessel  ss01_following_swell  peak_S=1.000  peak_T=0.000
+    14075:   6-DOF Stewart Platform Vessel  ss01_head_noswell     peak_S=1.000  peak_T=0.000
+    14076:   6-DOF Stewart Platform Vessel  ss01_head_swell       peak_S=1.000  peak_T=0.000
+    14077:   Active Suspension 6x6 EV Full  s01_bump              peak_S=1.115  peak_T=0.507
+>>> 14078:   SKIP run_s01_5C_discharge_ADRC.csv: cannot identify y/u columns
+    14079:   Aircraft Engine Thermal Manage s01_steady_condition1  peak_S=0.942  peak_T=1.000
+    14080:   Boiler Control                 s01_lowload_regulation  peak_S=1.086  peak_T=2.086
+    14081:   Bouyancy-Driven Airship in Ver s01_calm_step         peak_S=1.000  peak_T=0.000
+    14082:   SKIP run_s01_no_wind_AdaptiveRLS.csv: cannot identify y/u columns
+    14083:   Multi-Body Floating Wind-Wave  s01_regular_waves     peak_S=1.000  peak_T=0.000
+    14084:   Nonlinear Surface Ship Manoeuv s01                   peak_S=9.514  peak_T=10.514
+    14085:   PCM Thermal Energy Storage Con s01_scenario          peak_S=1.000  peak_T=0.000
+    14086:   Porous Fiber Plate Humidificat s01_design            peak_S=0.998  peak_T=0.298
+    14087:   Porous Fiber Plate Humidificat s01_design_GPC        peak_S=1.001  peak_T=0.293
+    14088:   Porous Fiber Plate Humidificat s01_design_PID        peak_S=1.050  peak_T=0.267
+    14089:   Satellite Launch Vehicle Syste s01_scenario          peak_S=1.000  peak_T=0.000
+    14090:   Separate Meter In Separate Met s01_resistive_step    peak_S=1.004  peak_T=0.060
+    14091:   Solar Cooker with Reflector an s01_clear_sky_tracking  peak_S=1.000  peak_T=0.000
+    14092:   Solar Ocean Thermal Energy Con s01_mppt_steady       peak_S=4.759  peak_T=5.759
 
 ------------------------------------------------------------------------
 

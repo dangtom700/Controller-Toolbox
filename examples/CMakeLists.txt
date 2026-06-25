@@ -143,6 +143,23 @@ add_example(ex90_notch_filter)
 # Additional Controller Types: PhaseLockedLoop tracking a synthetic AC signal
 add_example(ex91_phase_locked_loop)
 
+# Phase 3 (Algorithm Roadmap Phase 1): SI2 correlation-based identification
+add_example(ex92_correlation_id)
+# Phase 3 (Algorithm Roadmap Phase 1): MO2 Nelder-Mead simplex
+add_example(ex93_nelder_mead)
+# Phase 3 (Algorithm Roadmap Phase 1): FD1 generalized SK complex-response fitting
+add_example(ex94_sk_complex_fit)
+# Phase 3 (Algorithm Roadmap Phase 1): EF1 H-infinity filter (guards itself on CTRL_HAS_HINF)
+add_example(ex95_hinf_filter)
+# Phase 3 (Algorithm Roadmap Phase 1): RC1 general LFT uncertainty representation
+add_example(ex96_lft_system)
+# Phase 3 (Algorithm Roadmap Phase 1): NC1/NC2/NC4 nonlinear control trio
+add_example(ex97_backstepping)
+add_example(ex98_passivity_based)
+add_example(ex99_clf_controller)
+# Phase 3 (Algorithm Roadmap Phase 1): SI5 Hammerstein-Wiener identification
+add_example(ex100_hammerstein_wiener)
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)

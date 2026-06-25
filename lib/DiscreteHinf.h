@@ -396,6 +396,24 @@ public:
     const Eigen::MatrixXd &Dk() const { return Dk_; }
     /** @} */
 
+    /**
+     * @brief Symplectic-pencil Riccati solver for indefinite-R DAREs (public since Phase 3
+     * EF1: HinfFilter reuses this exact solver for the dual filtering Riccati equation, the
+     * same precedent as DiscreteLQR::solveDARE being made public for DiscreteH2's reuse).
+     *
+     * Solves `A'XA - X - A'XB*(R+B'XB)^-1*B'XA + Q = 0` for indefinite @p R (the H-infinity
+     * structure) via the symplectic pencil / generalised-eigenvalue method - the standard
+     * doubling iteration (DiscreteLQR::solveDARE) diverges for indefinite R.
+     *
+     * @see DiscreteLQR::solveDARE for the positive-definite-R counterpart.
+     */
+    // DareResult is shared with DiscreteLQR (defined in PlantModel.h).
+    static DareResult solveHinfDARE(const Eigen::MatrixXd &A,
+                                    const Eigen::MatrixXd &B,
+                                    const Eigen::MatrixXd &Q,
+                                    const Eigen::MatrixXd &R,
+                                    double tol, int maxIter);
+
 private:
     Eigen::MatrixXd Ak_, Bk_, Ck_, Dk_;
     Eigen::VectorXd xk_;
@@ -403,13 +421,6 @@ private:
     double Ts_;
     double gamma_;
     double u_prev_ = 0.0; ///< Last finite compute() scalar (hold-last NaN contract).
-
-    // DareResult is shared with DiscreteLQR (defined in PlantModel.h).
-    static DareResult solveHinfDARE(const Eigen::MatrixXd &A,
-                                    const Eigen::MatrixXd &B,
-                                    const Eigen::MatrixXd &Q,
-                                    const Eigen::MatrixXd &R,
-                                    double tol, int maxIter);
 
     static bool trySolve(const GeneralisedPlant &P, double gamma,
                          double dareTol, int dareMaxIter,

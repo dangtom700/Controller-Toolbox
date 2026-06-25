@@ -822,6 +822,42 @@ ctrl.PeakMuResult
           "(bisection search; returns sigma_max if even that bound is robust).");
 
     // -----------------------------------------------------------------------
+    // LFTSystem - general multi-block LFT/Delta channel-gather (Phase 3 RC1)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::LFTChannelMap>(m, "LFTChannelMap",
+        "Per-block row/column placement of each UncertaintyStructure block within M0's "
+        "own frequency-response matrix.")
+        .def(py::init<>())
+        .def_readwrite("row_start", &ctrl::LFTChannelMap::rowStart,
+                       "Per-block output-row offset into M0 (size == struc.blocks size).")
+        .def_readwrite("col_start", &ctrl::LFTChannelMap::colStart,
+                       "Per-block input-column offset into M0 (size == struc.blocks size).");
+
+    py::class_<ctrl::LFTSystem>(m, "LFTSystem", R"doc(
+General multi-block LFT/Delta channel-gather for mu-analysis.
+
+Generalizes peak_mu()'s hardcoded single canonical "M = sigma_rel * T" loop into
+arbitrary placement of one or more Delta blocks against an open-loop map's own channels.
+
+Example
+-------
+>>> chmap = ctrl.LFTChannelMap()
+>>> chmap.row_start = [0, 1]; chmap.col_start = [0, 1]
+>>> lft = ctrl.LFTSystem(M0, struc, chmap)
+>>> result = lft.peak_mu()
+)doc")
+        .def(py::init<const ctrl::StateSpace &, const ctrl::UncertaintyStructure &,
+                      const ctrl::LFTChannelMap &>(),
+             py::arg("M0"), py::arg("struc"), py::arg("map"))
+        .def("closed_loop_freq_response", &ctrl::LFTSystem::closedLoopFreqResponse,
+             py::arg("omegas"),
+             "Gathered M(jw) at each frequency, block-ordered to match the uncertainty "
+             "structure - directly feedable to compute_mu().")
+        .def("peak_mu", &ctrl::LFTSystem::peakMu,
+             py::arg("freq_points") = 200, py::arg("omega_min") = 1e-2,
+             "Peak structured singular value over a log-spaced frequency grid.");
+
+    // -----------------------------------------------------------------------
     // WorstCaseSearch - CMA-ES worst-case parameter search (Robustness Phase 4)
     // -----------------------------------------------------------------------
     py::class_<ctrl::WorstCaseSearchParams>(m, "WorstCaseSearchParams",
