@@ -200,4 +200,191 @@ void ParticleFilter::reset()
     initialised_    = false;
 }
 
+// ===========================================================================
+// ParticleFilterV2 (Phase 3 Roadmap Phase 2 EF3)
+// ===========================================================================
+
+ParticleFilterV2::ParticleFilterV2(const ParticleFilterParamsV2 &p, int n_states, int n_meas,
+                                    ParticleFn f, ParticleMeasFn h,
+                                    const Eigen::MatrixXd &A_lin, const Eigen::MatrixXd &B_lin,
+                                    const Eigen::MatrixXd &C_lin,
+                                    const Eigen::MatrixXd &Q_lin, const Eigen::MatrixXd &R_lin)
+    : ParticleFilter(p, n_states, n_meas, std::move(f), std::move(h)),
+      p2_(p), A_lin_(A_lin), B_lin_(B_lin), C_lin_(C_lin), Q_lin_(Q_lin), R_lin_(R_lin)
+{
+    if (p2_.variant == PFVariant::RaoBlackwellized)
+    {
+        const int nLin = static_cast<int>(p2_.linear_state_indices.size());
+        if (nLin == 0 || A_lin_.rows() != nLin || A_lin_.cols() != nLin ||
+            C_lin_.cols() != nLin || Q_lin_.rows() != nLin || Q_lin_.cols() != nLin)
+            throw std::invalid_argument(
+                "ParticleFilterV2: RaoBlackwellized requires A_lin/Q_lin (nLin x nLin), "
+                "C_lin (n_meas x nLin), and a non-empty linear_state_indices");
+        for (int idx : p2_.linear_state_indices)
+            if (idx < 0 || idx >= n_states)
+                throw std::invalid_argument("ParticleFilterV2: linear_state_indices out of range");
+
+        const StateSpace linPlant(A_lin_, B_lin_, C_lin_,
+                                   Eigen::MatrixXd::Zero(C_lin_.rows(), B_lin_.cols()), p.Ts);
+        kf_.reserve(p.n_particles);
+        kfResampleBuf_.reserve(p.n_particles);
+        for (int i = 0; i < p.n_particles; ++i)
+        {
+            kf_.emplace_back(linPlant, Q_lin_, R_lin_);
+            kfResampleBuf_.emplace_back(linPlant, Q_lin_, R_lin_);
+        }
+    }
+}
+
+std::vector<int> ParticleFilterV2::systematicIndices(const Eigen::VectorXd &weights)
+{
+    const int N = p_.n_particles;
+    cdf_(0) = weights(0);
+    for (int i = 1; i < N; ++i) cdf_(i) = cdf_(i - 1) + weights(i);
+
+    const double inv_N = 1.0 / static_cast<double>(N);
+    const double u0 = uniform_(rng_) * inv_N;
+
+    std::vector<int> idx(N);
+    int j = 0;
+    for (int i = 0; i < N; ++i)
+    {
+        const double ui = u0 + static_cast<double>(i) * inv_N;
+        while (j < N - 1 && cdf_(j) < ui) ++j;
+        idx[i] = j;
+    }
+    return idx;
+}
+
+void ParticleFilterV2::predict(const Eigen::VectorXd &u)
+{
+    if (p2_.variant != PFVariant::RaoBlackwellized)
+    {
+        ParticleFilter::predict(u); // Bootstrap: pure inheritance. Auxiliary: see step().
+        return;
+    }
+
+    Eigen::VectorXd noise(n_states_);
+    for (int i = 0; i < p_.n_particles; ++i)
+    {
+        sampleNoise(noise, L_Q_);
+        particles_[i] = f_(particles_[i], u) + noise; // linear-indexed entries overwritten below
+        kf_[i].predict(u);
+        const Eigen::VectorXd &xLin = kf_[i].state();
+        for (size_t j = 0; j < p2_.linear_state_indices.size(); ++j)
+            particles_[i](p2_.linear_state_indices[j]) = xLin(static_cast<int>(j));
+    }
+}
+
+void ParticleFilterV2::update(const Eigen::VectorXd &y, const Eigen::VectorXd &u)
+{
+    if (p2_.variant != PFVariant::RaoBlackwellized)
+    {
+        ParticleFilter::update(y, u); // Bootstrap: pure inheritance. Auxiliary: see step().
+        return;
+    }
+
+    // A_lin/C_lin/Q_lin/R_lin are LTI and shared across particles, so every kf_[i]'s covariance
+    // is identical after predict() (the covariance recursion doesn't depend on the data) -
+    // compute the shared innovation covariance once.
+    const Eigen::MatrixXd S = C_lin_ * kf_[0].covariance() * C_lin_.transpose() + R_lin_;
+    const Eigen::MatrixXd Sinv = S.inverse();
+
+    Eigen::VectorXd log_w = w_.array().log();
+    for (int i = 0; i < p_.n_particles; ++i)
+    {
+        Eigen::VectorXd xZeroLin = particles_[i];
+        for (int idx : p2_.linear_state_indices) xZeroLin(idx) = 0.0;
+        const Eigen::VectorXd yOffset = h_(xZeroLin, u); // exploits additive separability
+        const Eigen::VectorXd yPred = yOffset + C_lin_ * kf_[i].state();
+        const Eigen::VectorXd innov = y - yPred;
+        log_w(i) += -0.5 * innov.dot(Sinv * innov);
+
+        kf_[i].update(y - yOffset, u);
+        const Eigen::VectorXd &xLin = kf_[i].state();
+        for (size_t j = 0; j < p2_.linear_state_indices.size(); ++j)
+            particles_[i](p2_.linear_state_indices[j]) = xLin(static_cast<int>(j));
+    }
+
+    const double log_max = log_w.maxCoeff();
+    w_ = (log_w.array() - log_max).exp();
+    const double sum_w = w_.sum();
+    if (sum_w > 0.0) w_ /= sum_w; else w_.setConstant(1.0 / p_.n_particles);
+
+    if (resample_thresh_ > 0.0 && effectiveSampleSize() < resample_thresh_) resample();
+}
+
+void ParticleFilterV2::step(const Eigen::VectorXd &y, const Eigen::VectorXd &u_prev)
+{
+    if (p2_.variant != PFVariant::Auxiliary)
+    {
+        predict(u_prev); // dispatches virtually: Bootstrap or RaoBlackwellized
+        update(y, u_prev);
+        return;
+    }
+
+    // Auxiliary particle filter (Pitt & Shephard 1999): look-ahead resample using a
+    // deterministic (noise-free) propagation proxy, before the real noisy propagation.
+    const int N = p_.n_particles;
+    std::vector<Eigen::VectorXd> mu(N);
+    Eigen::VectorXd auxLogW(N);
+    for (int i = 0; i < N; ++i)
+    {
+        mu[i] = f_(particles_[i], u_prev);
+        const Eigen::VectorXd innov = y - h_(mu[i], u_prev);
+        auxLogW(i) = std::log(w_(i)) - 0.5 * innov.dot(R_inv_ * innov);
+    }
+    const double auxLogMax = auxLogW.maxCoeff();
+    Eigen::VectorXd auxW = (auxLogW.array() - auxLogMax).exp();
+    const double auxSum = auxW.sum();
+    if (auxSum > 0.0) auxW /= auxSum; else auxW.setConstant(1.0 / N);
+
+    const std::vector<int> ancestors = systematicIndices(auxW);
+
+    std::vector<Eigen::VectorXd> newParticles(N);
+    Eigen::VectorXd newLogW(N);
+    Eigen::VectorXd noise(n_states_);
+    for (int i = 0; i < N; ++i)
+    {
+        const int a = ancestors[i];
+        sampleNoise(noise, L_Q_);
+        newParticles[i] = f_(particles_[a], u_prev) + noise;
+
+        const Eigen::VectorXd innovReal = y - h_(newParticles[i], u_prev);
+        const double logLikReal = -0.5 * innovReal.dot(R_inv_ * innovReal);
+        const Eigen::VectorXd innovProxy = y - h_(mu[a], u_prev);
+        const double logLikProxy = -0.5 * innovProxy.dot(R_inv_ * innovProxy);
+        newLogW(i) = logLikReal - logLikProxy; // importance correction dividing out the proxy
+    }
+    particles_.swap(newParticles);
+
+    const double newLogMax = newLogW.maxCoeff();
+    w_ = (newLogW.array() - newLogMax).exp();
+    const double newSum = w_.sum();
+    if (newSum > 0.0) w_ /= newSum; else w_.setConstant(1.0 / N);
+
+    if (resample_thresh_ > 0.0 && effectiveSampleSize() < resample_thresh_) resample();
+}
+
+void ParticleFilterV2::resample()
+{
+    if (p2_.variant != PFVariant::RaoBlackwellized)
+    {
+        ParticleFilter::resample();
+        return;
+    }
+
+    const std::vector<int> ancestors = systematicIndices(w_);
+    const int N = p_.n_particles;
+    for (int i = 0; i < N; ++i)
+    {
+        resample_buf_[i] = particles_[ancestors[i]];
+        kfResampleBuf_[i] = kf_[ancestors[i]];
+    }
+    particles_.swap(resample_buf_);
+    kf_.swap(kfResampleBuf_);
+    w_.setConstant(1.0 / static_cast<double>(N));
+    ++resample_count_;
+}
+
 } // namespace ctrl

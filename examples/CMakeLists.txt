@@ -160,6 +160,21 @@ add_example(ex99_clf_controller)
 # Phase 3 (Algorithm Roadmap Phase 1): SI5 Hammerstein-Wiener identification
 add_example(ex100_hammerstein_wiener)
 
+# Phase 3 (Algorithm Roadmap Phase 2): OC1 self-tuning regulator
+add_example(ex101_self_tuning_regulator)
+# Phase 3 (Algorithm Roadmap Phase 2): SI1 MLE/MAP identification
+add_example(ex102_mle_identification)
+# Phase 3 (Algorithm Roadmap Phase 2): EF2 set-membership estimation
+add_example(ex103_set_membership_estimation)
+# Phase 3 (Algorithm Roadmap Phase 2): EF3 particle filter variants
+add_example(ex104_particle_filter_variants)
+# Phase 3 (Algorithm Roadmap Phase 2): MO1 NSGA-II multi-objective optimization
+add_example(ex105_nsga2)
+# Phase 3 (Algorithm Roadmap Phase 2): MO3 constrained tuning
+add_example(ex106_constrained_tuning)
+# Phase 3 (Algorithm Roadmap Phase 2): DT4 fault-tolerant control reconfiguration
+add_example(ex107_ftc_supervisor)
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)

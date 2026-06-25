@@ -1169,6 +1169,193 @@ Usage
              "Minimise cost(params) starting from x0. Returns TunerResult.");
 
     // -----------------------------------------------------------------------
+    // NSGA2 (Phase 3 Roadmap Phase 2 MO1)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::NSGA2Params>(m, "NSGA2Params", "Parameters for NSGA2.")
+        .def(py::init<>())
+        .def_readwrite("n_dim",        &ctrl::NSGA2Params::n_dim)
+        .def_readwrite("n_objectives", &ctrl::NSGA2Params::n_objectives)
+        .def_readwrite("population",   &ctrl::NSGA2Params::population)
+        .def_readwrite("max_gen",      &ctrl::NSGA2Params::max_gen)
+        .def_readwrite("crossover",    &ctrl::NSGA2Params::crossover)
+        .def_readwrite("mutation",     &ctrl::NSGA2Params::mutation)
+        .def_readwrite("alpha",        &ctrl::NSGA2Params::alpha)
+        .def_readwrite("lower",        &ctrl::NSGA2Params::lower)
+        .def_readwrite("upper",        &ctrl::NSGA2Params::upper)
+        .def_readwrite("seed",         &ctrl::NSGA2Params::seed);
+
+    py::class_<ctrl::ParetoResult>(m, "ParetoResult", "Result from NSGA2::optimize.")
+        .def_readonly("front_params",     &ctrl::ParetoResult::front_params)
+        .def_readonly("front_objectives", &ctrl::ParetoResult::front_objectives)
+        .def_readonly("nGens",            &ctrl::ParetoResult::nGens)
+        .def_readonly("nEvals",           &ctrl::ParetoResult::nEvals);
+
+    py::class_<ctrl::NSGA2>(m, "NSGA2", R"doc(
+NSGA-II multi-objective (Pareto) evolutionary optimizer - returns a Pareto front instead of a
+single best point.
+
+Usage
+-----
+>>> p = ctrl.NSGA2Params(); p.n_dim = 2; p.n_objectives = 2
+>>> p.lower = np.zeros(2); p.upper = np.ones(2) * 10
+>>> nsga = ctrl.NSGA2(p)
+>>> result = nsga.optimize(lambda x: np.array([x[0]**2, (x[0]-2)**2]))
+>>> print(result.front_params, result.front_objectives)
+)doc")
+        .def(py::init<const ctrl::NSGA2Params &>(), py::arg("params"))
+        .def("optimize",
+             [](ctrl::NSGA2 &self, py::object cost_py) {
+                 auto fn = [cost_py](const Eigen::VectorXd &p) -> Eigen::VectorXd {
+                     return cost_py(p).cast<Eigen::VectorXd>();
+                 };
+                 return self.optimize(fn);
+             },
+             py::arg("cost"),
+             "Minimise every component of cost(params). Returns a ParetoResult.");
+
+    // -----------------------------------------------------------------------
+    // tuneConstrained (Phase 3 Roadmap Phase 2 MO3)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::ConstrainedTuneParams>(m, "ConstrainedTuneParams",
+        "Parameters for tune_constrained.")
+        .def(py::init<>())
+        .def_readwrite("penalty_init",   &ctrl::ConstrainedTuneParams::penalty_init)
+        .def_readwrite("penalty_growth", &ctrl::ConstrainedTuneParams::penalty_growth)
+        .def_readwrite("outer_iters",    &ctrl::ConstrainedTuneParams::outer_iters)
+        .def_readwrite("feasTol",        &ctrl::ConstrainedTuneParams::feasTol)
+        .def_property("constraints",
+            [](const ctrl::ConstrainedTuneParams &) -> py::object { return py::none(); },
+            [](ctrl::ConstrainedTuneParams &self, py::object g_py) {
+                self.constraints = [g_py](const Eigen::VectorXd &theta) -> Eigen::VectorXd {
+                    return g_py(theta).cast<Eigen::VectorXd>();
+                };
+            },
+            "Constraint function g(theta) -> array; feasible iff every entry <= 0.");
+
+    m.def("tune_constrained",
+          [](py::object optimizer_run_py, py::object objective_py,
+             const ctrl::ConstrainedTuneParams &params, const Eigen::VectorXd &x0) {
+              auto optimizerRun = [optimizer_run_py](const ctrl::AutoTuner::CostFn &c,
+                                                       const Eigen::VectorXd &xx0) -> ctrl::TunerResult {
+                  auto cPy = [c](const Eigen::VectorXd &x) -> double { return c(x); };
+                  return optimizer_run_py(py::cpp_function(cPy), xx0).cast<ctrl::TunerResult>();
+              };
+              auto objective = [objective_py](const Eigen::VectorXd &x) -> double {
+                  return objective_py(x).cast<double>();
+              };
+              return ctrl::tuneConstrained(optimizerRun, objective, params, x0);
+          },
+          py::arg("optimizer_run"), py::arg("objective"), py::arg("params"), py::arg("x0"),
+          "Minimise objective(theta) subject to params.constraints(theta) <= 0, via an "
+          "exterior-penalty wrapper around optimizer_run(cost_fn, x0) -> TunerResult.");
+
+    // -----------------------------------------------------------------------
+    // SelfTuningRegulator (Phase 3 Roadmap Phase 2 OC1)
+    // -----------------------------------------------------------------------
+    py::enum_<ctrl::STRMode>(m, "STRMode")
+        .value("MinimumVariance", ctrl::STRMode::MinimumVariance)
+        .value("PolePlacement",   ctrl::STRMode::PolePlacement);
+
+    py::class_<ctrl::STRParams>(m, "STRParams", "Parameters for SelfTuningRegulator.")
+        .def(py::init<>())
+        .def_readwrite("na",             &ctrl::STRParams::na)
+        .def_readwrite("nb",             &ctrl::STRParams::nb)
+        .def_readwrite("mode",           &ctrl::STRParams::mode)
+        .def_readwrite("desired_poles",  &ctrl::STRParams::desired_poles,
+                       "PolePlacement mode only; size must equal na + nb - 1.")
+        .def_readwrite("lambda_",        &ctrl::STRParams::lambda)
+        .def_readwrite("bMin",           &ctrl::STRParams::bMin)
+        .def_readwrite("uMin",           &ctrl::STRParams::uMin)
+        .def_readwrite("uMax",           &ctrl::STRParams::uMax)
+        .def_readwrite("probeAmplitude", &ctrl::STRParams::probeAmplitude,
+                       "Persistent probing/dither amplitude added to u before saturation "
+                       "(0 = disabled). See the class-level warning about persistent excitation.")
+        .def_readwrite("probeSeed",      &ctrl::STRParams::probeSeed);
+
+    py::class_<ctrl::SelfTuningRegulator, ctrl::IController,
+               std::shared_ptr<ctrl::SelfTuningRegulator>>(
+        m, "SelfTuningRegulator", R"doc(
+Online self-tuning regulator: RecursiveLeastSquares identification + a selectable
+minimum-variance or pole-placement control law, re-derived every step.
+
+Usage (PlantOutput convention, like MRACController)
+----------------------------------------------------
+>>> p = ctrl.STRParams(); p.na = 2; p.nb = 1
+>>> str_ctrl = ctrl.SelfTuningRegulator(p, Ts)
+>>> str_ctrl.set_reference(r)
+>>> u = str_ctrl.compute(y)
+)doc")
+        .def(py::init<const ctrl::STRParams &, double>(), py::arg("params"), py::arg("Ts"))
+        .def("set_reference",          &ctrl::SelfTuningRegulator::setReference, py::arg("r"))
+        .def("compute",                &ctrl::SelfTuningRegulator::compute, py::arg("y_plant"))
+        .def("reset",                  &ctrl::SelfTuningRegulator::reset)
+        .def("sample_time",            &ctrl::SelfTuningRegulator::sampleTime)
+        .def("estimated_numerator",    &ctrl::SelfTuningRegulator::estimatedNumerator)
+        .def("estimated_denominator",  &ctrl::SelfTuningRegulator::estimatedDenominator)
+        .def("covariance",             &ctrl::SelfTuningRegulator::covariance);
+
+    // -----------------------------------------------------------------------
+    // FaultClassifier + FTCSupervisor (Phase 3 Roadmap Phase 2 DT4)
+    // -----------------------------------------------------------------------
+    py::enum_<ctrl::FaultType>(m, "FaultType")
+        .value("None_",           ctrl::FaultType::None) // "None" shadows Python's None keyword
+        .value("SensorBias",      ctrl::FaultType::SensorBias)
+        .value("SensorNoise",     ctrl::FaultType::SensorNoise)
+        .value("ActuatorLoss",    ctrl::FaultType::ActuatorLoss)
+        .value("ActuatorStuck",   ctrl::FaultType::ActuatorStuck);
+
+    py::class_<ctrl::FaultDetectorParams>(m, "FaultDetectorParams",
+        "Parameters for FaultClassifier / FTCSupervisor.")
+        .def(py::init<>())
+        .def_readwrite("residual_threshold", &ctrl::FaultDetectorParams::residual_threshold)
+        .def_readwrite("confirm_window",     &ctrl::FaultDetectorParams::confirm_window)
+        .def_readwrite("corr_threshold",     &ctrl::FaultDetectorParams::corr_threshold)
+        .def_readwrite("bias_threshold",     &ctrl::FaultDetectorParams::bias_threshold)
+        .def_readwrite("stuck_du_threshold", &ctrl::FaultDetectorParams::stuck_du_threshold);
+
+    py::class_<ctrl::FaultClassifier>(m, "FaultClassifier", R"doc(
+Heuristic per-step fault-type classifier over a rolling (innovation, u_cmd, y_meas) window.
+
+Example
+-------
+>>> fc = ctrl.FaultClassifier(ctrl.FaultDetectorParams())
+>>> fault = fc.classify(innovation, u_cmd, y_meas)
+)doc")
+        .def(py::init<const ctrl::FaultDetectorParams &>(), py::arg("params") = ctrl::FaultDetectorParams())
+        .def("classify", &ctrl::FaultClassifier::classify,
+             py::arg("innovation"), py::arg("u_cmd"), py::arg("y_meas"))
+        .def("reset",    &ctrl::FaultClassifier::reset);
+
+    py::class_<ctrl::FTCSupervisor, ctrl::IController,
+               std::shared_ptr<ctrl::FTCSupervisor>>(
+        m, "FTCSupervisor", R"doc(
+Fault-tolerant control reconfiguration: classifies faults and switches a ControllerStack's
+active entry accordingly, reusing its existing Supervisory-mode bumpless transfer.
+
+Usage
+-----
+>>> stack = ctrl.ControllerStack(ctrl.StackMode.Supervisory, Ts)
+>>> stack.add_controller(primary_pid, "primary")
+>>> stack.add_controller(fallback_pid, "fallback")
+>>> ftc = ctrl.FTCSupervisor(stack, ctrl.FaultDetectorParams(), Ts)
+>>> ftc.register_fault_response(ctrl.FaultType.None_, "primary")
+>>> ftc.register_fault_response(ctrl.FaultType.ActuatorLoss, "fallback")
+>>> ftc.feed_residual(innovation, u_prev, y_meas)
+>>> u = ftc.compute(error)
+)doc")
+        .def(py::init<std::shared_ptr<ctrl::ControllerStack>, const ctrl::FaultDetectorParams &,
+                      double>(),
+             py::arg("stack"), py::arg("params"), py::arg("Ts"))
+        .def("register_fault_response", &ctrl::FTCSupervisor::registerFaultResponse,
+             py::arg("fault"), py::arg("controller_name"))
+        .def("feed_residual", &ctrl::FTCSupervisor::feedResidual,
+             py::arg("innovation"), py::arg("u_cmd"), py::arg("y_meas"))
+        .def("compute",       &ctrl::FTCSupervisor::compute, py::arg("error"))
+        .def("reset",         &ctrl::FTCSupervisor::reset)
+        .def("sample_time",   &ctrl::FTCSupervisor::sampleTime)
+        .def("current_fault", &ctrl::FTCSupervisor::currentFault);
+
+    // -----------------------------------------------------------------------
     // ParticleSwarmOptimizer
     // -----------------------------------------------------------------------
     py::class_<ctrl::PSOParams>(m, "PSOParams", "Parameters for ParticleSwarmOptimizer.")

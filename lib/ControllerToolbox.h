@@ -76,6 +76,9 @@
 // #include "AtomicParamBuffer.h" ///< Lock-free double-buffer for RT parameter updates.
 
 #include "RecursiveLeastSquares.h"        ///< RLS - online ARX system identification with forgetting factor.
+#include "SelfTuningRegulator.h"          ///< SelfTuningRegulator - RLS-driven minimum-variance/pole-placement STR (Phase 3 OC1).
+#include "MLEIdentifier.h"                ///< MLEIdentifier - batch MLE/MAP ARX identification, Gaussian/Laplace noise (Phase 3 SI1).
+#include "SetMembershipEstimator.h"       ///< SetMembershipEstimator - bounded-error ellipsoidal state estimation (Phase 3 EF2).
 #include "RepetitiveController.h"         ///< RC  - plug-in periodic disturbance/reference cancellation.
 #include "GeneralizedPredictiveControl.h" ///< GPC - velocity-form MPC with reference trajectory (CARIMA).
 #include "GradientProjectionQP.h"         ///< Shared gradient-projection solver used by MPC and GPC.
@@ -120,6 +123,10 @@
 #include "ParticleSwarmOptimizer.h"     ///< ParticleSwarmOptimizer - Clerc-Kennedy PSO with velocity clamping (Clerc & Kennedy 2002).
 #include "DifferentialEvolution.h"      ///< DifferentialEvolution - DE/rand/1/bin with boundary reflection (Storn & Price 1997).
 #include "NelderMead.h"                 ///< NelderMead - reflect/expand/contract/shrink simplex search, no bounds/population needed (Phase 3 MO2).
+#include "NSGA2.h"                      ///< NSGA2 - multi-objective (Pareto) evolutionary optimizer (Phase 3 MO1).
+#include "ConstrainedTuning.h"          ///< tuneConstrained - exterior-penalty nonlinear-constraint wrapper for any CostFn optimizer (Phase 3 MO3).
+#include "FaultClassifier.h"            ///< FaultClassifier - heuristic fault-type classifier over rolling residual statistics (Phase 3 DT4).
+#include "FTCSupervisor.h"              ///< FTCSupervisor - reconfigures a ControllerStack's active entry on classified fault (Phase 3 DT4).
 #include "ControllerMonitor.h"          ///< ControllerMonitor - CUSUM + EWMA SPC charts on live controller output or onState channels (M3/SPC).
 #include "ComputationalDelayWrapper.h"  ///< ComputationalDelayWrapper - one-sample actuator delay decorator for realistic digital loop simulation (G3).
 #include "GreyBoxEstimator.h"           ///< GreyBoxEstimator - nonlinear param estimation via Levenberg-Marquardt for user-supplied ODE f(x,u,p) (E1).

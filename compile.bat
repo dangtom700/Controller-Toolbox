@@ -139,6 +139,13 @@ for %%T in (
     ex98_passivity_based
     ex99_clf_controller
     ex100_hammerstein_wiener
+    ex101_self_tuning_regulator
+    ex102_mle_identification
+    ex103_set_membership_estimation
+    ex104_particle_filter_variants
+    ex105_nsga2
+    ex106_constrained_tuning
+    ex107_ftc_supervisor
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

@@ -67,6 +67,19 @@ of it.
 | Passivity-based control | `lib/PassivityBasedController.h`/`.cpp` (`IController`, PD+ energy-shaping/damping-injection regulation) — Phase 3 NC2, `examples/ex98_passivity_based.cpp`. See [2026-06-24-nonlinear-control-trio-design.md](superpowers/specs/2026-06-24-nonlinear-control-trio-design.md). |
 | Direct Lyapunov redesign / CLF synthesis | `lib/CLFController.h`/`.cpp` (`IController`, Sontag's universal formula) — Phase 3 NC4, `examples/ex99_clf_controller.cpp`. See [2026-06-24-nonlinear-control-trio-design.md](superpowers/specs/2026-06-24-nonlinear-control-trio-design.md). |
 | Hammerstein-Wiener models | `lib/HammersteinWienerIdentifier.h`/`.cpp` (alternating linear/nonlinear least squares; batch-ARX helper + approximate-inverse refresh for Wiener) — Phase 3 SI5, `examples/ex100_hammerstein_wiener.cpp`. See [2026-06-24-hammerstein-wiener-design.md](superpowers/specs/2026-06-24-hammerstein-wiener-design.md). |
+| Minimum-variance control / STR, adaptive pole placement, self-tuning regulators (merged) | `lib/SelfTuningRegulator.h`/`.cpp` (`IController`, RLS identification + selectable minimum-variance/pole-placement control law) — Phase 3 OC1, `examples/ex101_self_tuning_regulator.cpp`. See [2026-06-25-adaptive-identification-design.md](superpowers/specs/2026-06-25-adaptive-identification-design.md). |
+| Maximum Likelihood / MAP identification | `lib/MLEIdentifier.h`/`.cpp` (batch ARX fit maximizing Gaussian or Laplace likelihood, optional Gaussian prior/MAP) — Phase 3 SI1, `examples/ex102_mle_identification.cpp`. See [2026-06-25-adaptive-identification-design.md](superpowers/specs/2026-06-25-adaptive-identification-design.md). |
+| Set-membership estimation | `lib/SetMembershipEstimator.h`/`.cpp` (ellipsoidal bounded-error state estimation, S-procedure outer-bounding predict/update) — Phase 3 EF2, `examples/ex103_set_membership_estimation.cpp`. See [2026-06-25-estimation-extensions-design.md](superpowers/specs/2026-06-25-estimation-extensions-design.md). |
+| Particle filter variants (auxiliary, Rao-Blackwellized) | `lib/ParticleFilter.h`/`.cpp` (`ParticleFilterV2`; `ParticleFilter`'s `predict`/`update`/`step`/`resample` made virtual to support it) — Phase 3 EF3, `examples/ex104_particle_filter_variants.cpp`. See [2026-06-25-estimation-extensions-design.md](superpowers/specs/2026-06-25-estimation-extensions-design.md). |
+| Multi-objective (Pareto) optimization | `lib/NSGA2.h`/`.cpp` (NSGA-II: fast non-dominated sort + crowding distance) — Phase 3 MO1, `examples/ex105_nsga2.cpp`. See [2026-06-25-optimization-extensions-design.md](superpowers/specs/2026-06-25-optimization-extensions-design.md). |
+| General nonlinear constrained tuning | `lib/ConstrainedTuning.h`/`.cpp` (`tuneConstrained`, exterior-penalty wrapper around any `CostFn`-based optimizer) — Phase 3 MO3, `examples/ex106_constrained_tuning.cpp`. See [2026-06-25-optimization-extensions-design.md](superpowers/specs/2026-06-25-optimization-extensions-design.md). |
+| Fault-tolerant control reconfiguration | `lib/FaultClassifier.h`/`.cpp` + `lib/FTCSupervisor.h`/`.cpp` (heuristic residual-based fault classifier driving `ControllerStack`'s active entry) — Phase 3 DT4, `examples/ex107_ftc_supervisor.cpp`. See [2026-06-25-ftc-reconfiguration-design.md](superpowers/specs/2026-06-25-ftc-reconfiguration-design.md). |
+
+**Shipped:** `ALGORITHM_ROADMAP_PHASE3.md` Phase 2 (7 designs: OC1, SI1, EF2, EF3, MO1, MO3, DT4),
+see [2026-06-25-adaptive-identification-design.md](superpowers/specs/2026-06-25-adaptive-identification-design.md),
+[2026-06-25-estimation-extensions-design.md](superpowers/specs/2026-06-25-estimation-extensions-design.md),
+[2026-06-25-optimization-extensions-design.md](superpowers/specs/2026-06-25-optimization-extensions-design.md),
+and [2026-06-25-ftc-reconfiguration-design.md](superpowers/specs/2026-06-25-ftc-reconfiguration-design.md).
 
 ---
 
@@ -96,12 +109,12 @@ Backstepping, passivity-based control, and direct Lyapunov redesign / CLF synthe
 
 ## System Identification
 
-Correlation-based identification and Hammerstein-Wiener models are **done** — see the "Already
-done" table above (`lib/CorrelationID.h`, `lib/HammersteinWienerIdentifier.h`). What's left:
+Correlation-based identification, Hammerstein-Wiener models, and Maximum Likelihood / MAP
+identification are **done** — see the "Already done" table above (`lib/CorrelationID.h`,
+`lib/HammersteinWienerIdentifier.h`, `lib/MLEIdentifier.h`). What's left:
 
 | Item | Notes |
 |---|---|
-| Maximum Likelihood / MAP identification | Statistical alternative to existing least-squares-based `RecursiveLeastSquares`/`GreyBoxEstimator`. |
 | MOESP / CVA (subspace ID variants) | `lib/SubspaceID.h` only implements N4SID-style identification today. |
 | NARMAX | Nonlinear parametric ID; distinct from `SINDy`'s sparse-regression approach. |
 
@@ -124,31 +137,30 @@ done" table above (`lib/SKFit.h`). What's left:
 
 ## Optimal Control
 
+Minimum-variance control / self-tuning regulator is **done** — see the "Already done" table
+above (`lib/SelfTuningRegulator.h`). What's left:
+
 | Item | Notes |
 |---|---|
 | Dynamic programming / value iteration | No DP solver exists; would need a discretized state-space grid. |
 | Dual control | Actively explores to reduce uncertainty — research-grade, niche; low priority. |
-| Minimum-variance control / self-tuning regulator | `GeneralizedPredictiveControl` (GPC) is the closest existing relative but isn't a minimum-variance STR. |
 | Linear-programming-based control | No LP solver exists in `lib/` (only `GradientProjectionQP` for QP). |
 
 ## Adaptive Control
 
+Adaptive pole placement and self-tuning regulators are **done** — see the "Already done" table
+above (`lib/SelfTuningRegulator.h`, merged with minimum-variance control under OC1). What's left:
+
 | Item | Notes |
 |---|---|
-| Adaptive pole placement | Distinct from `MRACController`'s Lyapunov-based approach. |
-| Self-tuning regulators | Pairs with minimum-variance control above. |
 | Full neural-network adaptive control | `NeuralPID` is a hybrid NN-PID, not a general adaptive NN control law. |
 | Reinforcement-learning-based adaptive control | `DynaController` (Dyna-style MBRL) and `CEMController` are lightweight; a full RL-policy controller is a larger, separate effort (see Deep RL below — same gap, two wishlist entries). |
 
 ## Advanced Estimation & Filtering
 
-H-infinity filter is **done** — see the "Already done" table above (`lib/HinfFilter.h`). What's
-left:
-
-| Item | Notes |
-|---|---|
-| Set-membership estimation | Bounded-error estimation, structurally different from the probabilistic filters already present. |
-| Particle filter variants (SIR, auxiliary PF, Rao-Blackwellized PF) | `lib/ParticleFilter.h` covers the base case only. |
+H-infinity filter, set-membership estimation, and particle filter variants are **done** — see
+the "Already done" table above (`lib/HinfFilter.h`, `lib/SetMembershipEstimator.h`,
+`lib/ParticleFilter.h`'s `ParticleFilterV2`). Nothing left in this category.
 
 ## Machine Learning Integration
 
@@ -169,14 +181,12 @@ picking these up.*
 | Code generation (C/C++ from controller design) | Heavy lift; highest production value of this category per the original wishlist's own priority table. |
 | Real-time profiling beyond WCET | `tools/wcet_report.py` covers worst-case execution time; finer-grained profiling is open. |
 | Distributed / networked control | `ComputationalDelayWrapper` handles a single fixed delay; multi-node/networked control is a different problem. |
-| Fault-tolerant control reconfiguration | `tools/fault_injector.py`/`fault_sweep.py` test fault *response*; an actively reconfiguring FTC *controller* is open. |
+
+Fault-tolerant control reconfiguration is **done** — see the "Already done" table above
+(`lib/FaultClassifier.h`, `lib/FTCSupervisor.h`).
 
 ## Multi-Objective & Constrained Optimization
 
-Nelder-Mead simplex is **done** — see the "Already done" table above (`lib/NelderMead.h`).
-What's left:
-
-| Item | Notes |
-|---|---|
-| Multi-objective (Pareto) optimization | `GeneticAlgorithm`/`ParticleSwarmOptimizer`/`DifferentialEvolution` are single-objective today. |
-| General nonlinear constrained tuning | `AutoTuner`/`TunerSuite` constraint handling is currently limited to box bounds. |
+Nelder-Mead simplex, multi-objective (Pareto) optimization, and general nonlinear constrained
+tuning are **done** — see the "Already done" table above (`lib/NelderMead.h`, `lib/NSGA2.h`,
+`lib/ConstrainedTuning.h`). Nothing left in this category.

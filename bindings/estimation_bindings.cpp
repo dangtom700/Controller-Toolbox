@@ -90,6 +90,38 @@ Example
              "Reset CUSUM accumulators without disabling detection.");
 
     // -----------------------------------------------------------------------
+    // SetMembershipEstimator (Phase 3 Roadmap Phase 2 EF2)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::SetMembershipParams>(m, "SetMembershipParams",
+        "Noise bounds for SetMembershipEstimator (isotropic ellipsoids).")
+        .def(py::init<>())
+        .def_readwrite("w_bound", &ctrl::SetMembershipParams::w_bound,
+                       "||process noise||_inf <= w_bound.")
+        .def_readwrite("v_bound", &ctrl::SetMembershipParams::v_bound,
+                       "||measurement noise||_inf <= v_bound.");
+
+    py::class_<ctrl::SetMembershipEstimator>(m, "SetMembershipEstimator", R"doc(
+Bounded-error (set-membership) ellipsoidal state estimator: given known noise *bounds* (not a
+probability distribution), maintains a guaranteed feasible ellipsoid containing the true state.
+
+Example
+-------
+>>> est = ctrl.SetMembershipEstimator(sys, params, x0, P0)
+>>> est.predict(u)
+>>> est.update(y)
+>>> c, P = est.center_estimate(), est.ellipsoid_shape()
+)doc")
+        .def(py::init<const ctrl::StateSpace &, const ctrl::SetMembershipParams &,
+                      const Eigen::VectorXd &, const Eigen::MatrixXd &>(),
+             py::arg("plant"), py::arg("params"), py::arg("x0_center"), py::arg("E0_shape"))
+        .def("predict",          &ctrl::SetMembershipEstimator::predict, py::arg("u"))
+        .def("update",           &ctrl::SetMembershipEstimator::update, py::arg("y"))
+        .def("center_estimate",  &ctrl::SetMembershipEstimator::centerEstimate)
+        .def("ellipsoid_shape",  &ctrl::SetMembershipEstimator::ellipsoidShape)
+        .def("is_consistent",    &ctrl::SetMembershipEstimator::isConsistent)
+        .def("reset",            &ctrl::SetMembershipEstimator::reset);
+
+    // -----------------------------------------------------------------------
     // RecursiveLeastSquares
     // -----------------------------------------------------------------------
     py::class_<ctrl::RecursiveLeastSquares>(m, "RecursiveLeastSquares", R"doc(
@@ -543,6 +575,54 @@ Usage
              "Reset particles and weights; requires re-initialisation.");
 
     // -----------------------------------------------------------------------
+    // ParticleFilterV2 (Phase 3 Roadmap Phase 2 EF3)
+    // -----------------------------------------------------------------------
+    py::enum_<ctrl::PFVariant>(m, "PFVariant")
+        .value("Bootstrap",         ctrl::PFVariant::Bootstrap)
+        .value("Auxiliary",         ctrl::PFVariant::Auxiliary)
+        .value("RaoBlackwellized",  ctrl::PFVariant::RaoBlackwellized);
+
+    py::class_<ctrl::ParticleFilterParamsV2, ctrl::ParticleFilterParams>(
+        m, "ParticleFilterParamsV2", "Configuration for ParticleFilterV2.")
+        .def(py::init<>())
+        .def_readwrite("variant", &ctrl::ParticleFilterParamsV2::variant)
+        .def_readwrite("linear_state_indices",
+                       &ctrl::ParticleFilterParamsV2::linear_state_indices,
+                       "RaoBlackwellized only: indices of x that are linear-Gaussian given the rest.");
+
+    py::class_<ctrl::ParticleFilterV2, ctrl::ParticleFilter>(m, "ParticleFilterV2", R"doc(
+Extends ParticleFilter with Auxiliary (look-ahead resampling) and RaoBlackwellized
+(embedded per-particle KalmanFilter for a linear-Gaussian substate) variants. Bootstrap mode
+falls straight through to ParticleFilter's own implementation (zero duplication).
+
+Usage (RaoBlackwellized)
+------------------------
+>>> p = ctrl.ParticleFilterParamsV2(); p.variant = ctrl.PFVariant.RaoBlackwellized
+>>> p.linear_state_indices = [1]  # e.g. velocity is linear-Gaussian, position is not
+>>> pf = ctrl.ParticleFilterV2(p, n_states, n_meas, f, h, A_lin, B_lin, C_lin, Q_lin, R_lin)
+)doc")
+        .def(py::init([](const ctrl::ParticleFilterParamsV2 &p, int n_states, int n_meas,
+                          py::object f_py, py::object h_py,
+                          const Eigen::MatrixXd &A_lin, const Eigen::MatrixXd &B_lin,
+                          const Eigen::MatrixXd &C_lin,
+                          const Eigen::MatrixXd &Q_lin, const Eigen::MatrixXd &R_lin) {
+            auto f = [f_py](const Eigen::VectorXd &x,
+                            const Eigen::VectorXd &u) -> Eigen::VectorXd {
+                return f_py(x, u).cast<Eigen::VectorXd>();
+            };
+            auto h = [h_py](const Eigen::VectorXd &x,
+                            const Eigen::VectorXd &u) -> Eigen::VectorXd {
+                return h_py(x, u).cast<Eigen::VectorXd>();
+            };
+            return std::make_unique<ctrl::ParticleFilterV2>(
+                p, n_states, n_meas, std::move(f), std::move(h), A_lin, B_lin, C_lin, Q_lin, R_lin);
+        }), py::arg("params"), py::arg("n_states"), py::arg("n_meas"),
+            py::arg("f"), py::arg("h"),
+            py::arg("A_lin") = Eigen::MatrixXd(), py::arg("B_lin") = Eigen::MatrixXd(),
+            py::arg("C_lin") = Eigen::MatrixXd(),
+            py::arg("Q_lin") = Eigen::MatrixXd(), py::arg("R_lin") = Eigen::MatrixXd());
+
+    // -----------------------------------------------------------------------
     // NotchFilter
     // -----------------------------------------------------------------------
     py::class_<ctrl::NotchFilterParams>(m, "NotchFilterParams",
@@ -854,6 +934,49 @@ Example
              py::arg("length"), py::arg("n_bits"), py::arg("seed") = 42U,
              "Generate a maximal-length PRBS test signal (period 2^n_bits - 1, "
              "values in {-1, +1}, n_bits in [2, 20]).");
+
+    // -----------------------------------------------------------------------
+    // MLEIdentifier (Phase 3 Roadmap Phase 2 SI1)
+    // -----------------------------------------------------------------------
+    py::enum_<ctrl::NoiseModel>(m, "NoiseModel")
+        .value("Gaussian", ctrl::NoiseModel::Gaussian)
+        .value("Laplace",  ctrl::NoiseModel::Laplace);
+
+    py::class_<ctrl::MLEParams>(m, "MLEParams", "Parameters for MLEIdentifier::fit.")
+        .def(py::init<>())
+        .def_readwrite("na",         &ctrl::MLEParams::na)
+        .def_readwrite("nb",         &ctrl::MLEParams::nb)
+        .def_readwrite("noise",      &ctrl::MLEParams::noise)
+        .def_readwrite("prior_mean", &ctrl::MLEParams::prior_mean,
+                       "MAP prior mean (empty = pure MLE, no prior).")
+        .def_readwrite("prior_cov",  &ctrl::MLEParams::prior_cov,
+                       "MAP prior covariance (empty = pure MLE, no prior).")
+        .def_readwrite("max_iter",   &ctrl::MLEParams::max_iter)
+        .def_readwrite("tol",        &ctrl::MLEParams::tol);
+
+    py::class_<ctrl::MLEResult>(m, "MLEResult", "Result from MLEIdentifier::fit.")
+        .def_readonly("theta",          &ctrl::MLEResult::theta,
+                      "[a1..a_na, b1..b_nb], RecursiveLeastSquares-identical layout.")
+        .def_readonly("covariance",     &ctrl::MLEResult::covariance,
+                      "Asymptotic parameter covariance (inverse-Hessian) at theta.")
+        .def_readonly("log_likelihood", &ctrl::MLEResult::logLikelihood)
+        .def_readonly("converged",      &ctrl::MLEResult::converged);
+
+    py::class_<ctrl::MLEIdentifier>(m, "MLEIdentifier", R"doc(
+Batch Maximum Likelihood / MAP ARX identification.
+
+Reduces to least squares under Gaussian noise with no prior; generalizes to a Laplace
+(outlier-robust) noise model and/or a Gaussian prior on theta (MAP).
+
+Example
+-------
+>>> result = ctrl.MLEIdentifier.fit(u, y, Ts=0.1, params=ctrl.MLEParams())
+>>> print(result.theta, result.converged)
+)doc")
+        .def_static("fit", &ctrl::MLEIdentifier::fit,
+             py::arg("u"), py::arg("y"), py::arg("Ts"),
+             py::arg("params") = ctrl::MLEParams(),
+             "Fit an ARX model to (u, y) data. Returns an MLEResult.");
 
     // -----------------------------------------------------------------------
     // SKFit - Sanathanan-Koerner-reweighted complex-response fitting

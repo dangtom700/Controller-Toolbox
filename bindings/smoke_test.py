@@ -58,6 +58,18 @@ kf.step(np.array([0.1]), np.array([0.5]), np.array([0.5]))  # 3-arg overload
 print(f'KF state after step: {kf.state()}')
 assert kf.state().shape == (1,)
 
+# SetMembershipEstimator (Phase 3 Roadmap Phase 2 EF2) smoke test
+_sm_params = ctrl.SetMembershipParams()
+_sm_params.w_bound = 0.05
+_sm_params.v_bound = 0.1
+_sm_est = ctrl.SetMembershipEstimator(sys_ss, _sm_params, np.array([0.0]), np.eye(1))
+_sm_est.predict(np.array([0.5]))
+_sm_est.update(np.array([0.1]))
+assert np.all(np.isfinite(_sm_est.center_estimate())), "SetMembershipEstimator center not finite"
+assert np.all(np.isfinite(_sm_est.ellipsoid_shape())), "SetMembershipEstimator shape not finite"
+assert ctrl.registry_has('set_membership_estimator'), "set_membership_estimator not registered"
+print('SetMembershipEstimator smoke test passed.')
+
 # 6. Observer shared_ptr lifetime (Python subclass)
 class Logger(ctrl.IControllerObserver):
     def __init__(self):
@@ -564,6 +576,33 @@ assert np.isfinite(pf_s.state()[0]), "ParticleFilter state not finite"
 assert pf_s.effective_sample_size() > 1.0, "ParticleFilter N_eff <= 1"
 print('ParticleFilter smoke test passed.')
 
+# ParticleFilterV2 (Phase 3 Roadmap Phase 2 EF3) smoke test
+_pf2p = ctrl.ParticleFilterParamsV2()
+_pf2p.n_particles = 50; _pf2p.Q = np.eye(1) * 0.1; _pf2p.R = np.eye(1) * 0.5; _pf2p.seed = 1
+_pf2p.variant = ctrl.PFVariant.Bootstrap
+_pf2_boot = ctrl.ParticleFilterV2(_pf2p, 1, 1,
+                                   lambda x, u: np.array([0.9 * x[0] + u[0]]),
+                                   lambda x, u: x.copy())
+_pf2_boot.initialise(np.zeros(1))
+_pf2_boot.step(np.array([0.3]), np.zeros(1))
+assert np.isfinite(_pf2_boot.state()[0]), "ParticleFilterV2 (Bootstrap) state not finite"
+
+_pf2p_rb = ctrl.ParticleFilterParamsV2()
+_pf2p_rb.n_particles = 30; _pf2p_rb.Q = np.eye(2) * 0.01; _pf2p_rb.R = np.eye(1) * 0.1
+_pf2p_rb.seed = 1; _pf2p_rb.variant = ctrl.PFVariant.RaoBlackwellized
+_pf2p_rb.linear_state_indices = [1]
+_pf2_rb = ctrl.ParticleFilterV2(
+    _pf2p_rb, 2, 1,
+    lambda x, u: np.array([np.sin(x[0]) + u[0], 0.0]),
+    lambda x, u: np.array([x[0] + x[1]]),
+    np.array([[0.9]]), np.array([[1.0]]), np.array([[1.0]]),
+    np.eye(1) * 0.01, np.eye(1) * 0.1)
+_pf2_rb.initialise(np.zeros(2))
+_pf2_rb.step(np.array([0.2]), np.zeros(1))
+assert np.all(np.isfinite(_pf2_rb.state())), "ParticleFilterV2 (RaoBlackwellized) state not finite"
+assert ctrl.registry_has('particle_filter_v2'), "particle_filter_v2 not registered"
+print('ParticleFilterV2 smoke test passed.')
+
 
 # ILC P-type
 _ip = ctrl.ILCParams()
@@ -773,6 +812,70 @@ assert np.isfinite(_nm_result.cost), "NelderMead result cost not finite"
 assert _nm_result.cost < 1e-3, f"NelderMead should converge near min: cost={_nm_result.cost}"
 assert 'nelder_mead' in ctrl.features()
 print('NelderMead smoke test passed.')
+
+# ---- SelfTuningRegulator (Phase 3 Roadmap Phase 2 OC1) ----------------------
+_strp = ctrl.STRParams()
+_strp.na = 1
+_strp.nb = 1
+_str = ctrl.SelfTuningRegulator(_strp, 0.1)
+_str.set_reference(1.0)
+_y = 0.0
+for _ in range(50):
+    _u = _str.compute(_y)
+    assert np.isfinite(_u), "SelfTuningRegulator produced a non-finite output"
+    _y = 0.5 * _y + 0.5 * _u  # toy first-order plant
+assert 'self_tuning_regulator' in ctrl.features()
+print('SelfTuningRegulator smoke test passed.')
+
+# ---- NSGA2 (Phase 3 Roadmap Phase 2 MO1) ------------------------------------
+_nsga_p = ctrl.NSGA2Params()
+_nsga_p.n_dim = 1
+_nsga_p.n_objectives = 2
+_nsga_p.population = 20
+_nsga_p.max_gen = 15
+_nsga_p.lower = np.array([0.0])
+_nsga_p.upper = np.array([2.0])
+_nsga = ctrl.NSGA2(_nsga_p)
+_nsga_result = _nsga.optimize(lambda x: np.array([x[0] ** 2, (x[0] - 2.0) ** 2]))
+assert _nsga_result.front_params.shape[0] >= 1, "NSGA2 front is empty"
+assert np.all(np.isfinite(_nsga_result.front_objectives)), "NSGA2 front_objectives not finite"
+assert 'nsga2' in ctrl.features()
+print('NSGA2 smoke test passed.')
+
+# ---- tune_constrained (Phase 3 Roadmap Phase 2 MO3) -------------------------
+_ct_params = ctrl.ConstrainedTuneParams()
+_ct_params.constraints = lambda x: np.array([x[0] - 1.0])  # feasible iff x <= 1
+_ct_atp = ctrl.AutoTunerParams()
+_ct_atp.n = 1
+_ct_tuner = ctrl.AutoTuner(_ct_atp)
+_ct_result = ctrl.tune_constrained(
+    lambda cost, x0: _ct_tuner.tune(cost, x0),
+    lambda x: float((x[0] - 2.0) ** 2),
+    _ct_params, np.array([0.0]))
+assert np.isfinite(_ct_result.cost), "tune_constrained result cost not finite"
+assert _ct_result.params[0] <= 1.0 + 1e-2, "tune_constrained should respect x <= 1"
+assert 'constrained_tuning' in ctrl.features()
+print('tune_constrained smoke test passed.')
+
+# ---- FaultClassifier + FTCSupervisor (Phase 3 Roadmap Phase 2 DT4) ----------
+_fc = ctrl.FaultClassifier(ctrl.FaultDetectorParams())
+for _ in range(10):
+    _fault = _fc.classify(0.0, 0.5, 0.5)
+assert _fault == ctrl.FaultType.None_, "FaultClassifier should report no fault on nominal residuals"
+assert 'fault_classifier' in ctrl.features()
+
+_ftc_stack = ctrl.ControllerStack(ctrl.StackMode.Supervisory, 0.1)
+_ftc_pid_p = ctrl.PIDParams(); _ftc_pid_p.Kp = 1.0
+_ftc_stack.add_controller(ctrl.DiscretePID(_ftc_pid_p, 0.1), "primary")
+_ftc_stack.add_controller(ctrl.DiscretePID(_ftc_pid_p, 0.1), "fallback")
+_ftc = ctrl.FTCSupervisor(_ftc_stack, ctrl.FaultDetectorParams(), 0.1)
+_ftc.register_fault_response(ctrl.FaultType.None_, "primary")
+_ftc.register_fault_response(ctrl.FaultType.ActuatorLoss, "fallback")
+_ftc.feed_residual(0.0, 0.5, 0.5)
+_u_ftc = _ftc.compute(1.0)
+assert np.isfinite(_u_ftc), "FTCSupervisor produced a non-finite output"
+assert ctrl.registry_has('ftc_supervisor'), "ftc_supervisor not registered"
+print('FaultClassifier/FTCSupervisor smoke test passed.')
 
 # ---- ParticleSwarmOptimizer -------------------------------------------------
 import numpy as _nppso
@@ -1201,6 +1304,26 @@ assert len(_ci_result.crosscorr_uy) == 21, "identify: crosscorr_uy length mismat
 assert abs(_ci_result.impulse_response[0] - 0.5) < 1e-9, \
     "identify: g_hat(0) should recover the static gain 0.5"
 print('CorrelationID smoke test passed.')
+
+# MLEIdentifier (Phase 3 Roadmap Phase 2 SI1) smoke test
+assert hasattr(ctrl, 'MLEIdentifier'), "MLEIdentifier not bound"
+assert hasattr(ctrl, 'MLEParams'), "MLEParams not bound"
+assert hasattr(ctrl, 'MLEResult'), "MLEResult not bound"
+assert hasattr(ctrl, 'NoiseModel'), "NoiseModel not bound"
+assert ctrl.registry_has('mle_identifier'), "mle_identifier not registered"
+
+_rng_mle = np.random.default_rng(1)
+_mle_N = 200
+_mle_u = _rng_mle.uniform(-1.0, 1.0, _mle_N)
+_mle_y = np.zeros(_mle_N)
+for _k in range(1, _mle_N):
+    _mle_y[_k] = 0.6 * _mle_y[_k - 1] + 0.4 * _mle_u[_k - 1]
+_mle_params = ctrl.MLEParams()
+_mle_params.na, _mle_params.nb = 1, 1
+_mle_result = ctrl.MLEIdentifier.fit(_mle_u, _mle_y, 0.1, _mle_params)
+assert np.all(np.isfinite(_mle_result.theta)), "MLEIdentifier theta not finite"
+assert abs(_mle_result.theta[0] - (-0.6)) < 0.1, "MLEIdentifier should recover a1 ~= -0.6"
+print('MLEIdentifier smoke test passed.')
 
 # SKFit - Sanathanan-Koerner-reweighted complex-response fitting (Phase 3 FD1) smoke test
 assert hasattr(ctrl, 'SKFit'), "SKFit not bound"

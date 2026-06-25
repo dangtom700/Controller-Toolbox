@@ -1,4 +1,7 @@
 #pragma once
+#include "ControllerRegistry.h"
+#include "KalmanFilter.h"
+#include "PlantModel.h"
 #include <Eigen/Dense>
 #include <functional>
 #include <random>
@@ -115,6 +118,10 @@ public:
                    ParticleFn  f,
                    ParticleMeasFn h);
 
+    /** @brief Virtual destructor - required now that this class is a polymorphic base
+     *  (ParticleFilterV2, Phase 3 Roadmap Phase 2 EF3). */
+    virtual ~ParticleFilter() = default;
+
     /**
      * @brief Initialise particle cloud from a Gaussian prior N(x0, P0).
      *
@@ -131,7 +138,7 @@ public:
      *
      * @param u Control input u[k] (m * 1).
      */
-    void predict(const Eigen::VectorXd &u);
+    virtual void predict(const Eigen::VectorXd &u);
 
     /**
      * @brief Update step: compute likelihoods and update weights.
@@ -141,7 +148,7 @@ public:
      * @param y Measurement y[k] (p * 1).
      * @param u Control input u[k] (m * 1). Passed to h(x, u).
      */
-    void update(const Eigen::VectorXd &y, const Eigen::VectorXd &u);
+    virtual void update(const Eigen::VectorXd &y, const Eigen::VectorXd &u);
 
     /**
      * @brief Combined predict(u_prev) + update(y, u_prev).
@@ -151,14 +158,14 @@ public:
      * @param y      Measurement y[k].
      * @param u_prev Control applied at step k-1 (used in predict step).
      */
-    void step(const Eigen::VectorXd &y, const Eigen::VectorXd &u_prev);
+    virtual void step(const Eigen::VectorXd &y, const Eigen::VectorXd &u_prev);
 
     /**
      * @brief Trigger a manual resample regardless of N_eff.
      *
      * Systematic resampling (Kitagawa 1996) - lower variance than multinomial.
      */
-    void resample();
+    virtual void resample();
 
     // -------------------------------------------------------------------------
     // State accessors
@@ -208,7 +215,7 @@ public:
      */
     void reset();
 
-private:
+protected:
     void sampleNoise(Eigen::VectorXd &out, const Eigen::MatrixXd &L);
 
     ParticleFilterParams   p_;
@@ -235,4 +242,72 @@ private:
     Eigen::VectorXd              cdf_;           ///< N-length CDF for systematic resampling
 };
 
+/**
+ * @brief Particle filter variant selector (Phase 3 Roadmap Phase 2 EF3).
+ * @see docs/superpowers/specs/2026-06-25-estimation-extensions-design.md
+ */
+enum class PFVariant
+{
+    Bootstrap,        ///< Plain SIR (inherits ParticleFilter's own implementation, unchanged).
+    Auxiliary,         ///< Pitt & Shephard 1999 look-ahead resampling (via step() only).
+    RaoBlackwellized   ///< Embedded per-particle KalmanFilter marginalizes a linear-Gaussian
+                       ///< substate (LTI dynamics, additively-coupled measurement - see spec).
+};
+
+/** @brief Parameters for ParticleFilterV2. */
+struct ParticleFilterParamsV2 : public ParticleFilterParams
+{
+    PFVariant variant = PFVariant::Bootstrap;
+
+    /**
+     * @brief RaoBlackwellized only: indices into the full state vector that are linear-Gaussian
+     * given the rest (size must equal A_lin's dimension). Empty for Bootstrap/Auxiliary.
+     */
+    std::vector<int> linear_state_indices;
+};
+
+/**
+ * @brief Extends ParticleFilter with an auxiliary (look-ahead) and a Rao-Blackwellized variant.
+ *
+ * Bootstrap mode adds nothing - predict()/update()/step() fall straight through to
+ * ParticleFilter's own implementation (zero duplication, true virtual-dispatch inheritance).
+ */
+class ParticleFilterV2 : public ParticleFilter
+{
+public:
+    /**
+     * @brief Construct a variant particle filter.
+     * @param p RaoBlackwellized: set p.variant and p.linear_state_indices; p.Q/p.R still cover
+     *        the FULL state for Bootstrap/Auxiliary, but for RaoBlackwellized only the
+     *        non-linear-indexed rows/cols of p.Q are used (the linear substate's process noise
+     *        is Q_lin instead).
+     * @param n_states, n_meas, f, h - same as ParticleFilter.
+     * @param A_lin, B_lin, C_lin, Q_lin, R_lin - RaoBlackwellized only: the linear substate's
+     *        fixed (LTI) dynamics/output/noise matrices. h(x, u) must be additively separable:
+     *        h(x,u) = h_nonlinear(x_nl, u) + C_lin * x_lin (see spec for why this is required).
+     * @throws std::invalid_argument if RaoBlackwellized and the *_lin matrices/indices are
+     *         missing or mis-sized.
+     */
+    ParticleFilterV2(const ParticleFilterParamsV2 &p, int n_states, int n_meas,
+                      ParticleFn f, ParticleMeasFn h,
+                      const Eigen::MatrixXd &A_lin = {}, const Eigen::MatrixXd &B_lin = {},
+                      const Eigen::MatrixXd &C_lin = {},
+                      const Eigen::MatrixXd &Q_lin = {}, const Eigen::MatrixXd &R_lin = {});
+
+    void predict(const Eigen::VectorXd &u) override;
+    void update(const Eigen::VectorXd &y, const Eigen::VectorXd &u) override;
+    void step(const Eigen::VectorXd &y, const Eigen::VectorXd &u_prev) override;
+    void resample() override;
+
+private:
+    std::vector<int> systematicIndices(const Eigen::VectorXd &weights);
+
+    ParticleFilterParamsV2 p2_;
+    std::vector<KalmanFilter> kf_;           ///< RaoBlackwellized only, one embedded KF per particle.
+    std::vector<KalmanFilter> kfResampleBuf_; ///< RaoBlackwellized only, resample() scratch buffer.
+    Eigen::MatrixXd A_lin_, B_lin_, C_lin_, Q_lin_, R_lin_;
+};
+
 } // namespace ctrl
+
+CTRL_REGISTER_FEATURE(particle_filter_v2)

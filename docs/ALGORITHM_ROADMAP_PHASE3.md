@@ -1,7 +1,7 @@
 # Controller Toolbox — Algorithm Roadmap: Phase 3
 
 **Created:** 2026-06-24.
-**Status:** Planning — 9 of 32 items shipped (Phase 1 complete).
+**Status:** Planning — 16 of 32 items shipped (Phase 1 and Phase 2 complete).
 **Source:** Every item below is one of the 35 open lines in `docs/algorithm_backlog.md` (the
 9 categories left after Phase 4's frequency-domain work and the Resonant/Notch/PLL controllers
 shipped). 3 backlog items (`Minimum-variance control/STR`, `Adaptive pole placement`,
@@ -32,13 +32,13 @@ sketches here are directional (to scope effort and reuse), not committed APIs.
 | SI2 | Correlation-Based Identification | 1 | Done |
 | FD1 | Generalized SK Iteration (complex-response fitting) | 1 | Done |
 | MO2 | Nelder-Mead Simplex | 1 | Done |
-| OC1 | Self-Tuning Regulator (merged) | 2 | Open |
-| SI1 | Maximum Likelihood / MAP Identification | 2 | Open |
-| EF2 | Set-Membership Estimation | 2 | Open |
-| EF3 | Particle Filter Variants | 2 | Open |
-| MO1 | Multi-Objective (Pareto) Optimization | 2 | Open |
-| MO3 | General Nonlinear Constrained Tuning | 2 | Open |
-| DT4 | Fault-Tolerant Control Reconfiguration | 2 | Open |
+| OC1 | Self-Tuning Regulator (merged) | 2 | Done |
+| SI1 | Maximum Likelihood / MAP Identification | 2 | Done |
+| EF2 | Set-Membership Estimation | 2 | Done |
+| EF3 | Particle Filter Variants | 2 | Done |
+| MO1 | Multi-Objective (Pareto) Optimization | 2 | Done |
+| MO3 | General Nonlinear Constrained Tuning | 2 | Done |
+| DT4 | Fault-Tolerant Control Reconfiguration | 2 | Done |
 | ML1 | NN Controller Core (direct NN architectures) | 3 | Open |
 | ML2 | NN-Adaptive Control (depends on ML1) | 3 | Open |
 | SI3 | MOESP / CVA Subspace ID Variants | 3 | Open |

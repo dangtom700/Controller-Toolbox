@@ -83,6 +83,13 @@ set(CTRL_CORE_SOURCES
     PassivityBasedController.cpp
     CLFController.cpp
     HammersteinWienerIdentifier.cpp
+    SelfTuningRegulator.cpp
+    MLEIdentifier.cpp
+    SetMembershipEstimator.cpp
+    NSGA2.cpp
+    ConstrainedTuning.cpp
+    FaultClassifier.cpp
+    FTCSupervisor.cpp
 )
 
 # --- Optional sources --------------------------------------------------------

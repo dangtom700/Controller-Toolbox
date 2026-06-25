@@ -54,6 +54,7 @@ Read both compact files for tribal knowledge before making any changes to contro
 | **AE-WCET** | Aircraft Engine Thermal Management `run_wcet_profile()` + `config/analysis.json` hook | LOW | **Done (Part 66)** |
 | **ACT-1** | Added `ResonantController`/`NotchFilter`/`PhaseLockedLoop` ("Additional Controller Types" backlog category) | MED | **Done (Part 67)** |
 | **DBG-1** | `-DCMAKE_BUILD_TYPE=Debug` (`-g`) fails on pre-existing Eigen-heavy TUs (`DiscreteHinf.cpp`, `test_catch2_advanced.cpp`); root cause not fixed, workaround documented | LOW | Open |
+| **P3-PH2** | `docs/ALGORITHM_ROADMAP_PHASE3.md` Phase 2 — OC1 `SelfTuningRegulator`, SI1 `MLEIdentifier`, EF2 `SetMembershipEstimator`, EF3 `ParticleFilterV2`, MO1 `NSGA2`, MO3 `tuneConstrained`, DT4 `FaultClassifier`/`FTCSupervisor` | HIGH | **Done (Part 68)** |
 
 ---
 
@@ -1120,3 +1121,106 @@ with `-DCMAKE_CXX_FLAGS_DEBUG=-O0` to get Debug optimization semantics without `
 the link step if it hits a transient `ld returned 5`.
 
 **Docs updated:** this report's header table + new Part 67 section.
+
+---
+
+## Part 68 — Algorithm Roadmap Phase 3, Phase 2 (7 items: OC1/SI1/EF2/EF3/MO1/MO3/DT4) — 2026-06-25
+
+All 7 Phase 2 roadmap items implemented end-to-end (lib + bindings + Catch2 tests + C++/Python
+examples + build wiring): `SelfTuningRegulator` (OC1, merges minimum-variance control/adaptive
+pole placement/self-tuning regulators), `MLEIdentifier` (SI1, Gaussian/Laplace batch ID),
+`SetMembershipEstimator` (EF2, ellipsoidal outer-bounding), `ParticleFilterV2` (EF3, Auxiliary +
+Rao-Blackwellized variants — required making `ParticleFilter::predict/update/step/resample`
+virtual), `NSGA2` (MO1, Pareto multi-objective), `tuneConstrained` (MO3, exterior-penalty
+wrapper), `FaultClassifier`/`FTCSupervisor` (DT4, FDI + `ControllerStack` reconfiguration). See
+`docs/superpowers/specs/2026-06-25-*-design.md` for the 4 design specs. Several real bugs
+surfaced during implementation/verification, all fixed in this same session:
+
+- **Bug found and fixed — dangling reference in `SelfTuningRegulator::estimatedNumerator()/
+  estimatedDenominator()`.** Both returned `const Eigen::VectorXd&` bound to
+  `RecursiveLeastSquares::numerator()/denominator()`, which return **by value** (computed
+  slices, not member references) — caught via `-Wreturn-local-addr`. Fixed by returning
+  `Eigen::VectorXd` by value.
+- **Bug found and fixed — `SelfTuningRegulator` cold-start deadlock.** `RecursiveLeastSquares`'s
+  `theta_` is zero-initialized, so the identified `b1`/`r0` is exactly 0 on the first call,
+  hitting the "ill-conditioned -> hold `uPrev_`" guard; since `uPrev_` itself starts at 0, the
+  plant is never excited and `b1` never leaves 0 — a permanent deadlock. Fixed by adding
+  `fallbackProportional()` (a small proportional law on `r_ - yHist_(0)`) used by all three
+  ill-conditioning guards instead of holding `uPrev_`.
+- **Significant finding, not a bug — certainty-equivalence STR has no general persistent-
+  excitation guarantee from closed-loop reference alone** (Astrom & Wittenmark, *Adaptive
+  Control*, Ch. 3/7): both control-law modes can converge confidently (shrinking
+  `covariance()`) to a *stabilizing but numerically wrong* parameter estimate. Verified via
+  isolated diagnostics that the underlying RLS and Diophantine-solve math are both correct in
+  isolation (instant convergence given true parameters or open-loop excitation) — the residual
+  tracking error is the textbook closed-loop-identifiability limitation, corroborated by the
+  roadmap's own (separately scoped, Phase 5) OC3 Dual Control item. Added `STRParams::
+  probeAmplitude`/`probeSeed` persistent-dither support (helps in practice but is not a
+  guarantee) and rewrote the 2 affected Catch2 tests + `ex101`/`ex118` to assert
+  stability/boundedness through a mid-run plant change rather than exact parameter/setpoint
+  convergence. Documented as class-level `@warning`s on `SelfTuningRegulator.h`.
+- **Bug found and fixed — deadbeat (poles-at-origin) `desired_poles`/minimum-variance targets
+  are fragile during the online-identification transient.** Both control laws divide by an
+  identified leading coefficient; an aggressive deadbeat design amplifies identification-
+  transient error into saturating control with the default `±1e9` actuator bounds, which feeds
+  a corrupted (clipped) data point back into RLS. Fixed the 3 affected tests + `ex101`/`ex118`
+  to use comfortably-damped `desired_poles` and realistic `uMin`/`uMax`; documented as a
+  class-level `@warning`.
+- **Bug found and fixed — `FaultClassifier::classify()`'s actuator/sensor discriminator
+  conflated "no information" with "low correlation."** `corr(du_cmd, dy_meas)` defaulted to
+  `0.0` whenever `duStd`/`dyStd` fell at or below the `1e-12` div-by-zero floor, which silently
+  satisfied `|corr| < corr_threshold` and misclassified a perfectly healthy but momentarily
+  quiescent closed loop as `ActuatorLoss`/`SensorNoise`. Fixed by gating the correlation check
+  on `duStd` alone (no command variation -> nothing to correlate against either way -> fall
+  through to the residual-amplitude sensor-fault check) and deciding the genuine broken-causal-
+  link case directly (`duStd` meaningfully nonzero but `dyStd` collapses to ~0 -> `ActuatorLoss`,
+  without dividing by a near-zero `dyStd`). Verified the existing `[fault_classifier]` Catch2
+  cases (including the literal broken-causal-link `ActuatorLoss` signature, which exercises
+  exactly the `dyStd~0` path) still pass unchanged.
+- **Bug found and fixed — `FTCSupervisor::compute()` reconfigured `ControllerStack` on *any*
+  fault-type change, including transient classifications with no registered response.**
+  `ex107_ftc_supervisor`'s redundant-sensor-pair scenario hit this directly: once the primary
+  sensor developed a bias, `FaultClassifier`'s small-sample (`confirm_window=5`) correlation
+  estimate legitimately flickered between `SensorBias`/`SensorNoise`/`ActuatorLoss` as the
+  still-settling 2-controller PID loop's residual statistics varied — and `compute()` was
+  deactivating *every* registered stack entry on each flicker into an unregistered fault type
+  (freezing the output), then bumplessly re-engaging against a further-diverged error once the
+  classification flickered back. This compounded every cycle into a runaway divergence (output
+  reached `~1e6` by step 190 in the diagnostic repro). Root-caused via an instrumented copy of
+  `ex107` tracing `(yPrimary, yBackup, residual, fault, active, u)` per step, isolating the
+  freeze/re-engage cycle before inspecting `FaultClassifier`'s internals with temporary debug
+  prints. Fixed by only reconfiguring when the newly classified fault type has a *registered*
+  response — an unregistered/transient classification now leaves the stack's current
+  configuration untouched (mirrors `ControllerStack`'s own "hold last output when nothing
+  eligible" philosophy). Updated `ex107`/`ex124`'s final assertions to check the reliably-true
+  property (fault detected at least once, active controller correctly latched on the backup,
+  bounded trajectory) instead of the literal last-step classifier output, which remains
+  expected to flicker by design of a small-sample per-step heuristic.
+- Verification: all 37 new Catch2 test cases (2429 assertions) pass; full `test_catch2_advanced`
+  suite (7564 assertions, 344 cases) passes with no regressions; all 7 new C++ examples
+  (`ex101`-`ex107`) compile and PASS.
+- **Python-binding verification (separate build step) surfaced two more bugs:**
+  1. *Wrong CMake Python interpreter.* A first bindings build configured outside the conda env
+     picked up MSYS2's system `python3.exe` (3.14), producing a `ctrl_toolbox.cp314-*.pyd` that
+     cannot be imported by the canonical `soft_robotics` env (Python 3.12, MSVC CPython). Fixed by
+     reconfiguring the `build` dir entirely *within* `conda run -n soft_robotics` (per `run.py`
+     Phase 3's own pattern) so pybind11 discovers the conda interpreter **and** `python312.lib`
+     consistently — yielding an importable `cp312-win_amd64.pyd`. (Not a library bug; a build-env
+     gotcha worth recording — the MinGW UCRT64 toolchain still cross-imports fine into the MSVC
+     conda CPython thanks to the static libstdc++/libgcc link, exactly as CLAUDE.md §2 notes.)
+  2. *`ss_step_copy` tuple misuse in 3 Python examples.* `ex122_nsga2.py`, `ex123_constrained_
+     tuning.py`, and `ex124_ftc_supervisor.py` wrote `y = ctrl.ss_step_copy(ss, x, uv)[0]`,
+     treating element `[0]` as the scalar plant output. `ss_step_copy` actually returns the tuple
+     `(y_vec, x_next)` (output **first**, next state second; both `np.ndarray`), so `[0]` was the
+     output *vector* — which then (a) got passed where a scalar `float` was expected (`compute()`
+     / `feed_residual()` raised `TypeError`) and (b) meant `x` was never reassigned, so the plant
+     state never advanced. These were latent because the examples had never run against a built
+     `.pyd`. Fixed to the canonical idiom used everywhere else (`y_vec, x = ctrl.ss_step_copy(...)`
+     then `y = float(y_vec[0])`); all three now PASS, with `ex124` reproducing the C++ `ex107`
+     trajectory exactly (latches `backup_sensor_pid`, final `y = -22.8183`).
+- Python verification result: `bindings/smoke_test.py` passes (all bound Phase 2 classes
+  importable); all 7 new Python examples (`ex118`-`ex124`) PASS under `conda run -n soft_robotics`.
+
+**Docs updated:** `docs/algorithm_backlog.md` (7 items moved to "Already done");
+`docs/ALGORITHM_ROADMAP_PHASE3.md` status table (16/32 shipped, Phase 1 + Phase 2 complete);
+this report's header table + new Part 68 section.
