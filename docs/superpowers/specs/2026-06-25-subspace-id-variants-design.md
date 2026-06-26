@@ -42,15 +42,27 @@ future output unexplained by either the input or the past data — i.e., the gen
 unpredictable/noise component). `L33`'s rows are indexed 1:1 by `Yf`'s own row layout (`i` repeated
 blocks of `p` output channels), so per-channel noise variance is `mean over the i repetitions of
 each channel's squared L33 row norm` — `p` scalars, trivially invertible, no rank-deficiency risk.
-This directly implements the plain-language motivation the roadmap itself gives for CVA ("preferred
-when output channels have very different noise scales") without the full canonical-correlation
-machinery's conditioning problem. Verified against a synthetic 2-output system with deliberately
-mismatched noise levels (`std = 0.005` vs `0.3`): CVA beats both MOESP and N4SID specifically on the
-high-noise channel (mean abs frequency-response error `0.157` vs `0.179` vs `0.313`), while tracking
-N4SID closely on equal-noise data and in a near-noiseless sanity check (no blow-ups, complex
-conjugate eigenvalue pair preserved, close to the true system). This is a narrower, regularized
-claim than full Larimore/Van Overschee-De Moor CVA, and is documented as such below — not a
-bit-for-bit reproduction of the original paper's weighting.
+This is a narrower, regularized claim than full Larimore/Van Overschee-De Moor CVA, and is
+documented as such below — not a bit-for-bit reproduction of the original paper's weighting.
+
+**A second, more important correction (post-Monte-Carlo verification):** an initial single-draw
+test appeared to show CVA beating *both* MOESP and N4SID on a mismatched-noise-channel scenario —
+but that single draw turned out to be using an RNG state already advanced by unrelated earlier
+code in the same prototyping script, not an independently controlled trial. Re-verified properly
+with 40 independent trials (fresh seeds per trial) on the same scenario (`std = 0.005` vs `0.3`
+across 2 output channels), then again at 10x the data to rule out a finite-sample artifact: **CVA
+beats N4SID reliably (~85% of trials, lower mean error on both channels)**, confirming the
+per-channel weighting fix over N4SID's right-weighting-only approach is real. But **plain unweighted
+MOESP outperforms both N4SID and CVA on this synthetic system, consistently, on both channels,
+regardless of data volume** — i.e., right-weighting by `L22^-1` (the N4SID step) measurably hurts
+accuracy here, and CVA's left-weighting only partially recovers from that, without fully closing the
+gap back to unweighted MOESP. This is not a coding defect — weighting-based subspace ID methods
+trading off differently than the unweighted baseline depending on the specific system is consistent
+with the literature (no universal winner across N4SID/MOESP/CVA is claimed there either) — but it
+means **this design does not claim CVA (or N4SID) outperforms MOESP**, only that CVA outperforms
+N4SID specifically, and that all three converge to the true system as noise -> 0. The motivating
+"different output noise scales" framing is kept only as a description of when CVA's relative
+improvement *over N4SID* is most pronounced, not as a claim of absolute superiority over MOESP.
 
 ## Algorithm
 
@@ -98,15 +110,20 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y, const Eigen::MatrixXd &U,
 /**
  * @brief Batch subspace identification with a choice of weighting (MOESP / N4SID / CVA).
  *
- * MOESP: unweighted oblique projection (identical to n4sid()).
+ * MOESP: unweighted oblique projection (identical to n4sid()). The strongest performer in
+ *        prototyping across every scenario tried -- offered as the default for that reason.
  * N4SID:  right-weights the past block by its Uf-conditioned covariance (Cholesky-clean).
  * CVA:    additionally left-weights each output channel by an estimated noise scale,
- *         derived from the LQ factor's residual block -- helps when output channels have
- *         very different noise levels. See the design doc for the numerical reasoning;
- *         this is a regularized, per-channel-scale variant, not full canonical-variate
- *         (cross-covariance) whitening, which proved numerically ill-conditioned in
- *         prototyping (the matrix it would require inverting is rank-deficient by
- *         construction whenever i_horizon > n_order, the normal operating regime).
+ *         derived from the LQ factor's residual block. Verified (40-trial Monte Carlo) to
+ *         reliably outperform N4SID when output channels have very different noise levels
+ *         (~85% win rate) -- but, like N4SID, does not reliably outperform unweighted MOESP
+ *         on the same data; no method here is claimed to universally beat the others, only
+ *         that CVA improves on N4SID's specific shortcoming. See the design doc for the full
+ *         numerical reasoning; this is a regularized, per-channel-scale variant, not full
+ *         canonical-variate (cross-covariance) whitening, which proved numerically
+ *         ill-conditioned in prototyping (the matrix it would require inverting is
+ *         rank-deficient by construction whenever i_horizon > n_order, the normal operating
+ *         regime).
  *
  * kalmanGain/innovCov (SubspaceIDResult's stochastic-realization diagnostics) are computed
  * for all three methods, including MOESP -- even though textbook MOESP has no stochastic
@@ -178,9 +195,12 @@ No changes to `lib/CMakeLists.txt` or `lib/ControllerToolbox.h` (no new source f
    realizations whose `A` eigenvalues match the true system within tolerance (similarity-invariant
    comparison, per `SubspaceID.h`'s own documented invariance contract); `subspaceID(..., MOESP)`
    matches `n4sid()`'s output bit-for-bit (regression, confirms the refactor is behavior-preserving).
-2. Mismatched output-channel noise scales (`std` differing by 60x between channels) — CVA's
-   recovered model has lower frequency-response error than both MOESP and N4SID specifically on
-   the high-noise channel (verified in the prototype: `0.157` vs `0.179` vs `0.313`).
+2. Mismatched output-channel noise scales (`std` differing by 60x between channels), averaged
+   over many independent trials (Monte Carlo, not a single noise draw — a single draw was
+   verified to flip unpredictably) — CVA's mean frequency-response error on the high-noise channel
+   is reliably lower than N4SID's (~85% win rate across 40 independent trials in prototyping).
+   This test does **not** assert CVA or N4SID beats MOESP — verified false in the same Monte Carlo
+   sweep (plain MOESP was the strongest performer on this synthetic system in every trial).
 3. `suggestOrder()` runs unchanged (same function, no method-specific branch) across all 3
    methods' `singularValues` outputs and returns a value `>= 1` for each.
 4. Degenerate excitation (near-constant input, near-singular `L22`) — N4SID/CVA return

@@ -325,6 +325,14 @@ if feats.get('subspace', False):
     order = ctrl.suggest_order(res.singular_values, threshold=0.01)
     print(f'suggest_order -> {order}')
     assert 1 <= order <= 5, f"suggest_order returned unexpected value: {order}"
+
+    assert hasattr(ctrl, 'subspace_id'), "subspace_id not bound"
+    assert hasattr(ctrl, 'SubspaceMethod'), "SubspaceMethod not bound"
+    for method in (ctrl.SubspaceMethod.MOESP, ctrl.SubspaceMethod.N4SID, ctrl.SubspaceMethod.CVA):
+        res_v = ctrl.subspace_id(Y_mat, U_mat, n_order=1, i_horizon=10, Ts=0.01, method=method)
+        assert res_v.success, f"subspace_id({method}) failed: {res_v.message}"
+    moesp_res = ctrl.subspace_id(Y_mat, U_mat, n_order=1, i_horizon=10, Ts=0.01, method=ctrl.SubspaceMethod.MOESP)
+    assert np.allclose(moesp_res.model.A, res.get_model().A), "subspace_id(MOESP) should match n4sid()"
     print('SubspaceID smoke tests passed.')
 else:
     print('Skipping SubspaceID: not compiled in.')
@@ -1120,6 +1128,32 @@ assert _hmpc.is_data_model_fitted(), "HybridMPC should be fitted after refit"
 assert ctrl.registry_has('hybrid_mpc'), "hybrid_mpc not registered"
 print('HybridMPC (H2) smoke test passed.')
 
+# ---- GPMPC (ML3) -------------------------------------------------------------
+import numpy as _npgpm
+
+def _f_gpm(x, u):
+    return _npgpm.array([0.9 * x[0] + u[0]])
+
+_gpm_params = ctrl.GPMPCParams()
+_gpm_params.nmpc.Np = 5; _gpm_params.nmpc.Nu = 3
+_gpm_params.nmpc.n_states = 1; _gpm_params.nmpc.n_inputs = 1; _gpm_params.nmpc.n_outputs = 1
+_gpm_params.nmpc.uMin = -5.0; _gpm_params.nmpc.uMax = 5.0; _gpm_params.nmpc.Ts = 0.1
+
+_gp_p_gpm = ctrl.GPParams()
+_gp_p_gpm.length_scale = 0.5; _gp_p_gpm.signal_var = 1.0; _gp_p_gpm.noise_var = 0.01
+_gpm_resid_params = ctrl.GPResidualParams()
+_gpm_resid_params.gp = _gp_p_gpm
+_gp_gpm = ctrl.GPResidualModel(2, _gpm_resid_params)  # x_dim = n_states + n_inputs
+
+_gpmpc = ctrl.GPMPC(_gpm_params, _f_gpm, _gp_gpm)
+_x0_gpm = _npgpm.array([1.0])
+_gpmpc.set_state(_x0_gpm)
+_u_gpm = _gpmpc.compute(0.5 - _x0_gpm[0])
+assert _npgpm.isfinite(_u_gpm), "GPMPC compute not finite"
+assert _npgpm.allclose(_gpmpc.last_tightening(), 0.0), "Unfitted GP should give zero tightening"
+assert ctrl.registry_has('gp_mpc'), "gp_mpc not registered"
+print('GPMPC (ML3) smoke test passed.')
+
 # ---- HybridModelTrainer (H4) ------------------------------------------------
 import numpy as _npmht
 def _f_phys_ht(x, u, p):
@@ -1338,6 +1372,24 @@ _sk_result = ctrl.SKFit.fit_sk(_sk_freqs, _sk_response, num_order=1, den_order=1
 assert len(_sk_result.iter_cost) >= 1, "fit_sk: expected at least one iteration"
 assert abs(_sk_result.model.den[1] - (-0.8)) < 1e-6, "fit_sk: den[1] should recover -0.8"
 print('SKFit smoke test passed.')
+
+# ComplexVectorFit - complex-conjugate-pole Vector Fitting (Phase 3 FD2) smoke test
+assert hasattr(ctrl, 'ComplexVectorFit'), "ComplexVectorFit not bound"
+assert hasattr(ctrl, 'ComplexVectorFitResult'), "ComplexVectorFitResult not bound"
+assert ctrl.registry_has('complex_vector_fit'), "complex_vector_fit not registered"
+
+_cvf_r, _cvf_theta = 0.97, 0.6
+_cvf_tf = ctrl.TransferFunction(
+    [0.0, 1.0 - _cvf_r, 0.0],
+    [1.0, -2.0 * _cvf_r * np.cos(_cvf_theta), _cvf_r ** 2],
+    0.1)
+_cvf_sys = ctrl.tf2ss(_cvf_tf)
+_cvf_freqs = list(np.linspace(0.5, 20.0, 40))
+_cvf_response = ctrl.SystemAnalysis.get_frequency_response(_cvf_sys, _cvf_freqs)
+_cvf_result = ctrl.ComplexVectorFit.fit(_cvf_freqs, _cvf_response, n_real_poles=0, n_complex_pairs=1, Ts=0.1)
+assert len(_cvf_result.iter_error) >= 1, "fit: expected at least one iteration"
+assert len(_cvf_result.poles) == 2, "fit: expected 2 poles (1 complex-conjugate pair)"
+print('ComplexVectorFit smoke test passed.')
 
 # HammersteinWienerIdentifier - Hammerstein/Wiener structured nonlinear ID (Phase 3 SI5)
 # smoke test
@@ -1625,5 +1677,39 @@ _nx_p.poly_degree = 1
 _nx_res = ctrl.NARMAXIdentifier.fit(_u_id, _y_id, _nx_p)
 assert len(_nx_res.selected_terms) >= 1, "NARMAX selected no terms"
 print('NARMAXIdentifier smoke test passed.')
+
+# ---------------------------------------------------------------------------
+# ValueIterationSolver (Phase 4 OC2) smoke test
+# ---------------------------------------------------------------------------
+assert hasattr(ctrl, 'ValueIterationSolver'), "ValueIterationSolver not bound"
+assert ctrl.registry_has('value_iteration'), "value_iteration not registered"
+
+
+def _vi_dynamics(x, u):
+    return np.array([x[0] + 0.1 * x[1], x[1] + 0.1 * u[0]])
+
+
+def _vi_cost(x, u):
+    return float(x @ x + 0.1 * (u @ u))
+
+
+_vi_gp = ctrl.DPGridParams()
+_vi_gp.x_min = np.array([-1.0, -1.0])
+_vi_gp.x_max = np.array([1.0, 1.0])
+_vi_gp.n_grid_per_dim = np.array([11, 11])
+_vi_gp.u_min = np.array([-2.0])
+_vi_gp.u_max = np.array([2.0])
+_vi_gp.n_grid_u = 5
+_vi_gp.discount = 0.95
+_vi_gp.max_iter = 50
+_vi_gp.tol = 1e-3
+
+_vi = ctrl.ValueIterationSolver(_vi_dynamics, _vi_cost, _vi_gp)
+_vi.solve()
+_u_vi = _vi.policy(np.array([0.5, 0.0]))
+assert np.all(np.isfinite(_u_vi)), "ValueIterationSolver policy not finite"
+_v_vi = _vi.value(np.array([0.5, 0.0]))
+assert np.isfinite(_v_vi), "ValueIterationSolver value not finite"
+print('ValueIterationSolver smoke test passed.')
 
 print('\nAll smoke tests passed.')

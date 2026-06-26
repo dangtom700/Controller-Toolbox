@@ -1054,4 +1054,41 @@ Example
              "Fit a num_order/den_order TransferFunction via SK-reweighted least squares. "
              "Iteration 0 is equivalent to fit_levy(); each subsequent iteration reweights "
              "by 1/|D_prev|.");
+
+    // -----------------------------------------------------------------------
+    // ComplexVectorFit - complex-conjugate-pole Vector Fitting
+    // (Phase 3 FD2)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::ComplexVectorFitResult>(m, "ComplexVectorFitResult",
+        "Result from ComplexVectorFit.fit().")
+        .def_readonly("model",      &ctrl::ComplexVectorFitResult::model,
+                      "Fitted discrete-time model (TransferFunction) after the final iteration.")
+        .def_readonly("poles",      &ctrl::ComplexVectorFitResult::poles,
+                      "Diagnostic: final pole locations (real or complex-conjugate pairs).")
+        .def_readonly("residues",   &ctrl::ComplexVectorFitResult::residues,
+                      "Diagnostic: partial-fraction residues corresponding to poles.")
+        .def_readonly("iter_error", &ctrl::ComplexVectorFitResult::iterError,
+                      "RMSE per SK iteration.")
+        .def_readonly("converged",  &ctrl::ComplexVectorFitResult::converged,
+                      "True if coefficient displacement dropped below tol.");
+
+    py::class_<ctrl::ComplexVectorFit>(m, "ComplexVectorFit", R"doc(
+Vector Fitting with complex-conjugate pole pairs for a complex (magnitude+phase) frequency
+response.
+
+Generalizes VectorFitting's real-pole/magnitude-only Sanathanan-Koerner loop to complex poles and
+a full complex response, tracking explicit pole/residue locations each iteration (unlike SKFit,
+which only returns polynomial coefficients).
+
+Example
+-------
+>>> result = ctrl.ComplexVectorFit.fit(omega, response, n_real_poles=0, n_complex_pairs=2, Ts=0.1)
+>>> print(result.model.num, result.model.den, result.poles)
+)doc")
+        .def_static("fit", &ctrl::ComplexVectorFit::fit,
+             py::arg("omega"), py::arg("response"),
+             py::arg("n_real_poles"), py::arg("n_complex_pairs"), py::arg("Ts"),
+             py::arg("max_iter") = 20, py::arg("tol") = 1e-6,
+             "Fit n_real_poles real poles plus n_complex_pairs complex-conjugate pole pairs to a "
+             "complex frequency response via SK-reweighted least squares.");
 }

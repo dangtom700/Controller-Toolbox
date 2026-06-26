@@ -150,6 +150,25 @@ public:
     /** @brief Full optimal first input u*_0 (m x 1). */
     const Eigen::VectorXd &lastControlVec() const { return u_opt_; }
 
+protected:
+    /**
+     * @brief Called once per RTI step, right after lb_qp_/ub_qp_ are filled with the
+     * uniform uMin/uMax-relative bounds, before the QP is solved (Lipschitz/LDLT step).
+     * Override to tighten them per-step. No-op by default -- preserves NonlinearMPC's
+     * exact existing behavior for any subclass that doesn't override it.
+     */
+    virtual void tightenStepBounds() {}
+
+    // Warm-started control sequence: U_warm_(m x Nu), column k = u_bar_k.
+    Eigen::MatrixXd  U_warm_;
+
+    // Pre-allocated trajectory workspace (sized once in init() via p_.Np / p_.n_states / p_.n_inputs).
+    std::vector<Eigen::VectorXd> x_traj_;  ///< Np+1 state vectors for nominal trajectory.
+
+    // QP box bounds (rebuilt every RTI step from p_.uMin/uMax minus U_warm_, then optionally
+    // tightened by a tightenStepBounds() override).
+    Eigen::VectorXd  lb_qp_, ub_qp_;
+
 private:
     void init();
 
@@ -168,11 +187,6 @@ private:
     Eigen::VectorXd  x_current_;  ///< Current state (n x 1).
     Eigen::VectorXd  y_ref_;      ///< Output reference (p x 1).
 
-    // Warm-started control sequence: U_warm_(m x Nu), column k = u_bar_k.
-    Eigen::MatrixXd  U_warm_;
-
-    // Pre-allocated trajectory workspace (sized once in init() via p_.Np / p_.n_states / p_.n_inputs).
-    std::vector<Eigen::VectorXd> x_traj_;  ///< Np+1 state vectors for nominal trajectory.
     std::vector<Eigen::MatrixXd> A_list_;  ///< Np linearised A matrices.
     std::vector<Eigen::MatrixXd> B_list_;  ///< Np linearised B matrices.
 
@@ -183,7 +197,6 @@ private:
     // QP buffers (pre-allocated, size m*Nu).
     Eigen::MatrixXd  H_qp_;
     Eigen::VectorXd  g_qp_;
-    Eigen::VectorXd  lb_qp_, ub_qp_;
     Eigen::VectorXd  dU_sol_, tmp1_, tmp2_, y_fista_;
     Eigen::LDLT<Eigen::MatrixXd> ldlt_;
     double           L_qp_ = 1.0;

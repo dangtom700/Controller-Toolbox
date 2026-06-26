@@ -68,6 +68,7 @@ private:
     FaultType lastApplied_ = FaultType::None;
     bool everApplied_ = false;
     double lastInnovation_ = 0.0, lastUCmd_ = 0.0, lastYMeas_ = 0.0;
+    double u_prev_ = 0.0;
     double Ts_;
 };
 

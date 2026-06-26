@@ -182,6 +182,14 @@ add_example(ex109_nn_adaptive_control)
 add_example(ex110_nonlinear_imc)
 # Phase 3 (Algorithm Roadmap Phase 3): SI4 NARMAX identification
 add_example(ex111_narmax)
+# Phase 3 (Algorithm Roadmap Phase 3): SI3 MOESP/N4SID/CVA subspace ID variants
+add_example(ex112_subspace_id_variants)
+# Phase 3 (Algorithm Roadmap Phase 3): ML3 GP-uncertainty-aware MPC input-bound tightening
+add_example(ex113_gp_mpc)
+# Phase 3 (Algorithm Roadmap Phase 3): FD2 complex-conjugate-pole Vector Fitting
+add_example(ex114_complex_vector_fit)
+# Phase 4 (Algorithm Roadmap Phase 3): OC2 dynamic programming / value iteration
+add_example(ex115_value_iteration_solver)
 
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)

@@ -80,6 +80,9 @@ public:
     int  size()    const noexcept { return static_cast<int>(X_.size()); }
     bool isFitted() const noexcept { return fitted_; }
 
+    /** @brief Input feature dimension this GP was constructed with. */
+    int  xDim()     const noexcept { return x_dim_; }
+
     void reset();
 
 private:

@@ -133,6 +133,66 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
                        double svd_tol = -1.0);
 
 /**
+ * @brief Weighting variant for subspaceID().
+ *
+ * All three share the same Hankel/LQ/extraction pipeline n4sid() already uses; they differ
+ * only in how the oblique projection L32 is weighted before its SVD (Step 3).
+ */
+enum class SubspaceMethod
+{
+    MOESP,  ///< Unweighted oblique projection (Verhaegen & Dewilde 1992). Identical to n4sid().
+            ///< The strongest performer across every scenario tried in prototyping; default.
+    N4SID,  ///< Right-weights the past block by its Uf-conditioned covariance (Cholesky-clean).
+    CVA     ///< Additionally weights each output channel by an estimated noise scale.
+};
+
+/**
+ * @brief Batch subspace identification with a choice of weighting (MOESP / N4SID / CVA).
+ *
+ * MOESP reproduces n4sid() exactly. N4SID right-weights the past data block by its
+ * Uf-conditioned covariance. CVA additionally left-weights each *output channel* by a
+ * noise-scale estimate (derived from the LQ factor's residual block). This is a regularized,
+ * per-channel-scale variant, not full canonical-variate (cross-covariance) whitening: that
+ * requires inverting an (i*p)x(i*p) matrix whose true rank is only n_order (<< i*p whenever
+ * i_horizon > n_order, the normal operating regime), which is numerically ill-conditioned
+ * even with ridge regularization (verified in prototyping -- see
+ * docs/superpowers/specs/2026-06-25-subspace-id-variants-design.md).
+ *
+ * Verified via a 40-trial Monte Carlo on a synthetic mismatched-output-noise system: CVA
+ * reliably outperforms N4SID (~85% win rate) when output channels have very different noise
+ * levels, confirming the per-channel weighting fix over N4SID's right-weighting-only
+ * shortcoming. However, neither N4SID nor CVA reliably outperforms unweighted MOESP on that
+ * same system -- no method here is a universal winner (consistent with the subspace-ID
+ * literature, where none of MOESP/N4SID/CVA dominates the others across all problem
+ * instances either); MOESP is offered as the default for that reason.
+ *
+ * kalmanGain/innovCov are computed for all three methods, including MOESP -- the same
+ * "free" diagnostic n4sid() already always populates, regardless of whether the chosen
+ * method has a textbook stochastic step.
+ *
+ * @param Y         Output data matrix (p * N): rows = outputs, columns = time samples.
+ * @param U         Input data matrix  (m * N): rows = inputs,  columns = time samples.
+ * @param n_order   Desired model order n.
+ * @param i_horizon Block-row count in Hankel matrices. Recommend i >= 2.n_order/p, minimum n_order+1.
+ * @param Ts        Sample time [s].
+ * @param method    Weighting variant. Defaults to MOESP (n4sid()'s existing behavior).
+ * @param svd_tol   SVD truncation tolerance; if > 0, n_order is capped at the number of
+ *                  singular values exceeding svd_tol. Pass -1.0 to disable (default).
+ * @return SubspaceIDResult containing the model, singular values, and diagnostics.
+ *         Check result.success before using result.model. success=false (with a
+ *         descriptive message) on a near-singular weighting matrix (N4SID/CVA only,
+ *         indicating non-persistent input excitation), in addition to n4sid()'s existing
+ *         failure modes.
+ */
+SubspaceIDResult subspaceID(const Eigen::MatrixXd &Y,
+                            const Eigen::MatrixXd &U,
+                            int n_order,
+                            int i_horizon,
+                            double Ts,
+                            SubspaceMethod method = SubspaceMethod::MOESP,
+                            double svd_tol = -1.0);
+
+/**
  * @brief Automated system-order selection from the singular-value spectrum.
  *
  * Uses the maximum-consecutive-ratio heuristic: finds the index i* where sv(i*)/sv(i*+1)

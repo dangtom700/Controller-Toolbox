@@ -395,6 +395,42 @@ max_order  : Hard cap on the returned order (-1 = no cap).
 
 Returns suggested model order >= 1.
 )doc");
+
+    py::enum_<ctrl::SubspaceMethod>(m, "SubspaceMethod",
+        "Weighting variant for subspace_id(). MOESP reproduces n4sid() exactly.")
+        .value("MOESP", ctrl::SubspaceMethod::MOESP)
+        .value("N4SID", ctrl::SubspaceMethod::N4SID)
+        .value("CVA",   ctrl::SubspaceMethod::CVA);
+
+    m.def("subspace_id",
+          &ctrl::subspaceID,
+          py::arg("Y"), py::arg("U"),
+          py::arg("n_order"), py::arg("i_horizon"), py::arg("Ts"),
+          py::arg("method") = ctrl::SubspaceMethod::MOESP,
+          py::arg("svd_tol") = -1.0,
+          R"doc(
+Batch subspace state-space identification with a choice of weighting (MOESP/N4SID/CVA).
+
+method=MOESP reproduces n4sid() exactly. N4SID right-weights the past data block by its
+Uf-conditioned covariance. CVA additionally weights each output channel by an estimated
+noise scale -- helps when output channels have very different noise levels.
+
+Parameters
+----------
+Y         : Output data (p x N) - rows=outputs, cols=time.
+U         : Input data  (m x N) - rows=inputs,  cols=time.
+n_order   : Desired model order.  Choose by inspecting result.singular_values.
+i_horizon : Block-row count (recommend >= 2*n_order/p, minimum n_order+1).
+Ts        : Sample time [s].
+method    : ctrl.SubspaceMethod.MOESP / .N4SID / .CVA (default MOESP).
+svd_tol   : SVD truncation floor (pass -1 to disable).
+
+Returns SubspaceIDResult. Check result.success before using result.get_model().
+
+Example
+-------
+>>> res = ctrl.subspace_id(Y, U, n_order=2, i_horizon=10, Ts=0.01, method=ctrl.SubspaceMethod.CVA)
+)doc");
 #endif  // CTRL_HAS_SUBSPACE
 
     // -----------------------------------------------------------------------

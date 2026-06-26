@@ -5,7 +5,7 @@ statement must be a non-finite guard (std::isfinite(...) check or ctrl::sanitize
 
 This is a heuristic source scan, not a C++ parser -- like tools/mu_analysis.py's
 column-name heuristic, it trades perfect precision for being cheap and catching real
-regressions. Two kinds of exception are built in:
+regressions. Three kinds of exception are built in:
   - A compute() body whose first statement delegates to another compute()-like call
     (directly returned, e.g. DiscreteADRC -> computeTracking(), or assigned to a local,
     e.g. AdaptiveSmithPredictor -> sp_->compute()) is exempt: the guard is expected to
@@ -14,6 +14,13 @@ regressions. Two kinds of exception are built in:
     compute() fans out to multiple already-guarded inner IController::compute() calls
     in a switch/loop, so the safety guarantee is transitive rather than visible as a
     single first statement.
+  - _EXEMPT_INTERFACE_GUARD_CLASSES below: classes whose compute(double) first
+    statement is a *usage*-contract guard (wrong overload for the current
+    configuration), not a numeric-safety check, e.g. NeuralNetworkController::compute
+    rejecting calls when n_input_features != 1 (the real isfinite guard is the very
+    next statement), or PassivityBasedController::compute unconditionally throwing
+    because it is MIMO-only (no value is ever returned on that path, so there is
+    nothing to guard).
 
 Usage:
     python tools/check_nan_guard.py
@@ -31,7 +38,7 @@ _ROOT = Path(__file__).resolve().parent.parent
 _LIB = _ROOT / "lib"
 
 _SIG_RE = re.compile(r"\b(\w+)::compute\s*\(\s*double\b")
-_GUARD_RE = re.compile(r"isfinite|ctrl::sanitize|sanitize\(")
+_GUARD_RE = re.compile(r"isfinite|allFinite|ctrl::sanitize|sanitize\(")
 # return otherFunction(...);  OR  <decl> = obj->compute(...);  /  <decl> = obj.compute(...);
 _DELEGATION_RE = re.compile(
     r"^\s*return\s+\w+\s*\(.*\)\s*;\s*$"
@@ -42,6 +49,10 @@ _DELEGATION_RE = re.compile(
 # inner IController::compute() calls (switch/loop), so no single first-statement guard
 # applies. See module docstring.
 _EXEMPT_CLASSES = {"ControllerStack"}
+
+# Classes whose compute(double) leads with a usage-contract guard (wrong overload for
+# the current configuration) rather than a numeric-safety check. See module docstring.
+_EXEMPT_INTERFACE_GUARD_CLASSES = {"NeuralNetworkController", "PassivityBasedController"}
 
 
 def _find_body(text: str, brace_start: int) -> str:
@@ -70,7 +81,7 @@ def check_file(path: Path) -> list[str]:
     violations = []
     for m in _SIG_RE.finditer(text):
         class_name = m.group(1)
-        if class_name in _EXEMPT_CLASSES:
+        if class_name in _EXEMPT_CLASSES or class_name in _EXEMPT_INTERFACE_GUARD_CLASSES:
             continue
         brace_pos = text.find("{", m.end())
         if brace_pos == -1:

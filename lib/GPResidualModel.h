@@ -113,6 +113,9 @@ public:
     /** @brief True if fit() has been called with at least one data point. */
     bool isFitted()                 const { return gp_.isFitted(); }
 
+    /** @brief Input feature dimension of the underlying GP. */
+    int xDim()                      const { return gp_.xDim(); }
+
     /** @brief Clear all stored data and reset the GP. */
     void reset();
 

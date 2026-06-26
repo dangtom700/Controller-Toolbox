@@ -178,6 +178,8 @@ void NonlinearMPC::buildAndSolve()
         ub_qp_.segment(k * m, m) -= U_warm_.col(k);
     }
 
+    tightenStepBounds(); // no-op in NonlinearMPC itself; overridden by GPMPC etc.
+
     // Lipschitz constant and LDLT (must be recomputed each RTI step)
     L_qp_ = H_qp_.selfadjointView<Eigen::Upper>().eigenvalues().maxCoeff();
     if (L_qp_ < 1e-12) L_qp_ = 1.0; // guard against degenerate H

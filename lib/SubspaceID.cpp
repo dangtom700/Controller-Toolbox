@@ -24,14 +24,15 @@ Eigen::MatrixXd buildHankel(const Eigen::MatrixXd &data, int i)
 } // namespace
 
 // ---------------------------------------------------------------------------
-// n4sid - MOESP oblique-projection subspace identification
+// subspaceID - MOESP / N4SID / CVA subspace identification
 // ---------------------------------------------------------------------------
-SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
-                       const Eigen::MatrixXd &U,
-                       int n_order,
-                       int i,
-                       double Ts,
-                       double svd_tol)
+SubspaceIDResult subspaceID(const Eigen::MatrixXd &Y,
+                            const Eigen::MatrixXd &U,
+                            int n_order,
+                            int i,
+                            double Ts,
+                            SubspaceMethod method,
+                            double svd_tol)
 {
     SubspaceIDResult res;
     const int p = Y.rows(); // output dimension
@@ -126,11 +127,74 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
 
     // Extract L32: (r_yf * r_wp)
     const Eigen::MatrixXd L32 = L.block(r_uf + r_wp, r_uf, r_yf, r_wp);
+    const Eigen::MatrixXd L22 = L.block(r_uf, r_uf, r_wp, r_wp);
+    const Eigen::MatrixXd L33 = L.block(r_uf + r_wp, r_uf + r_wp, r_yf, r_yf);
 
     // ------------------------------------------------------------------
-    // Step 3: SVD of L32 to get extended observability matrix Gamma
+    // Step 3: weight L32 by method, then SVD to get extended observability
+    // matrix Gamma. See SubspaceID.h's subspaceID() docstring and
+    // docs/superpowers/specs/2026-06-25-subspace-id-variants-design.md for
+    // the full numerical reasoning (in particular why CVA uses a per-channel
+    // scalar weight rather than full canonical-variate matrix whitening).
+    //
+    //   MOESP: SVD(L32) directly (Verhaegen & Dewilde 1992 - no weighting).
+    //   N4SID: SVD(L32 * L22^-1) - L22 is already a valid Cholesky-style
+    //          square root of Sigma_{Wp|Uf} = L22*L22^T/s, so this is a
+    //          single triangular solve, not a full matrix inverse.
+    //   CVA:   SVD(diag(w) * L32 * L22^-1) - w is a per-output-channel
+    //          noise-scale weight derived from L33 (Yf's residual after
+    //          removing BOTH Uf and Wp, i.e. the unpredictable/noise part).
+    //          L33's rows are indexed 1:1 by Yf's own row layout (i
+    //          repeated blocks of p output channels), so per-channel
+    //          noise variance is the mean squared row norm over the i
+    //          repetitions.
     // ------------------------------------------------------------------
-    Eigen::JacobiSVD<Eigen::MatrixXd> svd(L32, Eigen::ComputeThinU | Eigen::ComputeThinV);
+    Eigen::MatrixXd M;
+    Eigen::VectorXd cva_w1; // per-row weight (length r_yf), populated only for CVA
+
+    if (method == SubspaceMethod::MOESP)
+    {
+        M = L32;
+    }
+    else
+    {
+        const double l22_max_diag = L22.diagonal().cwiseAbs().maxCoeff();
+        const double l22_min_diag = L22.diagonal().cwiseAbs().minCoeff();
+        if (l22_max_diag < 1e-300 || l22_min_diag < 1e-10 * l22_max_diag)
+        {
+            res.message = "Input excitation too weak for weighted subspace ID "
+                          "(L22 near-singular); check persistence of excitation.";
+            return res;
+        }
+
+        const Eigen::MatrixXd L22_inv =
+            L22.triangularView<Eigen::Lower>().solve(Eigen::MatrixXd::Identity(r_wp, r_wp));
+
+        if (method == SubspaceMethod::N4SID)
+        {
+            M = L32 * L22_inv;
+        }
+        else // CVA
+        {
+            Eigen::VectorXd noise_var = Eigen::VectorXd::Zero(p);
+            for (int r = 0; r < i; ++r)
+                for (int j = 0; j < p; ++j)
+                    noise_var(j) += L33.row(r * p + j).squaredNorm();
+            noise_var /= static_cast<double>(i);
+
+            const double floor_val = 1e-12 * std::max(noise_var.maxCoeff(), 1e-300);
+            noise_var = noise_var.cwiseMax(floor_val);
+            const Eigen::VectorXd sigma = noise_var.cwiseSqrt();
+
+            cva_w1.resize(r_yf);
+            for (int r = 0; r < i; ++r)
+                cva_w1.segment(r * p, p) = sigma.cwiseInverse();
+
+            M = (cva_w1.asDiagonal() * L32) * L22_inv;
+        }
+    }
+
+    Eigen::JacobiSVD<Eigen::MatrixXd> svd(M, Eigen::ComputeThinU | Eigen::ComputeThinV);
     res.singularValues = svd.singularValues();
 
     if (svd_tol > 0.0)
@@ -153,7 +217,9 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
 
     // Gamma: (i*p * n)
     const Eigen::VectorXd S_sqrt = svd.singularValues().head(n_order).cwiseSqrt();
-    const Eigen::MatrixXd Gamma  = svd.matrixU().leftCols(n_order) * S_sqrt.asDiagonal();
+    Eigen::MatrixXd Gamma = svd.matrixU().leftCols(n_order) * S_sqrt.asDiagonal();
+    if (method == SubspaceMethod::CVA)
+        Gamma = cva_w1.cwiseInverse().asDiagonal() * Gamma; // undo per-channel left weighting
 
     // ------------------------------------------------------------------
     // Step 4: extract C and A from shift invariance of Gamma
@@ -268,6 +334,16 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
     res.model   = std::make_optional<StateSpace>(A, B, C, D, Ts);
     res.success = true;
     return res;
+}
+
+SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
+                       const Eigen::MatrixXd &U,
+                       int n_order,
+                       int i_horizon,
+                       double Ts,
+                       double svd_tol)
+{
+    return subspaceID(Y, U, n_order, i_horizon, Ts, SubspaceMethod::MOESP, svd_tol);
 }
 
 // ---------------------------------------------------------------------------

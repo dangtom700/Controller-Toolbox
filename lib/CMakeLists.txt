@@ -82,6 +82,7 @@ set(CTRL_CORE_SOURCES
     PhaseLockedLoop.cpp
     CorrelationID.cpp
     SKFit.cpp
+    ComplexVectorFit.cpp
     LFTSystem.cpp
     BacksteppingController.cpp
     PassivityBasedController.cpp
@@ -94,6 +95,8 @@ set(CTRL_CORE_SOURCES
     ConstrainedTuning.cpp
     FaultClassifier.cpp
     FTCSupervisor.cpp
+    GPMPC.cpp
+    ValueIterationSolver.cpp
 )
 
 # --- Optional sources --------------------------------------------------------

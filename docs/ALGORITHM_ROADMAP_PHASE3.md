@@ -1,8 +1,8 @@
 # Controller Toolbox — Algorithm Roadmap: Phase 3
 
 **Created:** 2026-06-24.
-**Status:** Planning — 20 of 32 items shipped (Phase 1 and Phase 2 complete; Phase 3 partial:
-ML1/ML2/NC3/SI4 done, SI3/FD2/ML3 open).
+**Status:** Planning — 23 of 32 items shipped (Phase 1, Phase 2, and Phase 3 complete:
+ML1/ML2/NC3/SI4/SI3/ML3/FD2 all done).
 **Pre-implementation audit (2026-06-25):** open items SI3, ML3, ML4, RC2, and DT1 had
 "Reused components"/effort claims checked against the actual current code; SI3/ML3/ML4 each have
 a real gap and RC2 has been re-sequenced. See "Pre-Implementation Audit Findings" near the end of
@@ -47,11 +47,11 @@ sketches here are directional (to scope effort and reuse), not committed APIs.
 | DT4 | Fault-Tolerant Control Reconfiguration | 2 | Done |
 | ML1 | NN Controller Core (direct NN architectures) | 3 | Done |
 | ML2 | NN-Adaptive Control (depends on ML1) | 3 | Done |
-| SI3 | MOESP / CVA Subspace ID Variants | 3 | Open |
+| SI3 | MOESP / CVA Subspace ID Variants | 3 | Done |
 | SI4 | NARMAX | 3 | Done |
-| FD2 | Complex-Conjugate-Pole Vector Fitting | 3 | Open |
+| FD2 | Complex-Conjugate-Pole Vector Fitting | 3 | Done |
 | NC3 | Nonlinear Internal Model Control | 3 | Done |
-| ML3 | GP-MPC | 3 | Open |
+| ML3 | GP-MPC | 3 | Done |
 | OC2 | Dynamic Programming / Value Iteration | 4 | Open |
 | OC4 | Linear-Programming-Based Control | 4 | Open |
 | DT1 | Code Generation | 4 | Open |

@@ -137,6 +137,7 @@
 #include "GPResidualModel.h"            ///< GPResidualModel - learn model-plant mismatch epsilon=y_true-y_model as GP; risk-aware MPC correction (E3).
 #include "HybridModel.h"               ///< HybridModel - plant combining physical ODE (RK4) + data-driven state correction f_data(x,u) (H1).
 #include "HybridMPC.h"                 ///< HybridMPC - NonlinearMPC variant using HybridModel; online ridge-regression data update every N steps (H2).
+#include "GPMPC.h"                     ///< GPMPC - GP-uncertainty-aware input-bound tightening for NonlinearMPC (ML3).
 #include "HybridModelTrainer.h"        ///< HybridModelTrainer - off-line trainer for f_data: Ridge / GP marginal / ESN cross-validation (H4).
 #include "VectorFitting.h"             ///< VectorFitting - SK iterative rational magnitude fitting; used by DiscreteHinf::solveMuSyn (T3 full DK-iteration).
 #include "BasicPID.h"                  ///< BasicPID<Scalar> - header-only template PID for embedded/float targets; no virtual dispatch, no Eigen (M4).
@@ -153,6 +154,8 @@
 #include "PhaseLockedLoop.h"          ///< PhaseLockedLoop - single-input SOGI-PLL phase/frequency estimator; no IController base.
 #include "CorrelationID.h"            ///< CorrelationID - cross-correlation impulse-response identification (Phase 3 SI2).
 #include "SKFit.h"                    ///< SKFit - Sanathanan-Koerner-reweighted complex-response fitting (Phase 3 FD1).
+#include "ComplexVectorFit.h"        ///< ComplexVectorFit - complex-conjugate-pole Vector Fitting (Phase 3 FD2).
+#include "ValueIterationSolver.h"    ///< ValueIterationSolver - grid-based dynamic programming / value iteration (Phase 4 OC2).
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,

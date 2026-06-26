@@ -1,5 +1,6 @@
 #include "FTCSupervisor.h"
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 namespace ctrl
@@ -37,6 +38,9 @@ void FTCSupervisor::feedResidual(double innovation, double u_cmd, double y_meas)
 
 double FTCSupervisor::compute(double error)
 {
+    if (!std::isfinite(error))
+        return u_prev_;
+
     // Only reconfigure when the newly classified fault has a *registered* response. A heuristic
     // classifier reading a noisy/small-sample residual window can transiently report a fault
     // type nobody registered a response for (e.g. SensorNoise/ActuatorLoss blips while the real
@@ -57,6 +61,7 @@ double FTCSupervisor::compute(double error)
         everApplied_ = true;
     }
     const double u = stack_->compute(error);
+    u_prev_ = u;
     notifyObserver(u, error);
     return u;
 }
@@ -68,6 +73,7 @@ void FTCSupervisor::reset()
     currentFault_ = FaultType::None;
     lastApplied_ = FaultType::None;
     everApplied_ = false;
+    u_prev_ = 0.0;
     notifyObserverReset();
 }
 

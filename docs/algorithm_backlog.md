@@ -85,10 +85,15 @@ and [2026-06-25-ftc-reconfiguration-design.md](superpowers/specs/2026-06-25-ftc-
 | Full neural-network adaptive control | `lib/NNAdaptiveController.h`/`.cpp` (inherits ML1; online output-layer adaptation via Lyapunov + sigma-modification, mirroring `MRACController`) — Phase 3 ML2, `examples/ex109_nn_adaptive_control.cpp`. See `docs/cumulative_bug_report.md` Part 69. |
 | Nonlinear Internal Model Control | `lib/NonlinearIMC.h`/`.cpp` (nonlinear analogue of `SmithPredictor`'s model-in-the-loop structure; parallel one-step model + inverse + mismatch feedback) — Phase 3 NC3, `examples/ex110_nonlinear_imc.cpp`. See `docs/cumulative_bug_report.md` Part 69. |
 | NARMAX | `lib/NARMAXIdentifier.h`/`.cpp` (polynomial NARMAX via Orthogonal Forward Regression / Error Reduction Ratio term selection, Extended Least Squares for noise terms) — Phase 3 SI4, `examples/ex111_narmax.cpp`. See `docs/cumulative_bug_report.md` Part 69. |
+| MOESP / CVA (subspace ID variants) | `lib/SubspaceID.h`/`.cpp` (`SubspaceMethod` enum + `subspaceID()`; `n4sid()` becomes a delegating one-liner at `SubspaceMethod::MOESP`) — Phase 3 SI3, `examples/ex112_subspace_id_variants.cpp`. See [2026-06-25-subspace-id-variants-design.md](superpowers/specs/2026-06-25-subspace-id-variants-design.md). |
+| GP-MPC (combined) | `lib/GPMPC.h`/`.cpp` (inherits `NonlinearMPC`; tightens input bounds per RTI step proportional to `GPResidualModel`'s predicted variance, via a new protected `tightenStepBounds()` hook added to `NonlinearMPC`) — Phase 3 ML3, `examples/ex113_gp_mpc.cpp`. See [2026-06-25-gp-mpc-design.md](superpowers/specs/2026-06-25-gp-mpc-design.md). |
+| Complex-conjugate-pole Vector Fitting | `lib/ComplexVectorFit.h`/`.cpp` (generalizes `VectorFitting`'s pole-relocation SK loop to a complex magnitude+phase target with complex-conjugate pole pairs; explicit pole/residue diagnostics) — Phase 3 FD2, `examples/ex114_complex_vector_fit.cpp`. See [2026-06-25-complex-vector-fit-design.md](superpowers/specs/2026-06-25-complex-vector-fit-design.md). |
 
-**Shipped:** `ALGORITHM_ROADMAP_PHASE3.md` Phase 3 partial (4 designs: ML1, ML2, NC3, SI4),
-see `docs/cumulative_bug_report.md` Part 69. SI3 (MOESP/CVA), FD2 (complex-pole Vector Fitting),
-and ML3 (GP-MPC) remain open.
+**Shipped:** `ALGORITHM_ROADMAP_PHASE3.md` Phase 3 **complete** (7 designs: ML1, ML2, NC3, SI4,
+SI3, ML3, FD2), see `docs/cumulative_bug_report.md` Part 69,
+[2026-06-25-subspace-id-variants-design.md](superpowers/specs/2026-06-25-subspace-id-variants-design.md),
+[2026-06-25-gp-mpc-design.md](superpowers/specs/2026-06-25-gp-mpc-design.md), and
+[2026-06-25-complex-vector-fit-design.md](superpowers/specs/2026-06-25-complex-vector-fit-design.md).
 
 ---
 
@@ -119,12 +124,10 @@ Internal Model Control are **done** — see the "Already done" table above
 ## System Identification
 
 Correlation-based identification, Hammerstein-Wiener models, Maximum Likelihood / MAP
-identification, and NARMAX are **done** — see the "Already done" table above (`lib/CorrelationID.h`,
-`lib/HammersteinWienerIdentifier.h`, `lib/MLEIdentifier.h`, `lib/NARMAXIdentifier.h`). What's left:
-
-| Item | Notes |
-|---|---|
-| MOESP / CVA (subspace ID variants) | `lib/SubspaceID.h` only implements N4SID-style identification today. |
+identification, NARMAX, and MOESP/CVA subspace ID variants are **done** — see the "Already
+done" table above (`lib/CorrelationID.h`, `lib/HammersteinWienerIdentifier.h`,
+`lib/MLEIdentifier.h`, `lib/NARMAXIdentifier.h`, `lib/SubspaceID.h`). Nothing left in this
+category.
 
 ## Frequency-Domain Identification Extensions (follow-ups to Phase 4 Iteration 2)
 
@@ -136,12 +139,9 @@ shipped as stubbed/non-functional code, per this repo's "no half-finished implem
 rule — **note both already exist in a narrower form** (see the "Already done" table above:
 `lib/VectorFitting.h`, real-pole/magnitude-only, built for `DiscreteHinf::solveMuSyn`):
 
-Generalizing SK iteration to full complex-response fitting is **done** — see the "Already
-done" table above (`lib/SKFit.h`). What's left:
-
-| Item | Notes |
-|---|---|
-| Complex-conjugate-pole Vector Fitting | `VectorFitting::fitMagnitude` only places real poles, so it can't represent resonant/lightly-damped systems. A general Vector Fitting with complex-conjugate pole-pair bookkeeping and relocation logic is more robust for those cases than Levy/SK, but a materially bigger lift — its own design pass, not a quick extension. |
+Generalizing SK iteration to full complex-response fitting, and complex-conjugate-pole Vector
+Fitting, are both **done** — see the "Already done" table above (`lib/SKFit.h`,
+`lib/ComplexVectorFit.h`). No items remain open in this category.
 
 ## Optimal Control
 
@@ -172,12 +172,11 @@ the "Already done" table above (`lib/HinfFilter.h`, `lib/SetMembershipEstimator.
 
 ## Machine Learning Integration
 
-Direct neural-network controller architectures are **done** — see the "Already done" table
-above (`lib/NeuralNetworkController.h`). What's left:
+Direct neural-network controller architectures and GP-MPC are **done** — see the "Already
+done" table above (`lib/NeuralNetworkController.h`, `lib/GPMPC.h`). What's left:
 
 | Item | Notes |
 |---|---|
-| GP-MPC (combined) | `GaussianProcess`/`GPResidualModel` and `NonlinearMPC`/`TubeMPC` exist separately; a controller that consumes GP uncertainty directly in the MPC cost/constraints is still open (`ALGORITHM_ROADMAP_PHASE2.md` flagged this as the motivation for hybrid models — partially addressed by `HybridMPC`, but not GP-uncertainty-aware MPC specifically). |
 | Deep reinforcement learning | Explicitly deferred already in `ALGORITHM_ROADMAP_PHASE2.md` ("Full RL framework... no C++ RL core needed" — Python example only, same reasoning likely applies here). |
 
 ## Deployment & Real-Time Tools

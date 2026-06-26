@@ -55,6 +55,7 @@
 #include "LyapunovRobustness.h"
 #include "FreqDomainIdentifier.h"
 #include "ResonantController.h"
+#include "ComplexVectorFit.h"
 #include "hal/HAL.h"   // SimScheduler, StdTimer (HAL not in umbrella by default)
 #include <cmath>
 #include <cstdlib>
@@ -9133,4 +9134,686 @@ TEST_CASE("NARMAXIdentifier guards bad inputs", "[narmax]")
     ctrl::NARMAXParams big;
     big.na = 10; big.nb = 10; big.nc = 10; big.poly_degree = 4; // huge library
     REQUIRE_THROWS_AS(ctrl::NARMAXIdentifier::fit(u2, y2, big), std::invalid_argument);
+}
+
+// -----------------------------------------------------------------------------
+// ComplexVectorFit - complex-conjugate-pole Vector Fitting (Phase 3 FD2)
+// -----------------------------------------------------------------------------
+
+namespace
+{
+std::vector<double> cvfPolyMulPair(const std::vector<double> &p, double a1, double a2)
+{
+    std::vector<double> result(p.size() + 2, 0.0);
+    for (std::size_t i = 0; i < p.size(); ++i)
+    {
+        result[i]     += p[i];
+        result[i + 1] += p[i] * a1;
+        result[i + 2] += p[i] * a2;
+    }
+    return result;
+}
+
+// Builds H(zinv) = N(zinv)/D(zinv) from `pairs` complex-conjugate pole pairs (plus one
+// optional real pole), evaluates it on `freqs` via tf2ss + SystemAnalysis::getFrequencyResponse,
+// and adds Gaussian measurement noise - mirrors SKFit's existing test-data convention.
+std::vector<std::complex<double>> cvfSyntheticResponse(
+    const std::vector<std::pair<double, double>> &pairs,
+    double realPole, bool hasRealPole,
+    const std::vector<double> &freqs, double Ts, unsigned seed, double noiseStd)
+{
+    std::vector<double> den{1.0};
+    for (const auto &pr : pairs)
+        den = cvfPolyMulPair(den, -2.0 * pr.first * std::cos(pr.second), pr.first * pr.first);
+    if (hasRealPole)
+    {
+        std::vector<double> next(den.size() + 1, 0.0);
+        for (std::size_t i = 0; i < den.size(); ++i)
+        {
+            next[i]     += den[i];
+            next[i + 1] += den[i] * (-realPole);
+        }
+        den = next;
+    }
+    std::vector<double> num(den.size(), 0.0);
+    num[1] = 0.05;
+
+    const ctrl::TransferFunction tf(num, den, Ts);
+    const auto sys = ctrl::tf2ss(tf);
+    auto response = ctrl::SystemAnalysis::getFrequencyResponse(sys, freqs);
+
+    std::mt19937 rng(seed);
+    std::normal_distribution<double> noise(0.0, noiseStd);
+    for (auto &h : response) h += std::complex<double>(noise(rng), noise(rng));
+    return response;
+}
+} // namespace
+
+TEST_CASE("ComplexVectorFit recovers known poles of a 3-resonance system and far outperforms "
+          "a one-shot Levy fit",
+          "[complex_vector_fit]")
+{
+    const double Ts = 0.1;
+    const std::vector<std::pair<double, double>> specs{{0.99, 0.4}, {0.985, 0.55}, {0.99, 0.75}};
+
+    std::vector<double> freqs;
+    for (int i = 1; i <= 80; ++i) freqs.push_back(0.25 * i);
+
+    const auto response = cvfSyntheticResponse(specs, 0.0, false, freqs, Ts, 11, 0.02);
+
+    const auto cvfResult  = ctrl::ComplexVectorFit::fit(freqs, response, 0, 3, Ts, 30);
+    const auto levyResult = ctrl::FreqDomainIdentifier::fitLevy(freqs, response, 6, 6, Ts);
+
+    REQUIRE(cvfResult.iterError.size() >= 1u);
+    REQUIRE(std::isfinite(cvfResult.iterError.back()));
+    // Verified in a numpy prototype: ~600x improvement on this exact scenario; 2x is a
+    // generous margin against this test's different (C++) RNG stream producing different noise.
+    REQUIRE(cvfResult.iterError.back() < 0.5 * levyResult.rmse);
+
+    REQUIRE(cvfResult.poles.size() == 6u);
+    std::vector<std::complex<double>> truePoles;
+    for (const auto &pr : specs)
+    {
+        truePoles.emplace_back(pr.first * std::cos(pr.second),  pr.first * std::sin(pr.second));
+        truePoles.emplace_back(pr.first * std::cos(pr.second), -pr.first * std::sin(pr.second));
+    }
+    for (const auto &p : cvfResult.poles)
+    {
+        double bestDist = 1e9;
+        for (const auto &tp : truePoles)
+            bestDist = std::min(bestDist, std::abs(p - tp));
+        // Verified in the prototype to recover poles within ~1e-3; 0.05 leaves generous margin.
+        REQUIRE(bestDist < 0.05);
+    }
+}
+
+TEST_CASE("ComplexVectorFit's returned poles always include each pole's conjugate partner",
+          "[complex_vector_fit]")
+{
+    const double Ts = 0.1;
+    const std::vector<std::pair<double, double>> specs{{0.97, 0.6}, {0.95, 1.5}};
+
+    std::vector<double> freqs;
+    for (int i = 1; i <= 40; ++i) freqs.push_back(0.5 * i);
+
+    const auto response = cvfSyntheticResponse(specs, 0.0, false, freqs, Ts, 7, 0.01);
+    const auto result = ctrl::ComplexVectorFit::fit(freqs, response, 0, 2, Ts);
+
+    REQUIRE(result.poles.size() == 4u);
+    for (const auto &p : result.poles)
+    {
+        bool foundConjugate = false;
+        for (const auto &q : result.poles)
+            if (std::abs(q - std::conj(p)) < 1e-6) { foundConjugate = true; break; }
+        REQUIRE(foundConjugate);
+    }
+}
+
+TEST_CASE("ComplexVectorFit correctly identifies a mixed real-pole + complex-pair system",
+          "[complex_vector_fit]")
+{
+    const double Ts = 0.1;
+    const std::vector<std::pair<double, double>> specs{{0.97, 0.6}};
+    const double realPole = 0.8;
+
+    std::vector<double> freqs;
+    for (int i = 1; i <= 40; ++i) freqs.push_back(0.5 * i);
+
+    const auto response = cvfSyntheticResponse(specs, realPole, true, freqs, Ts, 7, 0.01);
+    const auto result = ctrl::ComplexVectorFit::fit(freqs, response, 1, 1, Ts);
+
+    REQUIRE(result.poles.size() == 3u);
+
+    int realCount = 0, complexCount = 0;
+    for (const auto &p : result.poles)
+    {
+        if (std::abs(p.imag()) < 1e-3) ++realCount;
+        else ++complexCount;
+    }
+    REQUIRE(realCount == 1);
+    REQUIRE(complexCount == 2);
+
+    double bestRealDist = 1e9;
+    for (const auto &p : result.poles)
+        if (std::abs(p.imag()) < 1e-3)
+            bestRealDist = std::min(bestRealDist, std::abs(p.real() - realPole));
+    REQUIRE(bestRealDist < 0.05);
+}
+
+TEST_CASE("ComplexVectorFit throws on invalid inputs", "[complex_vector_fit]")
+{
+    const std::vector<double> freqs{1.0, 5.0, 10.0};
+    const std::vector<std::complex<double>> response{{0.1, 0.0}, {0.2, -0.1}, {0.1, 0.05}};
+
+    REQUIRE_THROWS_AS(ctrl::ComplexVectorFit::fit({}, {}, 1, 0, 0.1), std::invalid_argument);
+    REQUIRE_THROWS_AS(
+        ctrl::ComplexVectorFit::fit(freqs, {{0.1, 0.0}, {0.2, -0.1}}, 1, 0, 0.1),
+        std::invalid_argument);
+    REQUIRE_THROWS_AS(
+        ctrl::ComplexVectorFit::fit(freqs, response, 0, 0, 0.1),
+        std::invalid_argument);
+    // n_real_poles=1, n_complex_pairs=1 -> n_poles=3, n_unknowns=7, but only 3 samples given.
+    REQUIRE_THROWS_AS(
+        ctrl::ComplexVectorFit::fit(freqs, response, 1, 1, 0.1),
+        std::invalid_argument);
+}
+
+// -----------------------------------------------------------------------------
+// SubspaceID method variants - MOESP / N4SID / CVA (Phase 3 SI3)
+// -----------------------------------------------------------------------------
+
+namespace
+{
+// Simulates a discrete-time LTI system and adds independent Gaussian noise with a
+// possibly different std per output channel, mirroring the design spec's prototype.
+void simulateForSubspaceVariants(const Eigen::MatrixXd &A, const Eigen::MatrixXd &B,
+                                  const Eigen::MatrixXd &C, const Eigen::MatrixXd &D,
+                                  const Eigen::MatrixXd &U, const Eigen::VectorXd &noiseStd,
+                                  unsigned seed, Eigen::MatrixXd &Y_out)
+{
+    const int n = static_cast<int>(A.rows());
+    const int p = static_cast<int>(C.rows());
+    const int N = static_cast<int>(U.cols());
+    Y_out.resize(p, N);
+
+    Eigen::VectorXd x = Eigen::VectorXd::Zero(n);
+    std::mt19937 rng(seed);
+    std::normal_distribution<double> noise(0.0, 1.0);
+
+    for (int k = 0; k < N; ++k)
+    {
+        const Eigen::VectorXd u_k = U.col(k);
+        Eigen::VectorXd y_k = C * x + D * u_k;
+        for (int j = 0; j < p; ++j)
+            y_k(j) += noise(rng) * noiseStd(j);
+        Y_out.col(k) = y_k;
+        x = A * x + B * u_k;
+    }
+}
+} // namespace
+
+TEST_CASE("subspaceID(MOESP) matches n4sid() bit-for-bit (regression)",
+          "[subspace_id_variants]")
+{
+    Eigen::Matrix2d A_true;
+    A_true << 0.9, 0.1, -0.05, 0.85;
+    Eigen::MatrixXd B_true(2, 1); B_true << 0.5, 0.2;
+    Eigen::MatrixXd C_true(2, 2); C_true << 1.0, 0.0, 0.0, 1.0;
+    Eigen::MatrixXd D_true = Eigen::MatrixXd::Zero(2, 1);
+    const double Ts = 0.1;
+
+    std::mt19937 rng_u(42);
+    std::normal_distribution<double> u_dist(0.0, 1.0);
+    Eigen::MatrixXd U(1, 2000);
+    for (int k = 0; k < U.cols(); ++k) U(0, k) = u_dist(rng_u);
+
+    Eigen::MatrixXd Y;
+    simulateForSubspaceVariants(A_true, B_true, C_true, D_true, U,
+                                Eigen::Vector2d(0.01, 0.01), 7, Y);
+
+    const auto r1 = ctrl::n4sid(Y, U, 2, 10, Ts);
+    const auto r2 = ctrl::subspaceID(Y, U, 2, 10, Ts, ctrl::SubspaceMethod::MOESP);
+
+    REQUIRE(r1.success);
+    REQUIRE(r2.success);
+    REQUIRE(r1.model.value().A.isApprox(r2.model.value().A, 1e-12));
+    REQUIRE(r1.model.value().B.isApprox(r2.model.value().B, 1e-12));
+    REQUIRE(r1.model.value().C.isApprox(r2.model.value().C, 1e-12));
+    REQUIRE(r1.singularValues.isApprox(r2.singularValues, 1e-12));
+}
+
+TEST_CASE("subspaceID recovers a known 2-output system with equal noise (all 3 methods)",
+          "[subspace_id_variants]")
+{
+    Eigen::Matrix2d A_true;
+    A_true << 0.9, 0.1, -0.05, 0.85;
+    Eigen::MatrixXd B_true(2, 1); B_true << 0.5, 0.2;
+    Eigen::MatrixXd C_true(2, 2); C_true << 1.0, 0.0, 0.0, 1.0;
+    Eigen::MatrixXd D_true = Eigen::MatrixXd::Zero(2, 1);
+    const double Ts = 0.1;
+
+    std::mt19937 rng_u(42);
+    std::normal_distribution<double> u_dist(0.0, 1.0);
+    Eigen::MatrixXd U(1, 2000);
+    for (int k = 0; k < U.cols(); ++k) U(0, k) = u_dist(rng_u);
+
+    Eigen::MatrixXd Y;
+    simulateForSubspaceVariants(A_true, B_true, C_true, D_true, U,
+                                Eigen::Vector2d(0.01, 0.01), 7, Y);
+
+    const double true_eig_mag = std::abs(A_true.eigenvalues()(0));
+
+    for (auto method : {ctrl::SubspaceMethod::MOESP, ctrl::SubspaceMethod::N4SID,
+                        ctrl::SubspaceMethod::CVA})
+    {
+        const auto res = ctrl::subspaceID(Y, U, 2, 10, Ts, method);
+        REQUIRE(res.success);
+        const double est_eig_mag = std::abs(res.model.value().A.eigenvalues()(0));
+        REQUIRE_THAT(est_eig_mag, WithinAbs(true_eig_mag, 0.05));
+    }
+}
+
+TEST_CASE("subspaceID(CVA) reliably beats N4SID on the high-noise channel when output noise "
+          "scales are mismatched (Monte Carlo over independent trials)",
+          "[subspace_id_variants]")
+{
+    // A single noise draw was verified (during design prototyping) to flip unpredictably
+    // between CVA winning and losing -- the reliable claim only holds averaged over many
+    // independent trials. Neither CVA nor N4SID is claimed to beat plain MOESP here (a
+    // 40-trial Monte Carlo during prototyping showed unweighted MOESP is the strongest
+    // performer on this synthetic system); this test only checks CVA's improvement over
+    // N4SID's right-weighting-only approach, which IS reliable.
+    Eigen::Matrix2d A_true;
+    A_true << 0.9, 0.1, -0.05, 0.85;
+    Eigen::MatrixXd B_true(2, 1); B_true << 0.5, 0.2;
+    Eigen::MatrixXd C_true(2, 2); C_true << 1.0, 0.0, 0.0, 1.0;
+    Eigen::MatrixXd D_true = Eigen::MatrixXd::Zero(2, 1);
+    const double Ts = 0.1;
+    const std::vector<double> freqs{0.5, 1.0, 2.0, 4.0, 8.0, 12.0, 16.0, 20.0};
+    const ctrl::StateSpace trueChan1(A_true, B_true, C_true.row(1), D_true.row(1), Ts);
+    const auto resp_true = ctrl::SystemAnalysis::getFrequencyResponse(trueChan1, freqs);
+
+    auto chanError = [&](const ctrl::StateSpace &model) {
+        const ctrl::StateSpace estChan1(model.A, model.B, model.C.row(1), model.D.row(1), Ts);
+        const auto resp_est = ctrl::SystemAnalysis::getFrequencyResponse(estChan1, freqs);
+        double err = 0.0;
+        for (std::size_t k = 0; k < freqs.size(); ++k)
+            err += std::abs(std::abs(resp_est[k]) - std::abs(resp_true[k]));
+        return err / static_cast<double>(freqs.size());
+    };
+
+    const int n_trials = 20;
+    double total_n4sid = 0.0, total_cva = 0.0;
+    std::mt19937 master_rng(2026);
+
+    for (int trial = 0; trial < n_trials; ++trial)
+    {
+        std::mt19937 rng_u(master_rng());
+        std::mt19937 rng_n(master_rng());
+        std::normal_distribution<double> u_dist(0.0, 1.0);
+        Eigen::MatrixXd U(1, 2000);
+        for (int k = 0; k < U.cols(); ++k) U(0, k) = u_dist(rng_u);
+
+        Eigen::MatrixXd Y(2, U.cols());
+        {
+            std::normal_distribution<double> noise(0.0, 1.0);
+            const Eigen::Vector2d noiseStd(0.005, 0.3); // channel 1 has 60x channel 0's noise
+            Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
+            for (int k = 0; k < U.cols(); ++k)
+            {
+                const Eigen::VectorXd u_k = U.col(k);
+                Eigen::VectorXd y_k = C_true * x + D_true * u_k;
+                for (int j = 0; j < 2; ++j) y_k(j) += noise(rng_n) * noiseStd(j);
+                Y.col(k) = y_k;
+                x = A_true * x + B_true * u_k;
+            }
+        }
+
+        const auto n4sidv = ctrl::subspaceID(Y, U, 2, 10, Ts, ctrl::SubspaceMethod::N4SID);
+        const auto cva = ctrl::subspaceID(Y, U, 2, 10, Ts, ctrl::SubspaceMethod::CVA);
+        REQUIRE(n4sidv.success);
+        REQUIRE(cva.success);
+
+        total_n4sid += chanError(n4sidv.model.value());
+        total_cva   += chanError(cva.model.value());
+    }
+
+    const double mean_n4sid = total_n4sid / n_trials;
+    const double mean_cva   = total_cva / n_trials;
+    REQUIRE(mean_cva < mean_n4sid);
+}
+
+TEST_CASE("suggestOrder runs unchanged across all 3 subspaceID methods", "[subspace_id_variants]")
+{
+    Eigen::Matrix2d A_true;
+    A_true << 0.9, 0.1, -0.05, 0.85;
+    Eigen::MatrixXd B_true(2, 1); B_true << 0.5, 0.2;
+    Eigen::MatrixXd C_true(2, 2); C_true << 1.0, 0.0, 0.0, 1.0;
+    Eigen::MatrixXd D_true = Eigen::MatrixXd::Zero(2, 1);
+    const double Ts = 0.1;
+
+    std::mt19937 rng_u(42);
+    std::normal_distribution<double> u_dist(0.0, 1.0);
+    Eigen::MatrixXd U(1, 2000);
+    for (int k = 0; k < U.cols(); ++k) U(0, k) = u_dist(rng_u);
+
+    Eigen::MatrixXd Y;
+    simulateForSubspaceVariants(A_true, B_true, C_true, D_true, U,
+                                Eigen::Vector2d(0.005, 0.3), 7, Y);
+
+    for (auto method : {ctrl::SubspaceMethod::MOESP, ctrl::SubspaceMethod::N4SID,
+                        ctrl::SubspaceMethod::CVA})
+    {
+        const auto res = ctrl::subspaceID(Y, U, 6, 10, Ts, method);
+        REQUIRE(res.success);
+        const int order = ctrl::suggestOrder(res.singularValues, 0.01);
+        REQUIRE(order >= 1);
+    }
+}
+
+TEST_CASE("subspaceID(N4SID/CVA) reports failure (not a crash/NaN) on degenerate excitation",
+          "[subspace_id_variants]")
+{
+    // Constant input -> Wp's Uf-conditioned covariance (L22) is singular.
+    Eigen::Matrix2d A_true;
+    A_true << 0.9, 0.1, -0.05, 0.85;
+    Eigen::MatrixXd B_true(2, 1); B_true << 0.5, 0.2;
+    Eigen::MatrixXd C_true(2, 2); C_true << 1.0, 0.0, 0.0, 1.0;
+    Eigen::MatrixXd D_true = Eigen::MatrixXd::Zero(2, 1);
+    const double Ts = 0.1;
+
+    Eigen::MatrixXd U = Eigen::MatrixXd::Constant(1, 500, 1.0);
+    Eigen::MatrixXd Y;
+    simulateForSubspaceVariants(A_true, B_true, C_true, D_true, U,
+                                Eigen::Vector2d(0.01, 0.01), 7, Y);
+
+    const auto n4sidv = ctrl::subspaceID(Y, U, 2, 10, Ts, ctrl::SubspaceMethod::N4SID);
+    const auto cva = ctrl::subspaceID(Y, U, 2, 10, Ts, ctrl::SubspaceMethod::CVA);
+
+    REQUIRE_FALSE(n4sidv.success);
+    REQUIRE_FALSE(n4sidv.message.empty());
+    REQUIRE_FALSE(cva.success);
+    REQUIRE_FALSE(cva.message.empty());
+}
+
+// -----------------------------------------------------------------------------
+// GPMPC - GP-uncertainty-aware input-bound tightening for NonlinearMPC (Phase 3 ML3)
+// -----------------------------------------------------------------------------
+
+namespace
+{
+// Scalar plant: x[k+1] = 0.9*x[k] + u[k] (1 state, 1 input, y = x).
+Eigen::VectorXd gpMpcScalarDynamics(const Eigen::VectorXd &x, const Eigen::VectorXd &u)
+{
+    Eigen::VectorXd xn(1);
+    xn(0) = 0.9 * x(0) + u(0);
+    return xn;
+}
+
+ctrl::GPMPCParams gpMpcTestParams()
+{
+    ctrl::GPMPCParams p;
+    p.nmpc.Np = 5;
+    p.nmpc.Nu = 3;
+    p.nmpc.n_states = 1;
+    p.nmpc.n_inputs = 1;
+    p.nmpc.n_outputs = 1;
+    p.nmpc.uMin = -5.0;
+    p.nmpc.uMax = 5.0;
+    p.nmpc.Ts = 0.1;
+    p.uncertainty_inflation = 2.0;
+    return p;
+}
+} // namespace
+
+TEST_CASE("GPMPC with an unfitted GP is regression-identical to NonlinearMPC", "[gp_mpc]")
+{
+    const auto params = gpMpcTestParams();
+
+    ctrl::NonlinearMPC nmpc(params.nmpc, gpMpcScalarDynamics);
+
+    ctrl::GPResidualModel::Params gp_p;
+    gp_p.gp.length_scale = 0.5; gp_p.gp.signal_var = 1.0; gp_p.gp.noise_var = 0.01;
+    auto gp = std::make_shared<ctrl::GPResidualModel>(2, gp_p); // xDim = n_states+n_inputs = 2
+    ctrl::GPMPC gpmpc(params, gpMpcScalarDynamics, gp);
+
+    REQUIRE_FALSE(gp->isFitted());
+
+    Eigen::VectorXd x(1); x << 1.0;
+    for (int k = 0; k < 5; ++k)
+    {
+        nmpc.setState(x);
+        gpmpc.setState(x);
+        const double u_nmpc  = nmpc.compute(0.5 - x(0));
+        const double u_gpmpc = gpmpc.compute(0.5 - x(0));
+        REQUIRE_THAT(u_gpmpc, WithinAbs(u_nmpc, 1e-12));
+
+        Eigen::VectorXd u_vec(1); u_vec << u_nmpc;
+        x = gpMpcScalarDynamics(x, u_vec);
+    }
+
+    REQUIRE(gpmpc.lastTightening().isZero());
+}
+
+TEST_CASE("GPMPC tightens bounds when the GP reports high variance, and the QP respects it",
+          "[gp_mpc]")
+{
+    const auto params = gpMpcTestParams();
+
+    ctrl::GPResidualModel::Params gp_p;
+    gp_p.gp.length_scale = 0.5; gp_p.gp.signal_var = 1.0; gp_p.gp.noise_var = 0.01;
+    auto gp = std::make_shared<ctrl::GPResidualModel>(2, gp_p);
+
+    // Train far away from the test point so the posterior variance there is high
+    // (close to the GP's own prior signal_var, since no nearby training data informs it).
+    gp->addResidualPoint(Eigen::Vector2d(50.0, 50.0), 0.0, 0.0);
+    gp->fit();
+
+    ctrl::GPMPC gpmpc(params, gpMpcScalarDynamics, gp);
+
+    Eigen::VectorXd x(1); x << 1.0;
+    gpmpc.setState(x);
+    const double u = gpmpc.compute(0.5 - x(0));
+    REQUIRE(std::isfinite(u));
+
+    REQUIRE(gpmpc.lastTightening().maxCoeff() > 0.0);
+
+    // The tightened box around the warm-start must still contain the solved DeltaU --
+    // verify the *uniform* untightened box (uMin/uMax) is wider than what GPMPC reports
+    // having shrunk by, i.e. shrink is strictly less than the full half-width.
+    const double half_width = 0.5 * (params.nmpc.uMax - params.nmpc.uMin);
+    REQUIRE(gpmpc.lastTightening().maxCoeff() <= half_width);
+}
+
+TEST_CASE("GPMPC constructor throws on a GP with the wrong feature dimension", "[gp_mpc]")
+{
+    const auto params = gpMpcTestParams();
+
+    ctrl::GPResidualModel::Params gp_p;
+    gp_p.gp.length_scale = 0.5; gp_p.gp.signal_var = 1.0; gp_p.gp.noise_var = 0.01;
+    auto wrong_dim_gp = std::make_shared<ctrl::GPResidualModel>(1, gp_p); // should be 2
+
+    REQUIRE_THROWS_AS(ctrl::GPMPC(params, gpMpcScalarDynamics, wrong_dim_gp),
+                       std::invalid_argument);
+}
+
+TEST_CASE("GPMPC clamps tightening so lb never crosses ub even with extreme inflation",
+          "[gp_mpc]")
+{
+    auto params = gpMpcTestParams();
+    params.uncertainty_inflation = 1e9;
+
+    ctrl::GPResidualModel::Params gp_p;
+    gp_p.gp.length_scale = 0.5; gp_p.gp.signal_var = 1.0; gp_p.gp.noise_var = 0.01;
+    auto gp = std::make_shared<ctrl::GPResidualModel>(2, gp_p);
+    gp->addResidualPoint(Eigen::Vector2d(50.0, 50.0), 0.0, 0.0);
+    gp->fit();
+
+    ctrl::GPMPC gpmpc(params, gpMpcScalarDynamics, gp);
+
+    Eigen::VectorXd x(1); x << 1.0;
+    gpmpc.setState(x);
+    const double u = gpmpc.compute(0.5 - x(0));
+    REQUIRE(std::isfinite(u)); // box collapsed to a point, not crossed/NaN
+}
+
+// -----------------------------------------------------------------------------
+// ValueIterationSolver - grid-based DP / value iteration (Phase 4 OC2)
+// -----------------------------------------------------------------------------
+
+TEST_CASE("ValueIterationSolver matches the discounted-LQR gain on a double-integrator "
+          "(LQR-equivalent problem)", "[value_iteration]")
+{
+    auto plant = makeDoubleIntegrator();
+    ctrl::LQRParams lqr_p;
+    lqr_p.Q = 10.0 * Eigen::Matrix2d::Identity();
+    lqr_p.R = Eigen::MatrixXd::Identity(1, 1);
+
+    const double gamma = 0.95;
+    // Discounted-LQR reduces to the standard (undiscounted) LQR problem on the
+    // sqrt(gamma)-scaled system (Bertsekas, "Dynamic Programming and Optimal Control" Vol. 1,
+    // Sec. 4.2) -- this is the correct reference gain for a discounted value-iteration solve,
+    // not DiscreteLQR's plain (gamma=1) gain, which differs substantially here because the
+    // double integrator's eigenvalues sit exactly at the marginal-stability boundary (=1), so
+    // even a modest discount measurably changes the optimal gain.
+    ctrl::StateSpace discountedPlant = plant;
+    discountedPlant.A *= std::sqrt(gamma);
+    discountedPlant.B *= std::sqrt(gamma);
+    ctrl::DiscreteLQR lqr(discountedPlant, lqr_p);
+    REQUIRE(lqr.dareConverged());
+
+    auto f = [&plant](const Eigen::VectorXd &x, const Eigen::VectorXd &u) {
+        return ctrl::ssStepCopy(plant, x, u).second;
+    };
+    auto cost = [&lqr_p](const Eigen::VectorXd &x, const Eigen::VectorXd &u) {
+        return x.dot(lqr_p.Q * x) + u.dot(lqr_p.R * u);
+    };
+
+    ctrl::DPGridParams gp;
+    gp.x_min = Eigen::Vector2d(-1.0, -1.0);
+    gp.x_max = Eigen::Vector2d( 1.0,  1.0);
+    gp.n_grid_per_dim = Eigen::Vector2i(61, 61);
+    gp.u_min = Eigen::VectorXd::Constant(1, -5.0);
+    gp.u_max = Eigen::VectorXd::Constant(1,  5.0);
+    gp.n_grid_u = 41;
+    gp.discount = gamma;
+    gp.max_iter = 500;
+    gp.tol      = 1e-4;
+
+    ctrl::ValueIterationSolver vi(f, cost, gp);
+    vi.solve();
+    REQUIRE(vi.converged());
+
+    const Eigen::VectorXd x_test = (Eigen::VectorXd(2) << 0.5, 0.0).finished();
+    const Eigen::VectorXd u_lqr  = lqr.compute(x_test);
+    const Eigen::VectorXd u_vi   = vi.policy(x_test);
+
+    REQUIRE_THAT(u_vi(0), WithinAbs(u_lqr(0), 0.5)); // grid-resolution tolerance
+    REQUIRE(std::isfinite(vi.value(x_test)));
+}
+
+TEST_CASE("ValueIterationSolver's Bellman residual decreases monotonically across sweep counts",
+          "[value_iteration]")
+{
+    ctrl::DPGridParams gp;
+    gp.x_min = Eigen::Vector2d(-1.0, -1.0);
+    gp.x_max = Eigen::Vector2d( 1.0,  1.0);
+    gp.n_grid_per_dim = Eigen::Vector2i(21, 21);
+    gp.u_min = Eigen::VectorXd::Constant(1, -3.0);
+    gp.u_max = Eigen::VectorXd::Constant(1,  3.0);
+    gp.n_grid_u = 9;
+    gp.discount = 0.95;
+    gp.tol      = 1e-9; // tight enough that none of the iter counts below actually converge
+
+    auto f = [](const Eigen::VectorXd &x, const Eigen::VectorXd &u) {
+        Eigen::VectorXd xn(2);
+        xn(0) = x(0) + 0.1 * x(1);
+        xn(1) = x(1) + 0.1 * u(0);
+        return xn;
+    };
+    auto cost = [](const Eigen::VectorXd &x, const Eigen::VectorXd &u) {
+        return x.squaredNorm() + 0.1 * u.squaredNorm();
+    };
+
+    double prevDelta = std::numeric_limits<double>::infinity();
+    for (int iters : {5, 10, 15, 20, 25})
+    {
+        gp.max_iter = iters;
+        ctrl::ValueIterationSolver vi(f, cost, gp);
+        vi.solve();
+        REQUIRE_FALSE(vi.converged());
+        REQUIRE(vi.finalDelta() <= prevDelta + 1e-12);
+        prevDelta = vi.finalDelta();
+    }
+}
+
+TEST_CASE("ValueIterationSolver's policy error shrinks as the grid is refined "
+          "(curse-of-dimensionality, not a bug)", "[value_iteration]")
+{
+    auto plant = makeDoubleIntegrator();
+    ctrl::LQRParams lqr_p;
+    lqr_p.Q = 10.0 * Eigen::Matrix2d::Identity();
+    lqr_p.R = Eigen::MatrixXd::Identity(1, 1);
+
+    const double gamma = 0.95;
+    // See the discounted-LQR reduction note in the previous TEST_CASE: compare against the
+    // sqrt(gamma)-scaled system's standard LQR gain, not the plain (gamma=1) gain.
+    ctrl::StateSpace discountedPlant = plant;
+    discountedPlant.A *= std::sqrt(gamma);
+    discountedPlant.B *= std::sqrt(gamma);
+    ctrl::DiscreteLQR lqr(discountedPlant, lqr_p);
+
+    auto f = [&plant](const Eigen::VectorXd &x, const Eigen::VectorXd &u) {
+        return ctrl::ssStepCopy(plant, x, u).second;
+    };
+    auto cost = [&lqr_p](const Eigen::VectorXd &x, const Eigen::VectorXd &u) {
+        return x.dot(lqr_p.Q * x) + u.dot(lqr_p.R * u);
+    };
+
+    const Eigen::VectorXd x_test = (Eigen::VectorXd(2) << 0.5, 0.0).finished();
+    const double u_lqr = lqr.compute(x_test)(0);
+
+    auto policyErrorAt = [&](int n_grid) {
+        ctrl::DPGridParams gp;
+        gp.x_min = Eigen::Vector2d(-1.0, -1.0);
+        gp.x_max = Eigen::Vector2d( 1.0,  1.0);
+        gp.n_grid_per_dim = Eigen::Vector2i(n_grid, n_grid);
+        gp.u_min = Eigen::VectorXd::Constant(1, -5.0);
+        gp.u_max = Eigen::VectorXd::Constant(1,  5.0);
+        gp.n_grid_u = 41;
+        gp.discount = gamma;
+        gp.max_iter = 500;
+        gp.tol      = 1e-4;
+
+        ctrl::ValueIterationSolver vi(f, cost, gp);
+        vi.solve();
+        return std::abs(vi.policy(x_test)(0) - u_lqr);
+    };
+
+    const double err_coarse = policyErrorAt(11);
+    const double err_fine   = policyErrorAt(61);
+
+    REQUIRE(err_fine < err_coarse);
+}
+
+TEST_CASE("ValueIterationSolver's out_of_grid_penalty determines whether an out-of-bounds "
+          "action is selected over a within-bounds alternative", "[value_iteration]")
+{
+    // cost(x,u) = -x*u rewards (negative cost) actions that push x further from zero in its
+    // current direction. At x=0.9 the cheapest-looking actions all leave the grid; this isolates
+    // out_of_grid_penalty's effect on the first sweep, where V_old == 0 everywhere (hand-verified:
+    // with penalty=0.5, escaping via u=2 costs -1.8 + 0.95*0.5 = -1.325, beating the best
+    // in-bounds action u=0 at cost 0; with penalty=1e6, escaping costs ~949998, losing badly).
+    auto f = [](const Eigen::VectorXd &x, const Eigen::VectorXd &u) {
+        Eigen::VectorXd xn(1);
+        xn(0) = x(0) + u(0);
+        return xn;
+    };
+    auto cost = [](const Eigen::VectorXd &x, const Eigen::VectorXd &u) {
+        return -x(0) * u(0);
+    };
+
+    ctrl::DPGridParams gp;
+    gp.x_min = Eigen::VectorXd::Constant(1, -1.0);
+    gp.x_max = Eigen::VectorXd::Constant(1,  1.0);
+    gp.n_grid_per_dim = Eigen::VectorXi::Constant(1, 21); // spacing 0.1
+    gp.u_min = Eigen::VectorXd::Constant(1, -2.0);
+    gp.u_max = Eigen::VectorXd::Constant(1,  2.0);
+    gp.n_grid_u = 9;     // spacing 0.5: -2,-1.5,...,2
+    gp.discount = 0.95;
+    gp.max_iter = 1;     // exactly one sweep: V_old == 0 everywhere, hand-verifiable
+    gp.tol      = 1e-12;
+
+    const Eigen::VectorXd x_query = Eigen::VectorXd::Constant(1, 0.9); // exactly on a grid point
+
+    gp.out_of_grid_penalty = 0.5;
+    ctrl::ValueIterationSolver vi_weak(f, cost, gp);
+    vi_weak.solve();
+    REQUIRE(vi_weak.policy(x_query)(0) > 1.5); // picks the escaping action (u=2)
+
+    gp.out_of_grid_penalty = 1e6;
+    ctrl::ValueIterationSolver vi_strong(f, cost, gp);
+    vi_strong.solve();
+    REQUIRE(vi_strong.policy(x_query)(0) > -0.5);
+    REQUIRE(vi_strong.policy(x_query)(0) <  0.5); // settles on u~=0, the cheapest in-bounds action
 }

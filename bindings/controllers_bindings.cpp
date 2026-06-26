@@ -1898,7 +1898,7 @@ Example
         .def_readonly("variance",   &ctrl::GPResidualModel::Prediction::variance,
                       "GP posterior variance (>= 0). sqrt gives 1-sigma bound.");
 
-    py::class_<ctrl::GPResidualModel>(m, "GPResidualModel", R"doc(
+    py::class_<ctrl::GPResidualModel, std::shared_ptr<ctrl::GPResidualModel>>(m, "GPResidualModel", R"doc(
 GP Residual Model - learn model-plant mismatch for risk-aware MPC (E3).
 
 Fits a GP to residuals epsilon = y_true - y_model.  At prediction time:
@@ -2223,6 +2223,46 @@ Example
              "Return the shared HybridModel.");
 
     // -----------------------------------------------------------------------
+    // GPMPCParams
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::GPMPCParams>(m, "GPMPCParams",
+        "Parameters for GPMPC (ML3).")
+        .def(py::init<>())
+        .def_readwrite("nmpc",                  &ctrl::GPMPCParams::nmpc,
+                       "Base NMPCParams (Np, Nu, rho_y, rho_u, uMin, uMax, Ts, n_states, n_inputs, n_outputs).")
+        .def_readwrite("uncertainty_inflation",  &ctrl::GPMPCParams::uncertainty_inflation,
+                       "Tightening = inflation * sqrt(GP variance). Default 2.0.");
+
+    // -----------------------------------------------------------------------
+    // GPMPC (ML3) - inherits NonlinearMPC
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::GPMPC, ctrl::NonlinearMPC,
+               std::shared_ptr<ctrl::GPMPC>>(m, "GPMPC", R"doc(
+GP-uncertainty-aware tightening of NonlinearMPC's input bounds (Phase 3 ML3).
+
+Inherits NonlinearMPC. Per RTI step, tightens the input box bounds proportional to
+sqrt(GPResidualModel's predicted variance) at the predicted state/input feature for that
+step -- a no-op (identical to plain NonlinearMPC) whenever the GP is unfitted.
+
+Example
+-------
+>>> gp = ctrl.GPResidualModel(x_dim=2, params=p)  # x_dim = n_states + n_inputs
+>>> params = ctrl.GPMPCParams()
+>>> params.nmpc.Np = 5; params.nmpc.Nu = 3; params.nmpc.n_states = 1; params.nmpc.n_inputs = 1
+>>> gpmpc = ctrl.GPMPC(params, f_dynamics, gp)
+>>> gpmpc.set_state(x_k)
+>>> u = gpmpc.compute(error)
+>>> gpmpc.last_tightening()  # per-step shrink amounts (Nu*m vector)
+)doc")
+        .def(py::init<const ctrl::GPMPCParams&, ctrl::NonlinearMPC::DiscreteDynamics,
+                      std::shared_ptr<ctrl::GPResidualModel>>(),
+             py::arg("params"), py::arg("f_d"), py::arg("gp"),
+             "Construct GPMPC with params, discrete dynamics, and a shared GPResidualModel.")
+        .def("last_tightening", &ctrl::GPMPC::lastTightening,
+             "Per-step shrink amounts applied to the input bounds on the most recent compute() "
+             "(Nu*m vector). All zero if the GP is unfitted.");
+
+    // -----------------------------------------------------------------------
     // HybridModelTrainer (H4) - off-line trainer (Ridge / GP / ESN)
     // -----------------------------------------------------------------------
     py::enum_<ctrl::HybridModelTrainer::Method>(m, "HybridTrainerMethod",
@@ -2495,6 +2535,49 @@ Usage
         .def("sample_time", &ctrl::NonlinearIMC::sampleTime)
         .def("name",        &ctrl::NonlinearIMC::name)
         .def("set_state",   &ctrl::NonlinearIMC::setState, py::arg("x"));
+
+    // -----------------------------------------------------------------------
+    // ValueIterationSolver (Phase 4 OC2)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::DPGridParams>(m, "DPGridParams",
+        "Grid and solver parameters for ValueIterationSolver.")
+        .def(py::init<>())
+        .def_readwrite("x_min",               &ctrl::DPGridParams::x_min)
+        .def_readwrite("x_max",               &ctrl::DPGridParams::x_max)
+        .def_readwrite("n_grid_per_dim",      &ctrl::DPGridParams::n_grid_per_dim)
+        .def_readwrite("u_min",               &ctrl::DPGridParams::u_min)
+        .def_readwrite("u_max",               &ctrl::DPGridParams::u_max)
+        .def_readwrite("n_grid_u",            &ctrl::DPGridParams::n_grid_u)
+        .def_readwrite("discount",            &ctrl::DPGridParams::discount)
+        .def_readwrite("max_iter",            &ctrl::DPGridParams::max_iter)
+        .def_readwrite("tol",                 &ctrl::DPGridParams::tol)
+        .def_readwrite("out_of_grid_penalty", &ctrl::DPGridParams::out_of_grid_penalty);
+
+    py::class_<ctrl::ValueIterationSolver>(m, "ValueIterationSolver", R"doc(
+Grid-based dynamic programming / value iteration for low-dimensional (n<=3-4 states)
+discounted-infinite-horizon optimal control, where a globally optimal policy is wanted and
+MPC's local, continuous optimization isn't required or trusted.
+
+Usage
+-----
+>>> gp = ctrl.DPGridParams()
+>>> gp.x_min = np.array([-1.0, -1.0]); gp.x_max = np.array([1.0, 1.0])
+>>> gp.n_grid_per_dim = np.array([41, 41])
+>>> gp.u_min = np.array([-5.0]); gp.u_max = np.array([5.0])
+>>> vi = ctrl.ValueIterationSolver(dynamics_fn, cost_fn, gp)
+>>> vi.solve()
+>>> u = vi.policy(x)
+)doc")
+        .def(py::init<ctrl::ValueIterationSolver::DynamicsFn,
+                      ctrl::ValueIterationSolver::StageCost,
+                      const ctrl::DPGridParams &>(),
+             py::arg("dynamics_fn"), py::arg("cost_fn"), py::arg("params"))
+        .def("solve",       &ctrl::ValueIterationSolver::solve)
+        .def("policy",      &ctrl::ValueIterationSolver::policy, py::arg("x"))
+        .def("value",       &ctrl::ValueIterationSolver::value, py::arg("x"))
+        .def("converged",   &ctrl::ValueIterationSolver::converged)
+        .def("iterations",  &ctrl::ValueIterationSolver::iterations)
+        .def("final_delta", &ctrl::ValueIterationSolver::finalDelta);
 
     // Fuzzy bindings are fully implemented in advanced_bindings.cpp (bind_advanced).
     // The stale TODO stub that used to live here was removed (audit 2026-06-13, Finding 34).
