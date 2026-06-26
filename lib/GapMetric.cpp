@@ -40,6 +40,16 @@ std::vector<Eigen::MatrixXcd> freqResponseGrid(const StateSpace& sys,
     std::vector<Eigen::MatrixXcd> result;
     result.reserve(omega_grid.size());
 
+    // n == 0 means a purely static (zero-state) map: C*(zI-A)^-1*B is vacuously zero (C has
+    // no columns), so H(z) == D at every frequency. Skip straight to that, since
+    // FullPivLU::compute() unconditionally reduces the matrix via cwiseAbs().colwise().sum()
+    // .maxCoeff() for its internal rcond() support, and that reduction asserts on the 0-column
+    // result when decomposing a 0x0 matrix.
+    if (n == 0) {
+        result.assign(omega_grid.size(), Dc);
+        return result;
+    }
+
     for (double omega : omega_grid) {
         std::complex<double> z = std::exp(std::complex<double>(0.0, omega * Ts));
         // (z*I - A) is well-conditioned away from poles; fullPivLu handles near-singular.

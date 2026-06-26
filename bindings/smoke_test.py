@@ -386,8 +386,8 @@ else:
 # 17b. DiscreteH2 (Phase 4 Iteration 3 - discrete H2/LQG synthesis)
 # ---------------------------------------------------------------------------
 if feats.get('h2_synthesis', False):
-    # Hand-built D11=0 generalised plant (MixedSensitivity-built plants have D11 != 0
-    # from their W1/W3 weight gains and are rejected by DiscreteH2 - see lib/DiscreteH2.h).
+    # Hand-built generalised plant (D11=0 here; D11 != 0 is also supported - see
+    # lib/DiscreteH2.h - this smoke test just doesn't need it).
     # nw=2 deliberately - a single noise channel (nw=1) is a degenerate case for the filter
     # Riccati (S2^2 == Q2*R2 always for a scalar B1/D21), forcing Y=0 and an overly
     # aggressive, destabilising observer gain.
@@ -1711,5 +1711,36 @@ assert np.all(np.isfinite(_u_vi)), "ValueIterationSolver policy not finite"
 _v_vi = _vi.value(np.array([0.5, 0.0]))
 assert np.isfinite(_v_vi), "ValueIterationSolver value not finite"
 print('ValueIterationSolver smoke test passed.')
+
+# invert_transfer_function (dynamic-inversion helper)
+_itf_g = ctrl.TransferFunction([0.5, 0.3], [1.0, -0.6], 0.1)
+_itf_ginv = ctrl.invert_transfer_function(_itf_g)
+assert _itf_ginv.den[0] == 1.0, "invert_transfer_function: result not monic"
+assert abs(_itf_ginv.num[0] - 2.0) < 1e-9, "invert_transfer_function: wrong num[0]"
+try:
+    ctrl.invert_transfer_function(ctrl.TransferFunction([0.0, 0.3], [1.0, -0.6], 0.1))
+    raise AssertionError("invert_transfer_function should raise on b0 ~ 0")
+except ValueError:
+    pass
+print('invert_transfer_function smoke test passed.')
+
+# EventTriggeredWrapper
+assert hasattr(ctrl, 'EventTriggeredWrapper'), "EventTriggeredWrapper not bound"
+_etw_pp = ctrl.PIDParams()
+_etw_pp.Kp = 2.0
+_etw_pp.Ki = 0.0
+_etw_pp.Kd = 0.0
+_etw_pid = ctrl.DiscretePID(_etw_pp, 0.1)
+_etw_params = ctrl.EventTriggeredParams()
+_etw_params.sigma = 0.5
+_etw = ctrl.EventTriggeredWrapper(_etw_pid, _etw_params)
+_u0 = _etw.compute(1.0)   # first call always triggers
+_u1 = _etw.compute(1.1)   # within deadband -> holds
+assert _etw.trigger_count() == 1, "EventTriggeredWrapper: expected 1 trigger"
+assert _etw.hold_count() == 1, "EventTriggeredWrapper: expected 1 hold"
+assert _u1 == _u0, "EventTriggeredWrapper: held output should be unchanged"
+_u2 = _etw.compute(5.0)   # well past deadband -> triggers
+assert _etw.trigger_count() == 2, "EventTriggeredWrapper: expected 2nd trigger"
+print('EventTriggeredWrapper smoke test passed.')
 
 print('\nAll smoke tests passed.')

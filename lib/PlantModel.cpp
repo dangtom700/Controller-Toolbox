@@ -82,6 +82,30 @@ namespace ctrl
     }
 
     // ---------------------------------------------------------------------------
+    // invertTransferFunction - swap num/den, re-normalize both by b0 so the result's
+    // denominator is monic. G = B/A (A monic, leading coeff of B is b0) -> G_inv = A/B.
+    // As a TransferFunction this needs a monic denominator, so both A and B are divided
+    // by b0: numerator' = A/b0, denominator' = B/b0 (denominator'[0] = b0/b0 = 1), and
+    // numerator'/denominator' == A/B == G_inv exactly (the common factor 1/b0 cancels).
+    // ---------------------------------------------------------------------------
+    TransferFunction invertTransferFunction(const TransferFunction &G, double eps)
+    {
+        const double b0 = G.num.empty() ? 0.0 : G.num[0];
+        if (std::abs(b0) < eps)
+            throw std::invalid_argument(
+                "invertTransferFunction: |G.num[0]| (b0=" + std::to_string(b0) +
+                ") is below eps=" + std::to_string(eps) + " - G is not invertible this way "
+                "(strictly proper, or has a zero at DC in z^-1 terms).");
+
+        std::vector<double> new_num = G.den; // A
+        std::vector<double> new_den = G.num; // B
+        for (double &c : new_num) c /= b0;
+        for (double &c : new_den) c /= b0;   // new_den[0] == 1 (monic)
+
+        return TransferFunction(new_num, new_den, G.Ts);
+    }
+
+    // ---------------------------------------------------------------------------
     // ssStep - advance one discrete step and return current output.
     // Output is computed before state is updated so that y[k] = C.x[k] + D.u[k].
     // ---------------------------------------------------------------------------

@@ -52,12 +52,52 @@ void buildScaling(const UncertaintyStructure& struc, const Eigen::VectorXd& d,
     }
 }
 
-double scaledSigmaMax(const Eigen::MatrixXcd& M, const UncertaintyStructure& struc,
-                       const Eigen::VectorXd& d)
+// Build the G-scaling matrix (P x P, real-valued stored as complex) for Packard & Doyle
+// (1993) G-scaling: g_i placed on every diagonal row belonging to RealScalar block i, zero
+// elsewhere (including ComplexFull/ComplexScalar block rows, which have no G contribution).
+void buildGScaling(const UncertaintyStructure& struc, const Eigen::VectorXd& g,
+                   Eigen::MatrixXcd& G)
 {
-    Eigen::MatrixXcd D_L, D_R;
+    const int P = struc.totalOutputs();
+    G = Eigen::MatrixXcd::Zero(P, P);
+
+    int row = 0;
+    for (std::size_t i = 0; i < struc.blocks.size(); ++i) {
+        const auto& b = struc.blocks[i];
+        if (b.type == UncertaintyBlock::Type::RealScalar) {
+            const std::complex<double> gi(g(static_cast<int>(i)), 0.0);
+            for (int k = 0; k < b.r_out; ++k) G(row + k, row + k) = gi;
+        }
+        row += b.r_out;
+    }
+}
+
+// sigma_max((I+G^2)^{-1/2} * (D_L*M*D_R^-1 - jG)) - the Packard & Doyle (1993) G-scaled
+// upper bound. G is diagonal (one scalar g_i per RealScalar block, zero on Complex* block
+// rows), so (I+G^2)^{-1/2} is also diagonal and reduces to a per-row scale factor - no matrix
+// square root needed. With g == 0 (no RealScalar blocks, or not yet swept) this reduces
+// exactly to the original D-only upper bound: G == 0 and every scale factor == 1.
+double scaledSigmaMax(const Eigen::MatrixXcd& M, const UncertaintyStructure& struc,
+                       const Eigen::VectorXd& d, const Eigen::VectorXd& g)
+{
+    Eigen::MatrixXcd D_L, D_R, G;
     buildScaling(struc, d, D_L, D_R);
-    Eigen::MatrixXcd N = D_L * M * D_R.inverse();
+    buildGScaling(struc, g, G);
+
+    Eigen::MatrixXcd N = D_L * M * D_R.inverse() - std::complex<double>(0.0, 1.0) * G;
+
+    // Scale each row by 1/sqrt(1+g_i^2) directly (avoids mixing real VectorXd::asDiagonal()
+    // with a complex matrix, which Eigen's operator* does not allow without an explicit cast).
+    int row = 0;
+    for (std::size_t i = 0; i < struc.blocks.size(); ++i) {
+        const auto& b = struc.blocks[i];
+        if (b.type == UncertaintyBlock::Type::RealScalar) {
+            const double gi = g(static_cast<int>(i));
+            const double s  = 1.0 / std::sqrt(1.0 + gi * gi);
+            for (int k = 0; k < b.r_out; ++k) N.row(row + k) *= s;
+        }
+        row += b.r_out;
+    }
     return sigmaMax(N);
 }
 
@@ -100,11 +140,10 @@ MuBound computeMuOneFreq(const Eigen::MatrixXcd& M, const UncertaintyStructure& 
             "computeMu: the M-Delta loop requires a square interconnection "
             "(totalOutputs() must equal totalInputs()).");
 
+    bool has_real_scalar = false;
     for (const auto& b : struc.blocks) {
         if (b.type == UncertaintyBlock::Type::RealScalar)
-            throw std::invalid_argument(
-                "computeMu: RealScalar blocks require G-scaling (Packard & Doyle 1993); "
-                "not yet implemented.");
+            has_real_scalar = true;
         if (b.type != UncertaintyBlock::Type::ComplexFull && b.r_out != b.r_in)
             throw std::invalid_argument(
                 "computeMu: scalar (repeated) uncertainty blocks must have r_out == r_in.");
@@ -117,14 +156,24 @@ MuBound computeMuOneFreq(const Eigen::MatrixXcd& M, const UncertaintyStructure& 
     result.upper = sigma0;
     result.lower = 0.0;
 
-    if (F > 1) {
-        // Coordinate-descent D-scaling: minimise sigma_max(D*M*D^-1) over one positive
-        // scalar d_i per block (gauge-fixed d_{F-1} = 1, since a uniform global scaling
-        // leaves D*M*D^-1 unchanged). Exact for ComplexFull blocks; a valid-but-possibly-
-        // loose upper bound for ComplexScalar blocks of size > 1 (see header).
+    // D-scaling alone has no effect for a single block (a uniform global D cancels in
+    // D*M*D^-1), but G-scaling does NOT have that gauge freedom - a lone RealScalar block
+    // still benefits from searching g, so the sweep runs whenever F > 1 (D matters) or any
+    // block is RealScalar (G matters), not just F > 1.
+    if (F > 1 || has_real_scalar) {
+        // Coordinate-descent D/G-scaling: minimise
+        //   sigma_max((I+G^2)^-1/2 * (D*M*D^-1 - jG))
+        // over one positive scalar d_i per block (gauge-fixed d_{F-1} = 1, since a uniform
+        // global scaling leaves D*M*D^-1 unchanged) and one real scalar g_i per RealScalar
+        // block (Packard & Doyle 1993 G-scaling; g_i == 0 for Complex* blocks, where this
+        // reduces exactly to the original D-only upper bound). Exact for ComplexFull blocks
+        // and RealScalar blocks of size 1; a valid-but-possibly-loose upper bound for
+        // ComplexScalar/RealScalar blocks of size > 1 (see header).
         Eigen::VectorXd d = Eigen::VectorXd::Ones(F);
-        constexpr double LOG_RANGE = 4.0; // search d in [e^-4, e^4] per coordinate
-        constexpr int    SWEEPS    = 5;
+        Eigen::VectorXd g = Eigen::VectorXd::Zero(F);
+        constexpr double LOG_RANGE       = 4.0;  // search d in [e^-4, e^4] per coordinate
+        constexpr double G_THETA_RANGE   = 1.56; // search g = tan(theta), |g| up to ~tan(1.56)~92.6
+        constexpr int    SWEEPS          = 5;
         double best = sigma0;
 
         for (int sweep = 0; sweep < SWEEPS; ++sweep) {
@@ -132,13 +181,31 @@ MuBound computeMuOneFreq(const Eigen::MatrixXcd& M, const UncertaintyStructure& 
                 auto cost = [&](double log_di) {
                     Eigen::VectorXd dt = d;
                     dt(i) = std::exp(log_di);
-                    return scaledSigmaMax(M, struc, dt);
+                    return scaledSigmaMax(M, struc, dt, g);
                 };
                 const double log_d0  = std::log(d(i));
                 const double log_opt = goldenSectionMinimize(
                     cost, log_d0 - LOG_RANGE, log_d0 + LOG_RANGE, 40);
                 d(i) = std::exp(log_opt);
-                const double s = scaledSigmaMax(M, struc, d);
+                const double s = scaledSigmaMax(M, struc, d, g);
+                if (s < best) best = s;
+            }
+            for (int i = 0; i < F; ++i) {
+                if (struc.blocks[static_cast<std::size_t>(i)].type
+                    != UncertaintyBlock::Type::RealScalar)
+                    continue;
+                // Fixed window [-G_THETA_RANGE, G_THETA_RANGE] (not centered on the current
+                // g(i)) so theta always stays within tan()'s (-pi/2, pi/2) domain - golden
+                // section explores the whole given interval, so a fixed bracket is fine.
+                auto cost = [&](double theta) {
+                    Eigen::VectorXd gt = g;
+                    gt(i) = std::tan(theta);
+                    return scaledSigmaMax(M, struc, d, gt);
+                };
+                const double theta_opt = goldenSectionMinimize(
+                    cost, -G_THETA_RANGE, G_THETA_RANGE, 40);
+                g(i) = std::tan(theta_opt);
+                const double s = scaledSigmaMax(M, struc, d, g);
                 if (s < best) best = s;
             }
         }

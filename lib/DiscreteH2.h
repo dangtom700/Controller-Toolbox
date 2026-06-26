@@ -15,18 +15,25 @@
  * cross-term), each reduced to a standard (no-cross-term) DARE via the textbook
  * cross-term-elimination substitution and solved with DiscreteLQR::solveDARE.
  *
- * **Regularity assumptions (enforced by throwing, not silently ignored):**
- * - D11 = 0 (no direct exogenous-to-performance feedthrough). Most MixedSensitivity-built
- *   plants violate this (their W1/W3 weights have nonzero high/low-frequency gain), so
- *   DiscreteH2 pairs with a hand-built GeneralisedPlant, not directly with
- *   MixedSensitivity::build()'s S/KS/T construction. Full D11 != 0 support (via loop-shifting)
- *   is a deliberately deferred follow-up - see docs/algorithm_backlog.md.
- * - D22 = 0 (no direct control-to-measurement feedthrough).
+ * **D11 (exogenous-to-performance feedthrough) is fully supported.** With Dk = 0 (always true
+ * for the controller this class assembles), u[k] depends only on the controller state xk[k] -
+ * a function of past y's, hence past w's, never w[k] itself - so for zero-mean white w the
+ * cross term E[(C1 x[k] + D12 u[k])' D11 w[k]] is exactly zero regardless of the controller.
+ * Consequence: D11 never enters the control or filter Riccati equations (the cross-term-
+ * eliminated DARE reduction below was never a function of D11 to begin with), so the same F/L
+ * derivation is exactly correct for any D11. The only place D11 matters is the achieved H2 norm,
+ * which picks up an extra trace(D11*D11') term (a direct feedthrough contributes a constant,
+ * controller-independent amount to the H2 norm) - see DiscreteH2::solve()'s implementation.
+ * This means MixedSensitivity::build()'s S/KS/T-construction plants (which have D11 != 0 from
+ * the W1/W3 weight gains) can be passed directly, unlike in earlier revisions of this class.
+ *
+ * **Regularity assumptions still enforced by throwing:**
+ * - D22 = 0 (no direct control-to-measurement feedthrough) - the Dk = 0 assembly requires this.
  * - D12 full column rank, D21 full row rank (same DGKF-style regularity DiscreteHinf::solve()
  *   already requires).
  *
  * @code
- * // Typical usage (hand-built D11=0 generalised plant - see examples/ex88_h2_synthesis.cpp)
+ * // D11 may be nonzero - e.g. a MixedSensitivity::build()-produced plant works directly.
  * ctrl::H2Result result = ctrl::DiscreteH2::solve(P);
  * if (result.feasible) {
  *     ctrl::DiscreteH2 ctrl(result);

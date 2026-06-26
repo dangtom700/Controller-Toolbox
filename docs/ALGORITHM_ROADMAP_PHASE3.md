@@ -52,7 +52,7 @@ sketches here are directional (to scope effort and reuse), not committed APIs.
 | FD2 | Complex-Conjugate-Pole Vector Fitting | 3 | Done |
 | NC3 | Nonlinear Internal Model Control | 3 | Done |
 | ML3 | GP-MPC | 3 | Done |
-| OC2 | Dynamic Programming / Value Iteration | 4 | Open |
+| OC2 | Dynamic Programming / Value Iteration | 4 | Done |
 | OC4 | Linear-Programming-Based Control | 4 | Open |
 | DT1 | Code Generation | 4 | Open |
 | DT2 | Real-Time Profiling Beyond WCET | 4 | Open |
@@ -62,6 +62,9 @@ sketches here are directional (to scope effort and reuse), not committed APIs.
 | OC3 | Dual Control | 5 | Open |
 | ML4 | RL-Based Control (merged) | 5 | Open |
 
+*Note:* Currently open features will be paused to complete implementing features that are
+labeled as "Out of Scope" in the past iterations. In short, pay off the technical debt
+before proceeding any further milestones
 ---
 
 ## Motivation

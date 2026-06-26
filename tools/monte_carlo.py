@@ -30,6 +30,7 @@ import argparse
 import csv
 import importlib.util
 import math
+import multiprocessing
 import os
 import sys
 import copy
@@ -135,6 +136,43 @@ def _run_single(sim_mod, controller_name: str, perturbed_params: dict | None,
 
 
 # ---------------------------------------------------------------------------
+# Parallel workers (--workers > 1)
+# ---------------------------------------------------------------------------
+
+# Per-process cache: each worker process re-imports the sim module itself (the module
+# object loaded in the parent isn't picklable across the process boundary), but only
+# once per process, not once per sample.
+_worker_sim_cache: dict[str, Any] = {}
+
+
+def _get_cached_sim_module(study_dir: Path):
+    key = str(study_dir)
+    if key not in _worker_sim_cache:
+        _worker_sim_cache[key] = _load_sim_module(study_dir)
+    return _worker_sim_cache[key]
+
+
+def _mc_job(study_dir_str: str, ctrl_name: str, sample_id: int,
+            perturbed: dict | None, nominal_params: dict | None) -> dict:
+    """Worker-process entry point for one MC sample. Must be a module-level function
+    (not a closure) so multiprocessing can pickle a reference to it."""
+    sim_mod = _get_cached_sim_module(Path(study_dir_str))
+    metrics = _run_single(sim_mod, ctrl_name, perturbed, nominal_params)
+    return {"controller": ctrl_name, "sample_id": sample_id,
+            "perturbed": perturbed, "metrics": metrics}
+
+
+def _row_from_result(study_name: str, result: dict) -> dict:
+    row = dict(study=study_name, controller=result["controller"], sample_id=result["sample_id"])
+    row.update(result["metrics"])
+    if result["perturbed"]:
+        for pk, pv in result["perturbed"].items():
+            if isinstance(pv, (int, float)):
+                row[f"param_{pk}"] = float(pv)
+    return row
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -145,7 +183,9 @@ def main(argv=None):
     ap.add_argument("--sigma",   type=float, default=0.10, help="fractional param std dev")
     ap.add_argument("--seed",    type=int,   default=42,   help="random seed")
     ap.add_argument("--out",     default="",               help="output CSV path")
-    ap.add_argument("--workers", type=int,   default=1,    help="parallel workers (stub)")
+    ap.add_argument("--workers", type=int,   default=1,
+                     help="parallel worker processes (default 1 = sequential; >1 uses "
+                          "multiprocessing.Pool, one sim-module import per worker process)")
     args = ap.parse_args(argv)
 
     study_dir = _find_study_dir(args.study)
@@ -190,34 +230,52 @@ def main(argv=None):
     rng = np.random.default_rng(args.seed)
     all_rows: list[dict] = []
 
-    for ctrl_name in controllers:
-        print(f"  {ctrl_name} ...", end="", flush=True)
-        skipped = 0
-        for i in range(args.n):
-            perturbed = _perturb_params(nominal_params, args.sigma, rng) if nominal_params else None
-            metrics = _run_single(sim_mod, ctrl_name, perturbed, nominal_params)
-            if metrics.pop("_skipped", 0):
-                skipped += 1
-                if skipped == 1:
-                    print(" [no run_single hook - using nominal only]", end="", flush=True)
-                # Only record one nominal row per controller if no hook
-                if i == 0:
-                    row = dict(study=study_name, controller=ctrl_name, sample_id=0)
-                    row.update(metrics)
-                    if perturbed:
-                        for pk, pv in perturbed.items():
-                            if isinstance(pv, (int, float)):
-                                row[f"param_{pk}"] = float(pv)
-                    all_rows.append(row)
-                break
-            row = dict(study=study_name, controller=ctrl_name, sample_id=i)
-            row.update(metrics)
-            if perturbed:
-                for pk, pv in perturbed.items():
-                    if isinstance(pv, (int, float)):
-                        row[f"param_{pk}"] = float(pv)
-            all_rows.append(row)
-        print(f" {args.n - skipped} runs", flush=True)
+    # The "_skipped" short-circuit (no run_single hook -> one nominal row, skip the rest)
+    # is a sequential-only nicety: with no run_single, every remaining sample would be an
+    # identical no-op, so there is nothing to parallelize regardless of --workers.
+    use_pool = args.workers > 1 and hasattr(sim_mod, "run_single")
+
+    if not use_pool:
+        for ctrl_name in controllers:
+            print(f"  {ctrl_name} ...", end="", flush=True)
+            skipped = 0
+            for i in range(args.n):
+                perturbed = _perturb_params(nominal_params, args.sigma, rng) if nominal_params else None
+                metrics = _run_single(sim_mod, ctrl_name, perturbed, nominal_params)
+                if metrics.pop("_skipped", 0):
+                    skipped += 1
+                    if skipped == 1:
+                        print(" [no run_single hook - using nominal only]", end="", flush=True)
+                    # Only record one nominal row per controller if no hook
+                    if i == 0:
+                        all_rows.append(_row_from_result(
+                            study_name, {"controller": ctrl_name, "sample_id": 0,
+                                         "perturbed": perturbed, "metrics": metrics}))
+                    break
+                all_rows.append(_row_from_result(
+                    study_name, {"controller": ctrl_name, "sample_id": i,
+                                 "perturbed": perturbed, "metrics": metrics}))
+            print(f" {args.n - skipped} runs", flush=True)
+    else:
+        # Build every (controller, sample) job up front, drawing perturbations in the same
+        # order as the sequential path above, so --workers only changes execution, not the
+        # sequence of perturbed parameter values drawn from `rng`.
+        jobs = []
+        for ctrl_name in controllers:
+            for i in range(args.n):
+                perturbed = _perturb_params(nominal_params, args.sigma, rng) if nominal_params else None
+                jobs.append((str(study_dir), ctrl_name, i, perturbed, nominal_params))
+
+        print(f"Dispatching {len(jobs)} samples across {args.workers} worker processes...",
+              flush=True)
+        with multiprocessing.Pool(args.workers) as pool:
+            results = pool.starmap(_mc_job, jobs)
+
+        for ctrl_name in controllers:
+            ctrl_results = [r for r in results if r["controller"] == ctrl_name]
+            for r in ctrl_results:
+                all_rows.append(_row_from_result(study_name, r))
+            print(f"  {ctrl_name} ... {len(ctrl_results)} runs", flush=True)
 
     if not all_rows:
         print("No data collected.")

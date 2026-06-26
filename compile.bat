@@ -154,6 +154,8 @@ for %%T in (
     ex113_gp_mpc
     ex114_complex_vector_fit
     ex115_value_iteration_solver
+    ex116_dynamic_inversion_feedforward
+    ex117_event_triggered_wrapper
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

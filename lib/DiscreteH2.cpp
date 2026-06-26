@@ -128,16 +128,10 @@ H2Result DiscreteH2::solve(const GeneralisedPlant &P, const H2Params & /*params*
         throw std::invalid_argument(
             "DiscreteH2::solve: plant must have exogenous and performance channels.");
 
-    // D11 = 0 and D22 = 0 are required: the cross-term-elimination DARE reduction below has
-    // no closed form for D11 != 0 (see class docs for why this is a real, not hypothetical,
-    // limitation - most MixedSensitivity-built plants have D11 != 0). Throwing here, rather
-    // than silently ignoring the feedthrough, avoids producing a wrong/suboptimal controller.
-    if (!P.D11.isZero(1e-12))
-        throw std::invalid_argument(
-            "DiscreteH2::solve: generalised plant has nonzero D11 (exogenous-to-performance "
-            "feedthrough). DiscreteH2 requires D11 = 0; build a hand-written GeneralisedPlant "
-            "without direct feedthrough from w to z (most MixedSensitivity-built plants have "
-            "D11 != 0 from the W1/W3 weight gains and are not usable here).");
+    // D22 = 0 is required: the controller assembly below (Dk = 0 always) assumes no direct
+    // control-to-measurement feedthrough. D11 (exogenous-to-performance feedthrough) is fully
+    // supported - see the achieved-norm computation below and the class docs for why D11 never
+    // enters the Riccati equations themselves.
     if (!P.D22.isZero(1e-12))
         throw std::invalid_argument(
             "DiscreteH2::solve: generalised plant has nonzero D22 (control-to-measurement "
@@ -231,13 +225,21 @@ H2Result DiscreteH2::solve(const GeneralisedPlant &P, const H2Params & /*params*
         if (std::abs(esAk.eigenvalues()(i)) >= 1.0 + 1e-6) return result;
 
     // -------------------------------------------------------------------------
-    // Achieved H2 norm: sqrt(trace(C_cl * Wc * C_cl')), Wc solves the discrete
-    // controllability Lyapunov equation A_cl*Wc*A_cl' - Wc + B_cl*B_cl' = 0.
+    // Achieved H2 norm: sqrt(trace(D11*D11') + trace(C_cl * Wc * C_cl')), Wc solves the
+    // discrete controllability Lyapunov equation A_cl*Wc*A_cl' - Wc + B_cl*B_cl' = 0.
+    //
+    // The trace(D11*D11') term accounts for z's direct feedthrough from w (z = C1 x + D12 u +
+    // D11 w): with Dk = 0, u[k] depends only on the controller state xk[k] (a function of past
+    // y's, hence past w's), so u[k] and x[k] are independent of w[k] for zero-mean white w -
+    // the cross term E[(C1 x + D12 u)' D11 w] vanishes exactly, leaving the two contributions
+    // additive. This also confirms D11 never enters F/L above: it was never a function of D11
+    // to begin with, so any D11 is handled correctly by the existing cross-term-eliminated
+    // Riccati solve (this was previously rejected here; see lib/DiscreteH2.h's class docs).
     // -------------------------------------------------------------------------
     Eigen::MatrixXd A_cl, B_cl, C_cl;
     buildClosedLoop(P, result.Ak, result.Bk, result.Ck, A_cl, B_cl, C_cl);
     const Eigen::MatrixXd Wc = SystemAnalysis::solveDiscreteLyapunov(A_cl, B_cl * B_cl.transpose());
-    const double h2sq = (C_cl * Wc * C_cl.transpose()).trace();
+    const double h2sq = (P.D11 * P.D11.transpose()).trace() + (C_cl * Wc * C_cl.transpose()).trace();
     result.achievedH2Norm = std::sqrt(std::max(h2sq, 0.0));
     result.Ts = P.Ts;
     result.feasible = true;

@@ -1642,6 +1642,40 @@ u_out[k] = u_inner[k-1].  The first compute() returns initial_output (default 0)
              "Output buffered from the previous step (will be returned on next compute()).");
 
     // -----------------------------------------------------------------------
+    // EventTriggeredWrapper - aperiodic-sampling (deadband) decorator
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::EventTriggeredParams>(m, "EventTriggeredParams",
+        "Deadband threshold for EventTriggeredWrapper.")
+        .def(py::init<>())
+        .def_readwrite("sigma", &ctrl::EventTriggeredParams::sigma);
+
+    py::class_<ctrl::EventTriggeredWrapper, ctrl::IController,
+               std::shared_ptr<ctrl::EventTriggeredWrapper>>(
+        m, "EventTriggeredWrapper", R"doc(
+Aperiodic-sampling (event-triggered) decorator for any IController.
+
+Holds the last output (zero-order hold) until the incoming signal drifts more than
+`params.sigma` away from the signal value at the last triggered computation, then
+recomputes once. Convention-agnostic: only ever compares signal to its own last-triggered
+value, so it works regardless of the wrapped controller's sign convention.
+)doc")
+        .def(py::init<std::shared_ptr<ctrl::IController>, const ctrl::EventTriggeredParams&>(),
+             py::arg("inner"), py::arg("params") = ctrl::EventTriggeredParams{},
+             "Wrap inner controller with event-triggered (deadband) sampling.")
+        .def("compute",        &ctrl::EventTriggeredWrapper::compute, py::arg("signal"),
+             "Recompute if |signal - last_triggered_signal| > sigma; else hold last output.")
+        .def("reset",          &ctrl::EventTriggeredWrapper::reset,
+             "Reset inner controller and held state; next compute() triggers unconditionally.")
+        .def("sample_time",    &ctrl::EventTriggeredWrapper::sampleTime,
+             "Sample time [s] inherited from the inner controller.")
+        .def("last_output",    &ctrl::EventTriggeredWrapper::lastOutput,
+             "Output held since the last triggered computation.")
+        .def("trigger_count",  &ctrl::EventTriggeredWrapper::triggerCount,
+             "Number of compute() calls that triggered a real inner computation.")
+        .def("hold_count",     &ctrl::EventTriggeredWrapper::holdCount,
+             "Number of compute() calls that returned the held output unchanged.");
+
+    // -----------------------------------------------------------------------
     // ILC
     // -----------------------------------------------------------------------
     py::enum_<ctrl::ILC::Mode>(m, "ILCMode")

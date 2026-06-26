@@ -1262,10 +1262,12 @@ TEST_CASE("DiscreteH2::solve matches independent scipy DARE/Lyapunov reference",
         REQUIRE(std::abs(esAcl.eigenvalues()(i)) < 1.0);
 }
 
-TEST_CASE("DiscreteH2::solve throws on nonzero D11 (MixedSensitivity-built plant)", "[h2][hinf]")
+TEST_CASE("DiscreteH2::solve succeeds on a nonzero-D11 (MixedSensitivity-built) plant, "
+          "with F/L unaffected by D11 and the achieved norm picking up exactly trace(D11*D11')",
+          "[h2][hinf]")
 {
     // MixedSensitivity-built plants have D11 != 0 by construction (W1/W3 weight gains feed
-    // straight through to z) - this is the real-world rejection case, not a contrived one.
+    // straight through to z) - this used to be a hard rejection case; D11 is now supported.
     const double Ts = 0.1;
     const ctrl::StateSpace G = ctrl::c2d(
         ctrl::StateSpace(Eigen::MatrixXd::Constant(1,1,-1.0), Eigen::MatrixXd::Constant(1,1,1.0),
@@ -1276,8 +1278,26 @@ TEST_CASE("DiscreteH2::solve throws on nonzero D11 (MixedSensitivity-built plant
     const auto W3 = ctrl::MixedSensitivity::makeW3(30.0, 1.5, 0.01, Ts);
     const auto P  = ctrl::MixedSensitivity::build(G, W1, W2, W3);
 
-    REQUIRE(!P.D11.isZero(1e-12)); // sanity: confirms this is the real rejection case
-    REQUIRE_THROWS_WITH(ctrl::DiscreteH2::solve(P), Catch::Matchers::ContainsSubstring("D11"));
+    REQUIRE(!P.D11.isZero(1e-12)); // sanity: confirms D11 is genuinely nonzero here
+
+    const ctrl::H2Result result = ctrl::DiscreteH2::solve(P);
+    REQUIRE(result.feasible);
+
+    // Same plant with D11 zeroed out - everything else (A,B1,B2,C1,C2,D12,D21,D22) identical.
+    ctrl::GeneralisedPlant P0 = P;
+    P0.D11 = Eigen::MatrixXd::Zero(P.D11.rows(), P.D11.cols());
+    const ctrl::H2Result result0 = ctrl::DiscreteH2::solve(P0);
+    REQUIRE(result0.feasible);
+
+    // D11 must not affect the controller gains at all (it never enters the Riccati equations).
+    REQUIRE(result.Ak.isApprox(result0.Ak, 1e-9));
+    REQUIRE(result.Bk.isApprox(result0.Bk, 1e-9));
+    REQUIRE(result.Ck.isApprox(result0.Ck, 1e-9));
+
+    // The achieved norm must differ from the D11=0 case by exactly trace(D11*D11') in quadrature.
+    const double d11_contribution = (P.D11 * P.D11.transpose()).trace();
+    const double expected_sq = result0.achievedH2Norm * result0.achievedH2Norm + d11_contribution;
+    REQUIRE_THAT(result.achievedH2Norm * result.achievedH2Norm, WithinAbs(expected_sq, 1e-6));
 }
 
 TEST_CASE("DiscreteH2::solve throws on rank-deficient D12/D21", "[h2][hinf]")
@@ -7751,7 +7771,7 @@ TEST_CASE("computeMu() returns zero bounds for a zero interconnection matrix",
     REQUIRE_THAT(bounds[0].lower, WithinAbs(0.0, 1e-12));
 }
 
-TEST_CASE("computeMu() throws on dimension mismatch and on unsupported RealScalar blocks",
+TEST_CASE("computeMu() throws on dimension mismatch and on r_out != r_in scalar blocks",
           "[mu_analysis]")
 {
     ctrl::UncertaintyStructure struc;
@@ -7760,10 +7780,62 @@ TEST_CASE("computeMu() throws on dimension mismatch and on unsupported RealScala
     const Eigen::MatrixXcd M_wrong = Eigen::MatrixXcd::Identity(3, 3);
     REQUIRE_THROWS_AS(ctrl::computeMu({M_wrong}, struc), std::invalid_argument);
 
+    ctrl::UncertaintyStructure mismatched_struc;
+    mismatched_struc.blocks = {ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::RealScalar, 1, 2}};
+    const Eigen::MatrixXcd M_mismatched = Eigen::MatrixXcd::Identity(1, 1);
+    REQUIRE_THROWS_AS(ctrl::computeMu({M_mismatched}, mismatched_struc), std::invalid_argument);
+}
+
+TEST_CASE("computeMu() RealScalar G-scaling: a single real-scalar block drives the bound "
+          "well below the single-ComplexFull-block bound on the same purely-imaginary M",
+          "[mu_analysis]")
+{
+    // M = [i] (1x1, purely imaginary). For a single ComplexFull block, no scaling is possible
+    // (a lone block's global D cancels), so the bound is exactly sigma_max(M) = |i| = 1.
+    // For a single RealScalar block, G-scaling is NOT gauge-cancelled - minimising
+    // sigma_max((1+g^2)^-1/2 * (i - jg)) over real g gives an exact zero at g=1:
+    // (1+(-g)^2)... |i - jg| = |1-g|, so cost^2 = (1-g)^2/(1+g^2), which is exactly 0 at g=1.
+    // This is the textbook point of G-scaling: a real perturbation can never exactly cancel a
+    // purely-imaginary M the way a complex perturbation trivially can (delta=1/i=-i), giving a
+    // genuinely smaller real-mu bound, not just an artifact of looser scaling.
+    const Eigen::MatrixXcd M = (Eigen::MatrixXcd(1, 1) << std::complex<double>(0.0, 1.0)).finished();
+
+    ctrl::UncertaintyStructure complex_struc;
+    complex_struc.blocks = {ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 1, 1}};
+    const auto complex_bounds = ctrl::computeMu({M}, complex_struc);
+    REQUIRE_THAT(complex_bounds[0].upper, WithinAbs(1.0, 1e-9));
+
     ctrl::UncertaintyStructure real_struc;
     real_struc.blocks = {ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::RealScalar, 1, 1}};
-    const Eigen::MatrixXcd M_real = Eigen::MatrixXcd::Identity(1, 1);
-    REQUIRE_THROWS_AS(ctrl::computeMu({M_real}, real_struc), std::invalid_argument);
+    const auto real_bounds = ctrl::computeMu({M}, real_struc);
+    REQUIRE_THAT(real_bounds[0].upper, WithinAbs(0.0, 1e-3));
+    REQUIRE(real_bounds[0].upper < complex_bounds[0].upper - 0.9); // genuinely, not marginally, smaller
+}
+
+TEST_CASE("computeMu() mixed RealScalar/ComplexFull structure recovers the all-ComplexFull "
+          "bound when the off-diagonal example's optimal scaling is already real-positive",
+          "[mu_analysis]")
+{
+    // Same M as the classic 2x2 off-diagonal example (M=[[0,2],[0.5,0]]). With block 0 forced
+    // real (delta1 real) and block 1 free complex (delta2), the singularity condition
+    // 1 - delta1*delta2*m12*m21 = 0 (m12*m21 = 1 here) forces delta2 = 1/delta1, which is
+    // automatically real once delta1 is real - so the mixed real/complex structured mu equals
+    // the all-complex mu (=1) exactly, and the optimal scaling needs no G contribution at all
+    // (g1=0 already attains it, same d1=0.5/d2=1 the all-ComplexFull test uses) - a regression
+    // check that mixed block types interact correctly through the same alternating d/g sweep.
+    ctrl::UncertaintyStructure mixed_struc;
+    mixed_struc.blocks = {
+        ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::RealScalar,  1, 1},
+        ctrl::UncertaintyBlock{ctrl::UncertaintyBlock::Type::ComplexFull, 1, 1},
+    };
+
+    Eigen::MatrixXcd M(2, 2);
+    M << 0.0, 2.0,
+         0.5, 0.0;
+
+    const auto bounds = ctrl::computeMu({M}, mixed_struc, /*compute_lower_bound=*/true);
+    REQUIRE_THAT(bounds[0].upper, WithinAbs(1.0, 1e-3));
+    REQUIRE(bounds[0].upper <= 2.0 + 1e-9); // never worse than the unscaled sigma_max(M) baseline
 }
 
 TEST_CASE("computeMu() coordinate-descent D-scaling recovers the textbook mu=1 "
@@ -9816,4 +9888,156 @@ TEST_CASE("ValueIterationSolver's out_of_grid_penalty determines whether an out-
     vi_strong.solve();
     REQUIRE(vi_strong.policy(x_query)(0) > -0.5);
     REQUIRE(vi_strong.policy(x_query)(0) <  0.5); // settles on u~=0, the cheapest in-bounds action
+}
+
+// =============================================================================
+// invertTransferFunction - dynamic-inversion helper (scope-triage batch)
+// =============================================================================
+
+TEST_CASE("invertTransferFunction swaps and re-normalizes num/den to a monic denominator",
+          "[invert_tf]")
+{
+    // G(z^-1) = (0.5 + 0.3 z^-1) / (1 - 0.6 z^-1), b0 = 0.5.
+    // G_inv = A/B = (1 - 0.6z^-1) / (0.5 + 0.3z^-1), normalized by b0 so both num/den are
+    // divided by 0.5: num = [1,-0.6]/0.5 = [2,-1.2], den = [0.5,0.3]/0.5 = [1,0.6].
+    const ctrl::TransferFunction G({0.5, 0.3}, {1.0, -0.6}, 0.1);
+    const ctrl::TransferFunction Ginv = ctrl::invertTransferFunction(G);
+
+    REQUIRE(Ginv.den[0] == 1.0); // monic, by construction
+    REQUIRE_THAT(Ginv.num[0], WithinAbs( 2.0, 1e-12));
+    REQUIRE_THAT(Ginv.num[1], WithinAbs(-1.2, 1e-12));
+    REQUIRE_THAT(Ginv.den[1], WithinAbs( 0.6, 1e-12));
+    REQUIRE(Ginv.Ts == G.Ts);
+}
+
+TEST_CASE("invertTransferFunction is its own inverse (double inversion recovers G exactly)",
+          "[invert_tf]")
+{
+    const ctrl::TransferFunction G({0.5, 0.3}, {1.0, -0.6}, 0.1);
+    const ctrl::TransferFunction Ginv = ctrl::invertTransferFunction(G);
+    const ctrl::TransferFunction Gback = ctrl::invertTransferFunction(Ginv);
+
+    REQUIRE_THAT(Gback.num[0], WithinAbs(G.num[0], 1e-9));
+    REQUIRE_THAT(Gback.num[1], WithinAbs(G.num[1], 1e-9));
+    REQUIRE_THAT(Gback.den[0], WithinAbs(G.den[0], 1e-9));
+    REQUIRE_THAT(Gback.den[1], WithinAbs(G.den[1], 1e-9));
+}
+
+TEST_CASE("G_inv(z) cascaded after G(z) recovers the original input exactly (perfect inversion)",
+          "[invert_tf]")
+{
+    const ctrl::TransferFunction G({0.5, 0.3}, {1.0, -0.6}, 0.1);
+    const ctrl::TransferFunction Ginv = ctrl::invertTransferFunction(G);
+
+    const ctrl::StateSpace ssG    = ctrl::tf2ss(G);
+    const ctrl::StateSpace ssGinv = ctrl::tf2ss(Ginv);
+
+    Eigen::VectorXd xG    = Eigen::VectorXd::Zero(ssG.stateSize());
+    Eigen::VectorXd xGinv = Eigen::VectorXd::Zero(ssGinv.stateSize());
+
+    const std::vector<double> u_seq = {1.0, 1.0, -0.5, 2.0, 0.3, -1.0, 0.0, 0.7};
+    for (double u : u_seq)
+    {
+        Eigen::VectorXd uv(1);
+        uv << u;
+        const double y = ctrl::ssStep(ssG, xG, uv)(0);
+        Eigen::VectorXd yv(1);
+        yv << y;
+        const double v = ctrl::ssStep(ssGinv, xGinv, yv)(0);
+        REQUIRE_THAT(v, WithinAbs(u, 1e-9)); // G_inv(G(u)) == u exactly (zero-state cascade)
+    }
+}
+
+TEST_CASE("invertTransferFunction throws on a strictly-proper (b0 ~ 0) transfer function",
+          "[invert_tf]")
+{
+    const ctrl::TransferFunction G({0.0, 0.3}, {1.0, -0.6}, 0.1); // b0 = 0
+    REQUIRE_THROWS_AS(ctrl::invertTransferFunction(G), std::invalid_argument);
+}
+
+// =============================================================================
+// EventTriggeredWrapper - aperiodic-sampling (deadband) decorator
+// =============================================================================
+
+namespace
+{
+std::shared_ptr<ctrl::DiscretePID> makeProportionalPID(double Ts = 0.1, double Kp = 2.0)
+{
+    ctrl::PIDParams pp;
+    pp.Kp = Kp; pp.Ki = 0.0; pp.Kd = 0.0; pp.N = 10.0;
+    return std::make_shared<ctrl::DiscretePID>(pp, Ts);
+}
+} // namespace
+
+TEST_CASE("EventTriggeredWrapper always triggers on the first call", "[event_triggered]")
+{
+    ctrl::EventTriggeredParams params; params.sigma = 0.5;
+    ctrl::EventTriggeredWrapper etw(makeProportionalPID(), params);
+
+    REQUIRE_THAT(etw.compute(1.0), WithinAbs(2.0, 1e-12)); // Kp=2: u = 2*1.0
+    REQUIRE(etw.triggerCount() == 1);
+    REQUIRE(etw.holdCount() == 0);
+}
+
+TEST_CASE("EventTriggeredWrapper holds the output for signal changes within the deadband",
+          "[event_triggered]")
+{
+    ctrl::EventTriggeredParams params; params.sigma = 0.5;
+    ctrl::EventTriggeredWrapper etw(makeProportionalPID(), params);
+
+    REQUIRE_THAT(etw.compute(1.0), WithinAbs(2.0, 1e-12)); // triggers: u = 2*1.0 = 2
+    REQUIRE_THAT(etw.compute(1.2), WithinAbs(2.0, 1e-12)); // |1.2-1.0|=0.2 < 0.5 -> holds
+    REQUIRE_THAT(etw.compute(0.7), WithinAbs(2.0, 1e-12)); // |0.7-1.0|=0.3 < 0.5 -> holds
+
+    REQUIRE(etw.triggerCount() == 1);
+    REQUIRE(etw.holdCount() == 2);
+}
+
+TEST_CASE("EventTriggeredWrapper re-triggers once the signal exceeds the deadband",
+          "[event_triggered]")
+{
+    ctrl::EventTriggeredParams params; params.sigma = 0.5;
+    ctrl::EventTriggeredWrapper etw(makeProportionalPID(), params);
+
+    REQUIRE_THAT(etw.compute(1.0), WithinAbs(2.0, 1e-12)); // triggers: u = 2
+    REQUIRE_THAT(etw.compute(1.2), WithinAbs(2.0, 1e-12)); // holds
+    REQUIRE_THAT(etw.compute(2.0), WithinAbs(4.0, 1e-12)); // |2.0-1.0|=1.0 > 0.5 -> triggers, u=4
+
+    REQUIRE(etw.triggerCount() == 2);
+    REQUIRE(etw.holdCount() == 1);
+}
+
+TEST_CASE("EventTriggeredWrapper holds on NaN input without affecting trigger/hold counters",
+          "[event_triggered]")
+{
+    ctrl::EventTriggeredParams params; params.sigma = 0.5;
+    ctrl::EventTriggeredWrapper etw(makeProportionalPID(), params);
+
+    REQUIRE_THAT(etw.compute(1.0), WithinAbs(2.0, 1e-12)); // triggers
+    REQUIRE(etw.triggerCount() == 1);
+
+    const double nan_out = etw.compute(std::numeric_limits<double>::quiet_NaN());
+    REQUIRE_THAT(nan_out, WithinAbs(2.0, 1e-12)); // holds last output
+    REQUIRE(etw.triggerCount() == 1); // unchanged
+    REQUIRE(etw.holdCount() == 0);    // NaN doesn't count as a real hold either
+}
+
+TEST_CASE("EventTriggeredWrapper::reset() clears held state, forcing the next call to trigger",
+          "[event_triggered]")
+{
+    ctrl::EventTriggeredParams params; params.sigma = 0.5;
+    ctrl::EventTriggeredWrapper etw(makeProportionalPID(), params);
+
+    etw.compute(1.0);   // triggers
+    etw.compute(1.1);   // holds
+    REQUIRE(etw.triggerCount() == 1);
+    REQUIRE(etw.holdCount() == 1);
+
+    etw.reset();
+    REQUIRE_THAT(etw.lastOutput(), WithinAbs(0.0, 1e-12));
+
+    // Even a tiny signal triggers right after reset (no prior reference to compare against).
+    REQUIRE_THAT(etw.compute(0.01), WithinAbs(0.02, 1e-12)); // Kp=2: u = 2*0.01
+    REQUIRE(etw.triggerCount() == 1); // counters reset to 0 then incremented once
+    REQUIRE(etw.holdCount() == 0);
 }

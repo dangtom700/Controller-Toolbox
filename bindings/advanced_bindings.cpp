@@ -577,12 +577,13 @@ Controller matrices: xk[k+1] = Ak*xk + Bk*y,  u = Ck*xk + Dk*y.
 Discrete-time dynamic output-feedback H2-optimal (LQG) controller.
 
 Use DiscreteH2.solve() to synthesise, then construct with the H2Result. Requires a
-GeneralisedPlant with D11 = 0 and D22 = 0 (see class docs) - most MixedSensitivity-built
-plants are not usable here since their W1/W3 weights give D11 != 0.
+GeneralisedPlant with D22 = 0 (see class docs); D11 (exogenous-to-performance feedthrough)
+may be nonzero - MixedSensitivity-built plants (whose W1/W3 weights give D11 != 0) work
+directly.
 
 Example
 -------
->>> P = ctrl.GeneralisedPlant()  # hand-built, D11 = D22 = 0
+>>> P = ctrl.GeneralisedPlant()  # hand-built or MixedSensitivity.build()-produced; D22 = 0
 >>> result = ctrl.DiscreteH2.solve(P)
 >>> if result.feasible:
 ...     h2 = ctrl.DiscreteH2(result)

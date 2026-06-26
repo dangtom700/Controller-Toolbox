@@ -190,6 +190,10 @@ add_example(ex113_gp_mpc)
 add_example(ex114_complex_vector_fit)
 # Phase 4 (Algorithm Roadmap Phase 3): OC2 dynamic programming / value iteration
 add_example(ex115_value_iteration_solver)
+# Scope-triage batch: dynamic-inversion feedforward via invertTransferFunction()
+add_example(ex116_dynamic_inversion_feedforward)
+# Scope-triage batch: EventTriggeredWrapper aperiodic-sampling decorator
+add_example(ex117_event_triggered_wrapper)
 
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)

@@ -131,6 +131,23 @@ struct DareResult
 StateSpace tf2ss(const TransferFunction &tf);
 
 /**
+ * @brief Invert a SISO transfer function: G_inv(z^-^1) = A(z^-^1) / B(z^-^1) for G = B/A.
+ *
+ * Swaps numerator and denominator, then re-normalizes by the original numerator's leading
+ * coefficient @c b0 so the result satisfies @ref TransferFunction's monic-denominator
+ * requirement (the new denominator is the old numerator, which is not generally monic).
+ * Used for dynamic-inversion feedforward: feed @c invertTransferFunction(G) through @ref tf2ss
+ * and a FeedforwardController to realise @c u_ff = G^-1(z) * r.
+ *
+ * @param G   Transfer function to invert (z^-^1 form).
+ * @param eps Minimum |b0| below which @p G is treated as non-invertible this way (default 1e-9).
+ * @return    A(z^-^1) / B(z^-^1), normalized to a monic denominator.
+ * @throws std::invalid_argument If |G.num[0]| < eps (G is not invertible at DC this way -
+ *         e.g. a strictly proper G, or one with a zero at z=1 in z^-^1 terms).
+ */
+TransferFunction invertTransferFunction(const TransferFunction &G, double eps = 1e-9);
+
+/**
  * @brief Simulate one step of a state-space model with an in-place state update.
  *
  * Execution order:

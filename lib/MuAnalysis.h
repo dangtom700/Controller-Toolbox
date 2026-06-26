@@ -8,11 +8,14 @@
  * @file MuAnalysis.h
  * @brief Structured singular value (mu) analysis for block-structured uncertainty.
  *
- * Implements the standard D-scaling upper bound on the structured singular value
- * mu_Delta(M) for a block-diagonal uncertainty structure Delta = blkdiag(Delta_1, ..., Delta_F):
+ * Implements the D-scaling (and, for RealScalar blocks, additional G-scaling) upper bound on
+ * the structured singular value mu_Delta(M) for a block-diagonal uncertainty structure
+ * Delta = blkdiag(Delta_1, ..., Delta_F):
  * @code
- *   mu_Delta(M) <= min_{D in scaling commutant} sigma_max(D * M * D^-1)
+ *   mu_Delta(M) <= min_{D,G} sigma_max( (I+G^2)^-1/2 * (D * M * D^-1 - jG) )
  * @endcode
+ * (G == 0 whenever no block is RealScalar, reducing exactly to the classic D-only bound
+ * `mu_Delta(M) <= min_D sigma_max(D * M * D^-1)`.)
  *
  * **Scope (V1):**
  *  - @c ComplexFull blocks: the scaling commutant is exactly scalar*Identity, so the
@@ -22,8 +25,10 @@
  *    the true commutant still satisfies the inequality above) but is only *tight*
  *    when the block size is 1; for size > 1 the textbook-tight bound requires a full
  *    Hermitian-matrix scaling per block, which is not implemented here.
- *  - @c RealScalar blocks require an additional G-scaling (Packard & Doyle 1993) and
- *    are **not implemented** - @ref computeMu throws if any block has this type.
+ *  - @c RealScalar blocks: G-scaling (Packard & Doyle 1993) is implemented - a real scalar
+ *    @c g_i per block, alternating-coordinate-descent-optimised alongside the @c d_i. Exact
+ *    for block size 1 (same caveat as @c ComplexScalar for size > 1: a single repeated scalar
+ *    @c g_i, not a full per-entry Hermitian @c G).
  *  - The lower bound (when requested) is the generic, always-valid `rho(M) <= mu(M)`
  *    spectral-radius bound - not the full power-iteration lower bound (NP-hard in
  *    general; deferred per the implementation plan).
@@ -41,8 +46,8 @@ namespace ctrl
  */
 struct UncertaintyBlock
 {
-    /// @brief Uncertainty type. RealScalar is accepted in the struct but rejected
-    /// at @ref computeMu time (G-scaling not implemented).
+    /// @brief Uncertainty type. RealScalar uses G-scaling (Packard & Doyle 1993) at
+    /// @ref computeMu time, exact for block size 1 (see file docs for size > 1 caveats).
     enum class Type { RealScalar, ComplexScalar, ComplexFull };
 
     Type type  = Type::ComplexFull; ///< Block type.
@@ -87,7 +92,7 @@ struct MuBound
  *               `rho(M) <= mu(M)` (cheap, generic, not the full power-iteration bound).
  * @return One @ref MuBound per entry of @p M_freq.
  * @throws std::invalid_argument If a matrix's dimensions don't match @p struc, if M is
- *         not square, or if @p struc contains a @c RealScalar block.
+ *         not square, or if a scalar (repeated) block has @c r_out != r_in.
  */
 std::vector<MuBound>
 computeMu(const std::vector<Eigen::MatrixXcd>& M_freq,

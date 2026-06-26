@@ -788,12 +788,12 @@ ctrl.MonteCarloResult
     m.def("compute_mu", &ctrl::computeMu,
           py::arg("m_freq"), py::arg("struc"), py::arg("compute_lower_bound") = false,
           R"doc(
-Compute the D-scaling upper bound (and optional spectral-radius lower bound) on the
-structured singular value mu_Delta(M) at each supplied frequency-response matrix.
+Compute the D-scaling (and, for RealScalar blocks, G-scaling) upper bound (and optional
+spectral-radius lower bound) on the structured singular value mu_Delta(M) at each supplied
+frequency-response matrix.
 
-ComplexFull blocks are scaled exactly (textbook-tight); ComplexScalar blocks use a
-valid-but-possibly-loose single-scalar approximation (exact only for block size 1);
-RealScalar blocks raise ValueError (G-scaling not implemented).
+ComplexFull blocks are scaled exactly (textbook-tight); ComplexScalar and RealScalar blocks
+use a valid-but-possibly-loose single-scalar approximation (exact only for block size 1).
 
 Returns
 -------

@@ -91,6 +91,18 @@ All matrix members are Eigen::MatrixXd and map bidirectionally with NumPy arrays
     m.def("tf2ss", &ctrl::tf2ss, py::arg("tf"),
           "Convert a SISO discrete transfer function to controllable canonical state-space form.");
 
+    m.def("invert_transfer_function", &ctrl::invertTransferFunction,
+          py::arg("G"), py::arg("eps") = 1e-9,
+          R"doc(
+Invert a SISO transfer function: G_inv(z^-1) = A(z^-1) / B(z^-1) for G = B/A.
+
+Swaps numerator and denominator, re-normalized so the result has a monic denominator.
+Used for dynamic-inversion feedforward: feed invert_transfer_function(G) through tf2ss()
+and a FeedforwardController to realise u_ff = G^-1(z) * r.
+
+Raises ValueError if |G.num[0]| < eps (G is not invertible this way).
+)doc");
+
     m.def("ss_step", [](const ctrl::StateSpace &sys,
                         Eigen::Ref<Eigen::VectorXd> x,
                         const Eigen::VectorXd &u) {
