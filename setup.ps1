@@ -132,11 +132,49 @@ Write-Step "Configuring Python bindings"
 # Run cmake through 'conda run' so pybind11 installed in the conda env is
 # discovered by CMake's find_package(pybind11), while cmake/ninja/g++ come
 # from MSYS2 (which is prepended to PATH above).
-conda run -n soft_robotics -- `
-    cmake -S "$Root" -B "$Root\build" `
-        -DCMAKE_BUILD_TYPE=Release `
-        -DCTRL_BUILD_PYTHON_BINDINGS=ON `
-        -G Ninja
+#
+# No -G flag (this used to hardcode -G Ninja): if build/ was already configured
+# by compile.bat or CLAUDE.md's plain `cmake -S . -B build` recipe (neither
+# passes -G, so both cache CMake's platform default - MinGW Makefiles here),
+# forcing a different generator on the same cache makes CMake refuse to
+# reconfigure ("generator : Ninja / Does not match the generator used
+# previously"). Omitting -G inherits whatever's already cached, or picks the
+# platform default on a truly fresh build/.
+#
+# Explicit PYTHON_LIBRARY/Python3_LIBRARY pin: MSYS2 UCRT64 (the compiler
+# toolchain) and the conda env (the Python being targeted) are separate
+# installs. pybind11's legacy FindPythonLibs module can resolve PythonLibs to
+# MSYS2's own libpythonX.Y.dll.a instead of the conda env's matching import
+# lib, even when the modern Python3 finder correctly picked the conda
+# interpreter - producing a version-mismatched link failure at the
+# ctrl_toolbox build step. Pin both the modern and legacy variable names to
+# the conda env's own dev files so neither finder can pick the wrong one.
+#
+# Forward slashes, not backslashes: CMake bakes this path verbatim into
+# bindings/CMakeFiles/ctrl_toolbox.dir/linkLibs.rsp, and GNU ld's @response-
+# file parser treats backslashes as escape characters - a Windows-style
+# 'C:\Users\...\python312.lib' silently loses every backslash there
+# ("cannot find C:Users...python312.lib: No such file or directory").
+$pyPrefix = ((conda run -n soft_robotics -- python -c "import sys; print(sys.prefix)").Trim()).Replace('\', '/')
+$pyTag    = (conda run -n soft_robotics -- python -c "import sys; print(f'{sys.version_info.major}{sys.version_info.minor}')").Trim()
+$pyLib     = "$pyPrefix/libs/python$pyTag.lib"
+$pyInclude = "$pyPrefix/include"
+
+$cmakeArgs = @(
+    '-S', "$Root", '-B', "$Root\build",
+    '-DCMAKE_BUILD_TYPE=Release',
+    '-DCTRL_BUILD_PYTHON_BINDINGS=ON'
+)
+if (Test-Path $pyLib) {
+    $cmakeArgs += @(
+        "-DPython3_LIBRARY=$pyLib", "-DPython3_INCLUDE_DIR=$pyInclude",
+        "-DPYTHON_LIBRARY=$pyLib", "-DPYTHON_INCLUDE_DIR=$pyInclude"
+    )
+} else {
+    Write-Host "    [WARN] conda env python lib not found at $pyLib - skipping explicit pin" -ForegroundColor Yellow
+}
+
+conda run -n soft_robotics -- cmake @cmakeArgs
 if ($LASTEXITCODE -ne 0) { Write-Fail "CMake configure failed" }
 
 Write-Step "Building ctrl_toolbox binding target"

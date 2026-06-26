@@ -1224,3 +1224,111 @@ surfaced during implementation/verification, all fixed in this same session:
 **Docs updated:** `docs/algorithm_backlog.md` (7 items moved to "Already done");
 `docs/ALGORITHM_ROADMAP_PHASE3.md` status table (16/32 shipped, Phase 1 + Phase 2 complete);
 this report's header table + new Part 68 section.
+
+## Part 69 — Algorithm Roadmap Phase 3, Phase 3 (4 items: ML1/ML2/NC3/SI4) + Local Windows
+Binding-Build Diagnosis — 2026-06-25
+
+4 Phase 3 items implemented end-to-end (lib + bindings + Catch2 tests + C++/Python examples +
+build wiring), deliberately chosen as the lowest compiler-interaction-risk subset of the 7 open
+Phase 3 items — all four are **new files only** (`NeuralNetworkController`, `NNAdaptiveController`,
+`NonlinearIMC`, `NARMAXIdentifier`), so none of them edit an existing hot class; FD2 (complex-pole
+bookkeeping), SI3 (edits the shared `SubspaceID` free function), and ML3 (inherits the complex
+`NonlinearMPC`) were skipped as higher-risk:
+
+- `NeuralNetworkController` (ML1) — generic feedforward NN, fixed forward pass (arbitrary depth,
+  Tanh/ReLU/Sigmoid/Linear/Softplus per layer), reusing `NeuralPID`'s activation forms. Exposes
+  `protected hiddenFeatures()` (runs all layers except the last) specifically so `NNAdaptiveController`
+  can reuse the forward-pass machinery without duplicating it.
+- `NNAdaptiveController` (ML2) — inherits `NeuralNetworkController`; adapts only the output layer
+  online via a Lyapunov gradient + sigma-modification law (mirrors `MRACController`'s sigma
+  convention exactly: `theta[k+1] = theta[k] - Ts.(gamma.e_m.phi + sigma.theta)`). Requires the
+  base network's input width to be exactly 2 (`[y_m - y, r]` convention) and the output layer to
+  be `Linear` — both enforced as constructor `std::invalid_argument` checks.
+- `NonlinearIMC` (NC3) — nonlinear analogue of `SmithPredictor`'s model-in-the-loop structure:
+  parallel one-step `ModelFn`/`InverseModelFn` pair, IMC filter, mismatch feedback
+  (`s = e + y_model`). Falls back to hold-last on a non-finite/singular inverse-model result.
+- `NARMAXIdentifier` (SI4) — polynomial NARMAX via Orthogonal Forward Regression (Error Reduction
+  Ratio term selection, Billings & Korenberg); Extended Least Squares residual-refinement pass when
+  `nc > 0`. Static methods only (no `IController` base), which sidesteps the `std::shared_ptr<T>`
+  binding-holder rule entirely.
+
+**Verification (all green):** `bindings/smoke_test.py` (all 4 new classes, plus the full
+pre-existing suite); full Catch2 suite — **358 test cases, 7592 assertions, 0 failures**
+(`[neural_network_controller]`/`[nn_adaptive_control]`/`[nonlinear_imc]`/`[narmax]` tags: 14 cases,
+28 assertions); all 8 examples (4 C++ `ex108`-`ex111` + 4 Python `ex125`-`ex128`) PASS.
+
+**Bug found and fixed — smoke-test-only, not an implementation bug.** The `NNAdaptiveController`
+smoke-test snippet built its test network with `n_input_features = 1`, violating the class's own
+documented/enforced `[y_m - y, r]` 2-input contract; the constructor correctly raised
+`std::invalid_argument` (caught via running the *actual* smoke test rather than just trusting the
+C++ example, which used the correct 2-input shape throughout). Fixed by widening the smoke test's
+hidden-layer `W` to `(3, 2)` and setting `n_input_features = 2`, matching the C++ example/Catch2
+tests that were correct from the start.
+
+**Local Windows binding-build issue diagnosed and fixed (machine-specific, not a code bug).**
+Rebuilding `ctrl_toolbox` against the `soft_robotics` conda env surfaced a genuine link failure:
+`collect2.exe: error: ld returned 1 exit status` with zero further diagnostic text reaching `make`'s
+output (the real cause only appeared by extracting and re-running the failing `g++` link command
+directly). Root cause: this `build/` directory's cached `PYTHON_EXECUTABLE` pointed at MSYS2
+UCRT64's bundled `python3.exe` (3.14.6), not the conda env's Python (3.12.13) — `find_package
+(Python3 ...)` (the modern finder, `bindings/CMakeLists.txt:15`) correctly found the conda
+interpreter, but pybind11 v2.13.6's *legacy* `FindPythonLibs` (still in play because pybind11
+explicitly sets `CMP0148 OLD`) independently searched system `PATH`/lib dirs and resolved
+`PythonLibs` to `C:/msys64/ucrt64/lib/libpython3.14.dll.a` — a 3.14 import library linked against
+a module built with 3.12 headers/interpreter. Confirmed MSYS2 UCRT64 has *no* 3.12 variant at all
+(`ls /c/msys64/ucrt64/lib` shows only `libpython3.14.dll.a`), so the legacy finder had no correct
+candidate to find. **Fix:** the conda env ships its own matching dev files
+(`envs/soft_robotics/libs/python312.lib`, `envs/soft_robotics/include/Python.h`); pinning *both*
+the modern and legacy CMake variable names to those files resolves both finders identically:
+```
+conda run -n soft_robotics -- cmake -S . -B build \
+  -DPython3_LIBRARY="<conda_env>/libs/python312.lib" -DPython3_INCLUDE_DIR="<conda_env>/include" \
+  -DPYTHON_LIBRARY="<conda_env>/libs/python312.lib" -DPYTHON_INCLUDE_DIR="<conda_env>/include" \
+  -DCTRL_BUILD_PYTHON_BINDINGS=ON -DCMAKE_BUILD_TYPE=Release
+```
+MinGW `ld` links the MSVC-format `.lib` without issue (well-trodden combination for conda-on-Windows
++ MinGW). Considered and rejected two riskier alternatives (upgrading the conda env's Python to
+3.14 to match MSYS2, or side-installing a pinned Python 3.12 into MSYS2 UCRT64 — the latter isn't
+realistically supported since `pacman` tracks one rolling Python version per subsystem) per explicit
+user direction to try the narrowest fix first.
+
+**Separate, pre-existing issue found while diagnosing the above, since fixed in `run.py` and
+`setup.ps1` per explicit user direction ("fix them before you or I forget about it"):** `run.py`'s
+`phase_bindings()` and both `setup.ps1`/`setup.sh` hardcoded `-G Ninja` for their bindings-specific
+`cmake` configure call. `compile.bat`'s own configure call (run earlier in the *same* `run.py`
+invocation, Phase 2) passes no `-G` at all, so it silently inherits whatever generator is already
+cached — `MinGW Makefiles` on this machine, the CMake default when MSYS2 UCRT64 GCC is on `PATH`
+with no Visual Studio/Ninja forced. CMake refuses to switch an existing cache's generator without
+wiping it, so `run.py`'s Phase 3 reliably failed with `CMake Error: Error: generator : Ninja /
+Does not match the generator used previously: MinGW Makefiles` on any `build/` directory first
+configured via CLAUDE.md §2's own documented manual recipe (`cmake -S . -B build
+-DCMAKE_BUILD_TYPE=Release`, no `-G`) — exactly what the user's `run_20260625_150226.log` showed.
+Confirmed independent of today's controller work (the cached generator predated this session) and
+confirmed CI-unaffected (Windows CI never builds bindings at all — `has_python: false`; Linux/macOS
+CI use a fresh `build_py` dir with a single-toolchain `apt`/`brew` Python, immune to both this and
+the link issue above). **Fix applied to `run.py` and `setup.ps1`** (both Windows-relevant; `setup.sh`
+left untouched — it and its Linux/macOS sibling `compile.sh` both already pass `-G Ninja`
+consistently, so no clash exists there): drop the forced `-G`, letting the bindings configure step
+inherit whatever Phase 2 (or a prior manual configure) already cached.
+
+**Second bug found while scripting the Python-library-pin fix above into `run.py`/`setup.ps1`,
+also fixed:** the first scripted attempt (`os.path.join(sys.prefix, 'libs', ...)` in Python;
+native `"$pyPrefix\libs\..."` interpolation in PowerShell) reproduced the *exact* terse, contentless
+`ld returned 1 exit status` failure from before — even though `linkLibs.rsp` now correctly listed
+`python312.lib` instead of the mismatched `libpython3.14.dll.a`. Root cause: CMake bakes the pinned
+path verbatim into `bindings/CMakeFiles/ctrl_toolbox.dir/linkLibs.rsp`, and GNU `ld`'s `@response-
+file` parser treats backslashes as escape characters — a Windows-style `C:\Users\...\python312.lib`
+silently loses every backslash, producing `ld.exe: cannot find C:Users...python312.lib: No such
+file or directory` (this real message was being swallowed by both `cmake --build`'s output
+buffering *and*, surprisingly, by Git-Bash's invocation of the linker directly — it only surfaced
+by re-running the exact failing `g++`/`ld` command through native PowerShell with the `--%`
+stop-parsing token). **Fix:** both scripts now build the pinned path with forward slashes
+(`sys.prefix.replace('\\', '/')` in `run.py`; `.Replace('\', '/')` in `setup.ps1`) before handing it
+to `cmake -D...`. **Verified end-to-end after both fixes**: `conda run -n soft_robotics -- python
+-c "import run; run.phase_bindings()"` and `.\setup.ps1 -SkipCondaCreate` each independently
+configure, build, and smoke-test `ctrl_toolbox` from a clean invocation — both exit 0, both report
+"All smoke tests passed" including all 4 new Phase 3 classes.
+
+**Docs updated:** `docs/ALGORITHM_ROADMAP_PHASE3.md` status table (20/32 shipped, Phase 1-3
+complete for ML1/ML2/NC3/SI4; SI3/FD2/ML3 remain Open); this report's header table + new Part 69
+section; `run.py`/`setup.ps1` patched as described above.

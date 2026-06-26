@@ -60,6 +60,7 @@
 #include <cstdlib>
 #include <numbers>
 #include <random>
+#include <algorithm>
 
 using Catch::Matchers::WithinRel;
 using Catch::Matchers::WithinAbs;
@@ -8836,3 +8837,300 @@ TEST_CASE("PhaseLockedLoop throws on invalid construction parameters", "[pll]")
     REQUIRE_THROWS_AS(ctrl::PhaseLockedLoop(bad2, 1e-4), std::invalid_argument);
 }
 
+
+// =============================================================================
+// NeuralNetworkController (Phase 3 ML1)
+// =============================================================================
+
+TEST_CASE("NeuralNetworkController forward pass matches a hand-computed network", "[neural_network_controller]")
+{
+    // Hidden layer (2x1) tanh, output layer (1x2) linear: u = w*tanh(W*in + b1) + b2
+    ctrl::NNLayerSpec h;
+    h.W = Eigen::MatrixXd(2, 1);
+    h.W << 0.5, -1.5;
+    h.b = Eigen::VectorXd(2);
+    h.b << 0.1, -0.2;
+    h.activation = ctrl::NNLayerSpec::Activation::Tanh;
+
+    ctrl::NNLayerSpec o;
+    o.W = Eigen::MatrixXd(1, 2);
+    o.W << 2.0, 3.0;
+    o.b = Eigen::VectorXd::Constant(1, 0.25);
+    o.activation = ctrl::NNLayerSpec::Activation::Linear;
+
+    ctrl::NeuralControllerParams p;
+    p.layers = {h, o};
+    p.n_input_features = 1;
+    ctrl::NeuralNetworkController nn(p, 0.01);
+
+    const double in = 0.8;
+    const double h0 = std::tanh(0.5 * in + 0.1);
+    const double h1 = std::tanh(-1.5 * in - 0.2);
+    const double expected = 2.0 * h0 + 3.0 * h1 + 0.25;
+    REQUIRE_THAT(nn.compute(in), WithinAbs(expected, 1e-12));
+}
+
+TEST_CASE("NeuralNetworkController saturates and holds last output on NaN", "[neural_network_controller]")
+{
+    ctrl::NNLayerSpec layer;
+    layer.W = Eigen::MatrixXd::Constant(1, 1, 100.0); // large gain to force saturation
+    layer.b = Eigen::VectorXd::Zero(1);
+    layer.activation = ctrl::NNLayerSpec::Activation::Linear;
+    ctrl::NeuralControllerParams p;
+    p.layers = {layer};
+    p.n_input_features = 1;
+    p.uMin = -2.0;
+    p.uMax = 2.0;
+    ctrl::NeuralNetworkController nn(p, 0.01);
+
+    const double u_sat = nn.compute(1.0); // 100*1 -> clamped to uMax
+    REQUIRE_THAT(u_sat, WithinAbs(2.0, 1e-12));
+    // hold-last on non-finite input
+    REQUIRE_THAT(nn.compute(std::nan("")), WithinAbs(2.0, 1e-12));
+}
+
+TEST_CASE("NeuralNetworkController loadWeights hot-swap changes output immediately", "[neural_network_controller]")
+{
+    ctrl::NNLayerSpec layer;
+    layer.W = Eigen::MatrixXd::Constant(1, 1, 1.0);
+    layer.b = Eigen::VectorXd::Zero(1);
+    layer.activation = ctrl::NNLayerSpec::Activation::Linear;
+    ctrl::NeuralControllerParams p;
+    p.layers = {layer};
+    p.n_input_features = 1;
+    ctrl::NeuralNetworkController nn(p, 0.01);
+
+    REQUIRE_THAT(nn.compute(1.0), WithinAbs(1.0, 1e-12));
+
+    ctrl::NNLayerSpec newL = layer;
+    newL.W = Eigen::MatrixXd::Constant(1, 1, -5.0);
+    nn.loadWeights({newL});
+    REQUIRE_THAT(nn.compute(1.0), WithinAbs(-5.0, 1e-12));
+}
+
+TEST_CASE("NeuralNetworkController rejects inconsistent layer dimensions", "[neural_network_controller]")
+{
+    ctrl::NNLayerSpec bad;
+    bad.W = Eigen::MatrixXd(2, 3); // 3 inputs but n_input_features=1
+    bad.W.setZero();
+    bad.b = Eigen::VectorXd::Zero(2);
+    bad.activation = ctrl::NNLayerSpec::Activation::Linear;
+    ctrl::NeuralControllerParams p;
+    p.layers = {bad};
+    p.n_input_features = 1;
+    REQUIRE_THROWS_AS(ctrl::NeuralNetworkController(p, 0.01), std::invalid_argument);
+}
+
+// =============================================================================
+// NNAdaptiveController (Phase 3 ML2)
+// =============================================================================
+
+static ctrl::NNAdaptiveParams makeNNAdaptiveParams()
+{
+    ctrl::NNLayerSpec hidden;
+    hidden.W = Eigen::MatrixXd(6, 2);
+    hidden.W << 1.0, 0.5, -0.8, 0.3, 0.6, -0.4, -0.5, 0.7, 0.9, -0.2, 0.2, 0.8;
+    hidden.b = Eigen::VectorXd::Zero(6);
+    hidden.activation = ctrl::NNLayerSpec::Activation::Tanh;
+    ctrl::NNLayerSpec out;
+    out.W = Eigen::MatrixXd::Zero(1, 6);
+    out.b = Eigen::VectorXd::Zero(1);
+    out.activation = ctrl::NNLayerSpec::Activation::Linear;
+    ctrl::NNAdaptiveParams p;
+    p.nn.layers = {hidden, out};
+    p.nn.n_input_features = 2;
+    p.gamma_adapt = 3.0;
+    p.sigma_mod = 0.01;
+    p.a_m = 0.6;
+    p.b_m = 0.4;
+    p.uMin = -50.0;
+    p.uMax = 50.0;
+    return p;
+}
+
+TEST_CASE("NNAdaptiveController tracks the reference model with bounded weights", "[nn_adaptive_control]")
+{
+    const double Ts = 0.01;
+    ctrl::NNAdaptiveController c(makeNNAdaptiveParams(), Ts);
+
+    const double r = 1.0;
+    double y = 0.0, y_m = 0.0, late_err = 0.0;
+    for (int k = 0; k < 12000; ++k)
+    {
+        c.setReference(r);
+        const double u = c.compute(y);
+        y = 0.9 * y + 0.1 * (u + 0.3 * std::sin(y)); // unknown input nonlinearity
+        y_m = 0.6 * y_m + 0.4 * r;
+        if (k > 10000)
+            late_err = std::max(late_err, std::fabs(y - y_m));
+    }
+    REQUIRE(std::isfinite(y));
+    REQUIRE(late_err < 0.15);                 // tracks the reference model
+    REQUIRE(c.outputWeightNorm() < 1e3);      // sigma-mod keeps weights bounded
+}
+
+TEST_CASE("NNAdaptiveController holds last output on NaN and resets weights", "[nn_adaptive_control]")
+{
+    ctrl::NNAdaptiveController c(makeNNAdaptiveParams(), 0.01);
+    c.setReference(1.0);
+    for (int k = 0; k < 50; ++k)
+        c.compute(0.0);
+    const double w_after = c.outputWeightNorm();
+    REQUIRE(w_after > 0.0); // weights moved away from the zero initialization
+
+    const double u_last = c.compute(0.0);
+    REQUIRE_THAT(c.compute(std::nan("")), WithinAbs(u_last, 1e-12)); // hold-last
+
+    c.reset();
+    REQUIRE_THAT(c.outputWeightNorm(), WithinAbs(0.0, 1e-12)); // back to zero init
+    REQUIRE_THAT(c.modelOutput(), WithinAbs(0.0, 1e-12));
+}
+
+TEST_CASE("NNAdaptiveController rejects a non-Linear output layer", "[nn_adaptive_control]")
+{
+    ctrl::NNAdaptiveParams p = makeNNAdaptiveParams();
+    p.nn.layers.back().activation = ctrl::NNLayerSpec::Activation::Tanh;
+    REQUIRE_THROWS_AS(ctrl::NNAdaptiveController(p, 0.01), std::invalid_argument);
+}
+
+// =============================================================================
+// NonlinearIMC (Phase 3 NC3)
+// =============================================================================
+
+namespace {
+double nimc_model(const Eigen::VectorXd &x, double u) { return 0.7 * x(0) + 0.3 * u; }
+double nimc_inverse(const Eigen::VectorXd &x, double y_t) { return (y_t - 0.7 * x(0)) / 0.3; }
+
+double runNonlinearIMC(double plant_a, double plant_b)
+{
+    ctrl::NonlinearIMCParams p;
+    p.filter_lambda = 0.5;
+    p.uMin = -100.0;
+    p.uMax = 100.0;
+    ctrl::NonlinearIMC imc(nimc_model, nimc_inverse, p, 0.1);
+    const double r = 1.0;
+    double y = 0.0;
+    Eigen::VectorXd x(1);
+    for (int k = 0; k < 500; ++k)
+    {
+        x(0) = y;
+        imc.setState(x);
+        const double u = imc.compute(r - y);
+        y = plant_a * y + plant_b * u;
+    }
+    return y;
+}
+} // namespace
+
+TEST_CASE("NonlinearIMC tracks offset-free when the model matches the plant", "[nonlinear_imc]")
+{
+    REQUIRE_THAT(runNonlinearIMC(0.7, 0.3), WithinAbs(1.0, 1e-3));
+}
+
+TEST_CASE("NonlinearIMC rejects steady-state offset under model mismatch", "[nonlinear_imc]")
+{
+    REQUIRE_THAT(runNonlinearIMC(0.75, 0.28), WithinAbs(1.0, 1e-2));
+}
+
+TEST_CASE("NonlinearIMC holds last output on a non-finite inverse result", "[nonlinear_imc]")
+{
+    ctrl::NonlinearIMCParams p;
+    ctrl::NonlinearIMC imc(
+        [](const Eigen::VectorXd &x, double u) { return x(0) + u; },
+        [](const Eigen::VectorXd &, double) { return std::nan(""); }, // singular inverse
+        p, 0.1);
+    Eigen::VectorXd x(1);
+    x << 0.0;
+    imc.setState(x);
+    const double u = imc.compute(1.0);
+    REQUIRE_THAT(u, WithinAbs(0.0, 1e-12)); // holds the initial last output (0)
+}
+
+TEST_CASE("NonlinearIMC rejects an out-of-range filter pole", "[nonlinear_imc]")
+{
+    ctrl::NonlinearIMCParams p;
+    p.filter_lambda = 1.0; // must be < 1
+    REQUIRE_THROWS_AS(
+        ctrl::NonlinearIMC([](const Eigen::VectorXd &, double) { return 0.0; },
+                           [](const Eigen::VectorXd &, double) { return 0.0; }, p, 0.1),
+        std::invalid_argument);
+}
+
+// =============================================================================
+// NARMAXIdentifier (Phase 3 SI4)
+// =============================================================================
+
+TEST_CASE("NARMAXIdentifier recovers a known bilinear NARX term set", "[narmax]")
+{
+    // y[k] = 0.5 y[k-1] + 0.3 u[k-1] + 0.2 y[k-1] u[k-1]
+    const int N = 600;
+    std::mt19937 rng(12345);
+    std::uniform_real_distribution<double> dist(-1.0, 1.0);
+    Eigen::VectorXd u(N), y(N);
+    y(0) = 0.0;
+    u(0) = dist(rng);
+    for (int k = 1; k < N; ++k)
+    {
+        u(k) = dist(rng);
+        y(k) = 0.5 * y(k - 1) + 0.3 * u(k - 1) + 0.2 * y(k - 1) * u(k - 1);
+    }
+
+    ctrl::NARMAXParams p;
+    p.na = 1; p.nb = 1; p.nc = 0; p.poly_degree = 2;
+    p.significance_tol = 1e-4; p.max_terms = 6;
+    const ctrl::NARMAXResult res = ctrl::NARMAXIdentifier::fit(u, y, p);
+
+    auto has = [&](const std::string &t) {
+        return std::find(res.selected_terms.begin(), res.selected_terms.end(), t) !=
+               res.selected_terms.end();
+    };
+    REQUIRE(has("y(k-1)"));
+    REQUIRE(has("u(k-1)"));
+    REQUIRE(has("y(k-1)*u(k-1)"));
+    REQUIRE(res.final_err_sum > 0.999); // the three terms explain essentially all variance
+
+    // Coefficients match the generating system (find each term's coefficient by name).
+    auto coeffOf = [&](const std::string &t) {
+        auto it = std::find(res.selected_terms.begin(), res.selected_terms.end(), t);
+        return res.coefficients(static_cast<int>(it - res.selected_terms.begin()));
+    };
+    REQUIRE_THAT(coeffOf("y(k-1)"),        WithinAbs(0.5, 1e-6));
+    REQUIRE_THAT(coeffOf("u(k-1)"),        WithinAbs(0.3, 1e-6));
+    REQUIRE_THAT(coeffOf("y(k-1)*u(k-1)"), WithinAbs(0.2, 1e-6));
+}
+
+TEST_CASE("NARMAXIdentifier one-step prediction matches the true system", "[narmax]")
+{
+    const int N = 400;
+    std::mt19937 rng(7);
+    std::uniform_real_distribution<double> dist(-1.0, 1.0);
+    Eigen::VectorXd u(N), y(N);
+    y(0) = 0.0; u(0) = dist(rng);
+    for (int k = 1; k < N; ++k)
+    {
+        u(k) = dist(rng);
+        y(k) = 0.6 * y(k - 1) + 0.4 * u(k - 1);
+    }
+    ctrl::NARMAXParams p;
+    p.na = 1; p.nb = 1; p.nc = 0; p.poly_degree = 1; p.significance_tol = 1e-6;
+    const ctrl::NARMAXResult res = ctrl::NARMAXIdentifier::fit(u, y, p);
+
+    Eigen::VectorXd u_hist(1), y_hist(1);
+    u_hist << 0.5; y_hist << 0.2;
+    const double yhat = ctrl::NARMAXIdentifier::predict(res, u_hist, y_hist);
+    REQUIRE_THAT(yhat, WithinAbs(0.6 * 0.2 + 0.4 * 0.5, 1e-6));
+}
+
+TEST_CASE("NARMAXIdentifier guards bad inputs", "[narmax]")
+{
+    Eigen::VectorXd u(10), y(8);
+    u.setRandom();
+    REQUIRE_THROWS_AS(ctrl::NARMAXIdentifier::fit(u, y, ctrl::NARMAXParams()),
+                      std::invalid_argument); // length mismatch
+
+    Eigen::VectorXd u2(50), y2(50);
+    u2.setRandom(); y2.setRandom();
+    ctrl::NARMAXParams big;
+    big.na = 10; big.nb = 10; big.nc = 10; big.poly_degree = 4; // huge library
+    REQUIRE_THROWS_AS(ctrl::NARMAXIdentifier::fit(u2, y2, big), std::invalid_argument);
+}

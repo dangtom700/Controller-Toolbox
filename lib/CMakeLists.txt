@@ -61,6 +61,10 @@ set(CTRL_CORE_SOURCES
     GaussianProcess.cpp
     EchoStateNetwork.cpp
     NeuralPID.cpp
+    NeuralNetworkController.cpp
+    NNAdaptiveController.cpp
+    NonlinearIMC.cpp
+    NARMAXIdentifier.cpp
     CEMController.cpp
     DeePC.cpp
     DynaController.cpp

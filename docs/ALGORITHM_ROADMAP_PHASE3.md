@@ -1,7 +1,13 @@
 # Controller Toolbox — Algorithm Roadmap: Phase 3
 
 **Created:** 2026-06-24.
-**Status:** Planning — 16 of 32 items shipped (Phase 1 and Phase 2 complete).
+**Status:** Planning — 20 of 32 items shipped (Phase 1 and Phase 2 complete; Phase 3 partial:
+ML1/ML2/NC3/SI4 done, SI3/FD2/ML3 open).
+**Pre-implementation audit (2026-06-25):** open items SI3, ML3, ML4, RC2, and DT1 had
+"Reused components"/effort claims checked against the actual current code; SI3/ML3/ML4 each have
+a real gap and RC2 has been re-sequenced. See "Pre-Implementation Audit Findings" near the end of
+this document and the inline "**Known gap**" notes in those items' sections before brainstorming
+them.
 **Source:** Every item below is one of the 35 open lines in `docs/algorithm_backlog.md` (the
 9 categories left after Phase 4's frequency-domain work and the Resonant/Notch/PLL controllers
 shipped). 3 backlog items (`Minimum-variance control/STR`, `Adaptive pole placement`,
@@ -39,19 +45,19 @@ sketches here are directional (to scope effort and reuse), not committed APIs.
 | MO1 | Multi-Objective (Pareto) Optimization | 2 | Done |
 | MO3 | General Nonlinear Constrained Tuning | 2 | Done |
 | DT4 | Fault-Tolerant Control Reconfiguration | 2 | Done |
-| ML1 | NN Controller Core (direct NN architectures) | 3 | Open |
-| ML2 | NN-Adaptive Control (depends on ML1) | 3 | Open |
+| ML1 | NN Controller Core (direct NN architectures) | 3 | Done |
+| ML2 | NN-Adaptive Control (depends on ML1) | 3 | Done |
 | SI3 | MOESP / CVA Subspace ID Variants | 3 | Open |
-| SI4 | NARMAX | 3 | Open |
+| SI4 | NARMAX | 3 | Done |
 | FD2 | Complex-Conjugate-Pole Vector Fitting | 3 | Open |
-| NC3 | Nonlinear Internal Model Control | 3 | Open |
+| NC3 | Nonlinear Internal Model Control | 3 | Done |
 | ML3 | GP-MPC | 3 | Open |
-| RC2 | LMI Solver | 4 | Open |
 | OC2 | Dynamic Programming / Value Iteration | 4 | Open |
 | OC4 | Linear-Programming-Based Control | 4 | Open |
 | DT1 | Code Generation | 4 | Open |
 | DT2 | Real-Time Profiling Beyond WCET | 4 | Open |
 | DT3 | Distributed / Networked Control | 4 | Open |
+| RC2 | LMI Solver | 4 | Open — sequenced last in Phase 4, see RC2 section |
 | NC5 | Globally Linearizing Control | 5 | Open |
 | OC3 | Dual Control | 5 | Open |
 | ML4 | RL-Based Control (merged) | 5 | Open |
@@ -120,7 +126,6 @@ SI4 (NARMAX)                   — independent, distinct from SINDy's sparse-reg
 FD2 (Complex-pole VectorFit)   — extends VectorFitting; bigger lift than FD1, no dependency on it
 NC3 (Nonlinear IMC)            — independent, smaller class alongside SmithPredictor
 
-RC2 (LMI Solver)               — independent; nothing in Phase 1-3 requires it
 OC2 (DP/Value Iteration)       — independent
 OC4 (LP-Based Control)         — independent; could reuse GradientProjectionQP's box-constraint
                                   pattern as a starting point for a simplex/active-set LP solver
@@ -128,6 +133,11 @@ DT1 (Code Generation)          — independent, heaviest lift in the document
 DT2 (RT Profiling)             — independent, extends tools/wcet_report.py
 DT3 (Distributed Control)      — independent, extends ComputationalDelayWrapper's single-delay
                                   model to multi-node
+RC2 (LMI Solver)               — independent; nothing in Phase 1-3 requires it. Sequenced last in
+                                  Phase 4 (not first) — its only remaining motivating use case
+                                  (multi-objective Hinf/H2 mixed synthesis) has no roadmap line of
+                                  its own, and it's the single biggest, least-familiar lift in this
+                                  document
 
 NC5 / OC3 / ML4 (Phase 5)      — independent of everything above; kept for completeness
 ```
@@ -1004,6 +1014,16 @@ SubspaceIDResult subspaceID(const Eigen::MatrixXd& Y, const Eigen::MatrixXd& U,
 and SVD steps directly — MOESP and CVA differ only in the projection/weighting applied before
 the SVD, not in the surrounding pipeline.
 
+**Known gap (pre-implementation audit, 2026-06-25):** the sketch above invents a free function
+`subspaceID(..., method=N4SID, ...)` — the real function is `n4sid()` (`lib/SubspaceID.h:128`),
+and no `SubspaceMethod` enum exists yet anywhere in the codebase; it has to be created from
+scratch, not "extended." Separately, `n4sid()` today *unconditionally* computes a stochastic
+Kalman-gain/innovation-covariance estimate into `SubspaceIDResult::kalmanGain`/`innovCov`
+(`lib/SubspaceID.cpp:222-263`) — MOESP, by this item's own definition, has no stochastic step.
+The brainstorming pass needs to decide what those two fields contain in MOESP mode (left empty to
+match the algorithm's real definition, or still computed for free since the machinery is right
+there) before writing code.
+
 **Effort estimate:** ~250 lines (2 new weighting variants inserted into the existing pipeline +
 3 tests) — moderate, since most of the machinery is shared.
 
@@ -1193,8 +1213,22 @@ variance; `NonlinearMPC`'s existing rollout structure (the same `DiscreteDynamic
 pattern `HybridMPC` already overrides) as the integration point — `GPMPC` is architecturally a
 sibling of `HybridMPC`, not a from-scratch MPC.
 
+**Known gap (pre-implementation audit, 2026-06-25):** the "sibling of `HybridMPC`" framing doesn't
+hold for constraint tightening specifically. `NMPCParams::uMin`/`uMax` (`lib/NonlinearMPC.h:54-55`)
+are scalar and applied uniformly across the whole horizon; the loop that fills the actual per-step
+QP bounds (`lb_qp_`/`ub_qp_`) lives inside `NonlinearMPC::buildAndSolve()`, which is **private and
+non-virtual** (`lib/NonlinearMPC.h:153-162`, loop at `lib/NonlinearMPC.cpp:172-178`) — a subclass
+has no access and no hook to intercept it. `HybridMPC`'s "override" (the cited precedent) only
+swaps the dynamics via a constructor-injected lambda (`lib/HybridMPC.h:69,75-78`); it never needed
+to touch constraints, so it isn't actually evidence that per-step tightening is pluggable today.
+Before this is brainstormed, either (a) `NonlinearMPC` needs a new protected/virtual
+constraint-tightening hook added first (prerequisite modification to an already-shipped class,
+not currently scoped anywhere), or (b) `GPMPC` reimplements its own RTI solve loop, which
+contradicts "not a from-scratch MPC" and likely pushes well past the line estimate below.
+
 **Effort estimate:** ~300 lines (variance-aware constraint tightening inserted into the existing
-`NonlinearMPC` rollout + 3 tests).
+`NonlinearMPC` rollout + 3 tests) — **contingent on resolving the gap above first**; if a new hook
+must be added to `NonlinearMPC`, add that as a separate line item before estimating `GPMPC` itself.
 
 **Example use case:** A CSTR reactor where the GP residual model's predicted variance grows in
 under-explored operating regions — GP-MPC automatically backs off the constraint bounds there,
@@ -1212,6 +1246,15 @@ which a fixed-point-estimate `HybridMPC` cannot do.
 
 ## Phase 4: Heavy Infrastructure, Lower Near-Term Priority
 
+**Recommended order within Phase 4:** OC2 → OC4 → DT1 → DT2 → DT3 → RC2 (dead last). All six are
+independent, so this isn't a dependency requirement — it reflects an explicit call to push `RC2`
+behind every other Phase 4 item: it's the single largest item in the entire roadmap, its only
+remaining motivating use case isn't itself scoped anywhere in this document (see the RC2 section
+and `algorithm_backlog.md:104`), and LMI/SDP theory is unfamiliar territory relative to the rest
+of this codebase's convex-optimization surface (QP via `GradientProjectionQP`, Riccati via
+`DiscreteLQR::solveDARE`). Build familiarity on the cheaper, better-understood Phase 4 items
+first.
+
 ### RC2 — LMI Solver
 
 **Goal:** A general-purpose LMI (Linear Matrix Inequality) solver — feasibility, cost
@@ -1220,6 +1263,13 @@ toolbox still lacks (`GradientProjectionQP` is QP, not SDP). Its original motiva
 (H2 synthesis, structured Hinf) shipped via other routes (see `algorithm_backlog.md`'s Robust
 Control section), so this is now scoped narrower: multi-objective Hinf/H2 mixed synthesis and
 any future LMI-native algorithm.
+
+**Sequencing note (2026-06-25):** moved to dead-last priority within Phase 4 (see "Recommended
+order within Phase 4" above), per explicit decision — not a quick win, given the unfamiliarity
+of LMI/SDP theory relative to this codebase's existing convex-optimization machinery, and its
+sole remaining justification (multi-objective Hinf/H2 mixed synthesis) isn't itself a scoped item
+anywhere in this document. Worth deciding, before this is brainstormed, whether to scope `RC2`
+down to exactly that one consumer or add the consumer as its own follow-on roadmap item first.
 
 ```cpp
 struct LMIConstraint {
@@ -1373,7 +1423,7 @@ is "time to reach target" (an LP after time-discretization), not a quadratic tra
 heaviest lift. **Scoped down from the full 90-class library**: emit dependency-free,
 allocation-free C code only for controller types simple enough to have a clean closed-form
 update equation (the ones already mirrored in `lib/embedded/`'s header-only subset, e.g.
-`BasicPID`/`BasicSMC`, plus `LeadLagController`) — MPC/Hinf/MHE code-gen is explicitly out of
+`BasicPID`/`BasicSMC`, plus `DiscreteLeadLag`) — MPC/Hinf/MHE code-gen is explicitly out of
 scope for v1 (see "Out of Scope" below).
 
 ```cpp
@@ -1389,7 +1439,7 @@ public:
     // adding coverage is additive.
     static std::string generateC(const DiscretePID& controller, const CodeGenParams& params);
     static std::string generateC(const DiscreteSMC& controller, const CodeGenParams& params);
-    static std::string generateC(const LeadLagController& controller, const CodeGenParams& params);
+    static std::string generateC(const DiscreteLeadLag& controller, const CodeGenParams& params);
 };
 ```
 
@@ -1411,7 +1461,7 @@ with the tuned gains baked in.
 1. Generated C for a `DiscretePID`, compiled standalone (no Eigen, no `lib/` link) — bit-identical
    output to the original `DiscretePID::compute()` across a reference input sequence
    (golden-file regression).
-2. Same golden-file check for `DiscreteSMC` and `LeadLagController`.
+2. Same golden-file check for `DiscreteSMC` and `DiscreteLeadLag`.
 3. Generated code has zero dynamic allocation (grep-able check, matching `deployment.md`'s
    zero-allocation checklist) and compiles with `-fno-exceptions -fno-rtti`.
 
@@ -1616,8 +1666,18 @@ existing controller's parameters online — not a from-scratch C++ RL core. `Dyn
 being tuned); the same "Python policy adjusts a C++ controller's parameters" pattern Phase 2's
 H3 (RL-MPC stitching) already established and validated.
 
+**Known gap (pre-implementation audit, 2026-06-25):** the example use case above ("nudging...
+`OC1`'s `SelfTuningRegulator` forgetting factor lambda") isn't buildable against `OC1` as shipped.
+`SelfTuningRegulator` only exposes `lambda` via the constructor's `STRParams` and a `const
+params()` accessor (`lib/SelfTuningRegulator.h:161`) — there is no runtime setter. Adding one is
+small, but not a bare setter: changing the RLS forgetting factor mid-run interacts with the
+covariance matrix's conditioning, which deserves the same numerical-safety scrutiny
+`CONTRIBUTING.md` asks for elsewhere — not just "no new C++ required." Alternative: pick an
+example controller that already supports live parameter mutation instead of adding this to `OC1`.
+
 **Effort estimate:** ~250 lines Python (policy + training loop + plant-simulation glue),
-following H3's precedent almost exactly — no new C++ required.
+following H3's precedent almost exactly — plus a small but non-trivial C++ addition to whichever
+controller becomes the tuning target, if it doesn't already expose a runtime setter.
 
 **Example use case:** A policy that learns to adjust `OC1`'s forgetting factor `lambda` based
 on observed tracking performance, rather than a fixed value — closing the gap between "online
@@ -1626,6 +1686,53 @@ RLS identification" and "RL-tuned identification," without a general-purpose C++
 **Test plan (Python-level):** Verify the training loop converges (reward increases over
 training episodes) on a simple benchmark plant; verify the trained policy outperforms a
 fixed-parameter baseline controller on a held-out test trajectory.
+
+---
+
+## Pre-Implementation Audit Findings (2026-06-25)
+
+Before any of the still-open items (`SI3`, `FD2`, `ML3`, Phase 4, Phase 5) get their own
+brainstorming/spec pass, every "Reused components" claim above was checked against the actual
+current code rather than taken on the strength of this document's own description. Most held up
+exactly — `DiscreteHinf`/`MuAnalysis` for `EF1`/`RC1`, `VectorFitting`'s SK/pole-relocation
+pattern for `FD2`, `GPResidualModel::predictWithUncertainty()` for `ML3`'s variance source,
+`GradientProjectionQP`'s projection step for `RC2`/`OC4`, the `ComputationalDelayWrapper`/
+`AntiWindupWrapper`/`GainScheduledController` decorator stack for `DT3`, `FeedbackLinearisationController`
+for `NC5`, `RecursiveGreyBoxEstimator`/`AutoTuner` for `OC3`, `DynaController`/`CEMController` for
+`ML4`, `tools/wcet_report.py` for `DT2`, and the Phase 2 H3 Python/C++ pattern `ML4` cites as
+precedent — all verified accurate, and the line-count/day-estimate arithmetic across all 5
+phases reconciles exactly to the totals in the Estimated Timeline table below. Three items had a
+real gap, now noted inline in their own sections (cross-referenced here for visibility):
+
+- **`SI3`** (MOESP/CVA Subspace ID) — the sketch's `subspaceID(..., method=...)` free function and
+  `SubspaceMethod` enum don't exist; the real function is `n4sid()` (`lib/SubspaceID.h:128`) with
+  no method parameter at all. Separately, `n4sid()` already unconditionally computes a stochastic
+  Kalman-gain/innovation-covariance estimate (`lib/SubspaceID.cpp:222-263`) that true MOESP, by
+  this item's own definition, doesn't have — undefined what `SubspaceIDResult::kalmanGain`/
+  `innovCov` should contain in MOESP mode. See the `SI3` section's "Known gap" note.
+- **`ML3`** (GP-MPC) — the "architecturally a sibling of `HybridMPC`" framing doesn't extend to
+  constraint tightening. `NonlinearMPC`'s per-step QP bounds are built inside a private,
+  non-virtual method (`lib/NonlinearMPC.cpp:172-178`, declared at `lib/NonlinearMPC.h:153-162`)
+  with no subclass hook, unlike `HybridMPC`'s dynamics-only override
+  (`lib/HybridMPC.h:69,75-78`). The ~300-line effort estimate is contingent on resolving this —
+  either add a hook to `NonlinearMPC` first (unscoped prerequisite work) or `GPMPC` ends up a
+  from-scratch RTI loop. See the `ML3` section's "Known gap" note.
+- **`ML4`** (RL-based control) — its own example use case (nudging `OC1`'s RLS forgetting factor
+  `lambda` online) isn't buildable against `SelfTuningRegulator` as shipped: no runtime setter
+  exists (`lib/SelfTuningRegulator.h:161` only exposes a `const` accessor), and a forgetting-factor
+  setter isn't numerically trivial to add. See the `ML4` section's "Known gap" note.
+
+Also re-sequenced: **`RC2`** (LMI solver) was moved to dead-last within Phase 4 (was first) — see
+the "Recommended order within Phase 4" note and the `RC2` section's "Sequencing note." Its only
+remaining motivating use case (multi-objective Hinf/H2 mixed synthesis, per
+`algorithm_backlog.md:104`) has no roadmap line of its own anywhere in this document, and it
+remains the single largest, least-familiar lift in the whole roadmap — build familiarity on the
+cheaper Phase 4 items first, and decide whether to scope `RC2` down to that one consumer (or give
+the consumer its own item) before committing to it.
+
+One trivial naming fix applied throughout: `DT1`'s code-gen target was named `LeadLagController`
+in the original sketch; the real class is `DiscreteLeadLag` (now corrected in all 3 places it
+appeared).
 
 ---
 
@@ -1676,7 +1783,7 @@ this document scopes effort and sequencing, it does not replace that step.
 | Phase 1 | EF1, RC1, NC1, NC2, NC4, SI5, SI2, FD1, MO2 (9 items) | ~2,330 | ~22-26 days | Highest value-to-effort ratio; no cross-item dependencies, can be done in any order |
 | Phase 2 | OC1, SI1, EF2, EF3, MO1, MO3, DT4 (7 items, covers 9 backlog lines) | ~2,200 | ~21-24 days | `MO3` benefits from `MO2`/`MO1` existing but doesn't require them |
 | Phase 3 | ML1, ML2, SI3, SI4, FD2, NC3, ML3 (7 items) | ~2,250 | ~21-25 days | `ML2` strictly requires `ML1` first; everything else independent |
-| Phase 4 | RC2, OC2, OC4, DT1, DT2, DT3 (6 items) | ~2,450 | ~24-27 days | `RC2` is the single largest item in the roadmap |
+| Phase 4 | OC2, OC4, DT1, DT2, DT3, RC2 (6 items) | ~2,450 | ~24-27 days | `RC2` is the single largest item in the roadmap, sequenced last per explicit instruction (novelty/unfamiliarity, no scoped consumer — see RC2 section) |
 | Phase 5 | NC5, OC3, ML4 (3 items, covers 4 backlog lines) | ~850 | ~8-10 days | Niche/research-grade; smallest phase |
 | **Total** | **32 designs (35 backlog lines)** | **~10,080** | **~96-112 days** | Focused part-time development, roughly 19-22 weeks at the cadence `ALGORITHM_ROADMAP_PHASE2.md` used (~85-100 lines/day) |
 

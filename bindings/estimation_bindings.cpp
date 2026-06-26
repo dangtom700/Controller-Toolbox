@@ -207,6 +207,51 @@ Example
              "Fit a Wiener model: linear ARX(u -> w), then y[k] = poly(w[k]).");
 
     // -----------------------------------------------------------------------
+    // NARMAXIdentifier (Phase 3 SI4)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::NARMAXParams>(m, "NARMAXParams",
+        "Parameters for NARMAXIdentifier.")
+        .def(py::init<>())
+        .def_readwrite("na",               &ctrl::NARMAXParams::na, "Output (AR) lag order.")
+        .def_readwrite("nb",               &ctrl::NARMAXParams::nb, "Input lag order.")
+        .def_readwrite("nc",               &ctrl::NARMAXParams::nc, "Noise (MA) lag order (0 = NARX).")
+        .def_readwrite("poly_degree",      &ctrl::NARMAXParams::poly_degree, "Max monomial total degree.")
+        .def_readwrite("significance_tol", &ctrl::NARMAXParams::significance_tol,
+                       "Stop when cumulative ERR >= 1 - tol.")
+        .def_readwrite("max_terms",        &ctrl::NARMAXParams::max_terms, "Hard cap on selected terms.");
+
+    py::class_<ctrl::NARMAXResult>(m, "NARMAXResult",
+        "Result from NARMAXIdentifier.fit().")
+        .def_readonly("selected_terms", &ctrl::NARMAXResult::selected_terms,
+                      "Human-readable selected regressors, e.g. 'y(k-1)*u(k-2)'.")
+        .def_readonly("coefficients",   &ctrl::NARMAXResult::coefficients,
+                      "Least-squares coefficient per selected term.")
+        .def_readonly("final_err_sum",  &ctrl::NARMAXResult::final_err_sum,
+                      "Cumulative Error Reduction Ratio in [0,1].")
+        .def_readonly("na", &ctrl::NARMAXResult::na)
+        .def_readonly("nb", &ctrl::NARMAXResult::nb)
+        .def_readonly("nc", &ctrl::NARMAXResult::nc);
+
+    py::class_<ctrl::NARMAXIdentifier>(m, "NARMAXIdentifier", R"doc(
+Polynomial NARMAX identification via Orthogonal Forward Regression (ERR-based structure
+selection). Fits y[k] = f(y[k-1..k-na], u[k-1..k-nb], e[k-1..k-nc]) with a parsimonious
+polynomial term set.
+
+Example
+-------
+>>> p = ctrl.NARMAXParams(); p.na = 2; p.nb = 2; p.poly_degree = 2
+>>> res = ctrl.NARMAXIdentifier.fit(u, y, p)
+>>> print(res.selected_terms, res.final_err_sum)
+>>> yhat = ctrl.NARMAXIdentifier.predict(res, u_hist, y_hist)
+)doc")
+        .def_static("fit", &ctrl::NARMAXIdentifier::fit,
+             py::arg("u"), py::arg("y"), py::arg("params"),
+             "Fit a NARMAX model; returns selected terms, coefficients, and cumulative ERR.")
+        .def_static("predict", &ctrl::NARMAXIdentifier::predict,
+             py::arg("model"), py::arg("u_hist"), py::arg("y_hist"),
+             "One-step-ahead prediction (noise terms evaluated as zero).");
+
+    // -----------------------------------------------------------------------
     // ExtendedKalmanFilter  (optional - CTRL_HAS_ADVANCED_KALMAN)
     // -----------------------------------------------------------------------
 #if defined(CTRL_HAS_ADVANCED_KALMAN)

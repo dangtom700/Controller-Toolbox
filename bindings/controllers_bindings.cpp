@@ -2376,6 +2376,126 @@ Notes:
         .def("is_healthy",   &ctrl::DeePC::isHealthy,
              "False if the last ADMM solve did not converge within admm_iters.");
 
+    // -----------------------------------------------------------------------
+    // NeuralNetworkController (Phase 3 ML1)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::NNLayerSpec> nnlayer(m, "NNLayerSpec",
+        "One fully-connected layer: activation(W @ a + b).");
+    py::enum_<ctrl::NNLayerSpec::Activation>(nnlayer, "Activation")
+        .value("Tanh",     ctrl::NNLayerSpec::Activation::Tanh)
+        .value("ReLU",     ctrl::NNLayerSpec::Activation::ReLU)
+        .value("Sigmoid",  ctrl::NNLayerSpec::Activation::Sigmoid)
+        .value("Linear",   ctrl::NNLayerSpec::Activation::Linear)
+        .value("Softplus", ctrl::NNLayerSpec::Activation::Softplus)
+        .export_values();
+    nnlayer
+        .def(py::init<>())
+        .def_readwrite("W",          &ctrl::NNLayerSpec::W,          "Weight matrix (out_dim x in_dim).")
+        .def_readwrite("b",          &ctrl::NNLayerSpec::b,          "Bias vector (out_dim).")
+        .def_readwrite("activation", &ctrl::NNLayerSpec::activation, "Elementwise activation for this layer.");
+
+    py::class_<ctrl::NeuralControllerParams>(m, "NeuralControllerParams",
+        "Architecture/saturation parameters for NeuralNetworkController.")
+        .def(py::init<>())
+        .def_readwrite("layers",           &ctrl::NeuralControllerParams::layers,
+                       "Layers in forward order; the last must output a scalar.")
+        .def_readwrite("uMin",             &ctrl::NeuralControllerParams::uMin)
+        .def_readwrite("uMax",             &ctrl::NeuralControllerParams::uMax)
+        .def_readwrite("n_input_features", &ctrl::NeuralControllerParams::n_input_features);
+
+    py::class_<ctrl::NeuralNetworkController, ctrl::IController,
+               std::shared_ptr<ctrl::NeuralNetworkController>>(
+        m, "NeuralNetworkController", R"doc(
+Generic feedforward neural-network controller (fixed forward pass, scalar output).
+Import offline-trained weights; run as an IController.
+
+Usage
+-----
+>>> layer = ctrl.NNLayerSpec(); layer.W = np.array([[-1.0, -2.0]]); layer.b = np.zeros(1)
+>>> layer.activation = ctrl.NNLayerSpec.Activation.Linear
+>>> p = ctrl.NeuralControllerParams(); p.layers = [layer]; p.n_input_features = 2
+>>> nn = ctrl.NeuralNetworkController(p, Ts=0.01)
+>>> u = nn.compute_vec(np.array([x1, x2]))[0]
+)doc")
+        .def(py::init<const ctrl::NeuralControllerParams &, double>(),
+             py::arg("params"), py::arg("Ts"))
+        .def("compute",      &ctrl::NeuralNetworkController::compute,     py::arg("signal"))
+        .def("compute_vec",  &ctrl::NeuralNetworkController::computeVec,  py::arg("features"))
+        .def("reset",        &ctrl::NeuralNetworkController::reset)
+        .def("sample_time",  &ctrl::NeuralNetworkController::sampleTime)
+        .def("name",         &ctrl::NeuralNetworkController::name)
+        .def("load_weights", &ctrl::NeuralNetworkController::loadWeights, py::arg("layers"))
+        .def("input_features", &ctrl::NeuralNetworkController::inputFeatures)
+        .def("num_layers",     &ctrl::NeuralNetworkController::numLayers);
+
+    // -----------------------------------------------------------------------
+    // NNAdaptiveController (Phase 3 ML2)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::NNAdaptiveParams>(m, "NNAdaptiveParams",
+        "Parameters for NNAdaptiveController (online output-weight adaptation).")
+        .def(py::init<>())
+        .def_readwrite("nn",          &ctrl::NNAdaptiveParams::nn,
+                       "Base ML1 network; hidden layers fixed, the output layer adapts online.")
+        .def_readwrite("gamma_adapt", &ctrl::NNAdaptiveParams::gamma_adapt, "Adaptation gain.")
+        .def_readwrite("sigma_mod",   &ctrl::NNAdaptiveParams::sigma_mod,
+                       "sigma-modification leakage (bounds weight drift; same role as MRAC sigma).")
+        .def_readwrite("a_m",         &ctrl::NNAdaptiveParams::a_m, "Reference-model pole (|a_m| < 1).")
+        .def_readwrite("b_m",         &ctrl::NNAdaptiveParams::b_m, "Reference-model gain.")
+        .def_readwrite("uMin",        &ctrl::NNAdaptiveParams::uMin)
+        .def_readwrite("uMax",        &ctrl::NNAdaptiveParams::uMax);
+
+    py::class_<ctrl::NNAdaptiveController, ctrl::IController,
+               std::shared_ptr<ctrl::NNAdaptiveController>>(
+        m, "NNAdaptiveController", R"doc(
+Lyapunov-stable online adaptation of a neural network's output-layer weights, layered on
+the ML1 forward-pass core. compute(y_plant) takes the plant output (MRAC convention);
+call set_reference(r) once per step first.
+)doc")
+        .def(py::init<const ctrl::NNAdaptiveParams &, double>(),
+             py::arg("params"), py::arg("Ts"))
+        .def("compute",        &ctrl::NNAdaptiveController::compute, py::arg("y_plant"))
+        .def("set_reference",  &ctrl::NNAdaptiveController::setReference, py::arg("r"))
+        .def("reset",          &ctrl::NNAdaptiveController::reset)
+        .def("sample_time",    &ctrl::NNAdaptiveController::sampleTime)
+        .def("name",           &ctrl::NNAdaptiveController::name)
+        .def("model_output",   &ctrl::NNAdaptiveController::modelOutput)
+        .def("output_weight_norm", &ctrl::NNAdaptiveController::outputWeightNorm);
+
+    // -----------------------------------------------------------------------
+    // NonlinearIMC (Phase 3 NC3)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::NonlinearIMCParams>(m, "NonlinearIMCParams",
+        "Parameters for NonlinearIMC.")
+        .def(py::init<>())
+        .def_readwrite("filter_lambda", &ctrl::NonlinearIMCParams::filter_lambda,
+                       "IMC filter pole in (0,1): y_f[k] = lambda*y_f[k-1] + (1-lambda)*u.")
+        .def_readwrite("uMin",          &ctrl::NonlinearIMCParams::uMin)
+        .def_readwrite("uMax",          &ctrl::NonlinearIMCParams::uMax);
+
+    py::class_<ctrl::NonlinearIMC, ctrl::IController,
+               std::shared_ptr<ctrl::NonlinearIMC>>(
+        m, "NonlinearIMC", R"doc(
+Nonlinear Internal Model Control: a user-supplied nonlinear process model runs in parallel
+with the plant; the controller inverts the model for feedforward and corrects on the
+model-mismatch residual (the nonlinear analogue of the SmithPredictor structure).
+
+Usage
+-----
+>>> model   = lambda x, u: ...   # one-step process model y_hat = f(x, u)
+>>> inverse = lambda x, y_t: ... # u that drives the model output to y_t
+>>> imc = ctrl.NonlinearIMC(model, inverse, params, Ts=0.01)
+>>> imc.set_state(x)
+>>> u = imc.compute(r - y)
+)doc")
+        .def(py::init<ctrl::NonlinearIMC::ModelFn, ctrl::NonlinearIMC::InverseModelFn,
+                      const ctrl::NonlinearIMCParams &, double>(),
+             py::arg("model"), py::arg("inverse"), py::arg("params"), py::arg("Ts"))
+        .def("compute",     &ctrl::NonlinearIMC::compute, py::arg("error"))
+        .def("reset",       &ctrl::NonlinearIMC::reset)
+        .def("sample_time", &ctrl::NonlinearIMC::sampleTime)
+        .def("name",        &ctrl::NonlinearIMC::name)
+        .def("set_state",   &ctrl::NonlinearIMC::setState, py::arg("x"));
+
     // Fuzzy bindings are fully implemented in advanced_bindings.cpp (bind_advanced).
     // The stale TODO stub that used to live here was removed (audit 2026-06-13, Finding 34).
 }

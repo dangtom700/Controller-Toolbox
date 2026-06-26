@@ -81,6 +81,15 @@ see [2026-06-25-adaptive-identification-design.md](superpowers/specs/2026-06-25-
 [2026-06-25-optimization-extensions-design.md](superpowers/specs/2026-06-25-optimization-extensions-design.md),
 and [2026-06-25-ftc-reconfiguration-design.md](superpowers/specs/2026-06-25-ftc-reconfiguration-design.md).
 
+| Direct NN controller architectures | `lib/NeuralNetworkController.h`/`.cpp` (generic feedforward forward-pass core, arbitrary depth/activation, offline-weight import) — Phase 3 ML1, `examples/ex108_neural_network_controller.cpp`. See `docs/cumulative_bug_report.md` Part 69. |
+| Full neural-network adaptive control | `lib/NNAdaptiveController.h`/`.cpp` (inherits ML1; online output-layer adaptation via Lyapunov + sigma-modification, mirroring `MRACController`) — Phase 3 ML2, `examples/ex109_nn_adaptive_control.cpp`. See `docs/cumulative_bug_report.md` Part 69. |
+| Nonlinear Internal Model Control | `lib/NonlinearIMC.h`/`.cpp` (nonlinear analogue of `SmithPredictor`'s model-in-the-loop structure; parallel one-step model + inverse + mismatch feedback) — Phase 3 NC3, `examples/ex110_nonlinear_imc.cpp`. See `docs/cumulative_bug_report.md` Part 69. |
+| NARMAX | `lib/NARMAXIdentifier.h`/`.cpp` (polynomial NARMAX via Orthogonal Forward Regression / Error Reduction Ratio term selection, Extended Least Squares for noise terms) — Phase 3 SI4, `examples/ex111_narmax.cpp`. See `docs/cumulative_bug_report.md` Part 69. |
+
+**Shipped:** `ALGORITHM_ROADMAP_PHASE3.md` Phase 3 partial (4 designs: ML1, ML2, NC3, SI4),
+see `docs/cumulative_bug_report.md` Part 69. SI3 (MOESP/CVA), FD2 (complex-pole Vector Fitting),
+and ML3 (GP-MPC) remain open.
+
 ---
 
 ## Robust Control
@@ -98,25 +107,24 @@ General parametric-uncertainty representation (LFT) is **done** — see the "Alr
 
 ## Nonlinear Control
 
-Backstepping, passivity-based control, and direct Lyapunov redesign / CLF synthesis are **done**
-— see the "Already done" table above (`lib/BacksteppingController.h`, `lib/PassivityBasedController.h`,
-`lib/CLFController.h`). What's left:
+Backstepping, passivity-based control, direct Lyapunov redesign / CLF synthesis, and nonlinear
+Internal Model Control are **done** — see the "Already done" table above
+(`lib/BacksteppingController.h`, `lib/PassivityBasedController.h`, `lib/CLFController.h`,
+`lib/NonlinearIMC.h`). What's left:
 
 | Item | Notes |
 |---|---|
-| Nonlinear Internal Model Control | `SmithPredictor` + SOPDT/Rivera IMC cover the linear case; nonlinear IMC is a separate, smaller class. |
 | Globally Linearizing Control (GLC) | Niche/rare in practice — low priority. |
 
 ## System Identification
 
-Correlation-based identification, Hammerstein-Wiener models, and Maximum Likelihood / MAP
-identification are **done** — see the "Already done" table above (`lib/CorrelationID.h`,
-`lib/HammersteinWienerIdentifier.h`, `lib/MLEIdentifier.h`). What's left:
+Correlation-based identification, Hammerstein-Wiener models, Maximum Likelihood / MAP
+identification, and NARMAX are **done** — see the "Already done" table above (`lib/CorrelationID.h`,
+`lib/HammersteinWienerIdentifier.h`, `lib/MLEIdentifier.h`, `lib/NARMAXIdentifier.h`). What's left:
 
 | Item | Notes |
 |---|---|
 | MOESP / CVA (subspace ID variants) | `lib/SubspaceID.h` only implements N4SID-style identification today. |
-| NARMAX | Nonlinear parametric ID; distinct from `SINDy`'s sparse-regression approach. |
 
 ## Frequency-Domain Identification Extensions (follow-ups to Phase 4 Iteration 2)
 
@@ -148,12 +156,12 @@ above (`lib/SelfTuningRegulator.h`). What's left:
 
 ## Adaptive Control
 
-Adaptive pole placement and self-tuning regulators are **done** — see the "Already done" table
-above (`lib/SelfTuningRegulator.h`, merged with minimum-variance control under OC1). What's left:
+Adaptive pole placement, self-tuning regulators, and full neural-network adaptive control are
+**done** — see the "Already done" table above (`lib/SelfTuningRegulator.h`, merged with
+minimum-variance control under OC1; `lib/NNAdaptiveController.h`). What's left:
 
 | Item | Notes |
 |---|---|
-| Full neural-network adaptive control | `NeuralPID` is a hybrid NN-PID, not a general adaptive NN control law. |
 | Reinforcement-learning-based adaptive control | `DynaController` (Dyna-style MBRL) and `CEMController` are lightweight; a full RL-policy controller is a larger, separate effort (see Deep RL below — same gap, two wishlist entries). |
 
 ## Advanced Estimation & Filtering
@@ -164,11 +172,13 @@ the "Already done" table above (`lib/HinfFilter.h`, `lib/SetMembershipEstimator.
 
 ## Machine Learning Integration
 
+Direct neural-network controller architectures are **done** — see the "Already done" table
+above (`lib/NeuralNetworkController.h`). What's left:
+
 | Item | Notes |
 |---|---|
 | GP-MPC (combined) | `GaussianProcess`/`GPResidualModel` and `NonlinearMPC`/`TubeMPC` exist separately; a controller that consumes GP uncertainty directly in the MPC cost/constraints is still open (`ALGORITHM_ROADMAP_PHASE2.md` flagged this as the motivation for hybrid models — partially addressed by `HybridMPC`, but not GP-uncertainty-aware MPC specifically). |
 | Deep reinforcement learning | Explicitly deferred already in `ALGORITHM_ROADMAP_PHASE2.md` ("Full RL framework... no C++ RL core needed" — Python example only, same reasoning likely applies here). |
-| Direct neural-network controller architectures | Beyond `NeuralPID`'s NN-PID hybrid — a general NN control law. |
 
 ## Deployment & Real-Time Tools
 

@@ -448,12 +448,48 @@ def phase_bindings():
     # Step 1: cmake configure via conda run so pybind11 (installed in the conda
     # env) is discovered correctly.  Adds CTRL_BUILD_PYTHON_BINDINGS=ON and
     # Release build type to the existing build directory.
+    #
+    # No -G flag: this used to hardcode '-G', 'Ninja', but Phase 2 (compile.bat/
+    # compile.sh) configures the same build/ directory first with no -G of its
+    # own, so on Windows it caches whatever CMake's platform default is (MinGW
+    # Makefiles here). CMake refuses to reconfigure an existing cache with a
+    # different generator, so forcing Ninja here after Phase 2 already ran
+    # reliably failed with "generator : Ninja / Does not match the generator
+    # used previously". Omitting -G makes this step inherit whatever Phase 2
+    # just cached, which can never mismatch since it's the same value.
+    cmake_args = [
+        'cmake', '-S', '.', '-B', 'build',
+        '-DCTRL_BUILD_PYTHON_BINDINGS=ON',
+        '-DCMAKE_BUILD_TYPE=Release',
+    ]
+    if os.name == 'nt':
+        # MSYS2 UCRT64 (the compiler/cmake toolchain) and the conda env (the
+        # Python being targeted) are separate installs. pybind11's legacy
+        # FindPythonLibs module can resolve PythonLibs to MSYS2's own
+        # libpythonX.Y.dll.a instead of the conda env's matching import lib,
+        # even when PYTHON_EXECUTABLE/the modern Python3 finder correctly
+        # picked the conda interpreter — producing a version-mismatched link
+        # failure ("ld returned 1 exit status") at the ctrl_toolbox build step.
+        # Pin both the modern and legacy variable names to the conda env's own
+        # dev files so neither finder can pick the wrong one.
+        #
+        # Forward slashes, not os.path.join: CMake bakes this path verbatim into
+        # bindings/CMakeFiles/ctrl_toolbox.dir/linkLibs.rsp, and GNU ld's @response-
+        # file parser treats backslashes as escape characters - a Windows-style
+        # 'C:\Users\...\python312.lib' silently loses every backslash there
+        # ("cannot find C:Users...python312.lib: No such file or directory").
+        py_prefix = sys.prefix.replace('\\', '/')
+        py_lib = f'{py_prefix}/libs/python{sys.version_info.major}{sys.version_info.minor}.lib'
+        py_include = f'{py_prefix}/include'
+        if os.path.isfile(py_lib):
+            cmake_args += [
+                f'-DPython3_LIBRARY={py_lib}', f'-DPython3_INCLUDE_DIR={py_include}',
+                f'-DPYTHON_LIBRARY={py_lib}', f'-DPYTHON_INCLUDE_DIR={py_include}',
+            ]
+        else:
+            print(f'  [WARN] conda env python lib not found at {py_lib} - skipping explicit pin\n')
     rc = _run_cmd(
-        ['conda', 'run', '-n', 'soft_robotics', '--',
-         'cmake', '-S', '.', '-B', 'build',
-         '-DCTRL_BUILD_PYTHON_BINDINGS=ON',
-         '-DCMAKE_BUILD_TYPE=Release',
-         '-G', 'Ninja'],
+        ['conda', 'run', '-n', 'soft_robotics', '--'] + cmake_args,
         'cmake configure (bindings)'
     )
     if rc != 0:

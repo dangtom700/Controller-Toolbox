@@ -1548,4 +1548,82 @@ pll.step(1.0)
 assert math.isfinite(pll.frequency_hz())
 print(f'PhaseLockedLoop frequency_hz() after one step = {pll.frequency_hz():.4f}')
 
+# ---------------------------------------------------------------------------
+# NeuralNetworkController (Phase 3 ML1) smoke test
+# ---------------------------------------------------------------------------
+assert hasattr(ctrl, 'NeuralNetworkController'), "NeuralNetworkController not bound"
+assert ctrl.registry_has('neural_network_controller'), "neural_network_controller not registered"
+_nn_layer = ctrl.NNLayerSpec()
+_nn_layer.W = np.array([[-1.0, -2.0]])
+_nn_layer.b = np.zeros(1)
+_nn_layer.activation = ctrl.NNLayerSpec.Activation.Linear
+_nn_p = ctrl.NeuralControllerParams()
+_nn_p.layers = [_nn_layer]
+_nn_p.n_input_features = 2
+_nn = ctrl.NeuralNetworkController(_nn_p, 0.01)
+_u_nn = _nn.compute_vec(np.array([1.0, 0.5]))
+assert np.all(np.isfinite(_u_nn)), "NeuralNetworkController output not finite"
+assert abs(float(_u_nn[0]) - (-2.0)) < 1e-9, "NeuralNetworkController forward pass wrong"
+print('NeuralNetworkController smoke test passed.')
+
+# ---------------------------------------------------------------------------
+# NNAdaptiveController (Phase 3 ML2) smoke test
+# ---------------------------------------------------------------------------
+assert hasattr(ctrl, 'NNAdaptiveController'), "NNAdaptiveController not bound"
+assert ctrl.registry_has('nn_adaptive_controller'), "nn_adaptive_controller not registered"
+_nna_hidden = ctrl.NNLayerSpec()
+_nna_hidden.W = np.array([[1.0, 0.2], [0.5, -0.3], [-0.5, 0.1]])
+_nna_hidden.b = np.zeros(3)
+_nna_hidden.activation = ctrl.NNLayerSpec.Activation.Tanh
+_nna_out = ctrl.NNLayerSpec()
+_nna_out.W = np.zeros((1, 3))
+_nna_out.b = np.zeros(1)
+_nna_out.activation = ctrl.NNLayerSpec.Activation.Linear
+_nna_nn = ctrl.NeuralControllerParams()
+_nna_nn.layers = [_nna_hidden, _nna_out]
+_nna_nn.n_input_features = 2  # NNAdaptiveController requires the [y_m - y, r] feature convention
+_nna_p = ctrl.NNAdaptiveParams()
+_nna_p.nn = _nna_nn
+_nna_p.gamma_adapt = 0.5
+_nna = ctrl.NNAdaptiveController(_nna_p, 0.01)
+_nna.set_reference(1.0)
+_u_nna = _nna.compute(0.0)
+assert np.isfinite(_u_nna), "NNAdaptiveController output not finite"
+print('NNAdaptiveController smoke test passed.')
+
+# ---------------------------------------------------------------------------
+# NonlinearIMC (Phase 3 NC3) smoke test
+# ---------------------------------------------------------------------------
+assert hasattr(ctrl, 'NonlinearIMC'), "NonlinearIMC not bound"
+assert ctrl.registry_has('nonlinear_imc'), "nonlinear_imc not registered"
+_imc_p = ctrl.NonlinearIMCParams()
+_imc_p.filter_lambda = 0.8
+_imc = ctrl.NonlinearIMC(
+    lambda x, u: 0.5 * float(x[0]) + 0.5 * u,   # model y_hat = 0.5 x + 0.5 u
+    lambda x, y_t: 2.0 * y_t - float(x[0]),      # inverse: u such that model output = y_t
+    _imc_p, 0.1)
+_imc.set_state(np.array([0.0]))
+_u_imc = _imc.compute(1.0)
+assert np.isfinite(_u_imc), "NonlinearIMC output not finite"
+print('NonlinearIMC smoke test passed.')
+
+# ---------------------------------------------------------------------------
+# NARMAXIdentifier (Phase 3 SI4) smoke test
+# ---------------------------------------------------------------------------
+assert hasattr(ctrl, 'NARMAXIdentifier'), "NARMAXIdentifier not bound"
+assert ctrl.registry_has('narmax'), "narmax not registered"
+_rng = np.random.default_rng(0)
+_u_id = _rng.standard_normal(400)
+_y_id = np.zeros(400)
+for _k in range(2, 400):
+    _y_id[_k] = 0.5 * _y_id[_k - 1] + 0.4 * _u_id[_k - 1]
+_nx_p = ctrl.NARMAXParams()
+_nx_p.na = 1
+_nx_p.nb = 1
+_nx_p.nc = 0
+_nx_p.poly_degree = 1
+_nx_res = ctrl.NARMAXIdentifier.fit(_u_id, _y_id, _nx_p)
+assert len(_nx_res.selected_terms) >= 1, "NARMAX selected no terms"
+print('NARMAXIdentifier smoke test passed.')
+
 print('\nAll smoke tests passed.')

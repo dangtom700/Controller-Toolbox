@@ -146,6 +146,10 @@ for %%T in (
     ex105_nsga2
     ex106_constrained_tuning
     ex107_ftc_supervisor
+    ex108_neural_network_controller
+    ex109_nn_adaptive_control
+    ex110_nonlinear_imc
+    ex111_narmax
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

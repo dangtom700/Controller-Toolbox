@@ -114,6 +114,10 @@
 #include "GaussianProcess.h"            ///< GP - Gaussian Process Regression; SE kernel, Cholesky inference, fixed-budget online.
 #include "EchoStateNetwork.h"           ///< ESN - Echo State Network; random reservoir, ridge-regression readout (Jaeger 2001).
 #include "NeuralPID.h"                  ///< NeuralPID - online neural network adapts Kp/Ki/Kd via backprop through linearised plant.
+#include "NeuralNetworkController.h"    ///< NeuralNetworkController - generic feedforward NN, fixed forward pass (Phase 3 ML1).
+#include "NNAdaptiveController.h"       ///< NNAdaptiveController - Lyapunov-stable online output-weight adaptation over ML1 (Phase 3 ML2).
+#include "NonlinearIMC.h"               ///< NonlinearIMC - nonlinear Internal Model Control, model-in-the-loop mismatch feedback (Phase 3 NC3).
+#include "NARMAXIdentifier.h"           ///< NARMAXIdentifier - polynomial NARMAX ID via orthogonal forward regression (Phase 3 SI4).
 #include "CEMController.h"              ///< CEM-MPC - Cross-Entropy Method MPC; derivative-free stochastic rollout optimisation.
 #include "DeePC.h"                      ///< DeePC - Data-Enabled Predictive Control; Hankel + ADMM, no system ID needed (Coulson 2019).
 #include "DynaController.h"             ///< Dyna - model-based RL; SINDy error-dynamics fit + synthetic rollout planning (Sutton 1991).

@@ -174,6 +174,14 @@ add_example(ex105_nsga2)
 add_example(ex106_constrained_tuning)
 # Phase 3 (Algorithm Roadmap Phase 2): DT4 fault-tolerant control reconfiguration
 add_example(ex107_ftc_supervisor)
+# Phase 3 (Algorithm Roadmap Phase 3): ML1 generic feedforward neural-network controller
+add_example(ex108_neural_network_controller)
+# Phase 3 (Algorithm Roadmap Phase 3): ML2 NN-adaptive control
+add_example(ex109_nn_adaptive_control)
+# Phase 3 (Algorithm Roadmap Phase 3): NC3 nonlinear internal model control
+add_example(ex110_nonlinear_imc)
+# Phase 3 (Algorithm Roadmap Phase 3): SI4 NARMAX identification
+add_example(ex111_narmax)
 
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
