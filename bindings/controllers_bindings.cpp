@@ -2613,6 +2613,95 @@ Usage
         .def("iterations",  &ctrl::ValueIterationSolver::iterations)
         .def("final_delta", &ctrl::ValueIterationSolver::finalDelta);
 
+    // -----------------------------------------------------------------------
+    // LPSolver / LPMPC (Phase 4 OC4)
+    // -----------------------------------------------------------------------
+    py::enum_<ctrl::LPStatus>(m, "LPStatus", "Terminal status of an LPSolver::solve() call.")
+        .value("Optimal",       ctrl::LPStatus::Optimal)
+        .value("Infeasible",    ctrl::LPStatus::Infeasible)
+        .value("Unbounded",     ctrl::LPStatus::Unbounded)
+        .value("IterationLimit", ctrl::LPStatus::IterationLimit)
+        .export_values();
+
+    py::class_<ctrl::LPProblem>(m, "LPProblem",
+        "Bounded-variable LP: minimize c'x s.t. A_ineq*x<=b_ineq, A_eq*x==b_eq, lb<=x<=ub.")
+        .def(py::init<>())
+        .def_readwrite("c",      &ctrl::LPProblem::c)
+        .def_readwrite("A_ineq", &ctrl::LPProblem::A_ineq, "0 rows is valid (no inequalities).")
+        .def_readwrite("b_ineq", &ctrl::LPProblem::b_ineq)
+        .def_readwrite("A_eq",   &ctrl::LPProblem::A_eq, "0 rows is valid (no equalities).")
+        .def_readwrite("b_eq",   &ctrl::LPProblem::b_eq)
+        .def_readwrite("lb",     &ctrl::LPProblem::lb, "Required, finite (use +-1e9 for \"unbounded\").")
+        .def_readwrite("ub",     &ctrl::LPProblem::ub);
+
+    py::class_<ctrl::LPResult>(m, "LPResult", "Result of an LPSolver::solve() call.")
+        .def_readonly("status", &ctrl::LPResult::status)
+        .def_readonly("x",      &ctrl::LPResult::x, "Meaningful only when status == Optimal.")
+        .def_readonly("cost",   &ctrl::LPResult::cost, "Meaningful only when status == Optimal.")
+        .def_readonly("iters",  &ctrl::LPResult::iters);
+
+    py::class_<ctrl::LPSolver>(m, "LPSolver", R"doc(
+Two-phase simplex solver for bounded-variable linear programs. Not an extension of
+GradientProjectionQP (that solver is box-only/first-order QP; this is a from-scratch simplex --
+see docs/superpowers/specs/2026-06-27-lp-solver-lp-mpc-design.md).
+
+Usage
+-----
+>>> p = ctrl.LPProblem()
+>>> p.c = np.array([-1.0, -1.0])
+>>> p.A_ineq = np.array([[1.0, 2.0], [3.0, 1.0]]); p.b_ineq = np.array([4.0, 6.0])
+>>> p.lb = np.zeros(2); p.ub = np.full(2, 1e9)
+>>> result = ctrl.LPSolver.solve(p)
+>>> print(result.status, result.x, result.cost)
+)doc")
+        .def_static("solve", &ctrl::LPSolver::solve,
+             py::arg("problem"), py::arg("max_iter") = 200, py::arg("tol") = 1e-8,
+             "Solve via two-phase simplex (Bland's rule, cycle-free). Returns LPResult.");
+
+    py::class_<ctrl::LPMPCParams>(m, "LPMPCParams",
+        "Tuning and horizon parameters for LPMPC.")
+        .def(py::init<>())
+        .def_readwrite("Np",         &ctrl::LPMPCParams::Np,    "Prediction horizon [steps].")
+        .def_readwrite("Nc",         &ctrl::LPMPCParams::Nc,    "Control horizon [steps], Nc <= Np.")
+        .def_readwrite("rho_y",      &ctrl::LPMPCParams::rho_y, "Output-tracking L1 weight.")
+        .def_readwrite("rho_u",      &ctrl::LPMPCParams::rho_u, "Control-move L1 weight.")
+        .def_readwrite("uMin",       &ctrl::LPMPCParams::uMin,  "Hard lower limit on u.")
+        .def_readwrite("uMax",       &ctrl::LPMPCParams::uMax,  "Hard upper limit on u.")
+        .def_readwrite("duMin",      &ctrl::LPMPCParams::duMin, "Hard lower limit on Delta u.")
+        .def_readwrite("duMax",      &ctrl::LPMPCParams::duMax, "Hard upper limit on Delta u.")
+        .def_readwrite("lpMaxIter",  &ctrl::LPMPCParams::lpMaxIter, "LPSolver pivot budget per step.")
+        .def_readwrite("lpTol",      &ctrl::LPMPCParams::lpTol, "LPSolver feasibility/optimality tolerance.");
+
+    py::class_<ctrl::LPMPC, ctrl::IController,
+               std::shared_ptr<ctrl::LPMPC>>(m, "LPMPC", R"doc(
+SISO L1-cost linear MPC -- casts L1 tracking + L1 move-suppression as an LP each step
+(LPSolver two-phase simplex) instead of DiscreteMPC's L2/QP. NOT a zero-allocation hot path
+(LPSolver builds its tableau fresh per call); prefer DiscreteMPC for hard-RT loops where an
+L2 cost is acceptable.
+
+Example
+-------
+>>> p = ctrl.LPMPCParams(); p.Np = 15; p.Nc = 5; p.rho_y = 1.0; p.rho_u = 0.1
+>>> mpc = ctrl.LPMPC(plant_ss, p)   # plant_ss must be SISO (1 input, 1 output)
+>>> u = mpc.compute_ref(x_current, r_ref)
+)doc")
+        .def(py::init<const ctrl::StateSpace &, const ctrl::LPMPCParams &>(),
+             py::arg("plant"), py::arg("params"))
+        .def("compute",          &ctrl::LPMPC::compute, py::arg("error"))
+        .def("compute_ref",      &ctrl::LPMPC::computeRef,
+             py::arg("x_current"), py::arg("r_ref"),
+             "Optimise u[k] given state x[k] and scalar reference r[k].")
+        .def("reset",            &ctrl::LPMPC::reset)
+        .def("sample_time",      &ctrl::LPMPC::sampleTime)
+        .def("set_params",       &ctrl::LPMPC::setParams,       py::arg("params"))
+        .def("params",           &ctrl::LPMPC::params, py::return_value_policy::copy)
+        .def("set_plant",        &ctrl::LPMPC::setPlant,        py::arg("plant"))
+        .def("set_state",        &ctrl::LPMPC::setState,        py::arg("x"))
+        .def("set_last_applied", &ctrl::LPMPC::setLastApplied,  py::arg("u_applied"))
+        .def("last_lp_converged", &ctrl::LPMPC::lastLPConverged)
+        .def("last_lp_iters",      &ctrl::LPMPC::lastLPIters)
+        .def("is_healthy",        &ctrl::LPMPC::isHealthy);
+
     // Fuzzy bindings are fully implemented in advanced_bindings.cpp (bind_advanced).
     // The stale TODO stub that used to live here was removed (audit 2026-06-13, Finding 34).
 }

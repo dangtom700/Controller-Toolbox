@@ -194,6 +194,10 @@ add_example(ex115_value_iteration_solver)
 add_example(ex116_dynamic_inversion_feedforward)
 # Scope-triage batch: EventTriggeredWrapper aperiodic-sampling decorator
 add_example(ex117_event_triggered_wrapper)
+# Phase 4 (Algorithm Roadmap Phase 3): OC4 LPSolver - two-phase simplex
+add_example(ex118_lp_solver)
+# Phase 4 (Algorithm Roadmap Phase 3): OC4 LPMPC - SISO L1-cost linear MPC
+add_example(ex119_lp_mpc)
 
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)

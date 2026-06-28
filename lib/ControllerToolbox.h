@@ -157,6 +157,8 @@
 #include "ComplexVectorFit.h"        ///< ComplexVectorFit - complex-conjugate-pole Vector Fitting (Phase 3 FD2).
 #include "ValueIterationSolver.h"    ///< ValueIterationSolver - grid-based dynamic programming / value iteration (Phase 4 OC2).
 #include "EventTriggeredWrapper.h"   ///< EventTriggeredWrapper - aperiodic-sampling decorator, recomputes only past a deadband.
+#include "LPSolver.h"                ///< LPSolver - two-phase simplex for bounded-variable LPs (Phase 3 OC4).
+#include "LPMPC.h"                   ///< LPMPC - SISO L1-cost linear MPC solved via LPSolver per step (Phase 3 OC4).
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,

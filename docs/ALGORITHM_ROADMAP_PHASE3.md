@@ -1,8 +1,8 @@
 # Controller Toolbox — Algorithm Roadmap: Phase 3
 
 **Created:** 2026-06-24.
-**Status:** Planning — 23 of 32 items shipped (Phase 1, Phase 2, and Phase 3 complete:
-ML1/ML2/NC3/SI4/SI3/ML3/FD2 all done).
+**Status:** Planning — 25 of 32 items shipped (Phase 1, Phase 2, and Phase 3 complete:
+ML1/ML2/NC3/SI4/SI3/ML3/FD2 all done; Phase 4 underway: OC2, OC4 done).
 **Pre-implementation audit (2026-06-25):** open items SI3, ML3, ML4, RC2, and DT1 had
 "Reused components"/effort claims checked against the actual current code; SI3/ML3/ML4 each have
 a real gap and RC2 has been re-sequenced. See "Pre-Implementation Audit Findings" near the end of
@@ -53,7 +53,7 @@ sketches here are directional (to scope effort and reuse), not committed APIs.
 | NC3 | Nonlinear Internal Model Control | 3 | Done |
 | ML3 | GP-MPC | 3 | Done |
 | OC2 | Dynamic Programming / Value Iteration | 4 | Done |
-| OC4 | Linear-Programming-Based Control | 4 | Open |
+| OC4 | Linear-Programming-Based Control | 4 | Done |
 | DT1 | Code Generation | 4 | Open |
 | DT2 | Real-Time Profiling Beyond WCET | 4 | Open |
 | DT3 | Distributed / Networked Control | 4 | Open |

@@ -156,6 +156,8 @@ for %%T in (
     ex115_value_iteration_solver
     ex116_dynamic_inversion_feedforward
     ex117_event_triggered_wrapper
+    ex118_lp_solver
+    ex119_lp_mpc
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

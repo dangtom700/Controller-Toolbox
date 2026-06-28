@@ -10041,3 +10041,240 @@ TEST_CASE("EventTriggeredWrapper::reset() clears held state, forcing the next ca
     REQUIRE(etw.triggerCount() == 1); // counters reset to 0 then incremented once
     REQUIRE(etw.holdCount() == 0);
 }
+
+// =============================================================================
+// LPSolver - two-phase simplex for bounded-variable linear programs (Phase 3 OC4)
+// =============================================================================
+
+TEST_CASE("LPSolver recovers the textbook vertex optimum of a 2-variable LP", "[lp_solver]")
+{
+    // maximize x1+x2 (== minimize -x1-x2) s.t. x1+2x2<=4, 3x1+x2<=6, x>=0.
+    // Hand-derived vertex optimum: (x1,x2)=(1.6,1.2), objective=2.8 (c'x=-2.8).
+    ctrl::LPProblem problem;
+    problem.c.resize(2);
+    problem.c << -1.0, -1.0;
+    problem.A_ineq.resize(2, 2);
+    problem.A_ineq << 1.0, 2.0,
+                       3.0, 1.0;
+    problem.b_ineq.resize(2);
+    problem.b_ineq << 4.0, 6.0;
+    problem.lb = Eigen::VectorXd::Zero(2);
+    problem.ub = Eigen::VectorXd::Constant(2, 1e9);
+
+    const ctrl::LPResult result = ctrl::LPSolver::solve(problem);
+
+    REQUIRE(result.status == ctrl::LPStatus::Optimal);
+    REQUIRE_THAT(result.x(0), WithinAbs(1.6, 1e-6));
+    REQUIRE_THAT(result.x(1), WithinAbs(1.2, 1e-6));
+    REQUIRE_THAT(result.cost, WithinAbs(-2.8, 1e-6));
+}
+
+TEST_CASE("LPSolver handles an equality-constrained LP (A_eq path)", "[lp_solver]")
+{
+    // minimize 2*x1+3*x2 s.t. x1+x2=4 (equality), 0<=x1,x2<=3.
+    // x2=4-x1 => cost=12-x1, minimized by maximizing x1 -> x1=3 (its own upper bound), x2=1.
+    ctrl::LPProblem problem;
+    problem.c.resize(2);
+    problem.c << 2.0, 3.0;
+    problem.A_eq.resize(1, 2);
+    problem.A_eq << 1.0, 1.0;
+    problem.b_eq.resize(1);
+    problem.b_eq << 4.0;
+    problem.lb = Eigen::VectorXd::Zero(2);
+    problem.ub = Eigen::VectorXd::Constant(2, 3.0);
+
+    const ctrl::LPResult result = ctrl::LPSolver::solve(problem);
+
+    REQUIRE(result.status == ctrl::LPStatus::Optimal);
+    REQUIRE_THAT(result.x(0), WithinAbs(3.0, 1e-6));
+    REQUIRE_THAT(result.x(1), WithinAbs(1.0, 1e-6));
+    REQUIRE_THAT(result.cost, WithinAbs(9.0, 1e-6));
+}
+
+TEST_CASE("LPSolver reports Infeasible (not an infinite loop) on contradictory constraints",
+          "[lp_solver]")
+{
+    // x1<=1 (A_ineq row [1], b=1) AND x1>=3 (encoded as -x1<=-3) within box [0,10]: empty region.
+    ctrl::LPProblem problem;
+    problem.c.resize(1);
+    problem.c << 0.0;
+    problem.A_ineq.resize(2, 1);
+    problem.A_ineq << 1.0, -1.0;
+    problem.b_ineq.resize(2);
+    problem.b_ineq << 1.0, -3.0;
+    problem.lb = Eigen::VectorXd::Zero(1);
+    problem.ub = Eigen::VectorXd::Constant(1, 10.0);
+
+    const ctrl::LPResult result = ctrl::LPSolver::solve(problem);
+
+    REQUIRE(result.status == ctrl::LPStatus::Infeasible);
+}
+
+TEST_CASE("LPSolver reaches Optimal despite a genuinely redundant equality row", "[lp_solver]")
+{
+    // Same equality row listed twice (x1+2x2=4); regression guard for the "artificial parked at
+    // zero in the basis" degenerate case analyzed in LPSolver.h's doc comment. The equality is
+    // consistent with the (1.6,1.2) vertex from the first test above (1.6+2*1.2=4.0 exactly), so
+    // combined with 3x1+x2<=6 the optimum is identical: (1.6,1.2), cost=-2.8.
+    ctrl::LPProblem problem;
+    problem.c.resize(2);
+    problem.c << -1.0, -1.0;
+    problem.A_eq.resize(2, 2);
+    problem.A_eq << 1.0, 2.0,
+                    1.0, 2.0;
+    problem.b_eq.resize(2);
+    problem.b_eq << 4.0, 4.0;
+    problem.A_ineq.resize(1, 2);
+    problem.A_ineq << 3.0, 1.0;
+    problem.b_ineq.resize(1);
+    problem.b_ineq << 6.0;
+    problem.lb = Eigen::VectorXd::Zero(2);
+    problem.ub = Eigen::VectorXd::Constant(2, 1e9);
+
+    const ctrl::LPResult result = ctrl::LPSolver::solve(problem);
+
+    REQUIRE(result.status == ctrl::LPStatus::Optimal);
+    REQUIRE_THAT(result.x(0), WithinAbs(1.6, 1e-6));
+    REQUIRE_THAT(result.x(1), WithinAbs(1.2, 1e-6));
+    REQUIRE_THAT(result.cost, WithinAbs(-2.8, 1e-6));
+}
+
+TEST_CASE("LPSolver reports IterationLimit (not a mislabeled Infeasible) when starved",
+          "[lp_solver]")
+{
+    // Same LP as the first test, but maxIter=1 is nowhere near enough to resolve even Phase 1.
+    // Regression guard: running out of budget must not be reported as a false "Infeasible".
+    ctrl::LPProblem problem;
+    problem.c.resize(2);
+    problem.c << -1.0, -1.0;
+    problem.A_ineq.resize(2, 2);
+    problem.A_ineq << 1.0, 2.0,
+                       3.0, 1.0;
+    problem.b_ineq.resize(2);
+    problem.b_ineq << 4.0, 6.0;
+    problem.lb = Eigen::VectorXd::Zero(2);
+    problem.ub = Eigen::VectorXd::Constant(2, 1e9);
+
+    const ctrl::LPResult result = ctrl::LPSolver::solve(problem, /*maxIter=*/1);
+
+    REQUIRE(result.status == ctrl::LPStatus::IterationLimit);
+}
+
+// =============================================================================
+// LPMPC - SISO L1-cost linear MPC solved via LPSolver per step (Phase 3 OC4)
+// =============================================================================
+
+TEST_CASE("LPMPC tracks a unit step reference", "[lp_mpc][integration]")
+{
+    auto plant = makePlant();
+    ctrl::LPMPCParams p;
+    p.Np = 15; p.Nc = 5; p.rho_y = 10.0; p.rho_u = 0.01;
+    p.uMin = -100.0; p.uMax = 100.0; p.duMin = -100.0; p.duMax = 100.0;
+
+    ctrl::LPMPC mpc(plant, p);
+
+    Eigen::VectorXd x = Eigen::VectorXd::Zero(plant.stateSize());
+    double y = 0.0;
+    for (int k = 0; k < 1500; ++k)
+    {
+        mpc.setState(x);
+        const double u = mpc.computeRef(x, 1.0);
+        Eigen::VectorXd uv(1);
+        uv << u;
+        y = ctrl::ssStep(plant, x, uv)(0);
+    }
+
+    REQUIRE_THAT(y, WithinAbs(1.0, 0.02)); // within 2% of reference
+}
+
+TEST_CASE("LPMPC higher rho_u reduces peak control-move magnitude", "[lp_mpc]")
+{
+    auto plant = makePlant();
+    auto runPeakDu = [&](double rho_u) {
+        ctrl::LPMPCParams p;
+        p.Np = 15; p.Nc = 5; p.rho_y = 10.0; p.rho_u = rho_u;
+        p.uMin = -100.0; p.uMax = 100.0; p.duMin = -100.0; p.duMax = 100.0;
+        ctrl::LPMPC mpc(plant, p);
+
+        Eigen::VectorXd x = Eigen::VectorXd::Zero(plant.stateSize());
+        double u_prev = 0.0, peak_du = 0.0;
+        for (int k = 0; k < 200; ++k)
+        {
+            mpc.setState(x);
+            const double u = mpc.computeRef(x, 1.0);
+            peak_du = std::max(peak_du, std::fabs(u - u_prev));
+            u_prev = u;
+            Eigen::VectorXd uv(1);
+            uv << u;
+            ctrl::ssStep(plant, x, uv);
+        }
+        return peak_du;
+    };
+
+    const double peak_low_ru  = runPeakDu(0.001);
+    const double peak_high_ru = runPeakDu(1.0);
+    REQUIRE(peak_high_ru < peak_low_ru);
+}
+
+TEST_CASE("LPMPC respects hard u bounds under an unreachable reference", "[lp_mpc]")
+{
+    auto plant = makePlant();
+    ctrl::LPMPCParams p;
+    p.Np = 15; p.Nc = 5; p.rho_y = 10.0; p.rho_u = 0.01;
+    p.uMin = -0.5; p.uMax = 0.5; p.duMin = -100.0; p.duMax = 100.0;
+
+    ctrl::LPMPC mpc(plant, p);
+
+    Eigen::VectorXd x = Eigen::VectorXd::Zero(plant.stateSize());
+    bool within_bounds = true;
+    for (int k = 0; k < 300; ++k)
+    {
+        mpc.setState(x);
+        const double u = mpc.computeRef(x, 10.0); // far outside what +-0.5 can reach
+        within_bounds = within_bounds && (u >= p.uMin - 1e-9) && (u <= p.uMax + 1e-9);
+        Eigen::VectorXd uv(1);
+        uv << u;
+        ctrl::ssStep(plant, x, uv);
+    }
+    REQUIRE(within_bounds);
+}
+
+TEST_CASE("LPMPC holds u_prev on non-finite compute(error) input", "[lp_mpc][nan_guard]")
+{
+    auto plant = makePlant();
+    ctrl::LPMPCParams p;
+    p.Np = 10; p.Nc = 3;
+    ctrl::LPMPC mpc(plant, p);
+
+    const double u0     = mpc.compute(1.0);
+    const double u_nan  = mpc.compute(std::numeric_limits<double>::quiet_NaN());
+    REQUIRE_THAT(u_nan, WithinAbs(u0, 1e-12));
+}
+
+TEST_CASE("LPMPC lastLPConverged/isHealthy is true for a well-conditioned problem", "[lp_mpc]")
+{
+    auto plant = makePlant();
+    ctrl::LPMPCParams p;
+    p.Np = 10; p.Nc = 3; p.rho_y = 1.0; p.rho_u = 0.1;
+    ctrl::LPMPC mpc(plant, p);
+
+    Eigen::VectorXd x = Eigen::VectorXd::Zero(plant.stateSize());
+    mpc.computeRef(x, 1.0);
+
+    REQUIRE(mpc.lastLPConverged());
+    REQUIRE(mpc.isHealthy());
+}
+
+TEST_CASE("LPMPC isHealthy reflects LP convergence under a starved iteration budget",
+          "[lp_mpc][health_contract]")
+{
+    auto plant = makePlant();
+    ctrl::LPMPCParams p;
+    p.Np = 15; p.Nc = 5; p.lpMaxIter = 1; // deliberately starved
+    ctrl::LPMPC mpc(plant, p);
+
+    Eigen::VectorXd x = Eigen::VectorXd::Zero(plant.stateSize());
+    mpc.computeRef(x, 1.0);
+
+    REQUIRE_FALSE(mpc.isHealthy());
+}

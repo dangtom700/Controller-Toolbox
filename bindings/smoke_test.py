@@ -1743,4 +1743,37 @@ _u2 = _etw.compute(5.0)   # well past deadband -> triggers
 assert _etw.trigger_count() == 2, "EventTriggeredWrapper: expected 2nd trigger"
 print('EventTriggeredWrapper smoke test passed.')
 
+# LPSolver (Phase 4 OC4) - textbook 2-variable LP, known vertex optimum (1.6, 1.2), cost -2.8
+_lp_problem = ctrl.LPProblem()
+_lp_problem.c = np.array([-1.0, -1.0])
+_lp_problem.A_ineq = np.array([[1.0, 2.0], [3.0, 1.0]])
+_lp_problem.b_ineq = np.array([4.0, 6.0])
+_lp_problem.lb = np.zeros(2)
+_lp_problem.ub = np.full(2, 1e9)
+_lp_result = ctrl.LPSolver.solve(_lp_problem)
+assert _lp_result.status == ctrl.LPStatus.Optimal, "LPSolver: expected Optimal status"
+assert abs(float(_lp_result.x[0]) - 1.6) < 1e-4, "LPSolver: wrong x[0]"
+assert abs(float(_lp_result.x[1]) - 1.2) < 1e-4, "LPSolver: wrong x[1]"
+assert abs(_lp_result.cost - (-2.8)) < 1e-4, "LPSolver: wrong cost"
+print('LPSolver smoke test passed.')
+
+# LPMPC (Phase 4 OC4) - SISO step tracking on a stable first-order plant
+_lpmpc_plant_c = ctrl.StateSpace(np.array([[-1.0]]), np.array([[1.0]]),
+                                  np.array([[1.0]]), np.array([[0.0]]), 0.0)
+_lpmpc_plant = ctrl.c2d(_lpmpc_plant_c, 0.1, ctrl.C2dMethod.ZOH)
+_lpmpc_params = ctrl.LPMPCParams()
+_lpmpc_params.Np, _lpmpc_params.Nc = 10, 3
+_lpmpc_params.rho_y, _lpmpc_params.rho_u = 1.0, 0.1
+_lpmpc_params.uMin, _lpmpc_params.uMax = -5.0, 5.0
+_lpmpc = ctrl.LPMPC(_lpmpc_plant, _lpmpc_params)
+_x_lpmpc = np.zeros(_lpmpc_plant.state_size())
+_y_lpmpc = 0.0
+for _ in range(150):
+    _u_lpmpc = _lpmpc.compute(1.0 - _y_lpmpc)
+    _y_vec_lpmpc, _x_lpmpc = ctrl.ss_step_copy(_lpmpc_plant, _x_lpmpc, np.array([_u_lpmpc]))
+    _y_lpmpc = float(np.squeeze(_y_vec_lpmpc))
+assert _lpmpc.last_lp_converged(), "LPMPC: expected last LP solve to converge"
+assert abs(_y_lpmpc - 1.0) < 0.05, "LPMPC: did not track reference"
+print('LPMPC smoke test passed.')
+
 print('\nAll smoke tests passed.')

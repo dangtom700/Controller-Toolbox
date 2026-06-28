@@ -1332,3 +1332,104 @@ configure, build, and smoke-test `ctrl_toolbox` from a clean invocation — both
 **Docs updated:** `docs/ALGORITHM_ROADMAP_PHASE3.md` status table (20/32 shipped, Phase 1-3
 complete for ML1/ML2/NC3/SI4; SI3/FD2/ML3 remain Open); this report's header table + new Part 69
 section; `run.py`/`setup.ps1` patched as described above.
+
+---
+
+## Part 70 — Algorithm Roadmap Phase 3, Phase 4 (OC4: LPSolver + LPMPC) — 2026-06-27
+
+OC4 (Linear-Programming-Based Control, second in the recommended Phase 4 order after OC2)
+implemented end-to-end: `lib/LPSolver.h` (header-only two-phase simplex, Bland's rule, bounded
+variables) and `lib/LPMPC.{h,cpp}` (SISO L1-cost linear MPC built on it), plus bindings,
+`smoke_test.py`, 2 C++ + 2 Python examples (`ex118`/`ex119`, `ex135`/`ex136`), and 11 new Catch2
+tests (`[lp_solver]` x5, `[lp_mpc]` x6). See
+`docs/superpowers/specs/2026-06-27-lp-solver-lp-mpc-design.md` for the full design (including a
+pre-implementation audit that corrected the roadmap's "extends `GradientProjectionQP`" claim —
+verified false; `LPSolver` is a from-scratch simplex, since that QP solver has no general-
+inequality machinery and is a first-order method that can't produce exact LP vertices).
+
+**Four real numerical bugs found and fixed during local verification, none caught by code review
+alone** — all reproduced via a textbook 2-variable LP (`maximize x1+x2 s.t. x1+2x2<=4, 3x1+x2<=6,
+x>=0`, known optimum `(1.6, 1.2)`) and the LPMPC closed loop, before any of this shipped:
+
+1. **Catastrophic cancellation from the box-row-augmentation design itself.** Every `LPProblem`
+   variable's upper bound becomes an explicit inequality row (`y_i <= ub_i - lb_i`, the "shift to
+   nonnegative" trick from the design doc). This toolbox's "unbounded" sentinel is `+-1e9`
+   (`BacksteppingParams::uMin`/`uMax`, etc.) — injecting that literal magnitude into a row costs
+   ~9 orders of magnitude of float64 precision to every Gauss-Jordan elimination step touching
+   it. The textbook LP (trivially feasible, `x=(0,0)` alone proves it) came back `Infeasible`
+   with `phase1_obj=1.19e-7` against `tol=1e-8` — a precision artifact, not a real infeasibility.
+2. **The first fix (skip the box row entirely above a threshold) was wrong and reverted.**
+   Skipping the row removes simplex's own per-variable safety net: a column with no explicit
+   upper bound can hit "no eligible ratio-test row" (defensively read as `Unbounded`) when it's
+   only *indirectly* bounded via another variable's cost trade-off — exactly `LPMPC`'s `DeltaU`
+   when `duMin`/`duMax` are left at their default `+-1e9`. Confirmed by reproducing: the default-
+   `LPMPCParams` Catch2 test passed with skipping but failed (false `Unbounded`-shaped behavior)
+   once a second scenario exercised the default sentinel duMin/duMax.
+3. **The real fix: clamp `lb`/`ub` to `+-1e6` *before* computing the shift, not just inside the
+   box row.** The shift `y = x - lb` injects `lb`'s literal magnitude into *every* row referencing
+   that variable's column, not just its own box row — capping only the box row's RHS left the
+   shift itself contaminating the whole tableau. Root-caused via a standalone scratch harness
+   reproducing `LPMPC`'s exact LP structure outside the class, printing the raw tableau: a
+   trivially-feasible problem's Phase-1 "optimum" landed at `phase1_obj~=3e9` (matching `Nc=3`
+   `DeltaU` columns each shifted by `~1e9`) — a wrong-answer bug, not rounding noise. Fixed by
+   computing `lb_eff = lb.cwiseMax(-1e6)`, `ub_eff = ub.cwiseMin(1e6).cwiseMax(lb_eff)` (the
+   second clamp guards the pathological case where the *entire* true interval sits beyond the
+   cap on one side) and using these consistently everywhere a shift offset appears — the row
+   RHS, the original inequality/equality rows' constant term, and the final un-shift
+   `x = lb_eff + y_sol`. Documented as a deliberate scale limit: `LPSolver` is not intended for
+   problems whose true optimal `x_i` needs `|x_i| > 1e6`.
+4. **Phase-1 feasibility tolerance was too tight relative to ordinary pivot-count rounding.**
+   Even after fix 3, a ~25-variable `LPMPC` instance (`Np=15`, `Nc=5`) left
+   `phase1_obj=1.01e-8` after 65 pivots — *1% over* the default `tol=1e-8`, on a genuinely
+   feasible problem. `tol` also governs the ratio-test cutoff and Phase-2 optimality check, where
+   a tight value is exactly what a precision-seeking caller wants; decoupled the feasibility
+   check onto `std::max(tol, 1e-6)` instead of literal `tol`, so a looser user `tol` is still
+   honored while a floor protects the default.
+5. **`LPMPCParams::lpMaxIter` default (200, matching `LPSolver`'s own default) was insufficient
+   near a degenerate optimum.** Bland's rule (required for the cycle-free guarantee) converges
+   more slowly than Dantzig's rule near tied/degenerate vertices, and L1-cost epigraph
+   formulations are *structurally* prone to exactly that at their optimum (multiple `(t_y, t_u)`
+   splits sharing the same cost at a kink). Caught as 51/1500 steps reporting `IterationLimit`
+   at exactly 200 pivots once the closed loop settled near steady state, even though the
+   practically-useful answer was already correct. Raised `LPMPCParams::lpMaxIter` default to 500.
+6. **Not a bug — a genuine L1-MPC characteristic, "the deadzone."** Unlike QP/L2-cost MPC (which
+   always takes an infinitesimal `DeltaU` for any nonzero gradient), an L1 cost only moves when
+   the aggregate marginal benefit (`rho_y * sum` of the plant's per-step step-response
+   coefficients across the horizon) clears the `rho_u` penalty; below that threshold the
+   LP-optimal `DeltaU` is *exactly* zero, every step, forever. `ex119`'s plant (`G(s) =
+   1/(s^2+1.5s+1)`, `Ts=0.01s` — same plant as `ex01_tf_pid.cpp`) has a tiny per-step
+   sensitivity, so the first attempt at `rho_u=0.05` (a DiscreteMPC-style ratio) left the
+   controller stuck at `u=0` forever despite `e=1.0` persisting — correctly optimal given those
+   weights, not a solver fault. Fixed by retuning the example to `rho_u=0.001` (verified via a
+   `rho_u` sweep: `0.05`/`0.001` -> stuck/`0.0001`/`1e-5`/`1e-6` -> track correctly) and documented
+   as a class-level `@warning`-style note on `LPMPC.h`: rho_u typically needs to be 1-2 orders of
+   magnitude smaller than a QP analogue would suggest. All 11 `[lp_mpc]`/`[lp_solver]` Catch2
+   tests' chosen parameters were independently re-verified against this threshold and needed no
+   changes (already comfortably in the "active" regime or testing a property — bound respect,
+   NaN-guard, convergence flag — that doesn't depend on it).
+
+**Verification:** full `test_catch2_advanced` suite (7781 assertions, 397 test cases) passes, no
+regressions. Both new C++ examples PASS. `bindings/smoke_test.py` passes (built inside
+`conda run -n soft_robotics` per the Part 68 Python-interpreter gotcha — this session hit the
+*same* MSYS2-system-Python mis-detection again on the first configure attempt, plus a *second*,
+independent stale-cache issue: re-running `cmake -B build` with `CTRL_BUILD_PYTHON_BINDINGS=ON`
+inside `conda run` still picked up `PYTHON_EXECUTABLE` cached from an earlier failed attempt in
+this same `build/` dir, requiring an explicit `-DPYTHON_EXECUTABLE=<env path>` plus `-U`-clearing
+the stale `_Python3_*` internal cache entries to force fresh detection). Both new Python examples
+PASS.
+
+**Non-obvious facts added (Part 70):**
+```
+LPSolver bound scale     -> internally clamps to +-1e6; true optima outside that range are wrong
+LPSolver feasibility tol -> max(tol, 1e-6), decoupled from the optimality/ratio-test tol
+LPMPC rho_u tuning       -> 1-2 orders of magnitude smaller than a QP/DiscreteMPC analogue
+LPMPC lpMaxIter default  -> 500, not LPSolver's own 200 (L1 epigraph degenerate-vertex slowdown)
+LPMPC scope              -> SISO only; not a zero-allocation hot path (tableau built per call)
+cmake -B build (same dir, 2nd attempt with bindings ON) -> stale PYTHON_EXECUTABLE cache can
+  survive even inside conda run; pass -DPYTHON_EXECUTABLE explicitly + -U the _Python3_* keys
+```
+
+**Docs updated:** `docs/ALGORITHM_ROADMAP_PHASE3.md` status table (OC4 Open -> Done, 25/32
+shipped); `docs/algorithm_backlog.md` (OC4 + the already-shipped-but-still-listed OC2 moved to
+"Already done"); `docs/superpowers/specs/2026-06-27-lp-solver-lp-mpc-design.md` (new); this
+report's new Part 70 section.

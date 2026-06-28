@@ -97,6 +97,7 @@ set(CTRL_CORE_SOURCES
     FTCSupervisor.cpp
     GPMPC.cpp
     ValueIterationSolver.cpp
+    LPMPC.cpp
 )
 
 # --- Optional sources --------------------------------------------------------

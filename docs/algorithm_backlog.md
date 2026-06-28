@@ -52,6 +52,8 @@ of it.
 | MHE nonlinear/constrained variants (partial) | `lib/MovingHorizonEstimator.h` already has polytopic inequality constraints (`ALGORITHM_ROADMAP_PHASE2.md` E4) |
 | Sanathanan-Koerner iteration / Vector Fitting (partial) | `lib/VectorFitting.h` implements SK iteration and real-pole Vector Fitting (Gustavsen & Semlyen 1999), but only for fitting a *real positive magnitude* profile (no phase) to a *real-pole* filter, built for `DiscreteHinf::solveMuSyn`'s D-scaling fits — not general complex-response identification. See "Frequency-Domain Identification Extensions" below for what's still open. |
 | Frequency-domain identification | `lib/FreqDomainIdentifier.h` (`fitLevy`, Levy 1959 linearised least-squares fit of a full complex frequency response to a `TransferFunction`) — Phase 4 Iteration 2. SK-iteration and complex-pole-pair generalizations are deliberately deferred, see "Frequency-Domain Identification Extensions" below. |
+| Dynamic programming / value iteration | `lib/ValueIterationSolver.h` — grid-based synchronous value iteration, n<=3-4 states (Phase 4 OC2). |
+| Linear-programming-based control | `lib/LPSolver.h` (two-phase simplex, Bland's rule) + `lib/LPMPC.h` (SISO L1-cost linear MPC) — Phase 4 OC4. Min-time/free-horizon control and MIMO are explicitly out of scope; see the design doc. |
 | H2 synthesis | `lib/DiscreteH2.h`/`.cpp` — discrete LQG separation-principle solve (two DAREs via `DiscreteLQR::solveDARE`, the "Riccati-based shortcut" this entry once said H2 needed instead of an LMI solver). Requires D11=0/D22=0 generalised plants (full D11≠0 loop-shifting support still open, see Robust Control below). Bound in `bindings/advanced_bindings.cpp` (`ctrl.DiscreteH2`), exercised by `examples/ex88_h2_synthesis.cpp`. |
 | Structured H-infinity (fixed order/structure) | `DiscreteHinf::solveStructured()` in `lib/DiscreteHinf.h`/`.cpp` — CMA-ES (`AutoTuner`) direct search over a caller-supplied fixed-order parameterisation, exactly the non-LMI approach this entry predicted. **Caveat:** implemented but has no test/binding/example coverage yet (unlike `solve()`/`solveMuSyn()`) — verify behaviour before relying on it. |
 | Mu-synthesis / structured-uncertainty analysis (partial) | `lib/MuAnalysis.h` (`UncertaintyStructure`/`computeMu`/`peakMu`/`robustStabilityRadius`, D-scaling upper bound on the structured singular value) plus `DiscreteHinf::solveMuSyn()` (DK-iteration). Covers the canonical block-diagonal multiplicative-output-uncertainty M-Delta loop; a general arbitrary P-Delta LFT interconnection builder is still open, see "General parametric-uncertainty representation (LFT)" below. |
@@ -145,14 +147,14 @@ Fitting, are both **done** — see the "Already done" table above (`lib/SKFit.h`
 
 ## Optimal Control
 
-Minimum-variance control / self-tuning regulator is **done** — see the "Already done" table
-above (`lib/SelfTuningRegulator.h`). What's left:
+Minimum-variance control / self-tuning regulator, dynamic programming / value iteration, and
+linear-programming-based control are **done** — see the "Already done" table above
+(`lib/SelfTuningRegulator.h`, `lib/ValueIterationSolver.h`, `lib/LPSolver.h` + `lib/LPMPC.h`).
+What's left:
 
 | Item | Notes |
 |---|---|
-| Dynamic programming / value iteration | No DP solver exists; would need a discretized state-space grid. |
 | Dual control | Actively explores to reduce uncertainty — research-grade, niche; low priority. |
-| Linear-programming-based control | No LP solver exists in `lib/` (only `GradientProjectionQP` for QP). |
 
 ## Adaptive Control
 
