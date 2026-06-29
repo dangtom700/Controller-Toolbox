@@ -33,6 +33,13 @@ sys_ss = ctrl.tf2ss(tf)
 print(f'StateSpace n={sys_ss.state_size()} m={sys_ss.input_size()} p={sys_ss.output_size()}')
 assert sys_ss.state_size() == 1
 
+# 2b. ss2tf round-trip (biproper TF so num/den lengths already match - no padding ambiguity)
+_ss2tf_tf = ctrl.TransferFunction([0.5, 0.3], [1.0, -0.6], 0.01)
+_ss2tf_back = ctrl.ss2tf(ctrl.tf2ss(_ss2tf_tf))
+assert abs(_ss2tf_back.num[0] - 0.5) < 1e-9, "ss2tf round-trip num[0] mismatch"
+assert abs(_ss2tf_back.num[1] - 0.3) < 1e-9, "ss2tf round-trip num[1] mismatch"
+assert abs(_ss2tf_back.den[1] - (-0.6)) < 1e-9, "ss2tf round-trip den[1] mismatch"
+
 # 3. ssStepCopy (non-mutating)
 x = np.zeros(sys_ss.state_size())
 y, x_next = ctrl.ss_step_copy(sys_ss, x, np.array([1.0]))
@@ -1723,6 +1730,17 @@ try:
 except ValueError:
     pass
 print('invert_transfer_function smoke test passed.')
+
+# FeedforwardController (paired with invert_transfer_function + tf2ss for dynamic inversion)
+assert hasattr(ctrl, 'FeedforwardController'), "FeedforwardController not bound"
+_ff_ginv_ss = ctrl.tf2ss(_itf_ginv)
+_ff = ctrl.FeedforwardController(_ff_ginv_ss)
+_u_ff = _ff.compute(1.0)
+assert np.isfinite(_u_ff), "FeedforwardController.compute() not finite"
+assert _ff.sample_time() == _ff_ginv_ss.Ts
+_ff.reset()
+assert np.all(_ff.state() == 0.0), "FeedforwardController.reset() did not clear state"
+print('FeedforwardController smoke test passed.')
 
 # EventTriggeredWrapper
 assert hasattr(ctrl, 'EventTriggeredWrapper'), "EventTriggeredWrapper not bound"

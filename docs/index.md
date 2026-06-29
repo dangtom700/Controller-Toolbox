@@ -1,7 +1,7 @@
 # Documentation Index
 
 One map into all committed docs, organized by what you're trying to do rather than where
-the file happens to live. Nothing here duplicates content — every line links to a single
+the file happens to live. Nothing here duplicates content - every line links to a single
 source of truth.
 
 ---
@@ -12,7 +12,7 @@ source of truth.
 |---|---|
 | [README.md](../README.md) | Quick start, minimal example, repo layout, controller inventory |
 | `.\setup.ps1` (Windows) / `./setup.sh` (Linux/macOS) | One-time toolchain + conda env + bindings bootstrap |
-| [docs/handoff.md](handoff.md) | Onboarding tribal knowledge — current, verified, kept in sync. Read this before trusting any "status" doc below |
+| [docs/handoff.md](handoff.md) | Onboarding tribal knowledge - current, verified, kept in sync. Read this before trusting any "status" doc below |
 
 ## Using the library
 
@@ -37,7 +37,7 @@ source of truth.
 
 | Doc | What it's for |
 |---|---|
-| [case-study/](../case-study/) | The 18 end-to-end physics studies — start with the study's own `README.md` |
+| [case-study/](../case-study/) | The 18 end-to-end physics studies - start with the study's own `README.md` |
 | [docs/case_study_status.md](case_study_status.md) | Auto-generated per-study status (regenerate via `tools/case_study_tracker.py`; never hand-edit) |
 | [docs/case_study_copilot_reference.md](case_study_copilot_reference.md) | Condensed public-API map for scaffolding a new study |
 
@@ -59,7 +59,7 @@ source of truth.
 | Doc | What it's for |
 |---|---|
 | [docs/algorithm_backlog.md](algorithm_backlog.md) | Candidate algorithm list for future phases, deduped against current `lib/` contents |
-| [docs/ALGORITHM_ROADMAP_PHASE3.md](ALGORITHM_ROADMAP_PHASE3.md) | Phase-3 roadmap — 32 designs sequencing every open `algorithm_backlog.md` item by value/ROI into 5 phases |
+| [docs/ALGORITHM_ROADMAP_PHASE3.md](ALGORITHM_ROADMAP_PHASE3.md) | Phase-3 roadmap - 32 designs sequencing every open `algorithm_backlog.md` item by value/ROI into 5 phases |
 | [docs/superpowers/specs/](superpowers/specs/) | Approved design specs awaiting or under implementation |
 
 ## Historical / internal records
@@ -70,9 +70,9 @@ or the source itself, trust the latter.
 
 | Doc | What it's for |
 |---|---|
-| [docs/PROJECT_MASTER_STATE.md](PROJECT_MASTER_STATE.md) | Project state snapshot — flagged stale in its own header; see `handoff.md` instead |
-| [docs/ALGORITHM_ROADMAP_PHASE2.md](ALGORITHM_ROADMAP_PHASE2.md) | Phase-2 roadmap — 12/13 items shipped; kept as original design rationale |
-| [docs/robust_implementation_plan.md](robust_implementation_plan.md) | Robustness-analysis implementation plan — all 5 phases complete |
+| [docs/PROJECT_MASTER_STATE.md](PROJECT_MASTER_STATE.md) | Project state snapshot - flagged stale in its own header; see `handoff.md` instead |
+| [docs/ALGORITHM_ROADMAP_PHASE2.md](ALGORITHM_ROADMAP_PHASE2.md) | Phase-2 roadmap - 12/13 items shipped; kept as original design rationale |
+| [docs/robust_implementation_plan.md](robust_implementation_plan.md) | Robustness-analysis implementation plan - all 5 phases complete |
 | [docs/cumulative_bug_report.md](cumulative_bug_report.md) | Long-form, Part-numbered change/bug history (Part 51+) |
 | [docs/compact_bug_report_parts_1-25.md](compact_bug_report_parts_1-25.md) / [26-50.md](compact_bug_report_parts_26-50.md) | Condensed history for earlier parts |
 | [docs/archived/](../docs/archived/) | Superseded docs kept for reference (`test_update.md`, `audit_report.md`, `roadmap_deployment_frontend.md`) |

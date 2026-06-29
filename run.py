@@ -200,6 +200,7 @@ REPLACEMENTS = {
 }
 
 _self_basename = os.path.basename(__file__)
+_SKIP_DIRS = {'build', '.git', '__pycache__'}
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -227,7 +228,6 @@ def scan_files(directory, show_context=True):
     files_hit = 0
     char_freq = defaultdict(int)
 
-    _SKIP_DIRS = {'build', '.git', '__pycache__'}
     for root, dirs, files in os.walk(directory):
         dirs[:] = [d for d in dirs if d not in _SKIP_DIRS]
         for filename in sorted(files):
@@ -290,10 +290,11 @@ def apply_replacements(directory, dry_run=False):
     total_replacements = 0
     files_changed = 0
 
-    _SKIP_DIRS = {'build', '.git', '__pycache__', 'docs'}
     for root, dirs, files in os.walk(directory):
         dirs[:] = [d for d in dirs if d not in _SKIP_DIRS]
         for filename in sorted(files):
+            if filename.endswith('.txt'):
+                continue    # skip .txt files by default since they often contain arbitrary text (e.g. README, license)
             if filename == _self_basename:
                 continue
             if not filename.endswith(EXTENSIONS):

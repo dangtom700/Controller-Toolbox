@@ -4,16 +4,16 @@
 
 **Goal:** Add `ComplexVectorFit`, a `lib/` class that fits a stable discrete-time SISO model to complex (magnitude+phase) frequency-response data using complex-conjugate pole pairs, fully wired (build, Python bindings, smoke test, C++ + Python examples, Catch2 tests, doc status updates), per the approved design at `docs/superpowers/specs/2026-06-25-complex-vector-fit-design.md`.
 
-**Architecture:** One new standalone class (no shared base — it's a static-method identifier, like its siblings `SKFit`/`FreqDomainIdentifier`/`VectorFitting`). The algorithm is a Sanathanan-Koerner-reweighted least-squares loop in `TransferFunction`'s native `zinv = z^-1` basis (matching `FreqDomainIdentifier::buildLevySystem`'s convention, **not** `VectorFitting::buildSKSystem`'s internal ascending-`z^{+j}` convention, which is private to that class and would not produce valid `TransferFunction` coefficients if copied directly). Each iteration divides by the current denominator estimate `D_prev(zinv) = prod_k(1 - poles[k]*zinv)`, built from real and/or complex-conjugate-pair pole estimates; poles are relocated each iteration via a companion-matrix eigendecomposition (real matrix, so conjugate pairs come out exact — no perturbation hack needed, unlike `VectorFitting.cpp`'s real-pole-only workaround). Diagnostics (final poles + partial-fraction residues) are computed once after the loop via a closed-form formula, no second least-squares solve.
+**Architecture:** One new standalone class (no shared base - it's a static-method identifier, like its siblings `SKFit`/`FreqDomainIdentifier`/`VectorFitting`). The algorithm is a Sanathanan-Koerner-reweighted least-squares loop in `TransferFunction`'s native `zinv = z^-1` basis (matching `FreqDomainIdentifier::buildLevySystem`'s convention, **not** `VectorFitting::buildSKSystem`'s internal ascending-`z^{+j}` convention, which is private to that class and would not produce valid `TransferFunction` coefficients if copied directly). Each iteration divides by the current denominator estimate `D_prev(zinv) = prod_k(1 - poles[k]*zinv)`, built from real and/or complex-conjugate-pair pole estimates; poles are relocated each iteration via a companion-matrix eigendecomposition (real matrix, so conjugate pairs come out exact - no perturbation hack needed, unlike `VectorFitting.cpp`'s real-pole-only workaround). Diagnostics (final poles + partial-fraction residues) are computed once after the loop via a closed-form formula, no second least-squares solve.
 
 **Tech Stack:** C++20, Eigen (`Eigen::EigenSolver`, `Eigen::ColPivHouseholderQR`), pybind11, Catch2 v3, CMake, Python (numpy) for the example/smoke test.
 
 ## Global Constraints
 
-- This is offline system-identification code (not a `compute()`/`step()` hot path) — the RT zero-allocation rules (`CLAUDE.md` section 7) do **not** apply here, the same exemption `VectorFitting`/`SKFit`/`FreqDomainIdentifier` already have.
-- `TransferFunction`'s native convention is `H(zinv) = N(zinv)/D(zinv)`, `D[0]=1`, `zinv = exp(-j*omega*Ts)` — every basis function and companion-matrix construction in this plan is derived fresh for that convention, not copied from `VectorFitting.cpp`'s different internal convention.
-- `compile.bat`/`compile.sh` example-target lists are hand-maintained — every new example must be added to both.
-- Construction-time/call-time validation throws `std::invalid_argument` for invalid inputs (mismatched/empty lengths, zero total pole count, underdetermined systems) — matching `SKFit::fitSK`'s existing checks exactly.
+- This is offline system-identification code (not a `compute()`/`step()` hot path) - the RT zero-allocation rules (`CLAUDE.md` section 7) do **not** apply here, the same exemption `VectorFitting`/`SKFit`/`FreqDomainIdentifier` already have.
+- `TransferFunction`'s native convention is `H(zinv) = N(zinv)/D(zinv)`, `D[0]=1`, `zinv = exp(-j*omega*Ts)` - every basis function and companion-matrix construction in this plan is derived fresh for that convention, not copied from `VectorFitting.cpp`'s different internal convention.
+- `compile.bat`/`compile.sh` example-target lists are hand-maintained - every new example must be added to both.
+- Construction-time/call-time validation throws `std::invalid_argument` for invalid inputs (mismatched/empty lengths, zero total pole count, underdetermined systems) - matching `SKFit::fitSK`'s existing checks exactly.
 - The algorithm and all numeric thresholds below were verified in a throwaway numpy prototype before being written into this plan (mirrors `2026-06-24-resonant-notch-pll-controllers.md`'s precedent of pre-verifying math); see the design spec's "Why this is not redundant with SKFit" section for what that prototyping found and corrected.
 
 ---
@@ -544,7 +544,7 @@ Expected: clean compile (no errors). If `ComplexVectorFit.cpp`/`.h` have a typo,
 - [ ] **Step 7: Run the new tests and verify they pass**
 
 Run: `build/tests/test_catch2_advanced.exe [complex_vector_fit]`
-Expected: `All tests passed (N assertions in 4 test cases)`. If a test fails on a marginal threshold (e.g. the RMSE-vs-Levy margin or a pole-distance tolerance), the algorithm itself has already been verified correct in the design spec's prototyping — check first whether it's a genuinely-unlucky noise draw from this run's RNG stream (try re-running; `std::mt19937`/`std::normal_distribution` differ from the numpy prototype's RNG, so exact convergence numbers will differ run-to-run only if the seed changes, but are deterministic for a fixed seed) before suspecting the implementation. Document any real discrepancy in `docs/cumulative_bug_report.md` per this repo's workflow rather than re-deriving the algorithm from scratch.
+Expected: `All tests passed (N assertions in 4 test cases)`. If a test fails on a marginal threshold (e.g. the RMSE-vs-Levy margin or a pole-distance tolerance), the algorithm itself has already been verified correct in the design spec's prototyping - check first whether it's a genuinely-unlucky noise draw from this run's RNG stream (try re-running; `std::mt19937`/`std::normal_distribution` differ from the numpy prototype's RNG, so exact convergence numbers will differ run-to-run only if the seed changes, but are deterministic for a fixed seed) before suspecting the implementation. Document any real discrepancy in `docs/cumulative_bug_report.md` per this repo's workflow rather than re-deriving the algorithm from scratch.
 
 - [ ] **Step 8: Commit**
 
@@ -823,7 +823,7 @@ Expected: prints the same style of output as the C++ example, ending in `[PASS] 
 
 Insert a new row after line 87 (the `NARMAX` row in the "Already done" table):
 ```markdown
-| Complex-conjugate-pole Vector Fitting | `lib/ComplexVectorFit.h`/`.cpp` (generalizes `VectorFitting`'s pole-relocation SK loop to a complex magnitude+phase target with complex-conjugate pole pairs; explicit pole/residue diagnostics) — Phase 3 FD2, `examples/ex112_complex_vector_fit.cpp`. See [2026-06-25-complex-vector-fit-design.md](superpowers/specs/2026-06-25-complex-vector-fit-design.md). |
+| Complex-conjugate-pole Vector Fitting | `lib/ComplexVectorFit.h`/`.cpp` (generalizes `VectorFitting`'s pole-relocation SK loop to a complex magnitude+phase target with complex-conjugate pole pairs; explicit pole/residue diagnostics) - Phase 3 FD2, `examples/ex112_complex_vector_fit.cpp`. See [2026-06-25-complex-vector-fit-design.md](superpowers/specs/2026-06-25-complex-vector-fit-design.md). |
 ```
 
 Replace lines 89-91 (the "Shipped" summary):
@@ -838,7 +838,7 @@ Replace lines 139-144 (the "Frequency-Domain Identification Extensions" section'
 "What's left" table):
 ```markdown
 Generalizing SK iteration to full complex-response fitting, and complex-conjugate-pole Vector
-Fitting, are both **done** — see the "Already done" table above (`lib/SKFit.h`,
+Fitting, are both **done** - see the "Already done" table above (`lib/SKFit.h`,
 `lib/ComplexVectorFit.h`). No items remain open in this category.
 ```
 
@@ -846,7 +846,7 @@ Fitting, are both **done** — see the "Already done" table above (`lib/SKFit.h`
 
 Replace lines 4-5 (top status line):
 ```markdown
-**Status:** Planning — 21 of 32 items shipped (Phase 1 and Phase 2 complete; Phase 3 partial:
+**Status:** Planning - 21 of 32 items shipped (Phase 1 and Phase 2 complete; Phase 3 partial:
 ML1/ML2/NC3/SI4/FD2 done, SI3/ML3 open).
 ```
 

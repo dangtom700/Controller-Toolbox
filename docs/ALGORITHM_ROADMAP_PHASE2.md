@@ -1,13 +1,13 @@
-# Controller Toolbox — Algorithm Roadmap: Phase 2
+# Controller Toolbox - Algorithm Roadmap: Phase 2
 
 **Created:** 2026-06-11 (Part 50 planning)
 **Status (updated Part 66, 2026-06-20):** 12 of 13 items shipped. Only **D2 (Digital Twin
-Lite)** remains open (LOW priority, no implementation yet) — see `CLAUDE.md`'s Open Items
+Lite)** remains open (LOW priority, no implementation yet) - see `CLAUDE.md`'s Open Items
 table for current status. This document is kept below as the original design rationale/API
 sketches for each item; treat the per-item write-ups as historical design notes, not an
 indication that the work is still pending. See the status table immediately below for what
 shipped where.
-**Scope:** DAE Representation (P1-P3) → Model Estimation (E1-E4) → Hybrid Models (H1-H4) → Deployment (D1-D2)
+**Scope:** DAE Representation (P1-P3) -> Model Estimation (E1-E4) -> Hybrid Models (H1-H4) -> Deployment (D1-D2)
 
 | ID | Name | Status |
 |----|------|--------|
@@ -58,44 +58,44 @@ enforcement in MHE, and a cleaner `GreyBoxEstimator` API.
 
 ```
 P1 (DAESystem + dae2ode)
-  │
-  ├─► P2 (c2d for DAE)          enables linearise-and-discretise of DAE plants
-  └─► P3 (DAE-aware EKF)        algebraic projection after each UKF/EKF update step
-  │
-  ├─► E1 (GreyBoxEstimator) ───────────────────────────► E3 (GP Residual)
-  │     │                                                        │
-  │     └─► E2 (RecursiveGreyBox, wraps UKF)                    └─► H4 (HybridModelTrainer)
-  │                                                                       │
-  ├─► E4 (MHE Inequality Constraints) — independent                       │
-  │                                                               H1 (HybridModel base class)
-  │                                                                       │
-  └─────────────────────────────────────────────────────────► H2 (HybridMPC) ──► H3 (RL-MPC)
+  |
+  |-► P2 (c2d for DAE)          enables linearise-and-discretise of DAE plants
+  |-► P3 (DAE-aware EKF)        algebraic projection after each UKF/EKF update step
+  |
+  |-► E1 (GreyBoxEstimator) ---------------------------► E3 (GP Residual)
+  |     |                                                        |
+  |     |-► E2 (RecursiveGreyBox, wraps UKF)                    |-► H4 (HybridModelTrainer)
+  |                                                                       |
+  |-► E4 (MHE Inequality Constraints) - independent                       |
+  |                                                               H1 (HybridModel base class)
+  |                                                                       |
+  |---------------------------------------------------------► H2 (HybridMPC) --► H3 (RL-MPC)
 
-D1 (Mismatch Detector) — independent CUSUM extension
-D2 (Digital Twin Lite) ──── requires E1 + D1
+D1 (Mismatch Detector) - independent CUSUM extension
+D2 (Digital Twin Lite) ---- requires E1 + D1
 ```
 
-**Recommended implementation order:** P1 → P2 → P3 → E1 → E2 → E4 → E3 → H1 → H2 → D1 → H4 → H3 → D2
+**Recommended implementation order:** P1 -> P2 -> P3 -> E1 -> E2 -> E4 -> E3 -> H1 -> H2 -> D1 -> H4 -> H3 -> D2
 
 ---
 
 ## Phase 0: DAE Model Representation
 
-**Scope:** Index-1 semi-explicit DAE only. Index ≥ 2 requires the Pantelides algorithm
+**Scope:** Index-1 semi-explicit DAE only. Index >= 2 requires the Pantelides algorithm
 and is a research-grade effort outside this project's focus. Index-1 covers the overwhelming
 majority of control-relevant systems (constrained mechanisms, power systems, process plants
 with equilibrium stages, electrical circuits).
 
 **Semi-explicit Index-1 form:**
 ```
-x1' = f(x1, x2, u)    ← differential states (integrated by RK4 / Euler)
- 0  = g(x1, x2, u)    ← algebraic constraints (solved at each step, not integrated)
- y  = h(x1, x2, u)    ← outputs
+x1' = f(x1, x2, u)    <- differential states (integrated by RK4 / Euler)
+ 0  = g(x1, x2, u)    <- algebraic constraints (solved at each step, not integrated)
+ y  = h(x1, x2, u)    <- outputs
 ```
 
 ---
 
-### P1 — DAESystem Struct + `dae2ode()` Converter
+### P1 - DAESystem Struct + `dae2ode()` Converter
 
 **Goal:** Add a `DAESystem` data structure to `PlantModel.h` and a `dae2ode()` function
 that reduces it to a standard ODE by eliminating `x2` via a Newton solve on `g`. The
@@ -138,7 +138,7 @@ dae2ode(const DAESystem& dae,
 
 The Newton solve at each step: given `x1[k+1]` (after integrating `f`), find `x2[k+1]`
 such that `g(x1[k+1], x2[k+1], u) = 0` via Newton-Raphson with `LinearisationHelper`
-numerical Jacobian `∂g/∂x2`.
+numerical Jacobian `dg/dx2`.
 
 **Consistent initialisation helper:**
 ```cpp
@@ -150,8 +150,8 @@ VectorXd consistentInit(const DAESystem& dae,
 ```
 
 **Reused components:**
-- `PlantModel.h` — add `DAESystem` struct and free functions alongside existing `StateSpace`
-- `LinearisationHelper::jacobianX` — provides `∂g/∂x2` for Newton solve (no new dependency)
+- `PlantModel.h` - add `DAESystem` struct and free functions alongside existing `StateSpace`
+- `LinearisationHelper::jacobianX` - provides `dg/dx2` for Newton solve (no new dependency)
 
 **Effort estimate:** ~250 lines (struct + Newton + consistent init + binding + 3 tests)
 
@@ -165,13 +165,13 @@ balance `g = F_in*C_in - F_out*C - r(C, T) = 0` (equilibrium assumption for a fa
 - EHFS: pressure-balance algebraic equations currently inlined
 
 **Catch2 test plan (`[dae_system]`):**
-1. Index-1 DAE with known analytic solution — `dae2ode()` trajectory matches ODE solution within Newton tolerance
-2. `consistentInit()` — residual `‖g(x1, x2, u)‖ < tol` at the returned `x2`
-3. Singular or near-singular `∂g/∂x2` — Newton fails gracefully (return last iterate, set flag)
+1. Index-1 DAE with known analytic solution - `dae2ode()` trajectory matches ODE solution within Newton tolerance
+2. `consistentInit()` - residual `||g(x1, x2, u)|| < tol` at the returned `x2`
+3. Singular or near-singular `dg/dx2` - Newton fails gracefully (return last iterate, set flag)
 
 ---
 
-### P2 — `c2d()` Overload for DAE → Discrete-Time StateSpace
+### P2 - `c2d()` Overload for DAE -> Discrete-Time StateSpace
 
 **Goal:** Extend `c2d()` to accept a `DAESystem`, linearise it at an operating point,
 eliminate the algebraic states analytically, and return a discrete-time `StateSpace`.
@@ -189,10 +189,10 @@ StateSpace c2d(const DAESystem& dae,
 ```
 
 **Linearisation steps:**
-1. Compute Jacobians `A11 = ∂f/∂x1`, `A12 = ∂f/∂x2`, `G1 = ∂g/∂x1`, `G2 = ∂g/∂x2`
+1. Compute Jacobians `A11 = df/dx1`, `A12 = df/dx2`, `G1 = dg/dx1`, `G2 = dg/dx2`
    via `LinearisationHelper` central differences.
-2. Eliminate `x2` analytically: `δx2 = -G2⁻¹ G1 δx1` (Index-1 assumption: `G2` invertible).
-3. Reduced ODE: `A_red = A11 - A12 G2⁻¹ G1`, `B_red = B1 - A12 G2⁻¹ B2`.
+2. Eliminate `x2` analytically: `deltax2 = -G2^-^1 G1 deltax1` (Index-1 assumption: `G2` invertible).
+3. Reduced ODE: `A_red = A11 - A12 G2^-^1 G1`, `B_red = B1 - A12 G2^-^1 B2`.
 4. Apply existing `c2d(StateSpace, Ts, method)` to `(A_red, B_red, C_red, D_red)`.
 
 **Reused components:** `LinearisationHelper`; existing `c2d(StateSpace, ...)` for the final ZOH/Tustin step.
@@ -200,12 +200,12 @@ StateSpace c2d(const DAESystem& dae,
 **Effort estimate:** ~150 lines (linearise + eliminate + call existing c2d + 2 tests)
 
 **Catch2 test plan (`[dae_c2d]`):**
-1. DAE with known linear reduction — discrete eigenvalues match manual calculation
-2. Non-invertible `G2` — throws `std::runtime_error("DAE index > 1 at operating point")`
+1. DAE with known linear reduction - discrete eigenvalues match manual calculation
+2. Non-invertible `G2` - throws `std::runtime_error("DAE index > 1 at operating point")`
 
 ---
 
-### P3 — DAE-Aware EKF / UKF Extension
+### P3 - DAE-Aware EKF / UKF Extension
 
 **Goal:** Extend `ExtendedKalmanFilter` (and optionally `UnscentedKalmanFilter`) with an
 algebraic projection step. After each predict/update cycle, the algebraic states `x2` are
@@ -223,7 +223,7 @@ void setAlgebraicConstraint(DAESystem::AlgFunc g,
 
 **Implementation:** Override the post-update step to call `consistentInit()` on the
 `x2` block using the updated `x1` estimate. Covariance projection: `P = J_proj * P * J_proj'`
-where `J_proj = [I; -G2⁻¹ G1]` is the constraint Jacobian.
+where `J_proj = [I; -G2^-^1 G1]` is the constraint Jacobian.
 
 **Reused components:** `ExtendedKalmanFilter` (extend, not replace); `consistentInit()` from P1.
 
@@ -234,14 +234,14 @@ must satisfy the algebraic continuity equation at every step. Without projection
 estimate drifts off the pressure-balance manifold within ~10 steps.
 
 **Catch2 test plan (`[dae_ekf]`):**
-1. DAE system with known steady state — estimate converges and `‖g(x1, x2, u)‖ < tol` holds after each update
-2. No constraint set (default) — EKF behaves identically to existing EKF (no regression)
+1. DAE system with known steady state - estimate converges and `||g(x1, x2, u)|| < tol` holds after each update
+2. No constraint set (default) - EKF behaves identically to existing EKF (no regression)
 
 ---
 
 ## Phase 1: Model Estimation
 
-### E1 — GreyBoxEstimator
+### E1 - GreyBoxEstimator
 
 **Goal:** Non-linear least-squares parameter estimation for a user-supplied ODE `f(x, u, p)`.
 The user provides the dynamics and data; the estimator finds `p` that minimises the
@@ -278,7 +278,7 @@ public:
 
 **Reused components:**
 - `AutoTuner` cost-function pattern (`CostFn = std::function<double(VectorXd)>`)
-- `LinearisationHelper::jacobianX` for numerical sensitivity `∂f/∂p` (central differences)
+- `LinearisationHelper::jacobianX` for numerical sensitivity `df/dp` (central differences)
 
 **Effort estimate:** ~300 lines (+ ~150 lines test + ~100 lines Python binding)
 
@@ -287,15 +287,15 @@ from 24 hours of temperature + heater power data. One-liner: `estimator.estimate
 
 **Catch2 test plan (`[greybox_estimator]`):**
 1. Scalar first-order system `x_dot = -a*x + b*u`; inject known `[a, b]`, add noise, verify recovery within 1%
-2. Bounded parameters: p_lb violated in initialisation → clamped correctly
-3. Convergence flag: non-identifiable system (constant input) → `converged=false` or large cost
+2. Bounded parameters: p_lb violated in initialisation -> clamped correctly
+3. Convergence flag: non-identifiable system (constant input) -> `converged=false` or large cost
 
 ---
 
-### E2 — RecursiveGreyBoxEstimator
+### E2 - RecursiveGreyBoxEstimator
 
 **Goal:** Online parameter tracking via augmented-state UKF. Augments the plant state `x`
-with parameters `p` as slowly-varying states (`dp/dt ≈ 0` + small process noise `Q_p`).
+with parameters `p` as slowly-varying states (`dp/dt approx = 0` + small process noise `Q_p`).
 Handles slowly drifting parameters (friction, thermal resistance over lifetime).
 
 **Class signature (sketch):**
@@ -313,7 +313,7 @@ public:
 };
 ```
 
-**Helper:** `augmentStateAndParams(f, n_states, n_params)` — wraps a standard
+**Helper:** `augmentStateAndParams(f, n_states, n_params)` - wraps a standard
 `f(x, u, p)` into an augmented `f_aug([x; p], u)` ready for UKF propagation.
 
 **Reused components:** `UnscentedKalmanFilter` (existing); augmentation is a wrapper.
@@ -324,14 +324,14 @@ public:
 Online estimator tracks `[omega, mu_k]` simultaneously without stopping the motor.
 
 **Catch2 test plan (`[recursive_greybox]`):**
-1. Step in parameter (friction increase at t=5s) — estimator converges within 3 time constants
+1. Step in parameter (friction increase at t=5s) - estimator converges within 3 time constants
 2. Augmented state has correct dimension `n_states + n_params`
 
 ---
 
-### E3 — GP Residual Model (extend GaussianProcess)
+### E3 - GP Residual Model (extend GaussianProcess)
 
-**Goal:** Learn the model-plant mismatch `ε(t) = y_true(t) − y_model(t)` as a Gaussian
+**Goal:** Learn the model-plant mismatch `epsilon(t) = y_true(t) - y_model(t)` as a Gaussian
 Process indexed by `(x, u)`. The trained residual provides a predictive mean correction
 and variance (uncertainty) usable as a constraint slack in `NonlinearMPC` / `TubeMPC`.
 
@@ -357,16 +357,16 @@ GP learns the remaining 20% (unknown reaction term). MPC uses `predictWithUncert
 tighten constraints in high-variance regions and loosen them where the model is confident.
 
 **Catch2 test plan (`[gp_residual]`):**
-1. Synthetic residual `sin(x)` — GP mean matches after training, variance small near training points
-2. Extrapolation — variance grows away from training data
+1. Synthetic residual `sin(x)` - GP mean matches after training, variance small near training points
+2. Extrapolation - variance grows away from training data
 
 ---
 
-### E4 — MHE Inequality Constraints (extend MovingHorizonEstimator)
+### E4 - MHE Inequality Constraints (extend MovingHorizonEstimator)
 
 **Goal:** Add polytopic state constraints `C_ineq * x_0 <= d_ineq` to the arrival cost
 block in `MovingHorizonEstimator`. This allows hard bounds on state estimates (e.g.,
-concentration ≥ 0, temperature ≤ T_max) without a separate projection step.
+concentration >= 0, temperature <= T_max) without a separate projection step.
 
 **New fields in `MHEParams`:**
 ```cpp
@@ -386,14 +386,14 @@ for general polytopic, add a lightweight projected-gradient step.
 general polytopic `C_ineq` for applications like simplex constraints (mole fractions sum to 1).
 
 **Catch2 test plan (`[mhe_polytopic]`):**
-1. Simplex constraint (x1 + x2 = 1, both ≥ 0) — estimate stays on simplex
-2. Hard lower bound on concentration — estimate never goes negative despite noisy measurements
+1. Simplex constraint (x1 + x2 = 1, both >= 0) - estimate stays on simplex
+2. Hard lower bound on concentration - estimate never goes negative despite noisy measurements
 
 ---
 
 ## Phase 2: Hybrid Models
 
-### H1 — HybridModel Base Class
+### H1 - HybridModel Base Class
 
 **Goal:** Abstract interface `IPlantModel` (new interface, does not implement `IController`)
 that represents `xdot = f_phys(x, u, p) + f_data(x, u)`. The data component is optional
@@ -429,7 +429,7 @@ is used by both `HybridMPC` and the digital twin dashboard.
 
 ---
 
-### H2 — HybridMPC
+### H2 - HybridMPC
 
 **Goal:** `NonlinearMPC` variant that uses a `HybridModel` for rollout predictions.
 The data component can be updated every `N_update` steps as new data arrives.
@@ -452,7 +452,7 @@ public:
 
 ---
 
-### H3 — RL-MPC Stitching (Python example only)
+### H3 - RL-MPC Stitching (Python example only)
 
 **Goal:** A Python example showing how a small DQN or PPO policy can adjust `HybridMPC`
 parameters (specifically `rho_y` multiplier or reference offset) based on tracking error
@@ -470,7 +470,7 @@ The MPC runs with adjusted parameters each step.
 
 ---
 
-### H4 — HybridModelTrainer
+### H4 - HybridModelTrainer
 
 **Goal:** Train the `f_data` component of a `HybridModel`. Supports two backends:
 (a) GP marginal-likelihood hyperparameter optimisation (for GP residuals from E3),
@@ -500,7 +500,7 @@ public:
 
 ## Phase 3: Deployment / Validation
 
-### D1 — Mismatch Detector (extend KF/MHE)
+### D1 - Mismatch Detector (extend KF/MHE)
 
 **Goal:** Real-time CUSUM on the KF/MHE innovation sequence. When the innovation exceeds
 a threshold for a sustained number of steps, `mismatchDetected()` returns `true` and
@@ -526,7 +526,7 @@ a standalone `CUSUMDetector` helper class, then call from both KF and MHE).
 
 ---
 
-### D2 — Digital Twin Lite (Python application)
+### D2 - Digital Twin Lite (Python application)
 
 **Goal:** A self-contained Python reference application demonstrating the full Phase 1-2
 pipeline: run a simulation, log plant + model predictions, detect mismatch, periodically
@@ -538,10 +538,10 @@ bindings. No new C++ required.
 **File structure:**
 ```
 tools/digital_twin/
-├── app.py            FastAPI + Dash entry point
-├── twin.py           DigitalTwin class: runs GreyBoxEstimator + MismatchDetector
-├── dashboard.py      Plotly Dash layout + callbacks
-└── README.md
+|-- app.py            FastAPI + Dash entry point
+|-- twin.py           DigitalTwin class: runs GreyBoxEstimator + MismatchDetector
+|-- dashboard.py      Plotly Dash layout + callbacks
+|-- README.md
 ```
 
 **Effort estimate:** ~300 lines Python
@@ -554,7 +554,7 @@ tools/digital_twin/
 
 | Feature | Reason for deferral |
 |---------|---------------------|
-| DAE Index ≥ 2 (Pantelides algorithm, BLT ordering) | Research-grade effort; Index-1 (P1-P3) covers all current case-study plants |
+| DAE Index >= 2 (Pantelides algorithm, BLT ordering) | Research-grade effort; Index-1 (P1-P3) covers all current case-study plants |
 | FMU import/export (libfmilib) | Heavy external dependency; low immediate value vs. effort |
 | CasADi symbolic auto-differentiation | Adds a large dependency; `LinearisationHelper` numerical Jacobians are sufficient for moderate n |
 | Full RL framework (Stable-Baselines3 integration) | H3 example covers the use case; no C++ RL core needed |
@@ -568,21 +568,21 @@ tools/digital_twin/
 Each new `lib/` algorithm must follow the 8-step checklist from `CLAUDE.md`:
 
 ```
-1. lib/ClassName.{h,cpp} — implement; call notifyObserver() at end of compute()
-2. lib/CMakeLists.txt — add ClassName.cpp to CTRL_CORE_SOURCES
-3. lib/ControllerToolbox.h — add #include "ClassName.h"
-4. lib/Features.h — add {"feature_name", true} entry
-5. bindings/*_bindings.cpp — add pybind11 class with std::shared_ptr<T> 3rd arg
-6. bindings/smoke_test.py — add assertion
-7. tests/test_catch2_advanced.cpp — add 2+ Catch2 tests with [tag]
+1. lib/ClassName.{h,cpp} - implement; call notifyObserver() at end of compute()
+2. lib/CMakeLists.txt - add ClassName.cpp to CTRL_CORE_SOURCES
+3. lib/ControllerToolbox.h - add #include "ClassName.h"
+4. lib/Features.h - add {"feature_name", true} entry
+5. bindings/*_bindings.cpp - add pybind11 class with std::shared_ptr<T> 3rd arg
+6. bindings/smoke_test.py - add assertion
+7. tests/test_catch2_advanced.cpp - add 2+ Catch2 tests with [tag]
 8. examples/exNN.cpp + examples/python/exNN.py + update CMakeLists.txt + compile.bat
 ```
 
 For Python-only features (H3, D2): steps 1-4 and 7-8 (C++ side) are skipped.
 For extensions to existing classes (E3, E4, D1, P2, P3): only the modified files need updating,
-not the full 8-step checklist — but Catch2 tests are always required.
+not the full 8-step checklist - but Catch2 tests are always required.
 For `DAESystem` (P1): struct + free functions go in `PlantModel.h`/`PlantModel.cpp` alongside
-the existing `TransferFunction` and `StateSpace` — no new lib/ file needed.
+the existing `TransferFunction` and `StateSpace` - no new lib/ file needed.
 
 ---
 
@@ -591,7 +591,7 @@ the existing `TransferFunction` and `StateSpace` — no new lib/ file needed.
 | Phase | Items | Effort | Notes |
 |-------|-------|--------|-------|
 | Phase 0 | P1 (`DAESystem` + `dae2ode`) | ~3 days | First; unlocks cleaner plant formulation in all later phases |
-| Phase 0 | P2 (`c2d` for DAE) | ~1-2 days | After P1; short — reuses existing `c2d` + `LinearisationHelper` |
+| Phase 0 | P2 (`c2d` for DAE) | ~1-2 days | After P1; short - reuses existing `c2d` + `LinearisationHelper` |
 | Phase 0 | P3 (DAE-aware EKF) | ~1-2 days | After P1; extends existing EKF |
 | Phase 1 | E1, E2, E4 | ~5-7 days | After P1; E3 after E1 is validated |
 | Phase 1 | E3 | ~2-3 days | After E1 confirms GP residual concept |

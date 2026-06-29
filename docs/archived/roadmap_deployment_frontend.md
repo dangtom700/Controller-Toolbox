@@ -46,7 +46,7 @@ RPT-1 (static report)  --- requires ANA-1..7 (or stubs for unfinished sections)
 
 ## Track 1: Library Distribution
 
-### DIST-1 - vcpkg port + CMake install targets ✓ Done (Part 57E)
+### DIST-1 - vcpkg port + CMake install targets (check) Done (Part 57E)
 
 **Effort:** 2-3 person-days  
 **Rationale:** Largest friction point for new C++ users is the build. vcpkg + `find_package` eliminates it.
@@ -103,7 +103,7 @@ RPT-1 (static report)  --- requires ANA-1..7 (or stubs for unfinished sections)
 
 ---
 
-### DIST-2 - Curated embedded header-only subset ✓ Done (Part 57E)
+### DIST-2 - Curated embedded header-only subset (check) Done (Part 57E)
 
 **Effort:** 1 person-week  
 **Rationale:** `BasicPID<Scalar>` and `BasicSMC<Scalar>` (Part 54) are the seed. Extend to a
@@ -198,7 +198,7 @@ plant. CI note: add a new GitHub Actions workflow `ros2.yml` that runs on Ubuntu
 
 ---
 
-### DIST-4 - PyPI wheel distribution via cibuildwheel ✓ Done (Part 57E)
+### DIST-4 - PyPI wheel distribution via cibuildwheel (check) Done (Part 57E)
 
 **Effort:** 1 person-week  
 **Rationale:** Python users currently must build from source (CMake + Eigen + pybind11). A PyPI
@@ -218,7 +218,7 @@ build-backend = "scikit_build_core.build"
 [project]
 name = "controller-toolbox"
 version = "1.0.0"
-description = "Discrete-time control library — Python bindings"
+description = "Discrete-time control library - Python bindings"
 requires-python = ">=3.9"
 dependencies = []
 
@@ -284,12 +284,12 @@ jobs:
 
 ---
 
-### DIST-5 - Automated GitHub release workflow ✓ Done (Part 57E)
+### DIST-5 - Automated GitHub release workflow (check) Done (Part 57E)
 
 **Effort:** 1-2 person-days  
 **Rationale:** Currently there is no automated release process. Every release requires manual
 artifact collection. A `release.yml` triggered on version tags produces a GitHub Release with
-platform-specific static library bundles attached — giving C++ users a pre-built download
+platform-specific static library bundles attached - giving C++ users a pre-built download
 without needing vcpkg or a source build.  
 **Prerequisite:** DIST-1 (CMake `install()` targets needed for `cmake --install` to collect
 the right files into a staging directory).
@@ -363,7 +363,7 @@ jobs:
 > **ANA-1 is a prerequisite** - run it before any other ANA step. All scripts read from
 > `case-study/*/logs/` and write enriched outputs back there.
 
-### ANA-1 - Richer metric set + leaderboard (prerequisite) ✓ Done (Part 58)
+### ANA-1 - Richer metric set + leaderboard (prerequisite) (check) Done (Part 58)
 
 **Effort:** 2-3 person-days  
 **Prerequisite:** None
@@ -405,7 +405,7 @@ Prints a 6-column ranked table with no NaN values for all 18 controllers * 5 sce
 
 ---
 
-### ANA-2 - Monte Carlo sensitivity analysis ✓ Done (Part 58)
+### ANA-2 - Monte Carlo sensitivity analysis (check) Done (Part 58)
 
 **Effort:** 4-5 person-days (1 day framework + 1 day per study batch)  
 **Prerequisite:** ANA-1
@@ -445,7 +445,7 @@ in < 10 min and produces `mc_summary.csv` with 50 * 17 * 5 = 4250 rows, no NaN i
 
 ---
 
-### ANA-3 - Fault injection sweep ✓ Done (Part 58)
+### ANA-3 - Fault injection sweep (check) Done (Part 58)
 
 **Effort:** 1 person-week  
 **Prerequisite:** ANA-1
@@ -487,7 +487,7 @@ delay-robust (characteristic of sliding mode).
 
 ---
 
-### ANA-4 - ANOVA + Tukey HSD significance testing ✓ Done (Part 58)
+### ANA-4 - ANOVA + Tukey HSD significance testing (check) Done (Part 58)
 
 **Effort:** 1-2 person-days  
 **Prerequisite:** ANA-2 (`mc_summary.csv` must exist)
@@ -526,7 +526,7 @@ should be significant if the case study shows real performance differences).
 
 ---
 
-### ANA-5 - Real-time WCET profiling ✓ Done (Part 58)
+### ANA-5 - Real-time WCET profiling (check) Done (Part 58)
 
 **Effort:** 1-2 person-days  
 **Prerequisite:** ANA-1 (timing hooks go in the same runners)
@@ -563,7 +563,7 @@ a sanity check, not a hard requirement on exact values).
 
 ---
 
-### ANA-6 - Model validation / cross-validation ✓ Done (Part 58)
+### ANA-6 - Model validation / cross-validation (check) Done (Part 58)
 
 **Effort:** 1-2 person-days  
 **Prerequisite:** E1/E2 (GreyBoxEstimator / RecursiveGreyBoxEstimator - done Part 52)
@@ -605,7 +605,7 @@ skipped with a clear message.
 
 ---
 
-### ANA-7 - mu-analysis / structured uncertainty ✓ Done (Part 58)
+### ANA-7 - mu-analysis / structured uncertainty (check) Done (Part 58)
 
 **Effort:** 2 person-weeks  
 **Prerequisite:** None (uses existing `StateSpace` models already in `lib/`)
@@ -654,7 +654,7 @@ mu-margin is lower than LQR at high frequencies (expected: MPC is more aggressiv
 
 ## Track 3: Static HTML Report
 
-### RPT-1 - Static controller performance report ✓ Done (Part 58)
+### RPT-1 - Static controller performance report (check) Done (Part 58)
 
 **Effort:** 1 person-week (after ANA-1..7 data is available)  
 **Prerequisite:** ANA-1..7 (sections for missing data are rendered as placeholder cards)  
@@ -747,10 +747,10 @@ python tools/generate_all_reports.py --output-dir reports/
 ## Execution Schedule
 
 ```
-Week 1      DIST-1 (vcpkg + CMake install, 2-3 days)   ← unblocks DIST-4 and DIST-5
+Week 1      DIST-1 (vcpkg + CMake install, 2-3 days)   <- unblocks DIST-4 and DIST-5
             ANA-1  (metrics leaderboard, 2-3 days)
 
-Week 2      DIST-5 (release.yml, 1-2 days)             ← quick win once DIST-1 done
+Week 2      DIST-5 (release.yml, 1-2 days)             <- quick win once DIST-1 done
             DIST-2 (embedded subset, 5 days)
             ANA-2  (Monte Carlo framework, 3 days)
 
@@ -852,11 +852,11 @@ RPT-1   [ ] generate_all_reports.py completes for all 16 studies
 | Item | Reason not included |
 |------|-------------------|
 | CodeQL / ASan / UBSan | Already tracked as Iteration D finding #38 in `handoff_part57.md` |
-| Doxygen → GitHub Pages automation | `doc.yml` already exists; minor tweak, not a distribution item |
+| Doxygen -> GitHub Pages automation | `doc.yml` already exists; minor tweak, not a distribution item |
 | Conan package (`conanfile.py`) | User selected vcpkg specifically; redundant for same goal |
 | Debian/RPM packages | Not in selected scope; niche compared to vcpkg/PyPI reach |
 | CPack installers | DIST-1 + DIST-5 cover the C++ distribution need without CPack complexity |
-| Digital Twin / Streamlit (D2) | Postponed; open at LOW priority in `handoff_part57.md` §3 |
+| Digital Twin / Streamlit (D2) | Postponed; open at LOW priority in `handoff_part57.md` Section 3 |
 | TCLab HIL | Postponed per user decision |
 - Algorithm history: `docs/compact_bug_report_parts_1-25.md`, `docs/compact_bug_report_parts_26-50.md`
 - Active issues: `docs/cumulative_bug_report.md`

@@ -186,15 +186,15 @@ cmake --build build --target docs
 
 | Range | Theme |
 |-------|-------|
-| ex01–ex22 | Core controllers: PID, LQR, MPC, SMC, ADRC, ESC, Lead-Lag, Smith Predictor, LQG, stacks |
-| ex23–ex26 | Fuzzy Logic: FuzzyPD, FuzzyPID, FuzzySupervisor+MPC, TS gain scheduling |
-| ex27–ex31 | Advanced: function approximator, GPC, repetitive control, EKF, subspace ID |
-| ex32–ex41 | SOPDT ID, MHE, rational mu-synthesis, cascade/feedforward/smith/ESC/UKF/LPV |
-| ex42–ex54 | Corrector patterns: Cascade, Additive, Observer+SF, Supervisory/bumpless transfer |
-| ex55–ex59 | Extensions: LinearisationHelper, FeedbackLinearisation, MRAC, BalancedTruncation, ZPETC |
-| ex60–ex69 | Part 20–30: GapMetric/clustering, LPV ID, AutoGainScheduler, NonlinearMPC, AdaptiveSP, AutoTuner, AntiWindup, TubeMPC, ParticleFilter, DeePC |
-| ex70–ex79 | Part 31–33 ML/DD: ILC, SINDy, KoopmanEDMD, L1Adaptive, CBFSafety, GP+ESN+NeuralPID, DynaMBRL, ScenarioMPC, BayesianTuner, RegistryMonitor |
-| ex80–ex82 | Part 52–55: GreyBoxEstimator, HybridMPC, Metaheuristics (GA/PSO/DE) |
+| ex01-ex22 | Core controllers: PID, LQR, MPC, SMC, ADRC, ESC, Lead-Lag, Smith Predictor, LQG, stacks |
+| ex23-ex26 | Fuzzy Logic: FuzzyPD, FuzzyPID, FuzzySupervisor+MPC, TS gain scheduling |
+| ex27-ex31 | Advanced: function approximator, GPC, repetitive control, EKF, subspace ID |
+| ex32-ex41 | SOPDT ID, MHE, rational mu-synthesis, cascade/feedforward/smith/ESC/UKF/LPV |
+| ex42-ex54 | Corrector patterns: Cascade, Additive, Observer+SF, Supervisory/bumpless transfer |
+| ex55-ex59 | Extensions: LinearisationHelper, FeedbackLinearisation, MRAC, BalancedTruncation, ZPETC |
+| ex60-ex69 | Part 20-30: GapMetric/clustering, LPV ID, AutoGainScheduler, NonlinearMPC, AdaptiveSP, AutoTuner, AntiWindup, TubeMPC, ParticleFilter, DeePC |
+| ex70-ex79 | Part 31-33 ML/DD: ILC, SINDy, KoopmanEDMD, L1Adaptive, CBFSafety, GP+ESN+NeuralPID, DynaMBRL, ScenarioMPC, BayesianTuner, RegistryMonitor |
+| ex80-ex82 | Part 52-55: GreyBoxEstimator, HybridMPC, Metaheuristics (GA/PSO/DE) |
 
 **Python examples** (`examples/python/`, `ex01_*` through `ex102_*`): NumPy/python-control cross-validation and pybind11 binding demonstrations for every C++ class. Includes RL-MPC stitching, all ML/DD controllers, DAE/hybrid-model workflows, and metaheuristic optimisers.
 
@@ -202,16 +202,16 @@ cmake --build build --target docs
 
 Each case study pairs a nonlinear plant simulator with a roster of controllers, sweeps every controller across several scenarios, and writes CSV telemetry to `logs/` for post-processing. C++ studies build as self-contained executables; Python-only studies run via `sim/main.py` (discovered automatically by `run.py` Phase 6). The auto-generated status table is at [`docs/case_study_status.md`](case_study_status.md).
 
-#### C++ built (9) — registered in `case-study/CMakeLists.txt` + `compile.bat`
+#### C++ built (9) - registered in `case-study/CMakeLists.txt` + `compile.bat`
 
 | Study | Plant | Ctrls | Scenarios | Runs | Target |
 |---|---|---|---|---|---|
-| [`Boiler Control/`](../case-study/Boiler%20Control/) | Bell-Åström 3×3 MIMO boiler-turbine | 27 | 8 | 216 | `boiler_sim` |
+| [`Boiler Control/`](../case-study/Boiler%20Control/) | Bell-Astrom 3*3 MIMO boiler-turbine | 27 | 8 | 216 | `boiler_sim` |
 | [`Tug Boat Numerical Simulation/`](../case-study/Tug%20Boat%20Numerical%20Simulation/) | 3-DOF tug, 6-state MIMO + thrust allocation | 18 | 4 | 72 | `tug_sim` |
 | [`Solar-Driven Cooling .../`](../case-study/Solar-Driven%20Cooling%20System%20with%20Photovoltaic%20Evaporative%20Chimney/) | Algebraic SISO solar cooling + PV chimney | 14 | 5 | 70 | `solar_cooling_sim` |
 | [`Porous Fiber Plate Humidification System/`](../case-study/Porous%20Fiber%20Plate%20Humidification%20System/) | Flat-plate evaporative humidifier + room ODE + 2-step sensor delay | 15 | 5 | 75 | `humidification_sim` |
-| [`Active Suspension Mathematical Modeling and Optimization 2025/`](../case-study/Active%20Suspension%20Mathematical%20Modeling%20and%20Optimization%202025/) | 2-DOF quarter-car, 4-state RK4, F_act ±2000 N | 18 | 5 | 90 | `susp_sim` |
-| [`Non-Inverting Buck-Boost Converter/`](../case-study/Non-Inverting%20Buck-Boost%20Converter/) | Averaged 2-state buck-boost, RK4 at 50 kHz, mode hysteresis ±0.1 V | 12 | 5 | 60 | `buck_boost_sim` |
+| [`Active Suspension Mathematical Modeling and Optimization 2025/`](../case-study/Active%20Suspension%20Mathematical%20Modeling%20and%20Optimization%202025/) | 2-DOF quarter-car, 4-state RK4, F_act +/-2000 N | 18 | 5 | 90 | `susp_sim` |
+| [`Non-Inverting Buck-Boost Converter/`](../case-study/Non-Inverting%20Buck-Boost%20Converter/) | Averaged 2-state buck-boost, RK4 at 50 kHz, mode hysteresis +/-0.1 V | 12 | 5 | 60 | `buck_boost_sim` |
 | [`Solar Cooker with Reflector and Absorber/`](../case-study/Solar%20Cooker%20with%20Reflector%20and%20Absorber/) | 2-state absorber+pot ODE, PCM effective-C, RK4 (Ts=30 s) | 12 | 5 | 60 | `solar_cooker_sim` |
 | [`Solar Ocean Thermal Energy Conversion System/`](../case-study/Solar%20Ocean%20Thermal%20Energy%20Conversion%20System/) | 2-state collector+tank ODE, ORC algebraic map, Euler (Ts=30 s) | 12 | 5 | 60 | `sotec_sim` |
 | [`Separate Meter In Separate Meter Out/`](../case-study/Separate%20Meter%20In%20Separate%20Meter%20Out/) | SMISMO hydraulic cylinder, 8-state RK4 (Ts=1 ms), dual PDCVs + Stribeck friction | 13 | 5 | 65 | `smismo_sim` |
@@ -226,7 +226,7 @@ Each case study pairs a nonlinear plant simulator with a roster of controllers, 
 
 **SMISMO (13):** PID, CascadePID, LQR, LQG, MPC, ADRC, SMC, FeedbackLin, TubeMPC, L1Adaptive, GainScheduled, NonlinearMPC, DOBEnergyCtrl (adaptive supply-pressure DOB).
 
-#### Python-only (7) — `sim/main.py`, run by Phase 6 of `run.py`
+#### Python-only (7) - `sim/main.py`, run by Phase 6 of `run.py`
 
 These studies use `ctrl_toolbox` Python bindings directly; no C++ compilation is needed. Run individually with `conda run -n soft_robotics -- python sim/main.py` from the study directory, or automatically via `run.py` Phase 6.
 
@@ -246,27 +246,27 @@ These studies use `ctrl_toolbox` Python bindings directly; no C++ compilation is
 
 **EHFS (14):** OpenLoop, PID, ADRC, SMC, MPC, LQR, MRAC, L1Adaptive, FeedbackLin, NeuralPID, ILC, GainScheduled, HinfODFCCtrl, HinfCascadeCtrl.
 
-**EV 6×6 (18):** Passive, PD, GAOptPD, PSOOptPD, DEOptPD, PID, LQR, LQG, MPC, ADRC, SMC, MRAC, FuzzyPID, TubeMPC, ILC, CBF, L1Adaptive, ScenarioMPC.
+**EV 6*6 (18):** Passive, PD, GAOptPD, PSOOptPD, DEOptPD, PID, LQR, LQG, MPC, ADRC, SMC, MRAC, FuzzyPID, TubeMPC, ILC, CBF, L1Adaptive, ScenarioMPC.
 
 **Ship Manoeuvring (12):** OpenLoop, PID, SMC, ASMC, MPC, LQR, MRAC, L1Adaptive, GainScheduled, ADRC, NeuralPID, ILC.
 
-#### Spec-only stubs and unfilled scaffolds — `README.md`/PDF present, no real `sim/` content, not built
+#### Spec-only stubs and unfilled scaffolds - `README.md`/PDF present, no real `sim/` content, not built
 
-The exact count drifts as new studies are proposed; see [`docs/case_study_status.md`](case_study_status.md) for the live auto-generated status table (regenerate via `tools/case_study_tracker.py`) and `CLAUDE.md` Section "Spec-only stubs" for per-study tribal knowledge. Note: the tracker's "On-going" status only checks for `sim/` + `logs/` + `config/` presence, not real content — a few directories created by `tools/new_case_study.py` pass that check while still containing only placeholder dynamics and a single `OpenLoop` controller. Check the study's own `README.md` before treating it as a finished study.
+The exact count drifts as new studies are proposed; see [`docs/case_study_status.md`](case_study_status.md) for the live auto-generated status table (regenerate via `tools/case_study_tracker.py`) and `CLAUDE.md` Section "Spec-only stubs" for per-study tribal knowledge. Note: the tracker's "On-going" status only checks for `sim/` + `logs/` + `config/` presence, not real content - a few directories created by `tools/new_case_study.py` pass that check while still containing only placeholder dynamics and a single `OpenLoop` controller. Check the study's own `README.md` before treating it as a finished study.
 
 All C++ targets are listed in `compile.bat` / `compile.sh`; Python-only studies are **not** in `CMakeLists.txt` or the compile scripts. The standalone boiler demo [ex21_boiler_turbine_case_study.cpp](../examples/ex21_boiler_turbine_case_study.cpp) exercises the boiler plant without the full multi-controller sweep.
 
 ### 3.4 Tests (`tests/`)
 
-- `test_controllers.cpp` — per-class unit tests (custom `test_framework.h` harness)
-- `test_tuners_extended.cpp` — tuner suite tests (covers all 8 strategies)
-- `test_integration.cpp` — end-to-end closed-loop tests (c2d+MPC, N4SID+GPC adaptive pipeline)
-- `test_catch2_advanced.cpp` — main Catch2 v3 regression suite (~95 test cases). Tags include: `[pid]`, `[lqr]`, `[mpc]`, `[smc]`, `[adrc]`, `[mhe]`, `[mhe_constraints]`, `[mhe_polytopic]`, `[lqr_factory]`, `[delay_wrapper]`, `[gain_scheduled]`, `[mimo_nugap]`, `[ilc]`, `[sindy]`, `[koopman]`, `[l1adaptive]`, `[cbf]`, `[gp]`, `[esn]`, `[neuralpid]`, `[cem]`, `[dyna]`, `[scenario_mpc]`, `[bayesian_optimizer]`, `[registry]`, `[monitor]`, `[deepc]`, `[grey_box]`, `[recursive_grey_box]`, `[gp_residual]`, `[mismatch_detector]`, `[basic_pid]`, `[basic_smc]`, `[dae_system]`, `[dae_c2d]`, `[dae_ekf]`, `[genetic_algorithm]`, `[pso]`, `[de]`, `[repetitive]`, `[extremum_seeker]`
-- `test_catch2_pilot.cpp` — pilot Catch2 v3 tests (5 cases): LQRAdapter MIMO `computeVec()`, EKF scaled-epsilon Jacobian, PID DoM derivative suppression, 2DOF b_weight overshoot, observer telemetry
-- `test_stability_margins.cpp` — 3 `[stability_margins]` cases
-- `test_embedded_subset.cpp` — 13 tests, links only Catch2 (no Eigen); verifies `BasicPID<float>`, `BasicSMC<float>`, `DiscreteIntegrator`, `FixedRateFilter`, `RingBuffer` have zero Eigen dependency
+- `test_controllers.cpp` - per-class unit tests (custom `test_framework.h` harness)
+- `test_tuners_extended.cpp` - tuner suite tests (covers all 8 strategies)
+- `test_integration.cpp` - end-to-end closed-loop tests (c2d+MPC, N4SID+GPC adaptive pipeline)
+- `test_catch2_advanced.cpp` - main Catch2 v3 regression suite (~95 test cases). Tags include: `[pid]`, `[lqr]`, `[mpc]`, `[smc]`, `[adrc]`, `[mhe]`, `[mhe_constraints]`, `[mhe_polytopic]`, `[lqr_factory]`, `[delay_wrapper]`, `[gain_scheduled]`, `[mimo_nugap]`, `[ilc]`, `[sindy]`, `[koopman]`, `[l1adaptive]`, `[cbf]`, `[gp]`, `[esn]`, `[neuralpid]`, `[cem]`, `[dyna]`, `[scenario_mpc]`, `[bayesian_optimizer]`, `[registry]`, `[monitor]`, `[deepc]`, `[grey_box]`, `[recursive_grey_box]`, `[gp_residual]`, `[mismatch_detector]`, `[basic_pid]`, `[basic_smc]`, `[dae_system]`, `[dae_c2d]`, `[dae_ekf]`, `[genetic_algorithm]`, `[pso]`, `[de]`, `[repetitive]`, `[extremum_seeker]`
+- `test_catch2_pilot.cpp` - pilot Catch2 v3 tests (5 cases): LQRAdapter MIMO `computeVec()`, EKF scaled-epsilon Jacobian, PID DoM derivative suppression, 2DOF b_weight overshoot, observer telemetry
+- `test_stability_margins.cpp` - 3 `[stability_margins]` cases
+- `test_embedded_subset.cpp` - 13 tests, links only Catch2 (no Eigen); verifies `BasicPID<float>`, `BasicSMC<float>`, `DiscreteIntegrator`, `FixedRateFilter`, `RingBuffer` have zero Eigen dependency
 - Per-study regression tests: `test_boiler_regression`, `test_tugsim_regression`, `test_solar_regression`, `test_humid_regression`, `test_susp_regression`, `test_buck_boost_regression`, `test_solar_cooker_regression`, `test_sotec_regression`, `test_smismo_regression` (6 cases each)
-- `test_framework.h` — lightweight assertion macros for the custom harness
+- `test_framework.h` - lightweight assertion macros for the custom harness
 
 **Current totals:** run `conda run -n soft_robotics -- python run.py` to get the live count. All counts are unverified until a clean run confirms them.
 
@@ -486,7 +486,7 @@ SISO TF -> controllable canonical SS conversion.
 - **Inputs:** `compute(x, x_ref = \emptyset, u_ff = \emptyset)` - full state vector required.
 - **Returns:** `Eigen::VectorXd u[k]` (size m).
 - **Methods:** `gainMatrix()`, `riccatiSolution()`, `dareConverged()`, `dareIterations()`, `sampleTime()`.
-- **Helper:** `LQRAdapter` (Part 34) - wraps `DiscreteLQR` as `IController`. Two constructors: reference-capture (`LQRAdapter(lqr, state_fn)`) and owning (`LQRAdapter(owned_lqr, state_fn)`). Free function `makeLQRController(sys, lqr_params, state_fn)` creates a `shared_ptr<IController>`-compatible instance in one call — use this for `AutoGainScheduler`/`GainScheduledController` `design_fn` callbacks. MIMO note: `compute()` returns `u[0]` only; use `computeVec()` for the full vector.
+- **Helper:** `LQRAdapter` (Part 34) - wraps `DiscreteLQR` as `IController`. Two constructors: reference-capture (`LQRAdapter(lqr, state_fn)`) and owning (`LQRAdapter(owned_lqr, state_fn)`). Free function `makeLQRController(sys, lqr_params, state_fn)` creates a `shared_ptr<IController>`-compatible instance in one call - use this for `AutoGainScheduler`/`GainScheduledController` `design_fn` callbacks. MIMO note: `compute()` returns `u[0]` only; use `computeVec()` for the full vector.
 
 #### `DiscreteMPC` ([DiscreteMPC.h](../lib/DiscreteMPC.h))
 - **Purpose:** Condensed receding-horizon QP with hard box constraints on `Deltau` and `u`.
@@ -679,22 +679,22 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 - **IMC-PID (Rivera 1986):** `tau_eq = tau1+tau2`, `Kp = tau_eq / (K*(lambdaC + theta/2))`, `Ti = tau_eq`, `Td = tau1*tau2/tau_eq`.
 
 #### `MRACController` ([MRACController.h](../lib/MRACController.h))
-- **Purpose:** Discrete-time Model Reference Adaptive Control -- SISO, first-order reference model. Forces plant output to track y_m[k+1] = a_m*y_m + b_m*r via two-parameter Lyapunov adaptation with σ-modification and Euclidean projection.
+- **Purpose:** Discrete-time Model Reference Adaptive Control -- SISO, first-order reference model. Forces plant output to track y_m[k+1] = a_m*y_m + b_m*r via two-parameter Lyapunov adaptation with sigma-modification and Euclidean projection.
 - **Constructor:** `(MRACParams, Ts)`.
 - **Convention:** `compute(y_plant)` takes plant output (ADRC convention, not error). Call `setReference(r)` before each `compute()`.
-- **Adaptation law:** `θ[k+1] = θ[k] - Ts*(γ*e_m*φ + σ*θ[k])` with projection: if ‖θ‖ > theta_max -> θ <- θ*theta_max/‖θ‖.
-- **Parameters (`MRACParams`):** `a_m`, `b_m` (reference model), `gamma_r`, `gamma_y` (rates), `sigma` (σ-modification, 0=off), `theta_max` (projection bound), `uMin/uMax`.
+- **Adaptation law:** `theta[k+1] = theta[k] - Ts*(gamma*e_m*phi + sigma*theta[k])` with projection: if ||theta|| > theta_max -> theta <- theta*theta_max/||theta||.
+- **Parameters (`MRACParams`):** `a_m`, `b_m` (reference model), `gamma_r`, `gamma_y` (rates), `sigma` (sigma-modification, 0=off), `theta_max` (projection bound), `uMin/uMax`.
 - **Methods:** `compute(y)`, `setReference(r)`, `reset()`, `theta_r()`, `theta_y()`, `modelOutput()`, `modelError()`.
-- **Feasibility:** Minimum-phase plant required; gain sign must match γ_r, γ_y sign; persistent excitation needed for θ convergence.
+- **Feasibility:** Minimum-phase plant required; gain sign must match gamma_r, gamma_y sign; persistent excitation needed for theta convergence.
 
 #### `FeedbackLinearisationController` ([FeedbackLinearisation.h](../lib/FeedbackLinearisation.h))
-- **Purpose:** Exact feedback linearisation for SISO affine-in-control systems ẋ = f(x) + g(x)*u, relative degree 1. Cancels nonlinear terms algebraically; inner IController drives the resulting virtual integrator.
+- **Purpose:** Exact feedback linearisation for SISO affine-in-control systems xdot = f(x) + g(x)*u, relative degree 1. Cancels nonlinear terms algebraically; inner IController drives the resulting virtual integrator.
 - **Constructor:** `(DriftFn f, GainFn g, shared_ptr<IController> inner, FLParams, Ts)`.
 - **Control law:** `u[k] = clamp((v - f(x[k], u[k-1])) / g_eff(x[k], u[k-1]), uMin, uMax)` where v = inner->compute(error).
 - **Critical requirement:** `setState(x)` must be called before each `compute()` with the current measured or estimated plant state.
 - **Parameters (`FLParams`):** `uMin`, `uMax`, `regularisationEps` (minimum |g| before clamping; preserves sign).
-- **Feasibility:** Relative degree 1, minimum-phase zeros, g(x) ≠ 0 across operating region.
-- **Relative degree 2 note:** For angle-output systems (pendulum), the inner PID must be tuned for a virtual double integrator; example gains: Kp=9, Ki=5, Kd=5 for poles {-1, -2±j}. See `ex56_feedback_linearisation.cpp`.
+- **Feasibility:** Relative degree 1, minimum-phase zeros, g(x) != 0 across operating region.
+- **Relative degree 2 note:** For angle-output systems (pendulum), the inner PID must be tuned for a virtual double integrator; example gains: Kp=9, Ki=5, Kd=5 for poles {-1, -2+/-j}. See `ex56_feedback_linearisation.cpp`.
 
 #### `RecursiveLeastSquares` ([RecursiveLeastSquares.h](../lib/RecursiveLeastSquares.h))
 - **Purpose:** Online ARX parameter estimation using exponential forgetting (`lambda` factor).
@@ -703,31 +703,31 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 - **Typical use:** Feed identified `StateSpace` into `GPC::setPlant()` for adaptive GPC (see `ex28_gpc_adaptive.cpp`).
 
 #### `LinearisationHelper` ([LinearisationHelper.h](../lib/LinearisationHelper.h))
-- **Purpose:** Numerical Jacobians and ZOH linearisation of continuous-time nonlinear models at a given operating point. Central-difference with step `h_i = ε*max(|x_i|, 1)` for heterogeneous state magnitudes.
+- **Purpose:** Numerical Jacobians and ZOH linearisation of continuous-time nonlinear models at a given operating point. Central-difference with step `h_i = epsilon*max(|x_i|, 1)` for heterogeneous state magnitudes.
 - **Key functions:**
-  - `jacobianX(f, x0, u0, eps=1e-4)` -> MatrixXd ∂f/∂x (n evaluations of f).
-  - `jacobianU(f, x0, u0, eps=1e-4)` -> MatrixXd ∂f/∂u (m evaluations).
+  - `jacobianX(f, x0, u0, eps=1e-4)` -> MatrixXd df/dx (n evaluations of f).
+  - `jacobianU(f, x0, u0, eps=1e-4)` -> MatrixXd df/du (m evaluations).
   - `lineariseAtPoint(f, x0, u0, Ts)` -> discrete StateSpace (ZOH, C=I, D=0).
   - `lineariseAtPoint(f, h, x0, u0, Ts)` -> discrete StateSpace with custom output h(x,u).
 - **Note:** The `StateFunc`/`MeasFunc` type aliases are identical to those in `ExtendedKalmanFilter.h` -- safe to include both (C++ redeclaration of identical alias is valid).
 - **Typical use:** Compute A, B at operating point -> `c2d(ZOH)` -> `DiscreteLQR` design -> apply gain to nonlinear plant.
 
 #### `BalancedTruncation` ([BalancedTruncation.h](../lib/BalancedTruncation.h))
-- **Purpose:** Moore (1981) model order reduction via balanced realisation. Replaces an n-state stable system with an r-state approximation preserving the most energetically significant modes. Provides a-priori H∞ error bound.
+- **Purpose:** Moore (1981) model order reduction via balanced realisation. Replaces an n-state stable system with an r-state approximation preserving the most energetically significant modes. Provides a-priori Hinf error bound.
 - **Functions:**
   - `balancedTruncate(sys, r)` -> `TruncationResult {reduced, hankelSingularValues, errorBound, isStable}`.
   - `suggestOrder(result, tol=0.01)` -> int -- smallest r such that error bound < tol x total_norm.
-- **Algorithm:** Solve gramians via `SystemAnalysis::solveDiscreteLyapunov` -> Cholesky of P_c -> `SelfAdjointEigenSolver` of M = L_c'*P_o*L_c -> sort HSVs descending -> balanced transformation T_r = L_c*U*Σ^{-½} -> truncate.
-- **Error bound:** ‖G - G_r‖∞ ≤ 2*Σᵢ₌ᵣ₊₁ⁿ σᵢ. Verified: actual DC gain deviation is always within this bound.
-- **Constraint:** O(n⁶) Lyapunov solver -- use for n ≤ 10. Larger systems require Bartels-Stewart (not yet implemented).
+- **Algorithm:** Solve gramians via `SystemAnalysis::solveDiscreteLyapunov` -> Cholesky of P_c -> `SelfAdjointEigenSolver` of M = L_c'*P_o*L_c -> sort HSVs descending -> balanced transformation T_r = L_c*U*Sigma^{-½} -> truncate.
+- **Error bound:** ||G - G_r||inf <= 2*Sigma_i=ᵣ₊1^n sigma_i. Verified: actual DC gain deviation is always within this bound.
+- **Constraint:** O(n⁶) Lyapunov solver -- use for n <= 10. Larger systems require Bartels-Stewart (not yet implemented).
 - **Correct usage:** Design controller on `result.reduced`, then apply to the full-order plant. The error bound quantifies the performance degradation. See `ex58_balanced_truncation.cpp`.
 
 #### `ZeroPhaseTrackingFilter` ([ZeroPhaseTrackingFilter.h](../lib/ZeroPhaseTrackingFilter.h))
 - **Purpose:** ZPETC (Tomizuka 1987) feedforward prefilter. Inverts the minimum-phase part of a plant's numerator causally, normalises DC gain to 1, and produces zero phase error for min-phase zeros.
 - **Functions:**
-  - `transmissionZeros(sys)` -> `vector<complex<double>>` -- finite eigenvalues of the system matrix pencil `[[A-λI, B],[C, D]]` via `GeneralizedEigenSolver`.
+  - `transmissionZeros(sys)` -> `vector<complex<double>>` -- finite eigenvalues of the system matrix pencil `[[A-lambdaI, B],[C, D]]` via `GeneralizedEigenSolver`.
   - `designZPETC(plant)` -> `ZPETCResult {filter, dcAmplitudeError, hasNMPZeros, zeros, nmpZeros}`.
-- **Composite response:** G(z)*G_ff(z) = B⁻(z)/B⁻(1). For min-phase plants: G*G_ff = z^{-d} (unit magnitude, pure delay). For NMP: unit DC gain, amplitude error away from DC.
+- **Composite response:** G(z)*G_ff(z) = B^-(z)/B^-(1). For min-phase plants: G*G_ff = z^{-d} (unit magnitude, pure delay). For NMP: unit DC gain, amplitude error away from DC.
 - **Key implementation detail:** The evaluation function `evalTF` must store C as `MatrixXcd` not `VectorXcd` -- Eigen's implicit reshape transposed a (1xn) row into an (nx1) column, producing a x50 error. Fixed: use matrix products `C_c * zIA.solve(B_c) + D_c`.
 - **Python binding disambiguation:** `suggest_order` is overloaded -- VectorXd (SubspaceID) dispatches from `advanced_bindings.cpp`; TruncationResult (BalancedTruncation) from `analysis_bindings.cpp`. Wrapped in lambdas to resolve the C++ overload ambiguity.
 
@@ -796,17 +796,17 @@ All factories return `ctrl::MF = std::function<double(double)>` capturing parame
 - **Python:** `ctrl.AntiWindupWrapper(inner, uMin, uMax, Kb=1.0)`.
 
 #### `TubeMPC` ([TubeMPC.h](../lib/TubeMPC.h)) *Part 26*
-- **Purpose:** Robust MPC with mRPI tube guarantee for bounded additive disturbances `w[k] ∈ W` (Mayne, Seron & Rakovic 2005). The actual state stays inside `Z = {e : |e_i| ≤ z_max_i}` around the nominal trajectory for all admissible disturbances.
-- **Parameters (`TubeMPCParams`):** `Np`, `Nu`, `Q` (state cost), `R` (control cost), `K` (stabilising feedback — must make A+B*K stable), `wMax` (disturbance bound per state), `uMin/uMax`, `Ts`.
+- **Purpose:** Robust MPC with mRPI tube guarantee for bounded additive disturbances `w[k] \in W` (Mayne, Seron & Rakovic 2005). The actual state stays inside `Z = {e : |e_i| <= z_max_i}` around the nominal trajectory for all admissible disturbances.
+- **Parameters (`TubeMPCParams`):** `Np`, `Nu`, `Q` (state cost), `R` (control cost), `K` (stabilising feedback - must make A+B*K stable), `wMax` (disturbance bound per state), `uMin/uMax`, `Ts`.
 - **Offline (ctor):** computes mRPI set, tightens input constraints by K*Z, builds condensed QP matrices.
 - **Online:** `setState(x)`, `computeRef(x, y_ref)` applies composite law `u = K*(x - x_nom) + V*[0]`.
-- **Cave:** `y_ss ≈ Q/(Q+R)*r` without integral action; for ~0.5% error use `Q=10, R=0.05`. MATLAB `lqr()` sign: pass `K = -K_lqr` (negate).
+- **Cave:** `y_ss approx = Q/(Q+R)*r` without integral action; for ~0.5% error use `Q=10, R=0.05`. MATLAB `lqr()` sign: pass `K = -K_lqr` (negate).
 
 #### `ParticleFilter` ([ParticleFilter.h](../lib/ParticleFilter.h))
 - **Purpose:** SIR (Bootstrap) particle filter for nonlinear / non-Gaussian state estimation (Gordon, Salmond & Smith 1993). Use over EKF/UKF when the posterior is multimodal or heavy-tailed.
 - **Parameters:** `n_particles`, process-noise `Q`, measurement-noise `R`, `resample_threshold` (ESS fraction, typically 0.5).
-- **Usage:** provide `state_fn(x, u)` (dynamics) + `obs_fn(x, u)` (measurement model); call `update(u, y)` → `estimate()` returns weighted mean.
-- **Benchmark:** Kitagawa `y = x²/20 + noise` — RMSE 4–10 is normal (bimodal posterior).
+- **Usage:** provide `state_fn(x, u)` (dynamics) + `obs_fn(x, u)` (measurement model); call `update(u, y)` -> `estimate()` returns weighted mean.
+- **Benchmark:** Kitagawa `y = x^2/20 + noise` - RMSE 4-10 is normal (bimodal posterior).
 
 ---
 
@@ -902,75 +902,75 @@ for (int k = 0; k < N; ++k) {
 
 ---
 
-### 5.8 Data-Driven & ML Controllers (Parts 31–34)
+### 5.8 Data-Driven & ML Controllers (Parts 31-34)
 
 All algorithms below are in `lib/`, included by [ControllerToolbox.h](../lib/ControllerToolbox.h), and have pybind11 bindings + Catch2 tests.
 
 #### `ILCController` ([IterativeLearningControl.h](../lib/IterativeLearningControl.h)) *Part 31*
-- **Purpose:** Iterative Learning Control — learns a feedforward correction that eliminates repeating tracking errors across fixed-duration trials (Bristow 2006).
-- **Modes:** `P_type` (`u_{j+1} = u_j + L_p*e_j`), `D_type` (adds derivative term), `NormOptimal` (minimises `||e_{j+1}||²_R + ||Δu_j||²_Q` using the Markov-parameter matrix G).
-- **Usage:** `newTrial()` → run the trial → `endTrial(e_vec)` → `getNextInput(k)` for the feedforward at step k.
+- **Purpose:** Iterative Learning Control - learns a feedforward correction that eliminates repeating tracking errors across fixed-duration trials (Bristow 2006).
+- **Modes:** `P_type` (`u_{j+1} = u_j + L_p*e_j`), `D_type` (adds derivative term), `NormOptimal` (minimises `||e_{j+1}||^2_R + ||Deltau_j||^2_Q` using the Markov-parameter matrix G).
+- **Usage:** `newTrial()` -> run the trial -> `endTrial(e_vec)` -> `getNextInput(k)` for the feedforward at step k.
 
 #### `SINDy` + `SINDyModel` ([SINDy.h](../lib/SINDy.h)) *Part 31*
-- **Purpose:** Sparse Identification of Nonlinear Dynamics — builds a sparse polynomial/trig equation of motion from state-derivative data via STLS regression (Brunton 2016).
+- **Purpose:** Sparse Identification of Nonlinear Dynamics - builds a sparse polynomial/trig equation of motion from state-derivative data via STLS regression (Brunton 2016).
 - **Library options:** `PolyDeg1`, `PolyDeg2`, `PolyDeg3`, `PolyDeg1Trig` (adds sin/cos columns).
-- **Usage:** `fit(X_dot, X, U)` → `SINDyModel`; `model.stateFunc()` returns a `StateFunc` compatible with `NonlinearMPC`, `CEMController`, and `DynaController`.
+- **Usage:** `fit(X_dot, X, U)` -> `SINDyModel`; `model.stateFunc()` returns a `StateFunc` compatible with `NonlinearMPC`, `CEMController`, and `DynaController`.
 
 #### `KoopmanEDMD` ([KoopmanEDMD.h](../lib/KoopmanEDMD.h)) *Part 31*
-- **Purpose:** Extended Dynamic Mode Decomposition — lifts a nonlinear system to a high-dimensional linear representation via a dictionary of basis functions (Williams 2015).
+- **Purpose:** Extended Dynamic Mode Decomposition - lifts a nonlinear system to a high-dimensional linear representation via a dictionary of basis functions (Williams 2015).
 - **Dictionaries:** `PolyDeg1`, `PolyDeg2`, `RBF` (radial basis), and combinations.
-- **Methods:** `fit(X, U, Y)` → `StateSpace` (full lifting); `fitProjected()` → `StateSpace` restricted to the original state coordinates. The output drops directly into `DiscreteMPC` or `DiscreteLQR`.
+- **Methods:** `fit(X, U, Y)` -> `StateSpace` (full lifting); `fitProjected()` -> `StateSpace` restricted to the original state coordinates. The output drops directly into `DiscreteMPC` or `DiscreteLQR`.
 
 #### `L1AdaptiveController` ([L1AdaptiveController.h](../lib/L1AdaptiveController.h)) *Part 31*
-- **Purpose:** L1 adaptive control — state predictor + low-pass-filtered adaptation law; guarantees bounded transient performance independent of adaptation gain (Hovakimyan & Cao 2010).
-- **Usage (Python/C++):** `set_reference(r)` then `compute(y_plant)` — **not** `compute(r - y)`.
+- **Purpose:** L1 adaptive control - state predictor + low-pass-filtered adaptation law; guarantees bounded transient performance independent of adaptation gain (Hovakimyan & Cao 2010).
+- **Usage (Python/C++):** `set_reference(r)` then `compute(y_plant)` - **not** `compute(r - y)`.
 - **Key params:** `a_m` (model pole), `b_m` (model gain), `Gamma` (adaptation rate), `omega_c` (LP filter cutoff), `sigma_max` (projection bound). Constraint: `a_m` must give a stable reference model.
 
 #### `CBFSafetyFilter` ([CBFSafetyFilter.h](../lib/CBFSafetyFilter.h)) *Part 31*
-- **Purpose:** Control Barrier Function safety filter — 1D analytical QP wrapper that minimally modifies any `IController`'s output to keep the system inside a safe set `{x : h(x) ≥ 0}` (Ames et al. 2017).
+- **Purpose:** Control Barrier Function safety filter - 1D analytical QP wrapper that minimally modifies any `IController`'s output to keep the system inside a safe set `{x : h(x) >= 0}` (Ames et al. 2017).
 - **Usage:** provide `h_fn(x)` and `grad_h_fn(x)` (scalar + gradient); wraps any `shared_ptr<IController>`.
 - **1D analytical solve:** avoids a full QP; closed-form projection onto the CBF halfspace.
 
 #### `GaussianProcess` ([GaussianProcess.h](../lib/GaussianProcess.h)) *Part 31*
 - **Purpose:** Gaussian Process Regression with squared-exponential kernel and Cholesky inference (Rasmussen & Williams 2006). Fixed-budget online mode evicts oldest point at `N_max`.
-- **Methods:** `train(X, y)`, `predict(x*)` → `{mean, variance}`. Kernel params: `sigma_f` (signal std), `ell` (length scale), `sigma_n` (noise std).
+- **Methods:** `train(X, y)`, `predict(x*)` -> `{mean, variance}`. Kernel params: `sigma_f` (signal std), `ell` (length scale), `sigma_n` (noise std).
 - **Note:** Not an `IController`; used as a surrogate for GP-MPC or inside `BayesianOptimizer`.
 
 #### `EchoStateNetwork` ([EchoStateNetwork.h](../lib/EchoStateNetwork.h)) *Part 31*
-- **Purpose:** Echo State Network / Reservoir Computing — fixed random reservoir, trained readout only via ridge regression (Jaeger 2001). Identifies nonlinear dynamics without backprop.
-- **Methods:** `train(U, Y, washout)` fits `W_out`; `step(u)` → `y_hat`. Returns a `StateFunc` for use in predictive controllers.
-- **Key param:** `spectral_radius` — must be `< 1` for echo state property (typically 0.9).
+- **Purpose:** Echo State Network / Reservoir Computing - fixed random reservoir, trained readout only via ridge regression (Jaeger 2001). Identifies nonlinear dynamics without backprop.
+- **Methods:** `train(U, Y, washout)` fits `W_out`; `step(u)` -> `y_hat`. Returns a `StateFunc` for use in predictive controllers.
+- **Key param:** `spectral_radius` - must be `< 1` for echo state property (typically 0.9).
 
 #### `NeuralPID` ([NeuralPID.h](../lib/NeuralPID.h)) *Part 31*
-- **Purpose:** Online neural PID — 3-layer network `[e, ė, ∫e] → [Kp, Ki, Kd]` adapts weights each step via backprop through the linearised plant Jacobian.
+- **Purpose:** Online neural PID - 3-layer network `[e, ė, \inte] -> [Kp, Ki, Kd]` adapts weights each step via backprop through the linearised plant Jacobian.
 - **Params (`NeuralPIDParams`):** `n_hidden`, `lr`, `Ts`, `plant_gain`, `max_weight_norm`, `uMin/uMax`, `Kp0/Ki0/Kd0`. **Note:** `Ts` IS a field of `NeuralPIDParams` (unlike `PIDParams` where Ts is a constructor arg).
-- **Constructor:** `NeuralPID(params)` — single-arg, no separate Ts.
+- **Constructor:** `NeuralPID(params)` - single-arg, no separate Ts.
 
 #### `CEMController` ([CEMController.h](../lib/CEMController.h)) *Part 31*
-- **Purpose:** Cross-Entropy Method MPC — derivative-free stochastic rollout optimisation. Samples N action sequences, keeps elite set, refits Gaussian, warm-starts with previous solution.
+- **Purpose:** Cross-Entropy Method MPC - derivative-free stochastic rollout optimisation. Samples N action sequences, keeps elite set, refits Gaussian, warm-starts with previous solution.
 - **Params:** `N_samples` (typically 50), `elite_frac` (0.1), `n_iter`, `Np`, `sigma_init`.
 - **Usage:** provide `state_fn` (dynamics) + `cost_fn` (per-step cost); call `compute(error)`.
 
 #### `DynaController` ([DynaController.h](../lib/DynaController.h)) *Part 33*
-- **Purpose:** Model-based RL (Dyna, Sutton 1991) — wraps any base `IController`, accumulates transition data, fits a SINDy error-dynamics model, exposes `modelRollout()` for synthetic planning.
+- **Purpose:** Model-based RL (Dyna, Sutton 1991) - wraps any base `IController`, accumulates transition data, fits a SINDy error-dynamics model, exposes `modelRollout()` for synthetic planning.
 - **Usage:** `compute(error)` delegates to the wrapped policy + learns in the background once `min_data_points` transitions are collected. Call `modelRollout(u_seq, x0)` from Python to improve the policy on synthetic data.
 
 #### `ScenarioMPC` ([ScenarioMPC.h](../lib/ScenarioMPC.h)) *Part 33*
-- **Purpose:** Scenario-based stochastic MPC (Calafiore & Campi 2006) — averages the QP cost over N_s sampled Gaussian noise trajectories. More conservative than `DiscreteMPC`, less conservative than `TubeMPC`.
+- **Purpose:** Scenario-based stochastic MPC (Calafiore & Campi 2006) - averages the QP cost over N_s sampled Gaussian noise trajectories. More conservative than `DiscreteMPC`, less conservative than `TubeMPC`.
 - **Params:** `N_s` (scenario count), `Sigma_w` (process-noise covariance), plus the usual `MPCParams` fields. API mirrors `DiscreteMPC`.
 
 #### `BayesianOptimizer` ([BayesianOptimizer.h](../lib/BayesianOptimizer.h)) *Part 33, header-only*
-- **Purpose:** Bayesian Optimization for expensive controller parameter tuning — GP surrogate + UCB or EI acquisition (Srinivas 2010). Use instead of `AutoTuner` (CMA-ES) when each cost evaluation is costly (hardware test, long simulation).
+- **Purpose:** Bayesian Optimization for expensive controller parameter tuning - GP surrogate + UCB or EI acquisition (Srinivas 2010). Use instead of `AutoTuner` (CMA-ES) when each cost evaluation is costly (hardware test, long simulation).
 - **Acquisition:** `UCB` (exploration weight `kappa`) or `EI` (expected improvement `xi`).
-- **Shared types with AutoTuner:** `TunerResult`, `CostFn` — plug into the same cost wrappers.
+- **Shared types with AutoTuner:** `TunerResult`, `CostFn` - plug into the same cost wrappers.
 
 #### `ControllerRegistry` + `ControllerMonitor` ([ControllerRegistry.h](../lib/ControllerRegistry.h), [ControllerMonitor.h](../lib/ControllerMonitor.h)) *Part 33*
 - **Registry:** Meyers-singleton self-registration. Each algorithm header places `CTRL_REGISTER_FEATURE(name)` at its bottom; `ctrl::features()` then returns the live map. `CTRL_HAS_*` compile-time flags set conditional entries.
-- **Monitor:** Attaches to any `IController` as an `IControllerObserver`. Runs CUSUM (mean-shift detection, params `k`/`h`) and EWMA (drift detection, params `lambda`/`L`) SPC charts on the output stream. Fires a configurable `alarm_cb(chart_name, value)` on fault. Also listens to `onState(key, vec)` — ADRC emits `"eso"` z-vector, SMC emits `"surface"`.
+- **Monitor:** Attaches to any `IController` as an `IControllerObserver`. Runs CUSUM (mean-shift detection, params `k`/`h`) and EWMA (drift detection, params `lambda`/`L`) SPC charts on the output stream. Fires a configurable `alarm_cb(chart_name, value)` on fault. Also listens to `onState(key, vec)` - ADRC emits `"eso"` z-vector, SMC emits `"surface"`.
 
 #### `ComputationalDelayWrapper` ([ComputationalDelayWrapper.h](../lib/ComputationalDelayWrapper.h)) *Part 34, header-only*
-- **Purpose:** One-sample actuator delay decorator — models the realistic digital loop where computation at step k cannot reach the actuator until step k+1.
-- **Behaviour:** `u_out[k] = u_inner[k-1]` (first call returns 0, the held initial value). Shifts Nyquist phase margin by −π; use this to expose that margin during tuning, not to fix it.
+- **Purpose:** One-sample actuator delay decorator - models the realistic digital loop where computation at step k cannot reach the actuator until step k+1.
+- **Behaviour:** `u_out[k] = u_inner[k-1]` (first call returns 0, the held initial value). Shifts Nyquist phase margin by -pi; use this to expose that margin during tuning, not to fix it.
 - **Note:** Output is initialised to 0.0; warm up one step before trusting the output.
 
 ---

@@ -1,4 +1,4 @@
-# Design: Subspace ID Method Variants (Phase 3, SI3 — MOESP / N4SID / CVA)
+# Design: Subspace ID Method Variants (Phase 3, SI3 - MOESP / N4SID / CVA)
 
 **Date:** 2026-06-25
 **Roadmap source:** `docs/ALGORITHM_ROADMAP_PHASE3.md` SI3 section; `docs/algorithm_backlog.md`
@@ -17,36 +17,36 @@ only branches at the weighting-before-SVD step.
 The roadmap sketch invented a free function `subspaceID(..., method=N4SID, ...)` and assumed
 `n4sid()` was the deterministic-stochastic-combined N4SID algorithm being "extended" with MOESP
 and CVA as additions. Reading the real code shows the opposite: `n4sid()`'s own docstring says it
-implements **MOESP** (Verhaegen & Dewilde 1992) — an *unweighted* oblique projection — not weighted
+implements **MOESP** (Verhaegen & Dewilde 1992) - an *unweighted* oblique projection - not weighted
 N4SID at all (`lib/SubspaceID.h:16-62`). So "MOESP mode" is not new work; it is exactly today's
 existing `n4sid()`, mislabeled. The real new work is true (weighted) N4SID and CVA, which the
 unifying-theorem literature (Van Overschee & De Moor) frames as differing from MOESP **only** by
 weighting matrices applied to the oblique-projection matrix (`L32` in this codebase's notation)
-before its SVD — everything downstream (extracting `A`/`C` from shift-invariance, the `B`/`D`
+before its SVD - everything downstream (extracting `A`/`C` from shift-invariance, the `B`/`D`
 regression, the stochastic realization) is identical regardless of method.
 
 ## Why this needed a numpy prototype before writing it into a plan
 
-A first prototype attempt used the textbook-clean choice for CVA's "future" weighting —
-`Sigma_{Yf|Uf}^{-1/2}` computed from the existing LQ decomposition's `L32`/`L33` blocks — and it
+A first prototype attempt used the textbook-clean choice for CVA's "future" weighting -
+`Sigma_{Yf|Uf}^{-1/2}` computed from the existing LQ decomposition's `L32`/`L33` blocks - and it
 was numerically broken: `Sigma_{Yf|Uf}` is an `(i*p) x (i*p)` matrix whose **true rank is only the
 system order** (`n_order`, typically << `i*p`), so inverting it (even with ridge regularization)
 amplified noise directions by factors of 1000x+ in a near-noiseless sanity check that should have
-recovered the exact known system. This is not a contrived edge case — `i_horizon > n_order` is the
+recovered the exact known system. This is not a contrived edge case - `i_horizon > n_order` is the
 normal, recommended operating regime (the docstring itself recommends `i >= 2*n_order/p`), so this
 failure mode would hit real use, not just adversarial inputs.
 
 The fix that survived testing: instead of whitening the full multivariate future-block covariance,
 weight **per output channel** using a noise-scale estimate derived from `L33` (the part of each
-future output unexplained by either the input or the past data — i.e., the genuinely
+future output unexplained by either the input or the past data - i.e., the genuinely
 unpredictable/noise component). `L33`'s rows are indexed 1:1 by `Yf`'s own row layout (`i` repeated
 blocks of `p` output channels), so per-channel noise variance is `mean over the i repetitions of
-each channel's squared L33 row norm` — `p` scalars, trivially invertible, no rank-deficiency risk.
+each channel's squared L33 row norm` - `p` scalars, trivially invertible, no rank-deficiency risk.
 This is a narrower, regularized claim than full Larimore/Van Overschee-De Moor CVA, and is
-documented as such below — not a bit-for-bit reproduction of the original paper's weighting.
+documented as such below - not a bit-for-bit reproduction of the original paper's weighting.
 
 **A second, more important correction (post-Monte-Carlo verification):** an initial single-draw
-test appeared to show CVA beating *both* MOESP and N4SID on a mismatched-noise-channel scenario —
+test appeared to show CVA beating *both* MOESP and N4SID on a mismatched-noise-channel scenario -
 but that single draw turned out to be using an RNG state already advanced by unrelated earlier
 code in the same prototyping script, not an independently controlled trial. Re-verified properly
 with 40 independent trials (fresh seeds per trial) on the same scenario (`std = 0.005` vs `0.3`
@@ -54,11 +54,11 @@ across 2 output channels), then again at 10x the data to rule out a finite-sampl
 beats N4SID reliably (~85% of trials, lower mean error on both channels)**, confirming the
 per-channel weighting fix over N4SID's right-weighting-only approach is real. But **plain unweighted
 MOESP outperforms both N4SID and CVA on this synthetic system, consistently, on both channels,
-regardless of data volume** — i.e., right-weighting by `L22^-1` (the N4SID step) measurably hurts
+regardless of data volume** - i.e., right-weighting by `L22^-1` (the N4SID step) measurably hurts
 accuracy here, and CVA's left-weighting only partially recovers from that, without fully closing the
-gap back to unweighted MOESP. This is not a coding defect — weighting-based subspace ID methods
+gap back to unweighted MOESP. This is not a coding defect - weighting-based subspace ID methods
 trading off differently than the unweighted baseline depending on the specific system is consistent
-with the literature (no universal winner across N4SID/MOESP/CVA is claimed there either) — but it
+with the literature (no universal winner across N4SID/MOESP/CVA is claimed there either) - but it
 means **this design does not claim CVA (or N4SID) outperforms MOESP**, only that CVA outperforms
 N4SID specifically, and that all three converge to the true system as noise -> 0. The motivating
 "different output noise scales" framing is kept only as a description of when CVA's relative
@@ -71,31 +71,31 @@ LQ-decompose `Z = [Uf; Wp; Yf]`) and Steps 4-6 (extract `A`/`C` from `Gamma`'s s
 regress `B`/`D`, compute the stochastic realization) **completely unchanged** from today's
 `n4sid()`. Only Step 3 (weighting before the SVD that produces `Gamma`) branches by method:
 
-- **MOESP:** `SVD(L32)` directly — bit-identical to today's `n4sid()`.
-- **N4SID:** `SVD(L32 @ L22^-1)` — right-weight only. `L22` (the `(Wp,Wp)` block of the LQ
+- **MOESP:** `SVD(L32)` directly - bit-identical to today's `n4sid()`.
+- **N4SID:** `SVD(L32 @ L22^-1)` - right-weight only. `L22` (the `(Wp,Wp)` block of the LQ
   factor `L`) is already a valid Cholesky-style square root of `Sigma_{Wp|Uf} = L22 @ L22^T / s`
-  (Wp's covariance with the input's contribution regressed out) — no extra computation needed
+  (Wp's covariance with the input's contribution regressed out) - no extra computation needed
   beyond a triangular solve, and no rank-deficiency risk since `Wp` (raw past data) is not expected
   to be low-rank the way a future-output projection is.
 - **CVA:** `SVD(diag(w) @ L32 @ L22^-1)`, where `w` is a length-`i*p` vector built by tiling a
   length-`p` per-channel weight `i` times: `w_j = 1 / sqrt(mean_{r=0..i-1}(L33[r*p+j, :])^2-row-norm)`
   for channel `j = 0..p-1`. After truncating to `n_order` singular vectors, undo the (purely
   diagonal, trivially invertible) left weighting before forming `Gamma`, by multiplying back by
-  `1/w` element-wise — unlike a generic matrix weight, this never requires inverting an
+  `1/w` element-wise - unlike a generic matrix weight, this never requires inverting an
   ill-conditioned object.
 - `suggestOrder()` is reused unchanged for all three methods' `singularValues` (no method-specific
   branch). Its elbow heuristic is somewhat less sharp for CVA's reweighted spectrum in some
-  scenarios (verified in the prototype) — this is an existing, documented heuristic limitation
+  scenarios (verified in the prototype) - this is an existing, documented heuristic limitation
   (`suggestOrder`'s own docstring already frames it as a heuristic with a secondary threshold
   guard), not a new defect introduced by this design.
 
 ## API
 
 `lib/SubspaceID.h` / `lib/SubspaceID.cpp`. `n4sid()` keeps its exact current name, signature, and
-behavior — it is called from ~10 other locations (`lib/LPVSystemID.cpp`, the Boiler Control case
+behavior - it is called from ~10 other locations (`lib/LPVSystemID.cpp`, the Boiler Control case
 study, `examples/ex31_subspace_id.cpp`, `examples/ex20_system_identification_data.cpp`, tests,
 3 binding files) and none of them need to change. Internally, `n4sid()` becomes a one-line
-delegate to the new shared pipeline at `SubspaceMethod::MOESP` — a behavior-preserving refactor
+delegate to the new shared pipeline at `SubspaceMethod::MOESP` - a behavior-preserving refactor
 that also deletes ~150 lines of now-duplicate Hankel/LQ/extraction code.
 
 ```cpp
@@ -164,57 +164,57 @@ Steps-1-2 helper, branch on `method` to build the weighted matrix and its SVD, f
   `1/sqrt(.)` weight (prevents a division blow-up for a channel with literally zero estimated
   noise, e.g. a synthetic noiseless test channel), mirroring the floor already used in the
   prototype.
-- This is offline, batch identification code (not a `compute()`/`step()` hot path) — the RT
+- This is offline, batch identification code (not a `compute()`/`step()` hot path) - the RT
   zero-allocation rules (`CLAUDE.md` section 7) do not apply, the same exemption `n4sid()` already
   has.
 
 ## Wiring
 
 This is an **extension to an existing class** (`docs/ALGORITHM_ROADMAP_PHASE3.md`'s own
-Implementation Checklist already calls this out for SI3) — only the files below need updating,
+Implementation Checklist already calls this out for SI3) - only the files below need updating,
 not the full 8-step new-class checklist:
 
-1. `lib/SubspaceID.h` / `lib/SubspaceID.cpp` — `SubspaceMethod` enum, `subspaceID()`, internal
+1. `lib/SubspaceID.h` / `lib/SubspaceID.cpp` - `SubspaceMethod` enum, `subspaceID()`, internal
    refactor, `n4sid()` becomes a delegating one-liner.
 2. `bindings/advanced_bindings.cpp` (where `n4sid()`/`suggestOrder()` are already bound, under
-   `CTRL_HAS_SUBSPACE`) — bind the `SubspaceMethod` enum and `subspaceID()`.
-3. `bindings/smoke_test.py` — extend the existing `n4sid` smoke-test section with a `subspaceID`
+   `CTRL_HAS_SUBSPACE`) - bind the `SubspaceMethod` enum and `subspaceID()`.
+3. `bindings/smoke_test.py` - extend the existing `n4sid` smoke-test section with a `subspaceID`
    call across all 3 methods.
-4. `tests/test_catch2_advanced.cpp` — new Catch2 tests tagged `[subspace_id_variants]`.
+4. `tests/test_catch2_advanced.cpp` - new Catch2 tests tagged `[subspace_id_variants]`.
 5. `examples/ex113_subspace_id_variants.cpp` + `examples/python/ex130_subspace_id_variants.py`
    (next free numbers as of this writing, after FD2's reserved `ex112`/`ex129`), plus
    `examples/CMakeLists.txt`, `compile.bat`, `compile.sh` updates.
-6. `docs/algorithm_backlog.md` / `docs/ALGORITHM_ROADMAP_PHASE3.md` — mark SI3 done once shipped.
+6. `docs/algorithm_backlog.md` / `docs/ALGORITHM_ROADMAP_PHASE3.md` - mark SI3 done once shipped.
 
-No changes to `lib/CMakeLists.txt` or `lib/ControllerToolbox.h` (no new source file — `SubspaceID.h`/
+No changes to `lib/CMakeLists.txt` or `lib/ControllerToolbox.h` (no new source file - `SubspaceID.h`/
 `.cpp` already exist and are already wired in).
 
 ## Test plan (`[subspace_id_variants]`)
 
-1. Known 2-output state-space system, equal noise on both channels — all 3 methods recover
+1. Known 2-output state-space system, equal noise on both channels - all 3 methods recover
    realizations whose `A` eigenvalues match the true system within tolerance (similarity-invariant
    comparison, per `SubspaceID.h`'s own documented invariance contract); `subspaceID(..., MOESP)`
    matches `n4sid()`'s output bit-for-bit (regression, confirms the refactor is behavior-preserving).
 2. Mismatched output-channel noise scales (`std` differing by 60x between channels), averaged
-   over many independent trials (Monte Carlo, not a single noise draw — a single draw was
-   verified to flip unpredictably) — CVA's mean frequency-response error on the high-noise channel
+   over many independent trials (Monte Carlo, not a single noise draw - a single draw was
+   verified to flip unpredictably) - CVA's mean frequency-response error on the high-noise channel
    is reliably lower than N4SID's (~85% win rate across 40 independent trials in prototyping).
-   This test does **not** assert CVA or N4SID beats MOESP — verified false in the same Monte Carlo
+   This test does **not** assert CVA or N4SID beats MOESP - verified false in the same Monte Carlo
    sweep (plain MOESP was the strongest performer on this synthetic system in every trial).
 3. `suggestOrder()` runs unchanged (same function, no method-specific branch) across all 3
    methods' `singularValues` outputs and returns a value `>= 1` for each.
-4. Degenerate excitation (near-constant input, near-singular `L22`) — N4SID/CVA return
+4. Degenerate excitation (near-constant input, near-singular `L22`) - N4SID/CVA return
    `success=false` with a descriptive message rather than a NaN/garbage model; MOESP (which
    doesn't use `L22`) is unaffected by this specific degeneracy and is checked separately for its
    own existing failure modes (already covered by `n4sid()`'s current tests).
 
 ## Out of scope
 
-- Full Larimore/Van Overschee-De Moor canonical-variate (cross-covariance) whitening — proved
+- Full Larimore/Van Overschee-De Moor canonical-variate (cross-covariance) whitening - proved
   numerically ill-conditioned in prototyping (see "Why this needed a numpy prototype" above); the
   per-channel noise-scale weighting shipped instead is a deliberate, documented simplification.
-- Changing `n4sid()`'s name or signature — stays fully backward compatible for all existing callers.
+- Changing `n4sid()`'s name or signature - stays fully backward compatible for all existing callers.
 - A `SubspaceMethod`-aware variant of `kalmanGain`/`innovCov` semantics (e.g. leaving them empty
-  for "true" MOESP) — computed identically for all 3 methods, per the API section's reasoning.
-- Re-deriving `i_horizon`/`n_order` selection guidance per method — `suggestOrder()`'s existing
+  for "true" MOESP) - computed identically for all 3 methods, per the API section's reasoning.
+- Re-deriving `i_horizon`/`n_order` selection guidance per method - `suggestOrder()`'s existing
   heuristic is reused as-is; no new order-selection logic.

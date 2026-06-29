@@ -7,34 +7,34 @@
 
 DT4 closes the loop from fault detection to controller reconfiguration, built directly on
 `ControllerStack`'s existing Supervisory mode (health-aware fallback + bumpless transfer already
-built in) — driven by a fault classifier instead of a static activation condition.
+built in) - driven by a fault classifier instead of a static activation condition.
 `lib/ControllerStack.h` and `lib/MismatchDetector.h`/`KalmanFilter::mismatchDetected()`/
 `mismatchScore()` were read in full before writing this spec; both exist exactly as the roadmap
 assumes, with no corrections needed to the reuse claims. The one genuine design gap the roadmap's
-bare sketch leaves open — **how does `classify()` actually tell `SensorBias` apart from
-`ActuatorLoss` given only `(innovation, u_cmd, y_meas)`?** — is resolved below; this is a real FDI
+bare sketch leaves open - **how does `classify()` actually tell `SensorBias` apart from
+`ActuatorLoss` given only `(innovation, u_cmd, y_meas)`?** - is resolved below; this is a real FDI
 (fault detection *and isolation*) problem, not a rubber-stamp of the sketch.
 
 ## Scope
 
 This is a **heuristic** classifier over rolling-window statistics, not a rigorous geometric/
 structured-residual FDI observer bank (the academically rigorous approach to fault *isolation*,
-which needs one dedicated observer per fault direction — far beyond this item's ~300-line
+which needs one dedicated observer per fault direction - far beyond this item's ~300-line
 budget). It distinguishes the four `tools/fault_injector.py` fault kinds using two structurally
 different signatures that *are* recoverable from a scalar residual stream without a observer
 bank:
 - **Actuator faults** (loss, stuck) break the causal link between commanded `u` and measured `y`
-  — detectable via the correlation between consecutive changes in `u_cmd` and `y_meas`.
+  - detectable via the correlation between consecutive changes in `u_cmd` and `y_meas`.
 - **Sensor faults** (bias, noise) leave that causal link intact but corrupt the residual's own
-  distribution — a persistent offset (bias) vs. elevated variance with no offset (noise).
+  distribution - a persistent offset (bias) vs. elevated variance with no offset (noise).
 
-A true ambiguous case (e.g. a fault that mimics both signatures) can still misclassify — this is
+A true ambiguous case (e.g. a fault that mimics both signatures) can still misclassify - this is
 inherent to working from 3 scalars instead of a full structured-residual bank, and is documented
 as a limitation, not silently assumed away.
 
 ## Components
 
-### 1. `lib/FaultClassifier.h` / `.cpp` — standalone, no `IController`/`ControllerStack` dependency
+### 1. `lib/FaultClassifier.h` / `.cpp` - standalone, no `IController`/`ControllerStack` dependency
 
 ```cpp
 enum class FaultType { None, SensorBias, SensorNoise, ActuatorLoss, ActuatorStuck };
@@ -96,13 +96,13 @@ near-zero `stddev(dy)`). The existing `actuator_loss`/`actuator_stuck` test sign
 both break the `u_cmd -> y_meas` correlation (the plant stops responding proportionally to
 commands); they're told apart by whether the *controller's own* `u_cmd` has also collapsed to
 near-constant (a wound-up integrator pushing against an unresponsive actuator settles near a
-rail — low `stddev(uHist_)` — vs. `ActuatorLoss`, where `u_cmd` keeps varying normally since the
+rail - low `stddev(uHist_)` - vs. `ActuatorLoss`, where `u_cmd` keeps varying normally since the
 controller is still actively, if ineffectively, correcting through an attenuated actuator).
 `SensorBias`/`SensorNoise` both preserve the causal link (the controller's commands still
 correctly correlate with what the corrupted sensor reports); they're told apart by the classic
 mean-shift-vs-variance-inflation distinction on the innovation itself.
 
-### 2. `lib/FTCSupervisor.h` / `.cpp` — implements `IController`, composes a `ControllerStack`
+### 2. `lib/FTCSupervisor.h` / `.cpp` - implements `IController`, composes a `ControllerStack`
 
 ```cpp
 class FTCSupervisor : public IController {
@@ -142,7 +142,7 @@ private:
 ```
 
 **Why `feedResidual()` is a separate call (a small, necessary deviation from the roadmap's bare
-`compute(double error)` sketch):** `compute()`'s only input is the tracking error — it has no
+`compute(double error)` sketch):** `compute()`'s only input is the tracking error - it has no
 access to the model-based innovation, nor to the `u_cmd`/`y_meas` pair the classifier needs.
 `SelfTuningRegulator` (this phase's OC1) hit the same gap and resolved it with a `setReference()`
 pre-call; `FTCSupervisor` follows the same precedent with `feedResidual()`.
@@ -157,10 +157,10 @@ pre-call; `FTCSupervisor` follows the same precedent with `feedResidual()`.
      lastApplied_ = currentFault_
 3. return stack_->compute(error)
 ```
-No `ControllerStack` changes needed — `setActive()` (already public) plus Supervisory mode's
+No `ControllerStack` changes needed - `setActive()` (already public) plus Supervisory mode's
 existing "first `active && isHealthy()` entry wins, with automatic `bumplessInit()` on switch"
 behavior (`ControllerStack.h:30-46`) does all of the actual reconfiguration and bump-free
-switching. `FTCSupervisor` only decides *which single entry* should be `active` at any time —
+switching. `FTCSupervisor` only decides *which single entry* should be `active` at any time -
 exactly the "most of the orchestration machinery is pure reuse" claim the roadmap makes, now made
 concrete.
 
@@ -192,60 +192,60 @@ correct entry, bounded trajectory throughout (see the Testing Plan note below).
 
 ## Explicitly out of scope (this phase)
 
-- **A rigorous structured/directional-residual FDI observer bank** — see Scope; the heuristic
+- **A rigorous structured/directional-residual FDI observer bank** - see Scope; the heuristic
   classifier can misclassify genuinely ambiguous faults, documented rather than hidden.
-- **Multi-fault (simultaneous) classification** — `classify()` returns one `FaultType` per step;
+- **Multi-fault (simultaneous) classification** - `classify()` returns one `FaultType` per step;
   simultaneous sensor+actuator faults are not disambiguated.
-- **Automatic `ControllerStack` entry creation** — the user must `addController()` every
+- **Automatic `ControllerStack` entry creation** - the user must `addController()` every
   fault-response controller themselves before calling `registerFaultResponse()`; `FTCSupervisor`
   never constructs controllers on its own.
 
 ## Implementation checklist
 
-**`FaultClassifier`** (standalone utility, lightest checklist — same shape as `MismatchDetector`):
+**`FaultClassifier`** (standalone utility, lightest checklist - same shape as `MismatchDetector`):
 1. `lib/FaultClassifier.h`/`.cpp` + `CTRL_REGISTER_FEATURE(fault_classifier)`
-2. `lib/CMakeLists.txt` — add `FaultClassifier.cpp`
-3. `lib/ControllerToolbox.h` — `#include "FaultClassifier.h"` near `MismatchDetector.h`
+2. `lib/CMakeLists.txt` - add `FaultClassifier.cpp`
+3. `lib/ControllerToolbox.h` - `#include "FaultClassifier.h"` near `MismatchDetector.h`
 
 **`FTCSupervisor`** (full `IController` checklist, depends on `FaultClassifier`):
 4. `lib/FTCSupervisor.h`/`.cpp` + `CTRL_REGISTER_FEATURE(ftc_supervisor)`
-5. `lib/CMakeLists.txt` — add `FTCSupervisor.cpp`
-6. `lib/ControllerToolbox.h` — `#include "FTCSupervisor.h"` near `ControllerStack.h`
-7. `bindings/controllers_bindings.cpp` — bind `FaultType`, `FaultDetectorParams`,
+5. `lib/CMakeLists.txt` - add `FTCSupervisor.cpp`
+6. `lib/ControllerToolbox.h` - `#include "FTCSupervisor.h"` near `ControllerStack.h`
+7. `bindings/controllers_bindings.cpp` - bind `FaultType`, `FaultDetectorParams`,
    `FaultClassifier`, `FTCSupervisor` (`std::shared_ptr<T>` + `ctrl::IController` base)
-8. `bindings/smoke_test.py` — build a 2-entry stack, register `None`+`ActuatorLoss`, feed a
+8. `bindings/smoke_test.py` - build a 2-entry stack, register `None`+`ActuatorLoss`, feed a
    synthetic fault residual sequence, assert `current_fault()` flips as expected
-9. `examples/ex107_ftc_supervisor.cpp` + `examples/python/ex124_ftc_supervisor.py` — redundant
+9. `examples/ex107_ftc_supervisor.cpp` + `examples/python/ex124_ftc_supervisor.py` - redundant
    sensor pair scenario per the roadmap's own example use case (injected `sensor_bias`, supervisor
    switches to a controller relying on the healthy sensor)
-10. `tests/test_catch2_advanced.cpp` — tests under `[fault_classifier]` and `[ftc_supervisor]`
-11. `examples/CMakeLists.txt`, `compile.bat`/`compile.sh` — add `ex107_ftc_supervisor`
+10. `tests/test_catch2_advanced.cpp` - tests under `[fault_classifier]` and `[ftc_supervisor]`
+11. `examples/CMakeLists.txt`, `compile.bat`/`compile.sh` - add `ex107_ftc_supervisor`
 
 ## Testing plan
 
 **`[fault_classifier]`**
-1. Synthetic `sensor_bias` residual stream (persistent offset, causal link intact) — classifies
+1. Synthetic `sensor_bias` residual stream (persistent offset, causal link intact) - classifies
    as `SensorBias` within `confirm_window` samples.
-2. Synthetic `sensor_noise` residual stream (zero-mean, elevated variance, causal link intact) —
+2. Synthetic `sensor_noise` residual stream (zero-mean, elevated variance, causal link intact) -
    classifies as `SensorNoise`.
-3. Synthetic `actuator_loss` stream (attenuated but still-varying `u_cmd`, broken correlation) —
+3. Synthetic `actuator_loss` stream (attenuated but still-varying `u_cmd`, broken correlation) -
    classifies as `ActuatorLoss`.
-4. Synthetic `actuator_stuck` stream (near-constant `u_cmd`, broken correlation) — classifies as
+4. Synthetic `actuator_stuck` stream (near-constant `u_cmd`, broken correlation) - classifies as
    `ActuatorStuck`.
-5. No fault (nominal residual below `residual_threshold`) — classifies as `None` throughout.
-6. Insufficient history (`count_ < confirm_window`) — returns `None`, never a false positive on
+5. No fault (nominal residual below `residual_threshold`) - classifies as `None` throughout.
+6. Insufficient history (`count_ < confirm_window`) - returns `None`, never a false positive on
    the first few calls.
 
 **`[ftc_supervisor]`**
-1. Injected `actuator_loss` fault (matching `tools/fault_injector.py`'s taxonomy) — switches to
+1. Injected `actuator_loss` fault (matching `tools/fault_injector.py`'s taxonomy) - switches to
    the registered fallback controller within `confirm_window` steps of `feedResidual()` calls.
-2. No fault — behaves identically to a plain `ControllerStack` in Supervisory mode with one
+2. No fault - behaves identically to a plain `ControllerStack` in Supervisory mode with one
    always-active entry (regression; confirms the one-time initial `setActive()` pass doesn't
    alter steady-state behavior).
-3. Fault clears (residual returns to nominal) — supervisor switches back to the `None`-registered
+3. Fault clears (residual returns to nominal) - supervisor switches back to the `None`-registered
    controller with no bump in `u` (verified via `ControllerStack`'s existing bumpless-transfer
-   guarantee — i.e. this test is really confirming `FTCSupervisor` doesn't bypass it).
-4. `registerFaultResponse()` called with a controller name never added to `stack` — throws
+   guarantee - i.e. this test is really confirming `FTCSupervisor` doesn't bypass it).
+4. `registerFaultResponse()` called with a controller name never added to `stack` - throws
    `std::invalid_argument` immediately (see the correction above), surfacing the misconfiguration
    at registration time instead of silently doing nothing at `compute()` time.
 

@@ -91,6 +91,10 @@ All matrix members are Eigen::MatrixXd and map bidirectionally with NumPy arrays
     m.def("tf2ss", &ctrl::tf2ss, py::arg("tf"),
           "Convert a SISO discrete transfer function to controllable canonical state-space form.");
 
+    m.def("ss2tf", &ctrl::ss2tf, py::arg("sys"),
+          "Convert a SISO discrete state-space model to transfer-function (z^-1) form. "
+          "Raises ValueError if sys is not SISO.");
+
     m.def("invert_transfer_function", &ctrl::invertTransferFunction,
           py::arg("G"), py::arg("eps") = 1e-9,
           R"doc(
@@ -438,4 +442,34 @@ that participates in ControllerStack and all tuning infrastructure.
              "Remove the attached observer.")
         .def("has_observer", &ctrl::IController::hasObserver,
              "True if an observer is currently attached.");
+
+    // -----------------------------------------------------------------------
+    // FeedforwardController - u_ff[k] = G_ff(z) * r[k]
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::FeedforwardController, ctrl::IController,
+               std::shared_ptr<ctrl::FeedforwardController>>(
+        m, "FeedforwardController", R"doc(
+Feedforward controller: u_ff[k] = G_ff(z) * r[k].
+
+Applies a pre-designed discrete StateSpace filter to the reference signal (not the
+tracking error). Pair with invert_transfer_function() + tf2ss() for dynamic-inversion
+feedforward, or combine with a feedback controller via ControllerStack.Additive for a
+two-degree-of-freedom structure.
+)doc")
+        .def(py::init<const ctrl::StateSpace &>(), py::arg("ff_model"),
+             "Construct from a pre-designed discrete-time filter G_ff(z) (Ts > 0).")
+        .def("compute",     &ctrl::FeedforwardController::compute, py::arg("r"),
+             "Compute u_ff[k] = G_ff(z) * r[k] from the reference signal (not error).")
+        .def("compute_vec", &ctrl::FeedforwardController::computeVec, py::arg("r"),
+             "MIMO variant: u_ff[k] = G_ff(z) * r[k] for a vector reference.")
+        .def("reset",       &ctrl::FeedforwardController::reset,
+             "Reset the internal filter state to zero.")
+        .def("sample_time", &ctrl::FeedforwardController::sampleTime,
+             "Sample time Ts [s] of the feedforward filter.")
+        .def("model",       &ctrl::FeedforwardController::model,
+             py::return_value_policy::reference_internal,
+             "Read-only access to the feedforward filter's StateSpace model.")
+        .def("state",       &ctrl::FeedforwardController::state,
+             py::return_value_policy::reference_internal,
+             "Current filter state x.");
 }

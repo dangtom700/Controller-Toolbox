@@ -19,7 +19,7 @@ existing class covers:
 `lib/ParticleFilter.h` was read in full before writing this spec: `predict()`/`update()`/`step()`
 are **not virtual** and every data member is `private`. The roadmap's
 `class ParticleFilterV2 : public ParticleFilter` sketch, as written, would compile but couldn't
-actually override the algorithm — calling `predict()` on a `ParticleFilterV2&` (or even a
+actually override the algorithm - calling `predict()` on a `ParticleFilterV2&` (or even a
 `ParticleFilterV2*`) would always run the *base* bootstrap logic. This spec includes the (small,
 additive, behavior-preserving) base-class change needed to make the roadmap's inheritance claim
 true.
@@ -28,25 +28,25 @@ true.
 
 - **EF2**: linear plants (`StateSpace`) only; isotropic (componentwise-bound-derived) ellipsoidal
   process/measurement noise sets, since `SetMembershipParams` only exposes scalar `w_bound`/
-  `v_bound` (matching the roadmap's own struct — a general anisotropic ellipsoid bound is a
+  `v_bound` (matching the roadmap's own struct - a general anisotropic ellipsoid bound is a
   straightforward future extension, not built here).
 - **EF3 Auxiliary mode**: the look-ahead reweighting only changes behavior through `step()`
   (predict+update called together, the common usage pattern per `ParticleFilter`'s own docs).
   Calling `predict()`/`update()` separately on an `Auxiliary`-mode filter is well-defined but
-  degrades to plain bootstrap behavior for that call (documented, not an error) — splitting the
+  degrades to plain bootstrap behavior for that call (documented, not an error) - splitting the
   look-ahead resample across two independently-callable methods would require either buffering
   `y` across calls or accepting a measurement in `predict()`, both worse than this restriction.
 - **EF3 Rao-Blackwellized mode**: the linear substate's dynamics (`A_lin`, `B_lin`, `Q_lin`) are
   **fixed (LTI)**, and the nonlinear/linear coupling in the measurement is **additively
-  separable** — `h(x, u) = h_nonlinear(x_nl, u) + C_lin * x_lin` exactly. This is the standard
+  separable** - `h(x, u) = h_nonlinear(x_nl, u) + C_lin * x_lin` exactly. This is the standard
   "mixed linear/nonlinear measurement coupling" special case in the marginalized-PF literature
   (Schon, Gustafsson & Nordlund 2005), not the fully general conditionally-linear-dynamics case
-  (where `A_lin`/`C_lin` themselves depend on the nonlinear substate) — that generalization is
+  (where `A_lin`/`C_lin` themselves depend on the nonlinear substate) - that generalization is
   future work, flagged below.
 
 ## Components
 
-### 0. `lib/ParticleFilter.h` — base-class change enabling real inheritance (additive, zero behavior change for direct `ParticleFilter` use)
+### 0. `lib/ParticleFilter.h` - base-class change enabling real inheritance (additive, zero behavior change for direct `ParticleFilter` use)
 
 ```cpp
 class ParticleFilter {
@@ -79,15 +79,15 @@ protected:                              // CHANGED from private - same members, 
 };
 ```
 
-No method body changes in `ParticleFilter.cpp` — only the `private:` → `protected:` access
+No method body changes in `ParticleFilter.cpp` - only the `private:` -> `protected:` access
 specifier and four `virtual` keywords. Existing callers that hold a `ParticleFilter` (not
 `ParticleFilterV2`) value or reference see byte-identical behavior (virtual dispatch on a concrete
 base instance calls the base's own override, i.e. itself). This mirrors the precedent already set
 twice in this codebase for exactly this kind of additive access/virtuality change
-(`DiscreteLQR::solveDARE` and `DiscreteHinf::solveHinfDARE` both moved `private`→`public` so a new
+(`DiscreteLQR::solveDARE` and `DiscreteHinf::solveHinfDARE` both moved `private`->`public` so a new
 class could reuse them with zero behavior change to existing callers).
 
-### 1. `lib/SetMembershipEstimator.h` / `.cpp` — standalone estimator, no shared base (mirrors `KalmanFilter`'s `predict()`/`update()` shape)
+### 1. `lib/SetMembershipEstimator.h` / `.cpp` - standalone estimator, no shared base (mirrors `KalmanFilter`'s `predict()`/`update()` shape)
 
 ```cpp
 struct SetMembershipParams {
@@ -110,8 +110,8 @@ public:
 };
 ```
 
-**`predict()` — outer-bounding ellipsoid Minkowski sum** (Kurzhanski & Valyi, *Ellipsoidal
-Calculus for Estimation and Control*, 1997 — the standard ellipsoidal-bound result for
+**`predict()` - outer-bounding ellipsoid Minkowski sum** (Kurzhanski & Valyi, *Ellipsoidal
+Calculus for Estimation and Control*, 1997 - the standard ellipsoidal-bound result for
 `x[k+1] = A.x[k] + B.u[k] + w[k]`, `x[k] in E(c,P)`, `w[k] in E(0,Qw)`, independent):
 for any scalar `p > 0`,
 ```
@@ -126,13 +126,13 @@ c_ = A*c_ + B*u
 P_ = (1 + 1/p*) * A*P_*A' + (1 + p*) * Qw,   Qw = w_bound^2 * I
 ```
 
-**`update()` — outer-bounding ellipsoid intersection** (self-derived via the S-procedure, the
+**`update()` - outer-bounding ellipsoid intersection** (self-derived via the S-procedure, the
 same technique underlying the classical Schweppe 1968 / Fogel & Huang 1982 bounding-ellipsoid
 update, so this reproduces their result without depending on recalling their exact published
 closed form): for any `lambda in [0,1]`, since `E(c,P)` and the measurement consistency set `M =
 {x : (y-Cx)'Rv^-1(y-Cx) <= 1}` are each a sublevel set of a quadratic `<= 0`, any non-negative
 combination `(1-lambda).f_E(x) + lambda.f_M(x)` is also `<= 0` on `E ∩ M`, so its own sublevel set
-is an outer bound on the intersection for *every* `lambda` — giving a one-parameter family of
+is an outer bound on the intersection for *every* `lambda` - giving a one-parameter family of
 valid bounds to optimize over:
 ```
 M(lambda) = (1-lambda)*P^-1 + lambda*C'*Rv^-1*C
@@ -143,15 +143,15 @@ c'(lambda)     = M(lambda)^-1 * b(lambda)
 scale(lambda)  = b(lambda)' * M(lambda)^-1 * b(lambda) - k(lambda)
 P'(lambda)     = scale(lambda) * M(lambda)^-1            (valid ellipsoid iff scale(lambda) > 0)
 ```
-`update()` evaluates this on a fixed grid of `lambda in (0,1)` (e.g. 99 points — cheap, `na` is
+`update()` evaluates this on a fixed grid of `lambda in (0,1)` (e.g. 99 points - cheap, `na` is
 small; a closed-form/golden-section optimum is not assumed since unimodality of `trace(P'(lambda))`
 in `lambda` is not proven here, only empirically expected) and keeps the grid point minimizing
 `trace(P'(lambda))` among those with `scale(lambda) > 0`. **`isConsistent()`**: if `scale(lambda)
 <= 0` at *every* grid point, `E ∩ M` is empty (the measurement is inconsistent with the current
-ellipsoid + noise bound) — set `consistent_ = false` and **do not update** `c_`/`P_` (keep the
+ellipsoid + noise bound) - set `consistent_ = false` and **do not update** `c_`/`P_` (keep the
 pre-update, i.e. predicted, ellipsoid rather than corrupt state with an invalid result).
 
-### 2. `lib/ParticleFilter.h` additions — `ParticleFilterV2` (depends on component 0)
+### 2. `lib/ParticleFilter.h` additions - `ParticleFilterV2` (depends on component 0)
 
 ```cpp
 enum class PFVariant { Bootstrap, Auxiliary, RaoBlackwellized };
@@ -184,7 +184,7 @@ private:
 };
 ```
 
-**`Bootstrap`:** `predict()`/`update()`/`step()` are not overridden — `ParticleFilterV2` in this
+**`Bootstrap`:** `predict()`/`update()`/`step()` are not overridden - `ParticleFilterV2` in this
 mode *is* `ParticleFilter`'s own implementation via inherited virtuals, exactly the "zero
 duplication" property the roadmap wants (and now actually true, since component 0 made the
 methods virtual).
@@ -233,83 +233,83 @@ update(y, u):
   3. normalize w_; resample (inherited criterion) if N_eff < threshold
 ```
 (The "shared `S`/covariance across particles" step is a deliberate optimization, not an
-approximation — it follows exactly from the LTI assumption stated in Scope, since a Kalman
+approximation - it follows exactly from the LTI assumption stated in Scope, since a Kalman
 filter's covariance recursion is independent of the actual measurement values.)
 
 ## Explicitly out of scope (this phase)
 
-- **EF2 anisotropic/non-isotropic noise ellipsoids** — `SetMembershipParams` exposes only scalar
+- **EF2 anisotropic/non-isotropic noise ellipsoids** - `SetMembershipParams` exposes only scalar
   bounds (matching the roadmap struct); a `Qw`/`Rv`-matrix-accepting overload is a natural future
   extension.
-- **EF2 polytopic constraint sets** — `MovingHorizonEstimator`'s existing Hildreth-projection
+- **EF2 polytopic constraint sets** - `MovingHorizonEstimator`'s existing Hildreth-projection
   machinery remains a possible v2 backend per the roadmap's own note, not built here.
 - **EF3 fully general conditionally-linear-dynamics RBPF** (`A_lin`/`C_lin` depending on the
-  nonlinear substate) — the LTI + additive-measurement-coupling special case covers a real and
+  nonlinear substate) - the LTI + additive-measurement-coupling special case covers a real and
   common use case (the roadmap's own bearings-only-tracking example: nonlinear position, linear
   velocity) without the added complexity of state-dependent linear dynamics.
-- **EF3 Auxiliary mode's `predict()`/`update()` called independently** — documented fallback to
+- **EF3 Auxiliary mode's `predict()`/`update()` called independently** - documented fallback to
   bootstrap behavior, not full look-ahead (see Scope).
 
 ## Implementation checklist
 
 **Component 0** (`lib/ParticleFilter.h` base-class change):
-1. Apply the `private:`→`protected:` and four `virtual` changes; add `virtual ~ParticleFilter()`.
+1. Apply the `private:`->`protected:` and four `virtual` changes; add `virtual ~ParticleFilter()`.
 2. Re-run all existing `[particle_filter]`-tagged Catch2 tests to confirm zero behavior change.
 
 **EF2** (lighter non-`IController` estimator checklist, same shape as `KalmanFilter`):
 1. `lib/SetMembershipEstimator.h`/`.cpp` + `CTRL_REGISTER_FEATURE(set_membership_estimator)`
-2. `lib/CMakeLists.txt` — add `SetMembershipEstimator.cpp`
-3. `lib/ControllerToolbox.h` — `#include "SetMembershipEstimator.h"` near `KalmanFilter.h`
-4. `bindings/estimation_bindings.cpp` — bind `SetMembershipParams`, `SetMembershipEstimator`
-5. `bindings/smoke_test.py` — construct, `predict`/`update`, assert `ellipsoid_shape()` PD
+2. `lib/CMakeLists.txt` - add `SetMembershipEstimator.cpp`
+3. `lib/ControllerToolbox.h` - `#include "SetMembershipEstimator.h"` near `KalmanFilter.h`
+4. `bindings/estimation_bindings.cpp` - bind `SetMembershipParams`, `SetMembershipEstimator`
+5. `bindings/smoke_test.py` - construct, `predict`/`update`, assert `ellipsoid_shape()` PD
 6. `examples/ex103_set_membership_estimation.cpp` + `examples/python/ex120_set_membership_estimation.py`
-   — calibrated-sensor scenario per the roadmap's example use case, plus a side-by-side
+   - calibrated-sensor scenario per the roadmap's example use case, plus a side-by-side
    `KalmanFilter` comparison under non-Gaussian noise
-7. `tests/test_catch2_advanced.cpp` — tests under `[set_membership]`
-8. `examples/CMakeLists.txt`, `compile.bat`/`compile.sh` — add `ex103_set_membership_estimation`
+7. `tests/test_catch2_advanced.cpp` - tests under `[set_membership]`
+8. `examples/CMakeLists.txt`, `compile.bat`/`compile.sh` - add `ex103_set_membership_estimation`
 
-**EF3** (extension to an existing class — only modified/added files, per `CLAUDE.md`'s "extension"
+**EF3** (extension to an existing class - only modified/added files, per `CLAUDE.md`'s "extension"
 checklist row):
-1. `lib/ParticleFilter.h`/`.cpp` — component 0's virtual/access changes, plus `ParticleFilterV2`,
+1. `lib/ParticleFilter.h`/`.cpp` - component 0's virtual/access changes, plus `ParticleFilterV2`,
    `PFVariant`, `ParticleFilterParamsV2` + `CTRL_REGISTER_FEATURE(particle_filter_v2)`
-2. `lib/ControllerToolbox.h` — no new include (same header)
-3. `bindings/estimation_bindings.cpp` — bind `PFVariant`, `ParticleFilterParamsV2`,
+2. `lib/ControllerToolbox.h` - no new include (same header)
+3. `bindings/estimation_bindings.cpp` - bind `PFVariant`, `ParticleFilterParamsV2`,
    `ParticleFilterV2` (base `ctrl::ParticleFilter` in the `py::class_` bases list)
-4. `bindings/smoke_test.py` — one assertion per variant (construct + a few `step()` calls, assert
+4. `bindings/smoke_test.py` - one assertion per variant (construct + a few `step()` calls, assert
    `state()` finite)
 5. `examples/ex104_particle_filter_variants.cpp` + `examples/python/ex121_particle_filter_variants.py`
-   — bearings-only tracking scenario (nonlinear position/bearing, linear-Gaussian velocity),
+   - bearings-only tracking scenario (nonlinear position/bearing, linear-Gaussian velocity),
    comparing all three variants' RMSE at equal particle count
-6. `tests/test_catch2_advanced.cpp` — tests under `[particle_filter_variants]`
-7. `examples/CMakeLists.txt`, `compile.bat`/`compile.sh` — add `ex104_particle_filter_variants`
+6. `tests/test_catch2_advanced.cpp` - tests under `[particle_filter_variants]`
+7. `examples/CMakeLists.txt`, `compile.bat`/`compile.sh` - add `ex104_particle_filter_variants`
 
 ## Testing plan
 
 **`[set_membership]`**
-1. Known bounded noise, simulated worst-case sequence — the true state stays inside the returned
+1. Known bounded noise, simulated worst-case sequence - the true state stays inside the returned
    ellipsoid at every step (the core guarantee), checked via `(x_true-c)'P^-1(x_true-c) <= 1 +
    eps`.
-2. Comparison against `KalmanFilter` under non-Gaussian (e.g. uniform-bounded) noise — the
+2. Comparison against `KalmanFilter` under non-Gaussian (e.g. uniform-bounded) noise - the
    set-membership ellipsoid never excludes the true state while the KF's 99%-confidence interval
    occasionally does over many trials.
-3. Deliberately inconsistent measurement (`y` placed outside every bound) — `isConsistent()`
+3. Deliberately inconsistent measurement (`y` placed outside every bound) - `isConsistent()`
    returns `false` and `centerEstimate()`/`ellipsoidShape()` are unchanged from the pre-update
    (predicted) values.
 4. `predict()`'s `p*` reduces `trace(P_)` versus both `p=1` (naive equal-weight sum) and the
-   un-optimized endpoints — regression-tests that the closed-form optimum is actually being used.
+   un-optimized endpoints - regression-tests that the closed-form optimum is actually being used.
 
 **`[particle_filter_variants]`**
-1. `Bootstrap` mode — numerically identical to a plain `ParticleFilter` constructed with the same
+1. `Bootstrap` mode - numerically identical to a plain `ParticleFilter` constructed with the same
    seed/params over the same input sequence (confirms zero-duplication inheritance from component
    0).
 2. `Auxiliary` mode on a problem with an informative look-ahead (e.g. a sharply peaked likelihood)
-   — lower weight-variance (or higher `effectiveSampleSize()`) than `Bootstrap` at equal particle
+   - lower weight-variance (or higher `effectiveSampleSize()`) than `Bootstrap` at equal particle
    count over repeated trials.
-3. `RaoBlackwellized` mode on the bearings-only-tracking example — RMSE on the linear (velocity)
+3. `RaoBlackwellized` mode on the bearings-only-tracking example - RMSE on the linear (velocity)
    substate matches a hand-coded analytic marginal-likelihood baseline, and outperforms
    `Bootstrap` at low particle counts (`N <= 50`).
-4. `RaoBlackwellized`'s shared-covariance optimization — regression-test that `kf_[i].covariance()`
+4. `RaoBlackwellized`'s shared-covariance optimization - regression-test that `kf_[i].covariance()`
    is identical (within floating-point tolerance) across all particles after `predict()`, proving
    the LTI-shared-covariance claim holds in the implementation.
 5. Mis-sized `linear_state_indices` (length mismatch with `A_lin`'s dimension, or indices out of
-   `[0, n_states)`) — throws `std::invalid_argument` at construction.
+   `[0, n_states)`) - throws `std::invalid_argument` at construction.

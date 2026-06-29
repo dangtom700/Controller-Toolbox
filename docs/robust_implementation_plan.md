@@ -1,23 +1,23 @@
-# Robustness Analysis — C++ Implementation Plan
+# Robustness Analysis - C++ Implementation Plan
 
 Generated 2026-06-17. Authored against codebase state at Part 60.
 
 **Status update (Part 66, 2026-06-20): Phases 1-3 are done** (built shortly after this plan
-was authored — confirmed complete and documented in `CLAUDE.md`'s ROB-1 entry by Part 63).
+was authored - confirmed complete and documented in `CLAUDE.md`'s ROB-1 entry by Part 63).
 
 **Status update (Part 67, 2026-06-20): Phases 4 and 5 are also done.** Built as
 `lib/WorstCaseSearch.h` (CMA-ES worst-case parameter search, wraps `AutoTuner`) and
 `lib/LyapunovRobustness.h` (common quadratic Lyapunov function for polytopic uncertainty,
-wraps `SystemAnalysis::solveDiscreteLyapunov`) — both header-only, both bound in
+wraps `SystemAnalysis::solveDiscreteLyapunov`) - both header-only, both bound in
 `bindings/analysis_bindings.cpp`, both exercised by `bindings/smoke_test.py` and dedicated
 `[worst_case_search]`/`[lyapunov_robustness]` Catch2 tests, both with a runnable example
 (`ex86_worst_case.cpp`, `ex87_lyapunov_robust.cpp`). All five phases of this plan are now
-complete — see `CLAUDE.md`'s ROB-1 entry for the consolidated status and the "Part 67"
+complete - see `CLAUDE.md`'s ROB-1 entry for the consolidated status and the "Part 67"
 non-obvious-facts note for two real deviations from the literal pseudocode below (Phase 5's
 sum-vs-average fix, and Phase 4's normalised-search-space construction). The sections below
 are kept as the original design rationale, not a "to do" list. **Important:** the
 "Integration with Existing Case Studies" section near the end of this document describes a
-path that was **not** the one actually taken for case-study integration — see the
+path that was **not** the one actually taken for case-study integration - see the
 correction inserted there for what was actually built instead (Part 64 + 66) and why.
 
 ---
@@ -26,26 +26,26 @@ correction inserted there for what was actually built instead (Part 64 + 66) and
 
 | File | What it provides |
 |------|-----------------|
-| `lib/RobustnessAnalysis.h` / `.cpp` | **Built (Phase 1, done by Part 63).** `spawn_SS_samples`/`spawn_TF_samples`, `monteCarloAnalysis()` -> `MonteCarloResult` (stability probability, gain/phase margins, peak S/T, IAE, nu-gap). Bound as `ctrl.monte_carlo_analysis`/`ctrl.MonteCarloResult`/`ctrl.spawn_SS_samples`. Was a stub with broken syntax when this plan was authored (Part 60) — that description below is the *original* motivation for Phase 1, not the current state. |
+| `lib/RobustnessAnalysis.h` / `.cpp` | **Built (Phase 1, done by Part 63).** `spawn_SS_samples`/`spawn_TF_samples`, `monteCarloAnalysis()` -> `MonteCarloResult` (stability probability, gain/phase margins, peak S/T, IAE, nu-gap). Bound as `ctrl.monte_carlo_analysis`/`ctrl.MonteCarloResult`/`ctrl.spawn_SS_samples`. Was a stub with broken syntax when this plan was authored (Part 60) - that description below is the *original* motivation for Phase 1, not the current state. |
 | `lib/SystemAnalysis.h` | `getPoles`, `isDiscreteStable`, `solveDiscreteLyapunov`, `getFrequencyResponse`, `calculateMargins`, `calculateHInfinityNorm`. **Gang-of-Four + Disk Margin extensions (Phase 2) also done** (`gang_of_four`, `calculate_disk_margin`). |
 | `lib/GapMetric.h` | `nuGap`, `nuGapMatrix`, `freqResponseGrid`, `chordalDist`, `subspaceDist` |
 | `lib/DiscreteHinf.h` | Full DGKF Hinfty synthesis, `GeneralisedPlant`, `MixedSensitivity`, gamma-bisection |
 | `lib/PlantModel.h` | `TransferFunction`, `StateSpace`, `tf2ss`, `ss2tf`, `c2d`, `ssStep`, `minreal`, `DAESystem`, `consistentInit` |
-| `lib/AutoTuner.h` | CMA-ES optimiser — `AutoTuner`, `TunerResult`, `CostFn` |
-| `lib/ControllerMonitor.h` | `CUSUMChart`, `EWMAChart` — reuse for run-chart analysis |
+| `lib/AutoTuner.h` | CMA-ES optimiser - `AutoTuner`, `TunerResult`, `CostFn` |
+| `lib/ControllerMonitor.h` | `CUSUMChart`, `EWMAChart` - reuse for run-chart analysis |
 
 The implementation plan is structured in five phases ordered by value-to-effort ratio.
 Each phase is independent and can be merged separately.
 
 ---
 
-## Phase 1 — Fix and Complete `RobustnessAnalysis.h` (Model Spawning + Monte Carlo)
+## Phase 1 - Fix and Complete `RobustnessAnalysis.h` (Model Spawning + Monte Carlo)
 
 **Status: Done.** Built as `lib/RobustnessAnalysis.{h,cpp}`; bound, tested (`[robustness_mc]`),
 and exampled (`ex83_robustness_mc.cpp`). The write-up below is the original design plan kept
 for reference, not an outstanding task.
 
-**Priority: HIGH — unblocks everything else.**
+**Priority: HIGH - unblocks everything else.**
 
 ### 1.1 What to build
 
@@ -197,18 +197,18 @@ monteCarloAnalysis(const StateSpace& nominal_plant,
 
 ### 1.3 Checklist
 
-1. `lib/RobustnessAnalysis.h` — structs + declarations (≈120 lines)
-2. `lib/RobustnessAnalysis.cpp` — `spawn_*`, `evaluateSample`, `runMonteCarlo` (≈300 lines)
-3. `lib/CMakeLists.txt` — add `RobustnessAnalysis.cpp` to `CTRL_CORE_SOURCES`
-4. `lib/ControllerToolbox.h` — add `#include "RobustnessAnalysis.h"`
-5. `lib/Features.h` — `{"robustness_analysis", true}`
-6. `bindings/analysis_bindings.cpp` (or new file) — bind `MonteCarloResult`, `spawn_SS_samples`,
+1. `lib/RobustnessAnalysis.h` - structs + declarations (approx =120 lines)
+2. `lib/RobustnessAnalysis.cpp` - `spawn_*`, `evaluateSample`, `runMonteCarlo` (approx =300 lines)
+3. `lib/CMakeLists.txt` - add `RobustnessAnalysis.cpp` to `CTRL_CORE_SOURCES`
+4. `lib/ControllerToolbox.h` - add `#include "RobustnessAnalysis.h"`
+5. `lib/Features.h` - `{"robustness_analysis", true}`
+6. `bindings/analysis_bindings.cpp` (or new file) - bind `MonteCarloResult`, `spawn_SS_samples`,
    `runMonteCarlo`, `monteCarloAnalysis`
-7. `bindings/smoke_test.py` — `assert hasattr(ctrl, 'MonteCarloResult')`
-8. `tests/test_catch2_advanced.cpp` — 4+ `[robustness_mc]` tests:
+7. `bindings/smoke_test.py` - `assert hasattr(ctrl, 'MonteCarloResult')`
+8. `tests/test_catch2_advanced.cpp` - 4+ `[robustness_mc]` tests:
    - Spawned samples have perturbed A within expected range
    - All samples of a stable nominal plant return `is_stable=true` for small sigma
-   - Unstable nominal → `instability_probability > 0`
+   - Unstable nominal -> `instability_probability > 0`
    - `monteCarloAnalysis` end-to-end on a 2nd-order plant
 9. `examples/ex83_robustness_mc.cpp` + `examples/python/ex103_robustness_mc.py`
 
@@ -216,13 +216,13 @@ monteCarloAnalysis(const StateSpace& nominal_plant,
 
 ---
 
-## Phase 2 — `SystemAnalysis` Extensions (Gang of Four + Disk Margin)
+## Phase 2 - `SystemAnalysis` Extensions (Gang of Four + Disk Margin)
 
 **Status: Done.** Built directly in `lib/SystemAnalysis.h`/`.cpp` (`gang_of_four`,
 `calculate_disk_margin`). The write-up below is the original design plan kept for
 reference, not an outstanding task.
 
-**Priority: HIGH — frequency-domain robustness visualisation.**
+**Priority: HIGH - frequency-domain robustness visualisation.**
 
 ### 2.1 Add to `lib/SystemAnalysis.h` / `lib/SystemAnalysis.cpp`
 
@@ -297,9 +297,9 @@ static StateSpace feedback(const StateSpace& GK);
 
 1. Extend `lib/SystemAnalysis.h` with `DiskMargin`, `GangOfFour`, `GangOfFourNorms` structs
    and `calculateDiskMargin`, `gangOfFour`, `gangOfFourNorms`, `series`, `parallel`, `feedback`
-   declarations (≈80 lines header)
-2. Extend `lib/SystemAnalysis.cpp` with implementations (≈200 lines)
-3. Bindings: add `DiskMargin`, `GangOfFour`, `GangOfFourNorms`, all new methods (≈60 lines)
+   declarations (approx =80 lines header)
+2. Extend `lib/SystemAnalysis.cpp` with implementations (approx =200 lines)
+3. Bindings: add `DiskMargin`, `GangOfFour`, `GangOfFourNorms`, all new methods (approx =60 lines)
 4. Smoke test assertions for `ctrl.DiskMargin`, `ctrl.GangOfFour`
 5. Tests (4+ `[system_analysis_ext]`): series composition, Gang of Four norms on known plant,
    disk margin of well-tuned PID, `norm_S + norm_T` identity check
@@ -309,7 +309,7 @@ static StateSpace feedback(const StateSpace& GK);
 
 ---
 
-## Phase 3 — `lib/MuAnalysis.h` (Structured Singular Value)
+## Phase 3 - `lib/MuAnalysis.h` (Structured Singular Value)
 
 **Status: Done.** Built as `lib/MuAnalysis.{h,cpp}` (`compute_mu`/`peak_mu`/
 `robust_stability_radius`). **Note the naming collision documented in `CLAUDE.md`'s
@@ -318,15 +318,15 @@ ARMA(2,2)-identification heuristic over logged nonlinear closed-loop CSVs, not t
 structured singular value computed here. The write-up below is the original design plan
 kept for reference, not an outstanding task.
 
-**Priority: MEDIUM — most powerful deterministic robustness tool; highest effort.**
+**Priority: MEDIUM - most powerful deterministic robustness tool; highest effort.**
 
 ### 3.1 Scope
 
-Implement μ upper-bound computation for **repeated real scalar** and **complex full-block**
+Implement mu upper-bound computation for **repeated real scalar** and **complex full-block**
 uncertainty structures. This is the most commonly needed subset and matches what
 `DiscreteHinf::solveMuSyn` already uses internally (D-scaling).
 
-Full μ lower-bound (NP-hard in general) is deferred.
+Full mu lower-bound (NP-hard in general) is deferred.
 
 ### 3.2 API
 
@@ -423,19 +423,19 @@ and can be referenced but need not be duplicated.
 
 ### 3.4 Checklist
 
-1. `lib/MuAnalysis.h` — structs + declarations (≈100 lines)
-2. `lib/MuAnalysis.cpp` — `computeMu`, `peakMu`, `robustStabilityRadius` (≈350 lines)
-3. `lib/CMakeLists.txt` — add `MuAnalysis.cpp`
-4. `lib/ControllerToolbox.h` — `#include "MuAnalysis.h"`
-5. `lib/Features.h` — `{"mu_analysis", true}`
-6. Bindings (≈80 lines): `UncertaintyBlock`, `UncertaintyStructure`, `MuBound`,
+1. `lib/MuAnalysis.h` - structs + declarations (approx =100 lines)
+2. `lib/MuAnalysis.cpp` - `computeMu`, `peakMu`, `robustStabilityRadius` (approx =350 lines)
+3. `lib/CMakeLists.txt` - add `MuAnalysis.cpp`
+4. `lib/ControllerToolbox.h` - `#include "MuAnalysis.h"`
+5. `lib/Features.h` - `{"mu_analysis", true}`
+6. Bindings (approx =80 lines): `UncertaintyBlock`, `UncertaintyStructure`, `MuBound`,
    `PeakMuResult`, `computeMu`, `peakMu`, `robustStabilityRadius`
 7. Smoke test: `assert hasattr(ctrl, 'UncertaintyStructure')`
 8. Tests (5+ `[mu_analysis]`):
    - `UncertaintyStructure::totalInputs` for a known block list
    - `computeMu` returns `upper >= 0` for identity M
    - `computeMu` returns `upper <= 1` for small M
-   - `peakMu` on a well-tuned second-order SISO plant ≈ known value
+   - `peakMu` on a well-tuned second-order SISO plant approx = known value
    - `robustStabilityRadius` > 0 for a stabilising controller
 9. `examples/ex85_mu_analysis.cpp` + `examples/python/ex104_mu_analysis.py`
 
@@ -443,7 +443,7 @@ and can be referenced but need not be duplicated.
 
 ---
 
-## Phase 4 — `lib/WorstCaseSearch.h` (CMA-ES Worst-Case Parameter Search)
+## Phase 4 - `lib/WorstCaseSearch.h` (CMA-ES Worst-Case Parameter Search)
 
 **Status: Done (Part 67).** Built as `lib/WorstCaseSearch.h`, header-only, wrapping
 `AutoTuner`. One real deviation from the API sketch below: the search runs internally in
@@ -453,13 +453,13 @@ max(|param_nominal(i)|, 1)`. This lets `AutoTuner`'s single scalar `sigma0` (no
 per-parameter step size) still explore every parameter at its own relative scale, and lets
 hard bounds be supplied in physical units while CMA-ES itself only ever sees `z`-space
 bounds. `WorstCaseSearchParams::population` is kept for API-shape compatibility with the
-original sketch below but has no effect — `AutoTuner` derives its CMA-ES population size
+original sketch below but has no effect - `AutoTuner` derives its CMA-ES population size
 internally from the dimension (`4 + floor(3*ln(n))`, Hansen 2006) and does not expose an
 override; `max_evals` is honoured by dividing it by that same derived population size to
 get `AutoTunerParams::maxIter`. The write-up below is otherwise unchanged from the original
 design.
 
-**Priority: MEDIUM — uses existing `AutoTuner`, low incremental code.**
+**Priority: MEDIUM - uses existing `AutoTuner`, low incremental code.**
 
 ### 4.1 Concept
 
@@ -538,7 +538,7 @@ findWorstCase(
 
 - Internally wraps `AutoTuner` (CMA-ES). The cost function passed to `AutoTuner`
   builds the plant from the parameter vector, computes the closed-loop SS,
-  and returns the negated metric (so CMA-ES minimises → metric maximised).
+  and returns the negated metric (so CMA-ES minimises -> metric maximised).
 - `AutoTuner`'s `CostFn` signature is `std::function<double(const Eigen::VectorXd&)>`,
   which matches exactly.
 - Relative parameter bounds: multiply `param_sigma` by `param_nominal` to get
@@ -548,16 +548,16 @@ findWorstCase(
 
 ### 4.4 Checklist
 
-1. `lib/WorstCaseSearch.h` — header-only (~150 lines), includes `AutoTuner.h` and
+1. `lib/WorstCaseSearch.h` - header-only (~150 lines), includes `AutoTuner.h` and
    `RobustnessAnalysis.h`
-2. `lib/ControllerToolbox.h` — `#include "WorstCaseSearch.h"`
-3. `lib/Features.h` — `{"worst_case_search", true}`
-4. Bindings (≈60 lines): `WorstCaseSearchParams`, `WorstCaseResult`, all three
+2. `lib/ControllerToolbox.h` - `#include "WorstCaseSearch.h"`
+3. `lib/Features.h` - `{"worst_case_search", true}`
+4. Bindings (approx =60 lines): `WorstCaseSearchParams`, `WorstCaseResult`, all three
    `findWorstCase*` variants with `py::function` for `plant_factory` and `metric_fn`
 5. Smoke test: `assert hasattr(ctrl, 'WorstCaseResult')`
 6. Tests (3+ `[worst_case_search]`):
    - Worst-case GM search finds lower GM than nominal for known perturbed plant
-   - `findWorstCase` with identity metric returns `worst_cost ≈ metric(nominal)`
+   - `findWorstCase` with identity metric returns `worst_cost approx = metric(nominal)`
      when search space is epsilon-small
    - `findWorstCaseIAE` returns IAE worse than the nominal for a detuned controller
 7. Add to `ex83_robustness_mc.cpp` or create `ex86_worst_case.cpp`
@@ -566,19 +566,19 @@ findWorstCase(
 
 ---
 
-## Phase 5 — `lib/LyapunovRobustness.h` (Common Lyapunov Function for Polytopic Uncertainty)
+## Phase 5 - `lib/LyapunovRobustness.h` (Common Lyapunov Function for Polytopic Uncertainty)
 
 **Status: Done (Part 67).** Built as `lib/LyapunovRobustness.h`, header-only, wrapping
 `SystemAnalysis::solveDiscreteLyapunov`. **One real deviation from the algorithm in section
 5.3 below: the aggregation step sums the per-vertex exact solutions `X_i`, it does not
 average them** (the pseudocode's `P_new = P_new / L` line was dropped). This is not a
-style choice — averaging is provably insufficient even for simple, clustered vertex sets.
+style choice - averaging is provably insufficient even for simple, clustered vertex sets.
 Worked counterexample (`A_1=0.45, A_2=0.55, Q=1`, both individually stable): the exact
 per-vertex solutions are `X_1 = 1.2539`, `X_2 = 1.4337`; their *average* `P=1.3438` fails
 vertex 2's own decrease condition (`A_2^2*P - P + Q = +0.0627 > 0`, a violation), while
 their *sum* `P=2.6876` satisfies both vertices comfortably (`-1.1434` and `-0.8746`). The
 reason: for a candidate `P = sum_i X_i`, checking vertex `k` reduces algebraically to
-`A_k^T P A_k - P + Q = sum_{i != k} (A_k^T X_i A_k - X_i)` — the `i = k` term cancels
+`A_k^T P A_k - P + Q = sum_{i != k} (A_k^T X_i A_k - X_i)` - the `i = k` term cancels
 exactly against `Q` by construction, so summing preserves every vertex's own exact margin
 and only adds the (for nearby vertices, typically small and same-signed) cross terms on
 top; dividing by `L` instead shrinks the very term that vertex `k` needs to stay negative.
@@ -587,11 +587,11 @@ form is the one that actually works for the intended use case (vertices clustere
 common nominal, e.g. from `buildBoxVertices`) and is confirmed by both a dedicated unit
 test and the worked example above.
 
-**Priority: LOW — requires internal iterative solver; no external SDP dependency.**
+**Priority: LOW - requires internal iterative solver; no external SDP dependency.**
 
 ### 5.1 Scope
 
-For a **polytopic** uncertain system `A(t) ∈ conv{A_1, ..., A_L}` (convex hull of
+For a **polytopic** uncertain system `A(t) \in conv{A_1, ..., A_L}` (convex hull of
 vertex matrices), find a common quadratic Lyapunov function `V(x) = xᵀPx` such
 that `A_i^T P A_i - P < 0` for all vertices `i`. If such `P` exists, the switching
 system is quadratically stable.
@@ -638,7 +638,7 @@ isQuadraticallyStable(const std::vector<Eigen::MatrixXd>& vertices,
                       const LyapunovSearchParams& p = {});
 
 // Build vertex matrices from a nominal A and a list of perturbation directions.
-// vertices = {A + delta_i : delta_i ∈ Delta} where Delta is a box uncertainty.
+// vertices = {A + delta_i : delta_i \in Delta} where Delta is a box uncertainty.
 // uncertainty_cols: each column of this matrix is added/subtracted from A,
 //                   generating 2^m vertex matrices for m perturbation directions.
 // Warning: 2^m grows fast; keep m <= 10.
@@ -671,15 +671,15 @@ The existing `SystemAnalysis::solveDiscreteLyapunov` handles each vertex step.
 
 ### 5.4 Checklist
 
-1. `lib/LyapunovRobustness.h` — header-only (~200 lines), includes `SystemAnalysis.h`
-2. `lib/ControllerToolbox.h` — `#include "LyapunovRobustness.h"`
-3. `lib/Features.h` — `{"lyapunov_robustness", true}`
-4. Bindings (≈50 lines): `LyapunovSearchParams`, `LyapunovResult`,
+1. `lib/LyapunovRobustness.h` - header-only (~200 lines), includes `SystemAnalysis.h`
+2. `lib/ControllerToolbox.h` - `#include "LyapunovRobustness.h"`
+3. `lib/Features.h` - `{"lyapunov_robustness", true}`
+4. Bindings (approx =50 lines): `LyapunovSearchParams`, `LyapunovResult`,
    `findCommonLyapunov`, `isQuadraticallyStable`, `buildBoxVertices`
 5. Tests (4+ `[lyapunov_robustness]`):
    - `findCommonLyapunov({A})` recovers standard Lyapunov P for single stable A
-   - Polytope of stable vertices → `found = true`
-   - Polytope including an unstable vertex → `found = false` (not guaranteed but
+   - Polytope of stable vertices -> `found = true`
+   - Polytope including an unstable vertex -> `found = false` (not guaranteed but
      typical for highly unstable vertices)
    - `buildBoxVertices` produces `2^m` matrices
 6. Add to or create `ex87_lyapunov_robust.cpp`
@@ -698,7 +698,7 @@ The existing `SystemAnalysis::solveDiscreteLyapunov` handles each vertex step.
 | 4 | `lib/WorstCaseSearch.h` | `findWorstCase*` | ~150 | MEDIUM | Phase 1, `AutoTuner` | Done (Part 67) |
 | 5 | `lib/LyapunovRobustness.h` | `findCommonLyapunov`, `buildBoxVertices` | ~200 | LOW | `SystemAnalysis` | Done (Part 67) |
 
-**Total new code:** ~1500 lines C++ + ~300 lines bindings. All five phases are complete —
+**Total new code:** ~1500 lines C++ + ~300 lines bindings. All five phases are complete -
 the table above is kept for traceability, not as an outstanding work plan.
 All five phases follow the standard 8-step checklist from CLAUDE.md.
 
@@ -707,9 +707,9 @@ All five phases follow the standard 8-step checklist from CLAUDE.md.
 ## Recommended Build Order
 
 ```
-Phase 1 (MC)  →  Phase 2 (Gang of Four)  →  Phase 4 (Worst-Case)
-                                          →  Phase 3 (Mu)
-                                          →  Phase 5 (Lyapunov)
+Phase 1 (MC)  ->  Phase 2 (Gang of Four)  ->  Phase 4 (Worst-Case)
+                                          ->  Phase 3 (Mu)
+                                          ->  Phase 5 (Lyapunov)
 ```
 
 Phases 3, 4, and 5 can proceed in parallel once Phase 1 is complete.
@@ -763,20 +763,20 @@ findCommonLyapunov residual sign        -> negative = vertex satisfied with marg
 **Correction (Part 66): this is not the path that was actually taken.** Phase 1 has been
 complete since Part 63, but case-study integration did **not** go through
 `ctrl.monteCarloAnalysis`/`grey_box_model()`/`run_robustness()` as originally proposed
-below. Part 64 deliberately built a separate, independent mechanism instead —
+below. Part 64 deliberately built a separate, independent mechanism instead -
 `case-study/common/RobustnessStats.h` + a per-study `robustness_main.cpp`/`*_robustness`
 CMake target that perturbs real physical plant parameters and reruns the actual nonlinear
-closed-loop C++ simulation — because `ctrl.monteCarloAnalysis`'s linearized-`StateSpace`
+closed-loop C++ simulation - because `ctrl.monteCarloAnalysis`'s linearized-`StateSpace`
 Monte Carlo isn't meaningful for the SMC/ADRC/Fuzzy/GA-tuned nonlinear controllers most
 case studies actually use. This pattern now covers all 10 C++ case studies (3 in Part 64,
 the remaining 7 in Part 66; see `CLAUDE.md`'s ROB-1 entry). It remains unused (and the
 paragraph below remains a live, unexecuted proposal) for the ~21 case studies that are
-Python-only or not yet implemented — those would need either an equivalent Python-side
+Python-only or not yet implemented - those would need either an equivalent Python-side
 nonlinear-perturbation helper, or the original `ctrl.monteCarloAnalysis`-based approach
 below if a future session judges a linearized-model check sufficient for a particular
 study's controller roster.
 
-Original proposal (not executed as written — see correction above):
+Original proposal (not executed as written - see correction above):
 
 Once Phase 1 is complete, any Python-only case study can add a
 `grey_box_model() -> (ode, h, x0, names, lb, ub)` hook (already used by

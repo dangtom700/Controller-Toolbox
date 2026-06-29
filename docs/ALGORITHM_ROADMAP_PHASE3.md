@@ -1,7 +1,7 @@
-# Controller Toolbox — Algorithm Roadmap: Phase 3
+# Controller Toolbox - Algorithm Roadmap: Phase 3
 
 **Created:** 2026-06-24.
-**Status:** Planning — 25 of 32 items shipped (Phase 1, Phase 2, and Phase 3 complete:
+**Status:** Planning - 25 of 32 items shipped (Phase 1, Phase 2, and Phase 3 complete:
 ML1/ML2/NC3/SI4/SI3/ML3/FD2 all done; Phase 4 underway: OC2, OC4 done).
 **Pre-implementation audit (2026-06-25):** open items SI3, ML3, ML4, RC2, and DT1 had
 "Reused components"/effort claims checked against the actual current code; SI3/ML3/ML4 each have
@@ -14,15 +14,15 @@ shipped). 3 backlog items (`Minimum-variance control/STR`, `Adaptive pole placem
 `Self-tuning regulators`) are merged into one design (**OC1**) since they share an identical
 RLS-driven online-identification core and differ only in the control-law step. 2 backlog items
 (`Reinforcement-learning-based adaptive control`, `Deep reinforcement learning`) are merged into
-one design (**ML4**) for the same reason — `algorithm_backlog.md` itself flags them as "the same
+one design (**ML4**) for the same reason - `algorithm_backlog.md` itself flags them as "the same
 gap, two wishlist entries." That leaves **32 distinct designs** below.
-**Scope:** Phase 1 (foundational/quick-win) → Phase 2 (strong value, moderate effort) →
-Phase 3 (bigger/specialized lifts) → Phase 4 (heavy infrastructure) → Phase 5 (niche/research-grade,
+**Scope:** Phase 1 (foundational/quick-win) -> Phase 2 (strong value, moderate effort) ->
+Phase 3 (bigger/specialized lifts) -> Phase 4 (heavy infrastructure) -> Phase 5 (niche/research-grade,
 kept rather than cut, per explicit instruction).
 
 This document follows the same per-item format as `docs/ALGORITHM_ROADMAP_PHASE2.md`: goal,
 class/function sketch, reused components, effort estimate, example use case, Catch2 test plan.
-Like that document, **this is a planning reference, not 32 approved specs** — each item still
+Like that document, **this is a planning reference, not 32 approved specs** - each item still
 gets brainstormed into its own design doc under `docs/superpowers/specs/` before being built,
 the way Phase 4's frequency-domain work and the Resonant/Notch/PLL controllers were. The class
 sketches here are directional (to scope effort and reuse), not committed APIs.
@@ -57,7 +57,7 @@ sketches here are directional (to scope effort and reuse), not committed APIs.
 | DT1 | Code Generation | 4 | Open |
 | DT2 | Real-Time Profiling Beyond WCET | 4 | Open |
 | DT3 | Distributed / Networked Control | 4 | Open |
-| RC2 | LMI Solver | 4 | Open — sequenced last in Phase 4, see RC2 section |
+| RC2 | LMI Solver | 4 | Open - sequenced last in Phase 4, see RC2 section |
 | NC5 | Globally Linearizing Control | 5 | Open |
 | OC3 | Dual Control | 5 | Open |
 | ML4 | RL-Based Control (merged) | 5 | Open |
@@ -70,10 +70,10 @@ before proceeding any further milestones
 ## Motivation
 
 Phase 4 (frequency-domain plots, frequency-domain identification, Resonant/Notch/PLL
-controllers) closed out the backlog items with no real architectural risk — each slotted
+controllers) closed out the backlog items with no real architectural risk - each slotted
 cleanly into an existing pattern (`SystemAnalysis`, `FreqDomainIdentifier`, `IController`).
 What's left in `docs/algorithm_backlog.md` is a longer tail: 9 categories that don't share one
-dependency chain the way Phase 2's DAE→grey-box→hybrid-model work did. Phase 3 (this document)
+dependency chain the way Phase 2's DAE->grey-box->hybrid-model work did. Phase 3 (this document)
 is the first attempt to sequence that tail by **value/ROI** rather than by category, on the
 premise that the highest-leverage next steps are the ones that either (a) reuse a large chunk
 of an existing class almost for free (`EF1` reusing `DiscreteHinf`'s Riccati machinery; `MO2`
@@ -82,11 +82,11 @@ that recurs across the case-study roster (`SI5` Hammerstein-Wiener for valve/act
 nonlinearities; `NC1`/`NC2`/`NC4` for strict-feedback and energy-shaping nonlinear plants this
 toolbox can't yet handle without full feedback linearization).
 
-The lower-value tail (Phase 4/5 here) isn't cut, per explicit instruction — but it's sequenced
+The lower-value tail (Phase 4/5 here) isn't cut, per explicit instruction - but it's sequenced
 last because its main historical justification has weakened: the LMI solver (`RC2`) was
 originally scoped as a prerequisite for H2 synthesis and structured Hinf, and both shipped via
 a Riccati shortcut and a CMA-ES search instead (see `algorithm_backlog.md`'s Robust Control
-section). What's left needing `RC2` is narrower — multi-objective Hinf/H2 mixed synthesis,
+section). What's left needing `RC2` is narrower - multi-objective Hinf/H2 mixed synthesis,
 not the two items that originally justified the line item.
 
 ---
@@ -94,67 +94,67 @@ not the two items that originally justified the line item.
 ## Dependency Graph
 
 ```
-EF1 (Hinf Filter)              — independent, reuses DiscreteHinf's two-Riccati pattern
-RC1 (LFT Representation)       — independent, reuses MuAnalysis's UncertaintyStructure
-NC1/NC2/NC4 (Backstepping /    — independent of each other, share the DriftFn/GainFn callback
+EF1 (Hinf Filter)              - independent, reuses DiscreteHinf's two-Riccati pattern
+RC1 (LFT Representation)       - independent, reuses MuAnalysis's UncertaintyStructure
+NC1/NC2/NC4 (Backstepping /    - independent of each other, share the DriftFn/GainFn callback
   Passivity / CLF)               pattern from FeedbackLinearisation
-SI5 (Hammerstein-Wiener)       — independent, reuses RecursiveLeastSquares for the linear sub-step
-SI2 (Correlation ID)           — independent, smallest item in the roadmap
-FD1 (Generalized SK)           — independent, wraps fitLevy's existing linear-system-build step
-MO2 (Nelder-Mead)              — independent, drops into AutoTuner's CostFn/TunerResult contract
-  │
-  └─► MO3 (Constrained Tuning) — wraps ANY CostFn-based optimizer (AutoTuner, GA, PSO, DE,
+SI5 (Hammerstein-Wiener)       - independent, reuses RecursiveLeastSquares for the linear sub-step
+SI2 (Correlation ID)           - independent, smallest item in the roadmap
+FD1 (Generalized SK)           - independent, wraps fitLevy's existing linear-system-build step
+MO2 (Nelder-Mead)              - independent, drops into AutoTuner's CostFn/TunerResult contract
+  |
+  |-► MO3 (Constrained Tuning) - wraps ANY CostFn-based optimizer (AutoTuner, GA, PSO, DE,
                                   Nelder-Mead) in a penalty loop; benefits from MO2 existing but
                                   doesn't require it
-MO1 (NSGA-II)                  — extends GeneticAlgorithm's operators with non-dominated sorting
+MO1 (NSGA-II)                  - extends GeneticAlgorithm's operators with non-dominated sorting
 
-OC1 (Self-Tuning Regulator)    — reuses RecursiveLeastSquares wholesale; independent
-SI1 (MLE/MAP ID)               — reuses AutoTuner as its optimizer; independent of OC1
-EF2 (Set-Membership Est.)      — independent, optionally borrows MovingHorizonEstimator's
+OC1 (Self-Tuning Regulator)    - reuses RecursiveLeastSquares wholesale; independent
+SI1 (MLE/MAP ID)               - reuses AutoTuner as its optimizer; independent of OC1
+EF2 (Set-Membership Est.)      - independent, optionally borrows MovingHorizonEstimator's
                                   Hildreth-projection machinery as a v2 backend
-EF3 (Particle Filter Variants) — extends ParticleFilter by inheritance; independent
+EF3 (Particle Filter Variants) - extends ParticleFilter by inheritance; independent
 
-DT4 (FTC Reconfiguration)      — reuses ControllerStack (Supervisory mode) + KalmanFilter's
+DT4 (FTC Reconfiguration)      - reuses ControllerStack (Supervisory mode) + KalmanFilter's
                                   existing mismatchDetected()/mismatchScore() (Phase 2's D1)
 
 ML1 (NN Controller Core)
-  │
-  └─► ML2 (NN-Adaptive Control) — needs ML1's forward-pass primitive before adding the
+  |
+  |-► ML2 (NN-Adaptive Control) - needs ML1's forward-pass primitive before adding the
                                    Lyapunov-stable online weight-adaptation law
-ML3 (GP-MPC)                   — reuses GaussianProcess/GPResidualModel + NonlinearMPC's
+ML3 (GP-MPC)                   - reuses GaussianProcess/GPResidualModel + NonlinearMPC's
                                   DiscreteDynamics rollout hook; independent of ML1/ML2
 
-SI3 (MOESP/CVA)                — extends SubspaceID's existing Hankel/LQ/SVD pipeline
-SI4 (NARMAX)                   — independent, distinct from SINDy's sparse-regression approach
-FD2 (Complex-pole VectorFit)   — extends VectorFitting; bigger lift than FD1, no dependency on it
-NC3 (Nonlinear IMC)            — independent, smaller class alongside SmithPredictor
+SI3 (MOESP/CVA)                - extends SubspaceID's existing Hankel/LQ/SVD pipeline
+SI4 (NARMAX)                   - independent, distinct from SINDy's sparse-regression approach
+FD2 (Complex-pole VectorFit)   - extends VectorFitting; bigger lift than FD1, no dependency on it
+NC3 (Nonlinear IMC)            - independent, smaller class alongside SmithPredictor
 
-OC2 (DP/Value Iteration)       — independent
-OC4 (LP-Based Control)         — independent; could reuse GradientProjectionQP's box-constraint
+OC2 (DP/Value Iteration)       - independent
+OC4 (LP-Based Control)         - independent; could reuse GradientProjectionQP's box-constraint
                                   pattern as a starting point for a simplex/active-set LP solver
-DT1 (Code Generation)          — independent, heaviest lift in the document
-DT2 (RT Profiling)             — independent, extends tools/wcet_report.py
-DT3 (Distributed Control)      — independent, extends ComputationalDelayWrapper's single-delay
+DT1 (Code Generation)          - independent, heaviest lift in the document
+DT2 (RT Profiling)             - independent, extends tools/wcet_report.py
+DT3 (Distributed Control)      - independent, extends ComputationalDelayWrapper's single-delay
                                   model to multi-node
-RC2 (LMI Solver)               — independent; nothing in Phase 1-3 requires it. Sequenced last in
-                                  Phase 4 (not first) — its only remaining motivating use case
+RC2 (LMI Solver)               - independent; nothing in Phase 1-3 requires it. Sequenced last in
+                                  Phase 4 (not first) - its only remaining motivating use case
                                   (multi-objective Hinf/H2 mixed synthesis) has no roadmap line of
                                   its own, and it's the single biggest, least-familiar lift in this
                                   document
 
-NC5 / OC3 / ML4 (Phase 5)      — independent of everything above; kept for completeness
+NC5 / OC3 / ML4 (Phase 5)      - independent of everything above; kept for completeness
 ```
 
 **Recommended order within Phase 1** (all independent, so this is about quick wins surfacing
-first): SI2 → MO2 → FD1 → EF1 → RC1 → NC1 → NC2 → NC4 → SI5.
+first): SI2 -> MO2 -> FD1 -> EF1 -> RC1 -> NC1 -> NC2 -> NC4 -> SI5.
 
 ---
 
 ## Phase 1: Foundational / High-Value, Low-to-Moderate Effort
 
-### EF1 — H-Infinity Filter
+### EF1 - H-Infinity Filter
 
-**Goal:** Discrete-time Hinf filter — the *estimation* dual of `DiscreteHinf`'s two-Riccati
+**Goal:** Discrete-time Hinf filter - the *estimation* dual of `DiscreteHinf`'s two-Riccati
 controller synthesis. Bounds the worst-case ratio of estimation-error energy to disturbance/
 noise energy, instead of assuming Gaussian noise the way `KalmanFilter` does. Today `DiscreteHinf`
 is a controller only; there is no Hinf-optimal filter anywhere in `lib/`.
@@ -191,26 +191,26 @@ filtering Riccati replaces the control Riccati, but the bisection structure is a
 port); `DiscreteLQR::solveDARE` for the per-gamma Riccati solve; `KalmanFilter`'s
 `predict()`/`update()` method shape for a familiar runtime API.
 
-**Effort estimate:** ~350 lines (struct + bisection + DARE wiring + binding + tests) — most of
+**Effort estimate:** ~350 lines (struct + bisection + DARE wiring + binding + tests) - most of
 the control-flow plumbing already exists in `DiscreteHinf::solve()`.
 
 **Example use case:** A vibration sensor subject to bounded but non-Gaussian noise (impact
 disturbances). `KalmanFilter`'s Gaussian assumption breaks down; `HinfFilter` gives a guaranteed
-worst-case error bound regardless of the noise distribution — valuable for a safety case.
+worst-case error bound regardless of the noise distribution - valuable for a safety case.
 
 **Catch2 test plan (`[hinf_filter]`):**
-1. Known plant + bounded adversarial disturbance — achieved gamma correctly bounds the
+1. Known plant + bounded adversarial disturbance - achieved gamma correctly bounds the
    worst-case error-energy ratio under a simulated worst-case disturbance sequence.
-2. Comparison against `KalmanFilter` on Gaussian noise — `HinfFilter` is conservative but
+2. Comparison against `KalmanFilter` on Gaussian noise - `HinfFilter` is conservative but
    stable, RMS error within an expected factor of the KF's.
-3. Infeasible gamma (too tight) — `solve()` returns `feasible=false`, not a garbage result.
+3. Infeasible gamma (too tight) - `solve()` returns `feasible=false`, not a garbage result.
 
 ---
 
-### RC1 — General LFT Uncertainty Representation
+### RC1 - General LFT Uncertainty Representation
 
-**Goal:** Generalize `MuAnalysis.h`'s `peakMu()` — which hardcodes the single canonical
-"`M = sigma_rel * T`" multiplicative-output-uncertainty loop — into an `LFTSystem` that accepts
+**Goal:** Generalize `MuAnalysis.h`'s `peakMu()` - which hardcodes the single canonical
+"`M = sigma_rel * T`" multiplicative-output-uncertainty loop - into an `LFTSystem` that accepts
 *arbitrary* placement of one or more `Delta` blocks against a `GeneralisedPlant`'s `w`/`z`
 channels. This is the "real LFT model, not ad hoc sampling" gap `algorithm_backlog.md` flags
 under Robust Control.
@@ -232,25 +232,25 @@ public:
 ```
 
 **Reused components:** `GeneralisedPlant` (`DiscreteHinf.h`) for `P`; `UncertaintyStructure`/
-`computeMu()` (`MuAnalysis.h`) for `Delta` itself — no new uncertainty-block machinery needed,
+`computeMu()` (`MuAnalysis.h`) for `Delta` itself - no new uncertainty-block machinery needed,
 only the general interconnection wiring around it.
 
-**Effort estimate:** ~300 lines (channel-mapping bookkeeping + general `M`-builder + 3 tests) —
+**Effort estimate:** ~300 lines (channel-mapping bookkeeping + general `M`-builder + 3 tests) -
 moderate; the heavy lifting (`computeMu`, frequency-response grids) already exists.
 
 **Example use case:** A plant with simultaneous multiplicative input uncertainty *and* additive
-output uncertainty (two `Delta` blocks at two different loop locations) — today's `peakMu()`
+output uncertainty (two `Delta` blocks at two different loop locations) - today's `peakMu()`
 can only represent the single canonical case.
 
 **Catch2 test plan (`[lft_system]`):**
-1. Degenerate single-block case — `LFTSystem` reproduces existing `peakMu()`'s result exactly.
-2. Two simultaneous blocks at different loop locations — closed-loop frequency response matches
+1. Degenerate single-block case - `LFTSystem` reproduces existing `peakMu()`'s result exactly.
+2. Two simultaneous blocks at different loop locations - closed-loop frequency response matches
    a hand-derived formula for a simple 2x2 case.
-3. Mis-sized channel map — throws `std::invalid_argument`.
+3. Mis-sized channel map - throws `std::invalid_argument`.
 
 ---
 
-### NC1 — Backstepping
+### NC1 - Backstepping
 
 **Goal:** Recursive Lyapunov design for strict-feedback nonlinear systems
 (`x1' = f1(x1) + g1(x1)*x2`, `x2' = f2(x1,x2) + g2(x1,x2)*u`, extendable via recursive virtual-
@@ -281,22 +281,22 @@ resulting closed loop's Lyapunov function decreases.
 
 **Effort estimate:** ~300 lines (recursive virtual-control loop + 3 tests).
 
-**Example use case:** A two-link robotic arm with non-affine joint coupling — backstepping
+**Example use case:** A two-link robotic arm with non-affine joint coupling - backstepping
 handles the strict-feedback structure (relative degree > 1 with intermediate states) that flat
 feedback linearization can't.
 
 **Catch2 test plan (`[backstepping]`):**
-1. 2nd-order strict-feedback system with a known analytic backstepping law — tracking error
+1. 2nd-order strict-feedback system with a known analytic backstepping law - tracking error
    converges to zero, matching the hand-derived control law's output.
 2. Lyapunov function verified numerically non-increasing along a simulated trajectory.
-3. Actuator saturation (`uMin`/`uMax`) — output is hard-clamped, no internal windup.
+3. Actuator saturation (`uMin`/`uMax`) - output is hard-clamped, no internal windup.
 
 ---
 
-### NC2 — Passivity-Based Control
+### NC2 - Passivity-Based Control
 
 **Goal:** Energy-shaping + damping-injection control for port-Hamiltonian-representable systems
-(known mass/inertia + potential energy) — the canonical alternative to backstepping when a
+(known mass/inertia + potential energy) - the canonical alternative to backstepping when a
 natural storage function exists. `algorithm_backlog.md` correctly notes "no overlap with
 existing classes"; this is built from scratch but follows the same callback-pattern convention
 as `FeedbackLinearisationController`/`BacksteppingController` for consistency.
@@ -328,22 +328,22 @@ consistent "physics-callback" pattern across the new nonlinear-control trio.
 **Effort estimate:** ~280 lines (energy-shaping law + damping injection + 3 tests).
 
 **Example use case:** A 2-DOF manipulator regulated to a desired joint configuration despite
-unmodeled friction — PBC's energy argument guarantees stability without linearizing, valuable
+unmodeled friction - PBC's energy argument guarantees stability without linearizing, valuable
 when the Lagrangian structure (`M`, `C`, `g`) is known but exact linearization is brittle.
 
 **Catch2 test plan (`[passivity_based]`):**
-1. Single-pendulum regulation — converges to the desired angle; the shaped total energy
+1. Single-pendulum regulation - converges to the desired angle; the shaped total energy
    (kinetic + potential) is non-increasing.
 2. Closed-loop passivity verified via a storage-function check across a trajectory.
-3. Mass matrix singular at a boundary configuration — graceful handling (NaN guard, hold-last).
+3. Mass matrix singular at a boundary configuration - graceful handling (NaN guard, hold-last).
 
 ---
 
-### NC4 — CLF Synthesis / Direct Lyapunov Redesign
+### NC4 - CLF Synthesis / Direct Lyapunov Redesign
 
 **Goal:** Given a candidate Control Lyapunov Function `V(x)` and its Lie derivatives, synthesize
 a stabilizing law via Sontag's universal formula or a CLF-QP
-(`min ||u|| s.t. LfV + LgV*u <= -alpha*V`) — controller *synthesis*, distinct from
+(`min ||u|| s.t. LfV + LgV*u <= -alpha*V`) - controller *synthesis*, distinct from
 `LyapunovRobustness` which only *analyzes* a fixed controller's robustness.
 
 ```cpp
@@ -366,7 +366,7 @@ public:
 **Reused components:** `GradientProjectionQP` for the CLF-QP mode's box-constrained min-norm
 solve (the MIMO generalization of the path; SISO collapses to closed form); kept consistent
 with `LyapunovRobustness`'s `V`-function conventions so a synthesized controller can be handed
-straight to `LyapunovRobustness` afterward for independent verification (synthesis → analysis
+straight to `LyapunovRobustness` afterward for independent verification (synthesis -> analysis
 handoff).
 
 **Effort estimate:** ~250 lines (Sontag formula + QP path + 3 tests).
@@ -376,18 +376,18 @@ handoff).
 full backstepping structure isn't available but a CLF candidate is known.
 
 **Catch2 test plan (`[clf_controller]`):**
-1. Known CLF for a scalar nonlinear system — Sontag-formula output matches the hand-derived
+1. Known CLF for a scalar nonlinear system - Sontag-formula output matches the hand-derived
    closed form.
 2. QP mode and Sontag-formula mode agree on unconstrained cases.
-3. `LfV` positive and `LgV = 0` (uncontrollable direction) — flags infeasible rather than
+3. `LfV` positive and `LgV = 0` (uncontrollable direction) - flags infeasible rather than
    producing a nonsense `u`.
 
 ---
 
-### SI5 — Hammerstein-Wiener Model Identification
+### SI5 - Hammerstein-Wiener Model Identification
 
-**Goal:** Structured nonlinear identification for Hammerstein (static input nonlinearity →
-linear dynamics) and Wiener (linear dynamics → static output nonlinearity) model classes, fit
+**Goal:** Structured nonlinear identification for Hammerstein (static input nonlinearity ->
+linear dynamics) and Wiener (linear dynamics -> static output nonlinearity) model classes, fit
 via alternating linear/nonlinear least squares. Fills a gap the backlog calls out directly: "no
 current equivalent," despite this structure being extremely common (valves, actuator
 deadzone/saturation, sensor saturation).
@@ -421,27 +421,27 @@ public:
 outer iteration) for the linear sub-step; the polynomial-basis pattern from `SINDy`'s library
 functions for the static-nonlinearity basis.
 
-**Effort estimate:** ~350 lines (alternating-LS outer loop + polynomial basis + 3 tests) — most
+**Effort estimate:** ~350 lines (alternating-LS outer loop + polynomial basis + 3 tests) - most
 of the heavy lifting (ARX fit) already exists.
 
 **Example use case:** A valve with input saturation/deadzone (Hammerstein) followed by linear
 actuator dynamics, or a sensor with linear dynamics followed by a saturating output nonlinearity
-(Wiener) — both extremely common in real industrial loops.
+(Wiener) - both extremely common in real industrial loops.
 
 **Catch2 test plan (`[hammerstein_wiener]`):**
 1. Synthetic Hammerstein system (known cubic input nonlinearity + known 2nd-order linear part)
-   — both recovered within tolerance.
+   - both recovered within tolerance.
 2. Synthetic Wiener system, symmetric test.
-3. Pure-linear system (nonlinearity = identity) — alternating fit converges to a near-identity
+3. Pure-linear system (nonlinearity = identity) - alternating fit converges to a near-identity
    nonlinearity, doesn't overfit.
 
 ---
 
-### SI2 — Correlation-Based Identification
+### SI2 - Correlation-Based Identification
 
 **Goal:** Classical non-parametric impulse-response estimation via cross-correlation, driven by
 a PRBS input: `g_hat(k) = R_uy(k) / R_uu(0)` for near-white input. The simplest item in this
-document — a standard first step in classical system-ID workflow that currently has no home in
+document - a standard first step in classical system-ID workflow that currently has no home in
 this toolbox.
 
 ```cpp
@@ -461,30 +461,30 @@ CorrelationIDResult correlationID(const Eigen::VectorXd& u, const Eigen::VectorX
 Eigen::VectorXd generatePRBS(int length, int n_bits, unsigned seed = 42);
 ```
 
-**Reused components:** None required — intentionally the simplest classical method in the set
+**Reused components:** None required - intentionally the simplest classical method in the set
 (direct time-domain correlation sums). Could optionally reuse `FreqDomainIdentifier`'s FFT
 utilities for a frequency-domain variant, but that's a v2 extension, not required for v1.
 
-**Effort estimate:** ~150 lines (correlation sums + PRBS generator + 2 tests) — the smallest
+**Effort estimate:** ~150 lines (correlation sums + PRBS generator + 2 tests) - the smallest
 item in the entire roadmap.
 
 **Example use case:** A quick non-parametric "sanity check" impulse response before committing
-to a parametric structure (ARX/state-space) — standard first step in a classical ID workflow.
+to a parametric structure (ARX/state-space) - standard first step in a classical ID workflow.
 
 **Catch2 test plan (`[correlation_id]`):**
-1. Known linear system driven by PRBS — recovered impulse response matches the analytic one
+1. Known linear system driven by PRBS - recovered impulse response matches the analytic one
    within the noise floor.
-2. PRBS generator — verified near-white autocorrelation (single peak at lag 0).
-3. Colored input without whitening — result is visibly biased (a regression test documenting
+2. PRBS generator - verified near-white autocorrelation (single peak at lag 0).
+3. Colored input without whitening - result is visibly biased (a regression test documenting
    the known limitation, not a bug).
 
 ---
 
-### FD1 — Generalize SK Iteration to Full Complex-Response Fitting
+### FD1 - Generalize SK Iteration to Full Complex-Response Fitting
 
 **Goal:** `algorithm_backlog.md`'s own assessment: extend `VectorFitting`'s SK machinery (or
 `FreqDomainIdentifier::fitLevy`) to iteratively reweight against the *complex* frequency response
-(magnitude + phase), removing most of Levy's high-frequency bias — "a natural small follow-up,
+(magnitude + phase), removing most of Levy's high-frequency bias - "a natural small follow-up,
 not a from-scratch effort."
 
 ```cpp
@@ -505,23 +505,23 @@ SKFitResult fitSK(const std::vector<double>& omega,
 in an outer SK reweighting loop; `VectorFitting`'s existing SK convergence-check pattern.
 
 **Effort estimate:** ~150 lines (outer iteration loop wrapping existing `fitLevy` machinery +
-2 tests) — the cheapest item in Phase 1 besides `SI2`.
+2 tests) - the cheapest item in Phase 1 besides `SI2`.
 
 **Example use case:** A lightly-damped resonance where Levy's one-shot fit shows visible
 high-frequency bias; SK reweighting tightens the fit without changing the user-facing API shape.
 
 **Catch2 test plan (`[sk_complex_fit]`):**
-1. Synthetic complex response with known poles — SK-reweighted fit has lower error than
+1. Synthetic complex response with known poles - SK-reweighted fit has lower error than
    one-shot `fitLevy` on the same data.
-2. Convergence — `iterCost` is monotonically non-increasing.
-3. Already-good `fitLevy` result (low-order, low-damping) — SK iteration doesn't make it worse.
+2. Convergence - `iterCost` is monotonically non-increasing.
+3. Already-good `fitLevy` result (low-order, low-damping) - SK iteration doesn't make it worse.
 
 ---
 
-### MO2 — Nelder-Mead Simplex
+### MO2 - Nelder-Mead Simplex
 
 **Goal:** Derivative-free, non-population direct-search optimizer (reflect/expand/contract/
-shrink) — a lighter-weight alternative to CMA-ES/GA/PSO/DE for low-dimensional (`n < 10`) quick
+shrink) - a lighter-weight alternative to CMA-ES/GA/PSO/DE for low-dimensional (`n < 10`) quick
 tuning where population overhead isn't justified.
 
 ```cpp
@@ -539,30 +539,30 @@ public:
 };
 ```
 
-**Reused components:** `AutoTuner`'s `CostFn`/`TunerResult` types directly (zero new types) —
+**Reused components:** `AutoTuner`'s `CostFn`/`TunerResult` types directly (zero new types) -
 drops into the exact same call site as `GeneticAlgorithm`/`ParticleSwarmOptimizer`/
 `DifferentialEvolution`/`AutoTuner`.
 
 **Effort estimate:** ~200 lines (simplex operations + 2 tests).
 
 **Example use case:** A quick 2-3 parameter PID/lead-lag retune where CMA-ES's population
-overhead (and its `sigma0`/seed tuning) is unnecessary ceremony — Nelder-Mead needs only an
+overhead (and its `sigma0`/seed tuning) is unnecessary ceremony - Nelder-Mead needs only an
 initial point.
 
 **Catch2 test plan (`[nelder_mead]`):**
-1. Rosenbrock function (2D) — converges to the known minimum within tolerance.
-2. Quadratic bowl — converges in fewer evaluations than CMA-ES on the same problem (documents
+1. Rosenbrock function (2D) - converges to the known minimum within tolerance.
+2. Quadratic bowl - converges in fewer evaluations than CMA-ES on the same problem (documents
    the "why use this" case).
-3. Degenerate simplex collapse — detected and restarted, doesn't silently return a bad point.
+3. Degenerate simplex collapse - detected and restarted, doesn't silently return a bad point.
 
 ---
 
 ## Phase 2: Strong Value, Moderate Effort
 
-### OC1 — Self-Tuning Regulator (merged)
+### OC1 - Self-Tuning Regulator (merged)
 
-**Goal:** Merges 3 backlog line items — Optimal Control's "Minimum-variance control/STR" and
-Adaptive Control's "Adaptive pole placement" + "Self-tuning regulators" — into one class. All
+**Goal:** Merges 3 backlog line items - Optimal Control's "Minimum-variance control/STR" and
+Adaptive Control's "Adaptive pole placement" + "Self-tuning regulators" - into one class. All
 three share an identical RLS-driven online-identification core and differ only in the
 control-law step, so this is one online identifier with two selectable control-law modes:
 minimum-variance (classic Astrom direct-cancellation STR) or pole-placement (Diophantine-equation
@@ -594,7 +594,7 @@ public:
 (a linear solve over a Sylvester-like matrix via `Eigen::MatrixXd::solve`, no new dependency).
 
 **Effort estimate:** ~400 lines total (RLS wiring + 2 control-law modes + Diophantine solve +
-4 tests) — larger than a single-mode item, but smaller than building 3 separate near-duplicate
+4 tests) - larger than a single-mode item, but smaller than building 3 separate near-duplicate
 classes, which is the entire point of the merge.
 
 **Example use case:** A plant with slowly-changing dynamics (e.g. seasonal HVAC load) where a
@@ -602,21 +602,21 @@ fixed-gain controller degrades over time; the STR re-identifies online and updat
 law every step, with no manual re-tuning required.
 
 **Catch2 test plan (`[self_tuning_regulator]`):**
-1. Known ARX plant, `MinimumVariance` mode — converges to the analytic Astrom minimum-variance
+1. Known ARX plant, `MinimumVariance` mode - converges to the analytic Astrom minimum-variance
    law.
-2. Known ARX plant, `PolePlacement` mode — closed-loop poles converge to `desired_poles` within
+2. Known ARX plant, `PolePlacement` mode - closed-loop poles converge to `desired_poles` within
    tolerance.
-3. Plant parameter step-change mid-run — STR re-converges within N steps (true adaptation, not
+3. Plant parameter step-change mid-run - STR re-converges within N steps (true adaptation, not
    just initial identification).
-4. Non-identifiable input (constant `r`) — RLS covariance doesn't blow up, matching
+4. Non-identifiable input (constant `r`) - RLS covariance doesn't blow up, matching
    `RecursiveLeastSquares`'s existing numerical-safety contract.
 
 ---
 
-### SI1 — Maximum Likelihood / MAP Identification
+### SI1 - Maximum Likelihood / MAP Identification
 
 **Goal:** Statistical alternative to `RecursiveLeastSquares`/`GreyBoxEstimator`'s pure
-least-squares cost — maximize log-likelihood under an assumed noise model (Gaussian by default),
+least-squares cost - maximize log-likelihood under an assumed noise model (Gaussian by default),
 optionally with a Gaussian prior on parameters (MAP). Reduces to ridge-regularized LS in the
 Gaussian-Gaussian case but generalizes to non-Gaussian noise or heavier-tailed priors.
 
@@ -644,7 +644,7 @@ public:
 ```
 
 **Reused components:** `AutoTuner`'s CMA-ES (`CostFn`/`tune()`) as the optimizer for the
-(potentially non-convex, non-Gaussian-noise) log-likelihood — no new optimizer needed, just
+(potentially non-convex, non-Gaussian-noise) log-likelihood - no new optimizer needed, just
 `cost = -logLikelihood`; `RecursiveLeastSquares`'s ARX residual computation as the likelihood's
 inner data term.
 
@@ -652,19 +652,19 @@ inner data term.
 covariance + 3 tests).
 
 **Example use case:** Identification under known non-Gaussian measurement noise (e.g. a
-quantizing sensor modeled as uniform rather than Gaussian noise) — MLE with the correct noise
+quantizing sensor modeled as uniform rather than Gaussian noise) - MLE with the correct noise
 model gives a less biased estimate than plain least squares.
 
 **Catch2 test plan (`[mle_identification]`):**
-1. Gaussian noise, no prior — matches `RecursiveLeastSquares`'s batch LS result (MLE under
+1. Gaussian noise, no prior - matches `RecursiveLeastSquares`'s batch LS result (MLE under
    Gaussian noise = LS).
-2. With an informative prior (MAP) — result is pulled toward `prior_mean` by the expected ridge
+2. With an informative prior (MAP) - result is pulled toward `prior_mean` by the expected ridge
    amount relative to pure MLE.
-3. Non-Gaussian (e.g. Laplace) noise — MLE outperforms LS on a synthetic outlier-heavy dataset.
+3. Non-Gaussian (e.g. Laplace) noise - MLE outperforms LS on a synthetic outlier-heavy dataset.
 
 ---
 
-### EF2 — Set-Membership Estimation
+### EF2 - Set-Membership Estimation
 
 **Goal:** Bounded-error state estimation: given known noise *bounds* (not a probability
 distribution), maintain a guaranteed feasible set (ellipsoidal, for tractable propagation)
@@ -697,22 +697,22 @@ given case study (not required for v1).
 **Effort estimate:** ~300 lines (ellipsoid propagation + intersection via Fogel-Huang/Schweppe
 bounding + 3 tests).
 
-**Example use case:** A sensor with a hard calibration spec (±0.5% bounded error, not Gaussian)
+**Example use case:** A sensor with a hard calibration spec (+/-0.5% bounded error, not Gaussian)
 where a guaranteed feasible set is more meaningful to a safety case than a Kalman filter's
 probabilistic confidence interval.
 
 **Catch2 test plan (`[set_membership]`):**
-1. Known bounded noise — the true state stays inside the returned ellipsoid at every step (the
+1. Known bounded noise - the true state stays inside the returned ellipsoid at every step (the
    core guarantee).
-2. Comparison against `KalmanFilter` — the set-membership ellipsoid is conservative but never
+2. Comparison against `KalmanFilter` - the set-membership ellipsoid is conservative but never
    excludes the true state, while the KF's confidence interval occasionally does under
    non-Gaussian noise.
-3. Inconsistent measurement (outside all bounds) — `isConsistent()` correctly flags it instead
+3. Inconsistent measurement (outside all bounds) - `isConsistent()` correctly flags it instead
    of silently producing a wrong estimate.
 
 ---
 
-### EF3 — Particle Filter Variants
+### EF3 - Particle Filter Variants
 
 **Goal:** Extend `ParticleFilter.h` beyond the existing bootstrap/SIR baseline with (a) an
 auxiliary particle filter (look-ahead resampling using a cheap proxy for next-step likelihood)
@@ -740,23 +740,23 @@ straight through, zero duplication); `KalmanFilter` embedded per-particle for th
 Rao-Blackwellized linear substate.
 
 **Effort estimate:** ~350 lines (auxiliary look-ahead weighting + per-particle embedded KF for
-RB-PF + 3 tests) — moderate, since the bootstrap baseline is inherited, not rewritten.
+RB-PF + 3 tests) - moderate, since the bootstrap baseline is inherited, not rewritten.
 
 **Example use case:** Target tracking with nonlinear bearing-only measurements (needs particles)
-but linear-Gaussian velocity dynamics — RB-PF marginalizes velocity analytically, needing far
+but linear-Gaussian velocity dynamics - RB-PF marginalizes velocity analytically, needing far
 fewer particles than full bootstrap PF for equal accuracy.
 
 **Catch2 test plan (`[particle_filter_variants]`):**
-1. Bootstrap mode — numerically identical to the existing `ParticleFilter` (regression,
+1. Bootstrap mode - numerically identical to the existing `ParticleFilter` (regression,
    confirms zero-duplication inheritance).
-2. Auxiliary PF on a problem with informative look-ahead — lower effective-sample-size variance
+2. Auxiliary PF on a problem with informative look-ahead - lower effective-sample-size variance
    than bootstrap at equal particle count.
-3. Rao-Blackwellized PF on a mixed linear/nonlinear system — matches a hand-coded analytic
+3. Rao-Blackwellized PF on a mixed linear/nonlinear system - matches a hand-coded analytic
    marginal-likelihood baseline, outperforms bootstrap at low particle counts.
 
 ---
 
-### MO1 — Multi-Objective (Pareto) Optimization
+### MO1 - Multi-Objective (Pareto) Optimization
 
 **Goal:** NSGA-II-style multi-objective extension of `GeneticAlgorithm` (the population-based
 metaheuristic most naturally extended via non-dominated sorting), returning a Pareto front
@@ -787,30 +787,30 @@ public:
 ```
 
 **Reused components:** `GeneticAlgorithm`'s tournament-selection/BLX-alpha-crossover/elitism
-operators, unchanged — only the selection *criterion* changes (non-dominated rank + crowding
+operators, unchanged - only the selection *criterion* changes (non-dominated rank + crowding
 distance replacing single-objective fitness comparison, the standard NSGA-II modification).
 
 **Effort estimate:** ~400 lines (non-dominated sorting + crowding distance + operator reuse +
 3 tests).
 
-**Example use case:** Tuning a PID for both settling time *and* control effort simultaneously —
+**Example use case:** Tuning a PID for both settling time *and* control effort simultaneously -
 `TunerSuite::makeISECost`/`makeITAECost` give single-objective costs today; `NSGA2` returns the
 actual tradeoff curve instead of forcing a weighted-sum compromise upfront.
 
 **Catch2 test plan (`[nsga2]`):**
-1. Classic 2-objective benchmark (e.g. ZDT1) — recovered front matches the known analytic shape.
-2. Front diversity — crowding distance keeps solutions spread, not clustered.
-3. Degenerate single-objective case (`n_objectives=1`) — equivalent-quality result to
+1. Classic 2-objective benchmark (e.g. ZDT1) - recovered front matches the known analytic shape.
+2. Front diversity - crowding distance keeps solutions spread, not clustered.
+3. Degenerate single-objective case (`n_objectives=1`) - equivalent-quality result to
    `GeneticAlgorithm::optimize` on the same problem.
 
 ---
 
-### MO3 — General Nonlinear Constrained Tuning
+### MO3 - General Nonlinear Constrained Tuning
 
 **Goal:** Extend `TunerSuite`/`AutoTuner`'s box-bounds-only constraint handling to general
 nonlinear inequality constraints `g(theta) <= 0` (e.g. "closed-loop must remain stable",
 "overshoot <= 10%") via an augmented-Lagrangian/exterior-penalty wrapper around the existing
-`CostFn` contract — no change needed inside any optimizer, since penalty methods only transform
+`CostFn` contract - no change needed inside any optimizer, since penalty methods only transform
 the cost function passed in.
 
 ```cpp
@@ -827,32 +827,32 @@ TunerResult tuneConstrained(std::function<TunerResult(const CostFn&, const Eigen
 ```
 
 **Reused components:** Every existing metaheuristic's `CostFn`/`TunerResult` contract directly
-— this is a wrapper, not a new optimizer, so it composes with `AutoTuner`, `GeneticAlgorithm`,
+- this is a wrapper, not a new optimizer, so it composes with `AutoTuner`, `GeneticAlgorithm`,
 `ParticleSwarmOptimizer`, `DifferentialEvolution`, and (once built) `NelderMead`/`NSGA2` with
 zero changes to any of them.
 
-**Effort estimate:** ~200 lines (penalty-growth outer loop + 2 tests) — small, pure composition.
+**Effort estimate:** ~200 lines (penalty-growth outer loop + 2 tests) - small, pure composition.
 
 **Example use case:** Tuning an MPC's `rho_y`/`rho_u` weights to minimize tracking error subject
 to a hard constraint that the closed-loop spectral radius stay below 1 (via existing
-`SystemAnalysis` utilities) — `TunerSuite::optimise` only supports box bounds on the parameters
+`SystemAnalysis` utilities) - `TunerSuite::optimise` only supports box bounds on the parameters
 themselves today, not derived closed-loop properties.
 
 **Catch2 test plan (`[constrained_tuning]`):**
-1. Constrained quadratic with a known analytic optimum — penalty method converges to the
+1. Constrained quadratic with a known analytic optimum - penalty method converges to the
    constrained optimum, not the unconstrained one.
-2. Infeasible initial point — penalty growth still drives the search into the feasible region.
-3. Wraps `AutoTuner` and `GeneticAlgorithm` interchangeably — same constrained problem gives
+2. Infeasible initial point - penalty growth still drives the search into the feasible region.
+3. Wraps `AutoTuner` and `GeneticAlgorithm` interchangeably - same constrained problem gives
    consistent results from both backends.
 
 ---
 
-### DT4 — Fault-Tolerant Control Reconfiguration
+### DT4 - Fault-Tolerant Control Reconfiguration
 
 **Goal:** An actively-reconfiguring FTC controller closing the loop from fault detection to
 controller reconfiguration, built directly on `ControllerStack`'s existing Supervisory mode
 (health-aware fallback + bumpless transfer already built in) but driven by a fault classifier
-instead of a static activation condition — wiring `fault_injector.py`'s fault taxonomy
+instead of a static activation condition - wiring `fault_injector.py`'s fault taxonomy
 (`sensor_bias`, `sensor_noise`, `actuator_loss`, `actuator_stuck`) into `ControllerStack`'s
 per-entry activation automatically.
 
@@ -885,7 +885,7 @@ public:
 grounding.
 
 **Effort estimate:** ~300 lines (classifier + supervisor wiring over existing `ControllerStack`
-+ 3 tests) — most of the orchestration machinery is pure reuse.
++ 3 tests) - most of the orchestration machinery is pure reuse.
 
 **Example use case:** A loop with a redundant sensor pair; `FTCSupervisor` detects a
 `sensor_bias` fault via `mismatchScore()` crossing threshold and automatically switches
@@ -893,20 +893,20 @@ grounding.
 transfer already guaranteed by the existing Supervisory mode.
 
 **Catch2 test plan (`[ftc_supervisor]`):**
-1. Injected `actuator_loss` fault (via the `fault_injector` taxonomy) — switches to the
+1. Injected `actuator_loss` fault (via the `fault_injector` taxonomy) - switches to the
    registered fallback controller within `confirm_window` steps.
-2. No fault — behaves identically to a plain `ControllerStack` in Supervisory mode (regression).
-3. Fault clears — supervisor switches back (or stays, per registered policy) without a bump in
+2. No fault - behaves identically to a plain `ControllerStack` in Supervisory mode (regression).
+3. Fault clears - supervisor switches back (or stays, per registered policy) without a bump in
    `u` (verified via `ControllerStack`'s existing bumpless-transfer guarantee).
 
 ---
 
 ## Phase 3: Bigger / Specialized Lifts
 
-### ML1 — NN Controller Core (direct NN architectures)
+### ML1 - NN Controller Core (direct NN architectures)
 
-**Goal:** A generic feedforward neural-network controller primitive — forward-pass-only, usable
-as `compute()` with arbitrary (e.g. offline-trained) weights — beyond `NeuralPID`'s specific
+**Goal:** A generic feedforward neural-network controller primitive - forward-pass-only, usable
+as `compute()` with arbitrary (e.g. offline-trained) weights - beyond `NeuralPID`'s specific
 3-layer Kp/Ki/Kd-gain-output architecture. This is the dependency `ML2` needs before adding
 online adaptation.
 
@@ -944,18 +944,18 @@ for a learned control law, deployed in C++ without re-implementing the network a
 runtime.
 
 **Catch2 test plan (`[neural_network_controller]`):**
-1. Known small network (manually specified weights) — output matches the hand-computed forward
+1. Known small network (manually specified weights) - output matches the hand-computed forward
    pass.
-2. `loadWeights()` hot-swap mid-run — output changes immediately on the next `compute()`, no
+2. `loadWeights()` hot-swap mid-run - output changes immediately on the next `compute()`, no
    stale state.
 3. Saturation (`uMin`/`uMax`) enforced regardless of network output magnitude.
 
 ---
 
-### ML2 — NN-Adaptive Control (depends on ML1)
+### ML2 - NN-Adaptive Control (depends on ML1)
 
 **Goal:** Online Lyapunov-stable weight adaptation layered on top of `ML1`'s forward-pass
-primitive — the classic RBF-NN/Lyapunov-adaptive-control pattern (NN approximates an unknown
+primitive - the classic RBF-NN/Lyapunov-adaptive-control pattern (NN approximates an unknown
 nonlinearity; weights update via a Lyapunov-derived gradient law with sigma-modification for
 robustness, mirroring `MRACController`'s sigma-modification convention). Distinct from
 `NeuralPID`'s fixed hybrid architecture.
@@ -978,10 +978,10 @@ public:
 ```
 
 **Reused components:** `ML1`'s `NeuralNetworkController` as the forward-pass engine (only the
-output layer adapts online — the reason `ML1` must exist first); `MRACController`'s
+output layer adapts online - the reason `ML1` must exist first); `MRACController`'s
 sigma-modification adaptation-law convention for bounding weight drift.
 
-**Effort estimate:** ~300 lines (Lyapunov weight-update law wrapping `ML1` + 3 tests) — kept
+**Effort estimate:** ~300 lines (Lyapunov weight-update law wrapping `ML1` + 3 tests) - kept
 smaller than a from-scratch NN forward pass because `ML1` already provides that.
 
 **Example use case:** Adaptive cancellation of an unknown, NN-approximable nonlinearity (e.g.
@@ -989,18 +989,18 @@ unmodeled friction with no analytic form) where `MRACController`'s linear-in-par
 structure is too restrictive but full RL is unnecessary.
 
 **Catch2 test plan (`[nn_adaptive_control]`):**
-1. Unmodeled nonlinearity approximable by the NN's hidden layer — tracking error converges,
+1. Unmodeled nonlinearity approximable by the NN's hidden layer - tracking error converges,
    output weights converge near best-fit values.
 2. Sigma-modification bounds weight drift under persistent disturbance (no unbounded growth).
-3. `ML1` substrate hot-swap (different hidden-layer size) — adaptive layer re-initializes
+3. `ML1` substrate hot-swap (different hidden-layer size) - adaptive layer re-initializes
    correctly.
 
 ---
 
-### SI3 — MOESP / CVA Subspace ID Variants
+### SI3 - MOESP / CVA Subspace ID Variants
 
-**Goal:** Extend `SubspaceID.h`'s existing N4SID pipeline (Hankel matrix → LQ decomposition/
-oblique projection → SVD → A/C extraction → B/D regression) with MOESP (no stochastic/
+**Goal:** Extend `SubspaceID.h`'s existing N4SID pipeline (Hankel matrix -> LQ decomposition/
+oblique projection -> SVD -> A/C extraction -> B/D regression) with MOESP (no stochastic/
 Kalman-gain step, simpler oblique projection) and CVA (canonical-variate weighting before the
 SVD), sharing the same Hankel/SVD scaffolding.
 
@@ -1014,38 +1014,38 @@ SubspaceIDResult subspaceID(const Eigen::MatrixXd& Y, const Eigen::MatrixXd& U,
 ```
 
 **Reused components:** `SubspaceID.h`'s existing Hankel-matrix construction, LQ decomposition,
-and SVD steps directly — MOESP and CVA differ only in the projection/weighting applied before
+and SVD steps directly - MOESP and CVA differ only in the projection/weighting applied before
 the SVD, not in the surrounding pipeline.
 
 **Known gap (pre-implementation audit, 2026-06-25):** the sketch above invents a free function
-`subspaceID(..., method=N4SID, ...)` — the real function is `n4sid()` (`lib/SubspaceID.h:128`),
+`subspaceID(..., method=N4SID, ...)` - the real function is `n4sid()` (`lib/SubspaceID.h:128`),
 and no `SubspaceMethod` enum exists yet anywhere in the codebase; it has to be created from
 scratch, not "extended." Separately, `n4sid()` today *unconditionally* computes a stochastic
 Kalman-gain/innovation-covariance estimate into `SubspaceIDResult::kalmanGain`/`innovCov`
-(`lib/SubspaceID.cpp:222-263`) — MOESP, by this item's own definition, has no stochastic step.
+(`lib/SubspaceID.cpp:222-263`) - MOESP, by this item's own definition, has no stochastic step.
 The brainstorming pass needs to decide what those two fields contain in MOESP mode (left empty to
 match the algorithm's real definition, or still computed for free since the machinery is right
 there) before writing code.
 
 **Effort estimate:** ~250 lines (2 new weighting variants inserted into the existing pipeline +
-3 tests) — moderate, since most of the machinery is shared.
+3 tests) - moderate, since most of the machinery is shared.
 
 **Example use case:** A dataset where N4SID's stochastic balancing is unnecessary overhead
-(pure deterministic excitation) — MOESP's simpler projection is just as good and faster; CVA is
+(pure deterministic excitation) - MOESP's simpler projection is just as good and faster; CVA is
 preferred when output channels have very different noise scales.
 
 **Catch2 test plan (`[subspace_id_variants]`):**
-1. Known state-space system, all 3 methods — recover equivalent (up to similarity transform)
+1. Known state-space system, all 3 methods - recover equivalent (up to similarity transform)
    realizations.
-2. CVA on outputs with deliberately mismatched noise scales — outperforms N4SID/MOESP on the
+2. CVA on outputs with deliberately mismatched noise scales - outperforms N4SID/MOESP on the
    high-noise channel.
 3. `suggestOrder()` works unchanged across all 3 methods (shared singular-value heuristic).
 
 ---
 
-### SI4 — NARMAX
+### SI4 - NARMAX
 
-**Goal:** Nonlinear ARMAX identification — fit
+**Goal:** Nonlinear ARMAX identification - fit
 `y[k] = f(y[k-1..k-na], u[k-1..k-nb], e[k-1..k-nc])` where `f` is a polynomial expansion over
 *lagged* terms, structure-selected via orthogonal forward regression (the standard NARMAX
 approach). Distinct from `SINDy`'s sparse-regression-over-a-library approach, which expands
@@ -1078,21 +1078,21 @@ state-derivative regressors to lagged input/output regressors; a `RecursiveLeast
 normal-equation solve for the coefficient fit once terms are selected.
 
 **Effort estimate:** ~400 lines (term-library generation over lagged variables + orthogonal
-forward regression + 3 tests) — one of the bigger Phase 3 items.
+forward regression + 3 tests) - one of the bigger Phase 3 items.
 
 **Example use case:** A nonlinear process where the nonlinearity is naturally expressed in
-input/output lag terms (e.g. a heat exchanger with bilinear flow×temperature coupling) rather
+input/output lag terms (e.g. a heat exchanger with bilinear flow*temperature coupling) rather
 than as a sparse ODE right-hand side, which is `SINDy`'s domain.
 
 **Catch2 test plan (`[narmax]`):**
-1. Known NARMAX-generating synthetic system — term selection recovers the correct term set.
-2. Prediction accuracy on held-out data — one-step-ahead out-of-sample error within tolerance.
-3. Over-complete term library (more candidates than data supports) — `significance_tol` prunes
+1. Known NARMAX-generating synthetic system - term selection recovers the correct term set.
+2. Prediction accuracy on held-out data - one-step-ahead out-of-sample error within tolerance.
+3. Over-complete term library (more candidates than data supports) - `significance_tol` prunes
    to a parsimonious model, doesn't overfit.
 
 ---
 
-### FD2 — Complex-Conjugate-Pole Vector Fitting
+### FD2 - Complex-Conjugate-Pole Vector Fitting
 
 **Goal:** Per `algorithm_backlog.md`'s own assessment, a materially bigger lift than `FD1`:
 general Vector Fitting with complex-conjugate pole-pair bookkeeping and relocation logic (the
@@ -1123,30 +1123,30 @@ VectorFitComplexResult fitComplex(const std::vector<double>& omega,
 
 **Reused components:** `VectorFitting.h`'s existing SK-iteration convergence-check pattern and
 pole-relocation outer-loop structure; the conjugate-pair bookkeeping itself is new (poles/
-residues must come in conjugate pairs for a real-valued time-domain model) — the "own design
+residues must come in conjugate pairs for a real-valued time-domain model) - the "own design
 pass" the backlog calls for.
 
 **Effort estimate:** ~450 lines (complex-pole relocation + conjugate-pair constraint enforcement
-+ 3 tests) — the biggest System-ID-family item in this document.
++ 3 tests) - the biggest System-ID-family item in this document.
 
 **Example use case:** Fitting a frequency response with multiple lightly-damped resonances (e.g.
 a flexible-structure plant) where `fitMagnitude`'s real-pole restriction cannot represent the
 resonant peaks.
 
 **Catch2 test plan (`[vector_fit_complex]`):**
-1. Synthetic response with 2 known complex-conjugate pole pairs — recovered poles match within
+1. Synthetic response with 2 known complex-conjugate pole pairs - recovered poles match within
    tolerance.
-2. Conjugate-pair constraint — every returned pole has its conjugate also present (no orphaned
+2. Conjugate-pair constraint - every returned pole has its conjugate also present (no orphaned
    complex pole, which would produce a non-real-valued time response).
-3. Mixed real + complex pole system — correctly identifies which poles should be real vs.
+3. Mixed real + complex pole system - correctly identifies which poles should be real vs.
    complex-paired.
 
 ---
 
-### NC3 — Nonlinear Internal Model Control
+### NC3 - Nonlinear Internal Model Control
 
 **Goal:** Nonlinear extension of the IMC structure `SmithPredictor`/SOPDT-Rivera-IMC already
-cover for linear plants — uses a nonlinear process model directly inside the IMC feedback
+cover for linear plants - uses a nonlinear process model directly inside the IMC feedback
 structure (model-based feedforward + model-mismatch feedback correction).
 
 ```cpp
@@ -1171,24 +1171,24 @@ feedback on the model-mismatch residual), generalized from a linear SOPDT model 
 nonlinear `ModelFn`; the IMC filter follows the same first-order-filter convention as the
 existing Rivera-IMC tuning rule.
 
-**Effort estimate:** ~250 lines (parallel nonlinear model + mismatch feedback + 3 tests) —
+**Effort estimate:** ~250 lines (parallel nonlinear model + mismatch feedback + 3 tests) -
 `algorithm_backlog.md` correctly calls this "a separate, smaller class" relative to the linear
 case.
 
 **Example use case:** A chemical reactor with known nonlinear kinetics where a linear SOPDT
-approximation loses accuracy away from the linearization point — `NonlinearIMC` uses the full
+approximation loses accuracy away from the linearization point - `NonlinearIMC` uses the full
 nonlinear model for feedforward prediction while still rejecting model mismatch via the IMC
 feedback path.
 
 **Catch2 test plan (`[nonlinear_imc]`):**
-1. Exact model match (no plant-model mismatch) — perfect tracking (IMC's classic property).
-2. Model mismatch (perturbed model parameters) — feedback path corrects the steady-state offset.
-3. Inverse model unavailable/singular at an operating point — graceful fallback (hold-last, no
+1. Exact model match (no plant-model mismatch) - perfect tracking (IMC's classic property).
+2. Model mismatch (perturbed model parameters) - feedback path corrects the steady-state offset.
+3. Inverse model unavailable/singular at an operating point - graceful fallback (hold-last, no
    NaN propagation).
 
 ---
 
-### ML3 — GP-MPC
+### ML3 - GP-MPC
 
 **Goal:** A controller that consumes GP uncertainty directly in the MPC cost/constraints.
 `GaussianProcess`/`GPResidualModel` and `NonlinearMPC`/`TubeMPC` exist separately today;
@@ -1213,14 +1213,14 @@ public:
 
 **Reused components:** `GPResidualModel::predictWithUncertainty()` directly for the per-step
 variance; `NonlinearMPC`'s existing rollout structure (the same `DiscreteDynamics`-callback
-pattern `HybridMPC` already overrides) as the integration point — `GPMPC` is architecturally a
+pattern `HybridMPC` already overrides) as the integration point - `GPMPC` is architecturally a
 sibling of `HybridMPC`, not a from-scratch MPC.
 
 **Known gap (pre-implementation audit, 2026-06-25):** the "sibling of `HybridMPC`" framing doesn't
 hold for constraint tightening specifically. `NMPCParams::uMin`/`uMax` (`lib/NonlinearMPC.h:54-55`)
 are scalar and applied uniformly across the whole horizon; the loop that fills the actual per-step
 QP bounds (`lb_qp_`/`ub_qp_`) lives inside `NonlinearMPC::buildAndSolve()`, which is **private and
-non-virtual** (`lib/NonlinearMPC.h:153-162`, loop at `lib/NonlinearMPC.cpp:172-178`) — a subclass
+non-virtual** (`lib/NonlinearMPC.h:153-162`, loop at `lib/NonlinearMPC.cpp:172-178`) - a subclass
 has no access and no hook to intercept it. `HybridMPC`'s "override" (the cited precedent) only
 swaps the dynamics via a constructor-injected lambda (`lib/HybridMPC.h:69,75-78`); it never needed
 to touch constraints, so it isn't actually evidence that per-step tightening is pluggable today.
@@ -1230,27 +1230,27 @@ not currently scoped anywhere), or (b) `GPMPC` reimplements its own RTI solve lo
 contradicts "not a from-scratch MPC" and likely pushes well past the line estimate below.
 
 **Effort estimate:** ~300 lines (variance-aware constraint tightening inserted into the existing
-`NonlinearMPC` rollout + 3 tests) — **contingent on resolving the gap above first**; if a new hook
+`NonlinearMPC` rollout + 3 tests) - **contingent on resolving the gap above first**; if a new hook
 must be added to `NonlinearMPC`, add that as a separate line item before estimating `GPMPC` itself.
 
 **Example use case:** A CSTR reactor where the GP residual model's predicted variance grows in
-under-explored operating regions — GP-MPC automatically backs off the constraint bounds there,
+under-explored operating regions - GP-MPC automatically backs off the constraint bounds there,
 which a fixed-point-estimate `HybridMPC` cannot do.
 
 **Catch2 test plan (`[gp_mpc]`):**
-1. GP confident (low variance, well-explored region) — behaves like the underlying
+1. GP confident (low variance, well-explored region) - behaves like the underlying
    `NonlinearMPC` (regression, confirms tightening vanishes at zero variance).
-2. GP uncertain (high variance, extrapolation region) — constraints visibly tighten, control
+2. GP uncertain (high variance, extrapolation region) - constraints visibly tighten, control
    becomes more conservative.
-3. Comparison against `HybridMPC` on the same scenario — GP-MPC's variance-aware tightening
+3. Comparison against `HybridMPC` on the same scenario - GP-MPC's variance-aware tightening
    avoids a constraint violation that `HybridMPC`'s fixed-point estimate misses.
 
 ---
 
 ## Phase 4: Heavy Infrastructure, Lower Near-Term Priority
 
-**Recommended order within Phase 4:** OC2 → OC4 → DT1 → DT2 → DT3 → RC2 (dead last). All six are
-independent, so this isn't a dependency requirement — it reflects an explicit call to push `RC2`
+**Recommended order within Phase 4:** OC2 -> OC4 -> DT1 -> DT2 -> DT3 -> RC2 (dead last). All six are
+independent, so this isn't a dependency requirement - it reflects an explicit call to push `RC2`
 behind every other Phase 4 item: it's the single largest item in the entire roadmap, its only
 remaining motivating use case isn't itself scoped anywhere in this document (see the RC2 section
 and `algorithm_backlog.md:104`), and LMI/SDP theory is unfamiliar territory relative to the rest
@@ -1258,17 +1258,17 @@ of this codebase's convex-optimization surface (QP via `GradientProjectionQP`, R
 `DiscreteLQR::solveDARE`). Build familiarity on the cheaper, better-understood Phase 4 items
 first.
 
-### RC2 — LMI Solver
+### RC2 - LMI Solver
 
-**Goal:** A general-purpose LMI (Linear Matrix Inequality) solver — feasibility, cost
-minimization, generalized-eigenvalue minimization — the convex-optimization primitive this
+**Goal:** A general-purpose LMI (Linear Matrix Inequality) solver - feasibility, cost
+minimization, generalized-eigenvalue minimization - the convex-optimization primitive this
 toolbox still lacks (`GradientProjectionQP` is QP, not SDP). Its original motivating use cases
 (H2 synthesis, structured Hinf) shipped via other routes (see `algorithm_backlog.md`'s Robust
 Control section), so this is now scoped narrower: multi-objective Hinf/H2 mixed synthesis and
 any future LMI-native algorithm.
 
 **Sequencing note (2026-06-25):** moved to dead-last priority within Phase 4 (see "Recommended
-order within Phase 4" above), per explicit decision — not a quick win, given the unfamiliarity
+order within Phase 4" above), per explicit decision - not a quick win, given the unfamiliarity
 of LMI/SDP theory relative to this codebase's existing convex-optimization machinery, and its
 sole remaining justification (multi-objective Hinf/H2 mixed synthesis) isn't itself a scoped item
 anywhere in this document. Worth deciding, before this is brainstormed, whether to scope `RC2`
@@ -1302,32 +1302,32 @@ public:
 };
 ```
 
-**Reused components:** Nothing existing covers this directly — `GradientProjectionQP`'s
+**Reused components:** Nothing existing covers this directly - `GradientProjectionQP`'s
 projected-update iteration shape is a loose inspiration for the primal-dual structure, but the
 projection-onto-the-PSD-cone step (via eigenvalue decomposition) is new.
 
 **Effort estimate:** ~600 lines (interior-point/projected-subgradient SDP solver + 3
-problem-type wrappers + 5 tests) — the single biggest implementation effort in this roadmap.
+problem-type wrappers + 5 tests) - the single biggest implementation effort in this roadmap.
 
 **Example use case:** Multi-objective Hinf/H2 mixed-sensitivity synthesis (minimize H2 cost
-subject to an Hinf constraint) — the textbook case requiring genuine LMI machinery rather than
+subject to an Hinf constraint) - the textbook case requiring genuine LMI machinery rather than
 a Riccati shortcut.
 
 **Catch2 test plan (`[lmi_solver]`):**
-1. Simple Lyapunov-stability LMI (`A'P + PA < 0`) — recovers a known feasible `P` for a stable
+1. Simple Lyapunov-stability LMI (`A'P + PA < 0`) - recovers a known feasible `P` for a stable
    `A`, correctly reports infeasible for an unstable `A`.
-2. Cost-minimization LMI (e.g. minimize `trace(P)` subject to a Lyapunov LMI) — matches a
+2. Cost-minimization LMI (e.g. minimize `trace(P)` subject to a Lyapunov LMI) - matches a
    hand-solved small case.
-3. GEVP — matches a known generalized-eigenvalue benchmark.
-4. Near-degenerate constraint — doesn't diverge; returns an iters-exhausted/reduced-confidence
+3. GEVP - matches a known generalized-eigenvalue benchmark.
+4. Near-degenerate constraint - doesn't diverge; returns an iters-exhausted/reduced-confidence
    flag rather than a silently wrong answer.
 
 ---
 
-### OC2 — Dynamic Programming / Value Iteration
+### OC2 - Dynamic Programming / Value Iteration
 
 **Goal:** Classical DP/value-iteration solver over a discretized state-space grid for
-finite-horizon or discounted-infinite-horizon optimal control — valid for low-dimensional
+finite-horizon or discounted-infinite-horizon optimal control - valid for low-dimensional
 (`n <= 3-4`, curse-of-dimensionality-limited) problems where a globally optimal (not just
 locally optimal) policy is wanted and MPC's continuous optimization isn't required.
 
@@ -1353,7 +1353,7 @@ public:
 };
 ```
 
-**Reused components:** None — no grid-based DP exists in `lib/` today; a from-scratch effort.
+**Reused components:** None - no grid-based DP exists in `lib/` today; a from-scratch effort.
 The resulting `policy()` lookup can be wrapped in an `IController`-derived class using the same
 `compute()`-delegation pattern other wrappers use, which would be the first table-driven
 controller in the library.
@@ -1366,19 +1366,19 @@ globally optimal policy outperforms a locally-optimal `NonlinearMPC` initialized
 guess, and the state dimension is low enough for grid discretization to be tractable.
 
 **Catch2 test plan (`[value_iteration]`):**
-1. LQR-equivalent problem (linear dynamics + quadratic cost on a fine grid) — converges to a
+1. LQR-equivalent problem (linear dynamics + quadratic cost on a fine grid) - converges to a
    policy matching `DiscreteLQR`'s gain within grid-resolution error.
-2. Convergence — value-function update norm decreases monotonically toward `tol`.
-3. Grid-resolution sensitivity — a documented accuracy-vs-grid-size tradeoff test, confirming
+2. Convergence - value-function update norm decreases monotonically toward `tol`.
+3. Grid-resolution sensitivity - a documented accuracy-vs-grid-size tradeoff test, confirming
    expected curse-of-dimensionality behavior (not a bug).
 
 ---
 
-### OC4 — Linear-Programming-Based Control
+### OC4 - Linear-Programming-Based Control
 
 **Goal:** An LP solver (active-set) extending the QP-only optimization layer
 (`GradientProjectionQP`) to linear cost/linear constraint problems, then an LP-based MPC variant
-— min-time control, L1/Linf-cost MPC are naturally LPs, not QPs.
+- min-time control, L1/Linf-cost MPC are naturally LPs, not QPs.
 
 ```cpp
 struct LPProblem {
@@ -1413,20 +1413,20 @@ scaffolding, swapping only the inner solver.
 is "time to reach target" (an LP after time-discretization), not a quadratic tracking cost.
 
 **Catch2 test plan (`[lp_solver]`):**
-1. Known LP with a textbook solution — matches the known optimum.
-2. Infeasible LP — correctly reports `feasible=false`, doesn't loop forever.
-3. LP-MPC on a min-time problem — converges to the bang-bang-like solution expected for
+1. Known LP with a textbook solution - matches the known optimum.
+2. Infeasible LP - correctly reports `feasible=false`, doesn't loop forever.
+3. LP-MPC on a min-time problem - converges to the bang-bang-like solution expected for
    minimum-time problems.
 
 ---
 
-### DT1 — Code Generation
+### DT1 - Code Generation
 
 **Goal:** Per `algorithm_backlog.md`: "highest production value of this category" but also the
 heaviest lift. **Scoped down from the full 90-class library**: emit dependency-free,
 allocation-free C code only for controller types simple enough to have a clean closed-form
 update equation (the ones already mirrored in `lib/embedded/`'s header-only subset, e.g.
-`BasicPID`/`BasicSMC`, plus `DiscreteLeadLag`) — MPC/Hinf/MHE code-gen is explicitly out of
+`BasicPID`/`BasicSMC`, plus `DiscreteLeadLag`) - MPC/Hinf/MHE code-gen is explicitly out of
 scope for v1 (see "Out of Scope" below).
 
 ```cpp
@@ -1438,7 +1438,7 @@ struct CodeGenParams {
 class ControllerCodeGenerator {
 public:
     // Emits a self-contained .c/.h pair implementing compute() as a stateless-struct + step
-    // function, matching lib/embedded/'s conventions. One overload per supported class —
+    // function, matching lib/embedded/'s conventions. One overload per supported class -
     // adding coverage is additive.
     static std::string generateC(const DiscretePID& controller, const CodeGenParams& params);
     static std::string generateC(const DiscreteSMC& controller, const CodeGenParams& params);
@@ -1448,20 +1448,20 @@ public:
 
 **Reused components:** `lib/embedded/`'s existing header-only no-Eigen subset as both the
 *target* code style and the proof that these specific controllers admit a clean allocation-free
-C representation — the generator automates producing that style from a tuned `lib/` controller
+C representation - the generator automates producing that style from a tuned `lib/` controller
 instance's parameters, instead of requiring a hand port.
 
 **Effort estimate:** ~500 lines (template-based emission for 3 initial controller types +
-golden-file tests + 4 tests) — deliberately scoped down to stay achievable; each additional
+golden-file tests + 4 tests) - deliberately scoped down to stay achievable; each additional
 controller type is a small additive follow-up once the emitter framework exists.
 
 **Example use case:** A user who tuned a `DiscretePID` using the full C++ toolbox's analysis/
 tuning tooling wants to deploy just the resulting fixed-gain controller on a bare-metal MCU
-without linking Eigen or the rest of `lib/` — `generateC()` emits one dependency-free `.c` file
+without linking Eigen or the rest of `lib/` - `generateC()` emits one dependency-free `.c` file
 with the tuned gains baked in.
 
 **Catch2 test plan (`[code_generation]`):**
-1. Generated C for a `DiscretePID`, compiled standalone (no Eigen, no `lib/` link) — bit-identical
+1. Generated C for a `DiscretePID`, compiled standalone (no Eigen, no `lib/` link) - bit-identical
    output to the original `DiscretePID::compute()` across a reference input sequence
    (golden-file regression).
 2. Same golden-file check for `DiscreteSMC` and `DiscreteLeadLag`.
@@ -1470,10 +1470,10 @@ with the tuned gains baked in.
 
 ---
 
-### DT2 — Real-Time Profiling Beyond WCET
+### DT2 - Real-Time Profiling Beyond WCET
 
 **Goal:** Extend `tools/wcet_report.py`'s worst-case-execution-time coverage with finer-grained
-per-call-site profiling — timing *distribution* (not just the worst case), jitter analysis, and
+per-call-site profiling - timing *distribution* (not just the worst case), jitter analysis, and
 identification of hot paths sensitive to cache/branch prediction.
 
 ```python
@@ -1488,15 +1488,15 @@ class RTProfiler:
 ```
 
 **Reused components:** `tools/wcet_report.py`'s existing instrumentation/timing-harness
-approach directly — an additive sibling tool reusing the same measurement mechanism, aggregating
+approach directly - an additive sibling tool reusing the same measurement mechanism, aggregating
 distributionally instead of max-only.
 
 **Effort estimate:** ~250 lines Python (wraps existing WCET instrumentation with distributional
-statistics + report generation) — a `tools/` extension, no C++ changes, mirroring how Phase 2's
+statistics + report generation) - a `tools/` extension, no C++ changes, mirroring how Phase 2's
 D2 (Digital Twin Lite) was scoped Python-only.
 
 **Example use case:** A controller comfortably within its WCET budget but exhibiting high
-jitter (e.g. occasional cache misses on a branch-heavy NaN-guard path) — useful for diagnosing
+jitter (e.g. occasional cache misses on a branch-heavy NaN-guard path) - useful for diagnosing
 intermittent control-loop timing issues a single worst-case number hides.
 
 **Test plan (Python-level, not Catch2):** Verify against a synthetic controller with
@@ -1506,7 +1506,7 @@ distribution.
 
 ---
 
-### DT3 — Distributed / Networked Control
+### DT3 - Distributed / Networked Control
 
 **Goal:** Extend `ComputationalDelayWrapper`'s single-fixed-delay model to a multi-node
 networked-control scenario: variable/stochastic network delay, packet loss, and a simple
@@ -1545,24 +1545,24 @@ composability the existing wrapper already supports (stacks with `AntiWindupWrap
 3 tests).
 
 **Example use case:** A multi-actuator system where each actuator's local controller
-communicates over a lossy network (e.g. wireless sensor/actuator network) — lets a case study
+communicates over a lossy network (e.g. wireless sensor/actuator network) - lets a case study
 simulate realistic network conditions instead of assuming a perfect fixed-delay link.
 
 **Catch2 test plan (`[networked_control]`):**
-1. Zero jitter/loss — behaves identically to `ComputationalDelayWrapper` (regression, confirms
+1. Zero jitter/loss - behaves identically to `ComputationalDelayWrapper` (regression, confirms
    the generalization preserves the deterministic-delay special case).
-2. Packet loss — `droppedPacketCount()` matches the configured probability within statistical
+2. Packet loss - `droppedPacketCount()` matches the configured probability within statistical
    tolerance over many steps.
-3. Consensus primitive on a known small network topology — converges to the analytically
+3. Consensus primitive on a known small network topology - converges to the analytically
    expected consensus value.
 
 ---
 
 ## Phase 5: Niche / Research-Grade (Kept, Not Cut)
 
-### NC5 — Globally Linearizing Control
+### NC5 - Globally Linearizing Control
 
-**Goal:** Already flagged "niche/rare in practice — low priority" in `algorithm_backlog.md`.
+**Goal:** Already flagged "niche/rare in practice - low priority" in `algorithm_backlog.md`.
 GLC achieves *global* (not just local) linearization via a coordinate transformation valid over
 the entire state space, vs. `FeedbackLinearisationController`'s local relative-degree-1
 approach. Kept for completeness as a real, named technique; sequenced last because the backlog's
@@ -1586,29 +1586,29 @@ public:
 ```
 
 **Reused components:** `FeedbackLinearisationController`'s compute()-delegation-to-inner-
-controller pattern (transform → apply a linear controller in transformed coordinates →
+controller pattern (transform -> apply a linear controller in transformed coordinates ->
 transform back).
 
-**Effort estimate:** ~250 lines (global coordinate-transform wrapper + 2 tests) — small because
+**Effort estimate:** ~250 lines (global coordinate-transform wrapper + 2 tests) - small because
 it reuses `FeedbackLinearisation`'s delegation pattern; placed in Phase 5 purely for low expected
 usage, not implementation difficulty.
 
 **Example use case:** A system with a known global diffeomorphism to linear coordinates over
-its entire operating envelope — rare in practice, which is exactly why this is niche.
+its entire operating envelope - rare in practice, which is exactly why this is niche.
 
 **Catch2 test plan (`[glc]`):**
-1. Known globally-linearizable textbook system — closed loop matches the underlying linear
+1. Known globally-linearizable textbook system - closed loop matches the underlying linear
    controller's response exactly in transformed coordinates.
 2. Round-trip consistency: `Phi_inv(Phi(x)) == x` within tolerance.
-3. Operating point outside the transform's valid domain — flagged/clamped, not silently wrong.
+3. Operating point outside the transform's valid domain - flagged/clamped, not silently wrong.
 
 ---
 
-### OC3 — Dual Control
+### OC3 - Dual Control
 
 **Goal:** Already flagged "research-grade, niche; low priority" in `algorithm_backlog.md`. Dual
 control actively balances exploration (reducing parameter uncertainty) against exploitation
-(minimizing tracking cost) — distinct from `CEMController`/`DynaController`'s MBRL approach.
+(minimizing tracking cost) - distinct from `CEMController`/`DynaController`'s MBRL approach.
 Kept for completeness; sequenced last given its niche, research-grade status.
 
 ```cpp
@@ -1632,29 +1632,29 @@ the parameter-uncertainty input the dual cost needs; `AutoTuner`'s CMA-ES as the
 optimizer for the combined exploration+exploitation cost (generally non-convex).
 
 **Effort estimate:** ~350 lines (combined cost formulation + per-step CMA-ES optimization +
-3 tests) — placed in Phase 5 for niche applicability, not implementation difficulty.
+3 tests) - placed in Phase 5 for niche applicability, not implementation difficulty.
 
 **Example use case:** An adaptive controller for a system with persistent parameter uncertainty
-where pure certainty-equivalence control (e.g. plain MRAC) risks poor excitation — dual control
+where pure certainty-equivalence control (e.g. plain MRAC) risks poor excitation - dual control
 explicitly trades off a probing action against tracking performance.
 
 **Catch2 test plan (`[dual_control]`):**
-1. Known uncertain parameter, dual control vs. certainty-equivalence — dual control's parameter
+1. Known uncertain parameter, dual control vs. certainty-equivalence - dual control's parameter
    estimate converges faster due to deliberate exploration.
-2. `exploration_weight = 0` — reduces to certainty-equivalence behavior (regression case).
-3. Already-converged estimate (near-zero covariance) — exploration term vanishes, matches pure
+2. `exploration_weight = 0` - reduces to certainty-equivalence behavior (regression case).
+3. Already-converged estimate (near-zero covariance) - exploration term vanishes, matches pure
    exploitation.
 
 ---
 
-### ML4 — RL-Based Control (merged)
+### ML4 - RL-Based Control (merged)
 
-**Goal:** Merges 2 backlog line items — Adaptive Control's "Reinforcement-learning-based
-adaptive control" and Machine Learning Integration's "Deep reinforcement learning" — since
+**Goal:** Merges 2 backlog line items - Adaptive Control's "Reinforcement-learning-based
+adaptive control" and Machine Learning Integration's "Deep reinforcement learning" - since
 `algorithm_backlog.md` itself flags them as "the same gap, two wishlist entries." Following the
 precedent `ALGORITHM_ROADMAP_PHASE2.md` set for its H3 item ("Full RL framework... no C++ RL
 core needed"), this is scoped as a Python-only example wiring a small policy to adjust an
-existing controller's parameters online — not a from-scratch C++ RL core. `DynaController`/
+existing controller's parameters online - not a from-scratch C++ RL core. `DynaController`/
 `CEMController` already cover the lightweight MBRL end of this spectrum in C++.
 
 ```python
@@ -1672,18 +1672,18 @@ H3 (RL-MPC stitching) already established and validated.
 **Known gap (pre-implementation audit, 2026-06-25):** the example use case above ("nudging...
 `OC1`'s `SelfTuningRegulator` forgetting factor lambda") isn't buildable against `OC1` as shipped.
 `SelfTuningRegulator` only exposes `lambda` via the constructor's `STRParams` and a `const
-params()` accessor (`lib/SelfTuningRegulator.h:161`) — there is no runtime setter. Adding one is
+params()` accessor (`lib/SelfTuningRegulator.h:161`) - there is no runtime setter. Adding one is
 small, but not a bare setter: changing the RLS forgetting factor mid-run interacts with the
 covariance matrix's conditioning, which deserves the same numerical-safety scrutiny
-`CONTRIBUTING.md` asks for elsewhere — not just "no new C++ required." Alternative: pick an
+`CONTRIBUTING.md` asks for elsewhere - not just "no new C++ required." Alternative: pick an
 example controller that already supports live parameter mutation instead of adding this to `OC1`.
 
 **Effort estimate:** ~250 lines Python (policy + training loop + plant-simulation glue),
-following H3's precedent almost exactly — plus a small but non-trivial C++ addition to whichever
+following H3's precedent almost exactly - plus a small but non-trivial C++ addition to whichever
 controller becomes the tuning target, if it doesn't already expose a runtime setter.
 
 **Example use case:** A policy that learns to adjust `OC1`'s forgetting factor `lambda` based
-on observed tracking performance, rather than a fixed value — closing the gap between "online
+on observed tracking performance, rather than a fixed value - closing the gap between "online
 RLS identification" and "RL-tuned identification," without a general-purpose C++ RL framework.
 
 **Test plan (Python-level):** Verify the training loop converges (reward increases over
@@ -1697,39 +1697,39 @@ fixed-parameter baseline controller on a held-out test trajectory.
 Before any of the still-open items (`SI3`, `FD2`, `ML3`, Phase 4, Phase 5) get their own
 brainstorming/spec pass, every "Reused components" claim above was checked against the actual
 current code rather than taken on the strength of this document's own description. Most held up
-exactly — `DiscreteHinf`/`MuAnalysis` for `EF1`/`RC1`, `VectorFitting`'s SK/pole-relocation
+exactly - `DiscreteHinf`/`MuAnalysis` for `EF1`/`RC1`, `VectorFitting`'s SK/pole-relocation
 pattern for `FD2`, `GPResidualModel::predictWithUncertainty()` for `ML3`'s variance source,
 `GradientProjectionQP`'s projection step for `RC2`/`OC4`, the `ComputationalDelayWrapper`/
 `AntiWindupWrapper`/`GainScheduledController` decorator stack for `DT3`, `FeedbackLinearisationController`
 for `NC5`, `RecursiveGreyBoxEstimator`/`AutoTuner` for `OC3`, `DynaController`/`CEMController` for
 `ML4`, `tools/wcet_report.py` for `DT2`, and the Phase 2 H3 Python/C++ pattern `ML4` cites as
-precedent — all verified accurate, and the line-count/day-estimate arithmetic across all 5
+precedent - all verified accurate, and the line-count/day-estimate arithmetic across all 5
 phases reconciles exactly to the totals in the Estimated Timeline table below. Three items had a
 real gap, now noted inline in their own sections (cross-referenced here for visibility):
 
-- **`SI3`** (MOESP/CVA Subspace ID) — the sketch's `subspaceID(..., method=...)` free function and
+- **`SI3`** (MOESP/CVA Subspace ID) - the sketch's `subspaceID(..., method=...)` free function and
   `SubspaceMethod` enum don't exist; the real function is `n4sid()` (`lib/SubspaceID.h:128`) with
   no method parameter at all. Separately, `n4sid()` already unconditionally computes a stochastic
   Kalman-gain/innovation-covariance estimate (`lib/SubspaceID.cpp:222-263`) that true MOESP, by
-  this item's own definition, doesn't have — undefined what `SubspaceIDResult::kalmanGain`/
+  this item's own definition, doesn't have - undefined what `SubspaceIDResult::kalmanGain`/
   `innovCov` should contain in MOESP mode. See the `SI3` section's "Known gap" note.
-- **`ML3`** (GP-MPC) — the "architecturally a sibling of `HybridMPC`" framing doesn't extend to
+- **`ML3`** (GP-MPC) - the "architecturally a sibling of `HybridMPC`" framing doesn't extend to
   constraint tightening. `NonlinearMPC`'s per-step QP bounds are built inside a private,
   non-virtual method (`lib/NonlinearMPC.cpp:172-178`, declared at `lib/NonlinearMPC.h:153-162`)
   with no subclass hook, unlike `HybridMPC`'s dynamics-only override
-  (`lib/HybridMPC.h:69,75-78`). The ~300-line effort estimate is contingent on resolving this —
+  (`lib/HybridMPC.h:69,75-78`). The ~300-line effort estimate is contingent on resolving this -
   either add a hook to `NonlinearMPC` first (unscoped prerequisite work) or `GPMPC` ends up a
   from-scratch RTI loop. See the `ML3` section's "Known gap" note.
-- **`ML4`** (RL-based control) — its own example use case (nudging `OC1`'s RLS forgetting factor
+- **`ML4`** (RL-based control) - its own example use case (nudging `OC1`'s RLS forgetting factor
   `lambda` online) isn't buildable against `SelfTuningRegulator` as shipped: no runtime setter
   exists (`lib/SelfTuningRegulator.h:161` only exposes a `const` accessor), and a forgetting-factor
   setter isn't numerically trivial to add. See the `ML4` section's "Known gap" note.
 
-Also re-sequenced: **`RC2`** (LMI solver) was moved to dead-last within Phase 4 (was first) — see
+Also re-sequenced: **`RC2`** (LMI solver) was moved to dead-last within Phase 4 (was first) - see
 the "Recommended order within Phase 4" note and the `RC2` section's "Sequencing note." Its only
 remaining motivating use case (multi-objective Hinf/H2 mixed synthesis, per
 `algorithm_backlog.md:104`) has no roadmap line of its own anywhere in this document, and it
-remains the single largest, least-familiar lift in the whole roadmap — build familiarity on the
+remains the single largest, least-familiar lift in the whole roadmap - build familiarity on the
 cheaper Phase 4 items first, and decide whether to scope `RC2` down to that one consumer (or give
 the consumer its own item) before committing to it.
 
@@ -1741,7 +1741,7 @@ appeared).
 
 ## What's Explicitly Out of Scope (within items above)
 
-Mirroring `ALGORITHM_ROADMAP_PHASE2.md`'s deferral table — these are sub-scope cuts *within* an
+Mirroring `ALGORITHM_ROADMAP_PHASE2.md`'s deferral table - these are sub-scope cuts *within* an
 item above, not whole items cut from the roadmap (every category-level item is covered by Phase
 1-5 per the "include all, flag low-priority" decision for this document):
 
@@ -1749,7 +1749,7 @@ item above, not whole items cut from the roadmap (every category-level item is c
 |---|---|
 | `RC2` LMI solver: general N-block SDP beyond feasibility/cost-min/GEVP | Full general-purpose SDP (arbitrary cone combinations) is a research project on its own; the 3 problem types listed cover every robust-control use case currently on this roadmap |
 | `DT1` code generation: MPC/Hinf/MHE targets | Would need either a bundled QP solver in generated code or full offline precomputation; v1 is scoped to closed-form controllers only |
-| `ML4` RL-based control: full Stable-Baselines3 / general RL framework integration | Same reasoning as Phase 2's H3 — a Python example validates the pattern; no C++ RL core needed |
+| `ML4` RL-based control: full Stable-Baselines3 / general RL framework integration | Same reasoning as Phase 2's H3 - a Python example validates the pattern; no C++ RL core needed |
 | `DT3` distributed control: real multi-machine networking (sockets/network stack) | Simulated stochastic delay/loss is sufficient for the case-study roster; real network I/O is a deployment concern, not an algorithm one |
 | `OC2` DP/value iteration: state dimension > ~4 | Curse of dimensionality makes grid-based DP intractable beyond this; higher-dimensional problems should use the MPC family, which already exists |
 
@@ -1761,20 +1761,20 @@ Each new `lib/` algorithm follows the same 8-step checklist `ALGORITHM_ROADMAP_P
 established, from `CLAUDE.md`/`CONTRIBUTING.md`:
 
 ```
-1. lib/ClassName.{h,cpp} — implement; call notifyObserver() at end of compute()
-2. lib/CMakeLists.txt — add ClassName.cpp to CTRL_CORE_SOURCES
-3. lib/ControllerToolbox.h — add #include "ClassName.h"
-4. lib/Features.h — add {"feature_name", true} entry
-5. bindings/*_bindings.cpp — add pybind11 class with std::shared_ptr<T> 3rd arg
-6. bindings/smoke_test.py — add assertion
-7. tests/test_catch2_advanced.cpp — add 2+ Catch2 tests with [tag]
+1. lib/ClassName.{h,cpp} - implement; call notifyObserver() at end of compute()
+2. lib/CMakeLists.txt - add ClassName.cpp to CTRL_CORE_SOURCES
+3. lib/ControllerToolbox.h - add #include "ClassName.h"
+4. lib/Features.h - add {"feature_name", true} entry
+5. bindings/*_bindings.cpp - add pybind11 class with std::shared_ptr<T> 3rd arg
+6. bindings/smoke_test.py - add assertion
+7. tests/test_catch2_advanced.cpp - add 2+ Catch2 tests with [tag]
 8. examples/exNN.cpp + examples/python/exNN.py + update CMakeLists.txt + compile.bat
 ```
 
 For Python-only items (`DT2`, `ML4`): steps 1-4 and 7-8 (C++ side) are skipped.
 For extensions to existing classes (`SI3`, `EF3`, `FD1`, `FD2`, `MO3`, `DT4`): only the modified
-files need updating, not the full 8-step checklist — but Catch2 tests are always required.
-Every item still gets its own design spec under `docs/superpowers/specs/` before being built —
+files need updating, not the full 8-step checklist - but Catch2 tests are always required.
+Every item still gets its own design spec under `docs/superpowers/specs/` before being built -
 this document scopes effort and sequencing, it does not replace that step.
 
 ---
@@ -1786,14 +1786,14 @@ this document scopes effort and sequencing, it does not replace that step.
 | Phase 1 | EF1, RC1, NC1, NC2, NC4, SI5, SI2, FD1, MO2 (9 items) | ~2,330 | ~22-26 days | Highest value-to-effort ratio; no cross-item dependencies, can be done in any order |
 | Phase 2 | OC1, SI1, EF2, EF3, MO1, MO3, DT4 (7 items, covers 9 backlog lines) | ~2,200 | ~21-24 days | `MO3` benefits from `MO2`/`MO1` existing but doesn't require them |
 | Phase 3 | ML1, ML2, SI3, SI4, FD2, NC3, ML3 (7 items) | ~2,250 | ~21-25 days | `ML2` strictly requires `ML1` first; everything else independent |
-| Phase 4 | OC2, OC4, DT1, DT2, DT3, RC2 (6 items) | ~2,450 | ~24-27 days | `RC2` is the single largest item in the roadmap, sequenced last per explicit instruction (novelty/unfamiliarity, no scoped consumer — see RC2 section) |
+| Phase 4 | OC2, OC4, DT1, DT2, DT3, RC2 (6 items) | ~2,450 | ~24-27 days | `RC2` is the single largest item in the roadmap, sequenced last per explicit instruction (novelty/unfamiliarity, no scoped consumer - see RC2 section) |
 | Phase 5 | NC5, OC3, ML4 (3 items, covers 4 backlog lines) | ~850 | ~8-10 days | Niche/research-grade; smallest phase |
 | **Total** | **32 designs (35 backlog lines)** | **~10,080** | **~96-112 days** | Focused part-time development, roughly 19-22 weeks at the cadence `ALGORITHM_ROADMAP_PHASE2.md` used (~85-100 lines/day) |
 
 Unlike `ALGORITHM_ROADMAP_PHASE2.md`'s single dependency chain, these phases are mostly
-independent — the ordering above is a value/ROI recommendation, not a hard requirement. A phase
+independent - the ordering above is a value/ROI recommendation, not a hard requirement. A phase
 can be reprioritized or skipped without blocking the others (the two real dependency edges are
-`ML1 → ML2` and `MO2/MO1 → MO3` as a soft preference).
+`ML1 -> ML2` and `MO2/MO1 -> MO3` as a soft preference).
 
 ---
 

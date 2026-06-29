@@ -20,12 +20,16 @@ int main()
 {
     const double Ts = 0.1;
 
-    // Plant: G(s) = 2/(s+1) -> ZOH discretisation.
+    // Plant: G(s) = 2/(s+1) + 1 = (s+3)/(s+1) -> ZOH discretisation.
+    // Must be biproper (D != 0, relative degree 0): a strictly-proper plant ZOH-discretises to a
+    // strictly-proper discrete TF (num[0] == 0), whose causal inverse doesn't exist (it would
+    // need r[k+1] to compute u_ff[k]) - invertTransferFunction() throws std::invalid_argument
+    // for exactly this case (see its [b0 ~ 0] test in tests/test_catch2_advanced.cpp).
     const ctrl::StateSpace plant_c(
         Eigen::MatrixXd::Constant(1, 1, -1.0),
         Eigen::MatrixXd::Constant(1, 1,  1.0),
         Eigen::MatrixXd::Constant(1, 1,  2.0),
-        Eigen::MatrixXd::Zero(1, 1), 0.0);
+        Eigen::MatrixXd::Constant(1, 1,  1.0), 0.0);
     const ctrl::StateSpace plant = ctrl::c2d(plant_c, Ts, ctrl::C2dMethod::ZOH);
     const ctrl::TransferFunction G = ctrl::ss2tf(plant);
 

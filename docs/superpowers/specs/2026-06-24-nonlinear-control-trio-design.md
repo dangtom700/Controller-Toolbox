@@ -9,39 +9,39 @@
 handle today without full feedback linearization: strict-feedback systems with relative degree
 > 1 (Backstepping), energy-shaping regulation of Euler-Lagrange systems (Passivity-Based
 Control), and direct Lyapunov-based controller *synthesis* from a candidate `V(x)` (CLF
-synthesis — distinct from `LyapunovRobustness`, which only *analyzes* a fixed linear system's
+synthesis - distinct from `LyapunovRobustness`, which only *analyzes* a fixed linear system's
 robustness, not nonlinear synthesis). Bundled into one spec because the roadmap explicitly frames
 all three as sharing a "physics-callback" convention with `FeedbackLinearisationController`, and
-all three are `IController`-derived nonlinear synthesis controllers shipping in the same batch —
+all three are `IController`-derived nonlinear synthesis controllers shipping in the same batch -
 mirroring how Resonant/Notch/PLL were bundled by category and chronology despite no shared base
 class.
 
 **Shared caveat resolved once here (applies to NC1 and NC4 below):** `LyapunovRobustness.h`
 (confirmed: `findCommonLyapunov`/`isQuadraticallyStable`) operates on a **list of vertex
-matrices** for discrete-time linear polytopic uncertainty (`A_i'PA_i - P < 0` per vertex) — it
+matrices** for discrete-time linear polytopic uncertainty (`A_i'PA_i - P < 0` per vertex) - it
 has no notion of a nonlinear `V(x)` or Lie derivatives. Wherever the roadmap mentions "verified
 via `LyapunovRobustness`" or "consistent with `LyapunovRobustness`'s conventions," that's a
-conceptual analogy (both use a quadratic `V = x'Px` *in the test cases*), not a function call —
+conceptual analogy (both use a quadratic `V = x'Px` *in the test cases*), not a function call -
 each controller's Lyapunov-monotonicity test is a self-contained, test-local simulate-and-check
 helper.
 
 ## Scope
 
 - All three are `IController` subclasses, so they get the full checklist (bindings, `IController`
-  base, `CONTRIBUTING.md` sign-convention table row) — not the lighter utility-class checklist
+  base, `CONTRIBUTING.md` sign-convention table row) - not the lighter utility-class checklist
   SI2/MO2/FD1/EF1/RC1 used.
 - **NC1 (Backstepping):** strict-feedback chains of arbitrary stage count `N` (state dimension
-  `N`), not just the textbook 2-stage example — the per-stage callback vectors generalize
+  `N`), not just the textbook 2-stage example - the per-stage callback vectors generalize
   cleanly to any `N`.
 - **NC2 (Passivity-Based):** single-equilibrium **regulation** (`setDesired(q_d)`, a constant
-  configuration), not trajectory tracking — matching the roadmap's own single `setDesired()`
+  configuration), not trajectory tracking - matching the roadmap's own single `setDesired()`
   method (no `qdot_d`/`qddot_d` setters).
 - **NC4 (CLF Synthesis):** SISO only (matching the roadmap's `compute(double)`-based sketch and
-  scalar `LfVFn`/`LgVFn`) — a MIMO CLF-QP extension is a natural v2, not built now.
+  scalar `LfVFn`/`LgVFn`) - a MIMO CLF-QP extension is a natural v2, not built now.
 
 ## Components
 
-### 1. `lib/BacksteppingController.h` / `.cpp` — implements `IController`
+### 1. `lib/BacksteppingController.h` / `.cpp` - implements `IController`
 
 Recursive Lyapunov design for `N`-stage strict-feedback systems (`x1' = f1(x) + g1(x)*x2`, ...,
 `xN' = fN(x) + gN(x)*u`).
@@ -82,17 +82,17 @@ the Lyapunov cross-term cancellation) is **approximated via a backward finite di
 `Ts`** rather than computed analytically: `alpha_{i-1}'_k ~= (alpha_{i-1,k} - alpha_{i-1,k-1}) /
 Ts`, using the value stored from the previous `compute()` call (and `r'` similarly, from the
 reconstructed `r_k = x1_k + error_k`). This keeps the `DriftFn`/`GainFn` callback API as simple
-as `FeedbackLinearisationController`'s (just `(x, stage)` — no Jacobian/partial-derivative
+as `FeedbackLinearisationController`'s (just `(x, stage)` - no Jacobian/partial-derivative
 callbacks required from the caller) at the cost of an `O(Ts)` lag in the cancellation term,
 acceptable at the sample rates this toolbox targets; a future v2 could accept optional analytic
-derivative callbacks for stiffer systems. Only the final stage's `u` is clamped — intermediate
+derivative callbacks for stiffer systems. Only the final stage's `u` is clamped - intermediate
 `alpha_i` virtual controls are unclamped mathematical setpoints, not physical signals, and the
 stored `alpha_prev_` values used for the next step's finite difference are the **unclamped**
 values (clamping the physical `u` must not corrupt the virtual-control derivative chain).
 
 Hold-last NaN guard on non-finite `error`/`x`, consistent with the rest of the `compute()` fleet.
 
-### 2. `lib/PassivityBasedController.h` / `.cpp` — implements `IController` (MIMO, `computeVec`)
+### 2. `lib/PassivityBasedController.h` / `.cpp` - implements `IController` (MIMO, `computeVec`)
 
 Energy-shaping + damping-injection regulation for Euler-Lagrange systems
 `M(q)*qddot + C(q,qdot)*qdot + dV(q) = u`.
@@ -138,19 +138,19 @@ u = dV(q) - Kp*(q - q_d) - Kd*qdot
 ```
 **`Kp` addition (resolves a gap in the roadmap's sketch):** the roadmap's `PBCParams` lists only
 `Kd`, but a damping-only law has no restoring force toward `q_d` (nothing shapes the *potential*
-side of the energy, only dissipates kinetic energy) — "energy shaping" specifically refers to the
+side of the energy, only dissipates kinetic energy) - "energy shaping" specifically refers to the
 `Kp` term reshaping the total potential so its minimum sits at `q_d`. `Kp` is added as a required
 parameter; without it the controller cannot regulate to a nonzero `q_d` at all.
 
 **Why `M`/`C` are accepted but not used in `u` (resolves the roadmap's apparent-but-unstated
 assumption):** the classical PD+ stability proof (Lyapunov/storage function `V = 0.5*qdot'*M(q)
 *qdot + 0.5*(q-q_d)'*Kp*(q-q_d)`) shows `V' = -qdot'*Kd*qdot <= 0` **without** `u` needing to
-explicitly cancel `C` — the cross term vanishes via the standard Lagrangian skew-symmetry
+explicitly cancel `C` - the cross term vanishes via the standard Lagrangian skew-symmetry
 property `qdot'*(Mdot(q) - 2*C(q,qdot))*qdot = 0`, which holds when `C` is derived from `M` via
 the conventional Christoffel-symbol factorization (the standard choice in robotics/Lagrangian
 modeling; a non-standard caller-supplied `C` may not satisfy it exactly, in which case the proof's
 exact decay rate doesn't hold even though the law typically still stabilizes in practice). `M`/`C`
-*are* still evaluated every step — they feed `storageEnergy()` (the new accessor above) for
+*are* still evaluated every step - they feed `storageEnergy()` (the new accessor above) for
 passivity monitoring, which is also what the roadmap's own test plan item 2 needs to verify
 (numerically checking the storage function is non-increasing along a trajectory).
 
@@ -164,13 +164,13 @@ internal state.
 
 **`compute(double)` throws `std::logic_error`:** unlike `LQRAdapter` (which can return `u[0]`
 because its state comes from a *separate* callback, not the scalar argument), `PassivityBasedController`
-has no way to recover both `q` and `qdot` from a single scalar — even the SISO case (`n=1`,
+has no way to recover both `q` and `qdot` from a single scalar - even the SISO case (`n=1`,
 single pendulum) needs 2 numbers. `compute(double)` therefore throws
 `std::logic_error("PassivityBasedController is MIMO-only ([q;qdot] together) - call computeVec().")`,
 mirroring `IController::computeVec`'s own default behavior of throwing rather than silently
 truncating a multi-element signal.
 
-### 3. `lib/CLFController.h` / `.cpp` — implements `IController` (SISO)
+### 3. `lib/CLFController.h` / `.cpp` - implements `IController` (SISO)
 
 ```cpp
 struct CLFParams {
@@ -206,10 +206,10 @@ u = -(a + sqrt(a^2 + b^4)) / b     if b != 0
 (smooth and always satisfies `a + b*u <= 0`, since substituting gives `a + b*u = -sqrt(a^2+b^4)
 <= 0` exactly). Then `u = clamp(u, uMin, uMax)`.
 
-**Infeasibility (`LgV = 0`, uncontrollable direction, with `a > 0` — drift not naturally
+**Infeasibility (`LgV = 0`, uncontrollable direction, with `a > 0` - drift not naturally
 decaying):** the roadmap's test plan item 3 ("flags infeasible rather than producing a nonsense
 `u`") is satisfied via `isHealthy()` returning `false` after such a step (reusing
-`IController::isHealthy()`'s existing supervisory-fallback contract — no new bespoke API) and
+`IController::isHealthy()`'s existing supervisory-fallback contract - no new bespoke API) and
 holding the last finite `u`, consistent with the rest of the fleet's hold-last NaN/fault
 convention generalized to "instantaneously infeasible" as well as "non-finite input."
 
@@ -217,7 +217,7 @@ convention generalized to "instantaneously infeasible" as well as "non-finite in
 box-constrained QPs only; the CLF-QP problem's actual constraint (`LfV + LgV*u <= -alpha*V`) is a
 half-space constraint, not a box, so it cannot be expressed via that solver directly. For the
 SISO scope this phase covers, `useQP=true` and `useQP=false` both run the identical closed-form
-Sontag-formula path above — `useQP` is kept as a parameter for sketch-API compatibility and as a
+Sontag-formula path above - `useQP` is kept as a parameter for sketch-API compatibility and as a
 hook for a genuine future MIMO QP-based extension (where a half-space constraint folded into a
 box via a slack variable would actually call `GradientProjectionQP`), but v1 does not call that
 solver at all. This satisfies the roadmap's test plan item 2 ("QP mode and Sontag-formula mode
@@ -226,15 +226,15 @@ path.
 
 ## Explicitly out of scope (this phase)
 
-- **NC1: analytic virtual-control derivatives** — only the finite-difference approximation of
+- **NC1: analytic virtual-control derivatives** - only the finite-difference approximation of
   `alpha_i'` is built; an optional analytic-Jacobian callback variant is a natural, separable v2.
-- **NC2: trajectory tracking** (`qdot_d`/`qddot_d`, explicit Coriolis cancellation in `u`) — only
+- **NC2: trajectory tracking** (`qdot_d`/`qddot_d`, explicit Coriolis cancellation in `u`) - only
   constant-setpoint regulation; `setDesired()` deliberately takes one constant `q_d`.
-- **NC2: IDA-PBC / full inertia shaping** — only potential-side energy shaping (`Kp`) plus
+- **NC2: IDA-PBC / full inertia shaping** - only potential-side energy shaping (`Kp`) plus
   damping injection (`Kd`); modifying the apparent inertia is a materially bigger lift.
-- **NC4: MIMO CLF-QP** — SISO only; a real half-space-via-box-slack QP formulation for MIMO is
+- **NC4: MIMO CLF-QP** - SISO only; a real half-space-via-box-slack QP formulation for MIMO is
   deferred to a future extension once a concrete MIMO use case exists.
-- **NC4: control-Lyapunov-function *search*** (finding a valid `V(x)` automatically) — `LfVFn`/
+- **NC4: control-Lyapunov-function *search*** (finding a valid `V(x)` automatically) - `LfVFn`/
   `LgVFn` are caller-supplied; `CLFController` synthesizes the control law from a *given*
   candidate `V`, it does not search for one.
 
@@ -245,54 +245,54 @@ all three.)
 
 **Per controller** (`BacksteppingController`, `PassivityBasedController`, `CLFController`):
 1. `lib/<Name>.h`/`.cpp` + `CTRL_REGISTER_FEATURE(<name>)`
-2. `lib/CMakeLists.txt` — add to `CTRL_CORE_SOURCES`
-3. `lib/ControllerToolbox.h` — add `#include "<Name>.h"` near `FeedbackLinearisation.h`
-4. `bindings/controllers_bindings.cpp` — bind as `shared_ptr<T>` + `ctrl::IController` base
+2. `lib/CMakeLists.txt` - add to `CTRL_CORE_SOURCES`
+3. `lib/ControllerToolbox.h` - add `#include "<Name>.h"` near `FeedbackLinearisation.h`
+4. `bindings/controllers_bindings.cpp` - bind as `shared_ptr<T>` + `ctrl::IController` base
    (required for `ControllerStack.add_controller()`), alongside `FeedbackLinearisationController`
-5. `bindings/smoke_test.py` — construct, call `compute()`/`computeVec()`, confirm callable
-6. `tests/test_catch2_advanced.cpp` — tests under `[backstepping]` / `[passivity_based]` /
+5. `bindings/smoke_test.py` - construct, call `compute()`/`computeVec()`, confirm callable
+6. `tests/test_catch2_advanced.cpp` - tests under `[backstepping]` / `[passivity_based]` /
    `[clf_controller]` (see Testing plan)
-7. `CONTRIBUTING.md` sign-convention table — add `BacksteppingController` -> `Other` (or audit
+7. `CONTRIBUTING.md` sign-convention table - add `BacksteppingController` -> `Other` (or audit
    to `TrackingErrorRMinusY` per the `error = r - x1` convention), `PassivityBasedController` ->
    `PlantOutput`, `CLFController` -> `Other` (state-dependent, not a fixed error sign)
 
 **Examples** (next available numbers, in roadmap order NC1 -> NC2 -> NC4):
-- `examples/ex97_backstepping.cpp` — 2-link-arm-style strict-feedback system, tracking a
+- `examples/ex97_backstepping.cpp` - 2-link-arm-style strict-feedback system, tracking a
   reference that flat feedback linearization (relative degree > 1) can't handle directly
   + `examples/python/ex114_backstepping.py`
-- `examples/ex98_passivity_based.cpp` — single-pendulum regulation to a nonzero `q_d` despite
+- `examples/ex98_passivity_based.cpp` - single-pendulum regulation to a nonzero `q_d` despite
   unmodeled friction, monitoring `storageEnergy()` non-increase + `examples/python/ex115_passivity_based.py`
-- `examples/ex99_clf_controller.cpp` — scalar nonlinear system with a known quadratic CLF,
+- `examples/ex99_clf_controller.cpp` - scalar nonlinear system with a known quadratic CLF,
   comparing Sontag-formula output to the hand-derived closed form + `examples/python/ex116_clf_controller.py`
-- `examples/CMakeLists.txt`, `compile.bat`/`compile.sh` — add all three example targets
+- `examples/CMakeLists.txt`, `compile.bat`/`compile.sh` - add all three example targets
 
 ## Testing plan
 
 **`[backstepping]`**
 1. 2-stage strict-feedback system with a known analytic backstepping law (textbook example,
-   `Khalil Ch. 14`) — tracking error converges to zero, matching the hand-derived control law's
+   `Khalil Ch. 14`) - tracking error converges to zero, matching the hand-derived control law's
    output within the finite-difference approximation's expected error bound.
 2. Lyapunov function `V = 0.5*sum(z_i^2)` verified numerically non-increasing along a simulated
-   trajectory (test-local helper — not a call into `LyapunovRobustness`, see Motivation).
-3. Actuator saturation (`uMin`/`uMax`) — output is hard-clamped; confirm the stored `alpha_prev_`
+   trajectory (test-local helper - not a call into `LyapunovRobustness`, see Motivation).
+3. Actuator saturation (`uMin`/`uMax`) - output is hard-clamped; confirm the stored `alpha_prev_`
    chain used for the next step's finite difference is unaffected by the clamp (no windup
    artifact in the virtual-control derivative).
 
 **`[passivity_based]`**
-1. Single-pendulum regulation to a nonzero `q_d` — converges to the desired angle;
+1. Single-pendulum regulation to a nonzero `q_d` - converges to the desired angle;
    `storageEnergy()` is non-increasing across the trajectory.
 2. Closed-loop passivity verified via the storage-function check across a trajectory, using the
    caller-supplied `M`/`C` (confirming the skew-symmetry property holds for the test system's
    Christoffel-factorized `C`).
-3. `MassMatrixFn` returns a non-finite matrix at a boundary configuration — `compute()`/
+3. `MassMatrixFn` returns a non-finite matrix at a boundary configuration - `compute()`/
    `computeVec()` hold the last finite `u`, `storageEnergy()` does not propagate NaN into
    internal state.
 4. `compute(double)` throws `std::logic_error`.
 
 **`[clf_controller]`**
-1. Known CLF for a scalar nonlinear system — Sontag-formula output matches the hand-derived
+1. Known CLF for a scalar nonlinear system - Sontag-formula output matches the hand-derived
    closed form.
 2. `useQP=true` and `useQP=false` produce numerically identical output (both run the same
-   closed-form path in v1 — see "useQP note").
-3. `LfV` positive, `LgV = 0` (uncontrollable direction) — `isHealthy()` becomes `false`, output
+   closed-form path in v1 - see "useQP note").
+3. `LfV` positive, `LgV = 0` (uncontrollable direction) - `isHealthy()` becomes `false`, output
    holds the last finite value rather than a nonsense (or divide-by-zero) result.

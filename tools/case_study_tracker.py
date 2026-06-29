@@ -186,15 +186,36 @@ check_list_stat = [
     "mu_analysis.csv",
     "wcet_summary.csv"
 ]
+def _has_useful_rows(path: pathlib.Path) -> bool:
+    """True if path exists, parses as CSV, and has >=1 row of actual analysis output.
+
+    These are small per-study summary CSVs (one row per scenario/controller/sample,
+    not per timestep), so reading them in full is fine -- unlike logs/run_*.csv.
+    mu_analysis.csv rows carry a "status" column ("ok" vs "no_columns"/"too_short");
+    a file can exist with every row skipped (e.g. a study with no continuous y/u
+    pair to fit), which is not the same as analysis having actually run. Files
+    without a "status" column (fault_sweep/mc_summary/wcet_summary) just need
+    at least one data row beyond the header.
+    """
+    if not path.exists():
+        return False
+    try:
+        with path.open("r", newline="", encoding="utf-8", errors="ignore") as fh:
+            reader = csv.DictReader(fh)
+            if reader.fieldnames is None:
+                return False
+            if "status" in reader.fieldnames:
+                return any(row.get("status") == "ok" for row in reader)
+            return any(True for _ in reader)
+    except OSError:
+        return False
+
+
 def get_check_list(case_study_path: pathlib.Path) -> list[str]:
     checklist = []
     for file in check_list_stat:
         checklist.append(
-            response[
-                os.path.exists(
-                    os.path.join(case_study_path, file)
-                )
-            ]
+            response[_has_useful_rows(case_study_path / file)]
         )
 
     return checklist

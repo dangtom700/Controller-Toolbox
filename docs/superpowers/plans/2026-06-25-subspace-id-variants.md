@@ -10,10 +10,10 @@
 
 ## Global Constraints
 
-- This is offline, batch identification code (not a `compute()`/`step()` hot path) — the RT zero-allocation rules (`CLAUDE.md` section 7) do **not** apply here, the same exemption `n4sid()` already has.
-- `n4sid()`'s exact current name, signature, and behavior must not change — it is called from `lib/LPVSystemID.cpp`, `examples/ex31_subspace_id.cpp`, `examples/ex20_system_identification_data.cpp`, the Boiler Control case study, and existing tests/bindings.
-- This is an **extension to an existing class** (no new `lib/` source file, no `lib/CMakeLists.txt`/`lib/ControllerToolbox.h` changes) — only the files listed per task need updating.
-- Construction-time validation throws nothing (matches `n4sid()`'s existing contract of returning `SubspaceIDResult{success=false, message=...}` rather than throwing) — N4SID/CVA's new near-singular-`L22` guard follows this same return-not-throw convention.
+- This is offline, batch identification code (not a `compute()`/`step()` hot path) - the RT zero-allocation rules (`CLAUDE.md` section 7) do **not** apply here, the same exemption `n4sid()` already has.
+- `n4sid()`'s exact current name, signature, and behavior must not change - it is called from `lib/LPVSystemID.cpp`, `examples/ex31_subspace_id.cpp`, `examples/ex20_system_identification_data.cpp`, the Boiler Control case study, and existing tests/bindings.
+- This is an **extension to an existing class** (no new `lib/` source file, no `lib/CMakeLists.txt`/`lib/ControllerToolbox.h` changes) - only the files listed per task need updating.
+- Construction-time validation throws nothing (matches `n4sid()`'s existing contract of returning `SubspaceIDResult{success=false, message=...}` rather than throwing) - N4SID/CVA's new near-singular-`L22` guard follows this same return-not-throw convention.
 
 ---
 
@@ -22,7 +22,7 @@
 **Files:**
 - Modify: `lib/SubspaceID.h` (add enum + new declaration, after line 133's `n4sid()` declaration)
 - Modify: `lib/SubspaceID.cpp` (refactor body)
-- Modify: `tests/test_catch2_advanced.cpp` (append new `TEST_CASE`s at end of file, tag `[subspace_id_variants]`; no new `#include` needed — `SubspaceID.h` is already pulled in via `ControllerToolbox.h`)
+- Modify: `tests/test_catch2_advanced.cpp` (append new `TEST_CASE`s at end of file, tag `[subspace_id_variants]`; no new `#include` needed - `SubspaceID.h` is already pulled in via `ControllerToolbox.h`)
 
 **Interfaces:**
 - Consumes: nothing new (only Eigen + the existing `StateSpace`/`SubspaceIDResult`).
@@ -329,17 +329,17 @@ SubspaceIDResult n4sid(const Eigen::MatrixXd &Y,
 }
 ```
 
-Leave `buildHankel()` (the anonymous-namespace helper) and `suggestOrder()` exactly as they are — neither changes.
+Leave `buildHankel()` (the anonymous-namespace helper) and `suggestOrder()` exactly as they are - neither changes.
 
 - [ ] **Step 3: Configure and build the test target**
 
 Run: `cmake -S . -B build -DCMAKE_BUILD_TYPE=Release` then `cmake --build build --target test_catch2_advanced`
-Expected: clean compile. If `CTRL_HAS_SUBSPACE` is OFF in your build config (it's ON by default per `CLAUDE.md` section 2 — `CTRL_ENABLE_SUBSPACE`), this whole file is conditionally excluded; check `cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -LA | grep SUBSPACE` if anything related to `subspaceID` fails to link.
+Expected: clean compile. If `CTRL_HAS_SUBSPACE` is OFF in your build config (it's ON by default per `CLAUDE.md` section 2 - `CTRL_ENABLE_SUBSPACE`), this whole file is conditionally excluded; check `cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -LA | grep SUBSPACE` if anything related to `subspaceID` fails to link.
 
 - [ ] **Step 4: Run the existing n4sid tests to confirm the refactor is behavior-preserving**
 
 Run: `build/tests/test_catch2_advanced.exe [n4sid]`
-Expected: `All tests passed` — these tests call `ctrl::n4sid()` directly and must pass unchanged, since `n4sid()` now just delegates to `subspaceID(..., MOESP, ...)`.
+Expected: `All tests passed` - these tests call `ctrl::n4sid()` directly and must pass unchanged, since `n4sid()` now just delegates to `subspaceID(..., MOESP, ...)`.
 
 - [ ] **Step 5: Add the new tests to `tests/test_catch2_advanced.cpp`**
 
@@ -546,7 +546,7 @@ TEST_CASE("subspaceID(N4SID/CVA) reports failure (not a crash/NaN) on degenerate
 - [ ] **Step 6: Rebuild and run the new tests**
 
 Run: `cmake --build build --target test_catch2_advanced` then `build/tests/test_catch2_advanced.exe [subspace_id_variants]`
-Expected: `All tests passed (N assertions in 5 test cases)`. If the degenerate-excitation test (`Step 5`'s last `TEST_CASE`) doesn't trigger `success=false` with the constant-input data given, increase the constant-input length's redundancy is not the fix — verify `i_horizon=10` still satisfies `s > n_order` for `N=500` (`s = N - 2*i = 480`, fine); the near-singularity comes from `L22`'s conditioning on a Uf-correlated/non-exciting input, not from data quantity.
+Expected: `All tests passed (N assertions in 5 test cases)`. If the degenerate-excitation test (`Step 5`'s last `TEST_CASE`) doesn't trigger `success=false` with the constant-input data given, increase the constant-input length's redundancy is not the fix - verify `i_horizon=10` still satisfies `s > n_order` for `N=500` (`s = N - 2*i = 480`, fine); the near-singularity comes from `L22`'s conditioning on a Uf-correlated/non-exciting input, not from data quantity.
 
 - [ ] **Step 7: Commit**
 
@@ -563,7 +563,7 @@ git commit -m "Add SubspaceMethod (MOESP/N4SID/CVA) variants to SubspaceID (Phas
 - Modify: `bindings/advanced_bindings.cpp:398` (insert before `#endif  // CTRL_HAS_SUBSPACE`, right after the existing `suggest_order` binding)
 - Modify: `bindings/smoke_test.py` (extend the existing SubspaceID smoke-test section)
 - Create: `examples/ex113_subspace_id_variants.cpp`
-- Modify: `examples/CMakeLists.txt:184` (append `add_example(ex113_subspace_id_variants)` after `ex112_complex_vector_fit` if FD2 has already been wired by the time this task runs — otherwise after `ex111_narmax`; check the file's current tail before editing)
+- Modify: `examples/CMakeLists.txt:184` (append `add_example(ex113_subspace_id_variants)` after `ex112_complex_vector_fit` if FD2 has already been wired by the time this task runs - otherwise after `ex111_narmax`; check the file's current tail before editing)
 - Modify: `compile.bat` / `compile.sh` (append `ex113_subspace_id_variants` to the target lists, same position rule as above)
 - Create: `examples/python/ex130_subspace_id_variants.py`
 - Modify: `docs/algorithm_backlog.md` (move MOESP/CVA from "open" to "Already done")
@@ -573,7 +573,7 @@ git commit -m "Add SubspaceMethod (MOESP/N4SID/CVA) variants to SubspaceID (Phas
 - Consumes: `ctrl::subspaceID`/`ctrl::SubspaceMethod`/`ctrl::SubspaceIDResult` (Task 1), `ctrl::suggestOrder` (existing).
 - Produces: Python `ctrl.subspace_id(..., method=...)`, `ctrl.SubspaceMethod.MOESP/.N4SID/.CVA`; example binaries `ex113_subspace_id_variants` (C++) and `ex130_subspace_id_variants.py` (Python).
 
-**Numbering note:** `ex112`/`ex129` are reserved by FD2's plan (`docs/superpowers/plans/2026-06-25-complex-vector-fit.md`). Before starting this task, check whether `examples/ex112_complex_vector_fit.cpp` already exists — if FD2 shipped first, use `ex113`/`ex130` as written below; if this task runs before FD2's Task 2, use `ex112`/`ex129` instead and let FD2 claim `ex113`/`ex130` when it ships. Whichever runs second must check the other's actual file existence, not just this plan's text.
+**Numbering note:** `ex112`/`ex129` are reserved by FD2's plan (`docs/superpowers/plans/2026-06-25-complex-vector-fit.md`). Before starting this task, check whether `examples/ex112_complex_vector_fit.cpp` already exists - if FD2 shipped first, use `ex113`/`ex130` as written below; if this task runs before FD2's Task 2, use `ex112`/`ex129` instead and let FD2 claim `ex113`/`ex130` when it ships. Whichever runs second must check the other's actual file existence, not just this plan's text.
 
 - [ ] **Step 1: Add the Python binding to `bindings/advanced_bindings.cpp`**
 
@@ -727,7 +727,7 @@ int main()
 
 - [ ] **Step 5: Wire the example into `examples/CMakeLists.txt`, `compile.bat`, `compile.sh`**
 
-Append `add_example(ex113_subspace_id_variants)` to `examples/CMakeLists.txt` (after whichever of `ex111_narmax`/`ex112_complex_vector_fit` is currently last — check the file's tail first, per the Numbering Note above), and append `ex113_subspace_id_variants` to the target lists in `compile.bat` and `compile.sh` at the matching position.
+Append `add_example(ex113_subspace_id_variants)` to `examples/CMakeLists.txt` (after whichever of `ex111_narmax`/`ex112_complex_vector_fit` is currently last - check the file's tail first, per the Numbering Note above), and append `ex113_subspace_id_variants` to the target lists in `compile.bat` and `compile.sh` at the matching position.
 
 - [ ] **Step 6: Build and run the example**
 
@@ -817,7 +817,7 @@ Expected: prints the same style of output as the C++ example, ending in `[PASS] 
 
 Insert a new row after line 87 (the NARMAX row in the "Already done" table):
 ```markdown
-| MOESP / CVA (subspace ID variants) | `lib/SubspaceID.h`/`.cpp` (`SubspaceMethod` enum + `subspaceID()`; `n4sid()` becomes a delegating one-liner at `SubspaceMethod::MOESP`) — Phase 3 SI3, `examples/ex113_subspace_id_variants.cpp`. See [2026-06-25-subspace-id-variants-design.md](superpowers/specs/2026-06-25-subspace-id-variants-design.md). |
+| MOESP / CVA (subspace ID variants) | `lib/SubspaceID.h`/`.cpp` (`SubspaceMethod` enum + `subspaceID()`; `n4sid()` becomes a delegating one-liner at `SubspaceMethod::MOESP`) - Phase 3 SI3, `examples/ex113_subspace_id_variants.cpp`. See [2026-06-25-subspace-id-variants-design.md](superpowers/specs/2026-06-25-subspace-id-variants-design.md). |
 ```
 
 Replace lines 89-91 (the "Shipped" summary) with:
@@ -826,14 +826,14 @@ Replace lines 89-91 (the "Shipped" summary) with:
 see `docs/cumulative_bug_report.md` Part 69 and
 [2026-06-25-subspace-id-variants-design.md](superpowers/specs/2026-06-25-subspace-id-variants-design.md).
 FD2 (complex-pole Vector Fitting) and ML3 (GP-MPC) remain open (or are tracked separately, if
-they have already shipped by the time you read this — check the status table at the top of
+they have already shipped by the time you read this - check the status table at the top of
 `ALGORITHM_ROADMAP_PHASE3.md`).
 ```
 
-Replace line 127 (the MOESP/CVA "What's left" row in the System Identification section) — remove the row entirely and change the section's lead-in sentence:
+Replace line 127 (the MOESP/CVA "What's left" row in the System Identification section) - remove the row entirely and change the section's lead-in sentence:
 ```markdown
 Correlation-based identification, Hammerstein-Wiener models, Maximum Likelihood / MAP
-identification, NARMAX, and MOESP/CVA subspace ID variants are **done** — see the "Already
+identification, NARMAX, and MOESP/CVA subspace ID variants are **done** - see the "Already
 done" table above (`lib/CorrelationID.h`, `lib/HammersteinWienerIdentifier.h`,
 `lib/MLEIdentifier.h`, `lib/NARMAXIdentifier.h`, `lib/SubspaceID.h`). Nothing left in this
 category.
@@ -842,9 +842,9 @@ category.
 
 - [ ] **Step 10: Update `docs/ALGORITHM_ROADMAP_PHASE3.md` status**
 
-Replace lines 4-5 (top status line) — exact wording depends on whether FD2 has already shipped by the time this runs; if FD2 is still open:
+Replace lines 4-5 (top status line) - exact wording depends on whether FD2 has already shipped by the time this runs; if FD2 is still open:
 ```markdown
-**Status:** Planning — 21 of 32 items shipped (Phase 1 and Phase 2 complete; Phase 3 partial:
+**Status:** Planning - 21 of 32 items shipped (Phase 1 and Phase 2 complete; Phase 3 partial:
 ML1/ML2/NC3/SI4/SI3 done, FD2/ML3 open).
 ```
 

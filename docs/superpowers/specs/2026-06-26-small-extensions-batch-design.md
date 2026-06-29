@@ -1,4 +1,4 @@
-# Small Extensions Batch — Design Spec
+# Small Extensions Batch - Design Spec
 
 **Created:** 2026-06-26. **Source:** `docs/scope_triage_report.md`'s Promoted registry, minus the
 case-study items and the (Deferred, NP-hard) full mu lower bound. Five independent, small items,
@@ -8,11 +8,11 @@ bundled into one spec per the Phase-1 "small-foundational-utilities" precedent
 ## 1. `invertTransferFunction()` (Dynamic Inversion helper)
 
 **Problem:** `docs/control_strategies_deep_dive.md:452-456` claims dynamic inversion "is not yet
-wrapped as a dedicated class." False — `FeedforwardController` (`lib/FeedforwardController.h`)
+wrapped as a dedicated class." False - `FeedforwardController` (`lib/FeedforwardController.h`)
 already applies any discrete `StateSpace` to the reference, including an inverse-plant model (its
 own header demonstrates this at lines 39-45). The real, narrow gap: inverting a `TransferFunction`
 `B(z)/A(z)` to get `A(z)/B(z)` isn't a pure swap, because `TransferFunction` requires a monic
-denominator (`lib/PlantModel.h:35`, `den[0] == 1`) — so the new denominator (the old numerator `B`)
+denominator (`lib/PlantModel.h:35`, `den[0] == 1`) - so the new denominator (the old numerator `B`)
 must be re-normalized by its own leading coefficient `b0`.
 
 **API** (added to `lib/PlantModel.h`/`.cpp`, alongside `TransferFunction`/`tf2ss`):
@@ -37,7 +37,7 @@ input (perfect inversion property); verify throw when `b0 ~ 0`.
 ## 2. `tools/monte_carlo.py` real parallel workers
 
 **Problem:** `--workers` is accepted but ignored (`tools/monte_carlo.py:148`, docstring says
-"(stub)") — runs are always sequential.
+"(stub)") - runs are always sequential.
 
 **Design:** Extract the per-sample body of the existing `for ctrl_name: for i in range(args.n):`
 loop into a module-level function `_mc_job(study_dir, ctrl_name, sample_id, perturbed, nominal_params)`
@@ -60,15 +60,15 @@ resulting CSVs (same rows, same values, since `rng` is seeded before job generat
 follow-up... via loop-shifting." That's the wrong technique for this gap. Worked the math: with
 `Dk = 0` (always true for `DiscreteH2`'s controller assembly, confirmed at
 `lib/DiscreteH2.cpp:225`) and `w[k]` independent of `(x[k], u[k])` (both are functions of *past* w
-only — `Dk=0` means `u[k]` depends only on controller state `xk[k]`, which depends on past `y`'s,
+only - `Dk=0` means `u[k]` depends only on controller state `xk[k]`, which depends on past `y`'s,
 hence past `w`'s, never `w[k]` itself), the cross term
 `E[(C1 x[k] + D12 u[k])' D11 w[k]]` is **exactly zero** for zero-mean white `w`, regardless of the
-controller. Consequence: **`D11` never enters the control or filter Riccati equations** — the
+controller. Consequence: **`D11` never enters the control or filter Riccati equations** - the
 existing `F`/`L` derivation in `lib/DiscreteH2.cpp:170-217` (cross-term-eliminated DARE on
 `(A,B2,C1,D12)` and the dual on `(A,C2,B1,D21)`) is already exactly correct for any `D11`, because
 it was never a function of `D11` to begin with. The only place `D11` matters is the achieved-H2-norm
 bookkeeping: with `z = C1 x + D12 u + D11 w`, `||z||_2^2 = trace(D11 D11') + trace(C_cl Wc C_cl')`
-(a direct feedthrough term adds a constant, controller-independent contribution to the H2 norm —
+(a direct feedthrough term adds a constant, controller-independent contribution to the H2 norm -
 the standard discrete-time result for a system with direct disturbance feedthrough).
 
 **Changes:**
@@ -92,7 +92,7 @@ plants. Keep the `D22 != 0` throw test (`:1294`) unchanged.
 
 ## 4. `MuAnalysis` RealScalar block G-scaling
 
-**Problem:** `lib/MuAnalysis.h:24-29` and `MuAnalysis.cpp:104-107` reject any `RealScalar` block —
+**Problem:** `lib/MuAnalysis.h:24-29` and `MuAnalysis.cpp:104-107` reject any `RealScalar` block -
 G-scaling (Packard & Doyle 1993) isn't implemented.
 
 **Design:** Extend the existing coordinate-descent search in `MuAnalysis.cpp::computeMuOneFreq()`
@@ -103,7 +103,7 @@ implementing:
 mu(M) <= inf_{D,G} sigma_max( (I + G^2)^{-1/2} * (D_L M D_R^{-1} - jG) )
 ```
 where `G` is block-diagonal real, `g_i` placed on every diagonal entry belonging to `RealScalar`
-block `i` (zero elsewhere) — same one-scalar-per-block structure as `D`, so it reuses
+block `i` (zero elsewhere) - same one-scalar-per-block structure as `D`, so it reuses
 `buildScaling`'s block-iteration pattern. Scope (matching the existing `ComplexScalar` caveat
 already in the header docs): exact for `RealScalar` blocks of size 1, a valid-but-possibly-loose
 upper bound for size > 1 (same scalar `g_i` repeated on the block's diagonal, not a full per-entry
@@ -114,7 +114,7 @@ fixed. Remove the `RealScalar` throw in `computeMuOneFreq` (`MuAnalysis.cpp:104-
 
 **Validation target:** a known real-parametric-uncertainty example with an analytically-known mu
 (Skogestad & Postlethwaite-style real-mu example, mirroring the existing complex 2x2 example at
-`test_catch2_advanced.cpp:7769` but with a `RealScalar` structure) — not just a regression check,
+`test_catch2_advanced.cpp:7769` but with a `RealScalar` structure) - not just a regression check,
 since this is new math.
 
 **Doc updates:** `lib/MuAnalysis.h:24-29` scope comment, `bindings/analysis_bindings.cpp:796`'s
@@ -131,7 +131,7 @@ real+complex case to exercise the alternating `d`/`g` sweep.
 wrapper but calls a nonexistent `IController::lastOutput()`, and its trigger condition
 (`e - (y_last_ - ref)`) doesn't typecheck against any real signal convention.
 
-**Design:** New header-only class `lib/EventTriggeredWrapper.h` (no `.cpp` — matches
+**Design:** New header-only class `lib/EventTriggeredWrapper.h` (no `.cpp` - matches
 `ComputationalDelayWrapper.h`'s fully-inline pattern, so **no `lib/CMakeLists.txt` change is
 needed**, only a new `#include` in `lib/ControllerToolbox.h`):
 
@@ -163,7 +163,7 @@ private:
 };
 ```
 
-Trigger rule, convention-agnostic (works whether `signal` is `r-y`, `y-r`, or raw `y` — unlike the
+Trigger rule, convention-agnostic (works whether `signal` is `r-y`, `y-r`, or raw `y` - unlike the
 deep-dive sketch): on the first call, always trigger (no prior reference to compare against). After
 that, if `|signal - signal_last_triggered_| > params_.sigma`, call `inner_->compute(signal)`, store
 the new output in `u_held_` and `signal` in `signal_last_triggered_`, increment `n_triggered_`;
@@ -180,7 +180,7 @@ per the fleet NaN contract, no trigger, no counter change to `n_triggered_`/`n_h
 5. `bindings/controllers_bindings.cpp`: bind alongside `ComputationalDelayWrapper` (`:1620-1643`),
    mirroring its `py::class_<..., IController, shared_ptr<...>>` pattern.
 6. `bindings/smoke_test.py`: add `assert hasattr(ctrl, 'EventTriggeredWrapper')`.
-7. `tests/test_catch2_advanced.cpp`: tests tagged `[event_triggered]` — first-call always triggers;
+7. `tests/test_catch2_advanced.cpp`: tests tagged `[event_triggered]` - first-call always triggers;
    small signal change within deadband holds (counts via `holdCount()`); change exceeding `sigma`
    re-triggers; NaN input holds without affecting counters; `reset()` clears held state and forces
    the next call to trigger again (mirrors the first-call case).
@@ -192,9 +192,9 @@ per the fleet NaN contract, no trigger, no counter change to `n_triggered_`/`n_h
 ## Cross-cutting notes
 
 - None of the five touch `IController`'s base interface.
-- Items 3 and 4 are extensions to existing classes — per this repo's own checklist note
+- Items 3 and 4 are extensions to existing classes - per this repo's own checklist note
   ("extensions to existing classes... only the modified files need updating, not the full 8-step
-  checklist — but Catch2 tests are always required"), no new bindings/examples are needed for
+  checklist - but Catch2 tests are always required"), no new bindings/examples are needed for
   those two; existing bindings for `DiscreteH2`/`MuAnalysis` already expose everything touched.
 - Per established project workflow (confirmed in today's `docs/superpowers/plans/2026-06-26-value-iteration-solver.md`):
   write every file's content first, then one full build + Catch2 + example + smoke-test pass,

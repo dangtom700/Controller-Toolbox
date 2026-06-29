@@ -23,9 +23,12 @@ except (ImportError, AttributeError) as _e:
 
 Ts = 0.1
 
-# Plant: G(s) = 2/(s+1) -> ZOH discretisation.
+# Plant: G(s) = 2/(s+1) + 1 = (s+3)/(s+1) -> ZOH discretisation.
+# Must be biproper (D != 0): a strictly-proper plant ZOH-discretises to a strictly-proper
+# discrete TF (num[0] == 0), whose causal inverse doesn't exist - invert_transfer_function()
+# throws for exactly this case.
 plant_c = ctrl.StateSpace(np.array([[-1.0]]), np.array([[1.0]]),
-                           np.array([[2.0]]), np.array([[0.0]]), 0.0)
+                           np.array([[2.0]]), np.array([[1.0]]), 0.0)
 plant = ctrl.c2d(plant_c, Ts, ctrl.C2dMethod.ZOH)
 G = ctrl.ss2tf(plant)
 print(f"G(z^-1): num={G.num}  den={G.den}")
@@ -42,9 +45,10 @@ r_seq = [1.0, 1.0, 1.0, 2.5, 2.5, -1.0, -1.0, 0.0, 3.0, 3.0]
 ok = True
 for r in r_seq:
     u_ff = ff.compute(r)
-    y, x_plant = ctrl.ss_step_copy(plant, x_plant, np.array([u_ff]))
-    print(f"  r={r:.4f}  u_ff={u_ff:.6f}  y={float(y):.6f}")
-    ok = ok and np.isfinite(y) and abs(float(y) - r) < 1e-6
+    y_arr, x_plant = ctrl.ss_step_copy(plant, x_plant, np.array([u_ff]))
+    y = float(y_arr[0])
+    print(f"  r={r:.4f}  u_ff={u_ff:.6f}  y={y:.6f}")
+    ok = ok and np.isfinite(y) and abs(y - r) < 1e-6
 
 print("[PASS]" if ok else "[FAIL]")
 sys.exit(0 if ok else 1)

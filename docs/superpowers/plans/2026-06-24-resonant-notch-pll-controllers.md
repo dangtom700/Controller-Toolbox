@@ -2,21 +2,21 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add three new `lib/` classes from `docs/algorithm_backlog.md`'s "Additional Controller Types" category — `ResonantController`, `NotchFilter`, `PhaseLockedLoop` — each fully wired (build, Python bindings, smoke test, example, Catch2 tests), per the approved design at `docs/superpowers/specs/2026-06-24-resonant-notch-pll-controllers-design.md`.
+**Goal:** Add three new `lib/` classes from `docs/algorithm_backlog.md`'s "Additional Controller Types" category - `ResonantController`, `NotchFilter`, `PhaseLockedLoop` - each fully wired (build, Python bindings, smoke test, example, Catch2 tests), per the approved design at `docs/superpowers/specs/2026-06-24-resonant-notch-pll-controllers-design.md`.
 
-**Architecture:** `ResonantController` implements `IController` (a Tustin-discretized, prewarped biquad) and composes through the existing `ControllerStack(Additive)` mode. `NotchFilter` and `PhaseLockedLoop` are standalone classes (no shared base) — a fixed-design biquad filter and a single-input SOGI-PLL estimator, respectively. All three are scalar-only (no Eigen dependency in their own math).
+**Architecture:** `ResonantController` implements `IController` (a Tustin-discretized, prewarped biquad) and composes through the existing `ControllerStack(Additive)` mode. `NotchFilter` and `PhaseLockedLoop` are standalone classes (no shared base) - a fixed-design biquad filter and a single-input SOGI-PLL estimator, respectively. All three are scalar-only (no Eigen dependency in their own math).
 
 **Tech Stack:** C++20, Eigen (transitively via `IController`/project headers, not used directly in these classes' own math), pybind11, Catch2 v3, CMake.
 
 ## Global Constraints
 
-- NaN-guard hold-last contract: every `compute()`/`apply()`/`step()` must check `!std::isfinite(input)` as its first action and return/skip without mutating state (`[Ref: CONTRIBUTING.md#numerical-safety-rules, rule 7]`). Note: despite rule 7's text, there is no `ctrl::sanitize()` helper in `lib/IController.h` — the actual codebase convention (e.g. `lib/DiscreteLeadLag.cpp`) is an early `return` of the last-held value; follow that, not the rule's literal wording.
+- NaN-guard hold-last contract: every `compute()`/`apply()`/`step()` must check `!std::isfinite(input)` as its first action and return/skip without mutating state (`[Ref: CONTRIBUTING.md#numerical-safety-rules, rule 7]`). Note: despite rule 7's text, there is no `ctrl::sanitize()` helper in `lib/IController.h` - the actual codebase convention (e.g. `lib/DiscreteLeadLag.cpp`) is an early `return` of the last-held value; follow that, not the rule's literal wording.
 - Zero-allocation in the hot path: no `std::vector::push_back`, no STL streams, no `std::cout`/`cerr` inside `compute()`/`apply()`/`step()` (`[Ref: CLAUDE.md section 7]`).
 - New `IController` subclasses must be bound in Python as `std::shared_ptr<T>` + `ctrl::IController` base (`[Ref: CLAUDE.md section 6, bindings/controllers_bindings.cpp:47-48]`), or `ControllerStack.add_controller()` throws at runtime.
 - Self-registration: every new header ends with `CTRL_REGISTER_FEATURE(name)` (`[Ref: lib/ControllerRegistry.h]`); requires `#include "Features.h"`.
 - Construction-time validation throws `std::invalid_argument` for non-physical parameters (`<= 0` frequencies/gains, target at/above Nyquist `1/(2*Ts)`).
-- `compile.bat`/`compile.sh` example-target lists are hand-maintained — every new example must be added to both (`[Ref: CLAUDE.md section 2]`).
-- All math in this plan has been numerically verified in a throwaway scratch build before being written here; the constants below (Kp/Ki, Kr, wc, Q, etc.) are not arbitrary — see each task's derivation note.
+- `compile.bat`/`compile.sh` example-target lists are hand-maintained - every new example must be added to both (`[Ref: CLAUDE.md section 2]`).
+- All math in this plan has been numerically verified in a throwaway scratch build before being written here; the constants below (Kp/Ki, Kr, wc, Q, etc.) are not arbitrary - see each task's derivation note.
 
 ---
 
@@ -356,7 +356,7 @@ TEST_CASE("ResonantController reports TrackingErrorRMinusY as its sign conventio
 }
 ```
 
-Also add `#include "ResonantController.h"` to the include block near the top of `tests/test_catch2_advanced.cpp` (after line 56, the `FreqDomainIdentifier.h` include) — though `ControllerToolbox.h` (already included at line 24) now pulls it in transitively via Step 4, so this is optional; add it anyway for explicitness, matching how other recently-added classes (`FreqDomainIdentifier.h` at line 56) are listed individually despite the umbrella include.
+Also add `#include "ResonantController.h"` to the include block near the top of `tests/test_catch2_advanced.cpp` (after line 56, the `FreqDomainIdentifier.h` include) - though `ControllerToolbox.h` (already included at line 24) now pulls it in transitively via Step 4, so this is optional; add it anyway for explicitness, matching how other recently-added classes (`FreqDomainIdentifier.h` at line 56) are listed individually despite the umbrella include.
 
 - [ ] **Step 6: Configure and build the test target**
 
@@ -366,7 +366,7 @@ Expected: clean compile (no errors). If `ResonantController.cpp`/`.h` have a typ
 - [ ] **Step 7: Run the new tests and verify they pass**
 
 Run: `build/tests/test_catch2_advanced.exe [resonant_controller]`
-Expected: `All tests passed (N assertions in 6 test cases)` — all 6 `TEST_CASE`s from Step 5 green.
+Expected: `All tests passed (N assertions in 6 test cases)` - all 6 `TEST_CASE`s from Step 5 green.
 
 - [ ] **Step 8: Commit**
 
@@ -555,7 +555,7 @@ int main()
 }
 ```
 
-This has been verified numerically in a scratch build: `ripplePidOnly ≈ 0.0282`, `rippleWithRC ≈ 0.0065` (ratio ≈ 0.23 at the originally-tried `Kr=50`; the `Kr=200` used here measured ratio ≈ 0.065), both comfortably under the `0.3` threshold.
+This has been verified numerically in a scratch build: `ripplePidOnly approx = 0.0282`, `rippleWithRC approx = 0.0065` (ratio approx = 0.23 at the originally-tried `Kr=50`; the `Kr=200` used here measured ratio approx = 0.065), both comfortably under the `0.3` threshold.
 
 - [ ] **Step 5: Wire the example into `examples/CMakeLists.txt`**
 
@@ -610,7 +610,7 @@ git commit -m "Wire ResonantController into Python bindings, smoke test, and ex8
 - Test: `tests/test_catch2_advanced.cpp` (append new `TEST_CASE`s, tag `[notch_filter]`)
 
 **Interfaces:**
-- Consumes: `CTRL_REGISTER_FEATURE` (`lib/Features.h`) — no `IController` dependency
+- Consumes: `CTRL_REGISTER_FEATURE` (`lib/Features.h`) - no `IController` dependency
 - Produces: `struct ctrl::NotchFilterParams { double centerFreqHz; double Q; }`; `class ctrl::NotchFilter` (standalone) with constructor `NotchFilter(const NotchFilterParams&, double Ts)`, `double apply(double x)`, `void reset()`, `void setParams(const NotchFilterParams&)`, `const NotchFilterParams& params() const`.
 
 - [ ] **Step 1: Write `lib/NotchFilter.h`**
@@ -881,7 +881,7 @@ Expected: clean compile.
 - [ ] **Step 7: Run the new tests and verify they pass**
 
 Run: `build/tests/test_catch2_advanced.exe [notch_filter]`
-Expected: all 5 test cases pass. (Numerically verified in scratch: at-center peak ≈ `1.01e-4`, far-from-center peak ≈ `0.999`.)
+Expected: all 5 test cases pass. (Numerically verified in scratch: at-center peak approx = `1.01e-4`, far-from-center peak approx = `0.999`.)
 
 - [ ] **Step 8: Commit**
 
@@ -1019,7 +1019,7 @@ int main()
 }
 ```
 
-(Numerically verified in scratch: `peakAtResonance ≈ 1.01e-4`, `peakFarFromResonance ≈ 0.999`.)
+(Numerically verified in scratch: `peakAtResonance approx = 1.01e-4`, `peakFarFromResonance approx = 0.999`.)
 
 - [ ] **Step 5: Wire the example into `examples/CMakeLists.txt`**
 
@@ -1060,10 +1060,10 @@ git commit -m "Wire NotchFilter into Python bindings, smoke test, and ex90"
 - Test: `tests/test_catch2_advanced.cpp` (append new `TEST_CASE`s, tag `[pll]`)
 
 **Interfaces:**
-- Consumes: `CTRL_REGISTER_FEATURE` (`lib/Features.h`) — no `IController` dependency
+- Consumes: `CTRL_REGISTER_FEATURE` (`lib/Features.h`) - no `IController` dependency
 - Produces: `struct ctrl::PLLParams { double nominalFreqHz; double Kp; double Ki; double sogiK=1.41421356; }`; `class ctrl::PhaseLockedLoop` (standalone) with constructor `PhaseLockedLoop(const PLLParams&, double Ts)`, `void step(double sample)`, `double phase() const`, `double frequencyHz() const`, `double amplitude() const`, `bool locked() const`, `void reset()`, `const PLLParams& params() const`.
 
-**Derivation note (read before implementing):** the SOGI quadrature generator's states settle to `x1 ≈ A*sin(theta_true)`, `x2 ≈ A*cos(theta_true)` in steady state (verified numerically — *not* `x1≈A*cos`, `x2≈-A*sin` as a naive phasor derivation might suggest). The Park-transform error signal that correctly drives `theta_hat -> theta_true` with the right feedback sign is `v_q = x1*cos(theta_hat) - x2*sin(theta_hat)` (`= A*sin(theta_true - theta_hat)`, vanishing at lock), fed *directly* (no extra negation) into a positive-gain PI loop filter. Getting either the `x1`/`x2` roles or the sign of `v_q` wrong still produces a PLL that "locks" (small `v_q`) but at a phase offset by roughly 90 degrees from the true phase — the bug is silent unless you check the phase value itself, not just `locked()`. The code below has already had this bug found and fixed.
+**Derivation note (read before implementing):** the SOGI quadrature generator's states settle to `x1 approx = A*sin(theta_true)`, `x2 approx = A*cos(theta_true)` in steady state (verified numerically - *not* `x1approx =A*cos`, `x2approx =-A*sin` as a naive phasor derivation might suggest). The Park-transform error signal that correctly drives `theta_hat -> theta_true` with the right feedback sign is `v_q = x1*cos(theta_hat) - x2*sin(theta_hat)` (`= A*sin(theta_true - theta_hat)`, vanishing at lock), fed *directly* (no extra negation) into a positive-gain PI loop filter. Getting either the `x1`/`x2` roles or the sign of `v_q` wrong still produces a PLL that "locks" (small `v_q`) but at a phase offset by roughly 90 degrees from the true phase - the bug is silent unless you check the phase value itself, not just `locked()`. The code below has already had this bug found and fixed.
 
 - [ ] **Step 1: Write `lib/PhaseLockedLoop.h`**
 
@@ -1360,7 +1360,7 @@ Expected: clean compile.
 - [ ] **Step 7: Run the new tests and verify they pass**
 
 Run: `build/tests/test_catch2_advanced.exe [pll]`
-Expected: all 5 test cases pass. (Numerically verified in scratch: basic-lock freq diff ≈ `0.027 Hz`, phase diff ≈ `0.025 rad`; freq-step final freq ≈ `53.13 Hz`.)
+Expected: all 5 test cases pass. (Numerically verified in scratch: basic-lock freq diff approx = `0.027 Hz`, phase diff approx = `0.025 rad`; freq-step final freq approx = `53.13 Hz`.)
 
 - [ ] **Step 8: Commit**
 
@@ -1490,7 +1490,7 @@ int main()
 }
 ```
 
-(Numerically verified in scratch: final frequency estimate ≈ `53.13 Hz`.)
+(Numerically verified in scratch: final frequency estimate approx = `53.13 Hz`.)
 
 - [ ] **Step 5: Wire the example into `examples/CMakeLists.txt`**
 
@@ -1528,5 +1528,5 @@ git commit -m "Wire PhaseLockedLoop into Python bindings, smoke test, and ex91"
 
 ## Notes for the implementer
 
-- All three classes' core math (biquad coefficients, lock dynamics, the disturbance-rejection demo's effectiveness) were verified in a throwaway scratch C++ build before this plan was written — not just derived on paper. Two real bugs were caught this way: a Park-transform sign/state-pairing error in the PLL (documented in Task 5's derivation note) and a measurement-vs-process disturbance modeling error in the ex89 scenario (a sensor-point disturbance cannot be rejected by any controller — it must enter at the plant input to be a meaningful demo of resonant rejection). If a test in this plan fails after a correct transcription of the code above, suspect a transcription error first, then re-derive from the header's documented formula — not the test's expected numbers, which are real measured values, not guesses.
-- Update `docs/algorithm_backlog.md`'s "Additional Controller Types" table is *not* part of this plan's scope — that's a docs-tracking decision for whoever closes out the backlog item, likely after this lands.
+- All three classes' core math (biquad coefficients, lock dynamics, the disturbance-rejection demo's effectiveness) were verified in a throwaway scratch C++ build before this plan was written - not just derived on paper. Two real bugs were caught this way: a Park-transform sign/state-pairing error in the PLL (documented in Task 5's derivation note) and a measurement-vs-process disturbance modeling error in the ex89 scenario (a sensor-point disturbance cannot be rejected by any controller - it must enter at the plant input to be a meaningful demo of resonant rejection). If a test in this plan fails after a correct transcription of the code above, suspect a transcription error first, then re-derive from the header's documented formula - not the test's expected numbers, which are real measured values, not guesses.
+- Update `docs/algorithm_backlog.md`'s "Additional Controller Types" table is *not* part of this plan's scope - that's a docs-tracking decision for whoever closes out the backlog item, likely after this lands.

@@ -108,15 +108,15 @@ watchdog that resets the filter if max(|residual|) > threshold for more than K c
 
 | Parameter | Constraint | Note |
 |-----------|-----------|------|
-| `a_m` | `|a_m| < 1` | Reference model stability — constructor throws if violated |
+| `a_m` | `|a_m| < 1` | Reference model stability - constructor throws if violated |
 | `gamma_r`, `gamma_y` | Same sign as plant input gain b_p | Positive for positive-gain plants; negate both for negative-gain |
-| `sigma` | `>= 0`; typical 0.005–0.05 | 0 disables σ-modification (parameter drift risk under constant reference) |
-| `theta_max` | `> 0` | Projection bound — prevents finite-escape under large disturbances |
+| `sigma` | `>= 0`; typical 0.005-0.05 | 0 disables sigma-modification (parameter drift risk under constant reference) |
+| `theta_max` | `> 0` | Projection bound - prevents finite-escape under large disturbances |
 | `uMin / uMax` | `uMin < uMax` | Output saturation |
 
-**Stability note:** σ-modification provides bounded-input-bounded-output (BIIBO) stability for bounded disturbances. Without σ (sigma=0), persistent excitation (PE) of the reference is required to prevent parameter drift.
+**Stability note:** sigma-modification provides bounded-input-bounded-output (BIIBO) stability for bounded disturbances. Without sigma (sigma=0), persistent excitation (PE) of the reference is required to prevent parameter drift.
 
-**Real-time:** `compute()` is O(1) — one inner product, one scalar division, and a norm check. No heap allocation.
+**Real-time:** `compute()` is O(1) - one inner product, one scalar division, and a norm check. No heap allocation.
 
 ---
 
@@ -124,15 +124,15 @@ watchdog that resets the filter if max(|residual|) > threshold for more than K c
 
 | Requirement | Constraint | Consequence if violated |
 |-------------|-----------|------------------------|
-| `setState(x)` called before `compute()` | State must be current | Controller uses stale state → wrong inversion of f(x) and g(x) |
+| `setState(x)` called before `compute()` | State must be current | Controller uses stale state -> wrong inversion of f(x) and g(x) |
 | `|g(x)| >= regularisationEps` | g must be non-zero in operating region | Division by zero; clamped to regularisationEps with sign preserved |
-| Relative degree 1 | u must appear in ẏ directly | Higher relative degree: cascade the FL with additional integrators |
+| Relative degree 1 | u must appear in ydot directly | Higher relative degree: cascade the FL with additional integrators |
 | Minimum-phase zeros | All zeros of the effective plant must be inside unit circle | Internal states grow unboundedly even when y tracks the reference |
 
 **Inner controller tuning for relative degree 2:**
-When the output y has relative degree 2 (u appears in ÿ, not ẏ), the inner controller drives a virtual double integrator. Use characteristic polynomial `(s+a)(s²+bs+c)` for the desired poles. Example: poles {−1, −2±j} → Kp=9, Ki=5, Kd=5.
+When the output y has relative degree 2 (u appears in y, not ydot), the inner controller drives a virtual double integrator. Use characteristic polynomial `(s+a)(s^2+bs+c)` for the desired poles. Example: poles {-1, -2+/-j} -> Kp=9, Ki=5, Kd=5.
 
-**Real-time:** `compute()` calls the two user functors f_ and g_ plus the inner controller's `compute()`. No matrix operations for SISO — suitable for embedded targets.
+**Real-time:** `compute()` calls the two user functors f_ and g_ plus the inner controller's `compute()`. No matrix operations for SISO - suitable for embedded targets.
 
 ---
 
@@ -141,10 +141,10 @@ When the output y has relative degree 2 (u appears in ÿ, not ẏ), the inner co
 | Parameter | Constraint |
 |-----------|-----------|
 | `sys` | Must be strictly stable (`isDiscreteStable(sys) == true`) |
-| `r` | `1 ≤ r < n = sys.stateSize()` |
+| `r` | `1 <= r < n = sys.stateSize()` |
 | Gramian conditioning | `Pc` must be positive definite; throws if Cholesky fails (near-uncontrollable modes) |
 
-**Usage pattern:** `balancedTruncate` is an offline design tool — call it once before the control loop. The reduced model is then used for controller design (LQR, MPC, H∞). Do not call `balancedTruncate` inside a real-time loop.
+**Usage pattern:** `balancedTruncate` is an offline design tool - call it once before the control loop. The reduced model is then used for controller design (LQR, MPC, Hinf). Do not call `balancedTruncate` inside a real-time loop.
 
 **Cholesky failure remedy:** If Pc is near-singular, add a small regularisation before calling:
 ```cpp
@@ -179,7 +179,7 @@ Or pass a regularised system: `sys_reg.A = sys.A; sys_reg.B = sys.B * (1 + 1e-8)
 | `qpMaxIter` | `>= 10`; typical: 50-100 | QP iteration limit per step |
 | `P0` (in `initialize`) | Symmetric, PD | Arrival cost weight for initial state uncertainty |
 
-**Real-time latency:** MHE solve time scales as O(N^2 * n^2) for the condensed QP Hessian build plus O(qpMaxIter * N * n) for the projected gradient iterations. For `N=10, n=2`, expect ~20 µs per step on a 3 GHz core. Budget at least 3x for jitter.
+**Real-time latency:** MHE solve time scales as O(N^2 * n^2) for the condensed QP Hessian build plus O(qpMaxIter * N * n) for the projected gradient iterations. For `N=10, n=2`, expect ~20 mus per step on a 3 GHz core. Budget at least 3x for jitter.
 
 **Zero-allocation note:** `GradientProjectionQP` pre-allocates all work vectors at construction. No heap allocation occurs inside `estimate()` after `initialize()` is called.
 
@@ -198,7 +198,7 @@ Or pass a regularised system: `sys_reg.A = sys.A; sys_reg.B = sys.B * (1 + 1e-8)
 ```cpp
 ADRCParams p;
 p.omega_o = 40.0;  // 40 * 0.01 = 0.40 < 0.5 (check)
-p.omega_c =  8.0;  // < 40/3 ≈ 13 (check)
+p.omega_c =  8.0;  // < 40/3 approx = 13 (check)
 p.b0      = 1.0;
 ```
 
@@ -500,7 +500,7 @@ if (rms > 5.0 * sqrt(R_noise(0,0))) {
 Practically, keep `omega_o * Ts <= 0.4` for a comfortable margin.
 
 **Rule of thumb:** Target `omega_o = 5 * omega_c`; ensure `omega_o * Ts < 0.5`. For `Ts=0.01 s`
-and desired bandwidth `omega_c = 8 rad/s`: `omega_o = 40 rad/s` → `omega_o * Ts = 0.40` (check).
+and desired bandwidth `omega_c = 8 rad/s`: `omega_o = 40 rad/s` -> `omega_o * Ts = 0.40` (check).
 
 ---
 

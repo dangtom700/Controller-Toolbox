@@ -123,7 +123,7 @@ work only -- see Section 6)
 | `CBFSafetyFilter` | CBFSafetyFilter.h | 1D analytical QP safety wrapper |
 | `GaussianProcess` | GaussianProcess.h | SE kernel + Cholesky; fixed-budget FIFO eviction |
 | `EchoStateNetwork` | EchoStateNetwork.h | `reset()` preserves `W_out_` / `fitted_` |
-| `NeuralPID` | NeuralPID.h | 3→n_h→3 online backprop; softplus gains; numerically-stable two-branch softplus (Part 61 fix) |
+| `NeuralPID` | NeuralPID.h | 3->n_h->3 online backprop; softplus gains; numerically-stable two-branch softplus (Part 61 fix) |
 | `CEMController` | CEMController.h | Elite-sample stochastic MPC; `computeRef(x, y_ref)` |
 | `DynaController` | DynaController.h | Sutton Dyna MBRL; `modelRollout(e0, u_seq)` |
 | `ScenarioMPC` | ScenarioMPC.h | N_s-scenario noise-averaged QP; H constant per episode |
@@ -172,102 +172,102 @@ work only -- see Section 6)
 
 ```
 Controller Toolbox/
-├── lib/                      Core library: 84 headers + 59 .cpp, FLAT (no lib/control/
-│   │                          or lib/estimation/ subdirectories -- one file per class)
-│   ├── ControllerToolbox.h   Umbrella include
-│   ├── IController.h         Abstract base (virtual name() + notifyObserverState())
-│   ├── IControllerObserver.h Observer (virtual onState(key, vec) since Part 33)
-│   ├── Features.h            Delegates to ControllerRegistry::all() (Part 33)
-│   ├── ControllerRegistry.h  Meyers-singleton self-registration (Part 33)
-│   ├── ControllerRegistrations.h  Pre-M2 centralized entries (include LAST in umbrella)
-│   ├── ControllerMonitor.h   CUSUM + EWMA SPC observer (Part 33)
-│   ├── ComputationalDelayWrapper.h  One-sample delay decorator (Part 34)
-│   ├── GradientProjectionQP.h FISTA (header-only)
-│   ├── embedded/              BasicPID, BasicSMC, DiscreteIntegrator, FixedRateFilter, RingBuffer
-│   └── hal/                  HAL: SimScheduler, FreeRTOS/Zephyr stubs
-├── bindings/                 pybind11 C++ + smoke_test.py
-│   ├── module.cpp            PYBIND11_MODULE entry point; flat `ctrl_toolbox` module (no submodules)
-│   ├── plantmodel_bindings.cpp / controllers_bindings.cpp / estimation_bindings.cpp
-│   ├── advanced_bindings.cpp / analysis_bindings.cpp
-│   └── smoke_test.py
-├── tests/                    Catch2 + standalone test programs: 332 TEST_CASE() across 16 files
-│   ├── test_catch2_advanced.cpp   (main suite, 236 cases)
-│   ├── test_stability_margins.cpp, test_catch2_pilot.cpp, test_autoscheduling.cpp,
-│   │   test_humidification.cpp, test_embedded_subset.cpp
-│   └── test_{boiler,buck_boost,humid,smismo,solar,solar_cooker,sotec,stewart,susp,tugsim}_regression.cpp
-├── examples/                 86 C++ examples (ex01-ex82, some numbers reused across feature batches)
-│   └── python/               110 Python examples (ex01-ex102+, same reuse pattern)
-├── scripts/                  tune_all.cpp / simulate_all.cpp / realtime_all.cpp (generic example-plant
-│   │                          benchmarking, NOT case studies) + create_controller.py, deploy.py,
-│   │                          fix_examples_bindings.py, generate_test_data.py, visualize.py
-├── benchmark/                bench_controllers.cpp -- per-step latency microbenchmark for every
-│   │                          controller; opt-in via -DCTRL_BUILD_BENCHMARKS=ON, off by default
-├── cheatsheet/                Reference notes: controller_list.md, controller_categories.md,
-│   │                          controller-tuning-reference.md, tuning_methods.md,
-│   │                          control_design_pipeline.md, system_identification.md (+ armax.md/
-│   │                          fopdt.md/n4sid.md subfolder), advanced_model_estimation.md,
-│   │                          embedded_and_realtime.md, mismatch_detection.md, model_evaluation.md,
-│   │                          phase2_hybrid_modeling.md
-├── tools/
-│   ├── new_case_study.py        scaffolds a case-study framework (C++ or Python) from a source PDF
-│   ├── case_study_tracker.py    scans case-study/*/ (skips case-study/common/, Part 66); writes
-│   │                             docs/case_study_status.md (TRK-1, Part 62 rewrite)
-│   ├── metrics.py / compare_controllers.py / monte_carlo.py / mc_plots.py
-│   ├── fault_injector.py / fault_sweep.py / fault_plots.py
-│   ├── anova.py / wcet_report.py / model_validation.py / mu_analysis.py / mu_plots.py
-│   ├── generate_report.py       self-contained HTML report per study (RPT-1)
-│   ├── generate_all_reports.bat drives run_analysis.py + generate_report.py across every
-│   │                             case-study/*/ with a logs/ dir, then refreshes case_study_tracker.py;
-│   │                             logs to tools/generate_all_reports.log (gitignored)
-│   └── study_protocol.py        documentation-as-code: the run_single/run_with_fault/grey_box_model
-│                                  hook contract every Python case study's sim/main.py must honour
-├── case-study/               31 directories total -- status is AUTO-TRACKED, do not hand-list here.
-│   │                          common/RobustnessStats.h (Part 64): header-only FaultSpec/MetricStats
-│   │                          shared by every C++ study's robustness_main.cpp; not a case study
-│   │                          itself (excluded from the tracker, see tools/case_study_tracker.py above).
-│   │                          See docs/case_study_status.md (regenerate: `python tools/case_study_tracker.py`).
-│   │                          4-tier status: Complete / On-going / Open placeholder / Not started.
-│   │                          As of Part 66: 18 official-roster studies (10 C++ + 8 Python-only, all
-│   │                          reflected in CLAUDE.md's/README's roster tables), of which all 10 C++
-│   │                          studies now show as Complete (gained fault_sweep/mc_summary/wcet_summary
-│   │                          coverage Part 64+66 -- see Section 1); the 8 Python-only studies remain
-│   │                          On-going. 7 Open placeholder (scaffolded by tools/new_case_study.py,
-│   │                          never implemented), 6 Not started (PDF/README only). Full roster +
-│   │                          tribal knowledge per study: CLAUDE.md "Case Studies" section and each
-│   │                          study's own README.md.
-├── docs/
-│   ├── PROJECT_MASTER_STATE.md       <- this file
-│   ├── compact_bug_report_parts_1-25.md   (archived: Parts 1-25 tribal knowledge)
-│   ├── compact_bug_report_parts_26-50.md  (archived: Parts 26-44 tribal knowledge)
-│   ├── cumulative_bug_report.md      (Part 51+ active issues)
-│   ├── ALGORITHM_ROADMAP_PHASE2.md   (Phase 2 implementation plan: E1-E4, H1-H4, D1-D2)
-│   ├── DOCUMENTATION.md              (API reference)
-│   ├── deployment.md                 (RT/RTOS integration, troubleshooting)
-│   ├── control_strategies_deep_dive.md
-│   ├── case_study_status.md          (auto-generated case-study status tracker, 4-tier as of Part 62)
-│   └── archived/                     audit_report.md, roadmap_deployment_frontend.md, test_update.md
-│                                      -- moved here from docs/ root; CLAUDE.md's "Done in Part 57/57B"
-│                                      narrative entries still cite the pre-move docs/ path, which was
-│                                      correct AT THE TIME (historical journal, not re-edited).
-├── prompt/                   Task-specific prompt TEMPLATES (not session history -- prompt_enhanced.txt
-│   │                          was removed Part 62, decluttering; it is not coming back):
-│   ├── make_case_study_cpp.md      step-by-step: PDF -> production C++ case study
-│   ├── make_case_study_python.md   step-by-step: PDF -> production Python-only case study
-│   ├── audit_project.md            structural-audit persona/procedure
-│   ├── project_enrichment.md       strategic-advisor persona for library evolution questions
-│   ├── fresh_restart.md            "case-study co-pilot" onboarding persona (NOTE: its directory-
-│   │                                layout assumptions, e.g. lib/control/, are WRONG for this repo --
-│   │                                see docs/case_study_copilot_reference.md for the corrected version)
-│   └── handoff_prompt61.md         most recent dated session handoff (supersedes earlier handoffs)
-├── ros2/ctrl_toolbox_ros2/           ROS 2 Humble ament_cmake package (DIST-3, Part 60)
-│   ├── include/ctrl_toolbox_ros2/controller_node.hpp   ControllerNode<T> lifecycle node template
-│   ├── example/pid_temperature_node.cpp
-│   └── CMakeLists.txt + package.xml + README.md
-├── run.py                            Master build + test runner (7 phases, cross-platform Part 60)
-├── compile.bat / compile.sh          Windows / Linux-macOS sequential build
-├── setup.ps1 / setup.sh              Windows / Linux-macOS bootstrap
-├── CMakeLists.txt
-└── CLAUDE.md                         Session guide (law of the project)
+|-- lib/                      Core library: 84 headers + 59 .cpp, FLAT (no lib/control/
+|   |                          or lib/estimation/ subdirectories -- one file per class)
+|   |-- ControllerToolbox.h   Umbrella include
+|   |-- IController.h         Abstract base (virtual name() + notifyObserverState())
+|   |-- IControllerObserver.h Observer (virtual onState(key, vec) since Part 33)
+|   |-- Features.h            Delegates to ControllerRegistry::all() (Part 33)
+|   |-- ControllerRegistry.h  Meyers-singleton self-registration (Part 33)
+|   |-- ControllerRegistrations.h  Pre-M2 centralized entries (include LAST in umbrella)
+|   |-- ControllerMonitor.h   CUSUM + EWMA SPC observer (Part 33)
+|   |-- ComputationalDelayWrapper.h  One-sample delay decorator (Part 34)
+|   |-- GradientProjectionQP.h FISTA (header-only)
+|   |-- embedded/              BasicPID, BasicSMC, DiscreteIntegrator, FixedRateFilter, RingBuffer
+|   |-- hal/                  HAL: SimScheduler, FreeRTOS/Zephyr stubs
+|-- bindings/                 pybind11 C++ + smoke_test.py
+|   |-- module.cpp            PYBIND11_MODULE entry point; flat `ctrl_toolbox` module (no submodules)
+|   |-- plantmodel_bindings.cpp / controllers_bindings.cpp / estimation_bindings.cpp
+|   |-- advanced_bindings.cpp / analysis_bindings.cpp
+|   |-- smoke_test.py
+|-- tests/                    Catch2 + standalone test programs: 332 TEST_CASE() across 16 files
+|   |-- test_catch2_advanced.cpp   (main suite, 236 cases)
+|   |-- test_stability_margins.cpp, test_catch2_pilot.cpp, test_autoscheduling.cpp,
+|   |   test_humidification.cpp, test_embedded_subset.cpp
+|   |-- test_{boiler,buck_boost,humid,smismo,solar,solar_cooker,sotec,stewart,susp,tugsim}_regression.cpp
+|-- examples/                 86 C++ examples (ex01-ex82, some numbers reused across feature batches)
+|   |-- python/               110 Python examples (ex01-ex102+, same reuse pattern)
+|-- scripts/                  tune_all.cpp / simulate_all.cpp / realtime_all.cpp (generic example-plant
+|   |                          benchmarking, NOT case studies) + create_controller.py, deploy.py,
+|   |                          fix_examples_bindings.py, generate_test_data.py, visualize.py
+|-- benchmark/                bench_controllers.cpp -- per-step latency microbenchmark for every
+|   |                          controller; opt-in via -DCTRL_BUILD_BENCHMARKS=ON, off by default
+|-- cheatsheet/                Reference notes: controller_list.md, controller_categories.md,
+|   |                          controller-tuning-reference.md, tuning_methods.md,
+|   |                          control_design_pipeline.md, system_identification.md (+ armax.md/
+|   |                          fopdt.md/n4sid.md subfolder), advanced_model_estimation.md,
+|   |                          embedded_and_realtime.md, mismatch_detection.md, model_evaluation.md,
+|   |                          phase2_hybrid_modeling.md
+|-- tools/
+|   |-- new_case_study.py        scaffolds a case-study framework (C++ or Python) from a source PDF
+|   |-- case_study_tracker.py    scans case-study/*/ (skips case-study/common/, Part 66); writes
+|   |                             docs/case_study_status.md (TRK-1, Part 62 rewrite)
+|   |-- metrics.py / compare_controllers.py / monte_carlo.py / mc_plots.py
+|   |-- fault_injector.py / fault_sweep.py / fault_plots.py
+|   |-- anova.py / wcet_report.py / model_validation.py / mu_analysis.py / mu_plots.py
+|   |-- generate_report.py       self-contained HTML report per study (RPT-1)
+|   |-- generate_all_reports.bat drives run_analysis.py + generate_report.py across every
+|   |                             case-study/*/ with a logs/ dir, then refreshes case_study_tracker.py;
+|   |                             logs to tools/generate_all_reports.log (gitignored)
+|   |-- study_protocol.py        documentation-as-code: the run_single/run_with_fault/grey_box_model
+|                                  hook contract every Python case study's sim/main.py must honour
+|-- case-study/               31 directories total -- status is AUTO-TRACKED, do not hand-list here.
+|   |                          common/RobustnessStats.h (Part 64): header-only FaultSpec/MetricStats
+|   |                          shared by every C++ study's robustness_main.cpp; not a case study
+|   |                          itself (excluded from the tracker, see tools/case_study_tracker.py above).
+|   |                          See docs/case_study_status.md (regenerate: `python tools/case_study_tracker.py`).
+|   |                          4-tier status: Complete / On-going / Open placeholder / Not started.
+|   |                          As of Part 66: 18 official-roster studies (10 C++ + 8 Python-only, all
+|   |                          reflected in CLAUDE.md's/README's roster tables), of which all 10 C++
+|   |                          studies now show as Complete (gained fault_sweep/mc_summary/wcet_summary
+|   |                          coverage Part 64+66 -- see Section 1); the 8 Python-only studies remain
+|   |                          On-going. 7 Open placeholder (scaffolded by tools/new_case_study.py,
+|   |                          never implemented), 6 Not started (PDF/README only). Full roster +
+|   |                          tribal knowledge per study: CLAUDE.md "Case Studies" section and each
+|   |                          study's own README.md.
+|-- docs/
+|   |-- PROJECT_MASTER_STATE.md       <- this file
+|   |-- compact_bug_report_parts_1-25.md   (archived: Parts 1-25 tribal knowledge)
+|   |-- compact_bug_report_parts_26-50.md  (archived: Parts 26-44 tribal knowledge)
+|   |-- cumulative_bug_report.md      (Part 51+ active issues)
+|   |-- ALGORITHM_ROADMAP_PHASE2.md   (Phase 2 implementation plan: E1-E4, H1-H4, D1-D2)
+|   |-- DOCUMENTATION.md              (API reference)
+|   |-- deployment.md                 (RT/RTOS integration, troubleshooting)
+|   |-- control_strategies_deep_dive.md
+|   |-- case_study_status.md          (auto-generated case-study status tracker, 4-tier as of Part 62)
+|   |-- archived/                     audit_report.md, roadmap_deployment_frontend.md, test_update.md
+|                                      -- moved here from docs/ root; CLAUDE.md's "Done in Part 57/57B"
+|                                      narrative entries still cite the pre-move docs/ path, which was
+|                                      correct AT THE TIME (historical journal, not re-edited).
+|-- prompt/                   Task-specific prompt TEMPLATES (not session history -- prompt_enhanced.txt
+|   |                          was removed Part 62, decluttering; it is not coming back):
+|   |-- make_case_study_cpp.md      step-by-step: PDF -> production C++ case study
+|   |-- make_case_study_python.md   step-by-step: PDF -> production Python-only case study
+|   |-- audit_project.md            structural-audit persona/procedure
+|   |-- project_enrichment.md       strategic-advisor persona for library evolution questions
+|   |-- fresh_restart.md            "case-study co-pilot" onboarding persona (NOTE: its directory-
+|   |                                layout assumptions, e.g. lib/control/, are WRONG for this repo --
+|   |                                see docs/case_study_copilot_reference.md for the corrected version)
+|   |-- handoff_prompt61.md         most recent dated session handoff (supersedes earlier handoffs)
+|-- ros2/ctrl_toolbox_ros2/           ROS 2 Humble ament_cmake package (DIST-3, Part 60)
+|   |-- include/ctrl_toolbox_ros2/controller_node.hpp   ControllerNode<T> lifecycle node template
+|   |-- example/pid_temperature_node.cpp
+|   |-- CMakeLists.txt + package.xml + README.md
+|-- run.py                            Master build + test runner (7 phases, cross-platform Part 60)
+|-- compile.bat / compile.sh          Windows / Linux-macOS sequential build
+|-- setup.ps1 / setup.sh              Windows / Linux-macOS bootstrap
+|-- CMakeLists.txt
+|-- CLAUDE.md                         Session guide (law of the project)
 ```
 
 ---
@@ -298,12 +298,12 @@ CTRL_BUILD_BENCHMARKS      # benchmark/bench_controllers.cpp; OFF by default
 
 ### Critical parameter constraints
 ```
-DiscreteADRC:         omega_o * Ts < 0.5  (backward Euler stability — applies at ALL Ts values)
+DiscreteADRC:         omega_o * Ts < 0.5  (backward Euler stability - applies at ALL Ts values)
 UKF alpha:            sqrt((n+kappa)/n)   (alpha=1 -> negative Wc0)
 TubeMPC K:            u_tube = K*(x-x_nom); negate MATLAB lqr(): K = -K_lqr
 LPVSystemID:          identifyLPV expects (nxN) column-major
 phaseAt():            returns RADIANS (not degrees)
-ComputationalDelay:   first compute() returns 0 — warm up one step before trusting output
+ComputationalDelay:   first compute() returns 0 - warm up one step before trusting output
 ```
 
 ---
@@ -337,7 +337,7 @@ Python import is flat: `import ctrl_toolbox as ctrl` -- no submodule hierarchy.
 | **REL** | Rebuild `ctrl_toolbox.pyd` in Release to silence stale-.pyd QP warnings | LOW | Open |
 | **B36-3** | Unify NaN-guard across controller fleet | MED | Open |
 | **R1** | Edge-case contract matrix tests for every controller family | MED | Open |
-| **T3** | Full DK-iteration with vector-fitting rational D(jω) | LOW | Open |
+| **T3** | Full DK-iteration with vector-fitting rational D(jomega) | LOW | Open |
 | **TRK-2** | `case_study_tracker.py` 4-tier status detection (Complete / On-going / Open placeholder / Not started) replacing the old file-existence-only 3-tier scheme, which mis-classified untouched `new_case_study.py` scaffolds as "On-going" because the placeholder plant+controller still run and produce real-looking `logs/*.csv` | MED | **DONE (Part 62)** |
 | **DOC-1** | Reconcile `docs/PROJECT_MASTER_STATE.md` (was 12 Parts behind CLAUDE.md) and fix stale references repo-wide: `prompt/prompt_enhanced.txt` (removed Part 62, doesn't exist), `docs/audit_report.md` / `docs/roadmap_deployment_frontend.md` (moved to `docs/archived/`), missing mentions of `scripts/`, `benchmark/`, `cheatsheet/` | MED | **DONE (Part 62)** |
 | **P26-CS** | Meter-in-meter-out hydraulic case study | HIGH | **DONE (Part 26)** |
