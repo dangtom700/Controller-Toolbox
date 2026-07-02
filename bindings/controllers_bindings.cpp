@@ -160,6 +160,148 @@ action to drive output back to the reference.
              "Current sliding surface value s[k].");
 
     // -----------------------------------------------------------------------
+    // SuperTwistingSMC (2nd-order sliding mode; previously C++-only)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::SuperTwistingParams>(m, "SuperTwistingParams",
+        "Parameters for SuperTwistingSMC.  Sign convention: compute(y - ref).")
+        .def(py::init<>())
+        .def_readwrite("c_e",  &ctrl::SuperTwistingParams::c_e,  "Error coefficient in sliding surface.")
+        .def_readwrite("c_de", &ctrl::SuperTwistingParams::c_de, "Error-rate coefficient (absorbs Ts).")
+        .def_readwrite("K1",   &ctrl::SuperTwistingParams::K1,   "Power-term gain (|s|^{1/2}).")
+        .def_readwrite("K2",   &ctrl::SuperTwistingParams::K2,   "Integral-term gain (K2 > K1^2/4).")
+        .def_readwrite("uMin", &ctrl::SuperTwistingParams::uMin, "Lower output limit.")
+        .def_readwrite("uMax", &ctrl::SuperTwistingParams::uMax, "Upper output limit.");
+
+    py::class_<ctrl::SuperTwistingSMC, ctrl::IController,
+               std::shared_ptr<ctrl::SuperTwistingSMC>>(m, "SuperTwistingSMC", R"doc(
+Second-order (super-twisting) sliding-mode controller.
+
+Chattering-free (continuous control) with finite-time convergence and an internal
+integrator that removes steady-state error without a boundary layer.
+
+Sign convention: pass compute(y - ref), NOT compute(ref - y).
+)doc")
+        .def(py::init<const ctrl::SuperTwistingParams &, double>(),
+             py::arg("params"), py::arg("Ts"))
+        .def("compute",         &ctrl::SuperTwistingSMC::compute,        py::arg("error"))
+        .def("reset",           &ctrl::SuperTwistingSMC::reset)
+        .def("sample_time",     &ctrl::SuperTwistingSMC::sampleTime)
+        .def("set_params",      &ctrl::SuperTwistingSMC::setParams,      py::arg("params"))
+        .def("sliding_surface", &ctrl::SuperTwistingSMC::slidingSurface,
+             "Current sliding surface value s[k].");
+
+    // -----------------------------------------------------------------------
+    // NonsingularTerminalSMC (finite-time terminal sliding mode)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::NonsingularTerminalSMCParams>(m, "NonsingularTerminalSMCParams",
+        "Parameters for NonsingularTerminalSMC.  Sign convention: compute(y - ref).")
+        .def(py::init<>())
+        .def_readwrite("c_e",   &ctrl::NonsingularTerminalSMCParams::c_e,   "Error weight in the sliding surface.")
+        .def_readwrite("beta",  &ctrl::NonsingularTerminalSMCParams::beta,  "Terminal-surface coefficient (> 0).")
+        .def_readwrite("gamma", &ctrl::NonsingularTerminalSMCParams::gamma, "Fractional power p/q in (1, 2).")
+        .def_readwrite("K",     &ctrl::NonsingularTerminalSMCParams::K,     "Switching (reaching) gain.")
+        .def_readwrite("eta",   &ctrl::NonsingularTerminalSMCParams::eta,   "Proportional reaching gain.")
+        .def_readwrite("phi",   &ctrl::NonsingularTerminalSMCParams::phi,   "Boundary-layer thickness.")
+        .def_readwrite("uMin",  &ctrl::NonsingularTerminalSMCParams::uMin,  "Lower output limit.")
+        .def_readwrite("uMax",  &ctrl::NonsingularTerminalSMCParams::uMax,  "Upper output limit.");
+
+    py::class_<ctrl::NonsingularTerminalSMC, ctrl::IController,
+               std::shared_ptr<ctrl::NonsingularTerminalSMC>>(m, "NonsingularTerminalSMC", R"doc(
+Nonsingular terminal sliding-mode controller with finite-time convergence.
+
+A fractional-power sliding surface drives the error to zero in finite time rather than
+only asymptotically. Sign convention: pass compute(y - ref).
+)doc")
+        .def(py::init<const ctrl::NonsingularTerminalSMCParams &, double>(),
+             py::arg("params"), py::arg("Ts"))
+        .def("compute",         &ctrl::NonsingularTerminalSMC::compute,        py::arg("error"))
+        .def("reset",           &ctrl::NonsingularTerminalSMC::reset)
+        .def("sample_time",     &ctrl::NonsingularTerminalSMC::sampleTime)
+        .def("set_params",      &ctrl::NonsingularTerminalSMC::setParams,      py::arg("params"))
+        .def("sliding_surface", &ctrl::NonsingularTerminalSMC::slidingSurface,
+             "Current sliding surface value s[k].");
+
+    // -----------------------------------------------------------------------
+    // AdaptiveSMC (online switching-gain adaptation)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::AdaptiveSMCParams>(m, "AdaptiveSMCParams",
+        "Parameters for AdaptiveSMC.  Sign convention: compute(y - ref).")
+        .def(py::init<>())
+        .def_readwrite("c_e",     &ctrl::AdaptiveSMCParams::c_e,     "Error coefficient in sliding surface.")
+        .def_readwrite("c_de",    &ctrl::AdaptiveSMCParams::c_de,    "Error-rate coefficient (absorbs Ts).")
+        .def_readwrite("gamma",   &ctrl::AdaptiveSMCParams::gamma,   "Gain adaptation rate (> 0).")
+        .def_readwrite("epsilon", &ctrl::AdaptiveSMCParams::epsilon, "Dead-band on |s|.")
+        .def_readwrite("K0",      &ctrl::AdaptiveSMCParams::K0,      "Initial switching gain.")
+        .def_readwrite("Kmin",    &ctrl::AdaptiveSMCParams::Kmin,    "Lower clamp on adaptive gain.")
+        .def_readwrite("Kmax",    &ctrl::AdaptiveSMCParams::Kmax,    "Upper clamp on adaptive gain.")
+        .def_readwrite("phi",     &ctrl::AdaptiveSMCParams::phi,     "Boundary-layer thickness.")
+        .def_readwrite("uMin",    &ctrl::AdaptiveSMCParams::uMin,    "Lower output limit.")
+        .def_readwrite("uMax",    &ctrl::AdaptiveSMCParams::uMax,    "Upper output limit.");
+
+    py::class_<ctrl::AdaptiveSMC, ctrl::IController,
+               std::shared_ptr<ctrl::AdaptiveSMC>>(m, "AdaptiveSMC", R"doc(
+Adaptive-gain sliding-mode controller (no a-priori disturbance bound required).
+
+The switching gain grows online until the trajectory is confined to the sliding band,
+then plateaus. Sign convention: pass compute(y - ref).
+)doc")
+        .def(py::init<const ctrl::AdaptiveSMCParams &, double>(),
+             py::arg("params"), py::arg("Ts"))
+        .def("compute",         &ctrl::AdaptiveSMC::compute,        py::arg("error"))
+        .def("reset",           &ctrl::AdaptiveSMC::reset)
+        .def("sample_time",     &ctrl::AdaptiveSMC::sampleTime)
+        .def("set_params",      &ctrl::AdaptiveSMC::setParams,      py::arg("params"))
+        .def("sliding_surface", &ctrl::AdaptiveSMC::slidingSurface,
+             "Current sliding surface value s[k].")
+        .def("adaptive_gain",   &ctrl::AdaptiveSMC::adaptiveGain,
+             "Current value of the online-adapted switching gain K[k].");
+
+    // -----------------------------------------------------------------------
+    // FractionalDifferintegrator + FractionalOrderPID (PI^lambda D^mu)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::FractionalDifferintegrator>(m, "FractionalDifferintegrator",
+        "Oustaloup band-limited approximation of the fractional operator s^alpha.")
+        .def(py::init<double, double, double, int, double>(),
+             py::arg("alpha"), py::arg("wb"), py::arg("wh"), py::arg("N"), py::arg("Ts"))
+        .def("compute",       &ctrl::FractionalDifferintegrator::compute, py::arg("x"))
+        .def("reset",         &ctrl::FractionalDifferintegrator::reset)
+        .def("gain",          &ctrl::FractionalDifferintegrator::gain)
+        .def("section_count", &ctrl::FractionalDifferintegrator::sectionCount);
+
+    py::class_<ctrl::FOPIDParams>(m, "FOPIDParams",
+        "Parameters for FractionalOrderPID (PI^lambda D^mu).  Sign convention: compute(r - y).")
+        .def(py::init<>())
+        .def_readwrite("Kp",   &ctrl::FOPIDParams::Kp,   "Proportional gain.")
+        .def_readwrite("Ki",   &ctrl::FOPIDParams::Ki,   "Fractional-integral gain.")
+        .def_readwrite("Kd",   &ctrl::FOPIDParams::Kd,   "Fractional-derivative gain.")
+        // 'lambda' is a Python keyword, so the integral order is exposed as 'lam'.
+        .def_readwrite("lam",  &ctrl::FOPIDParams::lambda, "Integral order in (0, 1].")
+        .def_readwrite("mu",   &ctrl::FOPIDParams::mu,   "Derivative order in (0, 1].")
+        .def_readwrite("wb",   &ctrl::FOPIDParams::wb,   "Lower Oustaloup band edge [rad/s].")
+        .def_readwrite("wh",   &ctrl::FOPIDParams::wh,   "Upper Oustaloup band edge [rad/s].")
+        .def_readwrite("N",    &ctrl::FOPIDParams::N,    "Oustaloup order (2N+1 sections).")
+        .def_readwrite("uMin", &ctrl::FOPIDParams::uMin, "Lower output limit.")
+        .def_readwrite("uMax", &ctrl::FOPIDParams::uMax, "Upper output limit.")
+        .def_readwrite("Kaw",  &ctrl::FOPIDParams::Kaw,  "Anti-windup back-calculation gain.");
+
+    py::class_<ctrl::FractionalOrderPID, ctrl::IController,
+               std::shared_ptr<ctrl::FractionalOrderPID>>(m, "FractionalOrderPID", R"doc(
+Fractional-order PID controller (PI^lambda D^mu) with Oustaloup-approximated operators.
+
+A superset of the classical PID: the integral and derivative actions use non-integer
+orders lambda and mu. Reduces to a band-limited classical PID at lambda = mu = 1.
+Sign convention: pass compute(r - y) (same as DiscretePID).
+)doc")
+        .def(py::init<const ctrl::FOPIDParams &, double>(),
+             py::arg("params"), py::arg("Ts"))
+        .def("compute",     &ctrl::FractionalOrderPID::compute,   py::arg("error"))
+        .def("reset",       &ctrl::FractionalOrderPID::reset)
+        .def("sample_time", &ctrl::FractionalOrderPID::sampleTime)
+        .def("set_params",  &ctrl::FractionalOrderPID::setParams, py::arg("params"))
+        .def("params",      &ctrl::FractionalOrderPID::params,    py::return_value_policy::copy)
+        .def("last_output", &ctrl::FractionalOrderPID::lastOutput);
+
+    // -----------------------------------------------------------------------
     // DiscreteADRC
     // -----------------------------------------------------------------------
     py::class_<ctrl::ADRCParams>(m, "ADRCParams",

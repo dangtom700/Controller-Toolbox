@@ -159,6 +159,11 @@ for %%T in (
     ex118_lp_solver
     ex119_lp_mpc
     ex120_code_generation
+    ex121_terminal_smc
+    ex122_adaptive_smc
+    ex123_fractional_order_pid
+    ex124_super_twisting_smc
+    ex125_computational_delay_wrapper
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

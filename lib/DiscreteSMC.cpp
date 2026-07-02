@@ -95,4 +95,117 @@ namespace ctrl
         v_      = 0.0;
     }
 
+    // ---------------------------------------------------------------------------
+    // NonsingularTerminalSMC
+    // ---------------------------------------------------------------------------
+    NonsingularTerminalSMC::NonsingularTerminalSMC(const NonsingularTerminalSMCParams &params,
+                                                   double sampleTime)
+        : p_(params), Ts_(sampleTime)
+    {
+        reset();
+    }
+
+    // Terminal sliding surface with finite-time convergence (discrete form):
+    //   de = e[k] - e[k-1]                                   (raw per-step change)
+    //   s  = c_e.e + (1/beta).|de|^{gamma}.sign(de),   1 < gamma < 2
+    // Using the raw difference (not de/Ts) keeps the surface Ts-robust; beta absorbs the
+    // sample-time scaling, matching SMCParams::c_de.
+    // Reaching law (sat-smoothed, nonsingular - only positive powers of |de|):
+    //   u  = -( K.sat(s/phi) + eta.s )
+    double NonsingularTerminalSMC::compute(double error)
+    {
+        if (!std::isfinite(error))
+            return u_prev_;
+
+        const double de = error - e_prev_;
+        // |de|^{gamma}.sign(de); guarded so a zero change contributes nothing (and never a
+        // negative/singular power). std::pow(0, gamma) = 0 for gamma > 0, but branch anyway to
+        // avoid sign(0) ambiguity.
+        double term = 0.0;
+        const double abs_de = std::abs(de);
+        if (abs_de > 1e-12)
+            term = std::pow(abs_de, p_.gamma) * ((de > 0.0) ? 1.0 : -1.0);
+
+        const double beta = (std::abs(p_.beta) > 1e-12) ? p_.beta : 1e-12;
+        const double s = p_.c_e * error + (1.0 / beta) * term;
+
+        double sat_val;
+        if (p_.phi > 1e-12)
+            sat_val = std::max(-1.0, std::min(1.0, s / p_.phi));
+        else
+            sat_val = (s > 0.0) ? 1.0 : (s < 0.0 ? -1.0 : 0.0);
+
+        double u = -(p_.K * sat_val + p_.eta * s);
+        u = std::max(p_.uMin, std::min(p_.uMax, u));
+
+        e_prev_ = error;
+        s_prev_ = s;
+        u_prev_ = u;
+        notify_buf_(0) = s;
+        notifyObserverState("surface", notify_buf_);
+        notifyObserver(u, error);
+        return u;
+    }
+
+    void NonsingularTerminalSMC::reset()
+    {
+        e_prev_ = 0.0;
+        s_prev_ = 0.0;
+        u_prev_ = 0.0;
+        notifyObserverReset();
+    }
+
+    // ---------------------------------------------------------------------------
+    // AdaptiveSMC
+    // ---------------------------------------------------------------------------
+    AdaptiveSMC::AdaptiveSMC(const AdaptiveSMCParams &params, double sampleTime)
+        : p_(params), Ts_(sampleTime)
+    {
+        reset();
+    }
+
+    // First-order sliding surface with an online-adapted switching gain:
+    //   s      = c_e.e + c_de.(e - e_prev)
+    //   u      = -K.sat(s/phi)
+    //   K[k+1] = clamp( K + Ts.gamma.(|s| - epsilon), Kmin, Kmax )
+    // The gain grows while |s| exceeds the dead-band and relaxes inside it, so no a-priori
+    // disturbance bound is required.
+    double AdaptiveSMC::compute(double error)
+    {
+        if (!std::isfinite(error))
+            return u_prev_;
+
+        const double s = p_.c_e * error + p_.c_de * (error - e_prev_);
+
+        double sat_val;
+        if (p_.phi > 1e-12)
+            sat_val = std::max(-1.0, std::min(1.0, s / p_.phi));
+        else
+            sat_val = (s > 0.0) ? 1.0 : (s < 0.0 ? -1.0 : 0.0);
+
+        double u = -K_ * sat_val;
+        u = std::max(p_.uMin, std::min(p_.uMax, u));
+
+        // Gain adaptation (Euler integration of Kdot = gamma.(|s| - epsilon)).
+        K_ += Ts_ * p_.gamma * (std::abs(s) - p_.epsilon);
+        K_ = std::max(p_.Kmin, std::min(p_.Kmax, K_));
+
+        e_prev_ = error;
+        s_prev_ = s;
+        u_prev_ = u;
+        notify_buf_(0) = s;
+        notifyObserverState("surface", notify_buf_);
+        notifyObserver(u, error);
+        return u;
+    }
+
+    void AdaptiveSMC::reset()
+    {
+        e_prev_ = 0.0;
+        s_prev_ = 0.0;
+        u_prev_ = 0.0;
+        K_      = p_.K0;
+        notifyObserverReset();
+    }
+
 } // namespace ctrl

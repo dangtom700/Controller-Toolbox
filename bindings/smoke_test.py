@@ -1794,4 +1794,78 @@ assert _lpmpc.last_lp_converged(), "LPMPC: expected last LP solve to converge"
 assert abs(_y_lpmpc - 1.0) < 0.05, "LPMPC: did not track reference"
 print('LPMPC smoke test passed.')
 
+# Case-study coverage gap fill: SuperTwistingSMC (previously unbound),
+# NonsingularTerminalSMC, AdaptiveSMC, FractionalDifferintegrator + FractionalOrderPID.
+# --- SuperTwistingSMC (2nd-order SMC; now exposed to Python) ---
+_stp = ctrl.SuperTwistingParams()
+_stp.c_e, _stp.c_de = 1.0, 0.01
+_stp.K1, _stp.K2 = 2.0, 3.0
+_stp.uMin, _stp.uMax = -20.0, 20.0
+_st = ctrl.SuperTwistingSMC(_stp, 0.01)
+_y_st = 0.0
+_st_sum, _st_cnt = 0.0, 0          # mean over a final window (discrete ripple averages out)
+for _k in range(1000):
+    _u_st = _st.compute(_y_st - 1.0)   # SMC sign convention: y - ref
+    _y_st = 0.8 * _y_st + 0.2 * _u_st
+    if _k >= 800:
+        _st_sum += _y_st
+        _st_cnt += 1
+assert np.isfinite(_y_st) and abs(1.0 - _st_sum / _st_cnt) < 0.03, "SuperTwistingSMC did not track"
+print('SuperTwistingSMC smoke test passed.')
+
+# --- NonsingularTerminalSMC (finite-time SMC) on an integrator ---
+_ntp = ctrl.NonsingularTerminalSMCParams()
+_ntp.beta, _ntp.gamma = 1.0, 1.5
+_ntp.K, _ntp.eta, _ntp.phi = 2.0, 0.5, 0.5
+_ntp.uMin, _ntp.uMax = -20.0, 20.0
+_nt = ctrl.NonsingularTerminalSMC(_ntp, 0.01)
+_y_nt = 0.0
+for _ in range(800):
+    _u_nt = _nt.compute(_y_nt - 1.0)
+    _y_nt = _y_nt + 0.1 * _u_nt
+assert np.isfinite(_y_nt) and abs(1.0 - _y_nt) < 0.02, "NonsingularTerminalSMC did not converge"
+assert ctrl.registry_has('terminal_smc'), "terminal_smc not registered"
+print('NonsingularTerminalSMC smoke test passed.')
+
+# --- AdaptiveSMC (online gain adaptation vs unknown-bound disturbance) ---
+_asp2 = ctrl.AdaptiveSMCParams()
+_asp2.c_e, _asp2.c_de = 1.0, 0.05
+_asp2.gamma, _asp2.epsilon = 8.0, 0.02
+_asp2.K0, _asp2.Kmin, _asp2.Kmax = 0.2, 0.0, 100.0
+_asp2.phi = 0.3
+_asp2.uMin, _asp2.uMax = -20.0, 20.0
+_asmc = ctrl.AdaptiveSMC(_asp2, 0.01)
+_K0 = _asmc.adaptive_gain()
+_y_as = 0.0
+for _ in range(1500):
+    _u_as = _asmc.compute(_y_as - 1.0)
+    _y_as = _y_as + 0.1 * (_u_as + 0.3)   # matched disturbance d=0.3
+assert _asmc.adaptive_gain() > _K0, "AdaptiveSMC gain did not adapt upward"
+assert np.isfinite(_y_as) and abs(1.0 - _y_as) < 0.05, "AdaptiveSMC did not reject disturbance"
+assert ctrl.registry_has('adaptive_smc'), "adaptive_smc not registered"
+print('AdaptiveSMC smoke test passed.')
+
+# --- FractionalDifferintegrator + FractionalOrderPID ---
+# s^0.5 over [0.01,100] -> centre 1 rad/s where |s^0.5| = 1.
+_fdi = ctrl.FractionalDifferintegrator(0.5, 0.01, 100.0, 5, 0.005)
+_amp = 0.0
+for _k in range(40000):
+    _o = _fdi.compute(np.sin(1.0 * _k * 0.005))
+    if _k > 36000:
+        _amp = max(_amp, abs(_o))
+assert 0.85 < _amp < 1.15, f"FractionalDifferintegrator band-centre gain off: {_amp:.3f}"
+_fop = ctrl.FOPIDParams()
+_fop.Kp, _fop.Ki, _fop.Kd = 0.5, 0.3, 0.02
+_fop.lam, _fop.mu = 0.9, 0.6          # 'lambda' is a Python keyword -> exposed as 'lam'
+_fop.wb, _fop.wh, _fop.N = 0.01, 100.0, 4
+_fop.uMin, _fop.uMax = -10.0, 10.0
+_fopid = ctrl.FractionalOrderPID(_fop, 0.01)
+_y_fo = 0.0
+for _ in range(2000):
+    _u_fo = _fopid.compute(1.0 - _y_fo)   # PID sign convention: r - y
+    _y_fo = 0.8 * _y_fo + 0.2 * _u_fo
+assert np.isfinite(_y_fo) and abs(1.0 - _y_fo) < 0.1, "FractionalOrderPID did not track"
+assert ctrl.registry_has('fractional_order_pid'), "fractional_order_pid not registered"
+print('FractionalOrderPID smoke test passed.')
+
 print('\nAll smoke tests passed.')

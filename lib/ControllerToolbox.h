@@ -56,6 +56,7 @@
 #include "Features.h"            ///< ctrl::features() - runtime optional-module discovery.
 #include "PlantModel.h"       ///< TransferFunction, StateSpace, tf2ss, ssStep, c2d.
 #include "DiscretePID.h"      ///< PID - backward-Euler, derivative filter, anti-windup.
+#include "FractionalOrderPID.h" ///< FOPID - PI^lambda D^mu, Oustaloup-approximated fractional operators.
 #include "DiscreteMPC.h"      ///< MPC - condensed receding-horizon QP.
 #include "DiscreteLQR.h"      ///< LQR - DARE optimal gain, LQRAdapter.
 #include "ExtremumSeeker.h"   ///< ESC - perturbation-based extremum seeking.

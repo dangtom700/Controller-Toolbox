@@ -99,6 +99,7 @@ set(CTRL_CORE_SOURCES
     ValueIterationSolver.cpp
     LPMPC.cpp
     CodeGenC.cpp
+    FractionalOrderPID.cpp
 )
 
 # --- Optional sources --------------------------------------------------------

@@ -372,6 +372,131 @@ TEST_CASE("SuperTwistingSMC reduces tracking error on a first-order plant", "[sm
 }
 
 // -----------------------------------------------------------------------------
+// NonsingularTerminalSMC - finite-time reaching + zero offset on an integrator
+// -----------------------------------------------------------------------------
+
+TEST_CASE("NonsingularTerminalSMC reaches the setpoint in finite time on an integrator",
+          "[smc][terminal]")
+{
+    // Integrator plant y[k+1] = y + b*u holds any y at u = 0, so an SMC without
+    // integral action still reaches the setpoint with no steady-state offset.
+    ctrl::NonsingularTerminalSMCParams p;
+    p.beta = 1.0;
+    p.gamma = 1.5;   // in (1,2): nonsingular + finite-time
+    p.K   = 2.0;
+    p.eta = 0.5;
+    p.phi = 0.5;
+    p.uMin = -20.0;
+    p.uMax =  20.0;
+    ctrl::NonsingularTerminalSMC smc(p, Ts);
+
+    const double b = 0.1, ref = 1.0;
+    double y = 0.0;
+    int reach = -1;
+    for (int k = 0; k < 800; ++k)
+    {
+        const double u = smc.compute(y - ref); // SMC sign convention: y - ref
+        y += b * u;
+        if (reach < 0 && std::abs(smc.slidingSurface()) < p.phi)
+            reach = k;
+    }
+    REQUIRE(std::isfinite(y));
+    REQUIRE(reach >= 0);                    // finite-time reaching of the boundary layer
+    REQUIRE(std::abs(ref - y) < 0.02);      // integrator -> negligible steady offset
+}
+
+// -----------------------------------------------------------------------------
+// AdaptiveSMC - switching gain grows to reject an unknown-bound disturbance
+// -----------------------------------------------------------------------------
+
+TEST_CASE("AdaptiveSMC grows its gain to reject an unknown-bound disturbance",
+          "[smc][adaptive]")
+{
+    ctrl::AdaptiveSMCParams p;
+    p.c_e = 1.0;
+    p.c_de = 0.05;
+    p.gamma = 8.0;
+    p.epsilon = 0.02;
+    p.K0 = 0.2;       // deliberately too small for the disturbance below
+    p.Kmin = 0.0;
+    p.Kmax = 100.0;
+    p.phi = 0.3;
+    p.uMin = -20.0;
+    p.uMax =  20.0;
+    ctrl::AdaptiveSMC smc(p, Ts);
+
+    const double b = 0.1, d = 0.3, ref = 1.0; // matched disturbance, bound unknown to controller
+    double y = 0.0;
+    const double K0 = smc.adaptiveGain();
+    for (int k = 0; k < 1500; ++k)
+    {
+        const double u = smc.compute(y - ref);
+        y += b * (u + d);
+    }
+    REQUIRE(std::isfinite(y));
+    REQUIRE(smc.adaptiveGain() > K0);       // gain adapted upward
+    REQUIRE(std::abs(ref - y) < 0.05);      // disturbance rejected without a-priori bound
+}
+
+// -----------------------------------------------------------------------------
+// FractionalDifferintegrator - Oustaloup |s^alpha| = 1 at the band centre
+// -----------------------------------------------------------------------------
+
+TEST_CASE("FractionalDifferintegrator matches |s^alpha| = 1 at the band centre", "[pid][fopid]")
+{
+    // s^{0.5} over [0.01, 100] rad/s -> geometric centre sqrt(wb*wh) = 1 rad/s,
+    // where |(j*1)^0.5| = 1 exactly. Ts = 0.005 keeps Nyquist (~628 rad/s) well above wh.
+    const double Tsf = 0.005;
+    ctrl::FractionalDifferintegrator op(0.5, 0.01, 100.0, 5, Tsf);
+
+    const double w = 1.0;
+    double amp = 0.0;
+    const int N = 40000;
+    for (int k = 0; k < N; ++k)
+    {
+        const double o = op.compute(std::sin(w * k * Tsf));
+        if (k > N - 4000) amp = std::max(amp, std::abs(o)); // steady-state amplitude
+    }
+    // Tolerance ~15%: finite Oustaloup order (N=5 -> 11 sections) + bilinear warping.
+    REQUIRE(amp > 0.85);
+    REQUIRE(amp < 1.15);
+}
+
+// -----------------------------------------------------------------------------
+// FractionalOrderPID - degenerates to proportional + tracks a step
+// -----------------------------------------------------------------------------
+
+TEST_CASE("FractionalOrderPID reduces to P-only and tracks a step", "[pid][fopid]")
+{
+    // Ki = Kd = 0 -> pure proportional passthrough u = Kp * e.
+    {
+        ctrl::FOPIDParams pp;
+        pp.Kp = 1.0; pp.Ki = 0.0; pp.Kd = 0.0;
+        ctrl::FractionalOrderPID pure(pp, Ts);
+        REQUIRE(std::abs(pure.compute(1.0) - 1.0) < 1e-9);
+    }
+
+    // Closed-loop step tracking on y[k+1] = 0.8*y + 0.2*u (DC gain 1). The
+    // fractional-integral branch supplies the steady control that removes offset.
+    ctrl::FOPIDParams p;
+    p.Kp = 0.5; p.Ki = 0.3; p.Kd = 0.02;
+    p.lambda = 0.9; p.mu = 0.6;
+    p.wb = 0.01; p.wh = 100.0; p.N = 4;
+    p.uMin = -10.0; p.uMax = 10.0;
+    ctrl::FractionalOrderPID fopid(p, Ts);
+
+    double y = 0.0;
+    const double ref = 1.0;
+    for (int k = 0; k < 2000; ++k)
+    {
+        const double u = fopid.compute(ref - y); // PID sign convention: r - y
+        y = 0.8 * y + 0.2 * u;
+    }
+    REQUIRE(std::isfinite(y));
+    REQUIRE(std::abs(ref - y) < 0.1);
+}
+
+// -----------------------------------------------------------------------------
 // DiscreteLeadLag - phaseAt() returns radians regression guard (P12-21)
 // -----------------------------------------------------------------------------
 

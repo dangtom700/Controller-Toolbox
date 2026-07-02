@@ -35,6 +35,9 @@ class DiscreteMPC;
 class ExtremumSeeker;
 class DiscreteSMC;
 class SuperTwistingSMC;
+class NonsingularTerminalSMC;
+class AdaptiveSMC;
+class FractionalOrderPID;
 class DiscreteADRC;
 class DiscreteLeadLag;
 class SmithPredictor;
@@ -226,6 +229,60 @@ struct ControllerTraits<SuperTwistingSMC>
 {
     using category = tag::SlidingMode;
     static constexpr const char *name = "SuperTwistingSMC";
+    static constexpr bool supports_heuristic_pid = false;
+    static constexpr bool supports_lqr_tuning    = false;
+    static constexpr bool supports_mpc_tuning    = false;
+    static constexpr bool supports_freq_tuning   = false;
+    static constexpr bool supports_kalman_tuning = false;
+};
+
+/**
+ * @brief Traits for NonsingularTerminalSMC - finite-time terminal surface, Lyapunov-designed.
+ *
+ * beta, gamma, K, eta are chosen from terminal-SMC theory (finite-time reaching + convergence),
+ * not from classical auto-tuners.
+ */
+template <>
+struct ControllerTraits<NonsingularTerminalSMC>
+{
+    using category = tag::SlidingMode;
+    static constexpr const char *name = "NonsingularTerminalSMC";
+    static constexpr bool supports_heuristic_pid = false;
+    static constexpr bool supports_lqr_tuning    = false;
+    static constexpr bool supports_mpc_tuning    = false;
+    static constexpr bool supports_freq_tuning   = false;
+    static constexpr bool supports_kalman_tuning = false;
+};
+
+/**
+ * @brief Traits for AdaptiveSMC - switching gain adapts online; no classical auto-tuner.
+ *
+ * The designer sets the adaptation rate gamma and dead-band epsilon; the switching gain K is
+ * discovered online rather than fixed by a tuner.
+ */
+template <>
+struct ControllerTraits<AdaptiveSMC>
+{
+    using category = tag::SlidingMode;
+    static constexpr const char *name = "AdaptiveSMC";
+    static constexpr bool supports_heuristic_pid = false;
+    static constexpr bool supports_lqr_tuning    = false;
+    static constexpr bool supports_mpc_tuning    = false;
+    static constexpr bool supports_freq_tuning   = false;
+    static constexpr bool supports_kalman_tuning = false;
+};
+
+/**
+ * @brief Traits for FractionalOrderPID - fractional orders lambda/mu are designed, not tuned.
+ *
+ * Classical heuristic PID tuners only set Kp/Ki/Kd (integer-order); the fractional orders and
+ * Oustaloup band are design choices, so no auto-tuner is advertised here.
+ */
+template <>
+struct ControllerTraits<FractionalOrderPID>
+{
+    using category = tag::PID;
+    static constexpr const char *name = "FractionalOrderPID";
     static constexpr bool supports_heuristic_pid = false;
     static constexpr bool supports_lqr_tuning    = false;
     static constexpr bool supports_mpc_tuning    = false;

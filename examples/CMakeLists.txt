@@ -201,6 +201,15 @@ add_example(ex119_lp_mpc)
 # Phase 4 (Algorithm Roadmap Phase 3): DT1 ControllerCodeGen - flat C99 code generation
 add_example(ex120_code_generation)
 
+# Case-study coverage gap fill: new nonlinear/Lyapunov + fractional/classical controllers
+add_example(ex121_terminal_smc)          # NonsingularTerminalSMC - finite-time SMC
+add_example(ex122_adaptive_smc)          # AdaptiveSMC - online switching-gain adaptation
+add_example(ex123_fractional_order_pid)  # FractionalOrderPID - PI^lambda D^mu (Oustaloup)
+add_example(ex124_super_twisting_smc)    # SuperTwistingSMC - 2nd-order SMC (now demonstrated)
+
+# Example-coverage gap fill: previously-unexampled composition wrapper
+add_example(ex125_computational_delay_wrapper)  # ComputationalDelayWrapper - 1-sample delay
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)
