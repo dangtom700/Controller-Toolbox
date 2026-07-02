@@ -98,6 +98,7 @@ set(CTRL_CORE_SOURCES
     GPMPC.cpp
     ValueIterationSolver.cpp
     LPMPC.cpp
+    CodeGenC.cpp
 )
 
 # --- Optional sources --------------------------------------------------------

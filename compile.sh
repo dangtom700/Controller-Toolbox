@@ -199,6 +199,7 @@ TARGETS=(
     ex117_event_triggered_wrapper
     ex118_lp_solver
     ex119_lp_mpc
+    ex120_code_generation
     test_autoscheduling
     test_stability_margins
     example_pid_feedback
@@ -230,6 +231,7 @@ TARGETS=(
     stewart_sim
     stewart_robustness
     bouyancy_driven_airship_in_vertical_plan_sim
+    bouyancy_driven_airship_in_vertical_plan_robustness
     toolbox_examples
     test_catch2_pilot
     test_catch2_advanced

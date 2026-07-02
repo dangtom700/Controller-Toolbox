@@ -392,3 +392,17 @@ findings rather than plan-level decisions.
 
 Not implemented (deferred per "Model simplifications" above, consistent with the original
 plan): the paper's Sec. 4.4 added-mass and Sec. 4.5 aerodynamic-force model extensions.
+
+**Robustness analysis added.** `sim/src/robustness_main.cpp` (built as
+`bouyancy_driven_airship_in_vertical_plan_robustness`, registered in this study's
+`CMakeLists.txt` and `compile.bat`/`compile.sh`) follows the same `case-study/common/
+RobustnessStats.h` pattern as Boiler Control/Tug Boat/etc.: WCET (per-step `compute()` timing
+on the nominal `s01_calm_step` scenario), Monte Carlo (30 samples/controller, +-15% Gaussian
+perturbation of `m_bar`/`ms`/`J`, controllers built from the original nominal `PlantParams`,
+only the simulated `Plant` perturbed), and a fault sweep (3 magnitudes per applicable fault
+kind - sensor bias/noise on the measured `theta`, actuator loss/stuck on `u`, setpoint step on
+`theta_ref` - injected at 40% through the 60 s run). All 12 controllers stayed stable across
+every MC sample and fault trial (`P(unstable)=0` throughout). Output lands at the study root
+(`mc_summary.csv`, `fault_sweep.csv`, `wcet_summary.csv`, alongside the pre-existing
+`mu_analysis.csv`) and `report.html` was regenerated via `tools/generate_report.py` -
+`tools/case_study_tracker.py` now reports this study's status as `Complete`.

@@ -198,6 +198,8 @@ add_example(ex117_event_triggered_wrapper)
 add_example(ex118_lp_solver)
 # Phase 4 (Algorithm Roadmap Phase 3): OC4 LPMPC - SISO L1-cost linear MPC
 add_example(ex119_lp_mpc)
+# Phase 4 (Algorithm Roadmap Phase 3): DT1 ControllerCodeGen - flat C99 code generation
+add_example(ex120_code_generation)
 
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)

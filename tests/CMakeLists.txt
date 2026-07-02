@@ -22,6 +22,14 @@ add_executable(test_catch2_advanced test_catch2_advanced.cpp)
 target_link_libraries(test_catch2_advanced PRIVATE controller_toolbox Catch2::Catch2WithMain)
 target_include_directories(test_catch2_advanced PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
+# Code-generation golden-file tests compile emitted C with a discovered system C compiler.
+# Tests SKIP (not fail) at runtime when no compiler is found.
+find_program(CTRL_C_COMPILER NAMES gcc cc clang)
+if(NOT CTRL_C_COMPILER)
+    set(CTRL_C_COMPILER "")
+endif()
+target_compile_definitions(test_catch2_advanced PRIVATE CTRL_C_COMPILER_PATH="${CTRL_C_COMPILER}")
+
 # -- Catch2 auto-scheduling test suite (Part 20) ---------------------------
 add_executable(test_autoscheduling test_autoscheduling.cpp)
 target_link_libraries(test_autoscheduling PRIVATE controller_toolbox Catch2::Catch2WithMain)

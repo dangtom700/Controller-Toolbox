@@ -801,8 +801,20 @@ def phase_bug_report(log_path):
         'radial impact error [m]',
         'cross-validation state rms error',          # ex81 LPV cross-val metric
         'max error nominal:',             # ex80 GPResidual "max error nominal:" metric
-        'dominant_rho_y',                 # ex101 RL-MPC: "dominant" contains "nan" substring
+        'dominant',                       # "dominant" contains "nan" substring (ex101 RL-MPC
+                                           # "dominant_rho_y", ex106/ex123 "dominant pole magnitude")
         'resonance',                      # scenario name "s02_resonance" contains "nan" substring
+        'resonant',                       # ResonantController / ex89_resonant_controller /
+                                           # "resonant_controller" feature flag - "resonant" also
+                                           # contains "nan" substring, same root cause as 'resonance'
+        'cannot identify y/u columns',    # tools/mu_analysis.py self-skip for studies with no
+                                           # continuous y/u pair to fit (documented status=no_columns)
+        'gaussian error:',                # ex102(C++)/ex119(py) MLE identification "Gaussian error: ... Laplace error: ..."
+        'freq-response error',            # ex112(C++)/ex129(py) subspace ID variants progress line
+        'max |error|',                    # ex117(C++)/ex134(py) EventTriggeredWrapper "Max |error| (back half) = ..."
+        'max abs error vs',               # ex93(C++)/ex112(py) impulse-response fit "Max abs error vs. true impulse response: ..."
+        '(max error',                     # ex107(py) frequency-domain ID "recovered num/den: [...] (max error N)"
+        'rms error under',                # ex95(C++)/ex112(py) HinfFilter "RMS error under impulsive disturbance: ..."
         'initial p guess',                # ex98 RecursiveGreyBox "(error 0.300)" line
         'max error gp-corrected:',        # ex80 GPResidual "max error GP-corrected:" metric
         '| warned |',                     # ex26 soft-warning table column header ("warned")

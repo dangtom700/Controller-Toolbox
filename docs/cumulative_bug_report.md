@@ -1433,3 +1433,149 @@ cmake -B build (same dir, 2nd attempt with bindings ON) -> stale PYTHON_EXECUTAB
 shipped); `docs/algorithm_backlog.md` (OC4 + the already-shipped-but-still-listed OC2 moved to
 "Already done"); `docs/superpowers/specs/2026-06-27-lp-solver-lp-mpc-design.md` (new); this
 report's new Part 70 section.
+
+---
+
+## Part 71 - Bouyancy-Driven Airship in Vertical Plane Promoted to Complete (Robustness
+Analysis) - 2026-07-01
+
+New `case-study/Bouyancy-Driven Airship in Vertical Plane/sim/src/robustness_main.cpp` (built
+as `bouyancy_driven_airship_in_vertical_plan_robustness`) closes the study's only remaining
+gap - it already had a real 6-state liberated-center plant, 12-controller roster, 60
+regression runs, and `mu_analysis.csv`, but no `mc_summary.csv`/`fault_sweep.csv`/
+`wcet_summary.csv` or `report.html`, so `tools/case_study_tracker.py` reported it as
+`On-going` rather than `Complete`. Follows the exact `case-study/common/RobustnessStats.h` +
+`robustness_main.cpp` + `*_robustness` CMake-target pattern established in Part 64/66 for the
+other 10 C++ studies: WCET (per-step `ControllerBase::compute()` timing via `std::chrono`),
+Monte Carlo (30 samples/controller, +-15% Gaussian perturbation of `m_bar`/`ms`/`J`;
+controllers stay built from the original nominal `PlantParams` - per Part 64/66's own
+convention, only the *simulated* `Plant` is perturbed), and a fault sweep (3 magnitudes each of
+sensor bias/noise on measured `theta`, actuator loss/stuck on `u`, and setpoint step on
+`theta_ref`, injected 40% through the 60 s `s01_calm_step` scenario). The nominal analysis
+scenario is loaded via `Scenario::fromJson` from the study's own
+`config/scenarios/s01_calm_step.json` (and its `thetaRefAt()`/`m0At()` helpers reused
+directly) rather than duplicated, so it can never drift from the real scenario file.
+
+**One build bug found and fixed before this shipped:** the first `robustness_main.cpp` link
+failed with `undefined reference to Scenario::thetaRefAt/m0At/fromJson` - those are defined in
+`simulation_runner.cpp`, not the plant `.cpp`, and the new CMake target's source list initially
+only listed the plant + controllers files. Fixed by adding `sim/src/simulation_runner.cpp` to
+the `bouyancy_driven_airship_in_vertical_plan_robustness` target's sources in this study's own
+`CMakeLists.txt`.
+
+**Verification:** `bouyancy_driven_airship_in_vertical_plan_robustness` built clean and ran to
+completion - all 12 controllers, 30 MC samples each (360 trials) plus 15 fault-magnitude
+trials each (180 trials), zero NaN/Inf and `P(unstable)=0` throughout every trial (confirmed by
+grepping every output CSV for `nan`/`inf`). `tools/generate_report.py --study
+"Bouyancy-Driven Airship in Vertical Plane"` regenerated `report.html` with none of the four
+"no data" placeholder markers present. `tools/case_study_tracker.py` now reports this study
+`Complete` (19 of 31 studies Complete, up from 18).
+
+**Non-obvious facts added (Part 71):**
+```
+Airship robustness_main -> needs simulation_runner.cpp in its CMake sources (Scenario::
+                            thetaRefAt/m0At/fromJson live there, not in the plant .cpp)
+Airship MC perturbation -> m_bar/ms/J only (+-15%), NOT Ts/u_max/rp1_max; controllers built
+                            once from nominal PlantParams, only the simulated Plant perturbed
+Airship fault sweep     -> sensor fault perturbs only a copy of x(THETA) fed into
+                            ctrl.compute(); actuator fault applied to u before
+                            clampU()+Plant::step() (which also clamps internally)
+Airship overshoot_pct   -> direction-aware (handles both the study's ascending and descending
+                            theta_ref steps), unlike Boiler's positive-only formula
+```
+
+**Docs updated:** `README.md` (case-study count 18->19, new C++ roster row, intro sentence);
+this study's own `README.md` "Status" section; `docs/case_study_status.md` (auto-regenerated);
+this report's new Part 71 section.
+
+---
+
+## Part 72 - Algorithm Roadmap Phase 3, Phase 4 (DT1: ControllerCodeGen) - 2026-07-01
+
+Implemented `lib/CodeGenC.h`/`.cpp`: three free functions (no class, no inheritance) that emit
+flat, dependency-free C99 for a single tuned `DiscretePID`/`DiscreteSMC`/`DiscreteLeadLag`,
+optionally fused with one `AntiWindupWrapper`-equivalent corrector inline. Scoped deliberately
+to "step-based" controllers only (fixed, single-pass, O(1) update, no internal loop) -
+`FuzzyPD`/`FuzzyPID` (iterative CoG grid search per call) and `DiscreteMPC` (iterative QP solve
+per call, larger static footprint) were both considered during design and dropped for
+memory-/CPU-cycle predictability on constrained MCU targets; see
+`docs/superpowers/specs/2026-06-30-code-generation-design.md`'s same-day revision note.
+Golden-file Catch2 tests (`[code_generation]`) compile each emission with a discovered system C
+compiler (`gcc`/`cc`/`clang`, `tests/CMakeLists.txt`'s `find_program`) and diff its output
+against the live C++ controller; `examples/ex120_code_generation.cpp` demonstrates all three
+types plus one corrector-fused example.
+
+**Two real bugs found and fixed while first running the golden-file tests locally, neither
+caught by code review alone** (the implementation itself, per the design doc's own decision
+log, was already correct - both bugs were in the *test harness*):
+
+1. **Every golden-file test failed on Windows with `actual.has_value() == false` and stderr
+   `"The filename, directory name, or volume label syntax is incorrect."`.** Root-caused via a
+   standalone reproduction outside Catch2: a minimal C program calling `system()` with the
+   exact same multi-quoted-path command `runGeneratedC()` builds (`"<gcc>" -std=c99 -o "<out>"
+   "<in1.c>" "<in2.c>"`) reproduced the identical error in isolation. Cause: `std::system()` on
+   Windows shells out via `cmd.exe /c <string>`; `cmd.exe`'s legacy argument parser strips the
+   very first and last characters of that string whenever *both* are `"` and the string
+   contains more than two quote characters total (its "exactly two quotes = preserve them"
+   fast path doesn't apply once there's more than one quoted token) - exactly the shape of
+   every command this harness builds, since it always quotes 2-4 separate paths. This silently
+   corrupts the inner quoting rather than raising a parse error at the `cmd.exe` level; the
+   downstream "incorrect syntax" message comes from whatever mangled token ends up first.
+   Confirmed the fix in isolation before touching the harness: wrapping the *entire* command
+   string in one extra outer quote pair (`""cmd" arg "arg2""`) makes `cmd.exe` strip that
+   outer, harmless pair instead, leaving the real quoting untouched - verified against both a
+   multi-arg compile invocation and a multi-arg run invocation of an extensionless output
+   binary (see fact 2 below). This wrapping is Windows-only; POSIX's `/bin/sh -c` has no such
+   bug, and applying the same extra pair there re-tokenises a multi-quoted command into fewer,
+   wrongly-merged words (verified by hand-tracing the quote/unquote toggle). Fixed via a new
+   `codegen_test::runSystem(const std::string&)` helper in `tests/test_catch2_advanced.cpp`
+   that applies the extra wrap only under `#ifdef _WIN32`, used at both `std::system()` call
+   sites in `runGeneratedC()`.
+2. **Not a bug - verified `-o harness_exe` (no `.exe` extension) is safe on this toolchain.**
+   Suspected a second bug (MinGW `gcc -o harness_exe` actually writes `harness_exe.exe`, so
+   the harness's own later invocation of the extensionless path might not find it), but
+   `cmd.exe`'s command dispatch (unlike a raw `CreateProcess` call) applies `PATHEXT`-style
+   extension resolution even to explicit paths with directory components - confirmed by
+   reproducing both the single-arg and multi-arg (post-fix-1) invocation of an extensionless
+   compiled binary in isolation; both resolved and ran correctly. No code change needed here.
+3. **The Task 5 freestanding-source check false-positived on `DiscretePID`'s own emitted
+   code**, flagging the forbidden token `"new "` inside the legitimately-generated derivative
+   filter state line `const double d_new = alpha * s_deriv + ...` (the substring `"d_new "`
+   contains `"new "`). `DiscreteSMC`/`DiscreteLeadLag` have no `_new`-suffixed identifiers, so
+   only the PID case tripped it. Fixed by tightening the forbidden token from `"new "` to
+   `" new "` (requiring a leading space too) in `tests/test_catch2_advanced.cpp`'s
+   `kForbidden` list - a real C++ `new` keyword is always preceded by whitespace or
+   punctuation, never by an identifier character, so this still catches genuine `new`/`new[]`
+   usage while no longer matching `..._new` identifiers.
+
+**Verification:** full `test_catch2_advanced` suite (7881 assertions, 403 test cases,
+including all 6 `[code_generation]` cases) passes locally with no regressions.
+`ex120_code_generation` runs to completion (4 "generated" lines - pid/smc/leadlag/
+smc_corrector - plus a final `PASS`).
+
+**Non-obvious facts added (Part 72):**
+```
+CodeGenC scope        -> DiscretePID/DiscreteSMC(1st-order)/DiscreteLeadLag only
+                          ("step-based": single-pass, O(1), no internal loop); FuzzyPD/FuzzyPID
+                          and DiscreteMPC deliberately excluded (iterative per-step cost,
+                          larger memory footprint)
+CodeGenC correctors    -> AntiWindupWrapper only, fused inline (no wrapping function);
+                          rejected at generation time if PIDParams::Kb != 0 (native
+                          anti-windup already active)
+CodeGenC build gating  -> unconditional in CTRL_CORE_SOURCES (no CTRL_ENABLE_* gate needed,
+                          since PID/SMC/LeadLag are all always-on core sources)
+std::system() on Windows -> shells out via `cmd.exe /c <string>`; a string that both starts
+                          and ends with `"` and has >2 total quote chars gets its outer chars
+                          silently stripped by cmd.exe's legacy parser, corrupting multi-path
+                          quoted commands - wrap the WHOLE string in one extra outer quote
+                          pair to work around it (Windows-only; breaks POSIX /bin/sh -c)
+cmd.exe extensionless exe -> cmd.exe (not raw CreateProcess) resolves a quoted path lacking
+                          an extension via PATHEXT even with directory components present -
+                          MinGW gcc's auto-appended ".exe" on `-o name` doesn't need to be
+                          accounted for by the caller
+```
+
+**Docs updated:** `docs/ALGORITHM_ROADMAP_PHASE3.md` status table (DT1 Open -> Done, 26/32
+shipped); `docs/algorithm_backlog.md` ("Code generation" moved to "Already done");
+`docs/superpowers/specs/2026-06-30-code-generation-design.md` (design, already committed);
+this report's new Part 72 section.

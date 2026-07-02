@@ -62,6 +62,11 @@
 #include <numbers>
 #include <random>
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <iomanip>
+#include <optional>
+#include <sstream>
 
 using Catch::Matchers::WithinRel;
 using Catch::Matchers::WithinAbs;
@@ -10277,4 +10282,216 @@ TEST_CASE("LPMPC isHealthy reflects LP convergence under a starved iteration bud
     mpc.computeRef(x, 1.0);
 
     REQUIRE_FALSE(mpc.isHealthy());
+}
+
+// =============================================================================
+// Code generation (Phase 4 DT1) - golden-file tests
+// =============================================================================
+namespace codegen_test {
+
+namespace fs = std::filesystem;
+
+inline const std::string kCCompiler = CTRL_C_COMPILER_PATH;
+
+// std::system() on Windows shells out via `cmd.exe /c <string>`. cmd.exe's legacy argument
+// parser strips the very first and last characters of that string whenever both are `"` and
+// the string contains more than two quote characters total - exactly what every multi-path
+// quoted command below builds - corrupting the inner quoting (observed as "The filename,
+// directory name, or volume label syntax is incorrect."). Wrapping the whole string in one
+// extra outer quote pair makes cmd.exe strip that (harmless) pair instead, leaving the real
+// quoting intact. POSIX's `/bin/sh -c` has no such bug and would mis-parse the extra pair, so
+// this wrapping is Windows-only.
+inline int runSystem(const std::string &cmd)
+{
+#ifdef _WIN32
+    return std::system(("\"" + cmd + "\"").c_str());
+#else
+    return std::system(cmd.c_str());
+#endif
+}
+
+// Writes the generated .h/.c pair plus a small harness main() that reads doubles from
+// inputs.txt (one per line), calls controller_step() on each, and writes outputs.txt
+// (one per line, full double precision). Compiles standalone (no Eigen/lib link) and runs it.
+// Returns std::nullopt if the compiler invocation or the generated program fails.
+inline std::optional<std::vector<double>> runGeneratedC(
+    const ctrl::GeneratedCode &code,
+    const std::vector<double> &inputs,
+    const std::string &tag)
+{
+    fs::path dir = fs::temp_directory_path() / ("ctrl_codegen_" + tag);
+    fs::create_directories(dir);
+
+    {
+        std::ofstream h(dir / "controller_gen.h");
+        h << code.header;
+    }
+    {
+        std::ofstream c(dir / "controller_gen.c");
+        c << code.source;
+    }
+    {
+        std::ofstream m(dir / "harness.c");
+        m << "#include \"controller_gen.h\"\n"
+          << "#include <stdio.h>\n"
+          << "int main(int argc, char** argv) {\n"
+          << "    FILE* in = fopen(argv[1], \"r\");\n"
+          << "    FILE* out = fopen(argv[2], \"w\");\n"
+          << "    double x;\n"
+          << "    while (fscanf(in, \"%lf\", &x) == 1) {\n"
+          << "        fprintf(out, \"%.17g\\n\", controller_step(x));\n"
+          << "    }\n"
+          << "    fclose(in);\n"
+          << "    fclose(out);\n"
+          << "    return 0;\n"
+          << "}\n";
+    }
+    {
+        std::ofstream inf(dir / "inputs.txt");
+        for (double x : inputs) inf << std::setprecision(17) << x << "\n";
+    }
+
+    const fs::path exe = dir / "harness_exe";
+    std::ostringstream cmd;
+    cmd << "\"" << kCCompiler << "\" -std=c99 -o \"" << exe.string() << "\" \""
+        << (dir / "controller_gen.c").string() << "\" \"" << (dir / "harness.c").string() << "\"";
+    if (runSystem(cmd.str()) != 0) return std::nullopt;
+
+    const fs::path outputs = dir / "outputs.txt";
+    std::ostringstream runCmd;
+    runCmd << "\"" << exe.string() << "\" \"" << (dir / "inputs.txt").string() << "\" \""
+           << outputs.string() << "\"";
+    if (runSystem(runCmd.str()) != 0) return std::nullopt;
+
+    std::vector<double> result;
+    std::ifstream of(outputs);
+    double v;
+    while (of >> v) result.push_back(v);
+    return result;
+}
+
+} // namespace codegen_test
+
+TEST_CASE("Code generation: PID golden file matches DiscretePID", "[code_generation]")
+{
+    if (codegen_test::kCCompiler.empty())
+        SKIP("no C compiler (gcc/cc/clang) found on PATH; skipping code-generation golden-file test");
+
+    ctrl::PIDParams p;
+    p.Kp = 2.0; p.Ki = 0.5; p.Kd = 0.1; p.N = 50.0; p.Kb = 1.0;
+    p.uMin = -5.0; p.uMax = 5.0;
+
+    ctrl::DiscretePID pid(p, Ts);
+    const std::vector<double> inputs = {0.1, 0.5, 1.0, 3.0, 6.0, 6.0, 6.0, -6.0, -6.0, 0.0, 0.2};
+    std::vector<double> expected;
+    for (double e : inputs) expected.push_back(pid.compute(e));
+
+    const auto code = ctrl::generateControllerC(p, Ts);
+    const auto actual = codegen_test::runGeneratedC(code, inputs, "pid");
+    REQUIRE(actual.has_value());
+    REQUIRE(actual->size() == expected.size());
+    for (size_t i = 0; i < expected.size(); ++i)
+        REQUIRE_THAT(actual->at(i), WithinAbs(expected[i], 1e-9));
+}
+
+TEST_CASE("Code generation: SMC golden file matches DiscreteSMC", "[code_generation]")
+{
+    if (codegen_test::kCCompiler.empty())
+        SKIP("no C compiler (gcc/cc/clang) found on PATH; skipping code-generation golden-file test");
+
+    ctrl::SMCParams p;
+    p.c_e = 1.0; p.c_de = 0.05; p.K = 3.0; p.phi = 0.2;
+    p.uMin = -4.0; p.uMax = 4.0;
+
+    ctrl::DiscreteSMC smc(p, Ts);
+    const std::vector<double> inputs = {0.05, 0.3, 0.9, 2.0, -0.5, -2.0, 0.0, 0.01, -0.01};
+    std::vector<double> expected;
+    for (double e : inputs) expected.push_back(smc.compute(e));
+
+    const auto code = ctrl::generateControllerC(p, Ts);
+    const auto actual = codegen_test::runGeneratedC(code, inputs, "smc");
+    REQUIRE(actual.has_value());
+    REQUIRE(actual->size() == expected.size());
+    for (size_t i = 0; i < expected.size(); ++i)
+        REQUIRE_THAT(actual->at(i), WithinAbs(expected[i], 1e-9));
+}
+
+TEST_CASE("Code generation: LeadLag golden file matches DiscreteLeadLag", "[code_generation]")
+{
+    if (codegen_test::kCCompiler.empty())
+        SKIP("no C compiler (gcc/cc/clang) found on PATH; skipping code-generation golden-file test");
+
+    ctrl::LeadLagParams p;
+    p.continuousZero = 1.0; p.continuousPole = 10.0; p.gain = 2.0;
+
+    ctrl::DiscreteLeadLag ll(p, Ts);
+    const std::vector<double> inputs = {0.0, 1.0, 0.5, -0.5, -1.0, 2.0, 0.0, 0.3};
+    std::vector<double> expected;
+    for (double u : inputs) expected.push_back(ll.compute(u));
+
+    const auto code = ctrl::generateControllerC(p, Ts);
+    const auto actual = codegen_test::runGeneratedC(code, inputs, "leadlag");
+    REQUIRE(actual.has_value());
+    REQUIRE(actual->size() == expected.size());
+    for (size_t i = 0; i < expected.size(); ++i)
+        REQUIRE_THAT(actual->at(i), WithinAbs(expected[i], 1e-9));
+}
+
+TEST_CASE("Code generation: PID rejects a corrector when native anti-windup is active", "[code_generation]")
+{
+    ctrl::PIDParams p;
+    p.Kp = 1.0; p.Ki = 0.5; p.Kb = 1.0; // native anti-windup active
+    ctrl::CodeGenParams cfg;
+    cfg.corrector = ctrl::AntiWindupConfig{-5.0, 5.0, 1.0};
+    REQUIRE_THROWS_AS(ctrl::generateControllerC(p, 0.01, cfg), std::invalid_argument);
+}
+
+TEST_CASE("Code generation: SMC+corrector golden file matches AntiWindupWrapper(DiscreteSMC)", "[code_generation]")
+{
+    if (codegen_test::kCCompiler.empty())
+        SKIP("no C compiler (gcc/cc/clang) found on PATH; skipping code-generation golden-file test");
+
+    ctrl::SMCParams p;
+    p.c_e = 1.0; p.c_de = 0.05; p.K = 3.0; p.phi = 0.2;
+    p.uMin = -10.0; p.uMax = 10.0; // inner has wide limits; corrector applies the real bound
+
+    auto smc = std::make_shared<ctrl::DiscreteSMC>(p, Ts);
+    ctrl::AntiWindupWrapper wrapper(smc, -4.0, 4.0, 0.8);
+
+    const std::vector<double> inputs = {0.05, 0.3, 0.9, 2.0, -0.5, -2.0, 0.0, 0.01, -0.01};
+    std::vector<double> expected;
+    for (double e : inputs) expected.push_back(wrapper.compute(e));
+
+    ctrl::CodeGenParams cfg;
+    cfg.corrector = ctrl::AntiWindupConfig{-4.0, 4.0, 0.8};
+    const auto code = ctrl::generateControllerC(p, Ts, cfg);
+    const auto actual = codegen_test::runGeneratedC(code, inputs, "smc_corrector");
+    REQUIRE(actual.has_value());
+    REQUIRE(actual->size() == expected.size());
+    for (size_t i = 0; i < expected.size(); ++i)
+        REQUIRE_THAT(actual->at(i), WithinAbs(expected[i], 1e-9));
+}
+
+TEST_CASE("Code generation: emitted sources are freestanding (no malloc/new/STL/Eigen)", "[code_generation]")
+{
+    static const std::vector<std::string> kForbidden = {
+        // " new " (spaces both sides) - not "new " - so PID's legitimate "d_new" derivative
+        // state variable (e.g. "const double d_new = ...") isn't a false positive: the real
+        // C++ `new` keyword is always preceded by whitespace or punctuation, never by an
+        // identifier character.
+        "malloc", "calloc", "realloc", " new ", "std::", "#include <vector",
+        "#include <memory", "#include <Eigen", "#include <string"
+    };
+
+    auto checkFreestanding = [](const ctrl::GeneratedCode &code, const std::string &tag) {
+        for (const auto &token : kForbidden) {
+            INFO(tag << ": forbidden token \"" << token << "\"");
+            CHECK(code.header.find(token) == std::string::npos);
+            CHECK(code.source.find(token) == std::string::npos);
+        }
+    };
+
+    checkFreestanding(ctrl::generateControllerC(ctrl::PIDParams{}, 0.01), "PID");
+    checkFreestanding(ctrl::generateControllerC(ctrl::SMCParams{}, 0.01), "SMC");
+    checkFreestanding(ctrl::generateControllerC(ctrl::LeadLagParams{}, 0.01), "LeadLag");
 }

@@ -61,6 +61,30 @@ MCU, so there is nothing to wrap at runtime.
 - `float`-precision emission - same pattern as `BasicPID<float>` already existing alongside
   `BasicPID<double>`, deferred to keep this diff reviewable.
 
+**Candidates for the next code-generation iteration** (identified during this phase's scoping
+discussion, not yet designed/committed to): the following all share the same "step-based"
+shape - fixed, single-pass, O(1) update, small fixed `static` state, no internal loop or
+iteration - so each is a near-zero-cost extension of this phase's emitter framework once there is
+a concrete need:
+- `DiscreteADRC` - its entire state is one `Eigen::Vector3d` (extended-state-observer `z1`/`z2`/
+  `z3`) plus a couple of scalars (`u_prev_`, the derived `beta1_`/`beta2_`/`beta3_` observer
+  gains); single-pass ESO update, no iteration.
+- `SuperTwistingSMC` - identical shape to `DiscreteSMC`, plus exactly one extra integrator state
+  (`v_`). Excluded from this phase only because scope was narrowed to the first-order `DiscreteSMC`
+  variant for simplicity, not for any memory/CPU reason.
+- `NotchFilter` / `ResonantController` - plain biquad IIR filters (5-6 `static double`s each,
+  `b0_`/`b1_`/`b2_`/`a1_`/`a2_` plus two-sample input/output history); neither has an `IController`
+  base today, so their generation would be the simplest of the batch.
+- `ComputationalDelayWrapper` / `EventTriggeredWrapper` - trivial correctors (one buffered scalar;
+  one held value + a threshold/trigger-count), natural second and third corrector types alongside
+  this phase's `AntiWindupWrapper`.
+
+Everything else in `lib/` either needs a lookup table sized by a runtime parameter
+(`RepetitiveController`'s period buffer), arbitrary user-supplied callback functions
+(`FeedbackLinearisationController`'s drift/gain functions aren't flat numeric constants), or an
+iterative solve (the MPC/QP family, GP, NN controllers) - a materially bigger lift than this
+phase's three, and not assumed to be in scope for "the next iteration" without further scoping.
+
 ## Decision log (resolved before implementation)
 
 1. **Free functions in a new `lib/CodeGenC.h`/`.cpp`, not a class.** `GeneratedCode
