@@ -772,6 +772,79 @@ class ILCCtrl:
 
 
 # ---------------------------------------------------------------------------
+# 4b. AdaptiveSMC (library ctrl.AdaptiveSMC) - online switching-gain SMC
+# ---------------------------------------------------------------------------
+class AdaptiveSMCLibCtrl:
+    """Heading SMC using the general-purpose library ctrl.AdaptiveSMC.
+
+    Unlike ASMCCtrl (the paper's full-cascade adaptive SMC), this wires the
+    library's AdaptiveSMC on the heading-error sliding surface: the switching
+    gain grows online until the rudder confines the trajectory to the sliding
+    band, so no a-priori bound on the (unknown, current/wind-driven) disturbance
+    is required. Sign convention: the SMC takes e = y - r = (psi - psi_ref).
+    """
+    def __init__(self, plant_params):
+        Ts  = plant_params["integration"]["Ts"]
+        lim = plant_params["actuator_limits"]
+        self._Ts   = Ts
+        self._dmax = lim["delta_max_rad"]
+        self._speed = _SpeedPI(Ts, _n_ss(plant_params), n_max=lim["n_max_rps"])
+
+        # Tuning (also drives the pure-Python fallback so behaviour matches).
+        self._c_e = 1.0; self._c_de = 0.4
+        self._gamma = 15.0; self._eps = 0.01; self._phi = 0.08
+        self._K = 0.1; self._Kmin = 0.0; self._Kmax = 1.0
+        self._e_prev = 0.0
+
+        self._ctrl = None
+        if CTRL_AVAILABLE:
+            try:
+                sp = ctrl.AdaptiveSMCParams()
+                sp.c_e = self._c_e; sp.c_de = self._c_de
+                sp.gamma = self._gamma; sp.epsilon = self._eps; sp.phi = self._phi
+                sp.K0 = self._K; sp.Kmin = self._Kmin; sp.Kmax = self._Kmax
+                sp.uMin = -self._dmax; sp.uMax = self._dmax
+                self._ctrl = ctrl.AdaptiveSMC(sp, Ts)
+            except Exception:
+                self._ctrl = None
+
+    def name(self): return "AdaptiveSMC"
+
+    def reset(self):
+        if self._ctrl:
+            try: self._ctrl.reset()
+            except Exception: pass
+        self._K = 0.1; self._e_prev = 0.0
+        self._speed.reset()
+
+    def compute(self, x_ref, plant_state, t):
+        xd, yd, xd_d, yd_d, *_ = x_ref
+        u, v, r, psi, x, y = plant_state
+        psi_d   = _heading_from_ref(xd_d, yd_d)
+        psi_ref = _psi_cmd(xd, yd, xd_d, yd_d, x, y, psi_d)
+        psi_err = _wrap(psi - psi_ref)          # e = y - r (SMC convention)
+
+        if self._ctrl:
+            try:
+                delta = self._ctrl.compute(psi_err)
+            except Exception:
+                delta = 0.0
+        else:
+            s = self._c_e * psi_err + self._c_de * (psi_err - self._e_prev)
+            self._e_prev = psi_err
+            if self._phi > 1e-12:
+                sat = max(-1.0, min(1.0, s / self._phi))
+            else:
+                sat = 1.0 if s > 0 else (-1.0 if s < 0 else 0.0)
+            delta = -self._K * sat
+            self._K = min(self._Kmax, max(self._Kmin,
+                          self._K + self._Ts * self._gamma * (abs(s) - self._eps)))
+        delta = max(-self._dmax, min(self._dmax, delta))
+        n = self._speed.compute(max(0.5, _speed_from_ref(xd_d, yd_d)), u)
+        return n, delta
+
+
+# ---------------------------------------------------------------------------
 # Factory
 # ---------------------------------------------------------------------------
 def make_controllers(plant_params):
@@ -780,6 +853,7 @@ def make_controllers(plant_params):
         PIDCtrl(plant_params),
         SMCCtrl(plant_params),
         ASMCCtrl(plant_params),
+        AdaptiveSMCLibCtrl(plant_params),
         MPCCtrl(plant_params),
         LQRCtrl(plant_params),
         MRACCtrl(plant_params),

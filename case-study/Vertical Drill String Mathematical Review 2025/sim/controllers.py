@@ -141,6 +141,52 @@ class SMCCtrl(DrillController):
         return omega_ref + self._smc.compute(omega_b - omega_ref)
 
 
+class TerminalSMCCtrl(DrillController):
+    """Nonsingular terminal SMC - finite-time convergence, natural for the
+    finite-time stick-slip suppression the drill-string study targets."""
+    def __init__(self, p: dict):
+        Ts = p['Ts']
+        tp = ctrl.NonsingularTerminalSMCParams()
+        tp.c_e = 1.0; tp.beta = 1.0; tp.gamma = 1.5
+        tp.K = 5.0; tp.eta = 1.0; tp.phi = 0.5
+        tp.uMin = -30.0; tp.uMax = 30.0
+        self._smc = ctrl.NonsingularTerminalSMC(tp, Ts)
+
+    def name(self): return "TerminalSMC"
+
+    def reset(self):
+        self._smc.reset()
+
+    def compute(self, omega_ref, omega_b, phi, t):
+        # SMC convention: compute(y - ref); output is a correction on omega_ref
+        return omega_ref + self._smc.compute(omega_b - omega_ref)
+
+
+class SuperTwistingSMCCtrl(DrillController):
+    """2nd-order super-twisting SMC - continuous (chattering-free) control with
+    finite-time convergence; contrasts with the 1st-order boundary-layer SMC."""
+    def __init__(self, p: dict):
+        Ts = p['Ts']
+        stp = ctrl.SuperTwistingParams()
+        # Derivative-weighted surface (c_de >> ) so s tracks the error RATE and
+        # crosses zero as the reference is tracked, keeping the super-twisting
+        # integrator from winding up; gentle gains match the near-unity
+        # top-drive -> bit-speed gain.
+        stp.c_e = 0.4; stp.c_de = 1.0
+        stp.K1 = 1.2; stp.K2 = 0.5        # K2 > K1^2/4 = 0.36 (Moreno-Osorio)
+        stp.uMin = -30.0; stp.uMax = 30.0
+        self._smc = ctrl.SuperTwistingSMC(stp, Ts)
+
+    def name(self): return "SuperTwistingSMC"
+
+    def reset(self):
+        self._smc.reset()
+
+    def compute(self, omega_ref, omega_b, phi, t):
+        # SMC convention: compute(y - ref); output is a correction on omega_ref
+        return omega_ref + self._smc.compute(omega_b - omega_ref)
+
+
 # ---------------------------------------------------------------------------
 # 5. LQR (full-state, reference compensation)
 # ---------------------------------------------------------------------------
@@ -627,7 +673,7 @@ class CBFCtrl(DrillController):
 # Factory
 # ---------------------------------------------------------------------------
 def make_controllers(plant_params: dict):
-    """Return a list of all 17 DrillController instances."""
+    """Return a list of all 19 DrillController instances."""
     controllers = [OpenLoopCtrl()]
     if not CTRL_AVAILABLE:
         print("WARNING: ctrl_toolbox not available - only OpenLoop will run.")
@@ -638,6 +684,8 @@ def make_controllers(plant_params: dict):
         PIDCtrl(plant_params),
         ADRCCtrl(plant_params),
         SMCCtrl(plant_params),
+        TerminalSMCCtrl(plant_params),
+        SuperTwistingSMCCtrl(plant_params),
         LQRCtrl(plant_params, ss),
         MPCCtrl(plant_params, ss),
         MRACCtrl(plant_params),

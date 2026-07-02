@@ -1,14 +1,20 @@
 """
 run.py - Controller Toolbox build & test runner.
 
-Six automated phases (no user input required):
+Eight automated phases (no user input required):
   1. Non-ASCII clean    - auto-replace known non-standard characters.
-  2. Compile            - run compile.bat (Windows) or compile.sh (Linux/macOS).
-  3. Python bindings    - configure + build ctrl_toolbox binding + smoke test.
-  4. Run C++ executables - execute each binary one-by-one, stream output, print summary.
-  5. Python examples    - run examples/python/exNN_*.py via conda.
-  6. Python case studies - run case-study/*/sim/main.py via conda.
-  7. Status + report    - refresh docs/case_study_status.md and build a static
+  2. NaN-guard scan     - tools/check_nan_guard.py static source scan; every
+                          IController::compute() override must lead with a
+                          non-finite guard. Runs before the (slow) compile for
+                          fast feedback since this is a very common CI failure.
+                          Non-fatal here, but a violation makes run.py exit
+                          non-zero at the end (mirroring CI).
+  3. Compile            - run compile.bat (Windows) or compile.sh (Linux/macOS).
+  4. Python bindings    - configure + build ctrl_toolbox binding + smoke test.
+  5. Run C++ executables - execute each binary one-by-one, stream output, print summary.
+  6. Python examples    - run examples/python/exNN_*.py via conda.
+  7. Python case studies - run case-study/*/sim/main.py via conda.
+  8. Status + report    - refresh docs/case_study_status.md and build a static
                           HTML report (docs/report.html) over the on-going
                           studies' freshly-written logs.
 """
@@ -373,12 +379,68 @@ def phase_clean():
 
 
 # ---------------------------------------------------------------------------
-# Phase 2 — Compile
+# Phase 2 - NaN-guard scan (static)
+# ---------------------------------------------------------------------------
+
+def phase_nan_guard():
+    """Static scan for the NaN-guard rule (tools/check_nan_guard.py).
+
+    Every IController::compute() override must lead with a non-finite guard
+    (isfinite / ctrl::sanitize). This is a fast source scan (no build needed)
+    and a very common CI failure, so it runs early - before the slow compile -
+    for immediate feedback.
+
+    Non-fatal within the run (so the remaining phases still produce
+    diagnostics), but the caller records the result and makes run.py exit
+    non-zero at the very end, mirroring CI. On a violation this prints a
+    distinctive '[NAN-GUARD] FAIL' marker that phase_bug_report() will capture
+    (the checker's own 'missing the NaN guard' header would otherwise be hidden
+    by the 'nan guard' safe-phrase filter).
+
+    Returns True if any violation was found, False otherwise.
+    """
+    _divider()
+    print('  Phase 2 - NaN-guard scan')
+    _divider()
+    print()
+
+    checker = os.path.join('tools', 'check_nan_guard.py')
+    if not os.path.isfile(checker):
+        print(f'  [SKIP] {checker} not found\n')
+        return False
+
+    try:
+        proc = subprocess.run(
+            [sys.executable, checker],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, encoding='utf-8', errors='backslashreplace',
+        )
+        sys.stdout.write(proc.stdout)
+        rc = proc.returncode
+    except Exception as exc:
+        print(f'  ERROR launching NaN-guard check: {exc}\n')
+        return False
+
+    print()
+    if rc == 0:
+        print('  NaN-guard scan PASSED - every compute() override is guarded.\n')
+        return False
+
+    # Distinctive, greppable marker. The hyphen in '[NAN-GUARD]' keeps it clear of
+    # the 'nan guard' safe-phrase in phase_bug_report(), while 'fail' + 'nan'
+    # ensure the failure lands in bug_report.txt.
+    print(f'  [NAN-GUARD] FAIL: unguarded compute() override(s) detected (exit {rc}).')
+    print('  Fix per CONTRIBUTING.md#numerical-safety-rules before pushing.\n')
+    return True
+
+
+# ---------------------------------------------------------------------------
+# Phase 3 — Compile
 # ---------------------------------------------------------------------------
 
 def phase_compile():
     _divider()
-    print('  Phase 2 — Compile')
+    print('  Phase 3 — Compile')
     _divider()
     print()
 
@@ -412,7 +474,7 @@ def phase_compile():
 
 
 # ---------------------------------------------------------------------------
-# Phase 3 — Build Python bindings + smoke test
+# Phase 4 — Build Python bindings + smoke test
 # ---------------------------------------------------------------------------
 
 def phase_bindings():
@@ -426,7 +488,7 @@ def phase_bindings():
     if the binding build fails.
     """
     _divider()
-    print('  Phase 3 — Python bindings build + smoke test')
+    print('  Phase 4 — Python bindings build + smoke test')
     _divider()
     print()
 
@@ -537,7 +599,7 @@ def phase_bindings():
 
 
 # ---------------------------------------------------------------------------
-# Phase 4 — Run one-by-one
+# Phase 5 — Run one-by-one
 # ---------------------------------------------------------------------------
 
 def _is_build_exe(fpath, fname):
@@ -555,7 +617,7 @@ def _is_build_exe(fpath, fname):
 
 def phase_run():
     _divider()
-    print('  Phase 4 — Run executables')
+    print('  Phase 5 — Run executables')
     _divider()
     print()
 
@@ -632,7 +694,7 @@ def phase_run():
 
 
 # ---------------------------------------------------------------------------
-# Phase 5 — Run Python binding examples
+# Phase 6 — Run Python binding examples
 # ---------------------------------------------------------------------------
 
 def phase_python():
@@ -643,7 +705,7 @@ def phase_python():
     Scripts that import _setup_bindings require the .pyd to be built first.
     """
     _divider()
-    print('  Phase 5 — Python binding examples')
+    print('  Phase 6 — Python binding examples')
     _divider()
     print()
 
@@ -725,7 +787,7 @@ def phase_python():
 
 
 # ---------------------------------------------------------------------------
-# Phase 5 — Bug report (scan completed log for [FAIL] entries)
+# Bug report (post-run scan of the completed log for [FAIL] entries)
 # ---------------------------------------------------------------------------
 
 def phase_bug_report(log_path):
@@ -926,7 +988,7 @@ def phase_bug_report(log_path):
 
 
 # ---------------------------------------------------------------------------
-# Phase 6 — Run Python-only case studies
+# Phase 7 — Run Python-only case studies
 # ---------------------------------------------------------------------------
 
 def phase_python_case_studies():
@@ -937,7 +999,7 @@ def phase_python_case_studies():
     do not abort the overall run (same policy as Phase 5).
     """
     _divider()
-    print('  Phase 6 - Python case studies')
+    print('  Phase 7 - Python case studies')
     _divider()
     print()
 
@@ -1012,7 +1074,7 @@ def phase_python_case_studies():
 
 
 # ---------------------------------------------------------------------------
-# Phase 7 — Refresh case-study status + generate static HTML report
+# Phase 8 — Refresh case-study status + generate static HTML report
 # ---------------------------------------------------------------------------
 
 def phase_report():
@@ -1029,7 +1091,7 @@ def phase_report():
     degrades to plain tables without it) in the soft_robotics env.
     """
     _divider()
-    print('  Phase 7 - Case-study status + static report')
+    print('  Phase 8 - Case-study status + static report')
     _divider()
     print()
 
@@ -1111,8 +1173,10 @@ if __name__ == '__main__':
     sys.stdout = _Tee(sys.__stdout__, _log_file)
     print(f'  Log: {log_path}\n')
 
+    nan_guard_failed = False
     try:
         phase_clean()
+        nan_guard_failed = phase_nan_guard()  # static; non-fatal but sets exit code below
         phase_compile()
         phase_bindings()   # build ctrl_toolbox .pyd + smoke test
         phase_run()
@@ -1124,3 +1188,11 @@ if __name__ == '__main__':
         _log_file.close()
 
     phase_bug_report(log_path)
+
+    # A NaN-guard violation is a policy failure that CI rejects; make the local
+    # run mirror that by exiting non-zero (after the full run + bug report, so all
+    # diagnostics are still produced).
+    if nan_guard_failed:
+        print('\n  RUN FAILED: NaN-guard violation(s) detected - see the '
+              'Phase 2 output above and bug_report.txt.')
+        sys.exit(1)

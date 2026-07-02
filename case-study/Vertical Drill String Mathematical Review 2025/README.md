@@ -72,6 +72,8 @@ The `sim/` module sets the binding path 4 levels up: `_ROOT = dirname(dirname(di
 | 2 | PID | `ctrl.DiscretePID` | Error e = omega_ref - omega_b; proportional-integral on bit speed |
 | 3 | ADRC | `ctrl.DiscreteADRC` | omega_o=3.0, Ts=0.1 -> omega_o*Ts=0.30 < 0.5 (check); ESO estimates Stribeck friction as total disturbance |
 | 4 | SMC | `ctrl.DiscreteSMC` | compute(y - ref) convention; robust switching against stick-slip friction |
+| 4b | TerminalSMC | `ctrl.NonsingularTerminalSMC` | Finite-time terminal sliding surface (gamma=1.5); beats 1st-order SMC on step/high-speed/reversal |
+| 4c | SuperTwistingSMC | `ctrl.SuperTwistingSMC` | 2nd-order super-twisting; continuous (chattering-free) control, derivative-weighted surface to avoid integrator wind-up |
 | 5 | LQR | `ctrl.DiscreteLQR` | Full-state feedback; x_ref=[phi_ss, omega_ref]; u = u_ss + lqr.compute(x, x_ref)[0] |
 | 6 | MPC | `ctrl.DiscreteMPC` | ZOH linearised model; Np=20, Nu=5; handles omega_t actuator limits |
 | 7 | MRAC | `ctrl.MRACController` | `set_reference(r)` then `compute(y_plant)` - NOT compute(r-y) |
@@ -86,7 +88,7 @@ The `sim/` module sets the binding path 4 levels up: `_ROOT = dirname(dirname(di
 | 16 | ESNCtrl | `ctrl.EchoStateNetwork` | Reservoir trained on stick-slip data; W_out via ridge regression |
 | 17 | CBFSafety | `ctrl.CBFSafetyFilter` | Barrier on omega_b overshoot; wraps PID; prevents over-speed |
 
-**Total runs: 17 controllers * 5 scenarios = 85**
+**Total runs: 19 controllers * 5 scenarios = 95**
 
 ---
 

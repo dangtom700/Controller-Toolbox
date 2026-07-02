@@ -5,7 +5,7 @@
 *Ocean Engineering* 321 (2025) 120432.
 DOI: [10.1016/j.oceaneng.2025.120432](https://doi.org/10.1016/j.oceaneng.2025.120432)
 
-**Status:** Python-only | 12 controllers | 5 scenarios | 60 runs
+**Status:** Python-only | 13 controllers | 5 scenarios | 65 runs
 
 ---
 
@@ -117,6 +117,7 @@ All 19 identified parameters from Table 5 of Meng et al. (2025), obtained by SRU
 | 2 | PID | Feedback | DiscretePID on psi_err | Cross-track correction via atan law |
 | 3 | SMC | Feedback | 1st-order sliding surface on psi_err + integral | Ks=0.3, tanh switching |
 | 4 | ASMC | Cascade nonlinear | Full paper Section 4.1 | Paper result; disturbance feedforward |
+| 4b | AdaptiveSMC | Adaptive SMC | Library `ctrl.AdaptiveSMC` on psi_err; switching gain adapts online (no a-priori disturbance bound) | Off-the-shelf comparison to the bespoke ASMC (row 4) |
 | 5 | MPC | Predictive | DiscreteMPC, linearized [psi,r] model | Np=20, Nc=5, ZOH c2d |
 | 6 | LQR | State feedback | Discrete LQR on [psi_e, r] | Bryson Q=diag(16,4), R=3 |
 | 7 | MRAC | Adaptive | MRACController; set_reference+compute(psi) | am=-0.15, gamma=0.5 |

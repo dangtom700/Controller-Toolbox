@@ -198,6 +198,48 @@ class PIDCtrl(AETMController):
 
 
 # ---------------------------------------------------------------------------
+# 2b. FractionalPID (PI^lambda D^mu) - fractional-order dual loop
+# ---------------------------------------------------------------------------
+class FOPIDCtrl(AETMController):
+    """Fractional-order PID (PI^lambda D^mu) dual loop.
+
+    A superset of the integer PID: the fractional integral/derivative orders are
+    extra robustness knobs well-suited to this diffusion- and transport-delay
+    (60 s) dominated thermal loop. Kp is kept dominant (the plant is type-1 from
+    u to Thout, so Kp alone already gives zero steady-state error), so tracking
+    matches the tuned PID while lambda/mu shape the low-/high-frequency action -
+    the fractional derivative (mu < 1) is a gentler, delay-robust alternative to
+    full D. Same sign convention as PIDCtrl: e = Thout - ref.
+    """
+    def __init__(self, p: dict):
+        Ts = p["Ts"]; ur = p["u_rate_max"]
+
+        def _mk():
+            fp = ctrl.FOPIDParams()
+            fp.Kp = 4.0e-5; fp.Ki = 5.0e-8; fp.Kd = 1.0e-4
+            fp.lam = 0.9;   fp.mu = 0.7          # fractional integral/derivative orders
+            fp.wb = 1.0e-3; fp.wh = 10.0; fp.N = 4   # Oustaloup band for the slow loop
+            fp.uMin = -ur;  fp.uMax = ur; fp.Kaw = 0.5
+            return ctrl.FractionalOrderPID(fp, Ts)
+
+        self._fo1 = _mk()   # e1 -> u1 (m1_dot)
+        self._fo0 = _mk()   # e2 -> u2 (m2_dot)
+
+    def name(self): return "FOPID"
+
+    def reset(self):
+        self._fo0.reset(); self._fo1.reset()
+
+    def compute(self, refs, plant_state, t, outs):
+        Thout1, Thout2 = outs[0], outs[1]
+        e1 = Thout1 - refs[0]
+        e2 = Thout2 - refs[1]
+        u1 = self._fo1.compute(e1)
+        u0 = self._fo0.compute(e2)
+        return (u1, u0)
+
+
+# ---------------------------------------------------------------------------
 # 3. ADRC - decoupled dual loop, e = y - ref convention
 # ---------------------------------------------------------------------------
 class ADRCCtrl(AETMController):
@@ -553,7 +595,7 @@ class ILCCtrl(AETMController):
 # Factory
 # ---------------------------------------------------------------------------
 def make_controllers(plant_params: dict):
-    """Return a list of all 12 AETMController instances."""
+    """Return a list of all 13 AETMController instances."""
     ctrl_list = [OpenLoopCtrl()]
     if not CTRL_AVAILABLE:
         print("WARNING: ctrl_toolbox not available - only OpenLoop will run.")
@@ -564,6 +606,7 @@ def make_controllers(plant_params: dict):
 
     ctrl_list += [
         PIDCtrl(plant_params),
+        FOPIDCtrl(plant_params),
         ADRCCtrl(plant_params),
         SMCCtrl(plant_params),
         LQRCtrl(plant_params, ss_model, trim),

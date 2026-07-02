@@ -97,7 +97,7 @@ Integration: 4th-order Runge-Kutta at `Ts`; the lumped transport delay is applie
 
 ---
 
-## Controllers (12)
+## Controllers (13)
 
 All controllers share `compute(refs, plant_state, t, outs) -> (u1, u2)`. Sign convention: increasing flow rate (`m1` or `m2`) reduces the corresponding outlet temperature (negative-static-gain process within the monotonic operating branch) - mirrors the documented "Solar Cooker sign convention" precedent (CLAUDE.md).
 
@@ -105,6 +105,7 @@ All controllers share `compute(refs, plant_state, t, outs) -> (u1, u2)`. Sign co
 |---|------|--------------------|--------------|
 | 1 | OpenLoop | - | Holds flow rates constant (`u=0`); baseline |
 | 2 | PID | `ctrl.DiscretePID` | `e = y - ref`, positive gains; m1/m2 are already integrators of u (Eq. 14), so P alone gives zero steady-state error - Ki kept tiny, Kd small (60s delay makes derivative action on recent samples unreliable) |
+| 2b | FOPID | `ctrl.FractionalOrderPID` | Fractional-order PI^lambda D^mu (lambda=0.9, mu=0.7, Oustaloup band [1e-3,10]); Kp-dominant so it tracks like PID while fractional orders suit the diffusion/60s-delay loop - lower IAE than integer PID in all 5 scenarios |
 | 3 | ADRC | `ctrl.DiscreteADRC` | `omega_o=0.04, omega_c=0.015`, `Ts=0.5 -> omega_o*Ts=0.02<0.5` (check); bandwidth kept well below `1/tau_d` so the ESO does not chase the 60s delay |
 | 4 | SMC | `ctrl.DiscreteSMC` | Native `compute(y-ref)` convention; boundary layer `phi` sized to the small (~10K) typical operating error |
 | 5 | LQR | `ctrl.DiscreteLQR` | Full 3-state regulator toward the open-loop trim point; no integral action - does not re-solve the trim if the setpoint changes or under sustained disturbance |
@@ -116,7 +117,7 @@ All controllers share `compute(refs, plant_state, t, outs) -> (u1, u2)`. Sign co
 | 11 | NeuralPID | `ctrl.NeuralPID` | Standard `compute(r-y)` convention, **negative** `plant_gain` (mirrors the documented Solar Cooker NeuralPID precedent) |
 | 12 | ILC | `ctrl.ILC` | Two-phase P-type learning on the m1/Thout1 loop (`N_TRIAL=400`, 200s at Ts=0.5); m2/Thout2 loop uses plain PID |
 
-**Total runs: 12 controllers * 5 scenarios = 60**
+**Total runs: 13 controllers * 5 scenarios = 65**
 
 ---
 

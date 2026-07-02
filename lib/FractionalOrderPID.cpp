@@ -56,6 +56,11 @@ namespace ctrl
 
     double FractionalDifferintegrator::compute(double x)
     {
+        // Hold-last on a non-finite input: a NaN would otherwise propagate into every
+        // section's state (y1) and poison the IIR cascade permanently.
+        if (!std::isfinite(x))
+            return sec_.empty() ? 0.0 : sec_.back().y1;
+
         // Overall gain first, then cascade the (unit-high-frequency-gain) sections.
         double v = K_ * x;
         for (Section &s : sec_)
