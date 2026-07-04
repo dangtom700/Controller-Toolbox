@@ -27,4 +27,4 @@ TODO: describe each scenario in `config/scenarios/`.
 
 ## Run
 
-Build target `differential_drive_robot_tracking_sim` (registered in compile.bat); runs in run.py Phase 4.
+Build target `differential_drive_robot_tracking_sim` (registered in compile.bat); runs in run.py Phase 5.

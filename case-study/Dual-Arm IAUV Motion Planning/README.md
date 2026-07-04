@@ -27,4 +27,4 @@ TODO: describe each scenario in `config/scenarios/`.
 
 ## Run
 
-Build target `dual_arm_iauv_motion_planning_sim` (registered in compile.bat); runs in run.py Phase 4.
+Build target `dual_arm_iauv_motion_planning_sim` (registered in compile.bat); runs in run.py Phase 5.

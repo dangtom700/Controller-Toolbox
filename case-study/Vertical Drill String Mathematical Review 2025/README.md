@@ -58,7 +58,7 @@ where:
 
 ## Python-Only Implementation
 
-This study runs as a **Python-only case study** via `sim/main.py` (Phase 6 of `run.py`). It uses `ctrl_toolbox` Python bindings directly. No C++ compilation needed; NOT in `CMakeLists.txt` or `compile.bat`.
+This study runs as a **Python-only case study** via `sim/main.py` (Phase 7 of `run.py`). It uses `ctrl_toolbox` Python bindings directly. No C++ compilation needed; NOT in `CMakeLists.txt` or `compile.bat`.
 
 The `sim/` module sets the binding path 4 levels up: `_ROOT = dirname(dirname(dirname(abspath(__file__))))`.
 
@@ -118,4 +118,4 @@ The `sim/` module sets the binding path 4 levels up: `_ROOT = dirname(dirname(di
 
 ## Status
 
-Python-only implementation present in `sim/main.py`. Discovered by Phase 6 of `run.py`.
+Python-only implementation present in `sim/main.py`. Discovered by Phase 7 of `run.py`.

@@ -32,6 +32,11 @@ silently skip (the project's own PR checklist exists because of that).
   `.inverse()` directly.
 - First statement of every `compute()` must be a non-finite guard
   (`if (!std::isfinite(signal)) return ...;` or `ctrl::sanitize(v, fallback)`).
+- If the class overrides `computeVec(const VectorXd&)` (any MIMO controller/estimator), that
+  path needs its **own** guard - `if (!v.allFinite()) return <last output>;` **before** it
+  advances any internal state - or one non-finite sample permanently poisons the state vector.
+  The scalar guard does not cover it, and `tools/check_nan_guard.py` now scans `computeVec`
+  bodies too (the `allFinite()` guard must precede the first `.noalias()`).
 - No `std::cerr`/`std::clog` outside `#ifndef NDEBUG`.
 - Document per `CONTRIBUTING.md#documentation-standard`: one `@brief` line, `@param`/`@return`
   with physical units stated, mandatory `@throws` for anything that throws (or explicit
@@ -72,8 +77,11 @@ silently skip (the project's own PR checklist exists because of that).
 
 - Build: `cmake --build build` (no `--parallel`), then the `ctrl_toolbox` binding target, then
   run `conda run -n soft_robotics -- python bindings/smoke_test.py`.
-- Run the new Catch2 test: `ctest --test-dir build -R test_catch2_advanced --output-on-failure`,
-  or filter by `[tag]` on the built executable directly.
+- Run the new Catch2 test by filtering the built executable directly:
+  `build/tests/test_catch2_advanced.exe "[tag]"`. **Do not** use `ctest -R test_catch2_advanced` -
+  it matches zero tests (verified). `catch_discover_tests` registers each `TEST_CASE` under its
+  full sentence *name*, not the executable/target name, so `ctest -R "<name substring>"` works but
+  the target name never does.
 - Walk the 17-item PR checklist in `CONTRIBUTING.md#pr-checklist` before calling it done - most
   items are exactly Steps 2-5 above restated as checkboxes; use it as the final pass, not a
   substitute for actually doing the steps.

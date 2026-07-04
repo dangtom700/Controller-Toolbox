@@ -200,7 +200,7 @@ cmake --build build --target docs
 
 ### 3.3 Case Studies (`case-study/`)
 
-Each case study pairs a nonlinear plant simulator with a roster of controllers, sweeps every controller across several scenarios, and writes CSV telemetry to `logs/` for post-processing. C++ studies build as self-contained executables; Python-only studies run via `sim/main.py` (discovered automatically by `run.py` Phase 6). The auto-generated status table is at [`docs/case_study_status.md`](case_study_status.md).
+Each case study pairs a nonlinear plant simulator with a roster of controllers, sweeps every controller across several scenarios, and writes CSV telemetry to `logs/` for post-processing. C++ studies build as self-contained executables; Python-only studies run via `sim/main.py` (discovered automatically by `run.py` Phase 7). The auto-generated status table is at [`docs/case_study_status.md`](case_study_status.md).
 
 #### C++ built (9) - registered in `case-study/CMakeLists.txt` + `compile.bat`
 
@@ -226,9 +226,9 @@ Each case study pairs a nonlinear plant simulator with a roster of controllers, 
 
 **SMISMO (13):** PID, CascadePID, LQR, LQG, MPC, ADRC, SMC, FeedbackLin, TubeMPC, L1Adaptive, GainScheduled, NonlinearMPC, DOBEnergyCtrl (adaptive supply-pressure DOB).
 
-#### Python-only (7) - `sim/main.py`, run by Phase 6 of `run.py`
+#### Python-only (7) - `sim/main.py`, run by Phase 7 of `run.py`
 
-These studies use `ctrl_toolbox` Python bindings directly; no C++ compilation is needed. Run individually with `conda run -n soft_robotics -- python sim/main.py` from the study directory, or automatically via `run.py` Phase 6.
+These studies use `ctrl_toolbox` Python bindings directly; no C++ compilation is needed. Run individually with `conda run -n soft_robotics -- python sim/main.py` from the study directory, or automatically via `run.py` Phase 7.
 
 | Study | Plant | Ctrls | Scenarios | Runs |
 |---|---|---|---|---|

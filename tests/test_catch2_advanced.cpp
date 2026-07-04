@@ -1316,6 +1316,101 @@ TEST_CASE("DiscreteHinf::solveMuSyn runs DK-iteration without crashing",
             REQUIRE(mr.achievedMuUpper <= hr_std.achievedGamma + 1e-2);
     }
 }
+
+TEST_CASE("DiscreteHinf::solveStructured tunes a static output-feedback gain via CMA-ES",
+          "[structured][hinf]")
+{
+    // Simple SISO plant G(s) = 1/(s+1) at Ts=0.01 s (same idiom as the solveMuSyn test).
+    const double Ts_s = 0.01;
+    ctrl::StateSpace sys_c(
+        Eigen::MatrixXd::Constant(1,1,-1.0),
+        Eigen::MatrixXd::Constant(1,1, 1.0),
+        Eigen::MatrixXd::Constant(1,1, 1.0),
+        Eigen::MatrixXd::Zero(1,1), 0.0);
+    const ctrl::StateSpace G = ctrl::c2d(sys_c, Ts_s, ctrl::C2dMethod::ZOH);
+
+    const auto W1 = ctrl::MixedSensitivity::makeW1(1.0, 2.0, 0.01, Ts_s);
+    const auto W2 = ctrl::MixedSensitivity::makeW2constant(0.5, Ts_s);
+    const auto W3 = ctrl::MixedSensitivity::makeW3(5.0, 2.0, 0.01, Ts_s);
+    const ctrl::GeneralisedPlant P = ctrl::MixedSensitivity::build(G, W1, W2, W3);
+
+    // Static output-feedback controller: nk=0, so u = Dk*y with Dk = [theta].
+    // (Ak is 0x0, Bk is 0x ny, Ck is nu x 0 - the fixed-structure that solveStructured
+    //  validates against P.ny()/P.nu() before starting the CMA-ES search.)
+    auto staticGain = [](const Eigen::VectorXd &th,
+                         Eigen::MatrixXd &Ak, Eigen::MatrixXd &Bk,
+                         Eigen::MatrixXd &Ck, Eigen::MatrixXd &Dk) {
+        Ak = Eigen::MatrixXd(0, 0);
+        Bk = Eigen::MatrixXd(0, 1);
+        Ck = Eigen::MatrixXd(1, 0);
+        Dk = Eigen::MatrixXd(1, 1);
+        Dk(0, 0) = th(0);
+    };
+
+    ctrl::StructuredHinfParams sp;
+    sp.maxEvals = 300;   // keep the CMA-ES search short for a unit test
+    sp.seed     = 42;    // deterministic
+
+    const Eigen::VectorXd theta0 = Eigen::VectorXd::Constant(1, 0.0);
+
+    ctrl::StructuredHinfResult r;
+    REQUIRE_NOTHROW(r = ctrl::DiscreteHinf::solveStructured(P, staticGain, theta0, sp));
+
+    // Mechanics that hold regardless of the optimiser's outcome:
+    REQUIRE(r.theta.size() == 1);
+    REQUIRE(r.nEvals > 0);
+    REQUIRE(r.hinfResult.Dk.rows() == 1);
+    REQUIRE(r.hinfResult.Dk.cols() == 1);
+    REQUIRE(std::abs(r.hinfResult.Ts - P.Ts) < 1e-12);
+
+    // achievedGamma is finite & positive when feasible, +inf otherwise - never NaN.
+    if (r.hinfResult.feasible) {
+        REQUIRE(std::isfinite(r.hinfResult.achievedGamma));
+        REQUIRE(r.hinfResult.achievedGamma > 0.0);
+    } else {
+        REQUIRE(std::isinf(r.hinfResult.achievedGamma));
+    }
+}
+
+TEST_CASE("DiscreteHinf::solveStructured validates its arguments up front",
+          "[structured][hinf]")
+{
+    ctrl::StateSpace sys_c(
+        Eigen::MatrixXd::Constant(1,1,-1.0),
+        Eigen::MatrixXd::Constant(1,1, 1.0),
+        Eigen::MatrixXd::Constant(1,1, 1.0),
+        Eigen::MatrixXd::Zero(1,1), 0.0);
+    const ctrl::StateSpace G = ctrl::c2d(sys_c, 0.01, ctrl::C2dMethod::ZOH);
+    const auto W1 = ctrl::MixedSensitivity::makeW1(1.0, 2.0, 0.01, 0.01);
+    const auto W2 = ctrl::MixedSensitivity::makeW2constant(0.5, 0.01);
+    const auto W3 = ctrl::MixedSensitivity::makeW3(5.0, 2.0, 0.01, 0.01);
+    const ctrl::GeneralisedPlant P = ctrl::MixedSensitivity::build(G, W1, W2, W3);
+
+    auto staticGain = [](const Eigen::VectorXd &th,
+                         Eigen::MatrixXd &Ak, Eigen::MatrixXd &Bk,
+                         Eigen::MatrixXd &Ck, Eigen::MatrixXd &Dk) {
+        Ak = Eigen::MatrixXd(0, 0); Bk = Eigen::MatrixXd(0, 1);
+        Ck = Eigen::MatrixXd(1, 0); Dk = Eigen::MatrixXd(1, 1); Dk(0, 0) = th(0);
+    };
+
+    // Empty theta0 -> throw.
+    REQUIRE_THROWS_AS(
+        ctrl::DiscreteHinf::solveStructured(P, staticGain, Eigen::VectorXd(), {}),
+        std::invalid_argument);
+
+    // A structureFn that produces a wrong-shaped Dk (2x2, expected 1x1) is rejected before
+    // the search starts, not left to crash inside buildClosedLoop().
+    auto badShape = [](const Eigen::VectorXd &,
+                       Eigen::MatrixXd &Ak, Eigen::MatrixXd &Bk,
+                       Eigen::MatrixXd &Ck, Eigen::MatrixXd &Dk) {
+        Ak = Eigen::MatrixXd(0, 0); Bk = Eigen::MatrixXd(0, 1);
+        Ck = Eigen::MatrixXd(1, 0); Dk = Eigen::MatrixXd(2, 2);
+    };
+    const Eigen::VectorXd theta0 = Eigen::VectorXd::Constant(1, 0.0);
+    REQUIRE_THROWS_AS(
+        ctrl::DiscreteHinf::solveStructured(P, badShape, theta0, {}),
+        std::invalid_argument);
+}
 #endif
 
 // =============================================================================

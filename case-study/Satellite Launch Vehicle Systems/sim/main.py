@@ -1,7 +1,7 @@
 """main.py - entry point for Satellite Launch Vehicle Systems (TEMPLATE).
 
 Runs every controller x scenario, writes CSV to ../logs/, prints a summary.
-Auto-discovered by run.py Phase 6 (no CMake/compile registration needed).
+Auto-discovered by run.py Phase 7 (no CMake/compile registration needed).
 
 Usage (from repo root):
   conda run -n soft_robotics -- python "case-study/Satellite Launch Vehicle Systems/sim/main.py"

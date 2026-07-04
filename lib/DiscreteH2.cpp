@@ -27,7 +27,7 @@ DiscreteH2::DiscreteH2(const H2Result &result)
     const int nk = static_cast<int>(Ak_.rows());
     const int nu = static_cast<int>(Ck_.rows());
     xk_     = Eigen::VectorXd::Zero(nk);
-    u_work_.resize(nu);
+    u_work_ = Eigen::VectorXd::Zero(nu); // zero-init so the MIMO hold-last guard returns finite on the first call
 }
 
 double DiscreteH2::compute(double signal)
@@ -42,6 +42,10 @@ double DiscreteH2::compute(double signal)
 
 Eigen::VectorXd DiscreteH2::computeVec(const Eigen::VectorXd &y)
 {
+    // Hold the last output on a non-finite measurement and do NOT advance xk_ - the MIMO
+    // hold-last NaN contract (mirrors DiscreteHinf; the scalar compute() above is guarded).
+    if (!y.allFinite())
+        return u_work_;
     u_work_.noalias() = Ck_ * xk_;
     u_work_.noalias() += Dk_ * y;
     xk_ = Ak_ * xk_ + Bk_ * y;

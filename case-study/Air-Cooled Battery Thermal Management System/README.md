@@ -166,7 +166,7 @@ $u \in [-0.5, 0.5]\,K$; threshold $= \max(0.1,\,\Delta T_{\text{lim}} + u)$.
 
 ## Build and Run
 
-This is a **Python-only** case study (Phase 6 of `run.py`).  No C++ compilation needed.
+This is a **Python-only** case study (Phase 7 of `run.py`).  No C++ compilation needed.
 
 ```bash
 # Run from project root

@@ -119,7 +119,7 @@ not real content. A few directories scaffolded by `tools/new_case_study.py` show
 while still containing only placeholder dynamics and a single `OpenLoop` controller - check the
 study's own `README.md` before treating it as a finished template.
 
-**C++ study** (runs in Phase 4 as a `*_sim` executable):
+**C++ study** (runs in Phase 5 as a `*_sim` executable):
 
 1. `case-study/<StudyName>/sim/include/{<study>_plant.h, controllers.h, simulation_runner.h}`
    and `sim/src/{<study>_plant.cpp, controllers.cpp, simulation_runner.cpp, main.cpp}`.
@@ -139,7 +139,7 @@ study's own `README.md` before treating it as a finished template.
    when adding a controller. Update the case-study tables in `CLAUDE.md` / root `README.md`
    (re-run `tools/case_study_tracker.py` to refresh `docs/case_study_status.md`).
 
-**Python-only study** (runs in Phase 6): add `sim/main.py` following the Drill String
+**Python-only study** (runs in Phase 7): add `sim/main.py` following the Drill String
 pattern; no CMake/compile.bat registration. `sim/` locates the bindings 4 levels up
 (`build/bindings`).
 

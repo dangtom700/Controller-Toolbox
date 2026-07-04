@@ -173,11 +173,11 @@ Root `CMakeLists.txt`: C++20, CMake >= 3.16; MinGW/UCRT64 builds statically link
 (root): `CTRL_BUILD_EMBEDDED_ONLY`, `CTRL_FETCH_EIGEN_IF_MISSING`, `CTRL_BUILD_PYTHON_BINDINGS`,
 `CTRL_BUILD_BENCHMARKS`. `lib/Features.h` exposes the live set via `ctrl::features()`.
 
-**Build entry points.** `compile.bat` / `compile.sh` build ~120 targets **sequentially** from a
+**Build entry points.** `compile.bat` / `compile.sh` build ~155 targets **sequentially** from a
 hand-maintained list (a target not listed silently never builds). `run.py` is the canonical
-"is everything passing" command: 7 phases (ASCII scan, sequential compile, bindings + smoke
-test, run every `.exe`, run every Python example, run every Python-only case study, regenerate
-`docs/case_study_status.md` + `docs/report.html`).
+"is everything passing" command: 8 phases (ASCII scan, NaN-guard scan, sequential compile,
+bindings + smoke test, run every `.exe`, run every Python example, run every Python-only case
+study, regenerate `docs/case_study_status.md` + `docs/report.html`).
 
 ---
 
@@ -327,8 +327,8 @@ All studies share one shape regardless of language: instantiate plant -> instant
 roster -> for each scenario {reset, step loop: error -> `compute()` -> `plant.step(u)` ->
 accumulate IAE -> write a CSV row} -> next controller -> next scenario. C++ studies build a
 `*_sim` executable (registered in `case-study/CMakeLists.txt` *and* `compile.bat`/`.sh`, or the
-target silently does not build) and are run by `run.py` Phase 4; Python-only studies have just
-`sim/main.py`, are auto-discovered by `run.py` Phase 6, and locate the bindings build four
+target silently does not build) and are run by `run.py` Phase 5; Python-only studies have just
+`sim/main.py`, are auto-discovered by `run.py` Phase 7, and locate the bindings build four
 directories up.
 
 Representative complex studies (see `docs/DOCUMENTATION.md` 3.3 for the full roster with

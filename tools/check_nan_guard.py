@@ -25,8 +25,9 @@ regressions. Three kinds of exception are built in:
 Usage:
     python tools/check_nan_guard.py
 
-Exits 1 (and lists offending Class::compute locations) if any non-exempt compute()
-lacks the guard as its first statement, 0 otherwise.
+Exits 1 (and lists offending Class::compute / Class::computeVec locations) if any
+non-exempt compute() lacks the guard as its first statement, or any computeVec() lacks a
+finite guard before it commits to an output (see the computeVec rule below), 0 otherwise.
 """
 from __future__ import annotations
 
@@ -44,6 +45,18 @@ _DELEGATION_RE = re.compile(
     r"^\s*return\s+\w+\s*\(.*\)\s*;\s*$"
     r"|^\s*(?:const\s+)?\w+\s+\w+\s*=\s*\w+(?:->|\.)compute\w*\s*\(.*\)\s*;\s*$"
 )
+
+# computeVec(VectorXd) overrides carry the same hold-last NaN contract as compute(double),
+# but (unlike the scalar path) may legitimately lead with a dimension/usage check that throws
+# before the finite guard - e.g. NeuralNetworkController (size check, then allFinite) and
+# PassivityBasedController (even-length + lazy-init, then allFinite). So the rule here is
+# looser than "first statement must guard": a finite guard must be PRESENT and must appear
+# before the controller commits to an output via .noalias() (the hot-loop write that would
+# otherwise consume a NaN and advance internal state). A body that instead delegates to
+# another compute-like call is exempt (the guard lives in the callee).
+_COMPUTEVEC_SIG_RE = re.compile(r"\b(\w+)::computeVec\s*\(")
+_COMMIT_RE = re.compile(r"\.noalias\s*\(")
+_DELEGATION_ANY_RE = re.compile(r"(?:->|\.)compute\w*\s*\(")
 
 # Composition/dispatcher classes: their compute() fans out to multiple already-guarded
 # inner IController::compute() calls (switch/loop), so no single first-statement guard
@@ -100,6 +113,30 @@ def check_file(path: Path) -> list[str]:
             continue  # exempt: delegates to another compute-like function
         line_no = text.count("\n", 0, m.start()) + 1
         violations.append(f"{path.relative_to(_ROOT)}:{line_no}: {class_name}::compute() -> {first!r}")
+
+    # --- computeVec(VectorXd) overrides: a finite guard must exist and precede .noalias() ---
+    for m in _COMPUTEVEC_SIG_RE.finditer(text):
+        class_name = m.group(1)
+        if class_name in _EXEMPT_CLASSES:
+            continue
+        brace_pos = text.find("{", m.end())
+        if brace_pos == -1:
+            continue  # declaration only, not a definition
+        semicolon_pos = text.find(";", m.end())
+        if semicolon_pos != -1 and semicolon_pos < brace_pos:
+            continue  # declaration ending in ';' before any body
+        body = _find_body(text, brace_pos)
+        guard = _GUARD_RE.search(body)
+        if guard is not None:
+            commit = _COMMIT_RE.search(body)
+            if commit is None or guard.start() < commit.start():
+                continue  # guarded before committing to an output
+        elif _DELEGATION_ANY_RE.search(body):
+            continue  # delegates to an already-guarded compute()/computeVec()
+        line_no = text.count("\n", 0, m.start()) + 1
+        first = _first_statement(body) or ""
+        violations.append(f"{path.relative_to(_ROOT)}:{line_no}: {class_name}::computeVec() -> {first!r}")
+
     return violations
 
 
@@ -109,7 +146,8 @@ def main() -> int:
         all_violations.extend(check_file(path))
 
     if not all_violations:
-        print("OK: every IController::compute(double) override starts with a non-finite guard.")
+        print("OK: every IController::compute(double) leads with a non-finite guard, and "
+              "every computeVec() guards before committing to an output.")
         return 0
 
     print(f"{len(all_violations)} compute() override(s) missing the NaN guard as their first statement:")

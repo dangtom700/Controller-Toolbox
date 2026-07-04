@@ -263,7 +263,7 @@ Controller Toolbox/
 |   |-- include/ctrl_toolbox_ros2/controller_node.hpp   ControllerNode<T> lifecycle node template
 |   |-- example/pid_temperature_node.cpp
 |   |-- CMakeLists.txt + package.xml + README.md
-|-- run.py                            Master build + test runner (7 phases, cross-platform Part 60)
+|-- run.py                            Master build + test runner (8 phases, cross-platform Part 60)
 |-- compile.bat / compile.sh          Windows / Linux-macOS sequential build
 |-- setup.ps1 / setup.sh              Windows / Linux-macOS bootstrap
 |-- CMakeLists.txt

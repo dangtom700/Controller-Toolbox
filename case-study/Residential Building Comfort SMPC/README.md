@@ -27,4 +27,4 @@ TODO: describe each scenario in `config/scenarios/`.
 
 ## Run
 
-Build target `residential_building_comfort_smpc_sim` (registered in compile.bat); runs in run.py Phase 4.
+Build target `residential_building_comfort_smpc_sim` (registered in compile.bat); runs in run.py Phase 5.

@@ -2,7 +2,7 @@
 
 **Paper:** Aydogan & Yildiz (2025), "Active suspension control optimization for 6*6 electric vehicles using metaheuristic algorithms," *Alexandria Engineering Journal*, 127, 2025.
 
-**Type:** Python-only case study (sim/main.py). Discovered by run.py Phase 6.
+**Type:** Python-only case study (sim/main.py). Discovered by run.py Phase 7.
 **Runs:** 18 controllers * 5 scenarios = **90 runs**
 **Reference:** case-study\Active Suspension Mathematical Modeling and Optimization 2025
 

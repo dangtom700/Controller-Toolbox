@@ -152,13 +152,30 @@ namespace ctrl
         }
 
         DareResult res = solveDARE(plant.A, plant.B, params.Q, params.R);
+
+        // Fallback: if the DARE did not converge, retry once with a Tikhonov-regularised
+        // state cost Q + rho*I. A tiny rho restores detectability of marginal modes (the
+        // usual non-convergence cause) without perturbing systems that already converged -
+        // this branch never runs on the happy path. A genuinely unstabilisable (A,B) still
+        // will not converge (controllability, not Q, is the obstacle), so those cases fall
+        // through to the warning below exactly as before.
+        if (!res.converged)
+        {
+            const double rho = 1e-9 * (1.0 + params.Q.norm());
+            const Eigen::MatrixXd Qreg =
+                params.Q + rho * Eigen::MatrixXd::Identity(n_states_, n_states_);
+            const DareResult res_reg = solveDARE(plant.A, plant.B, Qreg, params.R);
+            if (res_reg.converged)
+                res = res_reg;
+        }
+
         dare_converged_  = res.converged;
         dare_iterations_ = res.iterations;
 
         if (!res.converged)
         {
             std::cerr << "[DiscreteLQR] WARNING: DARE did not converge in "
-                      << res.iterations << " iterations. "
+                      << res.iterations << " iterations (including a regularised retry). "
                       << "Using last iterate - verify (A,B) is stabilisable "
                       << "and (A,sqrt(Q)) is detectable.\n";
         }
@@ -173,6 +190,10 @@ namespace ctrl
                                          const Eigen::VectorXd &x_ref,
                                          const Eigen::VectorXd &u_ff) const
     {
+        if (x.size() != n_states_)
+            throw std::invalid_argument(
+                "DiscreteLQR::compute: x has wrong size (" +
+                std::to_string(x.size()) + "), expected " + std::to_string(n_states_));
         if (x_ref.size() != 0 && x_ref.size() != n_states_)
             throw std::invalid_argument(
                 "DiscreteLQR::compute: x_ref has wrong size (" +

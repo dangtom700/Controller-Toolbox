@@ -145,7 +145,7 @@ Reference real example (C++): `case-study/Boiler Control/sim/src/main.cpp` +
 Reference real example (Python-only): `case-study/Vertical Drill String Mathematical
 Review 2025/sim/main.py` (see CLAUDE.md "Python-only case studies" gotcha - these set
 `_ROOT = dirname(dirname(dirname(abspath(__file__))))` to find the `ctrl_toolbox` build,
-and are discovered by `run.py` Phase 6 - they are **not** in `CMakeLists.txt`/`compile.bat`).
+and are discovered by `run.py` Phase 7 - they are **not** in `CMakeLists.txt`/`compile.bat`).
 
 Config placement: per-study `config/plant_params.json` (physical constants, Ts, limits)
 and `config/scenarios/s0N_name.json` (one file per scenario: ref profile, disturbance,

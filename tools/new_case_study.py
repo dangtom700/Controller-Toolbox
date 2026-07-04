@@ -24,7 +24,7 @@ Flags:
 After C++ scaffolding, register the new target in:
   case-study/CMakeLists.txt   (add_subdirectory line)
   compile.bat / compile.sh    (add the <slug>_sim target - missing targets run stale .exe)
-Python studies need no registration; run.py Phase 6 auto-discovers sim/main.py.
+Python studies need no registration; run.py Phase 7 auto-discovers sim/main.py.
 
 PDF text extraction uses PyMuPDF (`pip install pymupdf`, imported as `fitz`).
 If it is not installed the script still scaffolds everything and writes a
@@ -573,7 +573,7 @@ def run_simulation(plant, scenario: dict, name: str, controller, log_dir: str) -
 PY_MAIN = '''"""main.py - entry point for @@NAME@@ (TEMPLATE).
 
 Runs every controller x scenario, writes CSV to ../logs/, prints a summary.
-Auto-discovered by run.py Phase 6 (no CMake/compile registration needed).
+Auto-discovered by run.py Phase 7 (no CMake/compile registration needed).
 
 Usage (from repo root):
   conda run -n soft_robotics -- python "@@MAINREL@@"
@@ -672,7 +672,7 @@ def main(argv=None):
     target = "%s_sim" % slug
     main_rel = os.path.join(study_dir, "sim", "main.py").replace("\\", "/")
     run_hint = ('conda run -n soft_robotics -- python "%s"' % main_rel) if args.lang == "python" \
-        else ('Build target `%s` (registered in compile.bat); runs in run.py Phase 4.' % target)
+        else ('Build target `%s` (registered in compile.bat); runs in run.py Phase 5.' % target)
 
     tokens = {
         "NAME": name, "SLUG": slug, "NS": ns, "GUARD": guard, "TARGET": target,
@@ -712,7 +712,7 @@ def main(argv=None):
         print("  4. add tests/test_%s_regression.cpp" % slug)
     else:
         print("  1. implement plant dynamics + controller roster (TODO markers)")
-        print("  2. run.py Phase 6 auto-discovers sim/main.py - no registration needed")
+        print("  2. run.py Phase 7 auto-discovers sim/main.py - no registration needed")
     print("  Review extracted_text.txt against the PDF before trusting it.")
     return 0
 

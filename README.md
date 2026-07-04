@@ -102,7 +102,7 @@ links are auto-tracked in [docs/case_study_status.md](docs/case_study_status.md)
 (regenerate via `tools/case_study_tracker.py`); rosters and tribal knowledge live in
 `CLAUDE.md`'s Case Studies section and in each study's own `README.md`.
 
-**C++ studies (built by `compile.bat`/`compile.sh`, run in Phase 4):**
+**C++ studies (built by `compile.bat`/`compile.sh`, run in Phase 5):**
 
 | Study | Plant | Controllers | Scenarios x Runs |
 |---|---|---|---|
@@ -118,7 +118,7 @@ links are auto-tracked in [docs/case_study_status.md](docs/case_study_status.md)
 | [6-DOF Stewart Platform Vessel Motion Simulator](case-study/6-DOF%20Stewart%20Platform%20Vessel%20Motion%20Simulator/) | 6-UPU Stewart platform, 12-state per-rod spring-mass-damper, closed-form IK+Jacobian, Douglas sea-state CFD-input stand-in | 12 | 60 -> 720 |
 | [Bouyancy-Driven Airship in Vertical Plane](case-study/Bouyancy-Driven%20Airship%20in%20Vertical%20Plane/) | 6-state liberated-center airship, moving-mass + net-lift actuation, RK4 (Ts=0.05s) | 12 | 5 -> 60 |
 
-**Python-only studies (discovered by `run.py` Phase 6 via `sim/main.py`):**
+**Python-only studies (discovered by `run.py` Phase 7 via `sim/main.py`):**
 
 | Study | Plant | Controllers | Scenarios x Runs |
 |---|---|---|---|
@@ -184,7 +184,7 @@ scaffolded by `tools/new_case_study.py` still contain only placeholder dynamics 
 C++ case studies: Boiler 216/216 . Tug 72/72 . Solar 70/70 . Humidification 75/75 .
 ActiveSuspension 90/90 (18 ctrl) . BuckBoost 60/60 . SolarCooker 60/60 . SOTEC 60/60 . SMISMO 65/65 (13 ctrl) .
 Stewart 720/720 (12 ctrl x 60 sea-state configs).
-Python-only (Phase 6): DrillString 85/85 . WindWave 80/80 . EHFS 70/70 (14 ctrl) .
+Python-only (Phase 7): DrillString 85/85 . WindWave 80/80 . EHFS 70/70 (14 ctrl) .
 Firefighting 60/60 . BTMS 60/60 . SurfaceShip 60/60 . EV6x6 90/90 (18 ctrl) .
 AircraftEngine 60/60 (12 ctrl).
 `bug_report.txt`: 0 blocks expected after a clean run.
@@ -194,7 +194,7 @@ AircraftEngine 60/60 (12 ctrl).
   controllers x 5 scenarios, real FTMS intermediate-circulation-loop plant) but had never
   been added to this README's tables or counts -- discovered via a `tools/case_study_tracker.py`
   rewrite (Part 62) that re-scanned every `case-study/*/` directory. No code changes were
-  needed: it's a pure Python-only study already auto-discovered by `run.py` Phase 6.
+  needed: it's a pure Python-only study already auto-discovered by `run.py` Phase 7.
 - Study roster (12): OpenLoop, PID, ADRC, SMC, LQR, MPC, MRAC, L1Adaptive, GainScheduled,
   SmithPredictor, NeuralPID, ILC. Negative-static-gain plant (mirrors the documented Solar
   Cooker sign-convention precedent) -- see the study's own README "Implementation Notes".
@@ -214,7 +214,7 @@ AircraftEngine 60/60 (12 ctrl).
 - `ros2/ctrl_toolbox_ros2/` - ROS 2 Humble `ament_cmake` package; `ControllerNode<T>` lifecycle node template wrapping any `ctrl::IController`.
 - CI/CD consolidated from 8 -> 3 workflow files (`documentation.yml`, `benchmarks.yml`, `cross-platform-cicd.yml`). Tag-triggered release + PyPI publish jobs folded into the unified workflow.
 - `tests/test_embedded_subset.cpp` API aligned with Part 54 (`BasicPID`/`BasicSMC` single-arg constructor, `Ts` in Params, `sp.K` not `sp.eta`).
-- `run.py` cross-platform: Phase 2 dispatches `compile.sh` (bash) on Linux/macOS; Phase 3 cmake via `conda run`; Phase 4 finds executables by no-extension + executable-bit on Linux.
+- `run.py` cross-platform: Phase 3 dispatches `compile.sh` (bash) on Linux/macOS; Phase 4 cmake via `conda run`; Phase 5 finds executables by no-extension + executable-bit on Linux.
 
 **Part 55 (2026-06-13) - GA/PSO/DE + controller gap audit (C3-C6):**
 - `GeneticAlgorithm`, `ParticleSwarmOptimizer`, `DifferentialEvolution` added to `lib/` + Python bindings.

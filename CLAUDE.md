@@ -6,14 +6,17 @@
 > `CONTRIBUTING.md` (conventions, sign-convention table, checklists, numerical-safety rules),
 > `docs/DOCUMENTATION.md` (full API), `docs/deployment.md` (RT constraints), `docs/handoff.md`
 > (cross-cutting caveats), `docs/forensic_reconstruction.md` (source-only architecture + v1->v2
-> diff), `docs/cumulative_bug_report.md` (Part-numbered history). Read those for depth; this file
-> is the 2-minute map.
+> diff), `docs/cumulative_bug_report.md` (Part-numbered history),
+> `docs/controller_selection_matrix.md` (plant-nature -> candidate-controller shortlist),
+> `docs/control_strategies_deep_dive.md` (per-strategy behaviour + decision framework). Read those
+> for depth; this file is the 2-minute map.
 
 ## 1. High-Level Project Philosophy
 
 Discrete-time control library: a flat C++20/Eigen core (~90 controller/estimator/identification
-classes) exposed through one flat `pybind11` module and exercised by ~89 examples + ~31 case
-studies. Almost every algorithm implements both its math and a single base interface
+classes across 119 `.h` + 89 `.cpp`; 42 are `IController` subclasses) exposed through one flat
+`pybind11` module and exercised by 126 C++ + 152 Python examples and 31 case studies (19 complete,
+12 open placeholder/not-started per `docs/case_study_status.md`). Almost every algorithm implements both its math and a single base interface
 (`IController`) in one class; the only deliberate split is the stateless `DiscreteLQR` +
 `LQRAdapter`. Cross-cutting behaviour (anti-windup, delay, gain scheduling, dead-time, multi-loop
 supervision) is added by **composition wrappers that are themselves `IController`s**, so they
@@ -28,11 +31,14 @@ test), not a quick edit `[Ref: CONTRIBUTING.md#adding-a-new-controller]`.
 ## 2. Essential Build & Environment Commands
 
 ```bash
-# Canonical "is everything passing" (7 phases: ASCII scan, compile, bindings+smoke,
-# run all .exe, run all python examples, run python case studies, regen status/report):
-conda run -n soft_robotics -- python run.py        # writes run_*.log; bug_report.txt ONLY on failure
+# Canonical "is everything passing" (8 phases: 1 ASCII scan, 2 NaN-guard scan, 3 compile,
+# 4 bindings+smoke, 5 run all .exe, 6 run all python examples, 7 python case studies, 8 regen
+# status/report). Last green run: 175/175 .exe, 149/149 py examples, 10/10 py case studies.
+conda run -n soft_robotics -- python run.py        # writes run_*.log; bug_report.txt on failure -
+#   NOTE: bug_report.txt can false-positive by matching "nan" in the PASSING Phase 2 banner;
+#   confirm against the log's "EXIT 0 - PASSED" lines before treating it as a real failure.
 
-# Full sequential C++ build of every target (~120; hand-maintained list - keep .bat/.sh in sync):
+# Full sequential C++ build of every target (~155; hand-maintained list - keep .bat/.sh in sync):
 ./compile.sh          # Windows: compile.bat   (do NOT add --parallel locally; CI does that)
 
 # Manual CMake (Release):
@@ -64,14 +70,14 @@ conda run -n soft_robotics -- python bindings/smoke_test.py
 
 **WARNING - the conventional `include/`, `src/`, `python/` directories do NOT exist here.** Map:
 
-- `lib/` - **flat** core engine; every class is `lib/ClassName.{h,cpp}` (no subpackages, ~145 files). `[Ref: lib/]`
+- `lib/` - **flat** core engine; every class is `lib/ClassName.{h,cpp}` (no subpackages, ~208 files: 119 `.h` + 89 `.cpp`). `[Ref: lib/]`
   - `lib/embedded/` - header-only, no-Eigen, no-virtual MCU subset (`BasicPID`, `BasicSMC`, `DiscreteIntegrator`, `FixedRateFilter`, `RingBuffer`).
   - `lib/hal/` - hardware abstraction (`ISensor`/`IActuator`/`ITimer`/`IScheduler`, Sim*/Safe*, FreeRTOS/Zephyr schedulers).
   - `lib/ControllerToolbox.h` - umbrella include; `lib/Features.h` - runtime feature registry (`ctrl.features()`).
 - `bindings/` - the **C++<->Python boundary** (NOT `python/`): one flat `pybind11` module `ctrl_toolbox`. Entry `bindings/module.cpp`; dispatch to `plantmodel/controllers/estimation/advanced/analysis_bindings.cpp`. `[Ref: bindings/module.cpp:18]`
-- `examples/` - ~89 single-file C++ demos `exNN_*.cpp` (print PASS/FAIL); `examples/python/`; `examples/embedded/`.
+- `examples/` - 126 single-file C++ demos `exNN_*.cpp` (print PASS/FAIL); `examples/python/` (152 scripts); `examples/embedded/`.
 - `tests/` - Catch2 suites + legacy hand-rolled + per-study regressions (21 executables). `[Ref: tests/CMakeLists.txt]`
-- `case-study/<Study>/` - C++ (`*_sim` exe, run by `run.py` Phase 4) or Python-only (`sim/main.py`, Phase 6).
+- `case-study/<Study>/` - C++ (`*_sim` exe, run by `run.py` **Phase 5**) or Python-only (`sim/main.py`, **Phase 7**). 31 studies (19 complete); `case-study/common/` is shared code, not a study.
 - `tools/` - post-hoc analysis pipeline only (metrics, compare_controllers, monte_carlo, fault_sweep, wcet_report, generate_report, case_study_tracker - never hand-edit `docs/case_study_status.md`).
 - `ros2/`, `docs/`, `cheatsheet/`, `scripts/`, `benchmark/`, `data/`, `cmake/` (minimal - just a config template).
 

@@ -34,7 +34,7 @@ DiscreteHinf::DiscreteHinf(const HinfResult &result)
     const int nk = static_cast<int>(Ak_.rows());
     const int nu = static_cast<int>(Ck_.rows());
     xk_     = Eigen::VectorXd::Zero(nk);
-    u_work_.resize(nu);
+    u_work_ = Eigen::VectorXd::Zero(nu); // zero-init so the MIMO hold-last guard returns finite on the first call
 }
 
 double DiscreteHinf::compute(double signal)
@@ -49,6 +49,11 @@ double DiscreteHinf::compute(double signal)
 
 Eigen::VectorXd DiscreteHinf::computeVec(const Eigen::VectorXd &y)
 {
+    // Hold the last output on a non-finite measurement and do NOT advance xk_ - the MIMO
+    // hold-last NaN contract. Without this a single NaN in y permanently poisons xk_ via
+    // xk_ = Ak_*xk_ + Bk_*y (the scalar compute() overload above is already guarded).
+    if (!y.allFinite())
+        return u_work_;
     // Controller update:
     //   u[k]   = Ck xk[k] + Dk y[k]
     //   xk[k+1] = Ak xk[k] + Bk y[k]

@@ -130,7 +130,7 @@ For the simplified two-body case an analytical expression for the natural freque
 
 ## Python-Only Implementation
 
-This study runs as a **Python-only case study** via `sim/main.py` (Phase 6 of `run.py`). It uses `ctrl_toolbox` Python bindings directly. No C++ compilation needed; NOT in `CMakeLists.txt` or `compile.bat`.
+This study runs as a **Python-only case study** via `sim/main.py` (Phase 7 of `run.py`). It uses `ctrl_toolbox` Python bindings directly. No C++ compilation needed; NOT in `CMakeLists.txt` or `compile.bat`.
 
 Plant: 4-state simplified FOWT heave + WEC arm model (Ts = 0.5 s):
 - States: `[z, zdot, x_rel, xrel_dot]` - FOWT heave and WEC arm relative displacement

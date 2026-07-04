@@ -146,7 +146,7 @@ u1, u2, Thin1, Thin2, override_active, iae_cumulative
 conda run -n soft_robotics -- python "case-study/Aircraft Engine Thermal Management/sim/main.py"
 ```
 
-This is a **Python-only case study** (Phase 6 of `run.py`). It does not appear in `CMakeLists.txt` or `compile.bat`.
+This is a **Python-only case study** (Phase 7 of `run.py`). It does not appear in `CMakeLists.txt` or `compile.bat`.
 
 ---
 

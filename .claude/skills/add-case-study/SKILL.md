@@ -11,8 +11,8 @@ Use this skill whenever asked to add a new case study under `case-study/`. Mirro
 
 ## Before starting
 
-- Decide C++ (built target, runs in `run.py` Phase 4) or Python-only (auto-discovered, runs in
-  Phase 6). Python-only is far less registration work - default to it unless there's a
+- Decide C++ (built target, runs in `run.py` Phase 5) or Python-only (auto-discovered, runs in
+  Phase 7). Python-only is far less registration work - default to it unless there's a
   specific reason (e.g. real-time/WCET profiling) to need a compiled C++ target.
 - Have the source paper/spec ready; `tools/new_case_study.py` takes a PDF path and scaffolds
   from it.
@@ -77,8 +77,12 @@ auto-discovery.
 ## Verify
 
 - C++: build via `compile.bat`/`compile.sh`, then run the `*_sim` executable and the new
-  regression test (`ctest --test-dir build -R test_<study>_regression`).
+  regression test by filtering its built exe on the study `[tag]`
+  (`build/tests/test_<study>_regression.exe "[<tag>]"`), or `ctest --test-dir build -R "<tag>"`.
+  **Do not** use `ctest -R test_<study>_regression` (the target name) - CTest registers each
+  `TEST_CASE` under its full sentence name via `catch_discover_tests`, so a filter on the
+  executable/target name matches zero tests (verified).
 - Python-only: `conda run -n soft_robotics -- python "case-study/<Study>/sim/main.py"`.
-- Full check: `conda run -n soft_robotics -- python run.py` - confirms Phase 4/6 discovery
+- Full check: `conda run -n soft_robotics -- python run.py` - confirms Phase 5/7 discovery
   actually picks up the new study and `docs/case_study_status.md` reflects it correctly (not
   "Open placeholder").
