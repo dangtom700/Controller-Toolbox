@@ -218,6 +218,21 @@ jobs:
           retention-days: 30
 
       # ── ASAN/UBSAN (linux-x86_64 only) ────────────────────────────────
+      # The Debug+ASan build recompiles all ~155 targets with unstripped debug
+      # symbols and sanitizer instrumentation (much larger objects/binaries than
+      # the preceding Release build/build_py). GitHub-hosted ubuntu-latest only
+      # has ~14GB free, and by this point the runner already holds the finished
+      # `build/` (Release) and `build_py/` (bindings) trees, which are no longer
+      # needed. Without freeing that space first, linking/compiling later
+      # targets fails with "No space left on device".
+      - name: Free disk space before ASAN/UBSAN build
+        if: matrix.run_asan == true
+        run: |
+          df -h .
+          rm -rf build build_py
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL
+          df -h .
+
       - name: ASAN/UBSAN Debug build
         if: matrix.run_asan == true
         run: |
