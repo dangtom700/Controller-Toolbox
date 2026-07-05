@@ -7,7 +7,7 @@
 | 6-DOF Stewart Platform Vessel Motion Simulator | C++ | Yes | Complete | Fine | _ | [README](../case-study/6-DOF Stewart Platform Vessel Motion Simulator/README.md) | Yes | Yes | Yes | Yes |
 | Active Suspension 6x6 EV Full Model | Python | _ | Complete | Fine | _ | [README](../case-study/Active Suspension 6x6 EV Full Model/README.md) | Yes | Yes | Yes | Yes |
 | Active Suspension Mathematical Modeling and Optimization 2025 | C++ | Yes | Complete | Fine | _ | [README](../case-study/Active Suspension Mathematical Modeling and Optimization 2025/README.md) | Yes | Yes | Yes | Yes |
-| Air-Cooled Battery Thermal Management System | Python | Yes | Complete | Fine | _ | [README](../case-study/Air-Cooled Battery Thermal Management System/README.md) | Yes | Yes | _ | Yes |
+| Air-Cooled Battery Thermal Management System | Python | Yes | Complete | Fine | _ | [README](../case-study/Air-Cooled Battery Thermal Management System/README.md) | Yes | Yes | Yes | Yes |
 | Aircraft Engine Thermal Management | Python | Yes | Complete | Fine | _ | [README](../case-study/Aircraft Engine Thermal Management/README.md) | Yes | Yes | Yes | Yes |
 | Boiler Control | C++ | Yes | Complete | Fine | _ | [README](../case-study/Boiler Control/README.md) | Yes | Yes | Yes | Yes |
 | Bouyancy-Driven Airship in Vertical Plane | C++ | Yes | Complete | Fine | _ | [README](../case-study/Bouyancy-Driven Airship in Vertical Plane/README.md) | Yes | Yes | Yes | Yes |
@@ -21,10 +21,10 @@
 | Multi-Body Floating Wind-Wave Platform | Python | Yes | Complete | Fine | _ | [README](../case-study/Multi-Body Floating Wind-Wave Platform/README.md) | Yes | Yes | Yes | Yes |
 | Non-Inverting Buck-Boost Converter | C++ | Yes | Complete | Fine | _ | [README](../case-study/Non-Inverting Buck-Boost Converter/README.md) | Yes | Yes | Yes | Yes |
 | Nonlinear Surface Ship Manoeuvring Control | Python | Yes | Complete | Fine | _ | [README](../case-study/Nonlinear Surface Ship Manoeuvring Control/README.md) | Yes | Yes | Yes | Yes |
-| PCM Thermal Energy Storage Control | Python | Yes | Open placeholder | Fine | _ | [README](../case-study/PCM Thermal Energy Storage Control/README.md) | _ | _ | Yes | _ |
+| PCM Thermal Energy Storage Control | Python | Yes | Complete | Fine | _ | [README](../case-study/PCM Thermal Energy Storage Control/README.md) | Yes | Yes | Yes | Yes |
 | Porous Fiber Plate Humidification System | C++ | Yes | Complete | Fine | _ | [README](../case-study/Porous Fiber Plate Humidification System/README.md) | Yes | Yes | Yes | Yes |
 | Residential Building Comfort SMPC | C++ | Yes | Open placeholder | No data | _ | [README](../case-study/Residential Building Comfort SMPC/README.md) | _ | _ | _ | _ |
-| Satellite Launch Vehicle Systems | Python | Yes | Open placeholder | Fine | _ | [README](../case-study/Satellite Launch Vehicle Systems/README.md) | _ | _ | Yes | _ |
+| Satellite Launch Vehicle Systems | Python | Yes | Complete | Fine | _ | [README](../case-study/Satellite Launch Vehicle Systems/README.md) | Yes | Yes | Yes | Yes |
 | Separate Meter In Separate Meter Out | C++ | Yes | Complete | Fine | _ | [README](../case-study/Separate Meter In Separate Meter Out/README.md) | Yes | Yes | Yes | Yes |
 | Solar Cooker with Reflector and Absorber | C++ | Yes | Complete | Fine | _ | [README](../case-study/Solar Cooker with Reflector and Absorber/README.md) | Yes | Yes | Yes | Yes |
 | Solar Ocean Thermal Energy Conversion System | C++ | Yes | Complete | Fine | _ | [README](../case-study/Solar Ocean Thermal Energy Conversion System/README.md) | Yes | Yes | Yes | Yes |

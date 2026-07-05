@@ -1,8 +1,8 @@
 {
-  "_comment": "TODO: real plant parameters for PCM Thermal Energy Storage Control",
-  "Ts":        0.01,
-  "param_a":   1.0,
-  "param_b":   1.0,
-  "u_max":     1.0,
-  "u_min":    -1.0
+  "_comment": "PCM-HP thermal-energy-storage plant. HP maps are the paper's Eqs. 1-2 (hard-coded in the plant module); capacities carry the paper's charge/discharge hysteresis. B_soc is the linearised dSoC/du at the u0~=0.5 operating point, used by the model-based controllers (MPC/LQR/GPC/ScenarioMPC).",
+  "Ts":            1.0,
+  "C_charge":      32.0,
+  "C_discharge":   27.0,
+  "B_soc":         0.30,
+  "SoC0":          0.5
 }

@@ -1,9 +1,14 @@
 {
-  "id":          "s03_scenario",
-  "description": "TODO describe scenario 3",
-  "T_sim":       30.0,
-  "ref_type":    "step",
-  "ref_init":    0.0,
-  "ref_final":   1.0,
-  "step_time":   1.0
+  "id":          "s03_guidance_command",
+  "description": "Typical open-loop guidance program (paper Fig. 7): piecewise-constant attitude steps emulating ground-computed pitch steering during atmospheric flight. No wind.",
+  "T_sim":       100.0,
+  "ref_type":    "guidance",
+  "segments": [
+    {"t_start": 0.0,  "value": 0.0},
+    {"t_start": 5.0,  "value": 0.06},
+    {"t_start": 25.0, "value": 0.10},
+    {"t_start": 50.0, "value": 0.08},
+    {"t_start": 75.0, "value": 0.04}
+  ],
+  "wind":        {"type": "none"}
 }

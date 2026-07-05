@@ -174,15 +174,17 @@ def main(argv=None):
         # "z" (Multi-Body Floating Wind-Wave Platform heave position) and "F"
         # (Electro-Hydraulic Force Servo tracked force) checked for collisions against
         # every other study's documented CSV columns before being added - no other study
-        # uses either name. Note: not every study's CSV has a fixable y/u pair - Air-Cooled
-        # BTMS switches between discrete flow patterns (no continuous actuator signal) and
-        # the Firefighting Bag Drop study logs one row per Monte Carlo trial (not a time
-        # series) - both are correctly skipped below, not column-naming bugs.
+        # uses either name. Air-Cooled BTMS switches between discrete flow patterns, but
+        # its ctrl_toolbox controllers compute a continuous threshold-adjustment signal
+        # underneath, now logged as u_ctrl alongside the DeltaT output - that (DeltaT,
+        # u_ctrl) pair is the fixable y/u pair fitted here (both names are BTMS-only, no
+        # collision). The Firefighting Bag Drop study logs one row per Monte Carlo trial
+        # (not a time series), so it has no y/u pair and is still correctly skipped below.
         y_candidates = ["z_s", "omega_b", "T_h", "T_pot", "v_out", "x_p", "Z_body",
-                        "phi_measured", "Tw1_C", "TT", "z", "F", "x", "y", "y1"]
+                        "phi_measured", "Tw1_C", "TT", "DeltaT", "z", "F", "x", "y", "y1"]
         u_candidates = ["F_act", "m_dot_f_cmd", "m_dot_f", "f_shade", "omega_t", "d",
-                        "F_act_1", "u_fan_ms", "m_dot_w_kgs", "tau_x", "F_pto", "u_v",
-                        "u", "u1"]
+                        "F_act_1", "u_fan_ms", "m_dot_w_kgs", "u_ctrl", "tau_x", "F_pto",
+                        "u_v", "u", "u1"]
         e_candidates = ["error", "e1", "e"]
         y_col = next((c for c in y_candidates if c in cols), None)
         u_col = next((c for c in u_candidates if c in cols), None)

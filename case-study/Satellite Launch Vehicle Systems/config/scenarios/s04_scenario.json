@@ -1,9 +1,12 @@
 {
-  "id":          "s04_scenario",
-  "description": "TODO describe scenario 4",
-  "T_sim":       30.0,
-  "ref_type":    "step",
-  "ref_init":    0.0,
-  "ref_final":   1.0,
-  "step_time":   1.0
+  "id":          "s04_param_perturbation",
+  "description": "Robustness under aerodynamic parameter perturbation (paper Sec. 4.2.1): the transonic instability peak is raised (mu_alpha_peak 4.0 -> 6.0, pole ~ +2.6 rad/s) while tracking the ramp guidance command. Stresses the adaptive/robust controllers.",
+  "T_sim":         100.0,
+  "ref_type":      "ramp",
+  "ref_init":      0.0,
+  "ref_final":     0.12,
+  "ramp_start":    5.0,
+  "ramp_duration": 60.0,
+  "wind":          {"type": "none"},
+  "plant_overrides": {"mu_alpha_peak": 6.0, "mu_c_decay": 0.45}
 }

@@ -1,0 +1,13 @@
+{
+  "mc_n_samples": 30,
+  "mc_sigma": 0.10,
+  "mc_perturb_keys": ["C_charge", "C_discharge", "B_soc"],
+  "nominal_scenario_id": "s01_typical_summer",
+  "fault_specs": [
+    {"kind": "sensor_bias",    "magnitudes": [0.02, 0.05, 0.10, 0.20]},
+    {"kind": "sensor_noise",   "magnitudes": [0.01, 0.02, 0.05]},
+    {"kind": "actuator_loss",  "magnitudes": [0.10, 0.20, 0.30]},
+    {"kind": "actuator_stuck", "magnitudes": [0.0, 0.25, 0.5]}
+  ],
+  "notes": "Perturbs store charge/discharge capacities (kWh, the paper's hysteretic capacity, a key uncertainty per Sec. 2.1.2) and the linearised SoC sensitivity B_soc by +/-10% (1-sigma). sensor = SoC [-] (state of charge); actuator = u [-] (normalised compressor speed). Nominal scenario is the typical summer day."
+}

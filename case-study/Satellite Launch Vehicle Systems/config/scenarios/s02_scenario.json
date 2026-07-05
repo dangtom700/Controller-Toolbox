@@ -1,9 +1,11 @@
 {
-  "id":          "s02_scenario",
-  "description": "TODO describe scenario 2",
-  "T_sim":       30.0,
-  "ref_type":    "step",
-  "ref_init":    0.0,
-  "ref_final":   1.0,
-  "step_time":   1.0
+  "id":          "s02_ramp_command",
+  "description": "Ramp attitude command (paper Fig. 4): theta_ref ramps 0 -> 0.12 rad over 60 s starting at t=5 s, then held. The transonic instability peak (~50 s) falls inside the ramp. No wind.",
+  "T_sim":         100.0,
+  "ref_type":      "ramp",
+  "ref_init":      0.0,
+  "ref_final":     0.12,
+  "ramp_start":    5.0,
+  "ramp_duration": 60.0,
+  "wind":          {"type": "none"}
 }

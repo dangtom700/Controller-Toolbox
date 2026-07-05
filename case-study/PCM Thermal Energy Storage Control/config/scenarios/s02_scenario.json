@@ -1,9 +1,14 @@
 {
-  "id":          "s02_scenario",
-  "description": "TODO describe scenario 2",
-  "T_sim":       30.0,
-  "ref_type":    "step",
-  "ref_init":    0.0,
-  "ref_final":   1.0,
-  "step_time":   1.0
+  "id":          "s02_heatwave",
+  "description": "Peak-cooling-season heatwave (paper July/August): higher mean/amplitude outdoor temperature and cooling load, stressing the store's charge/discharge throughput and the deeper pre-charge targets.",
+  "T_sim":       48.0,
+  "To_mean":     32.0,
+  "To_amp":      9.0,
+  "load_base":   1.8,
+  "load_day":    3.2,
+  "load_temp":   0.22,
+  "price_base":  0.55,
+  "price_amp":   0.5,
+  "soc_lo":      0.30,
+  "soc_hi":      0.90
 }

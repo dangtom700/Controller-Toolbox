@@ -1,8 +1,24 @@
 {
-  "_comment": "TODO: real plant parameters for Satellite Launch Vehicle Systems",
-  "Ts":        0.01,
-  "param_a":   1.0,
-  "param_b":   1.0,
-  "u_max":     1.0,
-  "u_min":    -1.0
+  "_comment": "SLV pitch-plane attitude plant. mu_alpha(t)/mu_c(t) are a control-oriented reconstruction of the paper's Fig. 3 (graphical only); see sim/..._plant.py and README. Angles in radians (delta_max = 8 deg).",
+  "Ts":              0.05,
+
+  "mu_alpha_base":   0.5,
+  "mu_alpha_peak":   2.8,
+  "mu_alpha_tpeak":  50.0,
+  "mu_alpha_width":  18.0,
+
+  "mu_c0":           10.0,
+  "mu_c_decay":      0.30,
+  "mu_c_Tref":       100.0,
+
+  "mu_alpha_design": 3.2,
+  "mu_c_design":     8.0,
+
+  "delta_max":       0.13963,
+  "delta_rate_max":  8.0,
+  "theta_clamp":     1.0,
+  "rate_clamp":      5.0,
+
+  "theta0":          0.0,
+  "theta_dot0":      0.0
 }

@@ -1,9 +1,14 @@
 {
-  "id":          "s04_scenario",
-  "description": "TODO describe scenario 4",
-  "T_sim":       30.0,
-  "ref_type":    "step",
-  "ref_init":    0.0,
-  "ref_final":   1.0,
-  "step_time":   1.0
+  "id":          "s04_weekend_low_load",
+  "description": "Weekend / low-occupancy day: reduced daytime cooling load, so the store spends more time near full and the controllers must avoid over-charging (SoC saturating at 1) while still honouring the schedule.",
+  "T_sim":       48.0,
+  "To_mean":     25.0,
+  "To_amp":      7.0,
+  "load_base":   1.0,
+  "load_day":    0.9,
+  "load_temp":   0.15,
+  "price_base":  0.5,
+  "price_amp":   0.4,
+  "soc_lo":      0.35,
+  "soc_hi":      0.80
 }

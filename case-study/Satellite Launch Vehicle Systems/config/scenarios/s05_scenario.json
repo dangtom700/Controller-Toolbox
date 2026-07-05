@@ -1,9 +1,10 @@
 {
-  "id":          "s05_scenario",
-  "description": "TODO describe scenario 5",
-  "T_sim":       30.0,
+  "id":          "s05_wind_gust",
+  "description": "Wind-disturbance rejection (paper Sec. 4.2.2): attitude command held small/constant while a raised-cosine wind gust (alpha_w up to 0.05 rad) hits during the high-dynamic-pressure transonic band (~45 s). Tests angle-of-attack / load build-up rejection.",
+  "T_sim":       100.0,
   "ref_type":    "step",
   "ref_init":    0.0,
-  "ref_final":   1.0,
-  "step_time":   1.0
+  "ref_final":   0.02,
+  "step_time":   5.0,
+  "wind":        {"type": "gust", "alpha_w_max": 0.05, "t_gust": 45.0, "w_gust": 8.0}
 }

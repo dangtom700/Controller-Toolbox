@@ -72,6 +72,16 @@ class BTMSController:
                 soc: float, t: float) -> str:
         return 'J'
 
+    def last_u(self) -> float:
+        """Continuous control signal from the most recent compute() call.
+
+        For ctrl_toolbox controllers this is the threshold adjustment u in
+        [-0.5, 0.5] K that actually drives the switching decision (the true
+        continuous actuator signal, logged for mu-analysis); for the discrete
+        rule-based controllers it is the flow-pattern encoding {J:+1, L:0, U:-1}
+        of the pattern returned. Defaults to 0.0 before the first compute()."""
+        return getattr(self, "_last_u", 0.0)
+
 
 # ---------------------------------------------------------------------------
 # 1. OpenLoop -- fixed J-type, no switching (baseline)
@@ -80,6 +90,7 @@ class OpenLoopCtrl(BTMSController):
     def name(self): return "OpenLoop"
 
     def compute(self, DeltaT, x_norm_hot, soc, t):
+        self._last_u = PATTERN_ENCODING['J']
         return 'J'
 
 
@@ -102,9 +113,11 @@ class SelfAdaptiveCtrl(BTMSController):
     def compute(self, DeltaT, x_norm_hot, soc, t):
         threshold = DT_LIM * (1.0 - self.DELTA) - self.EPS   # 0.92 K
         if DeltaT <= threshold:
+            self._last_u = PATTERN_ENCODING[self._prev]
             return self._prev
         mode = _position_rule(x_norm_hot)
         self._prev = mode
+        self._last_u = PATTERN_ENCODING[mode]
         return mode
 
 
@@ -125,6 +138,7 @@ class _CtrlToolboxBase(BTMSController):
     def compute(self, DeltaT, x_norm_hot, soc, t):
         e = DT_REF - DeltaT   # positive when DeltaT is below target (less urgent)
         u = _clamp(self._ctrl_output(e), -0.5, 0.5)
+        self._last_u = u      # continuous actuator signal (logged for mu-analysis)
         # Adjusted threshold: high u (DeltaT below target) -> raise threshold (less switching)
         # Low u (DeltaT above target) -> lower threshold (more aggressive switching)
         threshold = _clamp(DT_LIM + u, 0.1, 1.5)
@@ -228,15 +242,18 @@ class MPCCtrl(BTMSController):
 
     def compute(self, DeltaT, x_norm_hot, soc, t):
         if DeltaT < DT_ACTIVATE:
+            self._last_u = PATTERN_ENCODING[self._prev]
             return self._prev
 
         if self._plant_ref is None:
             # No plant reference: fall back to SelfAdaptive logic
             threshold = DT_LIM * 0.93 - 0.01
             if DeltaT <= threshold:
+                self._last_u = PATTERN_ENCODING[self._prev]
                 return self._prev
             mode = _position_rule(x_norm_hot)
             self._prev = mode
+            self._last_u = PATTERN_ENCODING[mode]
             return mode
 
         # Shallow copy plant state for each prediction
@@ -256,6 +273,7 @@ class MPCCtrl(BTMSController):
                 best_mode = candidate
 
         self._prev = best_mode
+        self._last_u = PATTERN_ENCODING[best_mode]
         return best_mode
 
 

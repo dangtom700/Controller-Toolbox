@@ -1,7 +1,7 @@
-# Controller Selection Matrix — plant nature → candidate shortlist
+# Controller Selection Matrix - plant nature -> candidate shortlist
 
-Purpose: given a plant model, **filter the ~42-controller roster down to a 3–5 candidate
-shortlist** for a case-study roster. This is a *triage* aid, not a design manual — once you have a
+Purpose: given a plant model, **filter the ~42-controller roster down to a 3-5 candidate
+shortlist** for a case-study roster. This is a *triage* aid, not a design manual - once you have a
 shortlist, read the per-strategy behaviour and pitfalls in
 [`control_strategies_deep_dive.md`](control_strategies_deep_dive.md), confirm the exact API and the
 `compute()` sign in the class header + `CONTRIBUTING.md#sign-conventions`, then wire it per the
@@ -19,23 +19,23 @@ Answer these before looking at any controller. Each axis is a hard filter.
 
 | Axis | Values that change the answer |
 |---|---|
-| **Linearity** | LTI · LPV (linear about a moving operating point) · nonlinear (known model) · black-box/data-only |
-| **Channels** | SISO · MIMO with coupling |
-| **Open-loop stability** | stable · integrating · unstable (RHP poles) |
-| **Phase** | minimum-phase · non-minimum-phase (RHP zeros → no clean inverse) |
-| **Dead-time** | negligible · significant transport delay |
-| **Constraints** | none · soft · **hard** actuator/state/safety limits |
-| **Dominant disturbance** | broadband/stochastic · **periodic** (known freq) · **matched** uncertainty · **previewable/measured** |
-| **Model confidence** | accurate · structured-but-uncertain · none (data only) |
-| **State access** | full state measured · output only (⇒ needs an estimator, §4) |
-| **Time-variation** | LTI · slowly varying · fast varying |
-| **Compute budget** | MCU/tiny · normal · can afford an online QP/NLP each step |
+| **Linearity** | LTI . LPV (linear about a moving operating point) . nonlinear (known model) . black-box/data-only |
+| **Channels** | SISO . MIMO with coupling |
+| **Open-loop stability** | stable . integrating . unstable (RHP poles) |
+| **Phase** | minimum-phase . non-minimum-phase (RHP zeros -> no clean inverse) |
+| **Dead-time** | negligible . significant transport delay |
+| **Constraints** | none . soft . **hard** actuator/state/safety limits |
+| **Dominant disturbance** | broadband/stochastic . **periodic** (known freq) . **matched** uncertainty . **previewable/measured** |
+| **Model confidence** | accurate . structured-but-uncertain . none (data only) |
+| **State access** | full state measured . output only (=> needs an estimator, Section 4) |
+| **Time-variation** | LTI . slowly varying . fast varying |
+| **Compute budget** | MCU/tiny . normal . can afford an online QP/NLP each step |
 
 ---
 
 ## 2. Roster at a glance (use when / assumes-or-avoid)
 
-### Classical linear SISO — cheap, first thing to try
+### Classical linear SISO - cheap, first thing to try
 | Class | Use when | Assumes / avoid |
 |---|---|---|
 | `DiscretePID` | Any stable/mildly-unstable SISO loop; the baseline every study should include | Weak on strong coupling, hard constraints, big dead-time |
@@ -45,7 +45,7 @@ Answer these before looking at any controller. Each axis is a hard filter.
 | `RepetitiveController` | Reject/track a **periodic** signal with known period (all harmonics) | Needs exact period; adds delay-line dynamics |
 | `FeedforwardController` | Add model-based FF to any feedback loop | Needs a plant/inverse model |
 
-### Optimal / predictive (model-based, linear) — the MIMO & constrained workhorses
+### Optimal / predictive (model-based, linear) - the MIMO & constrained workhorses
 | Class | Use when | Assumes / avoid |
 |---|---|---|
 | `DiscreteLQR` (+`LQRAdapter`) | LTI MIMO regulation with full state; smooth, no hard limits | Needs stabilizable/detectable + state (or observer); **no** hard constraints |
@@ -53,31 +53,31 @@ Answer these before looking at any controller. Each axis is a hard filter.
 | `DiscreteHinf` | LTI MIMO **robust** output-feedback (worst-case disturbance/uncertainty) | Needs weighting filters + LTI model; conservative |
 | `DiscreteMPC` | MIMO with **hard** input/state constraints, receding horizon, preview | Needs LTI model + per-step QP (compute budget) |
 | `GeneralizedPredictiveControl` | Predictive control that pairs with online RLS (adaptive CARIMA) | SISO-leaning; tuning of horizons |
-| `LPMPC` | MPC with 1-/∞-norm cost (LP instead of QP), constraints | Linear cost only |
+| `LPMPC` | MPC with 1-/inf-norm cost (LP instead of QP), constraints | Linear cost only |
 | `TubeMPC` | Constrained MPC that must stay feasible under **bounded** disturbance/uncertainty | Needs disturbance bound; more conservative than nominal MPC |
 | `ScenarioMPC` | **Stochastic** constraints under uncertainty via scenario sampling | Needs disturbance samples/scenarios; heavier compute |
 | `NonlinearMPC` | Nonlinear plant + constraints, model available | Needs nonlinear model + NLP solver; costly |
 | `NonlinearIMC` | Nonlinear plant with a usable model + stable inverse | Non-minimum-phase kills the inverse |
 
-### Adaptive / scheduled / model-free-tuning — uncertain or varying plants
+### Adaptive / scheduled / model-free-tuning - uncertain or varying plants
 | Class | Use when | Assumes / avoid |
 |---|---|---|
 | `MRACController` | Force an uncertain LTI-ish plant to track a reference model | Relative-degree/SPR assumptions; transients can be rough |
 | `L1AdaptiveController` | Fast adaptation with **guaranteed transient** on uncertain plants | Bandwidth-limited by its filter design |
 | `SelfTuningRegulator` | **Slowly** time-varying plant; RLS-ID + recompute control law | Poor on fast variation; ID excitation needed |
 | `GainScheduledController` | Plant whose linearisation varies with a **measurable** scheduling variable (LPV) | Needs the scheduling signal + gains per operating point |
-| `ExtremumSeeker` | **No reference known** — find the input that optimises a static map | Slow; steady-state optimisation only |
+| `ExtremumSeeker` | **No reference known** - find the input that optimises a static map | Slow; steady-state optimisation only |
 
-### Nonlinear (model-based) — mechanical/EL, robotics, strict-feedback
+### Nonlinear (model-based) - mechanical/EL, robotics, strict-feedback
 | Class | Use when | Assumes / avoid |
 |---|---|---|
 | `DiscreteSMC` | Robust tracking under **matched** uncertainty/disturbance; nonlinear/uncertain | Chattering vs. boundary layer; needs known control direction |
 | `BacksteppingController` | **Strict-feedback** nonlinear systems (many vehicle/robot models) | Needs the strict-feedback form + model |
 | `FeedbackLinearisation` | Cancel a **known** nonlinearity, then close a linear loop | Needs accurate model + full state; fails on unstable zero dynamics |
-| `PassivityBasedController` | **Euler-Lagrange / robotic** plants (needs `M(q)`, `C`, `∂V`) — manipulators | Needs the EL structure callbacks |
+| `PassivityBasedController` | **Euler-Lagrange / robotic** plants (needs `M(q)`, `C`, `dV`) - manipulators | Needs the EL structure callbacks |
 | `CLFController` | You can supply a control-Lyapunov function | Needs a valid CLF |
 
-### Data-driven / learning — soft robots, black-box, data-rich
+### Data-driven / learning - soft robots, black-box, data-rich
 | Class | Use when | Assumes / avoid |
 |---|---|---|
 | `DeePC` | Predictive control from **data only** (no parametric model), constraints | Needs rich, persistently-exciting data; LTI-ish behaviour |
@@ -93,25 +93,25 @@ Answer these before looking at any controller. Each axis is a hard filter.
 
 ---
 
-## 3. Quick filters — plant archetype → shortlist
+## 3. Quick filters - plant archetype -> shortlist
 
-- **Benign stable SISO, no constraints** → `DiscretePID` → `DiscreteLeadLag` / `FractionalOrderPID`.
-- **MIMO, coupled, hard constraints** → `DiscreteMPC` (→ `TubeMPC`/`ScenarioMPC` if disturbance is bounded/stochastic); `DiscreteLQR`+observer as the smooth baseline.
-- **MIMO, robustness-critical, LTI** → `DiscreteHinf` (→ `DiscreteH2` for stochastic-optimal).
-- **Unstable / fast, operating-point-varying** → `GainScheduledController` + `DiscreteLQR`/`DiscreteHinf` per point.
-- **Nonlinear robotics / EL dynamics** → `PassivityBasedController`, `FeedbackLinearisation` (computed-torque), `BacksteppingController`, `DiscreteSMC`.
-- **Matched uncertainty / robustness on nonlinear** → `DiscreteSMC`, `L1AdaptiveController`, `MRACController`.
-- **Periodic reference/disturbance** → `RepetitiveController` (period) / `ResonantController` (single freq).
-- **Big dead-time** → `SmithPredictor` wrapping the inner controller.
-- **Black-box / data-only** → `DeePC`, `CEMController`, `NeuralNetworkController` (+ SINDy/Koopman model-ID upstream).
-- **Safety set must never be violated** → wrap any of the above in `CBFSafetyFilter`.
+- **Benign stable SISO, no constraints** -> `DiscretePID` -> `DiscreteLeadLag` / `FractionalOrderPID`.
+- **MIMO, coupled, hard constraints** -> `DiscreteMPC` (-> `TubeMPC`/`ScenarioMPC` if disturbance is bounded/stochastic); `DiscreteLQR`+observer as the smooth baseline.
+- **MIMO, robustness-critical, LTI** -> `DiscreteHinf` (-> `DiscreteH2` for stochastic-optimal).
+- **Unstable / fast, operating-point-varying** -> `GainScheduledController` + `DiscreteLQR`/`DiscreteHinf` per point.
+- **Nonlinear robotics / EL dynamics** -> `PassivityBasedController`, `FeedbackLinearisation` (computed-torque), `BacksteppingController`, `DiscreteSMC`.
+- **Matched uncertainty / robustness on nonlinear** -> `DiscreteSMC`, `L1AdaptiveController`, `MRACController`.
+- **Periodic reference/disturbance** -> `RepetitiveController` (period) / `ResonantController` (single freq).
+- **Big dead-time** -> `SmithPredictor` wrapping the inner controller.
+- **Black-box / data-only** -> `DeePC`, `CEMController`, `NeuralNetworkController` (+ SINDy/Koopman model-ID upstream).
+- **Safety set must never be violated** -> wrap any of the above in `CBFSafetyFilter`.
 
 ---
 
-## 4. Estimators (needed whenever state isn't measured — the observer-SF partner)
+## 4. Estimators (needed whenever state isn't measured - the observer-SF partner)
 
-Observer + state feedback is **wired by hand** (`estimator.step()` → `ctrl.setState()` →
-`compute()`), not a class — see `CLAUDE.md §4`.
+Observer + state feedback is **wired by hand** (`estimator.step()` -> `ctrl.setState()` ->
+`compute()`), not a class - see `CLAUDE.md Section 4`.
 
 | Estimator | Use when |
 |---|---|
@@ -123,12 +123,12 @@ Observer + state feedback is **wired by hand** (`estimator.step()` → `ctrl.set
 | `GreyBoxEstimator` / `RecursiveGreyBoxEstimator` | Joint parameter+state ID from a structured model |
 | `SetMembershipEstimator` | Guaranteed **bounded-error** set estimation |
 
-## 5. Composition wrappers (all are `IController`s — nest freely)
+## 5. Composition wrappers (all are `IController`s - nest freely)
 
-`ControllerStack` (Additive=cascade/additive, Supervisory=health-aware switching) ·
-`AntiWindupWrapper` (saturation) · `CBFSafetyFilter` (safety set) · `GainScheduledController` ·
-`SmithPredictor` (dead-time) · `EventTriggeredWrapper` (reduce compute/comms) · `FTCSupervisor`
-(fault-tolerant switching) · `ControllerMonitor` (telemetry/health only). Compose rather than
+`ControllerStack` (Additive=cascade/additive, Supervisory=health-aware switching) .
+`AntiWindupWrapper` (saturation) . `CBFSafetyFilter` (safety set) . `GainScheduledController` .
+`SmithPredictor` (dead-time) . `EventTriggeredWrapper` (reduce compute/comms) . `FTCSupervisor`
+(fault-tolerant switching) . `ControllerMonitor` (telemetry/health only). Compose rather than
 build a monolith: e.g. `AntiWindupWrapper(SmithPredictor(DiscretePID))`.
 
 ---
@@ -158,7 +158,7 @@ Shortlists implied by each plant's physics (fill these when building the roster;
 ### Caveats
 - This matrix is **technique-level**; a specific `lib/` class may add its own assumptions (relative
   degree, control-direction sign, required callbacks). Always open the header before wiring.
-- Sign conventions are **not uniform** — check `signConvention()` / `CONTRIBUTING.md#sign-conventions`
+- Sign conventions are **not uniform** - check `signConvention()` / `CONTRIBUTING.md#sign-conventions`
   (e.g. SMC uses `e = y - r`, PID uses `e = r - y`).
-- Don't ship a single controller: case studies compare a **roster**. Include a PID baseline plus 2–4
+- Don't ship a single controller: case studies compare a **roster**. Include a PID baseline plus 2-4
   candidates from the shortlist so the comparison table is meaningful.

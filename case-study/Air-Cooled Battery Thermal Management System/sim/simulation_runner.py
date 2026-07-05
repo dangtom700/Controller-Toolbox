@@ -3,8 +3,13 @@ simulation_runner.py
 Run one (scenario, controller) pair for the Air-Cooled BTMS case study.
 
 CSV columns:
-  t, DeltaT_ref, DeltaT, T_max, T_min, T_avg, flow_pattern,
+  t, DeltaT_ref, DeltaT, T_max, T_min, T_avg, flow_pattern, u_ctrl,
   phi_b_kWm3, soc, n_switches, iae_cumulative
+
+u_ctrl is the controller's continuous control signal (threshold adjustment in
+[-0.5, 0.5] K for the ctrl_toolbox controllers, flow-pattern encoding for the
+rule-based ones). It is the continuous actuator counterpart to the discrete
+flow_pattern, and the (DeltaT, u_ctrl) pair is what tools/mu_analysis.py fits.
 """
 
 import csv
@@ -121,7 +126,8 @@ def run_simulation(plant_params: dict,
         writer = csv.writer(fh)
         writer.writerow([
             't', 'DeltaT_ref', 'DeltaT', 'T_max', 'T_min', 'T_avg',
-            'flow_pattern', 'phi_b_kWm3', 'soc', 'n_switches', 'iae_cumulative'
+            'flow_pattern', 'u_ctrl', 'phi_b_kWm3', 'soc', 'n_switches',
+            'iae_cumulative'
         ])
 
         for k in range(N):
@@ -150,6 +156,7 @@ def run_simulation(plant_params: dict,
             else:
                 new_pattern = controller.compute(DeltaT_obs, x_hot, soc, t)
             plant.set_pattern(new_pattern)
+            u_ctrl = controller.last_u()
 
             # Metrics
             iae    += abs(DeltaT - DT_REF) * Ts
@@ -165,6 +172,7 @@ def run_simulation(plant_params: dict,
                 f"{T_min:.4f}",
                 f"{T_avg_val:.4f}",
                 new_pattern,
+                f"{u_ctrl:.5f}",
                 f"{phi / 1000.0:.2f}",    # kW/m^3
                 f"{soc:.4f}",
                 str(plant.n_switches()),

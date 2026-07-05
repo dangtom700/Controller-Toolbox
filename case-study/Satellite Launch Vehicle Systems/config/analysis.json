@@ -1,0 +1,13 @@
+{
+  "mc_n_samples": 30,
+  "mc_sigma": 0.10,
+  "mc_perturb_keys": ["mu_alpha_peak", "mu_alpha_base", "mu_c0", "mu_c_decay"],
+  "nominal_scenario_id": "s02_ramp_command",
+  "fault_specs": [
+    {"kind": "sensor_bias",    "magnitudes": [0.005, 0.01, 0.02, 0.05]},
+    {"kind": "sensor_noise",   "magnitudes": [0.002, 0.005, 0.01]},
+    {"kind": "actuator_loss",  "magnitudes": [0.10, 0.20, 0.30]},
+    {"kind": "actuator_stuck", "magnitudes": [0.0, 0.02, 0.05]}
+  ],
+  "notes": "Perturbs the reconstructed aerodynamic-instability profile (mu_alpha_peak/base) and control-effectiveness profile (mu_c0/decay) by +/-10% (1-sigma). sensor = theta [rad] attitude measurement; actuator = delta [rad] gimbal command. Nominal scenario is the ramp guidance command (paper Fig. 4)."
+}

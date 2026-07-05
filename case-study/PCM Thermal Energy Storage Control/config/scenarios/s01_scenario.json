@@ -1,9 +1,14 @@
 {
-  "id":          "s01_scenario",
-  "description": "TODO describe scenario 1",
-  "T_sim":       30.0,
-  "ref_type":    "step",
-  "ref_init":    0.0,
-  "ref_final":   1.0,
-  "step_time":   1.0
+  "id":          "s01_typical_summer",
+  "description": "Typical Mediterranean summer cooling day (2-day horizon). Nominal outdoor-temperature, load, price and SoC pre-charge profiles - the baseline load-shifting case and the nominal scenario for Monte Carlo / fault analysis.",
+  "T_sim":       48.0,
+  "To_mean":     26.0,
+  "To_amp":      8.0,
+  "load_base":   1.2,
+  "load_day":    2.2,
+  "load_temp":   0.18,
+  "price_base":  0.5,
+  "price_amp":   0.45,
+  "soc_lo":      0.30,
+  "soc_hi":      0.85
 }

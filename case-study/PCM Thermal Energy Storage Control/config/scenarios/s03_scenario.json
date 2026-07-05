@@ -1,9 +1,14 @@
 {
-  "id":          "s03_scenario",
-  "description": "TODO describe scenario 3",
-  "T_sim":       30.0,
-  "ref_type":    "step",
-  "ref_init":    0.0,
-  "ref_final":   1.0,
-  "step_time":   1.0
+  "id":          "s03_price_volatility",
+  "description": "High electricity-price volatility (large peak/valley spread). Deep, sharply-timed SoC pre-charge targets reward controllers that track the load-shifting schedule tightly; punishes sluggish/offset controllers via the cost metric.",
+  "T_sim":       48.0,
+  "To_mean":     27.0,
+  "To_amp":      8.0,
+  "load_base":   1.3,
+  "load_day":    2.4,
+  "load_temp":   0.18,
+  "price_base":  0.35,
+  "price_amp":   0.85,
+  "soc_lo":      0.25,
+  "soc_hi":      0.90
 }

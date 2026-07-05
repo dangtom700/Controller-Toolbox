@@ -1,9 +1,14 @@
 {
-  "id":          "s05_scenario",
-  "description": "TODO describe scenario 5",
-  "T_sim":       30.0,
-  "ref_type":    "step",
-  "ref_init":    0.0,
-  "ref_final":   1.0,
-  "step_time":   1.0
+  "id":          "s05_shoulder_season",
+  "description": "Cooler shoulder-season day with a lower, flatter cooling load and a 3-day horizon: tests steady-state SoC regulation and drift over repeated daily cycles rather than peak throughput.",
+  "T_sim":       72.0,
+  "To_mean":     22.0,
+  "To_amp":      6.0,
+  "load_base":   0.8,
+  "load_day":    1.4,
+  "load_temp":   0.12,
+  "price_base":  0.5,
+  "price_amp":   0.4,
+  "soc_lo":      0.35,
+  "soc_hi":      0.75
 }

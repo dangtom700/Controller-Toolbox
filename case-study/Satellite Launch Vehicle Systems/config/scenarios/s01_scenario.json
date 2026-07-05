@@ -1,9 +1,10 @@
 {
-  "id":          "s01_scenario",
-  "description": "TODO describe scenario 1",
-  "T_sim":       30.0,
+  "id":          "s01_step_command",
+  "description": "Attitude step command: theta_ref 0 -> 0.10 rad at t=5 s, no wind. Baseline capture/regulation of the unstable pitch plane over the full 100 s ascent.",
+  "T_sim":       100.0,
   "ref_type":    "step",
   "ref_init":    0.0,
-  "ref_final":   1.0,
-  "step_time":   1.0
+  "ref_final":   0.10,
+  "step_time":   5.0,
+  "wind":        {"type": "none"}
 }
