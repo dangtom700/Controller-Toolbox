@@ -1,0 +1,12 @@
+{
+  "id": "s07_multiop_transition",
+  "description": "Multi-operating-point transition: Low Load (op A) -> Medium Load (op B) at t=1800s",
+  "operating_point": "A",
+  "mode": "tracking",
+  "dx0": [0.0, 0.0, 0.0],
+  "setpoint_dy": [0.0, 0.0, 0.0],
+  "transition_time_s": 1800,
+  "transition_to_op": "B",
+  "duration_s": 3600,
+  "Ts": 1.0
+}

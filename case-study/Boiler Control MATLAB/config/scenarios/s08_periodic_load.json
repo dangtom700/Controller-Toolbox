@@ -1,0 +1,24 @@
+{
+  "id": "s08_periodic_load",
+  "description": "Sinusoidal load disturbance at 0.05 Hz to demonstrate RepetitiveController advantage over PID/MPC. Plant starts at Medium Load (op B). A sinusoidal perturbation on y1 setpoint simulates periodic grid load oscillations at 0.05 Hz (period = 200 s). After one learning period, RepetitiveController should achieve near-zero periodic IAE; PID and MPC retain residual periodic error proportional to their disturbance-rejection bandwidth.",
+  "operating_point": "B",
+  "mode": "periodic_tracking",
+  "dx0": [0.0, 0.0, 0.0],
+  "setpoint_dy": [0.0, 0.0, 0.0],
+  "periodic_amp": [5.0, 2.0, 0.0],
+  "periodic_freq_hz": 0.005,
+  "duration_s": 7200,
+  "Ts": 1.0,
+
+  "_notes": {
+    "periodic_amp": "Sinusoidal setpoint amplitude [bar, MW, -] imposed on top of the operating-point output. y1: ±5 bar pressure swing; y2: ±2 MW power demand swing; y3: uncontrolled (ESC-only).",
+    "periodic_freq_hz": "0.005 Hz = period of 200 s. RepetitiveController periodSteps = 200. After one period (200 s), the repetitive buffer learns the full disturbance waveform and cancels it feed-forward. A faster frequency (e.g. 0.05 Hz, period 20 s) can also be used but requires periodSteps=20 and amplitudes scaled down.",
+    "duration_s": "7200 s = 36 repetitive periods. Gives PID, MPC, and RepetitiveController time to show long-term periodic-error behaviour clearly in the CSV logs.",
+    "validation_criteria": {
+      "RepetitiveCtrl_steady_periodic_IAE_fraction": "After t >= 400 s (2 learning periods), the running IAE rate for RepetitiveCtrl should be < 5% of the PID running IAE rate. Computed as: d(IAE_y1)/dt integrated over [400,7200] / d(IAE_y1)/dt for PID over the same window.",
+      "PID_periodic_error_visible": "PID y1 error trace should show persistent sinusoidal residual at 0.005 Hz with amplitude >= 1 bar throughout the run.",
+      "MPC_periodic_error_visible": "MPC y1 error trace should show residual periodic error at 0.005 Hz, smaller than PID but larger than RepetitiveCtrl after the learning period.",
+      "all_controllers_stable": "No NaN, no divergence, valve positions must remain in [0, 1] at all times."
+    }
+  }
+}

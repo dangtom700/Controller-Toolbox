@@ -1,0 +1,34 @@
+{
+  "_comment": "Bell-Astrom (1987) nonlinear boiler-turbine physical parameters.",
+
+  "sample_time_s": 1.0,
+
+  "valve_bounds": {
+    "u_min": 0.0,
+    "u_max": 1.0,
+    "du1_max": 0.007,
+    "du2_max": 0.020,
+    "du3_max": 0.050
+  },
+
+  "operating_points": {
+    "A": {
+      "label": "Low Load",
+      "x1": 75.6,   "x2": 15.3,   "x3": 508.97,
+      "u1": 0.11926, "u2": 0.38063, "u3": 0.12262,
+      "y3": 0.098414
+    },
+    "B": {
+      "label": "Medium Load",
+      "x1": 97.2,   "x2": 50.5,   "x3": 469.51,
+      "u1": 0.27049, "u2": 0.62082, "u3": 0.33979,
+      "y3": 0.097038
+    },
+    "C": {
+      "label": "High Load",
+      "x1": 140.0,  "x2": 128.0,  "x3": 323.68,
+      "u1": 0.59589, "u2": 0.89447, "u3": 0.78829,
+      "y3": 0.09797
+    }
+  }
+}

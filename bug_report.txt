@@ -1,6 +1,6 @@
-Bug Report - generated from run_20260704_093955.log on 2026-07-04 11:00:45.805397
-Total failure indicators found: 2
-Merged into 1 block(s)
+Bug Report - generated from run_20260705_150625.log on 2026-07-05 17:32:35.279881
+Total failure indicators found: 28
+Merged into 10 block(s)
 ========================================================================
 
 --- FAILURE BLOCK #1 (keywords: nan) ---
@@ -32,6 +32,414 @@ Lines 44 - 69
       67: ============================================================
       68: 
       69: [CONFIG] Configuring CMake...
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #2 (keywords: warn) ---
+Lines 116 - 151
+
+     116:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     117:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     118:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     119:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     120:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     121:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     122:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     123:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     124:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     125:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+>>>  126: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     127:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     128:       |                                                                              ^
+     129: In member function 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index, Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]',
+     130:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::false_type) const [with ArgType = const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1543:17,
+     131:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     132:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     133:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     134:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     135:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     136:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     137:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     138:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     139:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     140:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+     141: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     142:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     143:       |                                                                              ^
+     144: [  0%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DiscreteMPC.cpp.obj
+     145: In file included from C:/msys64/ucrt64/include/eigen3/Eigen/Core:333,
+     146:                  from C:/msys64/ucrt64/include/eigen3/Eigen/Dense:1,
+     147:                  from lib\IControllerObserver.h:2,
+     148:                  from lib\IController.h:2,
+     149:                  from lib\DiscreteMPC.h:2,
+     150:                  from lib\DiscreteMPC.cpp:1:
+     151: In member function 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index, Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]',
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #3 (keywords: warn) ---
+Lines 153 - 173
+
+     153:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     154:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     155:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     156:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     157:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     158:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     159:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     160:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     161:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     162:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+>>>  163: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     164:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     165:       |                                                                              ^
+     166: [  0%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ExtremumSeeker.cpp.obj
+     167: [  7%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/SmithPredictor.cpp.obj
+     168: [  7%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DiscreteLeadLag.cpp.obj
+     169: [  7%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DiscreteSMC.cpp.obj
+     170: [  7%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DiscreteADRC.cpp.obj
+     171: [  7%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/KalmanFilter.cpp.obj
+     172: [  7%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DiscreteLQG.cpp.obj
+     173: [ 15%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ControllerTuner.cpp.obj
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #4 (keywords: warn) ---
+Lines 189 - 213
+
+     189:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     190:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     191:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     192:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     193:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     194:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     195:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     196:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>; Rhs = Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     197:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>; Rhs = Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     198:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>; Rhs = Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+>>>  199: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     200:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     201:       |                                                                              ^
+     202: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     203: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     204: [ 23%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/RecursiveLeastSquares.cpp.obj
+     205: [ 23%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/RepetitiveController.cpp.obj
+     206: [ 23%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/GeneralizedPredictiveControl.cpp.obj
+     207: In file included from C:/msys64/ucrt64/include/eigen3/Eigen/Core:333,
+     208:                  from C:/msys64/ucrt64/include/eigen3/Eigen/Dense:1,
+     209:                  from lib\IControllerObserver.h:2,
+     210:                  from lib\IController.h:2,
+     211:                  from lib\GeneralizedPredictiveControl.h:2,
+     212:                  from lib\GeneralizedPredictiveControl.cpp:1:
+     213: In member function 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index, Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]',
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #5 (keywords: warn) ---
+Lines 215 - 235
+
+     215:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     216:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     217:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     218:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     219:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     220:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     221:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     222:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     223:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     224:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+>>>  225: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     226:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     227:       |                                                                              ^
+     228: [ 23%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/LinearisationHelper.cpp.obj
+     229: [ 23%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/FeedbackLinearisation.cpp.obj
+     230: [ 30%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/MRACController.cpp.obj
+     231: [ 30%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/BalancedTruncation.cpp.obj
+     232: In file included from C:/msys64/ucrt64/include/eigen3/Eigen/Core:333,
+     233:                  from C:/msys64/ucrt64/include/eigen3/Eigen/Dense:1,
+     234:                  from lib\BalancedTruncation.h:2,
+     235:                  from lib\BalancedTruncation.cpp:1:
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #6 (keywords: warn) ---
+Lines 238 - 299
+
+     238:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     239:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     240:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     241:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     242:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     243:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     244:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     245:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     246:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     247:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+>>>  248: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     249:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     250:       |                                                                              ^
+     251: [ 30%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ZeroPhaseTrackingFilter.cpp.obj
+     252: [ 30%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/GapMetric.cpp.obj
+     253: [ 30%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/LPVSystemID.cpp.obj
+     254: [ 30%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/NonlinearMPC.cpp.obj
+     255: [ 38%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/AdaptiveSmithPredictor.cpp.obj
+     256: [ 38%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/TubeMPC.cpp.obj
+     257: [ 38%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ParticleFilter.cpp.obj
+     258: [ 38%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/IterativeLearningControl.cpp.obj
+     259: [ 38%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/SINDy.cpp.obj
+     260: lib\SINDy.cpp: In member function 'Eigen::MatrixXd ctrl::SINDy::stls(const Eigen::MatrixXd&, const Eigen::MatrixXd&) const':
+     261: lib\SINDy.cpp:151:41: warning: 'Eigen::JacobiSVD<typename Eigen::DenseBase<Derived>::PlainObject, Options> Eigen::MatrixBase<Derived>::jacobiSvd(unsigned int) const [with int Options = 0; Derived = Eigen::Matrix<double, -1, -1>; typename Eigen::DenseBase<Derived>::PlainObject = Eigen::Matrix<double, -1, -1>]' is deprecated: Options should be specified using method's template parameter. [-Wdeprecated-declarations]
+     262:   151 |     Eigen::MatrixXd Xi = Theta.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV)
+     263:       |                          ~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     264: In file included from C:/msys64/ucrt64/include/eigen3/Eigen/SVD:39,
+     265:                  from C:/msys64/ucrt64/include/eigen3/Eigen/Dense:5,
+     266:                  from lib\PlantModel.h:6,
+     267:                  from lib\SINDy.h:2,
+     268:                  from lib\SINDy.cpp:1:
+     269: C:/msys64/ucrt64/include/eigen3/Eigen/src/SVD/JacobiSVD.h:839:63: note: declared here
+     270:   839 | JacobiSVD<typename MatrixBase<Derived>::PlainObject, Options> MatrixBase<Derived>::jacobiSvd(
+     271:       |                                                               ^~~~~~~~~~~~~~~~~~~
+     272: lib\SINDy.cpp:184:40: warning: 'Eigen::JacobiSVD<typename Eigen::DenseBase<Derived>::PlainObject, Options> Eigen::MatrixBase<Derived>::jacobiSvd(unsigned int) const [with int Options = 0; Derived = Eigen::Matrix<double, -1, -1>; typename Eigen::DenseBase<Derived>::PlainObject = Eigen::Matrix<double, -1, -1>]' is deprecated: Options should be specified using method's template parameter. [-Wdeprecated-declarations]
+     273:   184 |                 stls_Theta_a_.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV)
+     274:       |                 ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     275: C:/msys64/ucrt64/include/eigen3/Eigen/src/SVD/JacobiSVD.h:839:63: note: declared here
+     276:   839 | JacobiSVD<typename MatrixBase<Derived>::PlainObject, Options> MatrixBase<Derived>::jacobiSvd(
+     277:       |                                                               ^~~~~~~~~~~~~~~~~~~
+     278: [ 38%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/KoopmanEDMD.cpp.obj
+     279: [ 38%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/L1AdaptiveController.cpp.obj
+     280: [ 46%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/CBFSafetyFilter.cpp.obj
+     281: [ 46%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/GaussianProcess.cpp.obj
+     282: [ 46%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/EchoStateNetwork.cpp.obj
+     283: [ 46%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/NeuralPID.cpp.obj
+     284: [ 46%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/NeuralNetworkController.cpp.obj
+     285: [ 46%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/NNAdaptiveController.cpp.obj
+     286: [ 46%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/NonlinearIMC.cpp.obj
+     287: [ 53%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/NARMAXIdentifier.cpp.obj
+     288: lib\NARMAXIdentifier.cpp: In function 'std::string ctrl::{anonymous}::termLabel(const std::vector<int>&, int, int, int)':
+     289: lib\NARMAXIdentifier.cpp:130:76: warning: unused parameter 'nc' [-Wunused-parameter]
+     290:   130 | std::string termLabel(const std::vector<int> &factors, int na, int nb, int nc)
+     291:       |                                                                        ~~~~^~
+     292: [ 53%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/CEMController.cpp.obj
+     293: [ 53%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DeePC.cpp.obj
+     294: [ 53%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DynaController.cpp.obj
+     295: [ 53%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ScenarioMPC.cpp.obj
+     296: [ 53%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/GreyBoxEstimator.cpp.obj
+     297: [ 61%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/GPResidualModel.cpp.obj
+     298: [ 61%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/HybridMPC.cpp.obj
+     299: [ 61%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/HybridModelTrainer.cpp.obj
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #7 (keywords: warn) ---
+Lines 325 - 378
+
+     325:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     326:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     327:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     328:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     329:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     330:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     331:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     332:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     333:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     334:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+>>>  335: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     336:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     337:       |                                                                              ^
+     338: [ 84%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/NSGA2.cpp.obj
+     339: In file included from C:/msys64/ucrt64/include/c++/16.1.0/x86_64-w64-mingw32/bits/c++allocator.h:33,
+     340:                  from C:/msys64/ucrt64/include/c++/16.1.0/bits/allocator.h:46,
+     341:                  from C:/msys64/ucrt64/include/c++/16.1.0/string:46,
+     342:                  from lib\ControllerRegistry.h:2,
+     343:                  from lib\NSGA2.h:2,
+     344:                  from lib\NSGA2.cpp:1:
+     345: In member function 'constexpr void std::__new_allocator<_Tp>::deallocate(_Tp*, size_type) [with _Tp = int]',
+     346:     inlined from 'constexpr void std::allocator< <template-parameter-1-1> >::deallocate(_Tp*, std::size_t) [with _Tp = int]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/allocator.h:218:35,
+     347:     inlined from 'static constexpr void std::allocator_traits<std::allocator<_CharT> >::deallocate(allocator_type&, pointer, size_type) [with _Tp = int]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/alloc_traits.h:689:23,
+     348:     inlined from 'constexpr void std::_Vector_base<_Tp, _Alloc>::_M_deallocate(pointer, std::size_t) [with _Tp = int; _Alloc = std::allocator<int>]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/stl_vector.h:398:19,
+     349:     inlined from 'constexpr std::_Vector_base<_Tp, _Alloc>::~_Vector_base() [with _Tp = int; _Alloc = std::allocator<int>]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/stl_vector.h:378:15,
+     350:     inlined from 'constexpr std::vector<_Tp, _Alloc>::~vector() [with _Tp = int; _Alloc = std::allocator<int>]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/stl_vector.h:795:7,
+     351:     inlined from 'ctrl::ParetoResult ctrl::NSGA2::optimize(const ctrl::MultiCostFn&)' at lib\NSGA2.cpp:230:13:
+     352: C:/msys64/ucrt64/include/c++/16.1.0/bits/new_allocator.h:183:66: warning: 'void operator delete(void*, std::size_t)' called on pointer '<unknown>' with nonzero offset [4, 9223372036854775804] [-Wfree-nonheap-object]
+     353:   183 |         _GLIBCXX_OPERATOR_DELETE(_GLIBCXX_SIZED_DEALLOC(__p, __n));
+     354:       |                                                                  ^
+     355: In member function 'constexpr _Tp* std::__new_allocator<_Tp>::allocate(size_type, const void*) [with _Tp = int]',
+     356:     inlined from 'constexpr _Tp* std::allocator< <template-parameter-1-1> >::allocate(std::size_t) [with _Tp = int]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/allocator.h:206:40,
+     357:     inlined from 'static constexpr _Tp* std::allocator_traits<std::allocator<_CharT> >::allocate(allocator_type&, size_type) [with _Tp = int]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/alloc_traits.h:638:28,
+     358:     inlined from 'constexpr std::_Vector_base<_Tp, _Alloc>::pointer std::_Vector_base<_Tp, _Alloc>::_M_allocate(std::size_t) [with _Tp = int; _Alloc = std::allocator<int>]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/stl_vector.h:389:33,
+     359:     inlined from 'constexpr void std::_Vector_base<_Tp, _Alloc>::_M_create_storage(std::size_t) [with _Tp = int; _Alloc = std::allocator<int>]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/stl_vector.h:407:44,
+     360:     inlined from 'constexpr std::_Vector_base<_Tp, _Alloc>::_Vector_base(std::size_t, const allocator_type&) [with _Tp = int; _Alloc = std::allocator<int>]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/stl_vector.h:341:26,
+     361:     inlined from 'constexpr std::vector<_Tp, _Alloc>::vector(size_type, const allocator_type&) [with _Tp = int; _Alloc = std::allocator<int>]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/stl_vector.h:577:47,
+     362:     inlined from 'ctrl::ParetoResult ctrl::NSGA2::optimize(const ctrl::MultiCostFn&)' at lib\NSGA2.cpp:220:49:
+     363: C:/msys64/ucrt64/include/c++/16.1.0/bits/new_allocator.h:162:75: note: returned from 'void* operator new(std::size_t)'
+     364:   162 |           return static_cast<_Tp*>(_GLIBCXX_OPERATOR_NEW(__n * sizeof(_Tp)));
+     365:       |                                                                           ^
+     366: [ 84%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ConstrainedTuning.cpp.obj
+     367: lib\ConstrainedTuning.cpp: In function 'ctrl::TunerResult ctrl::tuneConstrained(std::function<TunerResult(const std::function<double(const Eigen::Matrix<double, -1, 1>&)>&, const Eigen::Matrix<double, -1, 1>&)>, const AutoTuner::CostFn&, const ConstrainedTuneParams&, const Eigen::VectorXd&)':
+     368: lib\ConstrainedTuning.cpp:44:36: warning: '*(unsigned char*)((char*)&innerResult + offsetof(ctrl::TunerResult, ctrl::TunerResult::converged))' may be used uninitialized [-Wmaybe-uninitialized]
+     369:    44 |     result.converged = innerResult.converged && feasible;
+     370:       |                        ~~~~~~~~~~~~^~~~~~~~~
+     371: lib\ConstrainedTuning.cpp:14:17: note: '*(unsigned char*)((char*)&innerResult + offsetof(ctrl::TunerResult, ctrl::TunerResult::converged))' was declared here
+     372:    14 |     TunerResult innerResult;
+     373:       |                 ^~~~~~~~~~~
+     374: [ 84%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/FaultClassifier.cpp.obj
+     375: [ 84%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/FTCSupervisor.cpp.obj
+     376: [ 84%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/GPMPC.cpp.obj
+     377: [ 84%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ValueIterationSolver.cpp.obj
+     378: [ 92%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/LPMPC.cpp.obj
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #8 (keywords: warn) ---
+Lines 396 - 416
+
+     396:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     397:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     398:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     399:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     400:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     401:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     402:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     403:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     404:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     405:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+>>>  406: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     407:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     408:       |                                                                              ^
+     409: [100%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/HinfFilter.cpp.obj
+     410: [100%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/FunctionApproximator.cpp.obj
+     411: [100%] Linking CXX static library libcontroller_toolbox.a
+     412: [100%] Built target controller_toolbox
+     413: [OK] controller_toolbox
+     414: 
+     415: ----------------------------------------------------------
+     416: [BUILD] test_controllers
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #9 (keywords: exception, fatal, assert) ---
+Lines 1565 - 1640
+
+    1565: [OK] ex125_computational_delay_wrapper
+    1566: 
+    1567: ----------------------------------------------------------
+    1568: [BUILD] test_autoscheduling
+    1569: ----------------------------------------------------------
+    1570: [  0%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/catch_chronometer.cpp.obj
+    1571: [  0%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_analyse.cpp.obj
+    1572: [  0%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_benchmark_function.cpp.obj
+    1573: [  0%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_run_for_at_least.cpp.obj
+    1574: [  0%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_stats.cpp.obj
+>>> 1575: [  0%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generator_exception.cpp.obj
+    1576: [  3%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generators.cpp.obj
+    1577: [  3%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generators_random.cpp.obj
+    1578: [  3%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_automake.cpp.obj
+    1579: [  3%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_common_base.cpp.obj
+    1580: [  3%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_compact.cpp.obj
+    1581: [  3%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_console.cpp.obj
+    1582: [  3%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_cumulative_base.cpp.obj
+    1583: [  6%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_event_listener.cpp.obj
+    1584: [  6%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_helpers.cpp.obj
+    1585: [  6%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_json.cpp.obj
+    1586: [  6%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_junit.cpp.obj
+    1587: [  6%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_multi.cpp.obj
+    1588: [  6%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_registrars.cpp.obj
+    1589: [ 10%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_sonarqube.cpp.obj
+    1590: [ 10%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_streaming_base.cpp.obj
+    1591: [ 10%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_tap.cpp.obj
+    1592: [ 10%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_teamcity.cpp.obj
+    1593: [ 10%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_xml.cpp.obj
+    1594: [ 10%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_capture.cpp.obj
+    1595: [ 10%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_config.cpp.obj
+    1596: [ 13%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_exception.cpp.obj
+    1597: [ 13%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_generatortracker.cpp.obj
+    1598: [ 13%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_registry_hub.cpp.obj
+    1599: [ 13%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_reporter.cpp.obj
+    1600: [ 13%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_reporter_factory.cpp.obj
+    1601: [ 13%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_testcase.cpp.obj
+    1602: [ 13%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_approx.cpp.obj
+    1603: [ 17%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_assertion_result.cpp.obj
+    1604: [ 17%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_config.cpp.obj
+    1605: [ 17%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_get_random_seed.cpp.obj
+    1606: [ 17%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_message.cpp.obj
+    1607: [ 17%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_registry_hub.cpp.obj
+    1608: [ 17%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_session.cpp.obj
+    1609: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_tag_alias_autoregistrar.cpp.obj
+    1610: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_test_case_info.cpp.obj
+    1611: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_test_spec.cpp.obj
+    1612: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_timer.cpp.obj
+    1613: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_tostring.cpp.obj
+    1614: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_totals.cpp.obj
+    1615: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_translate_exception.cpp.obj
+    1616: [ 24%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_version.cpp.obj
+    1617: [ 24%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_assertion_handler.cpp.obj
+    1618: [ 24%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_case_insensitive_comparisons.cpp.obj
+    1619: [ 24%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_clara.cpp.obj
+    1620: [ 24%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_commandline.cpp.obj
+    1621: [ 24%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_console_colour.cpp.obj
+    1622: [ 24%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_context.cpp.obj
+    1623: [ 27%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_debug_console.cpp.obj
+    1624: [ 27%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_debugger.cpp.obj
+    1625: [ 27%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_decomposer.cpp.obj
+    1626: [ 27%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_enforce.cpp.obj
+    1627: [ 27%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_enum_values_registry.cpp.obj
+    1628: [ 27%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_errno_guard.cpp.obj
+    1629: [ 31%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_exception_translator_registry.cpp.obj
+    1630: [ 31%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_fatal_condition_handler.cpp.obj
+    1631: [ 31%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_floating_point_helpers.cpp.obj
+    1632: [ 31%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_getenv.cpp.obj
+    1633: [ 31%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_istream.cpp.obj
+    1634: [ 31%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_jsonwriter.cpp.obj
+    1635: [ 31%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_lazy_expr.cpp.obj
+    1636: [ 34%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_leak_detector.cpp.obj
+    1637: [ 34%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_list.cpp.obj
+    1638: [ 34%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_message_info.cpp.obj
+    1639: [ 34%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_output_redirect.cpp.obj
+    1640: [ 34%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_parse_numbers.cpp.obj
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #10 (keywords: exception, fail) ---
+Lines 1642 - 1679
+
+    1642: [ 34%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_random_number_generator.cpp.obj
+    1643: [ 37%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_random_seed_generation.cpp.obj
+    1644: [ 37%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reporter_registry.cpp.obj
+    1645: [ 37%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reporter_spec_parser.cpp.obj
+    1646: [ 37%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_result_type.cpp.obj
+    1647: [ 37%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reusable_string_stream.cpp.obj
+    1648: [ 37%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_run_context.cpp.obj
+    1649: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_section.cpp.obj
+    1650: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_singletons.cpp.obj
+    1651: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_source_line_info.cpp.obj
+>>> 1652: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_startup_exception_registry.cpp.obj
+    1653: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_stdstreams.cpp.obj
+    1654: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_string_manip.cpp.obj
+    1655: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_stringref.cpp.obj
+    1656: [ 44%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_tag_alias_registry.cpp.obj
+    1657: [ 44%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_info_hasher.cpp.obj
+    1658: [ 44%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_registry_impl.cpp.obj
+    1659: [ 44%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_tracker.cpp.obj
+    1660: [ 44%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_failure_exception.cpp.obj
+    1661: [ 44%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_registry.cpp.obj
+    1662: [ 44%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_spec_parser.cpp.obj
+    1663: [ 48%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_textflow.cpp.obj
+    1664: [ 48%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_uncaught_exceptions.cpp.obj
+    1665: [ 48%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_wildcard_pattern.cpp.obj
+    1666: [ 48%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_xmlwriter.cpp.obj
+    1667: [ 48%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers.cpp.obj
+    1668: [ 48%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_container_properties.cpp.obj
+    1669: [ 51%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_exception.cpp.obj
+    1670: [ 51%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_floating_point.cpp.obj
+    1671: [ 51%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_predicate.cpp.obj
+    1672: [ 51%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_quantifiers.cpp.obj
+    1673: [ 51%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_string.cpp.obj
+    1674: [ 51%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_templated.cpp.obj
+    1675: [ 51%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/internal/catch_matchers_impl.cpp.obj
+    1676: [ 55%] Linking CXX static library libCatch2.a
+    1677: [ 55%] Built target Catch2
+    1678: [ 55%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2WithMain.dir/catch2/internal/catch_main.cpp.obj
+    1679: [ 55%] Linking CXX static library libCatch2Main.a
 
 ------------------------------------------------------------------------
 
