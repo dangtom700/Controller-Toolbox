@@ -316,6 +316,63 @@ Example (adaptive MPC loop)
         .def("params",     &ctrl::FuzzySupervisor::params,
              py::return_value_policy::copy)
         .def("set_params", &ctrl::FuzzySupervisor::setParams, py::arg("params"));
+
+    // --- FuzzySMCParams + FuzzySlidingModeController -------------------------
+    py::class_<ctrl::FuzzySMCParams>(m, "FuzzySMCParams",
+        "Tuning parameters for FuzzySlidingModeController.  Sign convention: compute(y - r).")
+        .def(py::init<>())
+        .def_readwrite("smc",       &ctrl::FuzzySMCParams::smc,
+                       "Nominal SMCParams: surface (c_e, c_de), gain K, boundary layer phi, u limits.")
+        .def_readwrite("fuzzy",     &ctrl::FuzzySMCParams::fuzzy,
+                       "FuzzyPDParams; e_scale/de_scale normalise the SLIDING SURFACE s and s_dot.")
+        .def_readwrite("gainSpan",  &ctrl::FuzzySMCParams::gainSpan,
+                       "K modulation depth: K = K_nom*(1 + gainSpan*m). Must be > -1.")
+        .def_readwrite("phiSpan",   &ctrl::FuzzySMCParams::phiSpan,
+                       "phi modulation depth: phi = phi_nom*(1 + phiSpan*m). Must be > -1.")
+        .def_readwrite("Kmin",      &ctrl::FuzzySMCParams::Kmin,   "Hard lower bound on scheduled K.")
+        .def_readwrite("Kmax",      &ctrl::FuzzySMCParams::Kmax,   "Hard upper bound on scheduled K.")
+        .def_readwrite("phiMin",    &ctrl::FuzzySMCParams::phiMin, "Hard lower bound on phi; must be > 0.")
+        .def_readwrite("phiMax",    &ctrl::FuzzySMCParams::phiMax, "Hard upper bound on phi.");
+
+    py::class_<ctrl::FuzzySlidingModeController, ctrl::IController,
+               std::shared_ptr<ctrl::FuzzySlidingModeController>>(
+        m, "FuzzySlidingModeController", R"doc(
+Fuzzy-scheduled sliding-mode controller (FSMC).
+
+Mamdani inference on the sliding surface (s, s_dot) retunes the switching gain K and
+the boundary layer phi every step: large |s| raises both (fast reaching), small |s|
+relaxes both back to nominal (precision, low chattering).  Yields lower total control
+variation than a fixed-gain DiscreteSMC at the same reaching authority.
+
+Sign convention: pass compute(y - r) - REVERSED from DiscretePID, inherited from
+DiscreteSMC.
+
+Example
+-------
+>>> p = ctrl.FuzzySMCParams()
+>>> p.smc.c_e = 1.0; p.smc.c_de = 5.0 * Ts; p.smc.K = 4.4; p.smc.phi = 0.05
+>>> p.fuzzy.e_scale = 0.5; p.fuzzy.de_scale = 20.0; p.fuzzy.u_scale = 1.0
+>>> p.gainSpan = 0.8; p.Kmin = 0.5; p.Kmax = 20.0
+>>> fsmc = ctrl.FuzzySlidingModeController(p, Ts=0.01)
+>>> u = fsmc.compute(y - r)
+)doc")
+        .def(py::init<const ctrl::FuzzySMCParams &, double>(),
+             py::arg("params"), py::arg("sample_time"))
+        .def("compute",        &ctrl::FuzzySlidingModeController::compute, py::arg("error"))
+        .def("reset",          &ctrl::FuzzySlidingModeController::reset)
+        .def("sample_time",    &ctrl::FuzzySlidingModeController::sampleTime)
+        .def("set_params",     &ctrl::FuzzySlidingModeController::setParams, py::arg("params"))
+        .def("params",         &ctrl::FuzzySlidingModeController::params,
+             py::return_value_policy::copy)
+        .def("switching_gain", &ctrl::FuzzySlidingModeController::switchingGain,
+             "Switching gain K[k] applied on the last compute() call.")
+        .def("boundary_layer", &ctrl::FuzzySlidingModeController::boundaryLayer,
+             "Boundary-layer thickness phi[k] applied on the last compute() call.")
+        .def("surface",        &ctrl::FuzzySlidingModeController::surface,
+             "Sliding surface s[k] from the last compute() call.")
+        .def("modulation",     &ctrl::FuzzySlidingModeController::modulation,
+             "Fuzzy modulation magnitude m[k] in [0, 1].")
+        .def("last_output",    &ctrl::FuzzySlidingModeController::lastOutput);
 #endif  // CTRL_HAS_FUZZY
 
     // -----------------------------------------------------------------------

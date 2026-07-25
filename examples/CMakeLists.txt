@@ -210,6 +210,13 @@ add_example(ex124_super_twisting_smc)    # SuperTwistingSMC - 2nd-order SMC (now
 # Example-coverage gap fill: previously-unexampled composition wrapper
 add_example(ex125_computational_delay_wrapper)  # ComputationalDelayWrapper - 1-sample delay
 
+# Fusion controllers: composition patterns harvested from case-study/ into lib/ classes
+add_example(ex126_cascade_controller)      # CascadeController - series outer -> inner setpoint
+add_example(ex127_disturbance_observer)    # DisturbanceObserverController - Q-filter DOB
+add_example(ex128_two_dof_controller)      # TwoDOFController - functional feedforward + trim
+add_example(ex129_learning_feedforward)    # LearningFeedforwardController - two-phase ILC
+add_example(ex130_fuzzy_smc)               # FuzzySlidingModeController - fuzzy-scheduled SMC
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)

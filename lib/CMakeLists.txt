@@ -100,6 +100,10 @@ set(CTRL_CORE_SOURCES
     LPMPC.cpp
     CodeGenC.cpp
     FractionalOrderPID.cpp
+    CascadeController.cpp
+    DisturbanceObserverController.cpp
+    TwoDOFController.cpp
+    LearningFeedforwardController.cpp
 )
 
 # --- Optional sources --------------------------------------------------------
@@ -117,6 +121,8 @@ endif()
 
 if(CTRL_ENABLE_FUZZY)
     list(APPEND CTRL_CORE_SOURCES FuzzyLogic.cpp)
+    # FuzzySlidingModeController composes FuzzyPD, so it follows the same flag.
+    list(APPEND CTRL_CORE_SOURCES FuzzySlidingModeController.cpp)
 endif()
 
 if(CTRL_ENABLE_HINF)

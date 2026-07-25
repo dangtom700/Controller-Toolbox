@@ -1579,3 +1579,114 @@ cmd.exe extensionless exe -> cmd.exe (not raw CreateProcess) resolves a quoted p
 shipped); `docs/algorithm_backlog.md` ("Code generation" moved to "Already done");
 `docs/superpowers/specs/2026-06-30-code-generation-design.md` (design, already committed);
 this report's new Part 72 section.
+
+---
+
+## Part 73 - Fusion controllers: five composition patterns harvested from `case-study/` - 2026-07-25
+
+Audited how the 25 populated case studies compose controllers and promoted the five most
+duplicated / most-missing patterns into `lib/` classes. Every one is built by composing existing
+library classes - no control law was re-derived where a class already implemented it.
+
+| New class | Feature slug | Catch2 tag | Replaces (hand-rolled in) |
+|---|---|---|---|
+| `CascadeController` | `cascade_controller` | `[cascade]` | 6 studies + `ex35`, `ex42`-`ex46` |
+| `DisturbanceObserverController` | `disturbance_observer` | `[dob]` | `ex52`, `smismo::DOBEnergyCtrl`, `FUHACCtrl::disturbanceObserver` |
+| `TwoDOFController` | `two_dof_controller` | `[two_dof]` | 8+ studies (`dSS`, `trimInput`, `load_feedforward`, `m_dot_wf_ff`, ...) |
+| `LearningFeedforwardController` | `learning_feedforward` | `[learning_ff]` | 10 studies carrying a byte-identical `k_`/`phase2_`/`N_TRIAL` block |
+| `FuzzySlidingModeController` | `fuzzy_smc` | `[fuzzy_smc]` | `ex48` (additive variant); FUHAC's neuro-fuzzy + `AdaptiveSMC` blend |
+
+### Findings that shaped the design
+
+1. **`ControllerStack::Additive` advertises a capability it structurally cannot provide.**
+   `lib/ControllerStack.h:51` reads "Use for: inner/outer cascade (fast PID + slow MPC trim)",
+   but `ControllerStack.cpp`'s Additive branch computes `out = sum(controller->compute(error))` -
+   a **parallel sum** over children that all receive the *same* error. A cascade requires the
+   outer output to become the inner **setpoint**, which no `StackMode` can express. That is why
+   six studies and five examples hand-wire two `compute()` calls instead. `CascadeController`
+   closes the gap; the comment was left in place (it still describes the additive-trim use case
+   correctly) but the selection matrix now states explicitly that Additive is a parallel sum.
+
+2. **`ctrl::FeedforwardController` was unused by every case study**, despite feedforward+feedback
+   being one of the most-duplicated patterns (8+ studies). Cause: it only accepts a designed
+   `StateSpace G_ff(z)` applied to `r`, so it cannot express `trimInput(setpoint)`,
+   `dSS(v_ref, V_in, mode)` or a measured-disturbance term - all of which are plain functions,
+   not filters. `TwoDOFController` takes a `std::function<double(double r, double d)>` instead.
+   The two are complementary, and each header now points at the other.
+
+3. **`docs/DOCUMENTATION.md`'s `FeedforwardController` entry documented an API that has never
+   existed** - a `FeedforwardParams{gain, referenceModel}` struct and a scalar-gain constructor.
+   The real class is `explicit FeedforwardController(const StateSpace&)` with no params struct
+   (`lib/FeedforwardController.h:73`). Corrected here rather than left standing, because
+   `TwoDOFController`'s entry contrasts itself against it directly.
+
+4. **No standalone disturbance observer existed in `lib/` at all.** The only extended state
+   observer in the codebase is private state inside `DiscreteADRC` (`z_`, `beta1_..beta3_`), not
+   reusable. `examples/ex52_dob_pi.cpp` additionally drives its nominal model with the raw PI
+   output rather than the applied command, which under-estimates `d` once the DOB is active;
+   `DisturbanceObserverController` uses the applied command (textbook form) and the header notes
+   the difference. The example was left as-is - it is a working demo of the hand-rolled shape.
+
+5. **`ILC` is not an `IController` and never was**, so the ten studies that use it each carry
+   their own trial state machine. `LearningFeedforwardController` owns a `ctrl::ILC` by value
+   and exposes the `IController` surface. It **throws** when `trialLength != ILC::Params::N` -
+   that mismatch is silent data loss (the ILC buffer and the caller's trial disagree), and it is
+   the single easiest way to mis-wire the class.
+
+### Cross-cutting behaviour worth knowing
+
+- **`signConvention()` finally has a consumer.** `CascadeController` queries
+  `inner->signConvention()` once at construction and forms the inner error as `y_in - sp` instead
+  of `sp - y_in` when it reports `TrackingErrorYMinusR`. `LearningFeedforwardController` uses the
+  same query to decide whether to negate the error handed to `ILC::recordError()` (ILC's update
+  law assumes `e = r - y`). Both are covered by tests that fail if the flip is dropped.
+- **Anti-windup is expressed through the existing `bumplessInit()`**, not a new mechanism:
+  `CascadeController` back-calculates the outer loop while the setpoint is clamped, and
+  `TwoDOFController` back-calculates the feedback path against `u_sat - u_ff`. This is exactly
+  what `smismo::CascadePIDCtrl` and `humid::CascadePIDHumidCtrl` do by hand.
+- **NaN contract:** all five hold-last on non-finite input and leave every child, filter state,
+  observer state and trial counter unadvanced. `TwoDOFController` additionally treats a
+  feedforward *callable* that returns non-finite as contributing `0.0` for that step rather than
+  poisoning the command path. `tools/check_nan_guard.py` passes with no new exemptions.
+- **`FuzzySlidingModeController` forms its own sliding surface** rather than reading
+  `DiscreteSMC::slidingSurface()`, which holds `s[k-1]` - the modulation must be driven by the
+  *current* surface. A test asserts the two agree sample-for-sample, and a second test asserts
+  that at `gainSpan = phiSpan = 0` the output matches a plain `DiscreteSMC` exactly, which pins
+  the composition itself rather than just its outputs.
+
+### Build-flag note
+
+`FuzzySlidingModeController` composes `FuzzyPD`, so its `.cpp` is appended inside the
+`if(CTRL_ENABLE_FUZZY)` block in `lib/CMakeLists.txt`, its include sits inside the existing
+`#if defined(CTRL_HAS_FUZZY) || (!defined(CTRL_DISABLE_FUZZY))` guard in
+`lib/ControllerToolbox.h`, and its binding lives in `bindings/advanced_bindings.cpp` inside the
+same `#if defined(CTRL_HAS_FUZZY)` block as the rest of the fuzzy family. The other four are
+unconditional and bound in `bindings/controllers_bindings.cpp`.
+
+### Measured results (from the new examples)
+
+| Demo | Result |
+|---|---|
+| `ex126` cascade vs single loop, inner load step | IAE 1.680 -> 0.099 (**-94 %**) |
+| `ex127` PI vs PI+DOB, post-step transient | IAE 0.290 -> 0.118 (**-59 %**), `d_hat` = 0.733 |
+| `ex128` 2-DOF with exact inverse | settles 8.25 s -> 6.50 s; final `u_fb` = 5e-5 |
+| `ex129` two-phase ILC, 6 trials | RMS 0.354 -> 0.091 (**-74 %**), monotone |
+| `ex130` FSMC vs fixed SMC at matched reaching gain | control variation **-10.5 %**, IAE 1.766 -> 1.541 |
+
+**No `lib/Features.h` edit was made** - `CONTRIBUTING.md` Step 2 and PR-checklist item 8 still
+say to add a flag there, but `Features.h` has been a 45-line shim over `ControllerRegistry` since
+Part 33 (M2). All five classes self-register with `CTRL_REGISTER_FEATURE` at the bottom of their
+own header, verified by a `[registry]` Catch2 case and by `ctrl.registry_has(...)` asserts in
+`bindings/smoke_test.py`.
+
+**Files added:** `lib/{CascadeController,DisturbanceObserverController,TwoDOFController,
+LearningFeedforwardController,FuzzySlidingModeController}.{h,cpp}`;
+`examples/ex126_cascade_controller.cpp` .. `ex130_fuzzy_smc.cpp`;
+`examples/python/ex145_cascade_controller.py` .. `ex149_fuzzy_smc.py`.
+
+**Files updated:** `lib/CMakeLists.txt`, `lib/ControllerToolbox.h`, `examples/CMakeLists.txt`,
+`compile.bat`, `compile.sh`, `tests/test_catch2_advanced.cpp` (13 new cases incl. an extended
+`[nan_guard]` and `[registry]`), `bindings/controllers_bindings.cpp`,
+`bindings/advanced_bindings.cpp`, `bindings/smoke_test.py`, `docs/DOCUMENTATION.md` (five new
+entries + the `FeedforwardController` correction), `CONTRIBUTING.md` (five sign-convention rows),
+`docs/controller_selection_matrix.md` (fusion-wrapper table + FSMC in the nonlinear roster).

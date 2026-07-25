@@ -1,0 +1,20 @@
+{
+  "id":          "s03_diamond_offset_start",
+  "description": "Diamond path with four sharp corners, started from a pose deviating from the reference vertex - the paper's non-zero-initial-condition test ('the robot initiates motion from a point deviating from the reference vertex'). x_ref = a*sgn(cos t)*(1-|sin t|), y_ref = a*sgn(sin t)*(1-|cos t|), a = 1.0 m. Paper Table 2: ISE 1.2032, IAE 3.8314, ITAE 35.6702, final error 0.0405 m, mean torque 9.237 N.m, Ks_final 4.568.",
+  "trajectory":  "diamond",
+  "a":           1.0,
+  "T_sim":       30.0,
+  "time_scale":  1.0,
+
+  "start_on_path": false,
+  "x0":            0.6,
+  "y0":           -0.4,
+  "theta0":        1.2,
+
+  "encoder_noise_std": 0.0,
+  "torque_dist_amp":   0.0,
+  "torque_dist_freq":  0.0,
+  "tau_max_override": -1.0,
+  "mass_mismatch":     1.0,
+  "seed":              42
+}

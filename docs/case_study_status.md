@@ -16,7 +16,7 @@
 | Bouyancy-Driven Airship in Vertical Plane | C++ | Yes | Complete | Fine | _ | [README](../case-study/Bouyancy-Driven Airship in Vertical Plane/README.md) | Yes | Yes | Yes | Yes |
 | Building Energy Management System | undetermined | Yes | Not started | No data | _ | - | _ | _ | _ | _ |
 | Data-Driven Sliding Mode Control of Soft Robot 2024 | undetermined | Yes | Not started | No data | _ | [README](../case-study/Data-Driven Sliding Mode Control of Soft Robot 2024/README.md) | _ | _ | _ | _ |
-| Differential Drive Robot Tracking | C++ | Yes | Open placeholder | No data | _ | [README](../case-study/Differential Drive Robot Tracking/README.md) | _ | _ | _ | _ |
+| Differential Drive Robot Tracking | C++ | Yes | Complete | Fine | _ | [README](../case-study/Differential Drive Robot Tracking/README.md) | Yes | Yes | Yes | Yes |
 | Dual-Arm IAUV Motion Planning | C++ | Yes | Open placeholder | No data | _ | [README](../case-study/Dual-Arm IAUV Motion Planning/README.md) | _ | _ | _ | _ |
 | Heavy-Duty Parallel-Serial Hydraulic Manipulator VDC | undetermined | Yes | Not started | No data | _ | [README](../case-study/Heavy-Duty Parallel-Serial Hydraulic Manipulator VDC/README.md) | _ | _ | _ | _ |
 | High-Altitude Aerial Firefighting Bag Drop | Python | Yes | Complete | Fine | _ | [README](../case-study/High-Altitude Aerial Firefighting Bag Drop/README.md) | Yes | Yes | _ | Yes |

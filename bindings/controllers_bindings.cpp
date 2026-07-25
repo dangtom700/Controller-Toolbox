@@ -2844,6 +2844,216 @@ Example
         .def("last_lp_iters",      &ctrl::LPMPC::lastLPIters)
         .def("is_healthy",        &ctrl::LPMPC::isHealthy);
 
+    // -----------------------------------------------------------------------
+    // CascadeController
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::CascadeParams>(m, "CascadeParams",
+        "Tuning parameters for CascadeController.")
+        .def(py::init<>())
+        .def_readwrite("spMin",           &ctrl::CascadeParams::spMin,
+                       "Lower clamp on the inner setpoint produced by the outer loop.")
+        .def_readwrite("spMax",           &ctrl::CascadeParams::spMax,
+                       "Upper clamp on the inner setpoint. Must exceed spMin.")
+        .def_readwrite("spRateMax",       &ctrl::CascadeParams::spRateMax,
+                       "Max |d(setpoint)/dt| [units/s]. Large value = unlimited.")
+        .def_readwrite("outerDecimation", &ctrl::CascadeParams::outerDecimation,
+                       "Run the outer loop every N inner ticks (multi-rate cascade); >= 1.")
+        .def_readwrite("antiWindup",      &ctrl::CascadeParams::antiWindup,
+                       "Back-calculate the outer loop while the setpoint is clamped.");
+
+    py::class_<ctrl::CascadeController, ctrl::IController,
+               std::shared_ptr<ctrl::CascadeController>>(m, "CascadeController", R"doc(
+Series (inner/outer) cascade: the outer output becomes the inner loop's setpoint.
+
+This is a SERIES hand-off and cannot be expressed with ControllerStack.Additive,
+which sums child outputs in parallel.  The inner error is formed as (sp - y_in),
+or (y_in - sp) automatically when the inner controller reports the
+TrackingErrorYMinusR convention (DiscreteSMC and friends).
+
+Example
+-------
+>>> casc = ctrl.CascadeController(pid_outer, pid_inner, ctrl.CascadeParams(), Ts=0.05)
+>>> casc.set_inner_measurement(y_inner)
+>>> u = casc.compute(r_outer - y_outer)
+)doc")
+        .def(py::init<std::shared_ptr<ctrl::IController>, std::shared_ptr<ctrl::IController>,
+                      const ctrl::CascadeParams &, double>(),
+             py::arg("outer"), py::arg("inner"), py::arg("params"), py::arg("Ts"))
+        .def("set_inner_measurement", &ctrl::CascadeController::setInnerMeasurement,
+             py::arg("y_inner"), "Provide the fast-loop measurement; call before compute().")
+        .def("compute",          &ctrl::CascadeController::compute, py::arg("outer_error"))
+        .def("reset",            &ctrl::CascadeController::reset)
+        .def("sample_time",      &ctrl::CascadeController::sampleTime)
+        .def("bumpless_init",    &ctrl::CascadeController::bumplessInit,
+             py::arg("u_target"), py::arg("error"))
+        .def("is_healthy",       &ctrl::CascadeController::isHealthy)
+        .def("inner_setpoint",   &ctrl::CascadeController::innerSetpoint,
+             "Inner setpoint applied on the last compute() call (post clamp + rate limit).")
+        .def("setpoint_clamped", &ctrl::CascadeController::setpointClamped,
+             "True if the last outer command was altered by the clamp or rate limit.")
+        .def("last_output",      &ctrl::CascadeController::lastOutput);
+
+    // -----------------------------------------------------------------------
+    // DisturbanceObserverController
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::DOBParams>(m, "DOBParams",
+        "Tuning parameters for DisturbanceObserverController.")
+        .def(py::init<>())
+        .def_readwrite("omega_q", &ctrl::DOBParams::omega_q,
+                       "Q-filter cutoff [rad/s]. Higher = faster rejection, more noise.")
+        .def_readwrite("qOrder",  &ctrl::DOBParams::qOrder, "Q-filter order: 1 or 2.")
+        .def_readwrite("gainDC",  &ctrl::DOBParams::gainDC,
+                       "Nominal plant DC gain; converts an output disturbance to input units.")
+        .def_readwrite("dMin",    &ctrl::DOBParams::dMin, "Lower clamp on d_hat.")
+        .def_readwrite("dMax",    &ctrl::DOBParams::dMax, "Upper clamp on d_hat.")
+        .def_readwrite("uMin",    &ctrl::DOBParams::uMin, "Lower output saturation limit.")
+        .def_readwrite("uMax",    &ctrl::DOBParams::uMax, "Upper output saturation limit.");
+
+    py::class_<ctrl::DisturbanceObserverController, ctrl::IController,
+               std::shared_ptr<ctrl::DisturbanceObserverController>>(
+        m, "DisturbanceObserverController", R"doc(
+Q-filter disturbance observer wrapped around any IController.
+
+Estimates the total disturbance (external input plus model error) by comparing the
+measurement against a nominal model driven by the applied command, and subtracts it:
+    d_hat = Q(z)*(y - y_nom) / gainDC
+    u     = clamp(inner.compute(e) - d_hat)
+
+Sign convention: pass compute(r - y).
+
+Example
+-------
+>>> p = ctrl.DOBParams(); p.omega_q = 5.0; p.gainDC = 1.0
+>>> dob = ctrl.DisturbanceObserverController(pi, sys_nom, p, Ts=0.05)
+>>> dob.set_plant_output(y)
+>>> u = dob.compute(r - y)
+)doc")
+        .def(py::init<std::shared_ptr<ctrl::IController>, const ctrl::StateSpace &,
+                      const ctrl::DOBParams &, double>(),
+             py::arg("inner"), py::arg("nominal"), py::arg("params"), py::arg("Ts"))
+        .def("set_plant_output",     &ctrl::DisturbanceObserverController::setPlantOutput,
+             py::arg("y"), "Provide the measured output; call before compute().")
+        .def("compute",              &ctrl::DisturbanceObserverController::compute, py::arg("error"))
+        .def("reset",                &ctrl::DisturbanceObserverController::reset)
+        .def("sample_time",          &ctrl::DisturbanceObserverController::sampleTime)
+        .def("is_healthy",           &ctrl::DisturbanceObserverController::isHealthy)
+        .def("disturbance_estimate", &ctrl::DisturbanceObserverController::disturbanceEstimate,
+             "Latest disturbance estimate d_hat[k] in INPUT units, post-clamp.")
+        .def("nominal_output",       &ctrl::DisturbanceObserverController::nominalOutput,
+             "Nominal-model output y_nom[k] from the last compute() call.")
+        .def("last_output",          &ctrl::DisturbanceObserverController::lastOutput);
+
+    // -----------------------------------------------------------------------
+    // TwoDOFController
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::TwoDOFParams>(m, "TwoDOFParams",
+        "Tuning parameters for TwoDOFController.")
+        .def(py::init<>())
+        .def_readwrite("uMin",       &ctrl::TwoDOFParams::uMin, "Lower saturation limit on the total.")
+        .def_readwrite("uMax",       &ctrl::TwoDOFParams::uMax, "Upper saturation limit on the total.")
+        .def_readwrite("antiWindup", &ctrl::TwoDOFParams::antiWindup,
+                       "Back-calculate the feedback path while the total is clamped.");
+
+    py::class_<ctrl::TwoDOFController, ctrl::IController,
+               std::shared_ptr<ctrl::TwoDOFController>>(m, "TwoDOFController", R"doc(
+Two-degree-of-freedom control: u = ff(r, d) + feedback.compute(e), saturated.
+
+Unlike FeedforwardController (which applies a designed StateSpace filter to r), the
+feedforward here is any Python callable f(r, d) -> float, so it can be a physics
+inversion or a measured-disturbance term.
+
+Sign convention: pass compute(r - y).
+
+Example
+-------
+>>> c2 = ctrl.TwoDOFController(pid, lambda r, d: r / 2.5 - d, ctrl.TwoDOFParams(), Ts=0.05)
+>>> c2.set_reference(r); c2.set_measured_disturbance(d)
+>>> u = c2.compute(r - y)
+)doc")
+        .def(py::init([](std::shared_ptr<ctrl::IController> feedback,
+                         py::object ff_fn,
+                         const ctrl::TwoDOFParams &params,
+                         double Ts) {
+                 // Capture py::object (not py::cpp_function) to avoid pybind11 v2.13
+                 // overload-deduction errors - see CONTRIBUTING.md#python-binding-conventions.
+                 ctrl::FeedforwardFn ff = [ff_fn](double r, double d) -> double {
+                     return ff_fn(r, d).cast<double>();
+                 };
+                 return std::make_shared<ctrl::TwoDOFController>(
+                     std::move(feedback), std::move(ff), params, Ts);
+             }),
+             py::arg("feedback"), py::arg("ff"), py::arg("params"), py::arg("Ts"))
+        .def("set_reference",           &ctrl::TwoDOFController::setReference, py::arg("r"))
+        .def("set_measured_disturbance", &ctrl::TwoDOFController::setMeasuredDisturbance,
+             py::arg("d"))
+        .def("compute",           &ctrl::TwoDOFController::compute, py::arg("error"))
+        .def("reset",             &ctrl::TwoDOFController::reset)
+        .def("sample_time",       &ctrl::TwoDOFController::sampleTime)
+        .def("bumpless_init",     &ctrl::TwoDOFController::bumplessInit,
+             py::arg("u_target"), py::arg("error"))
+        .def("is_healthy",        &ctrl::TwoDOFController::isHealthy)
+        .def("feedforward_term",  &ctrl::TwoDOFController::feedforwardTerm,
+             "Feedforward contribution u_ff from the last compute() call.")
+        .def("feedback_term",     &ctrl::TwoDOFController::feedbackTerm,
+             "Feedback contribution from the last compute() call.")
+        .def("saturated",         &ctrl::TwoDOFController::saturated)
+        .def("last_output",       &ctrl::TwoDOFController::lastOutput);
+
+    // -----------------------------------------------------------------------
+    // LearningFeedforwardController
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::LearningFFParams>(m, "LearningFFParams",
+        "Trial-management parameters for LearningFeedforwardController.")
+        .def(py::init<>())
+        .def_readwrite("trialLength", &ctrl::LearningFFParams::trialLength,
+                       "Steps per trial; must equal ILCParams.N.")
+        .def_readwrite("learnTrials", &ctrl::LearningFFParams::learnTrials,
+                       "Recording-only trials before the feedforward is applied; >= 0.")
+        .def_readwrite("autoAdvance", &ctrl::LearningFFParams::autoAdvance,
+                       "Call ILC.update_feedforward() automatically at each trial boundary.")
+        .def_readwrite("uMin",        &ctrl::LearningFFParams::uMin, "Lower saturation limit.")
+        .def_readwrite("uMax",        &ctrl::LearningFFParams::uMax, "Upper saturation limit.");
+
+    py::class_<ctrl::LearningFeedforwardController, ctrl::IController,
+               std::shared_ptr<ctrl::LearningFeedforwardController>>(
+        m, "LearningFeedforwardController", R"doc(
+Nominal feedback plus a trial-to-trial ILC feedforward, with the trial state machine
+built in (step index, wrap at trialLength, updateFeedforward at the boundary, and the
+switch from recording to applying).
+
+    trial 0 .. learnTrials-1 : u = nominal.compute(e)                  (record only)
+    trial learnTrials ..     : u = ilc.feedforward(k) + nominal.compute(e)
+
+Sign convention: mirrors the nominal controller (r - y for DiscretePID). The error
+handed to ILC is negated automatically when the nominal reports TrackingErrorYMinusR.
+
+Example
+-------
+>>> ip = ctrl.ILCParams(); ip.N = 200; ip.Ts = Ts; ip.Lp = 0.6
+>>> lp = ctrl.LearningFFParams(); lp.trialLength = 200; lp.learnTrials = 1
+>>> lff = ctrl.LearningFeedforwardController(pid, ip, lp, Ts)
+>>> u = lff.compute(r - y)      # trials advance automatically
+)doc")
+        .def(py::init<std::shared_ptr<ctrl::IController>, const ctrl::ILC::Params &,
+                      const ctrl::LearningFFParams &, double>(),
+             py::arg("nominal"), py::arg("ilc_params"), py::arg("params"), py::arg("Ts"))
+        .def("compute",           &ctrl::LearningFeedforwardController::compute, py::arg("error"))
+        .def("reset",             &ctrl::LearningFeedforwardController::reset)
+        .def("sample_time",       &ctrl::LearningFeedforwardController::sampleTime)
+        .def("bumpless_init",     &ctrl::LearningFeedforwardController::bumplessInit,
+             py::arg("u_target"), py::arg("error"))
+        .def("is_healthy",        &ctrl::LearningFeedforwardController::isHealthy)
+        .def("end_trial",         &ctrl::LearningFeedforwardController::endTrial,
+             "Close the current trial manually (only needed when autoAdvance is False).")
+        .def("trial_index",       &ctrl::LearningFeedforwardController::trialIndex)
+        .def("step_index",        &ctrl::LearningFeedforwardController::stepIndex)
+        .def("learning",          &ctrl::LearningFeedforwardController::learning,
+             "True while still in a recording-only trial.")
+        .def("last_rms_error",    &ctrl::LearningFeedforwardController::lastRMSError)
+        .def("feedforward_term",  &ctrl::LearningFeedforwardController::feedforwardTerm)
+        .def("last_output",       &ctrl::LearningFeedforwardController::lastOutput);
+
     // Fuzzy bindings are fully implemented in advanced_bindings.cpp (bind_advanced).
     // The stale TODO stub that used to live here was removed (audit 2026-06-13, Finding 34).
+    // FuzzySlidingModeController is bound there too, inside the CTRL_HAS_FUZZY guard.
 }

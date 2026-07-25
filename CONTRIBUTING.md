@@ -164,6 +164,11 @@ These conventions are tribal knowledge. They **must** be respected when implemen
 | `BacksteppingController` | `e = r - x1` (tracking error) | Call `setState(x)` before each compute(); `error` reconstructs the reference internally |
 | `PassivityBasedController` | raw stacked state `[q; qdot]` (MIMO only) | `compute(double)` always throws - call `computeVec()`; call `setDesired(q_d)` once before use |
 | `CLFController` | unused (`Other`) | Regulates toward V's equilibrium using `setState(x)`, not the scalar argument |
+| `CascadeController` | `e_out = r_out - y_out` (outer error) | Call `setInnerMeasurement(y_in)` first. The **inner** error is `sp - y_in`, auto-flipped to `y_in - sp` when `inner->signConvention()` is `TrackingErrorYMinusR` |
+| `DisturbanceObserverController` | `e = r - y` | Call `setPlantOutput(y)` before each compute(); without it `y ~= -error` is assumed |
+| `TwoDOFController` | `e = r - y` | Call `setReference(r)` (and `setMeasuredDisturbance(d)`) before compute() - the feedforward callable reads them, not `error` |
+| `LearningFeedforwardController` | mirrors the **nominal** controller | `signConvention()` delegates; the error recorded into ILC is negated when the nominal is `TrackingErrorYMinusR` (ILC assumes `r - y`) |
+| `FuzzySlidingModeController` | `e = y - r` (sign flipped!) | Inherits `DiscreteSMC`'s convention; `fuzzy.e_scale`/`de_scale` normalise the **sliding surface** `s` and `s_dot`, not `e` |
 
 ---
 

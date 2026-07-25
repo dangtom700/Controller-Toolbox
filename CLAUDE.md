@@ -14,9 +14,9 @@
 ## 1. High-Level Project Philosophy
 
 Discrete-time control library: a flat C++20/Eigen core (~125 controller/estimator/identification
-classes across 119 `.h` + 89 `.cpp`; 46 are `IController` subclasses) exposed through one flat
-`pybind11` module and exercised by 126 C++ + 152 Python examples and 31 tracked case studies
-(21 complete, 10 open placeholder/not-started per `docs/case_study_status.md`), plus 1
+classes across 124 `.h` + 94 `.cpp`; 51 are `IController` subclasses) exposed through one flat
+`pybind11` module and exercised by 131 C++ + 157 Python examples and 31 tracked case studies
+(22 complete, 9 open placeholder/not-started per `docs/case_study_status.md`), plus 1
 MATLAB-native study tracked by hand. Almost every algorithm implements both its math and a single base interface
 (`IController`) in one class; the only deliberate split is the stateless `DiscreteLQR` +
 `LQRAdapter`. Cross-cutting behaviour (anti-windup, delay, gain scheduling, dead-time, multi-loop
@@ -34,7 +34,7 @@ test), not a quick edit `[Ref: CONTRIBUTING.md#adding-a-new-controller]`.
 ```bash
 # Canonical "is everything passing" (8 phases: 1 ASCII scan, 2 NaN-guard scan, 3 compile,
 # 4 bindings+smoke, 5 run all .exe, 6 run all python examples, 7 python case studies, 8 regen
-# status/report). Last green run: 175/175 .exe, 149/149 py examples, 10/10 py case studies.
+# status/report). Last green run: 183/183 .exe, 154/154 py examples, 10/10 py case studies.
 conda run -n soft_robotics -- python run.py        # writes run_*.log; bug_report.txt on failure -
 #   NOTE: bug_report.txt can false-positive by matching "nan" in the PASSING Phase 2 banner;
 #   confirm against the log's "EXIT 0 - PASSED" lines before treating it as a real failure.
@@ -71,14 +71,14 @@ conda run -n soft_robotics -- python bindings/smoke_test.py
 
 **WARNING - the conventional `include/`, `src/`, `python/` directories do NOT exist here.** Map:
 
-- `lib/` - **flat** core engine; every class is `lib/ClassName.{h,cpp}` (no subpackages, ~208 files: 119 `.h` + 89 `.cpp`). `[Ref: lib/]`
+- `lib/` - **flat** core engine; every class is `lib/ClassName.{h,cpp}` (no subpackages, ~218 files: 124 `.h` + 94 `.cpp`). `[Ref: lib/]`
   - `lib/embedded/` - header-only, no-Eigen, no-virtual MCU subset (`BasicPID`, `BasicSMC`, `DiscreteIntegrator`, `FixedRateFilter`, `RingBuffer`).
   - `lib/hal/` - hardware abstraction (`ISensor`/`IActuator`/`ITimer`/`IScheduler`, Sim*/Safe*, FreeRTOS/Zephyr schedulers).
   - `lib/ControllerToolbox.h` - umbrella include; `lib/Features.h` - runtime feature registry (`ctrl.features()`).
 - `bindings/` - the **C++<->Python boundary** (NOT `python/`): one flat `pybind11` module `ctrl_toolbox`. Entry `bindings/module.cpp`; dispatch to `plantmodel/controllers/estimation/advanced/analysis_bindings.cpp`. `[Ref: bindings/module.cpp:18]`
-- `examples/` - 126 single-file C++ demos `exNN_*.cpp` (print PASS/FAIL); `examples/python/` (152 scripts); `examples/embedded/`.
-- `tests/` - Catch2 suites + legacy hand-rolled + per-study regressions (21 `.cpp`, **513 `TEST_CASE()`**; `test_catch2_advanced.cpp` alone is 409). `[Ref: tests/CMakeLists.txt]`
-- `case-study/<Study>/` - C++ (`*_sim` exe, run by `run.py` **Phase 5**) or Python-only (`sim/main.py`, **Phase 7**). 33 dirs -> **31 tracked**, 21 complete (11 C++ + 10 Python). Two dirs are excluded from `tools/case_study_tracker.py` by design: `case-study/common/` (shared code, not a study) and `Boiler Control MATLAB` (MATLAB-native: `matlab/` + `config/` + `logs/`, no `sim/`; run by hand via `run_all.m`, **not** by `run.py`). The tracker is **scoped to C++/Python only** - don't "fix" it to classify MATLAB studies.
+- `examples/` - 131 single-file C++ demos `exNN_*.cpp` (print PASS/FAIL); `examples/python/` (157 scripts); `examples/embedded/`.
+- `tests/` - Catch2 suites + legacy hand-rolled + per-study regressions (21 `.cpp`, **560 `TEST_CASE()`**; `test_catch2_advanced.cpp` alone is 424). `[Ref: tests/CMakeLists.txt]`
+- `case-study/<Study>/` - C++ (`*_sim` exe, run by `run.py` **Phase 5**) or Python-only (`sim/main.py`, **Phase 7**). 33 dirs -> **31 tracked**, 22 complete (12 C++ + 10 Python). Two dirs are excluded from `tools/case_study_tracker.py` by design: `case-study/common/` (shared code, not a study) and `Boiler Control MATLAB` (MATLAB-native: `matlab/` + `config/` + `logs/`, no `sim/`; run by hand via `run_all.m`, **not** by `run.py`). The tracker is **scoped to C++/Python only** - don't "fix" it to classify MATLAB studies.
 - `tools/` - post-hoc analysis pipeline only (metrics, compare_controllers, monte_carlo, fault_sweep, wcet_report, generate_report, case_study_tracker - never hand-edit `docs/case_study_status.md`).
 - `ros2/`, `docs/`, `cheatsheet/`, `scripts/`, `benchmark/`, `data/`, `cmake/` (minimal - just a config template).
 

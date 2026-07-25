@@ -10715,3 +10715,622 @@ TEST_CASE("Code generation: emitted sources are freestanding (no malloc/new/STL/
     checkFreestanding(ctrl::generateControllerC(ctrl::SMCParams{}, 0.01), "SMC");
     checkFreestanding(ctrl::generateControllerC(ctrl::LeadLagParams{}, 0.01), "LeadLag");
 }
+
+// -----------------------------------------------------------------------------
+// Fusion controllers (Part 73): CascadeController, DisturbanceObserverController,
+// TwoDOFController, LearningFeedforwardController, FuzzySlidingModeController.
+//
+// These package composition patterns that case studies previously hand-rolled, so
+// the tests below check the *structural* guarantee each class exists to provide,
+// not merely that the arithmetic runs.
+// -----------------------------------------------------------------------------
+
+namespace
+{
+// Shared two-lag cascade plant: fast inner (tau 0.5 s), slow outer (tau 2.0 s).
+constexpr double kCascTs = 0.05;
+const double kCascA1 = std::exp(-kCascTs / 0.5);
+const double kCascA2 = std::exp(-kCascTs / 2.0);
+
+ctrl::PIDParams cascOuterGains()
+{
+    ctrl::PIDParams p;
+    p.Kp = 1.2; p.Ki = 0.35; p.Kd = 0.0;
+    p.uMin = -5.0; p.uMax = 5.0;
+    return p;
+}
+
+ctrl::PIDParams cascInnerGains()
+{
+    ctrl::PIDParams p;
+    p.Kp = 2.5; p.Ki = 5.0; p.Kd = 0.0;
+    p.uMin = -10.0; p.uMax = 10.0;
+    return p;
+}
+} // namespace
+
+TEST_CASE("CascadeController rejects an inner-loop disturbance better than one loop", "[cascade]")
+{
+    constexpr int N = 1200, kDist = 400;
+    constexpr double dMag = 0.6, ref = 1.0;
+
+    // Baseline: a single outer PID sees the load only after the slow lag.
+    double iae_single = 0.0;
+    {
+        ctrl::DiscretePID single(cascOuterGains(), kCascTs);
+        double x1 = 0.0, x2 = 0.0;
+        for (int k = 0; k < N; ++k) {
+            const double d = (k >= kDist) ? dMag : 0.0;
+            const double u = single.compute(ref - x2);
+            if (k >= kDist) iae_single += std::abs(ref - x2) * kCascTs;
+            x2 = kCascA2 * x2 + (1.0 - kCascA2) * x1;
+            x1 = kCascA1 * x1 + (1.0 - kCascA1) * (u + d);
+        }
+    }
+
+    // Cascade: identical outer gains, so the comparison isolates the structure.
+    double iae_casc = 0.0;
+    {
+        auto outer = std::make_shared<ctrl::DiscretePID>(cascOuterGains(), kCascTs);
+        auto inner = std::make_shared<ctrl::DiscretePID>(cascInnerGains(), kCascTs);
+        ctrl::CascadeParams cp; cp.spMin = -5.0; cp.spMax = 5.0;
+        ctrl::CascadeController casc(outer, inner, cp, kCascTs);
+
+        double x1 = 0.0, x2 = 0.0;
+        for (int k = 0; k < N; ++k) {
+            const double d = (k >= kDist) ? dMag : 0.0;
+            casc.setInnerMeasurement(x1);
+            const double u = casc.compute(ref - x2);
+            if (k >= kDist) iae_casc += std::abs(ref - x2) * kCascTs;
+            x2 = kCascA2 * x2 + (1.0 - kCascA2) * x1;
+            x1 = kCascA1 * x1 + (1.0 - kCascA1) * (u + d);
+        }
+        REQUIRE(casc.name() == "CascadeController");
+        REQUIRE(casc.signConvention() == ctrl::SignConvention::TrackingErrorRMinusY);
+    }
+
+    REQUIRE(std::isfinite(iae_casc));
+    // Measured 1.680 (single) vs 0.099 (cascade). Require only a 5x margin - far
+    // inside the observed 17x, so retuning the lag constants will not flake it.
+    REQUIRE(iae_casc < iae_single / 5.0);
+}
+
+TEST_CASE("CascadeController clamps the inner setpoint and flags it", "[cascade]")
+{
+    auto outer = std::make_shared<ctrl::DiscretePID>(cascOuterGains(), kCascTs);
+    auto inner = std::make_shared<ctrl::DiscretePID>(cascInnerGains(), kCascTs);
+    ctrl::CascadeParams cp; cp.spMin = -0.3; cp.spMax = 0.3;
+    ctrl::CascadeController casc(outer, inner, cp, kCascTs);
+
+    double x1 = 0.0, x2 = 0.0, sp_peak = 0.0;
+    bool saw_clamp = false;
+    for (int k = 0; k < 1200; ++k) {
+        casc.setInnerMeasurement(x1);
+        const double u = casc.compute(1.0 - x2);
+        sp_peak = std::max(sp_peak, std::abs(casc.innerSetpoint()));
+        saw_clamp = saw_clamp || casc.setpointClamped();
+        x2 = kCascA2 * x2 + (1.0 - kCascA2) * x1;
+        x1 = kCascA1 * x1 + (1.0 - kCascA1) * u;
+    }
+    REQUIRE(sp_peak <= 0.3 + 1e-12);
+    REQUIRE(saw_clamp);
+}
+
+TEST_CASE("CascadeController flips the inner error for a y-minus-r inner loop", "[cascade]")
+{
+    // The point of the auto-flip: an SMC inner loop converges without the caller
+    // negating anything. Drop the flip and this loop runs away from the setpoint.
+    ctrl::SMCParams sp;
+    sp.c_e = 1.0; sp.c_de = 5.0 * kCascTs; sp.K = 6.0; sp.phi = 0.30;
+    sp.uMin = -10.0; sp.uMax = 10.0;
+    auto inner = std::make_shared<ctrl::DiscreteSMC>(sp, kCascTs);
+    REQUIRE(inner->signConvention() == ctrl::SignConvention::TrackingErrorYMinusR);
+
+    auto outer = std::make_shared<ctrl::DiscretePID>(cascOuterGains(), kCascTs);
+    ctrl::CascadeParams cp; cp.spMin = -5.0; cp.spMax = 5.0;
+    ctrl::CascadeController casc(outer, inner, cp, kCascTs);
+
+    double x1 = 0.0, x2 = 0.0;
+    for (int k = 0; k < 1200; ++k) {
+        casc.setInnerMeasurement(x1);
+        const double u = casc.compute(1.0 - x2);
+        x2 = kCascA2 * x2 + (1.0 - kCascA2) * x1;
+        x1 = kCascA1 * x1 + (1.0 - kCascA1) * u;
+    }
+    REQUIRE(std::isfinite(x2));
+    REQUIRE(std::abs(1.0 - x2) < 0.15);
+}
+
+TEST_CASE("CascadeController rejects invalid construction", "[cascade]")
+{
+    auto outer = std::make_shared<ctrl::DiscretePID>(cascOuterGains(), kCascTs);
+    auto inner = std::make_shared<ctrl::DiscretePID>(cascInnerGains(), kCascTs);
+    ctrl::CascadeParams cp;
+
+    REQUIRE_THROWS_AS(ctrl::CascadeController(nullptr, inner, cp, kCascTs), std::invalid_argument);
+    REQUIRE_THROWS_AS(ctrl::CascadeController(outer, nullptr, cp, kCascTs), std::invalid_argument);
+    REQUIRE_THROWS_AS(ctrl::CascadeController(outer, inner, cp, 0.0), std::invalid_argument);
+
+    ctrl::CascadeParams bad_dec = cp; bad_dec.outerDecimation = 0;
+    REQUIRE_THROWS_AS(ctrl::CascadeController(outer, inner, bad_dec, kCascTs), std::invalid_argument);
+
+    ctrl::CascadeParams bad_sp = cp; bad_sp.spMin = 1.0; bad_sp.spMax = -1.0;
+    REQUIRE_THROWS_AS(ctrl::CascadeController(outer, inner, bad_sp, kCascTs), std::invalid_argument);
+}
+
+TEST_CASE("DisturbanceObserverController estimates d and improves the transient", "[dob]")
+{
+    constexpr double dobTs = 0.05;
+    constexpr int N = 900, kDist = 200;
+    constexpr double dOut = 0.5, ref = 1.0;
+
+    // Nominal G(s) = 1/(s+1); true plant 1.5/(s+0.8) -> gain AND pole mismatch.
+    Eigen::MatrixXd Ac(1,1), Bc(1,1), Cc(1,1), Dc(1,1);
+    Ac << -1.0; Bc << 1.0; Cc << 1.0; Dc << 0.0;
+    const ctrl::StateSpace nom = ctrl::c2d(ctrl::StateSpace(Ac, Bc, Cc, Dc, 0.0),
+                                           dobTs, ctrl::C2dMethod::ZOH);
+    const double a_true = std::exp(-0.8 * dobTs);
+    const double b_true = 1.5 / 0.8 * (1.0 - a_true);
+
+    ctrl::PIDParams pp; pp.Kp = 1.5; pp.Ki = 0.8; pp.Kd = 0.0;
+    pp.uMin = -10.0; pp.uMax = 10.0;
+
+    ctrl::DOBParams dp;
+    dp.omega_q = 5.0; dp.qOrder = 1; dp.gainDC = 1.0;
+    dp.uMin = -10.0; dp.uMax = 10.0;
+    ctrl::DisturbanceObserverController dob(
+        std::make_shared<ctrl::DiscretePID>(pp, dobTs), nom, dp, dobTs);
+    ctrl::DiscretePID pi_bare(pp, dobTs);
+
+    double ya = 0.0, yb = 0.0, iae_dob = 0.0, iae_pi = 0.0;
+    for (int k = 0; k < N; ++k) {
+        const double d = (k >= kDist) ? dOut : 0.0;
+        dob.setPlantOutput(ya);
+        const double ua = dob.compute(ref - ya);
+        const double ub = pi_bare.compute(ref - yb);
+        if (k >= kDist && k < kDist + 100) {
+            iae_dob += std::abs(ref - ya) * dobTs;
+            iae_pi  += std::abs(ref - yb) * dobTs;
+        }
+        ya = a_true * ya + b_true * ua + (1.0 - a_true) * d;
+        yb = a_true * yb + b_true * ub + (1.0 - a_true) * d;
+    }
+
+    REQUIRE(std::isfinite(ya));
+    REQUIRE(std::abs(ref - ya) < 0.02);   // still tracks
+    REQUIRE(iae_dob < iae_pi);            // measured 0.118 vs 0.290
+    // The observer must actually carry load, not sit at zero.
+    REQUIRE(std::abs(dob.disturbanceEstimate()) > 1e-3);
+    REQUIRE(std::isfinite(dob.nominalOutput()));
+    REQUIRE(dob.name() == "DisturbanceObserverController");
+}
+
+TEST_CASE("DisturbanceObserverController honours dMin/dMax and validates inputs", "[dob]")
+{
+    constexpr double dobTs = 0.05;
+    Eigen::MatrixXd Ac(1,1), Bc(1,1), Cc(1,1), Dc(1,1);
+    Ac << -1.0; Bc << 1.0; Cc << 1.0; Dc << 0.0;
+    const ctrl::StateSpace nom = ctrl::c2d(ctrl::StateSpace(Ac, Bc, Cc, Dc, 0.0),
+                                           dobTs, ctrl::C2dMethod::ZOH);
+    ctrl::PIDParams pp; pp.Kp = 1.5; pp.Ki = 0.8; pp.uMin = -10.0; pp.uMax = 10.0;
+
+    // Authority clamp: an oversized disturbance must not push d_hat past dMax.
+    ctrl::DOBParams dp; dp.omega_q = 5.0; dp.gainDC = 1.0;
+    dp.dMin = -0.05; dp.dMax = 0.05;
+    dp.uMin = -10.0; dp.uMax = 10.0;
+    ctrl::DisturbanceObserverController dob(
+        std::make_shared<ctrl::DiscretePID>(pp, dobTs), nom, dp, dobTs);
+
+    const double a_true = std::exp(-0.8 * dobTs);
+    const double b_true = 1.5 / 0.8 * (1.0 - a_true);
+    double y = 0.0, d_peak = 0.0;
+    for (int k = 0; k < 600; ++k) {
+        const double d = (k >= 100) ? 2.0 : 0.0;
+        dob.setPlantOutput(y);
+        const double u = dob.compute(1.0 - y);
+        d_peak = std::max(d_peak, std::abs(dob.disturbanceEstimate()));
+        y = a_true * y + b_true * u + (1.0 - a_true) * d;
+    }
+    REQUIRE(d_peak <= 0.05 + 1e-12);
+
+    auto inner = std::make_shared<ctrl::DiscretePID>(pp, dobTs);
+    ctrl::DOBParams ok; ok.omega_q = 5.0;
+    REQUIRE_THROWS_AS(ctrl::DisturbanceObserverController(nullptr, nom, ok, dobTs),
+                      std::invalid_argument);
+    ctrl::DOBParams bad_w = ok; bad_w.omega_q = 0.0;
+    REQUIRE_THROWS_AS(ctrl::DisturbanceObserverController(inner, nom, bad_w, dobTs),
+                      std::invalid_argument);
+    ctrl::DOBParams bad_q = ok; bad_q.qOrder = 3;
+    REQUIRE_THROWS_AS(ctrl::DisturbanceObserverController(inner, nom, bad_q, dobTs),
+                      std::invalid_argument);
+    ctrl::DOBParams bad_g = ok; bad_g.gainDC = 0.0;
+    REQUIRE_THROWS_AS(ctrl::DisturbanceObserverController(inner, nom, bad_g, dobTs),
+                      std::invalid_argument);
+    // A MIMO nominal model must be rejected - the observer is SISO.
+    Eigen::MatrixXd A2 = Eigen::MatrixXd::Identity(2,2) * 0.9;
+    Eigen::MatrixXd B2 = Eigen::MatrixXd::Identity(2,2) * 0.1;
+    Eigen::MatrixXd C2 = Eigen::MatrixXd::Identity(2,2);
+    Eigen::MatrixXd D2 = Eigen::MatrixXd::Zero(2,2);
+    REQUIRE_THROWS_AS(ctrl::DisturbanceObserverController(
+                          inner, ctrl::StateSpace(A2, B2, C2, D2, dobTs), ok, dobTs),
+                      std::invalid_argument);
+}
+
+TEST_CASE("TwoDOFController hands the load to an exact feedforward", "[two_dof]")
+{
+    constexpr double tdTs = 0.05, Kp_plant = 2.5, ref = 1.0;
+    const double a = std::exp(-tdTs / 1.0);
+
+    ctrl::PIDParams pp; pp.Kp = 0.6; pp.Ki = 0.30; pp.Kd = 0.0;
+    pp.uMin = -5.0; pp.uMax = 5.0;
+    ctrl::TwoDOFParams tp; tp.uMin = -5.0; tp.uMax = 5.0;
+
+    ctrl::TwoDOFController c2(std::make_shared<ctrl::DiscretePID>(pp, tdTs),
+                              [](double r, double d) { return r / Kp_plant - d; },
+                              tp, tdTs);
+    c2.setReference(ref);
+
+    double y = 0.0;
+    for (int k = 0; k < 400; ++k) {
+        const double u = c2.compute(ref - y);
+        y = a * y + (1.0 - a) * Kp_plant * u;
+    }
+    REQUIRE(std::isfinite(y));
+    REQUIRE(std::abs(ref - y) < 0.01);
+    // Exact inverse => the feedforward carries all of it and the trim decays to ~0.
+    REQUIRE_THAT(c2.feedforwardTerm(), WithinAbs(ref / Kp_plant, 1e-12));
+    REQUIRE(std::abs(c2.feedbackTerm()) < 0.02);
+    REQUIRE(c2.signConvention() == ctrl::SignConvention::TrackingErrorRMinusY);
+
+    // A wrong feedforward gain must still converge - the trim absorbs the error.
+    ctrl::TwoDOFController c_bad(std::make_shared<ctrl::DiscretePID>(pp, tdTs),
+                                 [](double r, double d) { return r / 1.5 - d; },
+                                 tp, tdTs);
+    c_bad.setReference(ref);
+    double y_bad = 0.0;
+    for (int k = 0; k < 1200; ++k) {
+        const double u = c_bad.compute(ref - y_bad);
+        y_bad = a * y_bad + (1.0 - a) * Kp_plant * u;
+    }
+    REQUIRE(std::abs(ref - y_bad) < 0.01);
+    REQUIRE(std::abs(c_bad.feedbackTerm()) > 0.05);   // the trim is doing real work
+}
+
+TEST_CASE("TwoDOFController cancels a measured disturbance and validates inputs", "[two_dof]")
+{
+    constexpr double tdTs = 0.05, Kp_plant = 2.5, ref = 1.0;
+    const double a = std::exp(-tdTs / 1.0);
+
+    ctrl::PIDParams pp; pp.Kp = 0.6; pp.Ki = 0.30; pp.uMin = -5.0; pp.uMax = 5.0;
+    ctrl::TwoDOFParams tp; tp.uMin = -5.0; tp.uMax = 5.0;
+    ctrl::TwoDOFController c2(std::make_shared<ctrl::DiscretePID>(pp, tdTs),
+                              [](double r, double d) { return r / Kp_plant - d; },
+                              tp, tdTs);
+    c2.setReference(ref);
+
+    double y = 0.0, peak = 0.0;
+    for (int k = 0; k < 400; ++k) {
+        const double d = (k >= 200) ? 0.2 : 0.0;
+        c2.setMeasuredDisturbance(d);
+        const double u = c2.compute(ref - y);
+        y = a * y + (1.0 - a) * Kp_plant * (u + d);
+        if (k >= 200) peak = std::max(peak, std::abs(ref - y));
+    }
+    // Cancellation lands one sample late, so a small residual is expected.
+    REQUIRE(peak < 0.02);
+
+    auto fb = std::make_shared<ctrl::DiscretePID>(pp, tdTs);
+    auto ff = [](double r, double) { return r; };
+    REQUIRE_THROWS_AS(ctrl::TwoDOFController(nullptr, ff, tp, tdTs), std::invalid_argument);
+    REQUIRE_THROWS_AS(ctrl::TwoDOFController(fb, ctrl::FeedforwardFn{}, tp, tdTs),
+                      std::invalid_argument);
+    REQUIRE_THROWS_AS(ctrl::TwoDOFController(fb, ff, tp, 0.0), std::invalid_argument);
+    ctrl::TwoDOFParams bad = tp; bad.uMin = 1.0; bad.uMax = -1.0;
+    REQUIRE_THROWS_AS(ctrl::TwoDOFController(fb, ff, bad, tdTs), std::invalid_argument);
+}
+
+TEST_CASE("LearningFeedforwardController reduces error trial over trial", "[learning_ff]")
+{
+    constexpr double lTs = 0.01, load = 0.30;
+    constexpr int nTrial = 200, nTrials = 6;
+    const double a = std::exp(-lTs / 0.2);
+
+    ctrl::PIDParams pp; pp.Kp = 1.2; pp.Ki = 2.0; pp.Kd = 0.0;
+    pp.uMin = -10.0; pp.uMax = 10.0;
+
+    ctrl::ILC::Params ip;
+    ip.N = nTrial; ip.Ts = lTs; ip.mode = ctrl::ILC::Mode::PType;
+    ip.Lp = 0.6; ip.Q_filter = 0.98; ip.uMin = -10.0; ip.uMax = 10.0;
+
+    ctrl::LearningFFParams lp;
+    lp.trialLength = nTrial; lp.learnTrials = 1; lp.autoAdvance = true;
+    lp.uMin = -10.0; lp.uMax = 10.0;
+
+    ctrl::LearningFeedforwardController lff(
+        std::make_shared<ctrl::DiscretePID>(pp, lTs), ip, lp, lTs);
+
+    std::vector<double> rms(nTrials, 0.0);
+    double y = 0.0, ff_while_recording = 0.0;
+    for (int t = 0; t < nTrials; ++t) {
+        double sq = 0.0;
+        for (int k = 0; k < nTrial; ++k) {
+            const double e = std::sin(2.0 * M_PI * k / nTrial) - y;
+            sq += e * e;
+            const double u = lff.compute(e);
+            if (t < lp.learnTrials)
+                ff_while_recording = std::max(ff_while_recording, std::abs(lff.feedforwardTerm()));
+            y = a * y + (1.0 - a) * (u + load);
+        }
+        rms[t] = std::sqrt(sq / nTrial);
+    }
+
+    // Recording trials must contribute exactly zero feedforward.
+    REQUIRE(ff_while_recording == 0.0);
+    // Measured 0.354 -> 0.091 over 6 trials. Require monotone improvement plus a
+    // 25 % overall floor, well inside the observed 74 %.
+    for (int t = 1; t < nTrials; ++t) {
+        INFO("trial " << t << " rms " << rms[t] << " vs " << rms[t - 1]);
+        REQUIRE(rms[t] <= rms[t - 1] + 1e-12);
+    }
+    REQUIRE(std::isfinite(rms[nTrials - 1]));
+    REQUIRE(rms[nTrials - 1] < 0.75 * rms[0]);
+    REQUIRE(lff.trialIndex() == nTrials);
+    REQUIRE_FALSE(lff.learning());
+    REQUIRE(lff.stepIndex() == 0);
+}
+
+TEST_CASE("LearningFeedforwardController enforces the trialLength contract", "[learning_ff]")
+{
+    constexpr double lTs = 0.01;
+    ctrl::PIDParams pp; pp.Kp = 1.0; pp.Ki = 1.0; pp.uMin = -10.0; pp.uMax = 10.0;
+    ctrl::ILC::Params ip; ip.N = 200; ip.Ts = lTs;
+    auto nominal = std::make_shared<ctrl::DiscretePID>(pp, lTs);
+
+    ctrl::LearningFFParams good; good.trialLength = 200;
+    REQUIRE_NOTHROW(ctrl::LearningFeedforwardController(nominal, ip, good, lTs));
+
+    // A mismatch would silently truncate learning (or throw from ILC::feedforward).
+    ctrl::LearningFFParams bad = good; bad.trialLength = 201;
+    REQUIRE_THROWS_AS(ctrl::LearningFeedforwardController(nominal, ip, bad, lTs),
+                      std::invalid_argument);
+
+    ctrl::LearningFFParams bad_trials = good; bad_trials.learnTrials = -1;
+    REQUIRE_THROWS_AS(ctrl::LearningFeedforwardController(nominal, ip, bad_trials, lTs),
+                      std::invalid_argument);
+    REQUIRE_THROWS_AS(ctrl::LearningFeedforwardController(nullptr, ip, good, lTs),
+                      std::invalid_argument);
+}
+
+TEST_CASE("FuzzySlidingModeController cuts control variation at matched reaching gain", "[fuzzy_smc]")
+{
+    constexpr double fTs = 0.01, ref = 1.0, kReach = 8.0, gainSpan = 0.8;
+    constexpr int N = 2000;
+    const double a = std::exp(-fTs / 0.2);
+    auto dist = [&](int k) { return 0.3 * std::sin(2.0 * M_PI * k * fTs); };
+
+    ctrl::SMCParams sp;
+    sp.c_e = 1.0; sp.c_de = 5.0 * fTs; sp.K = kReach; sp.phi = 0.05;
+    sp.uMin = -20.0; sp.uMax = 20.0;
+
+    // Fixed-gain baseline at the full reaching gain.
+    double tv_fixed = 0.0, iae_fixed = 0.0;
+    {
+        ctrl::DiscreteSMC smc(sp, fTs);
+        double y = 0.0, u_prev = 0.0;
+        for (int k = 0; k < N; ++k) {
+            const double u = smc.compute(y - ref);   // SMC convention: e = y - r
+            tv_fixed += std::abs(u - u_prev);
+            u_prev = u;
+            if (k > N / 2) iae_fixed += std::abs(ref - y) * fTs;
+            y = a * y + (1.0 - a) * (u + dist(k));
+        }
+    }
+
+    // FSMC: nominal K scaled so the gain returns to kReach at full modulation.
+    ctrl::FuzzySMCParams fp;
+    fp.smc = sp;
+    fp.smc.K = kReach / (1.0 + gainSpan);
+    fp.fuzzy.e_scale = 0.5; fp.fuzzy.de_scale = 20.0; fp.fuzzy.u_scale = 1.0;
+    fp.gainSpan = gainSpan; fp.phiSpan = 0.5;
+    fp.Kmin = 0.5; fp.Kmax = 20.0; fp.phiMin = 0.01; fp.phiMax = 1.0;
+    ctrl::FuzzySlidingModeController fsmc(fp, fTs);
+
+    double tv_fuzzy = 0.0, iae_fuzzy = 0.0;
+    double k_lo = 1e9, k_hi = -1e9, phi_lo = 1e9, phi_hi = -1e9, m_hi = 0.0;
+    {
+        double y = 0.0, u_prev = 0.0;
+        for (int k = 0; k < N; ++k) {
+            const double u = fsmc.compute(y - ref);
+            tv_fuzzy += std::abs(u - u_prev);
+            u_prev = u;
+            if (k > N / 2) iae_fuzzy += std::abs(ref - y) * fTs;
+            k_lo = std::min(k_lo, fsmc.switchingGain());
+            k_hi = std::max(k_hi, fsmc.switchingGain());
+            phi_lo = std::min(phi_lo, fsmc.boundaryLayer());
+            phi_hi = std::max(phi_hi, fsmc.boundaryLayer());
+            m_hi = std::max(m_hi, fsmc.modulation());
+            y = a * y + (1.0 - a) * (u + dist(k));
+        }
+    }
+
+    REQUIRE(std::isfinite(tv_fuzzy));
+    // Measured TV 24203 vs 27043 (-10.5 %) and IAE 1.541 vs 1.766. Require strictly
+    // less actuator activity at no worse tracking; the tracking margin is loose
+    // because both metrics depend on the boundary-layer/disturbance interaction.
+    REQUIRE(tv_fuzzy < tv_fixed);
+    REQUIRE(iae_fuzzy < 2.0 * iae_fixed);
+
+    // The schedule must move, and must respect its declared bounds.
+    REQUIRE(k_hi - k_lo > 1e-3);
+    REQUIRE(k_lo >= fp.Kmin - 1e-12);
+    REQUIRE(k_hi <= fp.Kmax + 1e-12);
+    REQUIRE(phi_lo >= fp.phiMin - 1e-12);
+    REQUIRE(phi_hi <= fp.phiMax + 1e-12);
+    REQUIRE(m_hi > 0.0);
+    REQUIRE(m_hi <= 1.0);
+    REQUIRE(fsmc.signConvention() == ctrl::SignConvention::TrackingErrorYMinusR);
+}
+
+TEST_CASE("FuzzySlidingModeController degenerates to DiscreteSMC at zero span", "[fuzzy_smc]")
+{
+    // With both spans at 0 the fuzzy block cannot change anything, so the output must
+    // match a plain DiscreteSMC sample for sample. This pins the composition itself.
+    constexpr double fTs = 0.01;
+    ctrl::SMCParams sp;
+    sp.c_e = 1.0; sp.c_de = 5.0 * fTs; sp.K = 5.0; sp.phi = 0.10;
+    sp.uMin = -20.0; sp.uMax = 20.0;
+
+    ctrl::FuzzySMCParams fp;
+    fp.smc = sp;
+    fp.fuzzy.e_scale = 0.5; fp.fuzzy.de_scale = 20.0; fp.fuzzy.u_scale = 1.0;
+    fp.gainSpan = 0.0; fp.phiSpan = 0.0;
+    fp.Kmin = 0.0; fp.Kmax = 20.0; fp.phiMin = 0.01; fp.phiMax = 1.0;
+
+    ctrl::FuzzySlidingModeController fsmc(fp, fTs);
+    ctrl::DiscreteSMC plain(sp, fTs);
+
+    const double a = std::exp(-fTs / 0.2);
+    double y1 = 0.0, y2 = 0.0;
+    for (int k = 0; k < 500; ++k) {
+        const double u1 = fsmc.compute(y1 - 1.0);
+        const double u2 = plain.compute(y2 - 1.0);
+        INFO("step " << k << ": fsmc " << u1 << " vs smc " << u2);
+        REQUIRE_THAT(u1, WithinAbs(u2, 1e-12));
+        REQUIRE_THAT(fsmc.switchingGain(), WithinAbs(sp.K, 1e-12));
+        REQUIRE_THAT(fsmc.boundaryLayer(), WithinAbs(sp.phi, 1e-12));
+        // The locally-formed surface must agree with the SMC's own.
+        REQUIRE_THAT(fsmc.surface(), WithinAbs(plain.slidingSurface(), 1e-12));
+        y1 = a * y1 + (1.0 - a) * u1;
+        y2 = a * y2 + (1.0 - a) * u2;
+    }
+}
+
+TEST_CASE("FuzzySlidingModeController rejects invalid parameters", "[fuzzy_smc]")
+{
+    constexpr double fTs = 0.01;
+    ctrl::FuzzySMCParams ok;
+    ok.smc.c_e = 1.0; ok.smc.c_de = 0.05; ok.smc.K = 5.0; ok.smc.phi = 0.1;
+    ok.fuzzy.u_scale = 1.0;
+    ok.Kmin = 0.0; ok.Kmax = 20.0; ok.phiMin = 0.01; ok.phiMax = 1.0;
+    REQUIRE_NOTHROW(ctrl::FuzzySlidingModeController(ok, fTs));
+
+    REQUIRE_THROWS_AS(ctrl::FuzzySlidingModeController(ok, 0.0), std::invalid_argument);
+
+    ctrl::FuzzySMCParams bad_scale = ok; bad_scale.fuzzy.u_scale = 0.0;
+    REQUIRE_THROWS_AS(ctrl::FuzzySlidingModeController(bad_scale, fTs), std::invalid_argument);
+
+    ctrl::FuzzySMCParams bad_phi = ok; bad_phi.phiMin = 0.0;   // sat(s/phi) divides by phi
+    REQUIRE_THROWS_AS(ctrl::FuzzySlidingModeController(bad_phi, fTs), std::invalid_argument);
+
+    ctrl::FuzzySMCParams bad_k = ok; bad_k.Kmin = 5.0; bad_k.Kmax = 1.0;
+    REQUIRE_THROWS_AS(ctrl::FuzzySlidingModeController(bad_k, fTs), std::invalid_argument);
+
+    ctrl::FuzzySMCParams bad_span = ok; bad_span.gainSpan = -1.0;  // multiplier hits zero
+    REQUIRE_THROWS_AS(ctrl::FuzzySlidingModeController(bad_span, fTs), std::invalid_argument);
+}
+
+TEST_CASE("NaN input: fusion controllers hold last output and recover", "[nan_guard]")
+{
+    const double nTs = 0.05;
+    const double nan_v = std::numeric_limits<double>::quiet_NaN();
+
+    ctrl::PIDParams pp; pp.Kp = 1.0; pp.Ki = 0.5; pp.Kb = 1.0;
+    pp.uMin = -5.0; pp.uMax = 5.0;
+
+    Eigen::MatrixXd A1(1,1), B1(1,1), C1(1,1), D1(1,1);
+    A1 << 0.8; B1 << 0.2; C1 << 1.0; D1 << 0.0;
+    const ctrl::StateSpace plant1(A1, B1, C1, D1, nTs);
+
+    // ---- CascadeController -----------------------------------------------------
+    {
+        ctrl::CascadeParams cp; cp.spMin = -5.0; cp.spMax = 5.0;
+        ctrl::CascadeController c(std::make_shared<ctrl::DiscretePID>(pp, nTs),
+                                  std::make_shared<ctrl::DiscretePID>(pp, nTs), cp, nTs);
+        REQUIRE(std::isfinite(c.compute(nan_v)));   // u_prev_ starts at 0
+        const double u_last = c.compute(0.4);
+        const double u_held = c.compute(nan_v);
+        REQUIRE_THAT(u_held, WithinAbs(u_last, 1e-12));
+        REQUIRE(std::isfinite(c.compute(0.4)));
+    }
+
+    // ---- DisturbanceObserverController -----------------------------------------
+    {
+        ctrl::DOBParams dp; dp.omega_q = 5.0; dp.gainDC = 1.0;
+        dp.uMin = -5.0; dp.uMax = 5.0;
+        ctrl::DisturbanceObserverController c(
+            std::make_shared<ctrl::DiscretePID>(pp, nTs), plant1, dp, nTs);
+        REQUIRE(std::isfinite(c.compute(nan_v)));
+        c.setPlantOutput(0.2);
+        const double u_last = c.compute(0.4);
+        const double d_last = c.disturbanceEstimate();
+        const double u_held = c.compute(nan_v);
+        REQUIRE_THAT(u_held, WithinAbs(u_last, 1e-12));
+        // The observer must not advance on bad data either.
+        REQUIRE_THAT(c.disturbanceEstimate(), WithinAbs(d_last, 1e-12));
+        REQUIRE(std::isfinite(c.compute(0.4)));
+    }
+
+    // ---- TwoDOFController ------------------------------------------------------
+    {
+        ctrl::TwoDOFParams tp; tp.uMin = -5.0; tp.uMax = 5.0;
+        ctrl::TwoDOFController c(std::make_shared<ctrl::DiscretePID>(pp, nTs),
+                                 [](double r, double d) { return 0.5 * r + d; }, tp, nTs);
+        c.setReference(1.0);
+        REQUIRE(std::isfinite(c.compute(nan_v)));
+        const double u_last = c.compute(0.4);
+        const double u_held = c.compute(nan_v);
+        REQUIRE_THAT(u_held, WithinAbs(u_last, 1e-12));
+        REQUIRE(std::isfinite(c.compute(0.4)));
+
+        // A feedforward callable that itself returns NaN must not poison the command.
+        ctrl::TwoDOFController c_bad(std::make_shared<ctrl::DiscretePID>(pp, nTs),
+                                     [](double, double) {
+                                         return std::numeric_limits<double>::quiet_NaN();
+                                     }, tp, nTs);
+        REQUIRE(std::isfinite(c_bad.compute(0.4)));
+        REQUIRE_THAT(c_bad.feedforwardTerm(), WithinAbs(0.0, 1e-12));
+    }
+
+    // ---- LearningFeedforwardController -----------------------------------------
+    {
+        ctrl::ILC::Params ip; ip.N = 20; ip.Ts = nTs; ip.Lp = 0.5;
+        ctrl::LearningFFParams lp; lp.trialLength = 20; lp.learnTrials = 1;
+        lp.uMin = -5.0; lp.uMax = 5.0;
+        ctrl::LearningFeedforwardController c(
+            std::make_shared<ctrl::DiscretePID>(pp, nTs), ip, lp, nTs);
+        REQUIRE(std::isfinite(c.compute(nan_v)));
+        const int k_before = c.stepIndex();
+        const double u_last = c.compute(0.4);
+        const double u_held = c.compute(nan_v);
+        REQUIRE_THAT(u_held, WithinAbs(u_last, 1e-12));
+        // The trial must not advance on a bad sample or the ILC buffer desynchronises.
+        REQUIRE(c.stepIndex() == k_before + 1);
+        REQUIRE(std::isfinite(c.compute(0.4)));
+    }
+
+    // ---- FuzzySlidingModeController --------------------------------------------
+    {
+        ctrl::FuzzySMCParams fp;
+        fp.smc.c_e = 1.0; fp.smc.c_de = 0.05; fp.smc.K = 5.0; fp.smc.phi = 0.1;
+        fp.smc.uMin = -5.0; fp.smc.uMax = 5.0;
+        fp.fuzzy.u_scale = 1.0;
+        fp.Kmin = 0.0; fp.Kmax = 20.0; fp.phiMin = 0.01; fp.phiMax = 1.0;
+        ctrl::FuzzySlidingModeController c(fp, nTs);
+        REQUIRE(std::isfinite(c.compute(nan_v)));
+        const double u_last = c.compute(0.4);
+        const double s_last = c.surface();
+        const double u_held = c.compute(nan_v);
+        REQUIRE_THAT(u_held, WithinAbs(u_last, 1e-12));
+        REQUIRE_THAT(c.surface(), WithinAbs(s_last, 1e-12));   // surface not advanced
+        REQUIRE(std::isfinite(c.compute(0.4)));
+    }
+}
+
+TEST_CASE("Fusion controllers self-register in the feature registry", "[registry]")
+{
+    REQUIRE(ctrl::ControllerRegistry::has("cascade_controller"));
+    REQUIRE(ctrl::ControllerRegistry::has("disturbance_observer"));
+    REQUIRE(ctrl::ControllerRegistry::has("two_dof_controller"));
+    REQUIRE(ctrl::ControllerRegistry::has("learning_feedforward"));
+    REQUIRE(ctrl::ControllerRegistry::has("fuzzy_smc"));
+}

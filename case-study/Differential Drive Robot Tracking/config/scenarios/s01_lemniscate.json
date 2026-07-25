@@ -1,0 +1,17 @@
+{
+  "id":          "s01_lemniscate",
+  "description": "Paper's hardest benchmark: figure-eight with continuous curvature reversal. x_ref = a*cos(t)/(1+sin^2 t), y_ref = a*sin(t)*cos(t)/(1+sin^2 t), a = 2.0 m. Paper Table 2: ISE 3.6955, IAE 4.7004, ITAE 21.9771, final error 0.0345 m, mean torque 9.694 N.m, Ks_final 3.725, settling 12.7 s.",
+  "trajectory":  "lemniscate",
+  "a":           2.0,
+  "T_sim":       30.0,
+  "time_scale":  1.0,
+
+  "start_on_path": true,
+
+  "encoder_noise_std": 0.0,
+  "torque_dist_amp":   0.0,
+  "torque_dist_freq":  0.0,
+  "tau_max_override": -1.0,
+  "mass_mismatch":     1.0,
+  "seed":              42
+}

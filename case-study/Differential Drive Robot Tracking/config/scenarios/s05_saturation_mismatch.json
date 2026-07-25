@@ -1,0 +1,20 @@
+{
+  "id":          "s05_saturation_mismatch",
+  "description": "Circle at the Pioneer hardware torque limit with a 40% payload mass mismatch the controllers were NOT designed for. This reproduces the FAILURE MODE the paper reports on its Pioneer hardware trial (Fig. 22: torques 'reach the saturation limits plotted (+/- 15 N.m)', Lyapunov spikes, mean positional error 1.47 m). It is a stand-in - the real Pioneer time-series the paper used is not part of this repository, so no attempt is made to reproduce its numbers.",
+  "trajectory":  "circle",
+  "a":           3.0,
+  "T_sim":       30.0,
+  "time_scale":  1.0,
+
+  "start_on_path": false,
+  "x0":            2.4,
+  "y0":            0.5,
+  "theta0":        0.9,
+
+  "encoder_noise_std": 0.005,
+  "torque_dist_amp":   0.0,
+  "torque_dist_freq":  0.0,
+  "tau_max_override":  15.0,
+  "mass_mismatch":     1.4,
+  "seed":              7
+}

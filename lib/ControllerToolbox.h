@@ -161,6 +161,10 @@
 #include "LPSolver.h"                ///< LPSolver - two-phase simplex for bounded-variable LPs (Phase 3 OC4).
 #include "LPMPC.h"                   ///< LPMPC - SISO L1-cost linear MPC solved via LPSolver per step (Phase 3 OC4).
 #include "CodeGenC.h"                ///< CodeGenC - flat C99 code generation for a single tuned, step-based controller (Phase 4 DT1).
+#include "CascadeController.h"       ///< CascadeController - series inner/outer composition; outer output becomes the inner setpoint.
+#include "DisturbanceObserverController.h" ///< DisturbanceObserverController - Q-filter DOB wrapping any IController (Ohishi 1987).
+#include "TwoDOFController.h"        ///< TwoDOFController - functional feedforward + feedback trim (2-DOF structure).
+#include "LearningFeedforwardController.h" ///< LearningFeedforwardController - two-phase ILC layered on a nominal feedback loop.
 
 // Optional modules - controlled by CTRL_ENABLE_* cmake options (all ON by default).
 // When building without CMake, define CTRL_HAS_* manually to enable the relevant headers,
@@ -178,6 +182,7 @@
 
 #if defined(CTRL_HAS_FUZZY) || (!defined(CTRL_DISABLE_FUZZY))
 #include "FuzzyLogic.h" ///< Fuzzy - Mamdani/TS inference, FuzzyPD, FuzzyPID, FuzzySupervisor.
+#include "FuzzySlidingModeController.h" ///< FSMC - fuzzy-scheduled SMC switching gain + boundary layer (Palm 1994).
 #endif
 
 // Hinf - honour both legacy CTRL_DISABLE_HINF and new CTRL_HAS_HINF / CTRL_DISABLE_HINF2.

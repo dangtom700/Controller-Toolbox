@@ -72,6 +72,7 @@ Answer these before looking at any controller. Each axis is a hard filter.
 | Class | Use when | Assumes / avoid |
 |---|---|---|
 | `DiscreteSMC` | Robust tracking under **matched** uncertainty/disturbance; nonlinear/uncertain | Chattering vs. boundary layer; needs known control direction |
+| `FuzzySlidingModeController` | Same as `DiscreteSMC` but chattering matters: fuzzy inference on `(s, s_dot)` schedules `K` and `phi` - full gain far from the surface, relaxed inside the layer | Needs `CTRL_HAS_FUZZY`; `fuzzy.e_scale`/`de_scale` normalise **s**, not `e` |
 | `BacksteppingController` | **Strict-feedback** nonlinear systems (many vehicle/robot models) | Needs the strict-feedback form + model |
 | `FeedbackLinearisation` | Cancel a **known** nonlinearity, then close a linear loop | Needs accurate model + full state; fails on unstable zero dynamics |
 | `PassivityBasedController` | **Euler-Lagrange / robotic** plants (needs `M(q)`, `C`, `dV`) - manipulators | Needs the EL structure callbacks |
@@ -125,11 +126,23 @@ Observer + state feedback is **wired by hand** (`estimator.step()` -> `ctrl.setS
 
 ## 5. Composition wrappers (all are `IController`s - nest freely)
 
-`ControllerStack` (Additive=cascade/additive, Supervisory=health-aware switching) .
-`AntiWindupWrapper` (saturation) . `CBFSafetyFilter` (safety set) . `GainScheduledController` .
-`SmithPredictor` (dead-time) . `EventTriggeredWrapper` (reduce compute/comms) . `FTCSupervisor`
-(fault-tolerant switching) . `ControllerMonitor` (telemetry/health only). Compose rather than
-build a monolith: e.g. `AntiWindupWrapper(SmithPredictor(DiscretePID))`.
+`ControllerStack` (**Additive = parallel sum**, Weighted = normalised blend, Supervisory =
+health-aware switching) . `AntiWindupWrapper` (saturation) . `CBFSafetyFilter` (safety set) .
+`GainScheduledController` . `SmithPredictor` (dead-time) . `EventTriggeredWrapper` (reduce
+compute/comms) . `FTCSupervisor` (fault-tolerant switching) . `ControllerMonitor` (telemetry/health
+only). Compose rather than build a monolith: e.g. `AntiWindupWrapper(SmithPredictor(DiscretePID))`.
+
+**Fusion wrappers (Part 73)** - these package composition patterns that case studies previously
+hand-rolled:
+
+| Class | Use when |
+|---|---|
+| `CascadeController` | Inner/outer **series** cascade: the outer output is the inner **setpoint**. Note `ControllerStack::Additive` is a parallel *sum* and cannot express this. Handles the inner sign convention, setpoint clamp/rate limit, multi-rate decimation and outer anti-windup |
+| `DisturbanceObserverController` | Lump external disturbance + model error into `d_hat` via a Q-filter and cancel it ahead of the inner loop. The only standalone DOB in `lib/` (`DiscreteADRC`'s ESO is internal) |
+| `TwoDOFController` | Feedforward from a **physics inversion or a measured signal** plus a feedback trim. Use `FeedforwardController` instead when you have a designed `G_ff(z)` filter of `r` |
+| `LearningFeedforwardController` | Repeating task: two-phase ILC (record, then apply) layered on a nominal loop, with the trial state machine built in |
+
+`FuzzySlidingModeController` is a control **law**, not a wrapper - see the nonlinear roster below.
 
 ---
 

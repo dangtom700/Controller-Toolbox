@@ -205,6 +205,11 @@ TARGETS=(
     ex123_fractional_order_pid
     ex124_super_twisting_smc
     ex125_computational_delay_wrapper
+    ex126_cascade_controller
+    ex127_disturbance_observer
+    ex128_two_dof_controller
+    ex129_learning_feedforward
+    ex130_fuzzy_smc
     test_autoscheduling
     test_stability_margins
     example_pid_feedback
@@ -237,6 +242,8 @@ TARGETS=(
     stewart_robustness
     bouyancy_driven_airship_in_vertical_plan_sim
     bouyancy_driven_airship_in_vertical_plan_robustness
+    differential_drive_robot_tracking_sim
+    differential_drive_robot_tracking_robustness
     toolbox_examples
     test_catch2_pilot
     test_catch2_advanced
@@ -252,6 +259,7 @@ TARGETS=(
     test_smismo_regression
     test_stewart_regression
     test_bouyancy_driven_airship_regression
+    test_ddmr_regression
 )
 
 FAILED=()

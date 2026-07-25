@@ -4,7 +4,7 @@ A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H
 
 ~125 controller and estimation implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, flat-C code generation for step-based controllers, an analysis pipeline (Monte Carlo, fault injection, ANOVA, WCET, mu-analysis, HTML reports), and a hardware abstraction layer for simulation.
 
-Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. 126 C++ and 149 Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and algorithm extension. Twenty-one end-to-end physics case studies (eleven C++: boiler-turbine, tug boat, solar cooling, porous-plate humidification, active suspension 2-DOF, buck-boost converter, solar cooker, solar OTEC, hydraulic SMISMO, 6-DOF Stewart platform, bouyancy-driven airship; ten Python-only: drill string, wind-wave platform, electro-hydraulic force servo, aerial firefighting bag drop, battery thermal management, surface ship manoeuvring, active suspension 40-state 6x6 EV, aircraft engine thermal management, PCM thermal energy storage, satellite launch vehicle) exercise the full controller stack on nonlinear plants, plus one MATLAB-native study (Boiler Control MATLAB) built on the R2026a toolboxes.
+Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. 126 C++ and 149 Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and algorithm extension. Twenty-two end-to-end physics case studies (twelve C++: boiler-turbine, tug boat, solar cooling, porous-plate humidification, active suspension 2-DOF, buck-boost converter, solar cooker, solar OTEC, hydraulic SMISMO, 6-DOF Stewart platform, bouyancy-driven airship, differential-drive robot tracking; ten Python-only: drill string, wind-wave platform, electro-hydraulic force servo, aerial firefighting bag drop, battery thermal management, surface ship manoeuvring, active suspension 40-state 6x6 EV, aircraft engine thermal management, PCM thermal energy storage, satellite launch vehicle) exercise the full controller stack on nonlinear plants, plus one MATLAB-native study (Boiler Control MATLAB) built on the R2026a toolboxes.
 
 Current status, verified counts, and open work: [docs/PROJECT_MASTER_STATE.md](docs/PROJECT_MASTER_STATE.md). Live case-study status: [docs/case_study_status.md](docs/case_study_status.md) (auto-generated).
 
@@ -68,7 +68,7 @@ for (int k = 0; k < 500; ++k) {
 | [docs/archived/test_update.md](docs/archived/test_update.md) | Test suite history, regression coverage, sign-convention notes |
 | [docs/control_strategies_deep_dive.md](docs/control_strategies_deep_dive.md) | Taxonomy of strategy families, plant model interference, decision framework, proposed extensions |
 | [cheatsheet/](cheatsheet/) | Tuning methods, controller categories, system identification notes |
-| [case-study/](case-study/) | Twenty-one complete physics studies (11 C++ + 10 Python-only) + 1 MATLAB-native + 10 stubs -- see "Case Studies" below; auto-tracked status in [docs/case_study_status.md](docs/case_study_status.md) |
+| [case-study/](case-study/) | Twenty-two complete physics studies (12 C++ + 10 Python-only) + 1 MATLAB-native + 9 stubs -- see "Case Studies" below; auto-tracked status in [docs/case_study_status.md](docs/case_study_status.md) |
 
 ---
 
@@ -120,6 +120,7 @@ links are auto-tracked in [docs/case_study_status.md](docs/case_study_status.md)
 | [Separate Meter In Separate Meter Out](case-study/Separate%20Meter%20In%20Separate%20Meter%20Out/) | SMISMO hydraulic cylinder, 8-state RK4, dual PDCVs + Stribeck friction | 13 | 5 -> 65 |
 | [6-DOF Stewart Platform Vessel Motion Simulator](case-study/6-DOF%20Stewart%20Platform%20Vessel%20Motion%20Simulator/) | 6-UPU Stewart platform, 12-state per-rod spring-mass-damper, closed-form IK+Jacobian, Douglas sea-state CFD-input stand-in | 12 | 60 -> 720 |
 | [Bouyancy-Driven Airship in Vertical Plane](case-study/Bouyancy-Driven%20Airship%20in%20Vertical%20Plane/) | 6-state liberated-center airship, moving-mass + net-lift actuation, RK4 (Ts=0.05s) | 12 | 5 -> 60 |
+| [Differential Drive Robot Tracking](case-study/Differential%20Drive%20Robot%20Tracking/) | 5-state nonholonomic DDMR with COM offset, RK4 (5 ms) + PI wheel-torque layer, multi-rate 30/150 ms FUHAC | 12 | 5 -> 60 |
 
 **Python-only studies (discovered by `run.py` Phase 7 via `sim/main.py`):**
 
@@ -144,7 +145,7 @@ links are auto-tracked in [docs/case_study_status.md](docs/case_study_status.md)
 
 Built directly on the R2026a toolbox stack (`quadprog` MPC/GPC/NMPC, `mixsyn` H-infinity,
 `n4sid` subspace-ID LQG, EKF/UKF, gain scheduling) rather than on `lib/` -- see
-[MATLAB/HANDOFF.md](MATLAB/HANDOFF.md) §0 for the decision record. It is fully self-contained
+[MATLAB/HANDOFF.md](MATLAB/HANDOFF.md) Section 0 for the decision record. It is fully self-contained
 (its own `config/`, `matlab/`, `logs/`) and never writes into the C++ study's `logs/`. Run with
 `matlab -batch "addpath('case-study/Boiler Control MATLAB/matlab'); run_all()"`. It is tracked by
 hand: `tools/case_study_tracker.py` is scoped to the C++ and Python studies that `run.py` drives,

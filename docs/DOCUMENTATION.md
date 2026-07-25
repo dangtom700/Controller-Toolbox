@@ -552,10 +552,12 @@ SISO TF -> controllable canonical SS conversion.
 - **Methods:** `compute(e)`, `reset()`, `bufferSize()`.
 
 #### `FeedforwardController` ([FeedforwardController.h](../lib/FeedforwardController.h))
-- **Purpose:** Reference model feedforward - computes `u_ff = Kff * r` (static) or filters the reference through a model-inverse transfer function. Use additively with a feedback controller: `u = u_feedback + u_ff`.
-- **Parameters (`FeedforwardParams`):** `gain` (static gain), optional `referenceModel` (`StateSpace` for dynamic FF).
-- **Inputs:** `compute(reference)` - the setpoint signal.
-- **Returns:** Feedforward control signal.
+- **Purpose:** Reference feedforward - applies a **pre-designed discrete `StateSpace` filter** `G_ff(z)` to the reference: `u_ff[k] = G_ff(z) * r[k]`. Combine additively with a feedback controller (via `ControllerStack::Additive`) to form a 2-DOF structure.
+- **Constructor:** `FeedforwardController(const StateSpace &ff_model)` - **there is no `FeedforwardParams` struct and no scalar `gain` field**; `Ts` is taken from `ff_model.Ts`. (Earlier revisions of this entry described a `FeedforwardParams{gain, referenceModel}` API that has never existed - corrected in Part 73.)
+- **Inputs:** `compute(r)` - the **reference**, not the tracking error. MIMO via `computeVec(r)`.
+- **Returns:** Feedforward control signal `u_ff[k]`.
+- **Methods:** `compute(r)`, `computeVec(r)`, `reset()`, `sampleTime()`, `model()`, `state()`.
+- **When to use something else:** if the feedforward is a physics inversion or a measured exogenous signal rather than a filter of `r`, use [`TwoDOFController`](#twodofcontroller-twodofcontrollerh-part-73) instead.
 
 #### `GeneralizedPredictiveController` ([GeneralizedPredictiveControl.h](../lib/GeneralizedPredictiveControl.h))
 - **Purpose:** GPC based on the CARIMA (Controlled AutoRegressive Integrated Moving Average) process model. Supports online model adaptation via RLS using `setPlant()`.
@@ -930,6 +932,57 @@ All algorithms below are in `lib/`, included by [ControllerToolbox.h](../lib/Con
 - **Purpose:** Control Barrier Function safety filter - 1D analytical QP wrapper that minimally modifies any `IController`'s output to keep the system inside a safe set `{x : h(x) >= 0}` (Ames et al. 2017).
 - **Usage:** provide `h_fn(x)` and `grad_h_fn(x)` (scalar + gradient); wraps any `shared_ptr<IController>`.
 - **1D analytical solve:** avoids a full QP; closed-form projection onto the CBF halfspace.
+
+#### `CascadeController` ([CascadeController.h](../lib/CascadeController.h)) *Part 73*
+- **Purpose:** Series inner/outer cascade - the outer controller's output becomes the inner controller's **setpoint**. This is a series hand-off and is **not** expressible with `ControllerStack::Additive`, which sums child outputs in parallel.
+- **Parameters (`CascadeParams`):** `spMin`/`spMax` (clamp on the inner setpoint), `spRateMax` (max `|d(setpoint)/dt|` [units/s]), `outerDecimation` (run the outer loop every N inner ticks - multi-rate cascade), `antiWindup` (back-calculate the outer loop while the setpoint is clamped).
+- **Constructor:** `CascadeController(outer, inner, params, Ts)` with both children as `shared_ptr<IController>`.
+- **Inputs:** `setInnerMeasurement(y_inner)` **before** each `compute(r_outer - y_outer)`.
+- **Returns:** the inner loop's plant command `u[k]`.
+- **Methods:** `compute(e_out)`, `setInnerMeasurement(y)`, `reset()`, `bumplessInit(u, e)`, `isHealthy()`, `innerSetpoint()`, `setpointClamped()`, `lastOutput()`, `outerController()`, `innerController()`.
+- **Sign convention:** outer is `e = r - y`. The **inner** error is `sp - y_in`, or `y_in - sp` automatically when `inner->signConvention()` reports `TrackingErrorYMinusR` (`DiscreteSMC`, `SuperTwistingSMC`). Cached once at construction.
+- **Anti-windup:** when the setpoint clamps, `outer->bumplessInit(sp_clamped, e_out)` is called - the conditional-integration behaviour case studies hand-roll, expressed through the existing interface.
+- **Constraints:** throws `std::invalid_argument` if either controller is null, `Ts <= 0`, `outerDecimation < 1`, or `spMin >= spMax`.
+
+#### `DisturbanceObserverController` ([DisturbanceObserverController.h](../lib/DisturbanceObserverController.h)) *Part 73*
+- **Purpose:** Q-filter disturbance observer (Ohishi 1987) wrapping any `IController`. Estimates the total disturbance (external input plus model error) and cancels it before the inner loop must react. The only standalone DOB in `lib/` - `DiscreteADRC`'s ESO is private internal state.
+- **Parameters (`DOBParams`):** `omega_q` (Q-filter cutoff [rad/s]), `qOrder` (1 or 2), `gainDC` (nominal plant DC gain; converts an output disturbance to input units), `dMin`/`dMax` (observer authority clamp), `uMin`/`uMax`.
+- **Constructor:** `DisturbanceObserverController(inner, nominal, params, Ts)` where `nominal` is a **discrete SISO** `StateSpace` (use `c2d()` first).
+- **Inputs:** `setPlantOutput(y)` **before** each `compute(r - y)`. Without it, `y ~= -error` is assumed (same fallback as `AdaptiveSmithPredictor`).
+- **Returns:** `u[k] = clamp(inner.compute(e) - d_hat)`.
+- **Update law:** `y_nom[k] = C.x_nom + D.u[k-1]`; `d_hat = Q(z).(y - y_nom) / gainDC` clamped to `[dMin, dMax]`; then `x_nom[k+1] = A.x_nom + B.u[k]` - the nominal model is advanced with the **applied** command (textbook form). `Q(z)` is a unity-DC-gain ZOH low-pass, cascaded when `qOrder == 2`.
+- **Methods:** `compute(e)`, `setPlantOutput(y)`, `reset()`, `isHealthy()`, `disturbanceEstimate()`, `nominalOutput()`, `lastOutput()`, `innerController()`.
+- **Constraints:** throws `std::invalid_argument` if `inner` is null, `Ts <= 0`, `omega_q <= 0`, `qOrder` not in `{1,2}`, `|gainDC| < 1e-12`, the model is not SISO, or `dMin >= dMax` / `uMin >= uMax`.
+
+#### `TwoDOFController` ([TwoDOFController.h](../lib/TwoDOFController.h)) *Part 73*
+- **Purpose:** Two-degree-of-freedom control with a **functional** feedforward: `u = clamp(u_ff(r, d) + feedback.compute(e))`. Covers the case neither existing neighbour can - `FeedforwardController` needs a designed `StateSpace G_ff(z)` driven by `r`, and `PIDParams::b_weight` is setpoint weighting inside one PID. Use this when the feedforward is a physics inversion or a measured exogenous signal.
+- **Parameters (`TwoDOFParams`):** `uMin`/`uMax`, `antiWindup` (back-calculate the feedback path while the total is clamped).
+- **Constructor:** `TwoDOFController(feedback, ff, params, Ts)` where `ff` is `ctrl::FeedforwardFn = std::function<double(double r, double d)>`.
+- **Inputs:** `setReference(r)` and optionally `setMeasuredDisturbance(d)` before `compute(r - y)`.
+- **Returns:** saturated total command `u[k]`.
+- **Methods:** `compute(e)`, `setReference(r)`, `setMeasuredDisturbance(d)`, `reset()`, `bumplessInit(u, e)`, `isHealthy()`, `feedforwardTerm()`, `feedbackTerm()`, `saturated()`, `lastOutput()`, `feedbackController()`.
+- **Numerical safety:** a feedforward callable returning a non-finite value contributes `0.0` for that step rather than poisoning the command path.
+- **Constraints:** throws `std::invalid_argument` if `feedback` is null, `ff` is empty, `Ts <= 0`, or `uMin >= uMax`.
+
+#### `LearningFeedforwardController` ([LearningFeedforwardController.h](../lib/LearningFeedforwardController.h)) *Part 73*
+- **Purpose:** Two-phase iterative-learning feedforward on top of a nominal feedback controller. Owns a `ctrl::ILC` by value and encapsulates the trial state machine (step index, wrap at `trialLength`, `ILC::updateFeedforward()` at the boundary, switch from recording to applying).
+- **Parameters (`LearningFFParams`):** `trialLength` (**must equal `ILC::Params::N`**), `learnTrials` (recording-only trials before the feedforward is applied), `autoAdvance`, `uMin`/`uMax`.
+- **Constructor:** `LearningFeedforwardController(nominal, ilc_params, params, Ts)`.
+- **Inputs:** `compute(error)` in the **nominal controller's own** convention.
+- **Returns:** `u[k] = clamp(ilc.feedforward(k) + nominal.compute(e))`, with the ILC term zero until `learnTrials` have elapsed.
+- **Methods:** `compute(e)`, `reset()`, `bumplessInit(u, e)`, `endTrial()` (manual advance when `autoAdvance == false`), `trialIndex()`, `stepIndex()`, `learning()`, `lastRMSError()`, `feedforwardTerm()`, `lastOutput()`, `ilc()`, `nominalController()`.
+- **Sign convention:** mirrors the nominal controller. The error passed to `ILC::recordError()` is **negated** when the nominal reports `TrackingErrorYMinusR`, because ILC's update law assumes `e = r - y`.
+- **Constraints:** throws `std::invalid_argument` if `nominal` is null, `Ts <= 0`, `uMin >= uMax`, `learnTrials < 0`, or `trialLength != ilc_params.N` (a mismatch silently truncates learning). ILC only converges when the reference and disturbance repeat trial-to-trial; watch `lastRMSError()`.
+
+#### `FuzzySlidingModeController` ([FuzzySlidingModeController.h](../lib/FuzzySlidingModeController.h)) *Part 73, requires `CTRL_HAS_FUZZY`*
+- **Purpose:** Fuzzy-scheduled sliding-mode control (Palm 1994). Mamdani inference on `(s, s_dot)` retunes the switching gain `K` and boundary layer `phi` every step: large `|s|` raises both (fast reaching), small `|s|` relaxes both to nominal (precision, low chattering). Lower total control variation than a fixed-gain `DiscreteSMC` at the same reaching authority.
+- **Parameters (`FuzzySMCParams`):** `smc` (nominal `SMCParams`), `fuzzy` (`FuzzyPDParams`), `gainSpan`/`phiSpan` (modulation depths; must be `> -1`), `Kmin`/`Kmax`, `phiMin`/`phiMax`.
+- **Inputs:** `compute(y - r)` - the **SMC convention**, reversed from `DiscretePID`. `signConvention()` returns `TrackingErrorYMinusR`.
+- **Returns:** saturated control `u[k] = -K[k].sat(s[k] / phi[k])`.
+- **Update law:** `s = c_e.e + c_de.(e - e_prev)` (formed locally, so the modulation uses the *current* surface rather than `DiscreteSMC::slidingSurface()`'s one-sample-old value); `m = |FuzzyPD(s)| / u_scale` clamped to `[0,1]`; `K = clamp(K_nom.(1 + gainSpan.m), Kmin, Kmax)`; `phi = clamp(phi_nom.(1 + phiSpan.m), phiMin, phiMax)`.
+- **Methods:** `compute(e)`, `reset()`, `setParams(p)`, `params()`, `switchingGain()`, `boundaryLayer()`, `surface()`, `modulation()`, `lastOutput()`.
+- **Scaling gotcha:** `fuzzy.e_scale` normalises the **sliding surface** `s`, and `fuzzy.de_scale` normalises `s_dot`, not the tracking error. Set them to the typical magnitudes of those signals.
+- **Constraints:** throws `std::invalid_argument` if `Ts <= 0`, `fuzzy.u_scale <= 0`, `phiMin <= 0`, `Kmin >= Kmax`, `phiMin >= phiMax`, or either span `<= -1`. With `gainSpan = phiSpan = 0` the output matches `DiscreteSMC` sample for sample.
 
 #### `GaussianProcess` ([GaussianProcess.h](../lib/GaussianProcess.h)) *Part 31*
 - **Purpose:** Gaussian Process Regression with squared-exponential kernel and Cholesky inference (Rasmussen & Williams 2006). Fixed-budget online mode evicts oldest point at `N_max`.

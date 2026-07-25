@@ -1,0 +1,17 @@
+{
+  "id":          "s02_circle",
+  "description": "Constant-curvature circle, the paper's best-case profile. x_ref = a*cos(t), y_ref = a*sin(t), a = 3.0 m. Paper Table 2: ISE 1.0833, IAE 2.6197, ITAE 18.8138, final error 0.0394 m, mean torque 5.931 N.m, Ks_final 4.147, settling 12.72 s.",
+  "trajectory":  "circle",
+  "a":           3.0,
+  "T_sim":       30.0,
+  "time_scale":  1.0,
+
+  "start_on_path": true,
+
+  "encoder_noise_std": 0.0,
+  "torque_dist_amp":   0.0,
+  "torque_dist_freq":  0.0,
+  "tau_max_override": -1.0,
+  "mass_mismatch":     1.0,
+  "seed":              42
+}

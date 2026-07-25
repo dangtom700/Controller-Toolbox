@@ -1868,4 +1868,161 @@ assert np.isfinite(_y_fo) and abs(1.0 - _y_fo) < 0.1, "FractionalOrderPID did no
 assert ctrl.registry_has('fractional_order_pid'), "fractional_order_pid not registered"
 print('FractionalOrderPID smoke test passed.')
 
+# --- CascadeController ---
+# Two lags in series; the outer PID drives the inner PID's setpoint. A load step on
+# the inner loop must be rejected far better than by a single outer PID alone.
+_a1c, _a2c = np.exp(-0.05 / 0.5), np.exp(-0.05 / 2.0)
+
+
+def _run_cascade(use_cascade):
+    _pp_o = ctrl.PIDParams(); _pp_o.Kp, _pp_o.Ki = 1.2, 0.35
+    _pp_o.uMin, _pp_o.uMax = -5.0, 5.0
+    _pp_i = ctrl.PIDParams(); _pp_i.Kp, _pp_i.Ki = 2.5, 5.0
+    _pp_i.uMin, _pp_i.uMax = -10.0, 10.0
+    _cp = ctrl.CascadeParams(); _cp.spMin, _cp.spMax = -5.0, 5.0
+    _c = (ctrl.CascadeController(ctrl.DiscretePID(_pp_o, 0.05),
+                                 ctrl.DiscretePID(_pp_i, 0.05), _cp, 0.05)
+          if use_cascade else ctrl.DiscretePID(_pp_o, 0.05))
+    _x1 = _x2 = _iae = 0.0
+    for _k in range(1200):
+        _d = 0.6 if _k >= 400 else 0.0
+        if use_cascade:
+            _c.set_inner_measurement(_x1)
+        _u = _c.compute(1.0 - _x2)
+        if _k >= 400:
+            _iae += abs(1.0 - _x2) * 0.05
+        _x2 = _a2c * _x2 + (1.0 - _a2c) * _x1
+        _x1 = _a1c * _x1 + (1.0 - _a1c) * (_u + _d)
+    return _iae, _c
+
+
+_iae_single, _ = _run_cascade(False)
+_iae_casc, _casc = _run_cascade(True)
+assert np.isfinite(_iae_casc) and _iae_casc < _iae_single, \
+    f"CascadeController did not improve rejection: {_iae_casc:.4f} vs {_iae_single:.4f}"
+assert abs(_casc.inner_setpoint()) <= 5.0 + 1e-9, "CascadeController setpoint escaped spMin/spMax"
+assert ctrl.registry_has('cascade_controller'), "cascade_controller not registered"
+print('CascadeController smoke test passed.')
+
+# --- DisturbanceObserverController ---
+# Nominal G(s)=1/(s+1) but the true plant is 1.5/(s+0.8) with an output step; d_hat
+# must load up and the post-step transient must beat the bare PI.
+_nom_c = ctrl.StateSpace(np.array([[-1.0]]), np.array([[1.0]]),
+                         np.array([[1.0]]), np.array([[0.0]]), 0.0)
+_nom_d = ctrl.c2d(_nom_c, 0.05, ctrl.C2dMethod.ZOH)
+_at, _bt = np.exp(-0.8 * 0.05), 1.5 / 0.8 * (1.0 - np.exp(-0.8 * 0.05))
+
+
+def _pi_params():
+    _p = ctrl.PIDParams(); _p.Kp, _p.Ki = 1.5, 0.8
+    _p.uMin, _p.uMax = -10.0, 10.0
+    return _p
+
+
+_dp = ctrl.DOBParams()
+_dp.omega_q, _dp.qOrder, _dp.gainDC = 5.0, 1, 1.0
+_dp.uMin, _dp.uMax = -10.0, 10.0
+_dob = ctrl.DisturbanceObserverController(ctrl.DiscretePID(_pi_params(), 0.05),
+                                          _nom_d, _dp, 0.05)
+_pi_bare = ctrl.DiscretePID(_pi_params(), 0.05)
+_ya = _yb = _iae_dob = _iae_pi = 0.0
+for _k in range(900):
+    _d = 0.5 if _k >= 200 else 0.0
+    _dob.set_plant_output(_ya)
+    _ua = _dob.compute(1.0 - _ya)
+    _ub = _pi_bare.compute(1.0 - _yb)
+    if 200 <= _k < 300:
+        _iae_dob += abs(1.0 - _ya) * 0.05
+        _iae_pi += abs(1.0 - _yb) * 0.05
+    _ya = _at * _ya + _bt * _ua + (1.0 - _at) * _d
+    _yb = _at * _yb + _bt * _ub + (1.0 - _at) * _d
+assert np.isfinite(_ya) and abs(1.0 - _ya) < 0.02, "DOB did not track the reference"
+assert abs(_dob.disturbance_estimate()) > 1e-3, "DOB d_hat never loaded"
+assert _iae_dob < _iae_pi, f"DOB transient not better: {_iae_dob:.4f} vs {_iae_pi:.4f}"
+assert ctrl.registry_has('disturbance_observer'), "disturbance_observer not registered"
+print('DisturbanceObserverController smoke test passed.')
+
+# --- TwoDOFController ---
+# Exact inverse feedforward on a DC-gain-2.5 plant: the feedback trim must decay to ~0.
+_pp2 = ctrl.PIDParams(); _pp2.Kp, _pp2.Ki = 0.6, 0.30
+_pp2.uMin, _pp2.uMax = -5.0, 5.0
+_tp = ctrl.TwoDOFParams(); _tp.uMin, _tp.uMax = -5.0, 5.0
+_c2 = ctrl.TwoDOFController(ctrl.DiscretePID(_pp2, 0.05),
+                            lambda r, d: r / 2.5 - d, _tp, 0.05)
+_c2.set_reference(1.0)
+_a2d = np.exp(-0.05 / 1.0)
+_y2 = 0.0
+for _ in range(400):
+    _u2 = _c2.compute(1.0 - _y2)
+    _y2 = _a2d * _y2 + (1.0 - _a2d) * 2.5 * _u2
+assert np.isfinite(_y2) and abs(1.0 - _y2) < 0.01, "TwoDOFController did not track"
+assert abs(_c2.feedforward_term() - 0.4) < 1e-9, "TwoDOF feedforward != exact inverse r/K"
+assert abs(_c2.feedback_term()) < 0.02, "TwoDOF feedback did not hand over to the feedforward"
+assert ctrl.registry_has('two_dof_controller'), "two_dof_controller not registered"
+print('TwoDOFController smoke test passed.')
+
+# --- LearningFeedforwardController ---
+# Repeating sine + constant load: per-trial RMS error must fall trial over trial.
+_pp3 = ctrl.PIDParams(); _pp3.Kp, _pp3.Ki = 1.2, 2.0
+_pp3.uMin, _pp3.uMax = -10.0, 10.0
+_ip = ctrl.ILCParams()
+_ip.N, _ip.Ts, _ip.Lp, _ip.Q_filter = 200, 0.01, 0.6, 0.98
+_ip.uMin, _ip.uMax = -10.0, 10.0
+_lp = ctrl.LearningFFParams()
+_lp.trialLength, _lp.learnTrials = 200, 1
+_lp.uMin, _lp.uMax = -10.0, 10.0
+_lff = ctrl.LearningFeedforwardController(ctrl.DiscretePID(_pp3, 0.01), _ip, _lp, 0.01)
+_a3 = np.exp(-0.01 / 0.2)
+_y3, _rms = 0.0, []
+for _t in range(5):
+    _sq = 0.0
+    for _k in range(200):
+        _e3 = np.sin(2.0 * np.pi * _k / 200.0) - _y3
+        _sq += _e3 * _e3
+        _u3 = _lff.compute(_e3)
+        _y3 = _a3 * _y3 + (1.0 - _a3) * (_u3 + 0.3)
+    _rms.append(np.sqrt(_sq / 200.0))
+assert np.isfinite(_rms[-1]) and _rms[-1] < _rms[0], \
+    f"LearningFeedforwardController did not learn: {_rms[0]:.4f} -> {_rms[-1]:.4f}"
+assert _lff.trial_index() == 5 and not _lff.learning(), "LearningFF trial bookkeeping wrong"
+assert ctrl.registry_has('learning_feedforward'), "learning_feedforward not registered"
+print('LearningFeedforwardController smoke test passed.')
+
+# --- FuzzySlidingModeController ---
+# Matched reaching gain vs a fixed DiscreteSMC (K=8 both far from the surface); the
+# fuzzy schedule must cut the total control variation and stay inside [Kmin, Kmax].
+_sp = ctrl.SMCParams()
+_sp.c_e, _sp.c_de, _sp.K, _sp.phi = 1.0, 5.0 * 0.01, 8.0, 0.05
+_sp.uMin, _sp.uMax = -20.0, 20.0
+_fsp = ctrl.FuzzySMCParams()
+_fsp.smc = _sp
+_fsp.smc.K = 8.0 / 1.8            # grows back to 8.0 at m = 1
+_fsp.fuzzy.e_scale, _fsp.fuzzy.de_scale, _fsp.fuzzy.u_scale = 0.5, 20.0, 1.0
+_fsp.gainSpan, _fsp.phiSpan = 0.8, 0.5
+_fsp.Kmin, _fsp.Kmax, _fsp.phiMin, _fsp.phiMax = 0.5, 20.0, 0.01, 1.0
+_a4 = np.exp(-0.01 / 0.2)
+
+
+def _run_smc(_c, _track_gain):
+    _y, _up, _tv, _kmin, _kmax = 0.0, 0.0, 0.0, 1e9, -1e9
+    for _k in range(2000):
+        _u = _c.compute(_y - 1.0)          # SMC convention: e = y - r
+        _tv += abs(_u - _up)
+        _up = _u
+        if _track_gain:
+            _kmin, _kmax = min(_kmin, _c.switching_gain()), max(_kmax, _c.switching_gain())
+        _y = _a4 * _y + (1.0 - _a4) * (_u + 0.3 * np.sin(2.0 * np.pi * _k * 0.01))
+    return _tv, _kmin, _kmax
+
+
+_tv_fixed, _, _ = _run_smc(ctrl.DiscreteSMC(_sp, 0.01), False)
+_fsmc = ctrl.FuzzySlidingModeController(_fsp, 0.01)
+_tv_fuzzy, _kmn, _kmx = _run_smc(_fsmc, True)
+assert np.isfinite(_tv_fuzzy) and _tv_fuzzy < _tv_fixed, \
+    f"FuzzySMC did not reduce control variation: {_tv_fuzzy:.1f} vs {_tv_fixed:.1f}"
+assert _kmx - _kmn > 1e-3, "FuzzySMC switching gain never moved"
+assert _fsp.Kmin - 1e-9 <= _kmn and _kmx <= _fsp.Kmax + 1e-9, "FuzzySMC gain left its bounds"
+assert ctrl.registry_has('fuzzy_smc'), "fuzzy_smc not registered"
+print('FuzzySlidingModeController smoke test passed.')
+
 print('\nAll smoke tests passed.')

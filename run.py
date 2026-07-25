@@ -854,6 +854,12 @@ def phase_bug_report(log_path):
         'retain residual periodic error', # Scenario: s08_periodic_load
         'dcamplitudeerror',               # ex59/ex60/ex75: dcAmplitudeError metric (lowercased match)
         'trial |  rms error',             # ILC C++ table header "trial |  RMS error"
+        'per-trial rms tracking error',   # ex129(C++)/ex148(py) LearningFeedforwardController
+                                           # learning-curve section header
+        'trial     rms error',            # ...and its column header, in both the C++ (setw) and
+                                           # Python (f-string) variants - same 5-space gap
+        'feedforward gain error sweep',   # ex147(py) TwoDOFController feedforward-mismatch sweep
+                                           # header ("assumed K | final y | u_ff | u_fb")
         'step         y         u     error',  # DeePC ex69/ex89 table header ("step  y  u  error  ok?")
         'model - mean position error:',
         'a1 errors by snr',               # ex05 SNR table row (was uppercase SNR — broken)

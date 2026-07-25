@@ -1,8 +1,36 @@
 {
-  "_comment": "TODO: real plant parameters for Differential Drive Robot Tracking",
-  "Ts":        0.01,
-  "param_a":   1.0,
-  "param_b":   1.0,
-  "u_max":     1.0,
-  "u_min":    -1.0
+  "_comment": "Differential-drive mobile robot (DDMR) with COM offset. The FUHAC paper never tabulates the robot's physical constants - it only names the Pioneer platform - so these are documented Pioneer 3-DX values, EXCEPT Kf which is calibrated (see _sources).",
+  "_sources": {
+    "M_total":     "Pioneer 3-DX base mass (assumed; not in paper)",
+    "r_wheel":     "Pioneer 3-DX wheel radius (assumed; not in paper)",
+    "R_half_axle": "Pioneer 3-DX half-wheelbase, 0.33 m track (assumed; not in paper)",
+    "I_A":         "estimated body inertia about the COM (assumed; not in paper)",
+    "I_0":         "estimated wheel inertia (assumed; not in paper)",
+    "Kf":          "CALIBRATED: at the ~3 m/s cruise the paper's paths demand, tau = Kf*v/r = 7.7 N.m, inside the paper's reported 5.9-9.7 N.m band (Table 2). It also sets the physical speed ceiling v_ss = r*tau_max/Kf = 5.85 m/s, which must exceed the fastest reference.",
+    "d_com":       "assumed non-zero COM offset; the paper's kinematic matrix requires d != 0",
+    "tau_max":     "paper Fig. 22: 'the wheel torques reach the saturation limits plotted (+/- 15 N.m)'",
+    "Tf":          "paper: fast loop 30 ms (33 Hz)",
+    "Ts_slow":     "paper: slow loop 150 ms; eps = Tf/Ts_slow = 0.2"
+  },
+
+  "M_total":     9.0,
+  "r_wheel":     0.0975,
+  "R_half_axle": 0.165,
+  "I_A":         0.16,
+  "I_0":         0.005,
+  "Kf":          0.25,
+  "d_com":       0.05,
+
+  "tau_max":     15.0,
+  "v_max":       5.0,
+  "w_max":       6.0,
+
+  "Ts_plant":    0.005,
+  "Tf":          0.03,
+  "Ts_slow":     0.15,
+
+  "Kp_v":        30.0,
+  "Ki_v":        60.0,
+  "Kp_w":        6.0,
+  "Ki_w":        12.0
 }
