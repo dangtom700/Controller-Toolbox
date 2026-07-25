@@ -2,9 +2,11 @@
 
 A discrete-time C++20 control library with PID, LQR, LQG, MPC, GPC, ADRC, SMC, H-infinity, Lead-Lag, Smith Predictor, Repetitive Control, Feedforward, Extremum Seeking, Kalman/EKF/UKF/MHE filtering, Fuzzy Logic inference, SOPDT/FOPDT identification, RLS and N4SID system identification, Grey-Box / Recursive Grey-Box parameter estimation, GP residual models, DAE utilities, GA/PSO/DE metaheuristic optimisers, and a ROS 2 lifecycle node adapter.
 
-~90 controller and estimation implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, an analysis pipeline (Monte Carlo, fault injection, ANOVA, WCET, mu-analysis, HTML reports), and a hardware abstraction layer for simulation.
+~125 controller and estimation implementations, nine tuning families, frequency- and time-domain analysis, corrector-pattern composition (Cascade / Additive / Observer+SF / Supervisory), a lock-free parameter buffer for RT updates, flat-C code generation for step-based controllers, an analysis pipeline (Monte Carlo, fault injection, ANOVA, WCET, mu-analysis, HTML reports), and a hardware abstraction layer for simulation.
 
-Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. C++ example programs and 100+ Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and algorithm extension. Nineteen end-to-end physics case studies (eleven C++: boiler-turbine, tug boat, solar cooling, porous-plate humidification, active suspension 2-DOF, buck-boost converter, solar cooker, solar OTEC, hydraulic SMISMO, 6-DOF Stewart platform, bouyancy-driven airship; eight Python-only: drill string, wind-wave platform, electro-hydraulic force servo, aerial firefighting bag drop, battery thermal management, surface ship manoeuvring, active suspension 40-state 6x6 EV, aircraft engine thermal management) exercise the full controller stack on nonlinear plants.
+Full pybind11 Python bindings expose every class to NumPy-aware Python scripts. 126 C++ and 149 Python example scripts cover every controller, tuning method, identification approach, corrector pattern, and algorithm extension. Twenty-one end-to-end physics case studies (eleven C++: boiler-turbine, tug boat, solar cooling, porous-plate humidification, active suspension 2-DOF, buck-boost converter, solar cooker, solar OTEC, hydraulic SMISMO, 6-DOF Stewart platform, bouyancy-driven airship; ten Python-only: drill string, wind-wave platform, electro-hydraulic force servo, aerial firefighting bag drop, battery thermal management, surface ship manoeuvring, active suspension 40-state 6x6 EV, aircraft engine thermal management, PCM thermal energy storage, satellite launch vehicle) exercise the full controller stack on nonlinear plants, plus one MATLAB-native study (Boiler Control MATLAB) built on the R2026a toolboxes.
+
+Current status, verified counts, and open work: [docs/PROJECT_MASTER_STATE.md](docs/PROJECT_MASTER_STATE.md). Live case-study status: [docs/case_study_status.md](docs/case_study_status.md) (auto-generated).
 
 ---
 
@@ -66,18 +68,19 @@ for (int k = 0; k < 500; ++k) {
 | [docs/archived/test_update.md](docs/archived/test_update.md) | Test suite history, regression coverage, sign-convention notes |
 | [docs/control_strategies_deep_dive.md](docs/control_strategies_deep_dive.md) | Taxonomy of strategy families, plant model interference, decision framework, proposed extensions |
 | [cheatsheet/](cheatsheet/) | Tuning methods, controller categories, system identification notes |
-| [case-study/](case-study/) | Nineteen full physics studies (11 C++ + 8 Python-only) -- see "Case Studies" below; auto-tracked status in [docs/case_study_status.md](docs/case_study_status.md) |
+| [case-study/](case-study/) | Twenty-one complete physics studies (11 C++ + 10 Python-only) + 1 MATLAB-native + 10 stubs -- see "Case Studies" below; auto-tracked status in [docs/case_study_status.md](docs/case_study_status.md) |
 
 ---
 
 ## Repository Layout
 
 ```
-|-- lib/             # Library sources -> target: controller_toolbox (~90 modules)
+|-- lib/             # Library sources -> target: controller_toolbox (119 .h + 89 .cpp, ~125 modules)
 |-- lib/embedded/    # Header-only embedded subset (BasicPID, BasicSMC, DiscreteIntegrator, ...)
-|-- examples/        # ex01..ex82 single-file C++ demos
-|-- examples/python/ # ex01..ex102+ Python companion scripts and binding demos
-|-- case-study/      # 18 physics studies (10 C++ + 8 Python-only) + spec-only stubs
+|-- examples/        # 126 single-file C++ demos
+|-- examples/python/ # 149 Python companion scripts and binding demos
+|-- case-study/      # 21 complete physics studies (11 C++ + 10 Python-only)
+|                    #   + Boiler Control MATLAB (MATLAB-native) + 10 spec-only/placeholder stubs
 |-- tests/           # CTest-driven unit + integration tests (Catch2 v3)
 |-- bindings/        # pybind11 binding source files + smoke_test.py
 |-- ros2/            # ROS 2 package: ctrl_toolbox_ros2 (ControllerNode<T> lifecycle adapter)
@@ -94,7 +97,7 @@ for (int k = 0; k < 500; ++k) {
 
 ## Case Studies
 
-Nineteen self-contained physics studies under [case-study/](case-study/) exercise the
+Twenty-one self-contained physics studies under [case-study/](case-study/) exercise the
 library end-to-end. Each pairs a nonlinear plant simulator with a roster of
 controllers that wrap the `lib/` algorithms, then sweeps every controller across
 several scenarios and writes CSV telemetry for post-processing. Per-study status and
@@ -129,7 +132,23 @@ links are auto-tracked in [docs/case_study_status.md](docs/case_study_status.md)
 | [Air-Cooled Battery Thermal Management System](case-study/Air-Cooled%20Battery%20Thermal%20Management%20System/) | 1-D transient HX, N=9 cells, 10 channels, J/U/L flow-pattern switching, Euler Ts=1s | 12 | 5 -> 60 |
 | [Nonlinear Surface Ship Manoeuvring Control](case-study/Nonlinear%20Surface%20Ship%20Manoeuvring%20Control/) | 3-DOF MMG model, 19 SRUKF-identified params (Meng 2025), [u,v,r,ψ,x,y], RK4 Ts=0.08s | 12 | 5 -> 60 |
 | [Active Suspension 6x6 EV Full Model](case-study/Active%20Suspension%206x6%20EV%20Full%20Model/) | 40-state 20-DOF (body+wheels+motors+5-DOF human biodynamic), ZOH Ts=0.005s, 6 actuators | 18 | 5 -> 90 |
+| [PCM Thermal Energy Storage Control](case-study/PCM%20Thermal%20Energy%20Storage%20Control/) | Phase-change-material store + variable-speed heat pump, price-driven load shifting | 12 | 5 -> 60 |
+| [Satellite Launch Vehicle Systems](case-study/Satellite%20Launch%20Vehicle%20Systems/) | Pitch-plane rigid-body SLV, aerodynamically unstable + time-varying | 12 | 5 -> 60 |
 | [Aircraft Engine Thermal Management](case-study/Aircraft%20Engine%20Thermal%20Management/) | 3-state FTMS intermediate circulation loop [TT, m1, m2], effectiveness-NTU heat exchangers, 60s lumped transport delay, RK4 Ts=0.5s | 12 | 5 -> 60 |
+
+**MATLAB-native study (run by hand, not by `run.py`):**
+
+| Study | Plant | Controllers | Scenarios x Runs |
+|---|---|---|---|
+| [Boiler Control MATLAB](case-study/Boiler%20Control%20MATLAB/) | Nonlinear Bell-Astrom boiler-turbine, MATLAB twin of the C++ study | 27 | 8 -> 216 |
+
+Built directly on the R2026a toolbox stack (`quadprog` MPC/GPC/NMPC, `mixsyn` H-infinity,
+`n4sid` subspace-ID LQG, EKF/UKF, gain scheduling) rather than on `lib/` -- see
+[MATLAB/HANDOFF.md](MATLAB/HANDOFF.md) §0 for the decision record. It is fully self-contained
+(its own `config/`, `matlab/`, `logs/`) and never writes into the C++ study's `logs/`. Run with
+`matlab -batch "addpath('case-study/Boiler Control MATLAB/matlab'); run_all()"`. It is tracked by
+hand: `tools/case_study_tracker.py` is scoped to the C++ and Python studies that `run.py` drives,
+and skips MATLAB-native studies by design.
 
 Controllers span the full stack: PID, LQR, LQG, MPC, GPC-RLS, SMC, ADRC, Fuzzy-PID,
 Smith Predictor, MRAC, H-infinity, TubeMPC, ScenarioMPC, NonlinearMPC, Feedback

@@ -13,10 +13,11 @@
 
 ## 1. High-Level Project Philosophy
 
-Discrete-time control library: a flat C++20/Eigen core (~90 controller/estimator/identification
-classes across 119 `.h` + 89 `.cpp`; 42 are `IController` subclasses) exposed through one flat
-`pybind11` module and exercised by 126 C++ + 152 Python examples and 31 case studies (19 complete,
-12 open placeholder/not-started per `docs/case_study_status.md`). Almost every algorithm implements both its math and a single base interface
+Discrete-time control library: a flat C++20/Eigen core (~125 controller/estimator/identification
+classes across 119 `.h` + 89 `.cpp`; 46 are `IController` subclasses) exposed through one flat
+`pybind11` module and exercised by 126 C++ + 152 Python examples and 31 tracked case studies
+(21 complete, 10 open placeholder/not-started per `docs/case_study_status.md`), plus 1
+MATLAB-native study tracked by hand. Almost every algorithm implements both its math and a single base interface
 (`IController`) in one class; the only deliberate split is the stateless `DiscreteLQR` +
 `LQRAdapter`. Cross-cutting behaviour (anti-windup, delay, gain scheduling, dead-time, multi-loop
 supervision) is added by **composition wrappers that are themselves `IController`s**, so they
@@ -76,8 +77,8 @@ conda run -n soft_robotics -- python bindings/smoke_test.py
   - `lib/ControllerToolbox.h` - umbrella include; `lib/Features.h` - runtime feature registry (`ctrl.features()`).
 - `bindings/` - the **C++<->Python boundary** (NOT `python/`): one flat `pybind11` module `ctrl_toolbox`. Entry `bindings/module.cpp`; dispatch to `plantmodel/controllers/estimation/advanced/analysis_bindings.cpp`. `[Ref: bindings/module.cpp:18]`
 - `examples/` - 126 single-file C++ demos `exNN_*.cpp` (print PASS/FAIL); `examples/python/` (152 scripts); `examples/embedded/`.
-- `tests/` - Catch2 suites + legacy hand-rolled + per-study regressions (21 executables). `[Ref: tests/CMakeLists.txt]`
-- `case-study/<Study>/` - C++ (`*_sim` exe, run by `run.py` **Phase 5**) or Python-only (`sim/main.py`, **Phase 7**). 31 studies (19 complete); `case-study/common/` is shared code, not a study.
+- `tests/` - Catch2 suites + legacy hand-rolled + per-study regressions (21 `.cpp`, **513 `TEST_CASE()`**; `test_catch2_advanced.cpp` alone is 409). `[Ref: tests/CMakeLists.txt]`
+- `case-study/<Study>/` - C++ (`*_sim` exe, run by `run.py` **Phase 5**) or Python-only (`sim/main.py`, **Phase 7**). 33 dirs -> **31 tracked**, 21 complete (11 C++ + 10 Python). Two dirs are excluded from `tools/case_study_tracker.py` by design: `case-study/common/` (shared code, not a study) and `Boiler Control MATLAB` (MATLAB-native: `matlab/` + `config/` + `logs/`, no `sim/`; run by hand via `run_all.m`, **not** by `run.py`). The tracker is **scoped to C++/Python only** - don't "fix" it to classify MATLAB studies.
 - `tools/` - post-hoc analysis pipeline only (metrics, compare_controllers, monte_carlo, fault_sweep, wcet_report, generate_report, case_study_tracker - never hand-edit `docs/case_study_status.md`).
 - `ros2/`, `docs/`, `cheatsheet/`, `scripts/`, `benchmark/`, `data/`, `cmake/` (minimal - just a config template).
 
@@ -146,6 +147,6 @@ merge-base - history was re-rooted to drop bloated CSV commits; diff via tree, n
 classes/methods -> nothing is deprecated**). `[Ref: docs/forensic_reconstruction.md - Phase 0]`
 
 - **New in v2:** `signConvention()` + `SignConvention` enum on `IController` `[Ref: lib/IController.h:29-66]`; `SystemAnalysis::getSingularValues` `[Ref: lib/SystemAnalysis.h:144]`; files `FreqDomainIdentifier`, `LyapunovRobustness`, `WorstCaseSearch`; `DiscreteLQG::compute` NaN-guard.
-- **Working-tree-only (newer than both branches):** `DiscreteH2` `[Ref: lib/DiscreteH2.h:101-179]`, modified `DiscreteHinf`.
+- **`DiscreteH2`** (`[Ref: lib/DiscreteH2.h]`) and the modified `DiscreteHinf` were working-tree-only at the time of the v1/v2 forensic diff; **both are committed now** - treat them as normal `main` content.
 - **Doc-bug fixed in v2:** `DiscreteSMC` takes `e = y - r` (v1 docs wrongly said `e = r - y`; the code was always `y - r`). `[Ref: lib/DiscreteSMC.h:97]`
 - **Do NOT suggest** (never existed / template fictions): `include/`/`src/`/`python/` dirs; base classes `DiscreteController`/`Estimator`/`Model`; an `ObserverSF`/`Cascade`/`Supervisory` *class* (use `ControllerStack` modes / manual wiring); `LockFreeParameterBuffer` (use `AtomicParamBuffer`); `ros2_lifecycle_node.hpp` (use `controller_node.hpp`).
