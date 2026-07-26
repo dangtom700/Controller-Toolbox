@@ -217,6 +217,10 @@ add_example(ex128_two_dof_controller)      # TwoDOFController - functional feedf
 add_example(ex129_learning_feedforward)    # LearningFeedforwardController - two-phase ILC
 add_example(ex130_fuzzy_smc)               # FuzzySlidingModeController - fuzzy-scheduled SMC
 
+# -- Server/PLC master-slave fusions (docs/server_plc_fusion_plan.md) --------
+add_example(ex131_plc_jitter_mpc)          # DiscreteMPC + NetworkChannel + SmithPredictor
+add_example(ex132_plc_dual_rate_cascade)   # CascadeController + Supervisory stack + Monitor
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)

@@ -108,14 +108,31 @@ template <typename T, int Capacity = 64>
 class NetworkChannel
 {
     static_assert(Capacity > 0, "NetworkChannel Capacity must be positive");
+    static_assert(std::is_default_constructible_v<T>,
+                  "NetworkChannel payload T must be default-constructible "
+                  "(the in-flight ring is value-initialised at construction)");
 
 public:
     /** @brief Construct with tuning parameters; the RNG is seeded here. */
     explicit NetworkChannel(const NetworkChannelParams &params = NetworkChannelParams())
-        : p_(sanitise(params)), rng_(params.seed)
+        : p_(sanitise(params)), rng_(p_.seed)
     {
         reset();
     }
+
+    /**
+     * @brief Replace the link parameters mid-run without disturbing traffic or statistics.
+     *
+     * In-flight packets keep the delivery times they were already assigned; only packets sent
+     * *after* this call see the new values. Statistics and the RNG stream are left untouched, so
+     * a demo can degrade a link part-way through a run (raise `jitter_sigma`, start dropping) and
+     * still compare cumulative counters across the whole run. Use `reset()` instead when you want
+     * a clean, re-seeded channel.
+     *
+     * @note Changing `seed` here has no effect until the next `reset()` - the RNG is not re-seeded,
+     *       precisely so a mid-run parameter change cannot silently replay an earlier trace.
+     */
+    void setParams(const NetworkChannelParams &params) { p_ = sanitise(params); }
 
     /**
      * @brief Queue a packet for delivery at `t_now + latency`.

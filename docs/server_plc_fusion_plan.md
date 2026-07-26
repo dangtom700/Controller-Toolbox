@@ -3,7 +3,7 @@
 Authored 2026-07-25. Codebase state: 51 `IController` subclasses, 131 C++ examples
 (highest `ex130_fuzzy_smc`), 22 complete case studies.
 
-**Status: Stage 0 + Stage 1a complete. Stages 1b-4 open.** See the Staging table below.
+**Status: Stages 0, 1a and 2 complete. Stages 1b, 3 and 4 open.** See the Staging table below.
 
 This plan takes a proposal for four "Tier 1" server/PLC controller fusions - designs meant to be
 immediately implementable by wiring existing `lib/` components together - and turns it into
@@ -57,11 +57,21 @@ no fieldbus driver, no server process); any change to an existing `lib/` control
 | Stage | Contents | Status |
 |---|---|---|
 | **0** | This document + `docs/index.md` entry | **Done** |
-| **1a** | `lib/NetworkChannel.h` + umbrella include + `[network]` Catch2 cases | **Done** |
+| **1a** | `lib/NetworkChannel.h` + umbrella include + 12 `[network]` Catch2 cases | **Done** |
 | 1b | pybind11 binding + `smoke_test.py` + `docs/deployment.md` section | Open |
-| 2 | `ex131` jitter-MPC, `ex132` dual-rate cascade + registration | Open |
+| **2** | `ex131` jitter-MPC, `ex132` dual-rate cascade + registration | **Done** |
 | 3 | `ex133` event-triggered estimation, `ex134` bumpless redundancy + registration | Open |
 | 4 | Full `run.py` green pass, doc/count reconciliation | Open |
+
+### Measured results (Stages 1a + 2)
+
+| Check | Result |
+|---|---|
+| `[network]` Catch2 guards | 12/12, 504 assertions |
+| `test_catch2_advanced` total | 436/436, 10,502 assertions (was 424 cases) |
+| `ex131` jitter-compensated MPC | **PASS** - IAE 12.888 -> 0.335, a 97.4% improvement, paired trace verified |
+| `ex132` dual-rate cascade + supervisor | **PASS** - fault detected 36 ms after injection, 0 false alarms, final \|e\| 0.0007 vs 0.0449 degraded |
+| `check_build_target_drift.py` | `compile.bat` / `compile.sh` agree on 186 targets |
 
 Stage 1a deliberately excludes the bindings: those need a
 `-DCTRL_BUILD_PYTHON_BINDINGS=ON` rebuild, a separate and slower build path. Keeping them in 1b
@@ -179,15 +189,24 @@ easy, not that the fusion helped.
 
 ### ex131 - Network-Jitter-Compensated MPC
 
-`NonlinearMPC` + `NetworkChannel` + `SmithPredictor` + `ComputationalDelayWrapper`
+`DiscreteMPC` + `NetworkChannel` + `SmithPredictor` + `ComputationalDelayWrapper`
 
 The proposal assigned jitter modelling to `ComputationalDelayWrapper`, which cannot do it.
 Corrected split: `NetworkChannel` supplies the variable round-trip transport delay,
 `SmithPredictor` compensates the *nominal* dead time so the master predicts plant state at the
 moment the command will actually land, and `ComputationalDelayWrapper` keeps its honest role -
-the one-tick compute delay of the master itself.
+the one-tick compute delay of the master itself, applied identically to both arms.
 
-*Guard:* compensated IAE materially lower than the uncompensated arm on the same seed.
+**Deviation from the original plan: the inner predictive controller is `DiscreteMPC`, not
+`NonlinearMPC`.** `SmithPredictor` drives its inner controller purely through
+`compute(error)`, whereas `NonlinearMPC` additionally requires `setState()` before every call
+(`CONTRIBUTING.md` sign-convention table) - the two do not compose. `DiscreteMPC` carries its own
+internal state estimate across `compute()` calls and does.
+
+*Guard:* compensated IAE materially lower than the uncompensated arm on the same seed, plus an
+explicit paired-trace assertion that both arms saw identical uplink delivered/dropped counts.
+*Measured:* IAE `12.888 -> 0.335` (97.4% better); the uncompensated arm rings to `max |y| = 2.58`
+against a setpoint of 1.0.
 
 ### ex132 - Dual-Rate Cascade with Supervisor
 
@@ -196,11 +215,29 @@ the one-tick compute delay of the master itself.
 Mostly wiring: `CascadeController` already provides multi-rate via `CascadeParams::outerDecimation`.
 Inner `DiscretePID` at the 1 ms slave tick, outer controller every 10th tick. `ControllerMonitor`
 is an `IControllerObserver` - attach it to the inner loop and let its CUSUM/EWMA charts flag
-degradation; a Supervisory `ControllerStack` falls back to a detuned PI whose
+degradation; a Supervisory `ControllerStack` falls back to a single-loop PI whose
 `activationCondition` fires on that alarm.
 
-*Guard:* fallback engages under an injected inner-loop fault, transfer is bumpless
-(`bumplessInit()` on switch), loop stays bounded throughout.
+*Guard:* fault detected, **zero false alarms before the fault**, fallback engages after the
+fault, axis stays bounded, and the recovered steady-state error beats the degraded cascade.
+
+**Three corrections this demo forced** (each broke a revision before being fixed):
+
+1. **The monitored signal must be stationary.** `ControllerMonitor::onCompute()` feeds the
+   controller *output* to its charts. On a servo axis the steady command is
+   `u = (c*v + load)/k_act`, so it tracks the velocity setpoint: at `k_act = 12`, `v = 2` the
+   healthy command is `1.25` - **the same value as the faulted at-rest command**. A chart
+   centred on the at-rest value therefore alarms on every motion. Fixed by making the scenario
+   station keeping, so `v ~ 0` and `u` is genuinely stationary.
+2. **The fault needs a steady-state signature.** With no load the steady command is zero both
+   before and after an actuator-gain collapse, so no chart on `u` could ever see it. A constant
+   load makes the signature `0.25 -> 1.25`.
+3. **SPC must go live after commissioning.** The startup transient saturates the inner command
+   at `uMax`; charting it produced 25-26 false alarms at `t ~ 0.02 s` and engaged the fallback
+   before the fault existed. The monitor is attached only after the axis settles.
+
+Also note `ControllerMonitor::nAlarms()` only increments when an alarm callback is registered
+(see `ControllerMonitor::feed`) - `setAlarmCallback()` is not optional if you intend to count.
 
 ### ex133 - Event-Triggered Estimation
 

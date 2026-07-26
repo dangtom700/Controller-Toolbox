@@ -61,7 +61,7 @@ source of truth.
 | [docs/algorithm_backlog.md](algorithm_backlog.md) | Candidate algorithm list for future phases, deduped against current `lib/` contents |
 | [docs/ALGORITHM_ROADMAP_PHASE3.md](ALGORITHM_ROADMAP_PHASE3.md) | Phase-3 roadmap - 32 designs sequencing every open `algorithm_backlog.md` item by value/ROI into 5 phases |
 | [docs/superpowers/specs/](superpowers/specs/) | Approved design specs awaiting or under implementation |
-| [docs/server_plc_fusion_plan.md](server_plc_fusion_plan.md) | Server/PLC master-slave controller fusions - `NetworkChannel` + 4 `ex131`-`ex134` demos; Stage 0/1a done, 1b-4 open |
+| [docs/server_plc_fusion_plan.md](server_plc_fusion_plan.md) | Server/PLC master-slave controller fusions - `NetworkChannel` + 4 `ex131`-`ex134` demos; Stages 0/1a/2 done, 1b/3/4 open |
 
 ## Historical / internal records
 

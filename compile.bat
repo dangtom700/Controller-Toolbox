@@ -169,6 +169,8 @@ for %%T in (
     ex128_two_dof_controller
     ex129_learning_feedforward
     ex130_fuzzy_smc
+    ex131_plc_jitter_mpc
+    ex132_plc_dual_rate_cascade
     test_autoscheduling
     test_stability_margins
     example_pid_feedback
