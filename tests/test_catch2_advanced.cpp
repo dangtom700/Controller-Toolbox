@@ -11333,4 +11333,301 @@ TEST_CASE("Fusion controllers self-register in the feature registry", "[registry
     REQUIRE(ctrl::ControllerRegistry::has("two_dof_controller"));
     REQUIRE(ctrl::ControllerRegistry::has("learning_feedforward"));
     REQUIRE(ctrl::ControllerRegistry::has("fuzzy_smc"));
+    REQUIRE(ctrl::ControllerRegistry::has("network_channel"));
+}
+
+// ============================================================================
+// NetworkChannel - simulated master/slave link (docs/server_plc_fusion_plan.md)
+// ============================================================================
+
+namespace {
+
+/// Drive a channel over `n` ticks of `Ts`, sending the tick index as the payload.
+/// Returns the sequence of (t, value) pairs actually delivered.
+std::vector<std::pair<double, double>>
+driveChannel(ctrl::NetworkChannel<double> &ch, int n, double Ts)
+{
+    std::vector<std::pair<double, double>> trace;
+    double rx = 0.0;
+    for (int k = 0; k < n; ++k) {
+        const double t = k * Ts;
+        ch.send(static_cast<double>(k), t);
+        if (ch.tryReceive(rx, t)) trace.emplace_back(t, rx);
+    }
+    return trace;
+}
+
+}  // namespace
+
+TEST_CASE("NetworkChannel: identical seeds give identical delivery traces", "[network]")
+{
+    ctrl::NetworkChannelParams p;
+    p.latency_mean = 0.02; p.jitter_sigma = 0.008; p.loss_prob = 0.15; p.seed = 1234u;
+
+    ctrl::NetworkChannel<double> a(p), b(p);
+    const auto ta = driveChannel(a, 200, 0.01);
+    const auto tb = driveChannel(b, 200, 0.01);
+
+    REQUIRE(ta.size() == tb.size());
+    REQUIRE(!ta.empty());
+    for (size_t i = 0; i < ta.size(); ++i) {
+        REQUIRE_THAT(ta[i].first,  WithinAbs(tb[i].first,  1e-12));
+        REQUIRE_THAT(ta[i].second, WithinAbs(tb[i].second, 1e-12));
+    }
+    REQUIRE(a.delivered() == b.delivered());
+    REQUIRE(a.dropped()   == b.dropped());
+
+    // A different seed must actually change something, or the RNG is not being used.
+    ctrl::NetworkChannelParams q = p;
+    q.seed = 99u;
+    ctrl::NetworkChannel<double> c(q);
+    const auto tc = driveChannel(c, 200, 0.01);
+    REQUIRE(tc.size() != ta.size());   // 15% loss over 200 packets: collision is implausible
+}
+
+TEST_CASE("NetworkChannel: zero jitter reproduces the mean latency exactly", "[network]")
+{
+    ctrl::NetworkChannelParams p;
+    p.latency_mean = 0.05; p.jitter_sigma = 0.0; p.loss_prob = 0.0;
+
+    ctrl::NetworkChannel<double> ch(p);
+    double rx = 0.0;
+    const double Ts = 0.01;
+    for (int k = 0; k < 100; ++k) {
+        const double t = k * Ts;
+        ch.send(static_cast<double>(k), t);
+        if (ch.tryReceive(rx, t)) {
+            REQUIRE_THAT(ch.lastLatency(), WithinAbs(0.05, 1e-9));
+        }
+    }
+    REQUIRE(ch.delivered() > 0);
+}
+
+TEST_CASE("NetworkChannel: latency is never negative under heavy jitter", "[network]")
+{
+    // jitter_sigma >> latency_mean forces the Gaussian negative often; the truncation at 0
+    // is what preserves causality (no packet delivered before it was sent).
+    ctrl::NetworkChannelParams p;
+    p.latency_mean = 0.001; p.jitter_sigma = 0.05; p.seed = 5u;
+
+    ctrl::NetworkChannel<double> ch(p);
+    double rx = 0.0;
+    for (int k = 0; k < 500; ++k) {
+        const double t = k * 0.001;
+        ch.send(static_cast<double>(k), t);
+        if (ch.tryReceive(rx, t)) REQUIRE(ch.lastLatency() >= 0.0);
+    }
+    REQUIRE(ch.delivered() > 0);
+}
+
+TEST_CASE("NetworkChannel: packet accounting is conserved", "[network]")
+{
+    // sent == delivered + dropped + superseded + inFlight, for every configuration.
+    struct Cfg { double loss; double jitter; bool reorder; };
+    const Cfg cfgs[] = {{0.0, 0.000, false}, {0.3, 0.010, false},
+                        {0.0, 0.020, true},  {0.5, 0.030, true}};
+
+    for (const auto &c : cfgs) {
+        ctrl::NetworkChannelParams p;
+        p.latency_mean = 0.01; p.jitter_sigma = c.jitter;
+        p.loss_prob = c.loss;  p.allow_reorder = c.reorder; p.seed = 77u;
+
+        ctrl::NetworkChannel<double> ch(p);
+        driveChannel(ch, 300, 0.005);
+
+        INFO("loss=" << c.loss << " jitter=" << c.jitter << " reorder=" << c.reorder);
+        REQUIRE(ch.sent() == ch.delivered() + ch.dropped() + ch.superseded()
+                             + static_cast<unsigned>(ch.inFlight()));
+    }
+}
+
+TEST_CASE("NetworkChannel: in-order mode delivers strictly increasing sequence numbers",
+          "[network]")
+{
+    ctrl::NetworkChannelParams p;
+    p.latency_mean = 0.01; p.jitter_sigma = 0.02;   // jitter large enough to reorder if allowed
+    p.allow_reorder = false; p.seed = 31u;
+
+    ctrl::NetworkChannel<double> ch(p);
+    double rx = 0.0;
+    uint32_t prev = 0;
+    int deliveries = 0;
+    for (int k = 0; k < 400; ++k) {
+        const double t = k * 0.002;
+        ch.send(static_cast<double>(k), t);
+        if (ch.tryReceive(rx, t)) {
+            REQUIRE(ch.lastSequence() > prev);      // strictly increasing
+            prev = ch.lastSequence();
+            ++deliveries;
+        }
+    }
+    REQUIRE(deliveries > 0);
+}
+
+TEST_CASE("NetworkChannel: latest-wins keeps the newest packet of a release batch", "[network]")
+{
+    // Three packets sent back-to-back with zero latency all become due at once. Only the
+    // newest is returned; the older two are counted as superseded, not delivered.
+    ctrl::NetworkChannelParams p;
+    p.latency_mean = 0.0; p.jitter_sigma = 0.0; p.loss_prob = 0.0;
+
+    ctrl::NetworkChannel<double> ch(p);
+    ch.send(10.0, 0.0);
+    ch.send(20.0, 0.0);
+    ch.send(30.0, 0.0);
+
+    double rx = -1.0;
+    REQUIRE(ch.tryReceive(rx, 0.0));
+    REQUIRE_THAT(rx, WithinAbs(30.0, 1e-12));   // newest, not oldest
+    REQUIRE(ch.delivered()  == 1);
+    REQUIRE(ch.superseded() == 2);
+    REQUIRE(ch.inFlight()   == 0);
+    REQUIRE_FALSE(ch.tryReceive(rx, 0.0));      // queue now empty
+}
+
+TEST_CASE("NetworkChannel: starvation returns false and leaves the output untouched",
+          "[network]")
+{
+    ctrl::NetworkChannelParams p;
+    p.latency_mean = 0.1; p.jitter_sigma = 0.0;
+
+    ctrl::NetworkChannel<double> ch(p);
+    ch.send(42.0, 0.0);
+
+    double rx = -7.0;
+    REQUIRE_FALSE(ch.tryReceive(rx, 0.05));     // not due yet
+    REQUIRE_THAT(rx, WithinAbs(-7.0, 1e-12));   // caller's hold value is preserved
+    REQUIRE(ch.tryReceive(rx, 0.10));           // due now
+    REQUIRE_THAT(rx, WithinAbs(42.0, 1e-12));
+}
+
+TEST_CASE("NetworkChannel: ring overflow drops the oldest and never corrupts", "[network]")
+{
+    ctrl::NetworkChannelParams p;
+    p.latency_mean = 1e6;    // nothing is ever due, so the ring fills and stays full
+    p.jitter_sigma = 0.0;
+
+    ctrl::NetworkChannel<double, 8> ch(p);
+    for (int k = 0; k < 100; ++k) ch.send(static_cast<double>(k), 0.0);
+
+    REQUIRE(ch.sent()     == 100);
+    REQUIRE(ch.inFlight() == 8);           // capacity respected
+    REQUIRE(ch.dropped()  == 92);          // the 92 oldest were evicted
+
+    // The 8 survivors must be the NEWEST 8 (92..99); latest-wins returns 99.
+    double rx = 0.0;
+    REQUIRE(ch.tryReceive(rx, 2e6));
+    REQUIRE_THAT(rx, WithinAbs(99.0, 1e-12));
+}
+
+TEST_CASE("NetworkChannel: non-finite payload or time is rejected, never delivered", "[network]")
+{
+    const double nan_v = std::numeric_limits<double>::quiet_NaN();
+    const double inf_v = std::numeric_limits<double>::infinity();
+
+    ctrl::NetworkChannelParams p;
+    p.latency_mean = 0.0; p.jitter_sigma = 0.0;
+    ctrl::NetworkChannel<double> ch(p);
+
+    ch.send(nan_v, 0.0);      // poisoned payload
+    ch.send(inf_v, 0.0);      // poisoned payload
+    ch.send(1.0,   nan_v);    // poisoned clock
+    REQUIRE(ch.sent()     == 3);
+    REQUIRE(ch.dropped()  == 3);
+    REQUIRE(ch.inFlight() == 0);
+
+    double rx = -1.0;
+    REQUIRE_FALSE(ch.tryReceive(rx, 0.0));
+    REQUIRE_THAT(rx, WithinAbs(-1.0, 1e-12));
+    REQUIRE_FALSE(ch.tryReceive(rx, nan_v));   // non-finite query time is rejected too
+
+    ch.send(5.0, 0.0);                          // channel still usable afterwards
+    REQUIRE(ch.tryReceive(rx, 0.0));
+    REQUIRE_THAT(rx, WithinAbs(5.0, 1e-12));
+}
+
+TEST_CASE("NetworkChannel: parameters are sanitised and loss extremes behave", "[network]")
+{
+    SECTION("negative and non-finite parameters are clamped") {
+        ctrl::NetworkChannelParams bad;
+        bad.latency_mean = -1.0;
+        bad.jitter_sigma = -2.0;
+        bad.loss_prob    = -0.5;
+        ctrl::NetworkChannel<double> ch(bad);
+        REQUIRE_THAT(ch.params().latency_mean, WithinAbs(0.0, 1e-12));
+        REQUIRE_THAT(ch.params().jitter_sigma, WithinAbs(0.0, 1e-12));
+        REQUIRE_THAT(ch.params().loss_prob,    WithinAbs(0.0, 1e-12));
+    }
+    SECTION("loss_prob >= 1 drops everything") {
+        ctrl::NetworkChannelParams p;
+        p.loss_prob = 5.0;                       // clamped to 1.0
+        ctrl::NetworkChannel<double> ch(p);
+        REQUIRE_THAT(ch.params().loss_prob, WithinAbs(1.0, 1e-12));
+        driveChannel(ch, 50, 0.01);
+        REQUIRE(ch.delivered() == 0);
+        REQUIRE(ch.dropped()   == 50);
+    }
+}
+
+TEST_CASE("NetworkChannel: reset() restores a pristine, identically-seeded channel", "[network]")
+{
+    ctrl::NetworkChannelParams p;
+    p.latency_mean = 0.01; p.jitter_sigma = 0.005; p.loss_prob = 0.2; p.seed = 808u;
+
+    ctrl::NetworkChannel<double> ch(p);
+    const auto first = driveChannel(ch, 150, 0.004);
+    REQUIRE(ch.sent() > 0);
+
+    ch.reset();
+    REQUIRE(ch.sent()       == 0);
+    REQUIRE(ch.delivered()  == 0);
+    REQUIRE(ch.dropped()    == 0);
+    REQUIRE(ch.superseded() == 0);
+    REQUIRE(ch.inFlight()   == 0);
+    REQUIRE(ch.lastSequence() == 0);
+
+    const auto second = driveChannel(ch, 150, 0.004);   // must replay identically
+    REQUIRE(second.size() == first.size());
+    for (size_t i = 0; i < first.size(); ++i)
+        REQUIRE_THAT(second[i].second, WithinAbs(first[i].second, 1e-12));
+}
+
+TEST_CASE("NetworkChannel: a lossy link degrades closed-loop tracking measurably", "[network]")
+{
+    // End-to-end sanity: the same PID over a perfect link versus a lossy, jittery one.
+    // This is the paired-comparison pattern the ex131-ex134 demos are built on.
+    auto runLoop = [](const ctrl::NetworkChannelParams &p) {
+        ctrl::PIDParams q; q.Kp = 1.2; q.Ki = 2.0; q.Kd = 0.0; q.uMin = -5.0; q.uMax = 5.0;
+        ctrl::DiscretePID pid(q, 0.01);
+        ctrl::NetworkChannel<double> up(p), down(p);
+
+        double x = 0.0, y_hold = 0.0, u_hold = 0.0, iae = 0.0;
+        const double Ts = 0.01, ref = 1.0;
+        for (int k = 0; k < 800; ++k) {
+            const double t = k * Ts;
+            up.send(x, t);
+            double v = 0.0;
+            if (up.tryReceive(v, t)) y_hold = v;
+            down.send(pid.compute(ref - y_hold), t);
+            if (down.tryReceive(v, t)) u_hold = v;
+            x += Ts * (-0.5 * x + u_hold);          // first-order plant
+            iae += std::abs(ref - x) * Ts;
+        }
+        return iae;
+    };
+
+    ctrl::NetworkChannelParams perfect;
+    perfect.latency_mean = 0.0; perfect.jitter_sigma = 0.0; perfect.loss_prob = 0.0;
+
+    ctrl::NetworkChannelParams lossy;
+    lossy.latency_mean = 0.04; lossy.jitter_sigma = 0.015; lossy.loss_prob = 0.25;
+    lossy.seed = 2026u;
+
+    const double iae_perfect = runLoop(perfect);
+    const double iae_lossy   = runLoop(lossy);
+
+    INFO("IAE perfect = " << iae_perfect << ", IAE lossy = " << iae_lossy);
+    REQUIRE(std::isfinite(iae_perfect));
+    REQUIRE(std::isfinite(iae_lossy));
+    REQUIRE(iae_lossy > iae_perfect);   // the link must actually cost something
 }

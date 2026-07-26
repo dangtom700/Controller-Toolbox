@@ -75,6 +75,7 @@
 #include "SystemAnalysis.h"   ///< Frequency-domain and stability analysis.
 // #include "hal/HAL.h"          ///< ISensor, IActuator, SimPlant, SimSensor, SimActuator, SafeSensor, StdTimer.
 // #include "AtomicParamBuffer.h" ///< Lock-free double-buffer for RT parameter updates.
+#include "NetworkChannel.h"   ///< NetworkChannel - simulated master/slave link (latency, jitter, loss, reorder).
 
 #include "RecursiveLeastSquares.h"        ///< RLS - online ARX system identification with forgetting factor.
 #include "SelfTuningRegulator.h"          ///< SelfTuningRegulator - RLS-driven minimum-variance/pole-placement STR (Phase 3 OC1).
