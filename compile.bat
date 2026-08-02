@@ -171,6 +171,9 @@ for %%T in (
     ex130_fuzzy_smc
     ex131_plc_jitter_mpc
     ex132_plc_dual_rate_cascade
+    ex133_plc_event_triggered_estimation
+    ex134_plc_bumpless_redundancy
+    ex135_plc_adaptive_retuning
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

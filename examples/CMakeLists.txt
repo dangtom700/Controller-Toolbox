@@ -220,6 +220,9 @@ add_example(ex130_fuzzy_smc)               # FuzzySlidingModeController - fuzzy-
 # -- Server/PLC master-slave fusions (docs/server_plc_fusion_plan.md) --------
 add_example(ex131_plc_jitter_mpc)          # DiscreteMPC + NetworkChannel + SmithPredictor
 add_example(ex132_plc_dual_rate_cascade)   # CascadeController + Supervisory stack + Monitor
+add_example(ex133_plc_event_triggered_estimation)  # KalmanFilter + EventTriggered + mismatch
+add_example(ex134_plc_bumpless_redundancy) # Weighted stack + AtomicParamBuffer failover
+add_example(ex135_plc_adaptive_retuning)   # AutoTuner + RLS + MismatchDetector + param buffer
 
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)

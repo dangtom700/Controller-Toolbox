@@ -3,7 +3,8 @@
 Authored 2026-07-25. Codebase state: 51 `IController` subclasses, 131 C++ examples
 (highest `ex130_fuzzy_smc`), 22 complete case studies.
 
-**Status: Stages 0, 1a and 2 complete. Stages 1b, 3 and 4 open.** See the Staging table below.
+**Status: Stages 0, 1a, 2 and 3 complete - all four Tier 1 fusions are built and passing.
+Stages 1b (Python bindings) and 4 (full `run.py` pass) remain open.** See the Staging table below.
 
 This plan takes a proposal for four "Tier 1" server/PLC controller fusions - designs meant to be
 immediately implementable by wiring existing `lib/` components together - and turns it into
@@ -60,10 +61,11 @@ no fieldbus driver, no server process); any change to an existing `lib/` control
 | **1a** | `lib/NetworkChannel.h` + umbrella include + 12 `[network]` Catch2 cases | **Done** |
 | 1b | pybind11 binding + `smoke_test.py` + `docs/deployment.md` section | Open |
 | **2** | `ex131` jitter-MPC, `ex132` dual-rate cascade + registration | **Done** |
-| 3 | `ex133` event-triggered estimation, `ex134` bumpless redundancy + registration | Open |
+| **3** | `ex133` event-triggered estimation, `ex134` bumpless redundancy + registration | **Done** |
 | 4 | Full `run.py` green pass, doc/count reconciliation | Open |
+| **5** | `ex135` PLC-adaptive online retuning (Tier 2.1) | **Done** |
 
-### Measured results (Stages 1a + 2)
+### Measured results (Stages 1a + 2 + 3)
 
 | Check | Result |
 |---|---|
@@ -71,7 +73,10 @@ no fieldbus driver, no server process); any change to an existing `lib/` control
 | `test_catch2_advanced` total | 436/436, 10,502 assertions (was 424 cases) |
 | `ex131` jitter-compensated MPC | **PASS** - IAE 12.888 -> 0.335, a 97.4% improvement, paired trace verified |
 | `ex132` dual-rate cascade + supervisor | **PASS** - fault detected 36 ms after injection, 0 false alarms, final \|e\| 0.0007 vs 0.0449 degraded |
-| `check_build_target_drift.py` | `compile.bat` / `compile.sh` agree on 186 targets |
+| `ex133` event-triggered estimation | **PASS** - uplink traffic -77.5% (2000 -> 449 packets), pre-fault RMS estimate error 0.019 vs 0.023 periodic, sensor fault caught 30 ms after injection |
+| `ex134` bumpless redundancy | **PASS** - IAE 0.582 vs 6.680 wedged (11x), 0.824 command gap spread to 0.180 max per tick, 10 supervisor publishes |
+| `ex135` adaptive online retuning | **PASS** - post-drift IAE 2.367 -> 0.572 (-75.8%), 2 detector-triggered sessions, identified worn model exact to 4 dp |
+| `check_build_target_drift.py` | `compile.bat` / `compile.sh` agree on 189 targets |
 
 Stage 1a deliberately excludes the bindings: those need a
 `-DCTRL_BUILD_PYTHON_BINDINGS=ON` rebuild, a separate and slower build path. Keeping them in 1b
@@ -251,8 +256,26 @@ deadband semantics. The master's KF runs predict-only between arrivals;
 `MismatchDetector::update(innov)` / `detected()` flags a sensor fault.
 
 *Guard:* transmitted-packet count falls substantially versus periodic transmission while RMS
-estimation error stays inside a stated bound; `MismatchDetector` fires on an injected sensor bias
-and stays quiet during nominal operation.
+estimation error stays inside a stated bound; the detector fires on an injected sensor bias and
+stays quiet during nominal operation.
+*Measured:* uplink `2000 -> 449` packets (-77.5%), pre-fault RMS estimate error `0.019` (event)
+vs `0.023` (periodic), fault flagged 30 ms after injection with a pre-fault peak score of 0.03.
+
+**Two corrections this demo forced:**
+
+1. **The fault must be abrupt, not a drift.** The first revision ramped a sensor bias at
+   0.25 m/s and the detector never fired. A Kalman filter *tracks* slow drift: the per-tick bias
+   increment is 0.0025 m, four times smaller than the 0.01 m noise it hides in, so the innovation
+   never leaves its null distribution. Innovation-CUSUM catches abrupt faults; slow parametric
+   drift is a job for `RecursiveGreyBoxEstimator`. Changed to a 0.35 m step.
+2. **Estimation quality must be measured pre-fault.** Averaging estimate error over the whole run
+   let the post-fault period (where the filter is being fed a lie) dominate the RMS at ~0.46 m,
+   swamping the thing actually under test - whether event-triggering degrades the estimate.
+
+**Deviation from the plan:** no standalone `ctrl::MismatchDetector` is constructed.
+`ctrl::KalmanFilter` already embeds one - `enableMismatchDetection()` / `mismatchDetected()` /
+`mismatchScore()` - and feeds it the innovation on every `update()`. Hand-feeding a separate
+detector would duplicate that.
 
 ### ex134 - Bumpless Redundant Transfer
 
@@ -267,15 +290,86 @@ enforces - and the RT loop reads it with `read()`.
 **This is the first example in the repo to exercise `AtomicParamBuffer` at all.** It must
 `#include "AtomicParamBuffer.h"` **directly**: the umbrella header does not pull it in.
 
-*Guard:* no output discontinuity beyond a stated bump threshold across the transfer; tracking
-error stays bounded while the primary is dead.
+*Guard:* the handover gap must be non-trivial, the worst single-tick step must be a small
+fraction of it, the standby must recover the setpoint, and the failover must beat doing nothing
+by a real margin (25%, not noise).
+*Measured:* IAE `0.582` vs `6.680` wedged (11x better), an `0.824` command gap spread to a
+maximum `0.180` per tick, 10 supervisor publishes.
+
+**The correction this demo forced: the primary must wedge MID-TRANSIENT.** The first revision
+hung it at steady state, where the frozen command is still the *correct* command - so failing
+over gained nothing (IAE 0.3233 vs 0.3234, a 0.03% difference that is pure noise) and the
+measured bump was exactly 0.00000 because both controllers, fed identical inputs, produced
+identical outputs. There was literally nothing to transfer. Stepping the setpoint 50 ms before
+the hang makes the frozen command wrong and lets the live standby's command diverge from it,
+which is what makes both the benefit and the bumplessness measurable.
+
+Note also that "bumpless" is asserted **relative to what a hard switch would have delivered**
+(the total command change across the handover), not against an absolute constant - an absolute
+threshold passes trivially whenever the gap happens to be small.
 
 ### Registration
 
-- `examples/CMakeLists.txt` - four `add_example(...)` lines; the file defines that helper and
-  needs no other boilerplate.
-- `compile.bat` **and** `compile.sh` - four entries after `ex130_fuzzy_smc`. Both must stay in
+- `examples/CMakeLists.txt` - one `add_example(...)` line per demo; the file defines that helper
+  and needs no other boilerplate.
+- `compile.bat` **and** `compile.sh` - matching entries after `ex130_fuzzy_smc`. Both must stay in
   sync; `tools/check_build_target_drift.py` enforces it.
+
+---
+
+## 5b. Stage 5 - ex135, PLC-adaptive online retuning
+
+`AutoTuner` (CMA-ES) + `RecursiveLeastSquares` + `MismatchDetector` + `AtomicParamBuffer`
++ `NetworkChannel`
+
+This is Tier 2.1 from the original proposal, unblocked by `NetworkChannel` and by the
+`AtomicParamBuffer` pattern proven in `ex134`.
+
+```
+PLC (slave)  : plant whose dynamics DRIFT mid-run; PID at the fast tick.
+               Reads its gains from AtomicParamBuffer every tick - O(1), never stalls.
+   |  telemetry (y, u) -> NetworkChannel
+srv (master) : RecursiveLeastSquares identifies the live plant from (y, u).
+               MismatchDetector watches the RLS residual.
+               On a sustained alarm, AutoTuner::tune() runs a CMA-ES session against the
+               freshly identified model and publishes the new gains.
+```
+
+The point is the *separation of timescales*: identification and CMA-ES optimisation are
+expensive and run on the master's own schedule, while the real-time loop only ever does a
+lock-free `read()`. That is exactly what `AtomicParamBuffer` exists for - and `PIDParams` is
+all-doubles, so it satisfies the template's trivially-copyable `static_assert` directly.
+
+*Guard:* paired against a fixed-gain arm over the identical drift and disturbance sequence.
+The retuned arm must (a) actually retune, (b) end with materially different gains, (c) beat the
+fixed arm on post-drift IAE by a real margin, and (d) the tuning session must be triggered by
+the detector rather than scheduled at a hard-coded time - otherwise the demo is a timer, not an
+adaptive controller.
+
+*Measured:* post-drift IAE `2.3671 -> 0.5723` (**-75.8%**), 2 tuning sessions, first triggered at
+`t = 34.12 s` during the drift ramp. Gains `Kp 1.200 -> 6.918`, `Ki 1.800 -> 12.000`. The
+identified worn model matches the truth to four decimals: `a_d = 0.9860, b_d = 0.0199` against a
+true `0.9860, 0.0200`.
+
+**Two corrections this demo forced:**
+
+1. **An adaptive estimator's residual cannot detect the drift it is absorbing.** The first
+   revision fed `MismatchDetector` the residual of the tracking RLS. At `lambda = 0.995` the
+   effective memory is `1/(1-lambda) = 200` samples = 4 s, so RLS simply tracked the 6 s drift
+   ramp and the residual never left the noise floor - zero retunes, and the two arms came out
+   byte-identical. Fixed with a **two-model split**: an adaptive RLS tracks the live plant and
+   supplies the model `AutoTuner` optimises against, while a **frozen commissioning snapshot**
+   scores the live data, and it is *that* residual the detector watches. This is the same failure
+   class as `ex133`'s undetectable sensor drift.
+2. **Re-baseline after a successful retune.** Without it the frozen commissioning model stays
+   permanently wrong once the plant has drifted, so the detector alarms forever and the loop
+   retunes on every cooldown expiry - 7 sessions instead of the 2 the fault warrants. Accepting
+   the adapted plant as the new reference closes the detect -> adapt -> settle cycle.
+
+Note the `Ki` upper bound is **binding** at the optimum (it lands exactly on 12.0). That is
+expected, not an artefact: the worn plant is slow with high DC gain, so the cost function
+genuinely wants large integral action. The bound is a safety limit on how aggressive an
+unattended tuner may become.
 
 ---
 
