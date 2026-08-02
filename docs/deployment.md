@@ -385,6 +385,85 @@ Option C - successive linearisation at construction rate:
 Build a new `DiscreteMPC` on the background thread (off the hot path), then swap the pointer.
 Cost is one allocation per linearisation step; acceptable if linearisation rate << sample rate.
 
+### NetworkChannel - Simulated Master/Slave Transport
+
+Controllers split across a network - a server running the outer loop, a PLC running the inner
+one - face latency, jitter and packet loss that no single-delay model captures.
+`ComputationalDelayWrapper` is a **fixed one-sample** delay and cannot express jitter at all;
+`lib/hal/` stops at the device boundary. `NetworkChannel<T, Capacity>` fills that gap.
+
+**This is a simulation, not networking.** There is no socket, no fieldbus driver and no real
+peer - it is driven by an explicit simulation clock you pass in. Use it to size timeouts, to
+validate that a compensator earns its complexity, and to build regression demos; do not expect
+it to talk to hardware.
+
+**Pattern:**
+```cpp
+#include "ControllerToolbox.h"   // NetworkChannel is IN the umbrella (unlike AtomicParamBuffer)
+
+ctrl::NetworkChannelParams p;
+p.latency_mean = 0.008;   // 8 ms one way
+p.jitter_sigma = 0.003;   // 3 ms std dev, truncated at >= 0 for causality
+p.loss_prob    = 0.02;    // 2 % drop
+p.seed         = 7u;
+ctrl::NetworkChannel<double> up(p), down(p);
+
+double y_hold = 0.0, u_hold = 0.0, rx = 0.0;
+for (int k = 0; k < N; ++k) {
+    const double t = k * Ts;
+    up.send(plant.output(), t);                 // slave -> master
+    if (up.tryReceive(rx, t)) y_hold = rx;      // master takes newest, else holds
+    down.send(ctrl_.compute(r - y_hold), t);    // master -> slave
+    if (down.tryReceive(rx, t)) u_hold = rx;
+    plant.step(u_hold);                         // slave holds last on starvation
+}
+```
+
+**Guarantees:**
+- **Zero allocation.** The in-flight queue is a fixed `std::array` ring of `Capacity` slots
+  (default 64), so `send()`/`tryReceive()` are safe in the hot loop. Overflow drops the
+  *oldest* in-flight packet and counts it, rather than growing.
+- **Deterministic.** The channel owns its `std::mt19937`, seeded from `params.seed`. Same seed
+  plus same call sequence gives a byte-identical delivery trace.
+- **Latest-wins.** `tryReceive()` releases every packet due by `t_now` and returns only the
+  highest sequence number, counting the rest in `superseded()`. A superseded setpoint is
+  worthless once a newer one has landed - this is what makes `allow_reorder` safe to enable.
+- **Causal.** Sampled latency is truncated at `>= 0`; jitter can never deliver a packet before
+  it was sent.
+- **NaN-safe.** A non-finite payload or `t_now` is rejected at `send()` and counted in
+  `dropped()`, never propagated (`run.py` Phase 2 scans for this contract).
+- **Accounting closes:** `sent() == delivered() + dropped() + superseded() + inFlight()` holds
+  in every configuration - assert it if you are debugging a trace.
+
+**Always pair the two arms of a comparison on one seed.** A compensated loop that saw a
+different channel trace than its baseline proves nothing - a lower IAE only means it drew an
+easier random draw. `examples/ex131_plc_jitter_mpc.cpp` asserts identical delivered/dropped
+counts across both arms explicitly.
+
+**Python:** bound as `ctrl.NetworkChannel` / `ctrl.NetworkChannelParams` with a scalar
+(`double`) payload and the default 64-slot capacity. `try_receive(t_now)` returns the payload
+or `None` - the C++ out-parameter form does not cross the pybind11 boundary.
+```python
+ch = ctrl.NetworkChannel(p)
+ch.send(y, t)
+rx = ch.try_receive(t)
+if rx is not None:
+    y_hold = rx
+```
+
+**When to use vs. not use:**
+| Scenario | Use NetworkChannel? |
+|----------|--------------------|
+| Distributed controller split across a link, evaluating a compensator | Yes |
+| Sizing a starvation timeout or hold-last-value policy | Yes |
+| Fixed, known, jitter-free compute delay | No - use `ComputationalDelayWrapper` |
+| Actual fieldbus/EtherCAT/socket I/O on hardware | No - implement `ISensor`/`IActuator` in `lib/hal/` |
+| Non-scalar payloads from Python | No - the binding is scalar; use the C++ template |
+
+Worked demos: `examples/ex131`-`ex135` (jitter-compensated MPC, dual-rate cascade,
+event-triggered estimation, bumpless redundancy, PLC-adaptive retuning). Design rationale and
+the pitfalls each demo uncovered are in `docs/server_plc_fusion_plan.md`.
+
 ---
 
 ### RTOS Considerations

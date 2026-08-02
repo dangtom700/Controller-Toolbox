@@ -472,4 +472,95 @@ two-degree-of-freedom structure.
         .def("state",       &ctrl::FeedforwardController::state,
              py::return_value_policy::reference_internal,
              "Current filter state x.");
+
+    // -----------------------------------------------------------------------
+    // NetworkChannel - simulated master/slave transport (server/PLC fusions)
+    // -----------------------------------------------------------------------
+    py::class_<ctrl::NetworkChannelParams>(m, "NetworkChannelParams", R"doc(
+Tuning parameters for NetworkChannel.
+
+Out-of-range values are sanitised at construction: negative latency_mean/jitter_sigma
+become 0, and loss_prob is clamped to [0, 1]. Read params() back to see what the
+channel actually applied.
+)doc")
+        .def(py::init<>())
+        .def_readwrite("latency_mean",  &ctrl::NetworkChannelParams::latency_mean,
+                       "Mean one-way latency [s].")
+        .def_readwrite("jitter_sigma",  &ctrl::NetworkChannelParams::jitter_sigma,
+                       "Latency jitter std dev [s]; sampled latency is truncated at >= 0.")
+        .def_readwrite("loss_prob",     &ctrl::NetworkChannelParams::loss_prob,
+                       "Per-packet drop probability in [0, 1].")
+        .def_readwrite("allow_reorder", &ctrl::NetworkChannelParams::allow_reorder,
+                       "Permit out-of-order delivery; tryReceive still returns the newest.")
+        .def_readwrite("seed",          &ctrl::NetworkChannelParams::seed,
+                       "RNG seed. Same seed + same call sequence => identical trace.");
+
+    py::class_<ctrl::NetworkChannel<double>>(m, "NetworkChannel", R"doc(
+Deterministic simulation of a lossy, jittery communication link (scalar payload).
+
+Models master/slave transport: one-way latency with Gaussian jitter, random packet
+loss, optional reordering, and a bounded 64-slot in-flight ring. This is a simulation
+driven by an explicit clock you supply - there is no socket and no real peer.
+
+Delivery is latest-wins: try_receive() releases every packet due by t_now and returns
+only the newest by sequence number, counting the rest in superseded(). The accounting
+identity sent() == delivered() + dropped() + superseded() + in_flight() always holds.
+
+Usage
+-----
+>>> p = ctrl.NetworkChannelParams()
+>>> p.latency_mean, p.jitter_sigma, p.loss_prob, p.seed = 0.008, 0.003, 0.02, 7
+>>> up, down = ctrl.NetworkChannel(p), ctrl.NetworkChannel(p)
+>>> y_hold = u_hold = 0.0
+>>> for k in range(N):
+...     t = k * Ts
+...     up.send(plant_output, t)                  # slave -> master
+...     rx = up.try_receive(t)                    # None on starvation
+...     if rx is not None: y_hold = rx
+...     down.send(pid.compute(r - y_hold), t)     # master -> slave
+...     rx = down.try_receive(t)
+...     if rx is not None: u_hold = rx
+
+Always pair a compensated and an uncompensated arm on the SAME seed - comparing loops
+that saw different channel traces proves nothing.
+)doc")
+        .def(py::init<const ctrl::NetworkChannelParams &>(),
+             py::arg("params") = ctrl::NetworkChannelParams(),
+             "Construct with tuning parameters; the RNG is seeded here.")
+        .def("send", &ctrl::NetworkChannel<double>::send,
+             py::arg("value"), py::arg("t_now"),
+             "Queue a packet for delivery at t_now + latency. A non-finite value or "
+             "t_now is rejected and counted in dropped(), never delivered.")
+        .def("try_receive",
+             [](ctrl::NetworkChannel<double> &self, double t_now) -> std::optional<double> {
+                 double out = 0.0;
+                 if (self.tryReceive(out, t_now)) return out;
+                 return std::nullopt;
+             },
+             py::arg("t_now"),
+             "Return the newest payload due by t_now, or None on starvation (the caller "
+             "should hold its last value). C++ uses an out-parameter here; Python does not.")
+        .def("set_params", &ctrl::NetworkChannel<double>::setParams, py::arg("params"),
+             "Replace link parameters mid-run. In-flight packets keep their delivery times, "
+             "statistics and the RNG stream are untouched - changing seed needs a reset().")
+        .def("reset", &ctrl::NetworkChannel<double>::reset,
+             "Clear all in-flight packets and statistics, and re-seed the RNG.")
+        .def("sent",          &ctrl::NetworkChannel<double>::sent,
+             "Total packets handed to send(), including those later dropped.")
+        .def("delivered",     &ctrl::NetworkChannel<double>::delivered,
+             "Packets actually returned by try_receive().")
+        .def("dropped",       &ctrl::NetworkChannel<double>::dropped,
+             "Packets lost to loss_prob, ring overflow, or the NaN guard.")
+        .def("superseded",    &ctrl::NetworkChannel<double>::superseded,
+             "Packets discarded because a newer one superseded them in the same batch.")
+        .def("last_latency",  &ctrl::NetworkChannel<double>::lastLatency,
+             "Measured latency [s] of the most recently delivered packet.")
+        .def("last_sequence", &ctrl::NetworkChannel<double>::lastSequence,
+             "Sequence number of the most recent delivery (0 before the first). Strictly "
+             "increasing when allow_reorder is False.")
+        .def("in_flight",     &ctrl::NetworkChannel<double>::inFlight,
+             "Packets currently queued for future delivery.")
+        .def("params",        &ctrl::NetworkChannel<double>::params,
+             py::return_value_policy::reference_internal,
+             "Read-only access to the sanitised parameters actually in force.");
 }

@@ -93,6 +93,18 @@ remaining manual steps below since they touch shared files the script doesn't ow
 - Tests must check an actual numeric value, not just "no crash".
 - Tolerance choices must be commented with justification.
 - scipy/control cross-validation (via Python reference values embedded in comments) is the standard for any mathematical result.
+- **Never put an unbalanced `[` or `]` in a `TEST_CASE` name.** Catch2 v3.5.4's
+  `CatchAddTests.cmake` parses `--list-tests` with `foreach(line ${output})`; the unquoted
+  expansion makes CMake treat a lone bracket as a grouping delimiter and stop splitting on `;`,
+  so the offending test **and every test declared after it** collapse into one bogus `ctest`
+  entry whose filter matches nothing. The symptom is a single FAILED test with a
+  hundreds-of-characters-long name and "No tests ran" in its output - it looks like an assertion
+  failure and is not one. `"DDMR plant: wrapAngle maps into (-pi, pi]"` cost 25 tests this way.
+  Balanced pairs (`"bounded [0, 1]"`) are safe; write half-open intervals in words instead.
+  Enforced mechanically - `run.py` **Phase 2b** and the CI gate both run:
+  ```bash
+  python tools/check_test_names.py
+  ```
 
 ### Step 5 - Python bindings
 

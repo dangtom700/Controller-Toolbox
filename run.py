@@ -435,6 +435,62 @@ def phase_nan_guard():
 
 
 # ---------------------------------------------------------------------------
+# Phase 2b - Catch2 TEST_CASE name scan (static)
+# ---------------------------------------------------------------------------
+
+def phase_test_names():
+    """Static scan for TEST_CASE names that break ctest registration.
+
+    An unbalanced '[' or ']' in a Catch2 TEST_CASE name defeats
+    catch_discover_tests: the offending test and every test declared after it
+    collapse into one bogus ctest entry that matches nothing. It presents as a
+    single FAILED test with an enormous name and 'No tests ran' in its body -
+    which looks like an assertion failure and is not one - while silently
+    removing the bundled tests from the run.
+
+    Numbered 2b rather than 3 so the established 8-phase numbering (and every
+    doc that cites it) stays correct. Like Phase 2 this is a pure source scan
+    needing no build, so it runs before the slow compile.
+
+    Non-fatal within the run, but the caller records the result and makes
+    run.py exit non-zero at the end, mirroring CI.
+
+    Returns True if any violation was found, False otherwise.
+    """
+    _divider()
+    print('  Phase 2b - Catch2 TEST_CASE name scan')
+    _divider()
+    print()
+
+    checker = os.path.join('tools', 'check_test_names.py')
+    if not os.path.isfile(checker):
+        print(f'  [SKIP] {checker} not found\n')
+        return False
+
+    try:
+        proc = subprocess.run(
+            [sys.executable, checker],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, encoding='utf-8', errors='backslashreplace',
+        )
+        sys.stdout.write(proc.stdout)
+        rc = proc.returncode
+    except Exception as exc:
+        print(f'  ERROR launching TEST_CASE name check: {exc}\n')
+        return False
+
+    print()
+    if rc == 0:
+        print('  TEST_CASE name scan PASSED - every name registers as its own ctest entry.\n')
+        return False
+
+    print(f'  [TEST-NAME] FAIL: unbalanced bracket(s) in TEST_CASE name(s) (exit {rc}).')
+    print('  These break catch_discover_tests; fix per CONTRIBUTING.md '
+          '"Step 4 - Add Catch2 tests" before pushing.\n')
+    return True
+
+
+# ---------------------------------------------------------------------------
 # Phase 3 — Compile
 # ---------------------------------------------------------------------------
 
@@ -1180,9 +1236,11 @@ if __name__ == '__main__':
     print(f'  Log: {log_path}\n')
 
     nan_guard_failed = False
+    test_names_failed = False
     try:
         phase_clean()
-        nan_guard_failed = phase_nan_guard()  # static; non-fatal but sets exit code below
+        nan_guard_failed = phase_nan_guard()   # static; non-fatal but sets exit code below
+        test_names_failed = phase_test_names()  # static; same contract
         phase_compile()
         phase_bindings()   # build ctrl_toolbox .pyd + smoke test
         phase_run()
@@ -1195,10 +1253,15 @@ if __name__ == '__main__':
 
     phase_bug_report(log_path)
 
-    # A NaN-guard violation is a policy failure that CI rejects; make the local
+    # A static-scan violation is a policy failure that CI rejects; make the local
     # run mirror that by exiting non-zero (after the full run + bug report, so all
-    # diagnostics are still produced).
+    # diagnostics are still produced). Both are reported before exiting, so a run
+    # with two violations does not hide one behind the other.
     if nan_guard_failed:
         print('\n  RUN FAILED: NaN-guard violation(s) detected - see the '
               'Phase 2 output above and bug_report.txt.')
+    if test_names_failed:
+        print('\n  RUN FAILED: TEST_CASE name(s) that break ctest registration - '
+              'see the Phase 2b output above and bug_report.txt.')
+    if nan_guard_failed or test_names_failed:
         sys.exit(1)

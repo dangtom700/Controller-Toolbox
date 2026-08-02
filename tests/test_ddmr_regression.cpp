@@ -143,7 +143,15 @@ TEST_CASE("DDMR plant: torque saturation is enforced inside step()", "[ddmr][pla
     CHECK(a.state().isApprox(b.state()));
 }
 
-TEST_CASE("DDMR plant: wrapAngle maps into (-pi, pi]", "[ddmr][plant]") {
+// NOTE: the name deliberately avoids the half-open-interval notation "(-pi, pi]". An
+// UNBALANCED square bracket in a TEST_CASE name breaks catch_discover_tests: Catch2 v3.5.4's
+// CatchAddTests.cmake parses the --list-tests output with `foreach(line ${output})`, and the
+// unquoted expansion makes CMake treat a lone [ or ] as a grouping delimiter, so it stops
+// splitting on ';'. The offending name and every name after it get bundled into ONE bogus
+// ctest entry whose filter matches nothing ("No tests ran"). Balanced pairs like "[0, 1]" are
+// safe - that is why test_autoscheduling and test_humidification are unaffected.
+TEST_CASE("DDMR plant: wrapAngle maps into -pi (exclusive) to pi (inclusive)",
+          "[ddmr][plant]") {
     CHECK(wrapAngle(0.0) == Catch::Approx(0.0));
     CHECK(wrapAngle(3.0 * kPi) == Catch::Approx(kPi).margin(1e-12));
     CHECK(wrapAngle(-3.0 * kPi) == Catch::Approx(kPi).margin(1e-12));

@@ -174,6 +174,8 @@ for %%T in (
     ex133_plc_event_triggered_estimation
     ex134_plc_bumpless_redundancy
     ex135_plc_adaptive_retuning
+    ex136_autoscheduling_pipeline
+    ex137_repetitive_feedforward_stack
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

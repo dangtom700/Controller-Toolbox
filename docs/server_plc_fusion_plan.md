@@ -3,8 +3,9 @@
 Authored 2026-07-25. Codebase state: 51 `IController` subclasses, 131 C++ examples
 (highest `ex130_fuzzy_smc`), 22 complete case studies.
 
-**Status: Stages 0, 1a, 2 and 3 complete - all four Tier 1 fusions are built and passing.
-Stages 1b (Python bindings) and 4 (full `run.py` pass) remain open.** See the Staging table below.
+**Status: Stages 0, 1a, 1b, 2, 3 and 5 complete - all four Tier 1 fusions plus Tier 2.1 are
+built and passing, and `NetworkChannel` is bound into Python. Only Stage 4 (full `run.py` pass
+and doc/count reconciliation) remains open.** See the Staging table below.
 
 This plan takes a proposal for four "Tier 1" server/PLC controller fusions - designs meant to be
 immediately implementable by wiring existing `lib/` components together - and turns it into
@@ -59,7 +60,7 @@ no fieldbus driver, no server process); any change to an existing `lib/` control
 |---|---|---|
 | **0** | This document + `docs/index.md` entry | **Done** |
 | **1a** | `lib/NetworkChannel.h` + umbrella include + 12 `[network]` Catch2 cases | **Done** |
-| 1b | pybind11 binding + `smoke_test.py` + `docs/deployment.md` section | Open |
+| **1b** | pybind11 binding + `smoke_test.py` + `docs/deployment.md` section | **Done** |
 | **2** | `ex131` jitter-MPC, `ex132` dual-rate cascade + registration | **Done** |
 | **3** | `ex133` event-triggered estimation, `ex134` bumpless redundancy + registration | **Done** |
 | 4 | Full `run.py` green pass, doc/count reconciliation | Open |
@@ -76,11 +77,30 @@ no fieldbus driver, no server process); any change to an existing `lib/` control
 | `ex133` event-triggered estimation | **PASS** - uplink traffic -77.5% (2000 -> 449 packets), pre-fault RMS estimate error 0.019 vs 0.023 periodic, sensor fault caught 30 ms after injection |
 | `ex134` bumpless redundancy | **PASS** - IAE 0.582 vs 6.680 wedged (11x), 0.824 command gap spread to 0.180 max per tick, 10 supervisor publishes |
 | `ex135` adaptive online retuning | **PASS** - post-drift IAE 2.367 -> 0.572 (-75.8%), 2 detector-triggered sessions, identified worn model exact to 4 dp |
-| `check_build_target_drift.py` | `compile.bat` / `compile.sh` agree on 189 targets |
+| `check_build_target_drift.py` | `compile.bat` / `compile.sh` agree on 191 targets |
 
 Stage 1a deliberately excludes the bindings: those need a
 `-DCTRL_BUILD_PYTHON_BINDINGS=ON` rebuild, a separate and slower build path. Keeping them in 1b
 lets Stage 1a be verified with a single fast Release build.
+
+### Stage 1b as built
+
+`ctrl.NetworkChannel` / `ctrl.NetworkChannelParams` in
+[bindings/plantmodel_bindings.cpp](../bindings/plantmodel_bindings.cpp) (beside `ControllerMonitor`,
+its closest analogue), a `NetworkChannel` subsection in
+[docs/deployment.md](deployment.md), and a smoke-test block covering the fixed-latency trace,
+seed determinism under jitter + loss, latest-wins supersession, the NaN contract and parameter
+sanitisation. `ctrl.features()` reports `network_channel`. The binding is scalar-payload
+(`NetworkChannel<double>`) at the default 64-slot capacity; `try_receive(t_now)` returns the
+payload or `None`, since the C++ out-parameter form does not cross the pybind11 boundary.
+
+**One gotcha, found by the smoke test failing:** do not assert exact arrival ticks. A packet sent
+at `t` with latency exactly `n*Ts` lands precisely on `tryReceive`'s `t_deliver > t_now`
+comparison, and `(t + latency) <= (t + n*Ts)` is a coin flip in binary floating point - so some
+packets slip a tick, arrive two-at-a-time, and the older one is correctly discarded as
+superseded. The first version of the test asserted 95 deliveries and got 87. The channel was
+right; the test was measuring the FPU. Use a latency that is deliberately *not* a whole number of
+ticks (the block uses 45 ms against a 10 ms tick) so the comparison is never on the boundary.
 
 ---
 

@@ -32,9 +32,11 @@ test), not a quick edit `[Ref: CONTRIBUTING.md#adding-a-new-controller]`.
 ## 2. Essential Build & Environment Commands
 
 ```bash
-# Canonical "is everything passing" (8 phases: 1 ASCII scan, 2 NaN-guard scan, 3 compile,
-# 4 bindings+smoke, 5 run all .exe, 6 run all python examples, 7 python case studies, 8 regen
-# status/report). Last green run: 183/183 .exe, 154/154 py examples, 10/10 py case studies.
+# Canonical "is everything passing" (8 phases: 1 ASCII scan, 2 NaN-guard scan, 2b Catch2
+# TEST_CASE name scan, 3 compile, 4 bindings+smoke, 5 run all .exe, 6 run all python examples,
+# 7 python case studies, 8 regen status/report). Phases 1/2/2b are pure source scans that need
+# no build and mirror the CI gate; 2b is lettered so the 8-phase numbering stays stable.
+# Last green run: 183/183 .exe, 154/154 py examples, 10/10 py case studies.
 conda run -n soft_robotics -- python run.py        # writes run_*.log; bug_report.txt on failure -
 #   NOTE: bug_report.txt can false-positive by matching "nan" in the PASSING Phase 2 banner;
 #   confirm against the log's "EXIT 0 - PASSED" lines before treating it as a real failure.

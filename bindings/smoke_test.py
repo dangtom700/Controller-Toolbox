@@ -2025,4 +2025,81 @@ assert _fsp.Kmin - 1e-9 <= _kmn and _kmx <= _fsp.Kmax + 1e-9, "FuzzySMC gain lef
 assert ctrl.registry_has('fuzzy_smc'), "fuzzy_smc not registered"
 print('FuzzySlidingModeController smoke test passed.')
 
+# --- NetworkChannel ---
+# Fixed 45 ms link, no jitter/loss: delivery starts 5 ticks late and the accounting
+# identity sent == delivered + dropped + superseded + in_flight holds.
+#
+# The 45 ms is deliberately NOT a whole number of 10 ms ticks. A packet sent at t and
+# due at exactly t + 5*Ts sits on the comparison boundary in tryReceive(), and
+# (t + latency) <= (t + 5*Ts) is a coin flip in binary floating point - so some packets
+# slip a tick, arrive two-at-a-time, and the older one is discarded as superseded. Any
+# test that assumes exact-arithmetic arrival times is testing the FPU, not the channel.
+_ncp = ctrl.NetworkChannelParams()
+_ncp.latency_mean, _ncp.jitter_sigma, _ncp.loss_prob, _ncp.seed = 0.045, 0.0, 0.0, 11
+_nc = ctrl.NetworkChannel(_ncp)
+_first_rx, _last_rx, _n_rx = None, None, 0
+for _k in range(100):
+    _t = _k * 0.01
+    _nc.send(float(_k), _t)
+    _rx = _nc.try_receive(_t)
+    if _rx is not None:
+        if _first_rx is None:
+            _first_rx = _k
+        _last_rx, _n_rx = _rx, _n_rx + 1
+assert _first_rx == 5, f"NetworkChannel delivered at tick {_first_rx}, expected 5"
+assert _n_rx == 95 and _last_rx == 94.0, f"NetworkChannel trace wrong: {_n_rx} rx, last {_last_rx}"
+assert abs(_nc.last_latency() - 0.045) < 1e-12, "Zero-jitter latency should equal latency_mean"
+assert _nc.sent() == _nc.delivered() + _nc.dropped() + _nc.superseded() + _nc.in_flight(), \
+    "NetworkChannel packet accounting identity violated"
+assert _nc.last_sequence() == 95, f"NetworkChannel sequence wrong: {_nc.last_sequence()}"
+
+# Determinism: same seed + same call sequence => byte-identical trace, even with
+# jitter and loss active. This is what makes paired A/B comparisons meaningful.
+_ncp2 = ctrl.NetworkChannelParams()
+_ncp2.latency_mean, _ncp2.jitter_sigma, _ncp2.loss_prob, _ncp2.seed = 0.02, 0.008, 0.15, 3
+
+
+def _run_channel():
+    _ch, _trace = ctrl.NetworkChannel(_ncp2), []
+    for _i in range(200):
+        _tt = _i * 0.005
+        _ch.send(float(_i), _tt)
+        _trace.append(_ch.try_receive(_tt))
+    return _ch, _trace
+
+
+_chA, _traceA = _run_channel()
+_chB, _traceB = _run_channel()
+assert _traceA == _traceB, "NetworkChannel is not deterministic under a fixed seed"
+assert _chA.dropped() > 0, "15% loss dropped nothing - the loss model did not engage"
+assert _chA.sent() == _chA.delivered() + _chA.dropped() + _chA.superseded() + _chA.in_flight(), \
+    "NetworkChannel accounting identity violated with loss enabled"
+
+# Latest-wins: three packets released in one batch yield one delivery, two superseded.
+_ncp3 = ctrl.NetworkChannelParams()
+_ncp3.latency_mean, _ncp3.jitter_sigma, _ncp3.loss_prob = 0.0, 0.0, 0.0
+_nc3 = ctrl.NetworkChannel(_ncp3)
+for _v in (1.0, 2.0, 3.0):
+    _nc3.send(_v, 0.0)
+assert _nc3.try_receive(0.0) == 3.0, "NetworkChannel did not return the newest due packet"
+assert _nc3.delivered() == 1 and _nc3.superseded() == 2, "latest-wins bookkeeping wrong"
+
+# NaN contract: a poisoned payload is counted and discarded, never delivered.
+_nc3.reset()
+_nc3.send(float('nan'), 0.0)
+_nc3.send(1.0, float('inf'))
+assert _nc3.try_receive(0.0) is None, "NetworkChannel delivered a non-finite packet"
+assert _nc3.sent() == 2 and _nc3.dropped() == 2, "NaN guard did not count both rejects"
+
+# Parameters are sanitised, and set_params takes effect without disturbing statistics.
+_ncp4 = ctrl.NetworkChannelParams()
+_ncp4.latency_mean, _ncp4.loss_prob = -1.0, 2.0
+_nc4 = ctrl.NetworkChannel(_ncp4)
+assert _nc4.params().latency_mean == 0.0 and _nc4.params().loss_prob == 1.0, \
+    "NetworkChannelParams were not sanitised"
+_nc4.set_params(_ncp3)
+assert _nc4.params().loss_prob == 0.0, "set_params did not take effect"
+assert ctrl.registry_has('network_channel'), "network_channel not registered"
+print('NetworkChannel smoke test passed.')
+
 print('\nAll smoke tests passed.')

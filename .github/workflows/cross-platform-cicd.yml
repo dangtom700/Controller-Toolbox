@@ -51,6 +51,14 @@ jobs:
       - name: Check compute() NaN-guard convention
         run: python3 tools/check_nan_guard.py
 
+      # Catches unbalanced [ or ] in TEST_CASE names, which break
+      # catch_discover_tests and silently bundle every test declared after the
+      # offender into one permanently-red ctest entry. Runs here (seconds, no
+      # deps) rather than surfacing as a baffling "No tests ran" failure after
+      # the full build in the Test step below.
+      - name: Check Catch2 TEST_CASE names register correctly
+        run: python3 tools/check_test_names.py
+
       - name: Install Eigen3 and nlohmann-json
         run: sudo apt-get update && sudo apt-get install -y libeigen3-dev nlohmann-json3-dev
 

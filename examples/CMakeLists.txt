@@ -224,6 +224,10 @@ add_example(ex133_plc_event_triggered_estimation)  # KalmanFilter + EventTrigger
 add_example(ex134_plc_bumpless_redundancy) # Weighted stack + AtomicParamBuffer failover
 add_example(ex135_plc_adaptive_retuning)   # AutoTuner + RLS + MismatchDetector + param buffer
 
+# --- Cross-cutting fusions (docs/fusion_opportunity_backlog.md) ---------------------------
+add_example(ex136_autoscheduling_pipeline) # identifyLPV + clusterByGap + AutoGS + CodeGenC
+add_example(ex137_repetitive_feedforward_stack)  # ZPETC + LearningFeedforward(ILC) + Repetitive
+
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)
     add_executable(${NAME} cpp/${NAME}.cpp)
