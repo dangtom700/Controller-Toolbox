@@ -176,6 +176,8 @@ for %%T in (
     ex135_plc_adaptive_retuning
     ex136_autoscheduling_pipeline
     ex137_repetitive_feedforward_stack
+    ex138_safety_supervised_adaptation
+    ex139_robustness_driven_selection
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

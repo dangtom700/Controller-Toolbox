@@ -61,7 +61,7 @@ source of truth.
 | [docs/algorithm_backlog.md](algorithm_backlog.md) | Candidate algorithm list for future phases, deduped against current `lib/` contents |
 | [docs/ALGORITHM_ROADMAP_PHASE3.md](ALGORITHM_ROADMAP_PHASE3.md) | Phase-3 roadmap - 32 designs sequencing every open `algorithm_backlog.md` item by value/ROI into 5 phases |
 | [docs/superpowers/specs/](superpowers/specs/) | Approved design specs awaiting or under implementation |
-| [docs/fusion_opportunity_backlog.md](fusion_opportunity_backlog.md) | Ranked backlog of feasible controller fusions from existing `lib/` parts, sized for incremental pickup; A1/B1/B3 built (`ex135`-`ex137`), 4 remain. Includes assessed-and-rejected ideas, the demo-design pitfalls found building `ex131`-`ex137`, and a recorded `clusterByGap` defect |
+| [docs/fusion_opportunity_backlog.md](fusion_opportunity_backlog.md) | Ranked backlog of feasible controller fusions from existing `lib/` parts; **Tier B complete** - A1/B1/B2/B3/B4 built (`ex135`-`ex139`), only A2/A3 remain. Includes assessed-and-rejected ideas, 13 demo-design pitfalls found building `ex131`-`ex139`, and recorded defects/limits in `clusterByGap`, `L1AdaptiveController` nesting and `LyapunovRobustness` |
 | [docs/server_plc_fusion_plan.md](server_plc_fusion_plan.md) | Server/PLC master-slave controller fusions - `NetworkChannel` + `ex131`-`ex135`, all passing and bound into Python; only Stage 4 (full `run.py` pass) open |
 
 ## Historical / internal records

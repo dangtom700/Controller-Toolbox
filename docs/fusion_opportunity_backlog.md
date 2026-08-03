@@ -1,8 +1,9 @@
 # Controller Fusion - Opportunity Backlog
 
 Authored 2026-07-26 against a codebase with 51 `IController` subclasses, 135 C++ examples
-(`ex01`-`ex135`) and 22 complete case studies. Updated 2026-08-02: **A1, B1 and B3 are built**
-(`ex135`, `ex137`, `ex136`), taking the C++ example count to 137.
+(`ex01`-`ex135`) and 22 complete case studies. Updated 2026-08-02: **A1, B1, B2, B3 and B4 are
+built** (`ex135`-`ex139`), taking the C++ example count to 139. Tier B is complete; **A2 and A3
+are the only items left**.
 
 Companion to [`docs/server_plc_fusion_plan.md`](server_plc_fusion_plan.md), which covers the
 server/PLC master-slave series specifically. **This document is the wider backlog**: fusions of
@@ -57,9 +58,9 @@ These were Tier 2 in the original fusion proposal and were blocked on a transpor
 | # | Demo | Components | Effort | Notes |
 |---|---|---|---|---|
 | B1 | **Repetitive-motion feedforward stack** | `designZPETC` + `LearningFeedforwardController` (owns the `ILC`) + `RepetitiveController` | M | **Built and passing - `ex137`.** The premise below ("they compose naturally") was **wrong** and the demo says so: ZPETC and ILC are *substitutes*, both attacking trial-repeatable error. Rebuilt as a 2x2 error-class matrix. See section 2b. |
-| B2 | **Safety-supervised adaptation** | `CBFSafetyFilter` + `CLFController` + `L1AdaptiveController` + `ControllerMonitor` | M | The safety filter enforces constraints while adaptation runs underneath. This is the *feasible core* of the original proposal's Tier 3 "self-reflective safety controller", with the unimplementable parts removed. |
+| B2 | **Safety-supervised adaptation** | `CBFSafetyFilter` + `CLFController` + `L1AdaptiveController` + `KalmanFilter` + `ControllerMonitor` | M | **Built and passing - `ex138`.** The obvious wiring (feed L1's own `sigma_hat` to the CBF) **does not work** - an input-consistency break. Needed a fifth component. See section 2c. |
 | B3 | **End-to-end auto-scheduling pipeline** | `identifyLPV` -> `clusterByGap` -> (design) -> `generateControllerC`, with `buildAutoGainScheduler` as the parallel front end | S | **Built and passing - `ex136`.** The chain as written above is **not composable** - `buildAutoGainScheduler` cannot consume an `LPVModel`. It also surfaced a real defect in `clusterByGap`. See section 2b. |
-| B4 | **Robustness-driven controller selection** | `nuGap` + `MuAnalysis` + `WorstCaseSearch` + `LyapunovRobustness` | M | Analysis-side rather than control-side: score a candidate roster against an uncertainty set and pick a winner on evidence. All four have examples (`ex60`, `ex85`, `ex86`, `ex87`); the *selection procedure* built on them does not. |
+| B4 | **Robustness-driven controller selection** | `nuGap` + `MuAnalysis` + `WorstCaseSearch` + `LyapunovRobustness` | M | **Built and passing - `ex139`.** Three axes gate; `LyapunovRobustness` could not certify a single integral-action candidate and is reported rather than gated. See section 2c. |
 
 ---
 
@@ -143,6 +144,76 @@ the B1 row listing both as separate components was wrong.
 
 ---
 
+## 2c. Findings from B2 and B4
+
+### B2 / `ex138` - the intuitive fusion is an input-consistency break
+
+A CBF is not a guarantee; it is a guarantee *conditional on the (f0, g) it was handed*. Tell
+`CBFSafetyFilter` the input gain is 1.0 when the plant's is 1.6 and it authorises 60 % more
+control than the plant can safely absorb, reporting success the whole way. Measured: barrier
+violation 0.207 with the safe set at x <= 1.00.
+
+The repair looks obvious and is algebraically exact. Matched uncertainty (gain error *or* load)
+satisfies `xdot = -a x + b_true u + d == -a x + b_nom (u + sigma)`, so it is representable as a
+drift offset `f0_eff = -a x + b_nom sigma`, and at the barrier the corrected constraint reduces
+to exactly `u <= (a x_max - d)/b_true`. Estimating sigma is what an adaptive law does. Wire
+`L1AdaptiveController::estimatedDisturbance()` into the CBF's `f0` and it should work.
+
+**It does not.** L1 advances its internal state predictor with the command *it* computed; the
+CBF rewrites that command downstream and L1 is never told. Its `sigma_hat` therefore silently
+becomes "plant uncertainty **plus whatever the filter just did**", and feeding it back closes a
+loop through the filter's own edits:
+
+| CBF drift source | max x | violation | sigma used | sigma true |
+|---|---|---|---|---|
+| nominal `f0` (no sharing) | 1.207 | 0.207 | 0.000 | 0.410 |
+| **L1's own `sigma_hat`** | 1.217 | **0.217** | **0.103** | 0.403 |
+| **`KalmanFilter` on the applied input** | 1.017 | **0.017** | **0.375** | 0.375 |
+
+This is not tuning - swept `Gamma` over 1..100 and no value helps, because the shipped API has
+no way to tell L1 what was actually applied. The estimator must *observe* the applied command,
+so the drift correction comes from a `ctrl::KalmanFilter` on the augmented state `[x; sigma]`,
+whose `step(y, u_prev, u_current)` takes it explicitly. L1 keeps its real job (adaptive
+tracking); the KF supplies the filter.
+
+**Generalisable rule: an adaptive controller's internal uncertainty estimate is a control
+signal, not a plant measurement.** Nesting it under anything that rewrites its output
+invalidates it for every downstream consumer. This applies to `AntiWindupWrapper`,
+`ControllerStack`, saturation - any wrapper that edits a command.
+
+Two smaller notes. `CLFController` is a regulator toward V's minimum with no equilibrium
+feedforward and no integral action, so it parks at an offset on any plant needing a nonzero
+equilibrium input - supply `u_eq` yourself. And a discrete-time CBF enforced at sample instants
+permits a bounded one-step excursion (residual violation 0.017, not 0); the claim to assert is
+an order-of-magnitude reduction, not zero.
+
+### B4 / `ex139` - one of the four axes cannot certify the problem class
+
+The procedure works: score a roster on nu-gap set radius, mu-based stability radius, CMA-ES
+worst-case IAE and common-Lyapunov certification, gate, then rank. It selects `PI balanced`
+(worst-case IAE 3.333, stability radius 1.000) over the nominal-IAE winner `PI aggressive`
+(nominal IAE 0.948 - best of the roster - but **unstable inside the box**, stability radius
+0.669 against a set nu-gap radius of 0.690).
+
+**`isQuadraticallyStable` certified none of the five candidates**, and this is a property of the
+method rather than of the candidates. It is explicitly a heuristic, not an SDP: it *sums* the
+per-vertex Lyapunov solutions, and its own header warns it suits "vertices clustered around a
+common nominal". Every closed loop here contains an integrator, hence a pole near `z = 1`, hence
+enormous per-vertex Lyapunov matrices whose cross terms swamp the decrease condition. Swept
+`Ts` from 0.05 to 0.50 and box widths down to +-10 %: **no integral-action loop was ever
+certified, even at a closed-loop spectral radius of 0.80**. The same call certifies a
+well-damped no-integrator vertex set (residual -1.60), so the tool is not broken - the problem
+class is outside it. `ex139` runs that control check inline and reports the axis as evidence
+rather than gating on it; gating would have rejected every candidate.
+
+**Scope limit worth stating once:** all four tools are LTI. `findWorstCaseIAE` and
+`robustStabilityRadius` take the controller as a `StateSpace`, and `isQuadraticallyStable` needs
+closed-loop vertex A-matrices. `DiscreteSMC`, `DiscreteMPC`, `FuzzyPID` and ADRC's nonlinear part
+cannot be scored by any of them. This procedure ranks LTI candidates against parametric
+uncertainty, and nothing else.
+
+---
+
 ## 3. Assessed as not worth attempting
 
 Recorded so they are not re-proposed. Each was checked against the actual API surface.
@@ -210,6 +281,17 @@ a rebuild cycle to find.
    program compiled against `libcontroller_toolbox.a`; guessing twice cost more than writing it
    would have. Note `-std=c++20` does not define `M_PI` - the CMake build uses `gnu++20`, so a
    hand-rolled `g++` line needs `-std=gnu++20` to match.
+12. **Check whether a nested estimate is still measuring the plant.** Any estimator that
+   predicts from *its own* output stops being a plant measurement the moment something
+   downstream rewrites that output. `ex138` lost a whole revision to this. Before consuming an
+   adaptive controller's internal estimate anywhere else, ask what signal its predictor was
+   advanced with - and prefer an estimator that takes the applied input explicitly, as
+   `KalmanFilter::step(y, u_prev, u_current)` does.
+13. **A tool returning "no" is not the same as a tool being wrong.** `ex139`'s common-Lyapunov
+   axis certified nothing, and the useful move was a control case proving the same call
+   succeeds on a problem it *can* handle - which converts "this looks broken" into "this
+   problem class is outside the method". Run that control case before reporting a negative
+   result, and never gate on an axis that cannot say yes.
 
 ---
 
