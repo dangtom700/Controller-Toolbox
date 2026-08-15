@@ -1,6 +1,6 @@
-Bug Report - generated from run_20260725_135735.log on 2026-07-25 15:42:00.735337
-Total failure indicators found: 54
-Merged into 4 block(s)
+Bug Report - generated from run_20260803_101933.log on 2026-08-03 13:02:30.760168
+Total failure indicators found: 100
+Merged into 20 block(s)
 ========================================================================
 
 --- FAILURE BLOCK #1 (keywords: nan) ---
@@ -24,161 +24,838 @@ Lines 44 - 69
       59:   NaN-guard scan PASSED - every compute() override is guarded.
       60: 
       61: ========================================================================
-      62:   Phase 3 — Compile
+      62:   Phase 2b - Catch2 TEST_CASE name scan
       63: ========================================================================
       64: 
-      65: ============================================================
-      66:   Controller Toolbox  -  Sequential Build  (no benchmarks)
-      67: ============================================================
+      65: OK: 572 TEST_CASE names across 22 files have balanced brackets.
+      66: 
+      67:   TEST_CASE name scan PASSED - every name registers as its own ctest entry.
       68: 
-      69: [CONFIG] Configuring CMake...
+      69: ========================================================================
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #2 (keywords: nan) ---
-Lines 3615 - 3701
+--- FAILURE BLOCK #2 (keywords: warn) ---
+Lines 124 - 159
 
-    3615:   [10/183]  build\case-study\Differential Drive Robot Tracking\differential_drive_robot_tracking_sim.exe
-    3616: ------------------------------------------------------------------------
-    3617: 
-    3618: Loading plant parameters from: case-study/Differential Drive Robot Tracking/config/plant_params.json
-    3619: DDMR: M=9 kg  r=0.0975 m  R=0.165 m  d=0.05 m  Kf=0.25 N.m.s/rad  tau_max=15 N.m
-    3620: Rates: plant/inner-PI 0.005 s | fast loop 0.03 s | slow loop 0.15 s (eps = 0.2)
-    3621: 
-    3622: Running 60 simulations (5 scenarios x 12 controllers)...
-    3623: 
-    3624: -- s01_lemniscate (lemniscate, a=2 m, 30 s) --
->>> 3625:   OpenLoop        ISE=   6.8130  IAE=  14.6978  ITAE=  252.9795  final_err=  0.5179 m  mean_tau=  4.9303 N.m  Ks=    nan  settle=-1.0000 s
-    3626:   PID             ISE=   0.1892  IAE=   2.7302  ITAE=   41.4300  final_err=  0.0545 m  mean_tau=  4.7820 N.m  Ks=    nan  settle=-1.0000 s
-    3627:   Backstepping    ISE=   0.1028  IAE=   2.2649  ITAE=   35.0828  final_err=  0.0503 m  mean_tau=  4.8976 N.m  Ks=    nan  settle=-1.0000 s
-    3628:   SMC             ISE=   0.1258  IAE=   2.3687  ITAE=   34.4890  final_err=  0.0310 m  mean_tau=  4.8230 N.m  Ks=    nan  settle=29.5500 s
-    3629:   AdaptiveSMC     ISE=   0.1258  IAE=   2.3687  ITAE=   34.4890  final_err=  0.0310 m  mean_tau=  4.8230 N.m  Ks= 3.0000  settle=29.5500 s
-    3630:   ADRC            ISE=   0.2507  IAE=   3.2094  ITAE=   47.9403  final_err=  0.1228 m  mean_tau=  4.9681 N.m  Ks=    nan  settle=-1.0000 s
-    3631:   FuzzyTSK        ISE=   3.5079  IAE=  12.2251  ITAE=  190.7142  final_err=  0.2689 m  mean_tau=  6.2434 N.m  Ks=    nan  settle=-1.0000 s
-    3632:   LQR             ISE=   0.1582  IAE=   2.6783  ITAE=   41.1042  final_err=  0.0532 m  mean_tau=  4.8357 N.m  Ks=    nan  settle=-1.0000 s
-    3633:   NMPC            ISE=   0.2372  IAE=   3.1911  ITAE=   49.0793  final_err=  0.0985 m  mean_tau=  4.8490 N.m  Ks=    nan  settle=-1.0000 s
-    3634:   L1Adaptive      ISE=   0.0894  IAE=   2.1017  ITAE=   31.2285  final_err=  0.0431 m  mean_tau=  4.8968 N.m  Ks=    nan  settle=29.7000 s
-    3635:   GainScheduled   ISE=   0.1891  IAE=   2.7291  ITAE=   41.1725  final_err=  0.0537 m  mean_tau=  4.7817 N.m  Ks=    nan  settle=-1.0000 s
-    3636:   FUHAC           ISE=   0.2332  IAE=   3.0706  ITAE=   46.2432  final_err=  0.0381 m  mean_tau=  4.7014 N.m  Ks= 3.0000  settle=29.8800 s
-    3637: 
-    3638: -- s02_circle (circle, a=3.0000 m, 30.0000 s) --
-    3639:   OpenLoop        ISE=   3.0708  IAE=  11.7436  ITAE=  179.6184  final_err=  0.3017 m  mean_tau=  8.1391 N.m  Ks=    nan  settle=-1.0000 s
-    3640:   PID             ISE=   0.3043  IAE=   3.8060  ITAE=   56.0105  final_err=  0.0961 m  mean_tau=  8.0892 N.m  Ks=    nan  settle=-1.0000 s
-    3641:   Backstepping    ISE=   0.2397  IAE=   3.3844  ITAE=   52.1148  final_err=  0.0914 m  mean_tau=  8.1620 N.m  Ks=    nan  settle=-1.0000 s
-    3642:   SMC             ISE=   0.2687  IAE=   3.5765  ITAE=   52.9130  final_err=  0.0910 m  mean_tau=  8.1409 N.m  Ks=    nan  settle=-1.0000 s
-    3643:   AdaptiveSMC     ISE=   0.2687  IAE=   3.5765  ITAE=   52.9130  final_err=  0.0910 m  mean_tau=  8.1409 N.m  Ks= 3.0000  settle=-1.0000 s
-    3644:   ADRC            ISE=   0.5852  IAE=   4.8063  ITAE=   61.7773  final_err=  0.0965 m  mean_tau=  8.0949 N.m  Ks=    nan  settle=-1.0000 s
-    3645:   FuzzyTSK        ISE=   6.0786  IAE=  16.6099  ITAE=  279.2058  final_err=  0.5181 m  mean_tau=  8.3686 N.m  Ks=    nan  settle=-1.0000 s
-    3646:   LQR             ISE=   0.2904  IAE=   3.7322  ITAE=   57.1407  final_err=  0.1002 m  mean_tau=  8.1221 N.m  Ks=    nan  settle=-1.0000 s
-    3647:   NMPC            ISE=   0.3218  IAE=   3.9435  ITAE=   59.9882  final_err=  0.1051 m  mean_tau=  8.0786 N.m  Ks=    nan  settle=-1.0000 s
-    3648:   L1Adaptive      ISE=   0.2717  IAE=   3.5959  ITAE=   53.3303  final_err=  0.0929 m  mean_tau=  8.1368 N.m  Ks=    nan  settle=-1.0000 s
-    3649:   GainScheduled   ISE=   0.3050  IAE=   3.8100  ITAE=   56.0839  final_err=  0.0961 m  mean_tau=  8.0889 N.m  Ks=    nan  settle=-1.0000 s
-    3650:   FUHAC           ISE=   1.8220  IAE=   7.9169  ITAE=  143.3753  final_err=  0.2760 m  mean_tau=  8.2592 N.m  Ks= 3.0143  settle=-1.0000 s
-    3651: 
-    3652: -- s03_diamond_offset_start (diamond, a=1.0000 m, 30.0000 s) --
-    3653:   OpenLoop        ISE= 132.8638  IAE=  67.8342  ITAE= 1046.8027  final_err=  1.4675 m  mean_tau=  3.0078 N.m  Ks=    nan  settle=-1.0000 s
-    3654:   PID             ISE=  11.8863  IAE=  21.8526  ITAE=  307.8419  final_err=  0.6715 m  mean_tau=  2.1143 N.m  Ks=    nan  settle=-1.0000 s
-    3655:   Backstepping    ISE=   8.2026  IAE=  19.3686  ITAE=  296.3149  final_err=  0.3525 m  mean_tau=  3.8728 N.m  Ks=    nan  settle=-1.0000 s
-    3656:   SMC             ISE=  25.0372  IAE=  31.5613  ITAE=  521.6930  final_err=  0.7925 m  mean_tau=  4.7208 N.m  Ks=    nan  settle=-1.0000 s
-    3657:   AdaptiveSMC     ISE=   7.6787  IAE=  17.2149  ITAE=  266.1103  final_err=  0.4610 m  mean_tau=  4.4138 N.m  Ks= 5.0000  settle=-1.0000 s
-    3658:   ADRC            ISE=  41.7588  IAE=  37.6010  ITAE=  565.6678  final_err=  0.7713 m  mean_tau=  3.1087 N.m  Ks=    nan  settle=-1.0000 s
-    3659:   FuzzyTSK        ISE=  56.1746  IAE=  50.8415  ITAE=  763.9133  final_err=  1.7720 m  mean_tau=  6.7055 N.m  Ks=    nan  settle=-1.0000 s
-    3660:   LQR             ISE=   2.7463  IAE=  11.4502  ITAE=  177.7617  final_err=  0.2765 m  mean_tau=  4.1381 N.m  Ks=    nan  settle=-1.0000 s
-    3661:   NMPC            ISE=   0.2242  IAE=   2.8539  ITAE=   40.6981  final_err=  0.0517 m  mean_tau=  5.1361 N.m  Ks=    nan  settle=-1.0000 s
-    3662:   L1Adaptive      ISE=   1.8746  IAE=   8.5566  ITAE=  132.7456  final_err=  0.4295 m  mean_tau=  2.7955 N.m  Ks=    nan  settle=-1.0000 s
-    3663:   GainScheduled   ISE=  11.9991  IAE=  21.9151  ITAE=  308.7618  final_err=  0.6639 m  mean_tau=  2.0935 N.m  Ks=    nan  settle=-1.0000 s
-    3664:   FUHAC           ISE=   1.7312  IAE=   8.2903  ITAE=  123.4569  final_err=  0.2431 m  mean_tau=  4.3299 N.m  Ks= 5.0000  settle=-1.0000 s
-    3665: 
-    3666: -- s04_noise_disturbance (lemniscate, a=2.0000 m, 30.0000 s) --
-    3667:   OpenLoop        ISE=   6.9509  IAE=  14.7879  ITAE=  252.4091  final_err=  0.4982 m  mean_tau=  5.3571 N.m  Ks=    nan  settle=-1.0000 s
-    3668:   PID             ISE=   0.1988  IAE=   2.7751  ITAE=   42.1617  final_err=  0.0810 m  mean_tau=  5.2354 N.m  Ks=    nan  settle=-1.0000 s
-    3669:   Backstepping    ISE=   0.1093  IAE=   2.2893  ITAE=   35.1172  final_err=  0.0549 m  mean_tau=  5.3577 N.m  Ks=    nan  settle=-1.0000 s
-    3670:   SMC             ISE=   0.1268  IAE=   2.3653  ITAE=   34.3237  final_err=  0.0357 m  mean_tau=  5.2755 N.m  Ks=    nan  settle=29.6700 s
-    3671:   AdaptiveSMC     ISE=   0.1268  IAE=   2.3653  ITAE=   34.3237  final_err=  0.0357 m  mean_tau=  5.2755 N.m  Ks= 3.0000  settle=29.6700 s
-    3672:   ADRC            ISE=   0.3069  IAE=   3.3654  ITAE=   49.1986  final_err=  0.1441 m  mean_tau=  5.3921 N.m  Ks=    nan  settle=-1.0000 s
-    3673:   FuzzyTSK        ISE=   2.2122  IAE=   9.5818  ITAE=  139.8002  final_err=  0.2283 m  mean_tau= 10.8995 N.m  Ks=    nan  settle=-1.0000 s
-    3674:   LQR             ISE=   0.1675  IAE=   2.7278  ITAE=   41.7728  final_err=  0.0712 m  mean_tau=  5.2917 N.m  Ks=    nan  settle=-1.0000 s
-    3675:   NMPC            ISE=   0.2473  IAE=   3.2544  ITAE=   49.9648  final_err=  0.1151 m  mean_tau=  5.3050 N.m  Ks=    nan  settle=-1.0000 s
-    3676:   L1Adaptive      ISE=   0.0966  IAE=   2.1258  ITAE=   31.5053  final_err=  0.0512 m  mean_tau=  5.3567 N.m  Ks=    nan  settle=-1.0000 s
-    3677:   GainScheduled   ISE=   0.1968  IAE=   2.7814  ITAE=   42.0106  final_err=  0.0768 m  mean_tau=  5.2295 N.m  Ks=    nan  settle=-1.0000 s
-    3678:   FUHAC           ISE=   0.6091  IAE=   4.9201  ITAE=   76.3646  final_err=  0.1582 m  mean_tau=  5.8739 N.m  Ks= 3.0005  settle=-1.0000 s
-    3679: 
-    3680: -- s05_saturation_mismatch (circle, a=3.0000 m, 30.0000 s) --
-    3681:   OpenLoop        ISE= 364.8336  IAE= 121.4645  ITAE= 1872.2090  final_err=  3.7956 m  mean_tau=  8.1513 N.m  Ks=    nan  settle=-1.0000 s
-    3682:   PID             ISE=   0.4467  IAE=   4.2507  ITAE=   56.3986  final_err=  0.0957 m  mean_tau=  8.0486 N.m  Ks=    nan  settle=-1.0000 s
-    3683:   Backstepping    ISE=   0.3514  IAE=   3.7020  ITAE=   52.1444  final_err=  0.0904 m  mean_tau=  8.1695 N.m  Ks=    nan  settle=-1.0000 s
-    3684:   SMC             ISE=   0.3500  IAE=   3.7156  ITAE=   51.8628  final_err=  0.0909 m  mean_tau=  8.1251 N.m  Ks=    nan  settle=-1.0000 s
-    3685:   AdaptiveSMC     ISE=   0.3500  IAE=   3.7157  ITAE=   51.8615  final_err=  0.0909 m  mean_tau=  8.1250 N.m  Ks= 3.0000  settle=-1.0000 s
-    3686:   ADRC            ISE=  13.1779  IAE=  19.7502  ITAE=  164.8924  final_err=  0.0948 m  mean_tau=  8.0605 N.m  Ks=    nan  settle=-1.0000 s
-    3687:   FuzzyTSK        ISE=   3.0147  IAE=  11.9280  ITAE=  173.9301  final_err=  0.2813 m  mean_tau= 11.0632 N.m  Ks=    nan  settle=-1.0000 s
-    3688:   LQR             ISE=   0.3968  IAE=   4.0496  ITAE=   57.2420  final_err=  0.0992 m  mean_tau=  8.1178 N.m  Ks=    nan  settle=-1.0000 s
-    3689:   NMPC            ISE=   0.5000  IAE=   4.4457  ITAE=   60.3119  final_err=  0.1030 m  mean_tau=  8.0007 N.m  Ks=    nan  settle=-1.0000 s
-    3690:   L1Adaptive      ISE=   0.4406  IAE=   4.2363  ITAE=   55.7185  final_err=  0.0944 m  mean_tau=  8.1100 N.m  Ks=    nan  settle=-1.0000 s
-    3691:   GainScheduled   ISE=   0.4819  IAE=   4.4131  ITAE=   57.2533  final_err=  0.0957 m  mean_tau=  8.0512 N.m  Ks=    nan  settle=-1.0000 s
-    3692:   FUHAC           ISE=   2.1882  IAE=   8.7839  ITAE=  152.6669  final_err=  0.5309 m  mean_tau=  8.2791 N.m  Ks= 3.0352  settle=-1.0000 s
-    3693: 
-    3694: Done. 60/60 runs completed. Results in: case-study/Differential Drive Robot Tracking/logs
-    3695: 
-    3696:   EXIT 0 — PASSED
-    3697: 
-    3698: ------------------------------------------------------------------------
-    3699:   [11/183]  build\case-study\Non-Inverting Buck-Boost Converter\buck_boost_robustness.exe
-    3700: ------------------------------------------------------------------------
-    3701: 
+     124:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     125:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     126:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     127:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     128:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     129:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     130:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     131:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     132:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     133:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+>>>  134: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     135:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     136:       |                                                                              ^
+     137: In member function 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index, Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]',
+     138:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::false_type) const [with ArgType = const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1543:17,
+     139:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     140:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     141:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     142:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     143:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     144:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     145:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     146:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     147:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     148:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+     149: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     150:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     151:       |                                                                              ^
+     152: [  7%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DiscreteMPC.cpp.obj
+     153: In file included from C:/msys64/ucrt64/include/eigen3/Eigen/Core:333,
+     154:                  from C:/msys64/ucrt64/include/eigen3/Eigen/Dense:1,
+     155:                  from lib\IControllerObserver.h:2,
+     156:                  from lib\IController.h:2,
+     157:                  from lib\DiscreteMPC.h:2,
+     158:                  from lib\DiscreteMPC.cpp:1:
+     159: In member function 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index, Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]',
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #3 (keywords: error) ---
-Lines 5448 - 5468
+--- FAILURE BLOCK #3 (keywords: warn) ---
+Lines 161 - 181
 
-    5448:       2      0.218411      0.252786
-    5449:       3      0.160317      0.332359
-    5450:       4      0.119661      0.389385
-    5451:       5      0.091297      0.430356
-    5452: 
-    5453:   trials completed : 6   still learning : no
-    5454:   reduction trial 0 -> 5 : 74.209856 %
-    5455: 
-    5456:   mismatched trialLength rejected : yes
-    5457: 
->>> 5458:   ILC reduced the error = yes   first applied trial improved = yes
-    5459: PASS
-    5460: 
-    5461:   EXIT 0 — PASSED
-    5462: 
-    5463: ------------------------------------------------------------------------
-    5464:   [67/183]  build\examples\ex12_weighted_stack.exe
-    5465: ------------------------------------------------------------------------
-    5466: 
-    5467: === Weighted Stack Blending ===
-    5468:   k    t[s]      y       u   wA(Aggr) wB(Gentle)
+     161:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     162:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     163:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     164:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     165:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     166:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     167:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     168:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     169:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     170:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+>>>  171: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     172:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     173:       |                                                                              ^
+     174: [  7%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ExtremumSeeker.cpp.obj
+     175: [  7%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/SmithPredictor.cpp.obj
+     176: [  7%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DiscreteLeadLag.cpp.obj
+     177: [  7%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DiscreteSMC.cpp.obj
+     178: [  7%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DiscreteADRC.cpp.obj
+     179: [ 14%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/KalmanFilter.cpp.obj
+     180: [ 14%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DiscreteLQG.cpp.obj
+     181: [ 14%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ControllerTuner.cpp.obj
 
 ------------------------------------------------------------------------
 
---- FAILURE BLOCK #4 (keywords: skip) ---
-Lines 13633 - 13653
+--- FAILURE BLOCK #4 (keywords: warn) ---
+Lines 197 - 221
 
-    13633: ========================================================================
-    13634:   Python case studies: 10 passed  |  0 failed
-    13635: ========================================================================
-    13636: ========================================================================
-    13637:   Phase 8 - Case-study status + static report
-    13638: ========================================================================
-    13639: 
-    13640:   [case_study_tracker.py]
-    13641: 
-    13642: Written 31 entries -> docs\case_study_status.md
->>> 13643: Skipped (MATLAB-native, out of scope): Boiler Control MATLAB
-    13644: 
-    13645: Status:   {'Complete': 22, 'Not started': 6, 'Open placeholder': 3}
-    13646: Language: {'C++': 15, 'Python': 10, 'undetermined': 6}
-    13647: IAE:      {'Fine': 22, 'No data': 9}
-    13648: 
-    13649:   [INFO] Running MC + fault sweep + WCET + mu analysis (set CTRL_SKIP_ANALYSIS=1 to skip)
-    13650: 
-    13651:   [run_analysis.py]
-    13652: 
-    13653: 
+     197:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     198:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     199:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     200:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     201:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     202:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     203:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     204:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>; Rhs = Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     205:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>, 1, -1, false>; Rhs = Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     206:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, Eigen::Transpose<Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false> >, 0>; Rhs = Eigen::Block<Eigen::Matrix<double, -1, -1>, -1, -1, false>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+>>>  207: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     208:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     209:       |                                                                              ^
+     210: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     211: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     212: [ 21%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/RecursiveLeastSquares.cpp.obj
+     213: [ 21%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/RepetitiveController.cpp.obj
+     214: [ 21%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/GeneralizedPredictiveControl.cpp.obj
+     215: In file included from C:/msys64/ucrt64/include/eigen3/Eigen/Core:333,
+     216:                  from C:/msys64/ucrt64/include/eigen3/Eigen/Dense:1,
+     217:                  from lib\IControllerObserver.h:2,
+     218:                  from lib\IController.h:2,
+     219:                  from lib\GeneralizedPredictiveControl.h:2,
+     220:                  from lib\GeneralizedPredictiveControl.cpp:1:
+     221: In member function 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index, Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]',
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #5 (keywords: warn) ---
+Lines 223 - 243
+
+     223:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     224:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     225:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     226:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     227:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     228:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     229:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     230:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     231:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     232:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+>>>  233: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     234:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     235:       |                                                                              ^
+     236: [ 28%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/LinearisationHelper.cpp.obj
+     237: [ 28%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/FeedbackLinearisation.cpp.obj
+     238: [ 28%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/MRACController.cpp.obj
+     239: [ 28%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/BalancedTruncation.cpp.obj
+     240: In file included from C:/msys64/ucrt64/include/eigen3/Eigen/Core:333,
+     241:                  from C:/msys64/ucrt64/include/eigen3/Eigen/Dense:1,
+     242:                  from lib\BalancedTruncation.h:2,
+     243:                  from lib\BalancedTruncation.cpp:1:
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #6 (keywords: warn) ---
+Lines 246 - 307
+
+     246:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     247:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     248:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     249:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     250:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     251:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     252:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     253:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     254:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     255:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+>>>  256: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     257:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     258:       |                                                                              ^
+     259: [ 28%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ZeroPhaseTrackingFilter.cpp.obj
+     260: [ 28%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/GapMetric.cpp.obj
+     261: [ 28%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/LPVSystemID.cpp.obj
+     262: [ 35%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/NonlinearMPC.cpp.obj
+     263: [ 35%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/AdaptiveSmithPredictor.cpp.obj
+     264: [ 35%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/TubeMPC.cpp.obj
+     265: [ 35%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ParticleFilter.cpp.obj
+     266: [ 35%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/IterativeLearningControl.cpp.obj
+     267: [ 35%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/SINDy.cpp.obj
+     268: lib\SINDy.cpp: In member function 'Eigen::MatrixXd ctrl::SINDy::stls(const Eigen::MatrixXd&, const Eigen::MatrixXd&) const':
+     269: lib\SINDy.cpp:151:41: warning: 'Eigen::JacobiSVD<typename Eigen::DenseBase<Derived>::PlainObject, Options> Eigen::MatrixBase<Derived>::jacobiSvd(unsigned int) const [with int Options = 0; Derived = Eigen::Matrix<double, -1, -1>; typename Eigen::DenseBase<Derived>::PlainObject = Eigen::Matrix<double, -1, -1>]' is deprecated: Options should be specified using method's template parameter. [-Wdeprecated-declarations]
+     270:   151 |     Eigen::MatrixXd Xi = Theta.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV)
+     271:       |                          ~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     272: In file included from C:/msys64/ucrt64/include/eigen3/Eigen/SVD:39,
+     273:                  from C:/msys64/ucrt64/include/eigen3/Eigen/Dense:5,
+     274:                  from lib\PlantModel.h:6,
+     275:                  from lib\SINDy.h:2,
+     276:                  from lib\SINDy.cpp:1:
+     277: C:/msys64/ucrt64/include/eigen3/Eigen/src/SVD/JacobiSVD.h:839:63: note: declared here
+     278:   839 | JacobiSVD<typename MatrixBase<Derived>::PlainObject, Options> MatrixBase<Derived>::jacobiSvd(
+     279:       |                                                               ^~~~~~~~~~~~~~~~~~~
+     280: lib\SINDy.cpp:184:40: warning: 'Eigen::JacobiSVD<typename Eigen::DenseBase<Derived>::PlainObject, Options> Eigen::MatrixBase<Derived>::jacobiSvd(unsigned int) const [with int Options = 0; Derived = Eigen::Matrix<double, -1, -1>; typename Eigen::DenseBase<Derived>::PlainObject = Eigen::Matrix<double, -1, -1>]' is deprecated: Options should be specified using method's template parameter. [-Wdeprecated-declarations]
+     281:   184 |                 stls_Theta_a_.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV)
+     282:       |                 ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     283: C:/msys64/ucrt64/include/eigen3/Eigen/src/SVD/JacobiSVD.h:839:63: note: declared here
+     284:   839 | JacobiSVD<typename MatrixBase<Derived>::PlainObject, Options> MatrixBase<Derived>::jacobiSvd(
+     285:       |                                                               ^~~~~~~~~~~~~~~~~~~
+     286: [ 35%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/KoopmanEDMD.cpp.obj
+     287: [ 42%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/L1AdaptiveController.cpp.obj
+     288: [ 42%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/CBFSafetyFilter.cpp.obj
+     289: [ 42%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/GaussianProcess.cpp.obj
+     290: [ 42%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/EchoStateNetwork.cpp.obj
+     291: [ 42%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/NeuralPID.cpp.obj
+     292: [ 42%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/NeuralNetworkController.cpp.obj
+     293: [ 42%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/NNAdaptiveController.cpp.obj
+     294: [ 42%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/NonlinearIMC.cpp.obj
+     295: [ 50%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/NARMAXIdentifier.cpp.obj
+     296: lib\NARMAXIdentifier.cpp: In function 'std::string ctrl::{anonymous}::termLabel(const std::vector<int>&, int, int, int)':
+     297: lib\NARMAXIdentifier.cpp:130:76: warning: unused parameter 'nc' [-Wunused-parameter]
+     298:   130 | std::string termLabel(const std::vector<int> &factors, int na, int nb, int nc)
+     299:       |                                                                        ~~~~^~
+     300: [ 50%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/CEMController.cpp.obj
+     301: [ 50%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DeePC.cpp.obj
+     302: [ 50%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/DynaController.cpp.obj
+     303: [ 50%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ScenarioMPC.cpp.obj
+     304: [ 50%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/GreyBoxEstimator.cpp.obj
+     305: [ 50%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/GPResidualModel.cpp.obj
+     306: [ 57%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/HybridMPC.cpp.obj
+     307: [ 57%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/HybridModelTrainer.cpp.obj
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #7 (keywords: warn) ---
+Lines 333 - 386
+
+     333:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     334:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     335:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     336:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     337:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     338:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     339:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     340:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     341:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     342:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+>>>  343: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     344:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     345:       |                                                                              ^
+     346: [ 71%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/NSGA2.cpp.obj
+     347: In file included from C:/msys64/ucrt64/include/c++/16.1.0/x86_64-w64-mingw32/bits/c++allocator.h:33,
+     348:                  from C:/msys64/ucrt64/include/c++/16.1.0/bits/allocator.h:46,
+     349:                  from C:/msys64/ucrt64/include/c++/16.1.0/string:46,
+     350:                  from lib\ControllerRegistry.h:2,
+     351:                  from lib\NSGA2.h:2,
+     352:                  from lib\NSGA2.cpp:1:
+     353: In member function 'constexpr void std::__new_allocator<_Tp>::deallocate(_Tp*, size_type) [with _Tp = int]',
+     354:     inlined from 'constexpr void std::allocator< <template-parameter-1-1> >::deallocate(_Tp*, std::size_t) [with _Tp = int]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/allocator.h:218:35,
+     355:     inlined from 'static constexpr void std::allocator_traits<std::allocator<_CharT> >::deallocate(allocator_type&, pointer, size_type) [with _Tp = int]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/alloc_traits.h:689:23,
+     356:     inlined from 'constexpr void std::_Vector_base<_Tp, _Alloc>::_M_deallocate(pointer, std::size_t) [with _Tp = int; _Alloc = std::allocator<int>]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/stl_vector.h:398:19,
+     357:     inlined from 'constexpr std::_Vector_base<_Tp, _Alloc>::~_Vector_base() [with _Tp = int; _Alloc = std::allocator<int>]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/stl_vector.h:378:15,
+     358:     inlined from 'constexpr std::vector<_Tp, _Alloc>::~vector() [with _Tp = int; _Alloc = std::allocator<int>]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/stl_vector.h:795:7,
+     359:     inlined from 'ctrl::ParetoResult ctrl::NSGA2::optimize(const ctrl::MultiCostFn&)' at lib\NSGA2.cpp:230:13:
+     360: C:/msys64/ucrt64/include/c++/16.1.0/bits/new_allocator.h:183:66: warning: 'void operator delete(void*, std::size_t)' called on pointer '<unknown>' with nonzero offset [4, 9223372036854775804] [-Wfree-nonheap-object]
+     361:   183 |         _GLIBCXX_OPERATOR_DELETE(_GLIBCXX_SIZED_DEALLOC(__p, __n));
+     362:       |                                                                  ^
+     363: In member function 'constexpr _Tp* std::__new_allocator<_Tp>::allocate(size_type, const void*) [with _Tp = int]',
+     364:     inlined from 'constexpr _Tp* std::allocator< <template-parameter-1-1> >::allocate(std::size_t) [with _Tp = int]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/allocator.h:206:40,
+     365:     inlined from 'static constexpr _Tp* std::allocator_traits<std::allocator<_CharT> >::allocate(allocator_type&, size_type) [with _Tp = int]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/alloc_traits.h:638:28,
+     366:     inlined from 'constexpr std::_Vector_base<_Tp, _Alloc>::pointer std::_Vector_base<_Tp, _Alloc>::_M_allocate(std::size_t) [with _Tp = int; _Alloc = std::allocator<int>]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/stl_vector.h:389:33,
+     367:     inlined from 'constexpr void std::_Vector_base<_Tp, _Alloc>::_M_create_storage(std::size_t) [with _Tp = int; _Alloc = std::allocator<int>]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/stl_vector.h:407:44,
+     368:     inlined from 'constexpr std::_Vector_base<_Tp, _Alloc>::_Vector_base(std::size_t, const allocator_type&) [with _Tp = int; _Alloc = std::allocator<int>]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/stl_vector.h:341:26,
+     369:     inlined from 'constexpr std::vector<_Tp, _Alloc>::vector(size_type, const allocator_type&) [with _Tp = int; _Alloc = std::allocator<int>]' at C:/msys64/ucrt64/include/c++/16.1.0/bits/stl_vector.h:577:47,
+     370:     inlined from 'ctrl::ParetoResult ctrl::NSGA2::optimize(const ctrl::MultiCostFn&)' at lib\NSGA2.cpp:220:49:
+     371: C:/msys64/ucrt64/include/c++/16.1.0/bits/new_allocator.h:162:75: note: returned from 'void* operator new(std::size_t)'
+     372:   162 |           return static_cast<_Tp*>(_GLIBCXX_OPERATOR_NEW(__n * sizeof(_Tp)));
+     373:       |                                                                           ^
+     374: [ 78%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ConstrainedTuning.cpp.obj
+     375: lib\ConstrainedTuning.cpp: In function 'ctrl::TunerResult ctrl::tuneConstrained(std::function<TunerResult(const std::function<double(const Eigen::Matrix<double, -1, 1>&)>&, const Eigen::Matrix<double, -1, 1>&)>, const AutoTuner::CostFn&, const ConstrainedTuneParams&, const Eigen::VectorXd&)':
+     376: lib\ConstrainedTuning.cpp:44:36: warning: '*(unsigned char*)((char*)&innerResult + offsetof(ctrl::TunerResult, ctrl::TunerResult::converged))' may be used uninitialized [-Wmaybe-uninitialized]
+     377:    44 |     result.converged = innerResult.converged && feasible;
+     378:       |                        ~~~~~~~~~~~~^~~~~~~~~
+     379: lib\ConstrainedTuning.cpp:14:17: note: '*(unsigned char*)((char*)&innerResult + offsetof(ctrl::TunerResult, ctrl::TunerResult::converged))' was declared here
+     380:    14 |     TunerResult innerResult;
+     381:       |                 ^~~~~~~~~~~
+     382: [ 78%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/FaultClassifier.cpp.obj
+     383: [ 78%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/FTCSupervisor.cpp.obj
+     384: [ 78%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/GPMPC.cpp.obj
+     385: [ 78%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/ValueIterationSolver.cpp.obj
+     386: [ 78%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/LPMPC.cpp.obj
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #8 (keywords: warn) ---
+Lines 409 - 429
+
+     409:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = false]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     410:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::linear_coeff_impl(Eigen::Index, std::true_type) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1539:27,
+     411:     inlined from 'Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::CoeffReturnType Eigen::internal::unary_evaluator<Eigen::Block<XprType, BlockRows, BlockCols, InnerPanel>, Eigen::internal::IndexBased>::coeff(Eigen::Index) const [with ArgType = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; int BlockRows = 1; int BlockCols = -1; bool InnerPanel = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1465:29,
+     412:     inlined from 'Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::Scalar Eigen::internal::inner_product_evaluator<Func, Lhs, Rhs>::coeff(Eigen::Index) const [with Func = Eigen::internal::scalar_inner_product_op<double, double, true>; Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:84:36,
+     413:     inlined from 'static Eigen::internal::inner_product_impl<Evaluator, false>::Scalar Eigen::internal::inner_product_impl<Evaluator, false>::run(const Evaluator&) [with Evaluator = Eigen::internal::inner_product_evaluator<Eigen::internal::scalar_inner_product_op<double, double, true>, Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>, Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true> >]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:120:31,
+     414:     inlined from 'static Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::result_type Eigen::internal::default_inner_product_impl<Lhs, Rhs, Conj>::run(const Eigen::MatrixBase<Derived>&, const Eigen::MatrixBase<Rhs>&) [with Lhs = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>; Rhs = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; bool Conj = true]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/InnerProduct.h:250:46,
+     415:     inlined from 'typename Eigen::ScalarBinaryOpTraits<typename Eigen::internal::traits<T>::Scalar, typename Eigen::internal::traits<OtherDerived>::Scalar>::ReturnType Eigen::MatrixBase<Derived>::dot(const Eigen::MatrixBase<OtherDerived>&) const [with OtherDerived = Eigen::Block<const Eigen::Matrix<double, -1, -1>, -1, 1, true>; Derived = Eigen::Block<const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>, 1, -1, true>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/Dot.h:53:56,
+     416:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:385:63,
+     417:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 7>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Block<Eigen::Matrix<double, -1, -1>, 1, -1, false>; Lhs = const Eigen::Block<const Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>, 1, -1, false>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/ProductEvaluators.h:381:53,
+     418:     inlined from 'static void Eigen::internal::generic_product_impl<Lhs, Rhs, Eigen::DenseShape, Eigen::DenseShape, 8>::scaleAndAddTo(Dest&, const Lhs&, const Rhs&, const Scalar&) [with Dest = Eigen::Matrix<double, -1, -1>; Lhs = Eigen::Product<Eigen::Transpose<const Eigen::Matrix<double, -1, -1> >, Eigen::Matrix<double, -1, -1>, 0>; Rhs = Eigen::Matrix<double, -1, -1>]' at C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/products/GeneralMatrixMatrix.h:426:72:
+>>>  419: C:/msys64/ucrt64/include/eigen3/Eigen/src/Core/CoreEvaluators.h:1461:78: warning: '*(const double*)result' may be used uninitialized [-Wmaybe-uninitialized]
+     420:  1461 |     return m_argImpl.coeff(m_startRow.value() + row, m_startCol.value() + col);
+     421:       |                                                                              ^
+     422: [ 92%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/HinfFilter.cpp.obj
+     423: [ 92%] Building CXX object lib/CMakeFiles/controller_toolbox.dir/FunctionApproximator.cpp.obj
+     424: [100%] Linking CXX static library libcontroller_toolbox.a
+     425: [100%] Built target controller_toolbox
+     426: [OK] controller_toolbox
+     427: 
+     428: ----------------------------------------------------------
+     429: [BUILD] test_controllers
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #9 (keywords: exception, assert, fatal) ---
+Lines 1704 - 1779
+
+    1704: [OK] ex139_robustness_driven_selection
+    1705: 
+    1706: ----------------------------------------------------------
+    1707: [BUILD] test_autoscheduling
+    1708: ----------------------------------------------------------
+    1709: [  0%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/catch_chronometer.cpp.obj
+    1710: [  0%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_analyse.cpp.obj
+    1711: [  0%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_benchmark_function.cpp.obj
+    1712: [  0%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_run_for_at_least.cpp.obj
+    1713: [  0%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/benchmark/detail/catch_stats.cpp.obj
+>>> 1714: [  0%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generator_exception.cpp.obj
+    1715: [  0%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generators.cpp.obj
+    1716: [  3%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/generators/catch_generators_random.cpp.obj
+    1717: [  3%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_automake.cpp.obj
+    1718: [  3%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_common_base.cpp.obj
+    1719: [  3%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_compact.cpp.obj
+    1720: [  3%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_console.cpp.obj
+    1721: [  3%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_cumulative_base.cpp.obj
+    1722: [  3%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_event_listener.cpp.obj
+    1723: [  6%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_helpers.cpp.obj
+    1724: [  6%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_json.cpp.obj
+    1725: [  6%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_junit.cpp.obj
+    1726: [  6%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_multi.cpp.obj
+    1727: [  6%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_registrars.cpp.obj
+    1728: [  6%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_sonarqube.cpp.obj
+    1729: [  6%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_streaming_base.cpp.obj
+    1730: [ 10%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_tap.cpp.obj
+    1731: [ 10%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_teamcity.cpp.obj
+    1732: [ 10%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/reporters/catch_reporter_xml.cpp.obj
+    1733: [ 10%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_capture.cpp.obj
+    1734: [ 10%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_config.cpp.obj
+    1735: [ 10%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_exception.cpp.obj
+    1736: [ 10%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_generatortracker.cpp.obj
+    1737: [ 13%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_registry_hub.cpp.obj
+    1738: [ 13%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_reporter.cpp.obj
+    1739: [ 13%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_reporter_factory.cpp.obj
+    1740: [ 13%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/interfaces/catch_interfaces_testcase.cpp.obj
+    1741: [ 13%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_approx.cpp.obj
+    1742: [ 13%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_assertion_result.cpp.obj
+    1743: [ 13%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_config.cpp.obj
+    1744: [ 17%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_get_random_seed.cpp.obj
+    1745: [ 17%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_message.cpp.obj
+    1746: [ 17%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_registry_hub.cpp.obj
+    1747: [ 17%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_session.cpp.obj
+    1748: [ 17%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_tag_alias_autoregistrar.cpp.obj
+    1749: [ 17%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_test_case_info.cpp.obj
+    1750: [ 17%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_test_spec.cpp.obj
+    1751: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_timer.cpp.obj
+    1752: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_tostring.cpp.obj
+    1753: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_totals.cpp.obj
+    1754: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_translate_exception.cpp.obj
+    1755: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/catch_version.cpp.obj
+    1756: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_assertion_handler.cpp.obj
+    1757: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_case_insensitive_comparisons.cpp.obj
+    1758: [ 20%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_clara.cpp.obj
+    1759: [ 24%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_commandline.cpp.obj
+    1760: [ 24%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_console_colour.cpp.obj
+    1761: [ 24%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_context.cpp.obj
+    1762: [ 24%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_debug_console.cpp.obj
+    1763: [ 24%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_debugger.cpp.obj
+    1764: [ 24%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_decomposer.cpp.obj
+    1765: [ 24%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_enforce.cpp.obj
+    1766: [ 27%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_enum_values_registry.cpp.obj
+    1767: [ 27%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_errno_guard.cpp.obj
+    1768: [ 27%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_exception_translator_registry.cpp.obj
+    1769: [ 27%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_fatal_condition_handler.cpp.obj
+    1770: [ 27%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_floating_point_helpers.cpp.obj
+    1771: [ 27%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_getenv.cpp.obj
+    1772: [ 27%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_istream.cpp.obj
+    1773: [ 31%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_jsonwriter.cpp.obj
+    1774: [ 31%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_lazy_expr.cpp.obj
+    1775: [ 31%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_leak_detector.cpp.obj
+    1776: [ 31%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_list.cpp.obj
+    1777: [ 31%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_message_info.cpp.obj
+    1778: [ 31%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_output_redirect.cpp.obj
+    1779: [ 31%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_parse_numbers.cpp.obj
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #10 (keywords: exception, fail) ---
+Lines 1781 - 1818
+
+    1781: [ 34%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_random_number_generator.cpp.obj
+    1782: [ 34%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_random_seed_generation.cpp.obj
+    1783: [ 34%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reporter_registry.cpp.obj
+    1784: [ 34%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reporter_spec_parser.cpp.obj
+    1785: [ 34%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_result_type.cpp.obj
+    1786: [ 34%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_reusable_string_stream.cpp.obj
+    1787: [ 37%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_run_context.cpp.obj
+    1788: [ 37%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_section.cpp.obj
+    1789: [ 37%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_singletons.cpp.obj
+    1790: [ 37%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_source_line_info.cpp.obj
+>>> 1791: [ 37%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_startup_exception_registry.cpp.obj
+    1792: [ 37%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_stdstreams.cpp.obj
+    1793: [ 37%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_string_manip.cpp.obj
+    1794: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_stringref.cpp.obj
+    1795: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_tag_alias_registry.cpp.obj
+    1796: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_info_hasher.cpp.obj
+    1797: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_registry_impl.cpp.obj
+    1798: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_case_tracker.cpp.obj
+    1799: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_failure_exception.cpp.obj
+    1800: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_registry.cpp.obj
+    1801: [ 41%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_test_spec_parser.cpp.obj
+    1802: [ 44%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_textflow.cpp.obj
+    1803: [ 44%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_uncaught_exceptions.cpp.obj
+    1804: [ 44%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_wildcard_pattern.cpp.obj
+    1805: [ 44%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/internal/catch_xmlwriter.cpp.obj
+    1806: [ 44%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers.cpp.obj
+    1807: [ 44%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_container_properties.cpp.obj
+    1808: [ 44%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_exception.cpp.obj
+    1809: [ 48%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_floating_point.cpp.obj
+    1810: [ 48%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_predicate.cpp.obj
+    1811: [ 48%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_quantifiers.cpp.obj
+    1812: [ 48%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_string.cpp.obj
+    1813: [ 48%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/catch_matchers_templated.cpp.obj
+    1814: [ 48%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/catch2/matchers/internal/catch_matchers_impl.cpp.obj
+    1815: [ 48%] Linking CXX static library libCatch2.a
+    1816: [ 48%] Built target Catch2
+    1817: [ 96%] Built target controller_toolbox
+    1818: [100%] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2WithMain.dir/catch2/internal/catch_main.cpp.obj
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #11 (keywords: nan) ---
+Lines 4229 - 4315
+
+    4229:   [10/194]  build\case-study\Differential Drive Robot Tracking\differential_drive_robot_tracking_sim.exe
+    4230: ------------------------------------------------------------------------
+    4231: 
+    4232: Loading plant parameters from: case-study/Differential Drive Robot Tracking/config/plant_params.json
+    4233: DDMR: M=9 kg  r=0.0975 m  R=0.165 m  d=0.05 m  Kf=0.25 N.m.s/rad  tau_max=15 N.m
+    4234: Rates: plant/inner-PI 0.005 s | fast loop 0.03 s | slow loop 0.15 s (eps = 0.2)
+    4235: 
+    4236: Running 60 simulations (5 scenarios x 12 controllers)...
+    4237: 
+    4238: -- s01_lemniscate (lemniscate, a=2 m, 30 s) --
+>>> 4239:   OpenLoop        ISE=   6.8130  IAE=  14.6978  ITAE=  252.9795  final_err=  0.5179 m  mean_tau=  4.9303 N.m  Ks=    nan  settle=-1.0000 s
+    4240:   PID             ISE=   0.1892  IAE=   2.7302  ITAE=   41.4300  final_err=  0.0545 m  mean_tau=  4.7820 N.m  Ks=    nan  settle=-1.0000 s
+    4241:   Backstepping    ISE=   0.1028  IAE=   2.2649  ITAE=   35.0828  final_err=  0.0503 m  mean_tau=  4.8976 N.m  Ks=    nan  settle=-1.0000 s
+    4242:   SMC             ISE=   0.1258  IAE=   2.3687  ITAE=   34.4890  final_err=  0.0310 m  mean_tau=  4.8230 N.m  Ks=    nan  settle=29.5500 s
+    4243:   AdaptiveSMC     ISE=   0.1258  IAE=   2.3687  ITAE=   34.4890  final_err=  0.0310 m  mean_tau=  4.8230 N.m  Ks= 3.0000  settle=29.5500 s
+    4244:   ADRC            ISE=   0.2507  IAE=   3.2094  ITAE=   47.9403  final_err=  0.1228 m  mean_tau=  4.9681 N.m  Ks=    nan  settle=-1.0000 s
+    4245:   FuzzyTSK        ISE=   3.5079  IAE=  12.2251  ITAE=  190.7142  final_err=  0.2689 m  mean_tau=  6.2434 N.m  Ks=    nan  settle=-1.0000 s
+    4246:   LQR             ISE=   0.1582  IAE=   2.6783  ITAE=   41.1042  final_err=  0.0532 m  mean_tau=  4.8357 N.m  Ks=    nan  settle=-1.0000 s
+    4247:   NMPC            ISE=   0.2372  IAE=   3.1911  ITAE=   49.0793  final_err=  0.0985 m  mean_tau=  4.8490 N.m  Ks=    nan  settle=-1.0000 s
+    4248:   L1Adaptive      ISE=   0.0894  IAE=   2.1017  ITAE=   31.2285  final_err=  0.0431 m  mean_tau=  4.8968 N.m  Ks=    nan  settle=29.7000 s
+    4249:   GainScheduled   ISE=   0.1891  IAE=   2.7291  ITAE=   41.1725  final_err=  0.0537 m  mean_tau=  4.7817 N.m  Ks=    nan  settle=-1.0000 s
+    4250:   FUHAC           ISE=   0.2332  IAE=   3.0706  ITAE=   46.2432  final_err=  0.0381 m  mean_tau=  4.7014 N.m  Ks= 3.0000  settle=29.8800 s
+    4251: 
+    4252: -- s02_circle (circle, a=3.0000 m, 30.0000 s) --
+    4253:   OpenLoop        ISE=   3.0708  IAE=  11.7436  ITAE=  179.6184  final_err=  0.3017 m  mean_tau=  8.1391 N.m  Ks=    nan  settle=-1.0000 s
+    4254:   PID             ISE=   0.3043  IAE=   3.8060  ITAE=   56.0105  final_err=  0.0961 m  mean_tau=  8.0892 N.m  Ks=    nan  settle=-1.0000 s
+    4255:   Backstepping    ISE=   0.2397  IAE=   3.3844  ITAE=   52.1148  final_err=  0.0914 m  mean_tau=  8.1620 N.m  Ks=    nan  settle=-1.0000 s
+    4256:   SMC             ISE=   0.2687  IAE=   3.5765  ITAE=   52.9130  final_err=  0.0910 m  mean_tau=  8.1409 N.m  Ks=    nan  settle=-1.0000 s
+    4257:   AdaptiveSMC     ISE=   0.2687  IAE=   3.5765  ITAE=   52.9130  final_err=  0.0910 m  mean_tau=  8.1409 N.m  Ks= 3.0000  settle=-1.0000 s
+    4258:   ADRC            ISE=   0.5852  IAE=   4.8063  ITAE=   61.7773  final_err=  0.0965 m  mean_tau=  8.0949 N.m  Ks=    nan  settle=-1.0000 s
+    4259:   FuzzyTSK        ISE=   6.0786  IAE=  16.6099  ITAE=  279.2058  final_err=  0.5181 m  mean_tau=  8.3686 N.m  Ks=    nan  settle=-1.0000 s
+    4260:   LQR             ISE=   0.2904  IAE=   3.7322  ITAE=   57.1407  final_err=  0.1002 m  mean_tau=  8.1221 N.m  Ks=    nan  settle=-1.0000 s
+    4261:   NMPC            ISE=   0.3218  IAE=   3.9435  ITAE=   59.9882  final_err=  0.1051 m  mean_tau=  8.0786 N.m  Ks=    nan  settle=-1.0000 s
+    4262:   L1Adaptive      ISE=   0.2717  IAE=   3.5959  ITAE=   53.3303  final_err=  0.0929 m  mean_tau=  8.1368 N.m  Ks=    nan  settle=-1.0000 s
+    4263:   GainScheduled   ISE=   0.3050  IAE=   3.8100  ITAE=   56.0839  final_err=  0.0961 m  mean_tau=  8.0889 N.m  Ks=    nan  settle=-1.0000 s
+    4264:   FUHAC           ISE=   1.8220  IAE=   7.9169  ITAE=  143.3753  final_err=  0.2760 m  mean_tau=  8.2592 N.m  Ks= 3.0143  settle=-1.0000 s
+    4265: 
+    4266: -- s03_diamond_offset_start (diamond, a=1.0000 m, 30.0000 s) --
+    4267:   OpenLoop        ISE= 132.8638  IAE=  67.8342  ITAE= 1046.8027  final_err=  1.4675 m  mean_tau=  3.0078 N.m  Ks=    nan  settle=-1.0000 s
+    4268:   PID             ISE=  11.8863  IAE=  21.8526  ITAE=  307.8419  final_err=  0.6715 m  mean_tau=  2.1143 N.m  Ks=    nan  settle=-1.0000 s
+    4269:   Backstepping    ISE=   8.2026  IAE=  19.3686  ITAE=  296.3149  final_err=  0.3525 m  mean_tau=  3.8728 N.m  Ks=    nan  settle=-1.0000 s
+    4270:   SMC             ISE=  25.0372  IAE=  31.5613  ITAE=  521.6930  final_err=  0.7925 m  mean_tau=  4.7208 N.m  Ks=    nan  settle=-1.0000 s
+    4271:   AdaptiveSMC     ISE=   7.6787  IAE=  17.2149  ITAE=  266.1103  final_err=  0.4610 m  mean_tau=  4.4138 N.m  Ks= 5.0000  settle=-1.0000 s
+    4272:   ADRC            ISE=  41.7588  IAE=  37.6010  ITAE=  565.6678  final_err=  0.7713 m  mean_tau=  3.1087 N.m  Ks=    nan  settle=-1.0000 s
+    4273:   FuzzyTSK        ISE=  56.1746  IAE=  50.8415  ITAE=  763.9133  final_err=  1.7720 m  mean_tau=  6.7055 N.m  Ks=    nan  settle=-1.0000 s
+    4274:   LQR             ISE=   2.7463  IAE=  11.4502  ITAE=  177.7617  final_err=  0.2765 m  mean_tau=  4.1381 N.m  Ks=    nan  settle=-1.0000 s
+    4275:   NMPC            ISE=   0.2242  IAE=   2.8539  ITAE=   40.6981  final_err=  0.0517 m  mean_tau=  5.1361 N.m  Ks=    nan  settle=-1.0000 s
+    4276:   L1Adaptive      ISE=   1.8746  IAE=   8.5566  ITAE=  132.7456  final_err=  0.4295 m  mean_tau=  2.7955 N.m  Ks=    nan  settle=-1.0000 s
+    4277:   GainScheduled   ISE=  11.9991  IAE=  21.9151  ITAE=  308.7618  final_err=  0.6639 m  mean_tau=  2.0935 N.m  Ks=    nan  settle=-1.0000 s
+    4278:   FUHAC           ISE=   1.7312  IAE=   8.2903  ITAE=  123.4569  final_err=  0.2431 m  mean_tau=  4.3299 N.m  Ks= 5.0000  settle=-1.0000 s
+    4279: 
+    4280: -- s04_noise_disturbance (lemniscate, a=2.0000 m, 30.0000 s) --
+    4281:   OpenLoop        ISE=   6.9509  IAE=  14.7879  ITAE=  252.4091  final_err=  0.4982 m  mean_tau=  5.3571 N.m  Ks=    nan  settle=-1.0000 s
+    4282:   PID             ISE=   0.1988  IAE=   2.7751  ITAE=   42.1617  final_err=  0.0810 m  mean_tau=  5.2354 N.m  Ks=    nan  settle=-1.0000 s
+    4283:   Backstepping    ISE=   0.1093  IAE=   2.2893  ITAE=   35.1172  final_err=  0.0549 m  mean_tau=  5.3577 N.m  Ks=    nan  settle=-1.0000 s
+    4284:   SMC             ISE=   0.1268  IAE=   2.3653  ITAE=   34.3237  final_err=  0.0357 m  mean_tau=  5.2755 N.m  Ks=    nan  settle=29.6700 s
+    4285:   AdaptiveSMC     ISE=   0.1268  IAE=   2.3653  ITAE=   34.3237  final_err=  0.0357 m  mean_tau=  5.2755 N.m  Ks= 3.0000  settle=29.6700 s
+    4286:   ADRC            ISE=   0.3069  IAE=   3.3654  ITAE=   49.1986  final_err=  0.1441 m  mean_tau=  5.3921 N.m  Ks=    nan  settle=-1.0000 s
+    4287:   FuzzyTSK        ISE=   2.2122  IAE=   9.5818  ITAE=  139.8002  final_err=  0.2283 m  mean_tau= 10.8995 N.m  Ks=    nan  settle=-1.0000 s
+    4288:   LQR             ISE=   0.1675  IAE=   2.7278  ITAE=   41.7728  final_err=  0.0712 m  mean_tau=  5.2917 N.m  Ks=    nan  settle=-1.0000 s
+    4289:   NMPC            ISE=   0.2473  IAE=   3.2544  ITAE=   49.9648  final_err=  0.1151 m  mean_tau=  5.3050 N.m  Ks=    nan  settle=-1.0000 s
+    4290:   L1Adaptive      ISE=   0.0966  IAE=   2.1258  ITAE=   31.5053  final_err=  0.0512 m  mean_tau=  5.3567 N.m  Ks=    nan  settle=-1.0000 s
+    4291:   GainScheduled   ISE=   0.1968  IAE=   2.7814  ITAE=   42.0106  final_err=  0.0768 m  mean_tau=  5.2295 N.m  Ks=    nan  settle=-1.0000 s
+    4292:   FUHAC           ISE=   0.6091  IAE=   4.9201  ITAE=   76.3646  final_err=  0.1582 m  mean_tau=  5.8739 N.m  Ks= 3.0005  settle=-1.0000 s
+    4293: 
+    4294: -- s05_saturation_mismatch (circle, a=3.0000 m, 30.0000 s) --
+    4295:   OpenLoop        ISE= 364.8336  IAE= 121.4645  ITAE= 1872.2090  final_err=  3.7956 m  mean_tau=  8.1513 N.m  Ks=    nan  settle=-1.0000 s
+    4296:   PID             ISE=   0.4467  IAE=   4.2507  ITAE=   56.3986  final_err=  0.0957 m  mean_tau=  8.0486 N.m  Ks=    nan  settle=-1.0000 s
+    4297:   Backstepping    ISE=   0.3514  IAE=   3.7020  ITAE=   52.1444  final_err=  0.0904 m  mean_tau=  8.1695 N.m  Ks=    nan  settle=-1.0000 s
+    4298:   SMC             ISE=   0.3500  IAE=   3.7156  ITAE=   51.8628  final_err=  0.0909 m  mean_tau=  8.1251 N.m  Ks=    nan  settle=-1.0000 s
+    4299:   AdaptiveSMC     ISE=   0.3500  IAE=   3.7157  ITAE=   51.8615  final_err=  0.0909 m  mean_tau=  8.1250 N.m  Ks= 3.0000  settle=-1.0000 s
+    4300:   ADRC            ISE=  13.1779  IAE=  19.7502  ITAE=  164.8924  final_err=  0.0948 m  mean_tau=  8.0605 N.m  Ks=    nan  settle=-1.0000 s
+    4301:   FuzzyTSK        ISE=   3.0147  IAE=  11.9280  ITAE=  173.9301  final_err=  0.2813 m  mean_tau= 11.0632 N.m  Ks=    nan  settle=-1.0000 s
+    4302:   LQR             ISE=   0.3968  IAE=   4.0496  ITAE=   57.2420  final_err=  0.0992 m  mean_tau=  8.1178 N.m  Ks=    nan  settle=-1.0000 s
+    4303:   NMPC            ISE=   0.5000  IAE=   4.4457  ITAE=   60.3119  final_err=  0.1030 m  mean_tau=  8.0007 N.m  Ks=    nan  settle=-1.0000 s
+    4304:   L1Adaptive      ISE=   0.4406  IAE=   4.2363  ITAE=   55.7185  final_err=  0.0944 m  mean_tau=  8.1100 N.m  Ks=    nan  settle=-1.0000 s
+    4305:   GainScheduled   ISE=   0.4819  IAE=   4.4131  ITAE=   57.2533  final_err=  0.0957 m  mean_tau=  8.0512 N.m  Ks=    nan  settle=-1.0000 s
+    4306:   FUHAC           ISE=   2.1882  IAE=   8.7839  ITAE=  152.6669  final_err=  0.5309 m  mean_tau=  8.2791 N.m  Ks= 3.0352  settle=-1.0000 s
+    4307: 
+    4308: Done. 60/60 runs completed. Results in: case-study/Differential Drive Robot Tracking/logs
+    4309: 
+    4310:   EXIT 0 — PASSED
+    4311: 
+    4312: ------------------------------------------------------------------------
+    4313:   [11/194]  build\case-study\Non-Inverting Buck-Boost Converter\buck_boost_robustness.exe
+    4314: ------------------------------------------------------------------------
+    4315: 
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #12 (keywords: alarm) ---
+Lines 6146 - 6178
+
+    6146: ------------------------------------------------------------------------
+    6147: 
+    6148: === ex132: dual-rate cascade with a health supervisor ===
+    6149: 
+    6150: plant   : x2' = -6.0 x2 + k_act u - 3.0 ,  x1' = x2
+    6151: rates   : inner 1 ms | outer every 10 ticks (100 Hz)
+    6152: SPC live: t >= 2.0 s (after commissioning transient)
+    6153: fault   : actuator gain 12.0 -> 2.4 at t = 3.5 s
+    6154:           steady inner command 0.25 -> 1.25 (the detectable signature)
+    6155: 
+>>> 6156:   arm                           IAE    final |e|    max |pos|   alarms
+    6157:   cascade only               0.6466       0.0449       0.9551     6953
+    6158:   cascade + supervisor       0.9075       0.0007       1.0007       25
+    6159: 
+    6160:   fallback engaged at t = 3.536 s (36 ms after the fault), active controller at end = 'FallbackPI'
+    6161:   the supervisor pays a switching transient in IAE (0.907 vs 0.647) and buys
+    6162:   correct steady-state regulation under the degraded actuator (final |e| 0.0007 vs 0.0449)
+    6163: 
+    6164:   degradation detected  = yes (25 alarms, 0 of them before the fault)
+    6165:   fallback engaged      = yes (after the fault = yes)
+    6166:   axis stayed bounded   = yes (max |pos| = 1.001 < 5.0)
+    6167:   multi-rate cascade    = yes (outerDecimation = 10)
+    6168:   no false alarms       = yes (0 before the fault)
+    6169:   recovery beats degraded cascade = yes (0.0007 < 0.0449)
+    6170: 
+    6171: PASS
+    6172: 
+    6173:   EXIT 0 — PASSED
+    6174: 
+    6175: ------------------------------------------------------------------------
+    6176:   [71/194]  build\examples\ex133_plc_event_triggered_estimation.exe
+    6177: ------------------------------------------------------------------------
+    6178: 
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #13 (keywords: fail) ---
+Lines 6207 - 6230
+
+    6207: === ex134: bumpless transfer between redundant control servers ===
+    6208: 
+    6209: plant     : x' = -1.6 x + 1.6 u   (tau = 0.62 s)
+    6210: servers   : primary + hot standby, identical laws, Weighted ControllerStack
+    6211: scenario  : setpoint 1.0 -> 1.8 at t = 8.00 s; primary wedges MID-TRANSIENT
+    6212:             at t = 8.05 s (output freezes on a command that is already wrong)
+    6213: supervisor: heartbeat timeout 150 ms, then a 100 ms bumpless weight ramp
+    6214: transport : AtomicParamBuffer (supervisor -> RT loop), NetworkChannel (master -> PLC)
+    6215: 
+    6216:   arm                             IAE    final |e|    w_primary
+>>> 6217:   wedged, no failover          6.6803       0.8901         1.00
+    6218:   wedged + failover            0.5820       0.0000         0.00
+    6219: 
+    6220:   failover started at t = 8.210 s, 10 supervisor publishes through AtomicParamBuffer
+    6221:   total command change across handover : 0.82405 (a hard switch delivers this in ONE tick)
+    6222:   worst single-tick step during it     : 0.18007
+    6223: 
+    6224:   handover non-trivial = yes (gap 0.82405 > 0.05, else nothing to transfer)
+    6225:   handover bumpless    = yes (worst tick 0.18007 < 35% of the 0.82405 gap)
+    6226:   standby took over    = yes (final w_primary = 0.00)
+    6227:   recovered setpoint   = yes (final |e| = 0.0000 < 0.02)
+    6228:   better than wedged   = yes (IAE 0.5820 < 75% of 6.6803)
+    6229:   AtomicParamBuffer    = exercised (10 publishes, one lock-free read per tick)
+    6230: 
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #14 (keywords: error) ---
+Lines 6269 - 6289
+
+    6269: === ex136: auto-scheduling pipeline, measured data -> deployable C ===
+    6270: 
+    6271: -- Part 1: data-driven front end (exogenous scheduling parameter) --
+    6272: 
+    6273: true plant : x[k+1] = a(p) x[k] + b(p) u[k],  p in [0, 1]
+    6274:              a(p) = 0.990 -0.290 p   (tau 1.99 s -> 0.056 s)
+    6275:              b(p) = 0.010 +1.190 p   (DC gain 1.00 -> 4.00)
+    6276: 
+    6277:   [1] logged 4000 samples (Ts = 0.020 s, 80 s of operation), 1 mm measurement noise
+    6278:   [2] identifyLPV (degree 1):  a = 0.9900 -0.2900 p   b = 0.0100 +1.1899 p
+>>> 6279:       truth                 :  a = 0.9900 -0.2900 p   b = 0.0100 +1.1900 p   (worst coeff error 6.40e-05)
+    6280: 
+    6281:   [3] froze the identified model at 11 operating points
+    6282:   [4] nu-gap neighbour profile (p_i to p_i+1):
+    6283:         0.814 0.310 0.194 0.142 0.113 0.095 0.082 0.072 0.065 0.060 
+    6284:       end-to-end gap G(p=0, p=1) = 0.955
+    6285:       clusterByGap(threshold = 0.35) -> 2 clusters from 11 models  (suggestGapThreshold said 0.14)
+    6286:         cluster 0: rep at p = 0.00, max intra-cluster gap 0.000
+    6287:         cluster 1: rep at p = 0.60, max intra-cluster gap 0.805   <-- EXCEEDS THE THRESHOLD
+    6288: 
+    6289:   [5] breakpoint placement:
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #15 (keywords: warn) ---
+Lines 6295 - 6315
+
+    6295:           p = 0.30 -> Kp  0.518  Ki  2.643
+    6296:           p = 0.70 -> Kp  0.211  Ki  2.527
+    6297: 
+    6298:   [6] closed loop on the TRUE plant, identical p sweep and setpoint train:
+    6299:       arm                                             IAE    worst |e|      TV(u)
+    6300:       fixed PID, tuned at p = 0.50                 2.1102       0.6325       7.25
+    6301:       clusterByGap reps + LinearBlend              1.5223       0.4551      14.56
+    6302:       gap-covering + LinearBlend                   1.4198       0.5114       9.02
+    6303:       gap-covering + NearestNeighbor               2.7599       0.6936       4.75
+    6304: 
+>>> 6305:       Mode note, measured rather than assumed. GainScheduledController.h warns
+    6306:       that LinearBlend advances EVERY bracketing controller's integrator each
+    6307:       tick, which suggests NearestNeighbor for PI controllers - and that is
+    6308:       wrong here. Hard switching re-seeds an integrator at each of the ~6
+    6309:       crossings and each re-seed costs a transient, while gap-covering already
+    6310:       places the breakpoints close enough to apply the header's own mitigation.
+    6311:       Smoothness wins, so buildAutoGainScheduler()'s hardcoded LinearBlend is
+    6312:       the right default after all.
+    6313: 
+    6314: -- Part 2: model-based front end (state-dependent operating point) --
+    6315: 
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #16 (keywords: error, assert) ---
+Lines 6342 - 6371
+
+    6342:       | static const double ND = 50.0;
+    6343:       | static const double KB = 1.0;
+    6344:       | static const double U_MIN = -5.0;
+    6345:       | static const double U_MAX = 5.0;
+    6346:       | static const double TS = 0.02;
+    6347:       | 
+    6348:       | static double s_integral = 0.0;
+    6349:       | static double s_deriv = 0.0;
+    6350:       | ... (1193 bytes total)
+    6351: 
+>>> 6352:   LPV ID accurate        = yes (worst coefficient error 6.40e-05 < 5e-3)
+    6353:   schedule compresses    = yes (4 breakpoints cover 11 grid models)
+    6354:   every model covered    = yes (worst model-to-breakpoint gap 0.195 < 0.35;
+    6355:                                 clusterByGap's reps leave 0.694)
+    6356:   schedule earns itself  = yes (IAE 1.4198 < 70% of the fixed arm's 2.1102)
+    6357:   gap-covering matters   = yes (IAE 1.4198 < clusterByGap reps' 1.5223; NearestNeighbor measured 2.7599)
+    6358:   model-based front end  = yes (2 point(s) returned, coverage needs 2, finite across range)
+    6359:   deployable C emitted   = yes (6 units, guard + reset + step all present, no external deps)
+    6360:   single-linkage chaining= OBSERVED (worst intra-cluster gap 0.805 vs threshold 0.35)
+    6361:                            reported as a finding, not asserted against
+    6362: 
+    6363: PASS
+    6364: 
+    6365:   EXIT 0 — PASSED
+    6366: 
+    6367: ------------------------------------------------------------------------
+    6368:   [75/194]  build\examples\ex137_repetitive_feedforward_stack.exe
+    6369: ------------------------------------------------------------------------
+    6370: 
+    6371: === ex137: which feedforward mechanism, and when ===
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #17 (keywords: error, fatal) ---
+Lines 6373 - 6421
+
+    6373: axis      : NMP servo, 200 Hz, trial = 400 steps (2.0 s), 40 trials per run
+    6374: load      : constant 0.15 - repeats every trial, so ILC can learn it
+    6375: disturb.  : 0.10 sin(2 pi k / 157) - the period does NOT divide the 400-step
+    6376:             trial, so it slips 0.548 of a cycle per trial and ILC provably
+    6377:             cannot represent it, while RC (buffer mod 157) sees it as stationary
+    6378: gains     : ILC Lp = 0.05 (diverges at 0.20), RC Krc = 0.02 (diverges at 0.10)
+    6379: 
+    6380: designZPETC on the nominal model:
+    6381:   transmission zeros : -1.200+0.000j (|z| = 1.200)  
+    6382:   non-minimum phase  : yes (1 NMP zero(s) - handled by DC normalisation, not cancellation)
+>>> 6383:   DC amplitude error : 0.9041  (the NMP zero sits near z = -1, so the composite
+    6384:                        response collapses at Nyquist; harmless for a smooth
+    6385:                        reference, fatal for a stepped one)
+    6386: 
+    6387: final-trial RMS tracking error, identical trajectory and disturbance per column:
+    6388: 
+    6389:   scenario                           PID    +ZPETC  +ZPETC+ILC  +ZPETC+RC  all three
+    6390:   accurate model, no periodic    0.07065   0.00962     0.00631    0.00960    0.00634
+    6391:   poor model,     no periodic    0.07065   0.06964     0.04713    0.06918    0.04690
+    6392:   accurate model, periodic       0.13225   0.09220     0.09618    0.02776    0.02865
+    6393:   poor model,     periodic       0.13225   0.09993     0.10306    0.06655    0.05133
+    6394: 
+    6395: marginal contribution of each mechanism (negative = it helped):
+    6396: 
+    6397:   scenario                       ZPETC vs PID   ILC vs ZPETC    RC vs ZPETC
+    6398:   accurate model, no periodic            -86%           -34%            -0%
+    6399:   poor model,     no periodic             -1%           -32%            -1%
+    6400:   accurate model, periodic               -30%             4%           -70%
+    6401:   poor model,     periodic               -24%             3%           -33%
+    6402: 
+    6403:   RC applied with nothing to cancel: Krc = 0.02 leaves RMS at 0.00960 (inert,
+    6404:   vs 0.00962 without it); raising Krc to 0.05 for faster learning degrades it to
+    6405:   0.04308 - a 4.5x penalty for using the right tool on the wrong error class.
+    6406: 
+    6407:   ZPETC owns model error   = yes (accurate model: 0.00962 < 25% of PID's 0.07065)
+    6408:   ...and needs that model  = yes (poor model: 0.06964 still > 90% of PID's 0.07065)
+    6409:   ILC recovers the rest    = yes (poor model: 0.04713 < 75% of ZPETC's 0.06964)
+    6410:   ...but is blind to phase = yes (periodic: 0.09618, no better than ZPETC's 0.09220)
+    6411:   RC owns periodic error   = yes (periodic: 0.02776 < 50% of ZPETC's 0.09220)
+    6412:   ...and nothing else      = yes (no periodic: 0.00960, no better than 0.00962)
+    6413:   full stack only pays     = yes (both classes: 0.05133 < 85% of ZPETC+RC's 0.06655
+    6414:                                   and < 62% of PID's 0.13225)
+    6415: 
+    6416: PASS
+    6417: 
+    6418:   EXIT 0 — PASSED
+    6419: 
+    6420: ------------------------------------------------------------------------
+    6421:   [76/194]  build\examples\ex138_safety_supervised_adaptation.exe
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #18 (keywords: error, alarm) ---
+Lines 6423 - 6471
+
+    6423: 
+    6424: === ex138: a safety filter is only as good as WHO estimated its model ===
+    6425: 
+    6426: plant    : xdot = -0.50 x + 1.60 u + d(t)   (the CBF is told b = 1.00 - the
+    6427:            real input gain is 60% higher than the filter believes)
+    6428: safe set : h(x) = 1.00 - x >= 0,  CBF alpha = 2.0
+    6429: setpoint : 1.15, deliberately ABOVE the limit, so safety and tracking
+    6430:            genuinely conflict and the filter has to do real work
+    6431: load     : +0.30 matched disturbance at t = 20 s
+    6432: 
+>>> 6433:   arm                               max x  violation       IAE CBF hits  alarms
+    6434:   1. CLF only (no filter)          1.3588     0.3588     6.526        0       0   <-- UNSAFE
+    6435:   2. L1 only (no filter)           1.2898     0.2898     2.999        0    1997   <-- UNSAFE
+    6436:   3. L1 + CBF, nominal f0          1.2069     0.2069     3.609     1293    1977   <-- UNSAFE
+    6437:   4. L1 + CBF fed L1's sigma       1.2165     0.2165     2.561     1838    1979   <-- UNSAFE
+    6438:   5. L1 + CBF fed a KF sigma       1.0174     0.0174     7.419     1855    1992
+    6439: 
+    6440:   drift correction actually supplied to the safety filter:
+    6441:     arm                        sigma used   sigma TRUE      error
+    6442:     L1 + CBF fed L1's sigma        0.1031       0.4031       3.9x
+    6443:     L1 + CBF fed a KF sigma        0.3750       0.3750       1.0x
+    6444: 
+    6445:   L1 advances its state predictor with the command IT computed. The CBF
+    6446:   rewrites that command downstream, and L1 is never told - so its sigma_hat
+    6447:   absorbs the filter's own edits and stops being a plant measurement. The KF
+    6448:   is driven by step(y, u_prev, u_applied) and therefore stays exact.
+    6449: 
+    6450:   control condition - arm 5's stack, setpoint 0.50, no load:
+    6451:     max x 0.5115, 0 CBF interventions, 0 alarms
+    6452: 
+    6453:   no filter -> unsafe       = yes (violations 0.3588, 0.2898 > 0.05)
+    6454:   CBF on nominal f0         = yes, STILL UNSAFE (violation 0.2069)
+    6455:   L1's own sigma does NOT help = correct (violation 0.2165, no better than arm 3)
+    6456:   ...because it is corrupted= yes (reported 0.1031 vs true 0.4031)
+    6457:   KF sigma is exact         = yes (|0.3750 - 0.3750| < 0.02)
+    6458:   ...and the barrier holds  = yes (violation 0.0174 < 15% of arm 3's 0.2069)
+    6459:   ...not by being timid     = yes (max x 1.0174 still rides the 1.00 barrier)
+    6460:   filter actually acted     = yes (1855 interventions)
+    6461:   monitor discriminates     = yes (1992 alarms load-bearing, 0 idle)
+    6462:   filter inert when safe    = yes (0 interventions at setpoint 0.50)
+    6463: 
+    6464: PASS
+    6465: 
+    6466:   EXIT 0 — PASSED
+    6467: 
+    6468: ------------------------------------------------------------------------
+    6469:   [77/194]  build\examples\ex139_robustness_driven_selection.exe
+    6470: ------------------------------------------------------------------------
+    6471: 
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #19 (keywords: fail) ---
+Lines 6504 - 6524
+
+    6504:     stability radius       PI balanced > PI moderate > PI conservative > PI aggressive > PI very aggr. > 
+    6505: 
+    6506:   nominal-IAE winner : PI aggressive  (IAE 0.948)
+    6507:   SELECTED           : PI balanced  (worst-case IAE 3.333 finite over the whole box,
+    6508:                        stability radius 1.000 > set nu-gap radius 0.6896)
+    6509: 
+    6510:   uncertainty set measured  = yes (nu-gap radius 0.6896 in (0, 1))
+    6511:   gate discriminates        = yes (3 of 5 candidates cleared it)
+    6512:   axes are non-redundant    = yes (the three rankings are not all identical)
+    6513:   robust winner != nominal  = yes (PI balanced vs PI aggressive)
+>>> 6514:   nominal winner is rejected= yes (it fails at least one robustness gate)
+    6515:   selection is certified    = yes (finite worst case, margin 1.000 > set radius 0.6896)
+    6516:   Lyapunov axis is capable  = yes (certifies the control vertex set, residual -1.5984)
+    6517: 
+    6518: PASS
+    6519: 
+    6520:   EXIT 0 — PASSED
+    6521: 
+    6522: ------------------------------------------------------------------------
+    6523:   [78/194]  build\examples\ex13_pid_antiwindup.exe
+    6524: ------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+--- FAILURE BLOCK #20 (keywords: skip) ---
+Lines 14756 - 14776
+
+    14756: ========================================================================
+    14757:   Python case studies: 10 passed  |  0 failed
+    14758: ========================================================================
+    14759: ========================================================================
+    14760:   Phase 8 - Case-study status + static report
+    14761: ========================================================================
+    14762: 
+    14763:   [case_study_tracker.py]
+    14764: 
+    14765: Written 31 entries -> docs\case_study_status.md
+>>> 14766: Skipped (MATLAB-native, out of scope): Boiler Control MATLAB
+    14767: 
+    14768: Status:   {'Complete': 22, 'Not started': 6, 'Open placeholder': 3}
+    14769: Language: {'C++': 15, 'Python': 10, 'undetermined': 6}
+    14770: IAE:      {'Fine': 22, 'No data': 9}
+    14771: 
+    14772:   [INFO] Running MC + fault sweep + WCET + mu analysis (set CTRL_SKIP_ANALYSIS=1 to skip)
+    14773: 
+    14774:   [run_analysis.py]
+    14775: 
+    14776: 
 
 ------------------------------------------------------------------------
 
