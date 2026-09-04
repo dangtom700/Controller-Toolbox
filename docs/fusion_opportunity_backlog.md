@@ -2,8 +2,9 @@
 
 Authored 2026-07-26 against a codebase with 51 `IController` subclasses, 135 C++ examples
 (`ex01`-`ex135`) and 22 complete case studies. Updated 2026-08-02: **A1, B1, B2, B3 and B4 are
-built** (`ex135`-`ex139`), taking the C++ example count to 139. Tier B is complete; **A2 and A3
-are the only items left**.
+built** (`ex135`-`ex139`), taking the C++ example count to 139. Tier B is complete.
+Updated 2026-09-03: **A2 is built** (`ex140`), taking the count to 140. **A3 is the only item
+left** - and see section 2d, which argues part of it is already spoken for by roadmap `DT3`.
 
 Companion to [`docs/server_plc_fusion_plan.md`](server_plc_fusion_plan.md), which covers the
 server/PLC master-slave series specifically. **This document is the wider backlog**: fusions of
@@ -50,7 +51,7 @@ These were Tier 2 in the original fusion proposal and were blocked on a transpor
 | # | Demo | Components | Effort | Notes |
 |---|---|---|---|---|
 | A1 | **PLC-adaptive online retuning** | `AutoTuner` + `RecursiveLeastSquares` + `MismatchDetector` + `AtomicParamBuffer` + `NetworkChannel` | M | **Built and passing - `ex135`** (post-drift IAE -75.8%). See the server/PLC plan, Stage 5, for the two-model detection split it forced. |
-| A2 | **Fault-tolerant sensor voting** | `UnscentedKalmanFilter` + `FTCSupervisor` + 3x `NetworkChannel` | M | Three sensors on independent links with different loss/latency; `FTCSupervisor::feedResidual()` + `registerFaultResponse()` drop a faulted channel. `FTCSupervisor` is an `IController`, so it composes into a stack directly. |
+| A2 | **Fault-tolerant sensor voting** | `UnscentedKalmanFilter` + `FTCSupervisor` + 3x `NetworkChannel` | M | **Built and passing - `ex140`.** The premise below was **wrong on two counts**: the UKF cannot drop a channel (p and R are fixed at construction) and `FTCSupervisor` switches controllers, not sensors. Rebuilt around two residuals instead of one. See section 2d. |
 | A3 | **Distributed MPC coordination** | 2x `DiscreteMPC` or `ScenarioMPC` + `NetworkChannel` + `ControllerStack` (Supervisory) | L | Two subsystems exchanging predicted trajectories, degrading to decentralised control on link loss. Heaviest of the three - needs a coupling model and a prediction-exchange protocol. |
 
 ### Tier B - compositions with no PLC dependency
@@ -214,6 +215,81 @@ uncertainty, and nothing else.
 
 ---
 
+## 2d. Findings from A2
+
+### A2 / `ex140` - the proposed wiring was wrong in both directions
+
+The A2 row said "three sensors on independent links; `FTCSupervisor::feedResidual()` +
+`registerFaultResponse()` drop a faulted channel". Neither half survives contact with the API.
+
+**`UnscentedKalmanFilter` cannot drop a channel.** Measurement dimension `p` and covariance `R`
+are constructor arguments with no setter ([UnscentedKalmanFilter.h](../lib/UnscentedKalmanFilter.h)),
+so there is no runtime way to shrink `y` or de-weight a row. Voting has to sit *in front of* a
+`p = 1` filter, not inside a `p = 3` one. Anyone reaching for per-sensor gating in the estimator
+should expect to add the setter first, or to fuse before filtering as `ex140` does.
+
+**`FTCSupervisor` switches controllers, not sensors.** `registerFaultResponse()` maps a
+`FaultType` onto a `ControllerStack` entry *name*; the class has no notion of a channel. Sensor
+exclusion is the voter's job. The supervisor's job is deciding what to do once the vote is no
+longer trustworthy - which is a different question, and the more interesting one.
+
+**The actual finding: one residual is never enough in a voted architecture.** Two are available
+and each is blind to what the other catches:
+
+| window | disagreement `max_i \|y_i - y_vote\|` | innovation `y_vote - h_model` |
+|---|---|---|
+| healthy | 0.063 | 0.078 |
+| 1 bad sensor | **0.387** | 0.024 |
+| 2 bad sensors (same sign) | **0.375** | **0.327** |
+
+With one faulty sensor the vote is still right, so the innovation sees *nothing* - correctly,
+since nothing needs reconfiguring. Only the sensor-vs-sensor disagreement fires. With two faulty
+sensors the vote carries the fault and both fire. Disagreement says "someone is lying";
+only the model-referenced innovation says "the majority is lying". Monitoring one and not the
+other leaves a whole failure mode invisible. Measured end to end: mean tracking error in the
+2-bad window is 0.251 m voting alone versus 0.008 m with the reconfiguration (alarm threshold
+0.15, sized ~2x clear on both sides rather than guessed).
+
+**Acting on an absorbed residual erases it - the supervisor then flip-flops.** Feeding
+`FTCSupervisor` the raw UKF innovation does not work. The filter absorbs the bias over a few
+ticks, the residual decays under threshold, the classification returns to `None`, the supervisor
+switches *back*, the loop re-engages on the lying measurement, and the innovation now sits at
+zero because the estimate agrees with the lie. `ex140` therefore scores the fault against a
+reference twin that tracks the filter while healthy and **freezes into open-loop propagation the
+moment a fault is flagged**. This is `ex135`'s frozen-reference-model rule (lesson 4b) arriving
+from the opposite direction, and it is now general enough to state as lesson 14 below.
+
+**No feedback reconfiguration repairs a corrupted measurement.** This kills the obvious response
+of switching to a detuned or gain-limited controller: *any* law with integral action drives the
+**measured** value to setpoint, so detuning changes the transient and leaves the steady-state
+error exactly where it was. The only reconfiguration that helps is one that stops using the
+measurement - here a model-inverse feedforward entry. That has a real cost, and `ex140` runs a
+permanently-open-loop control arm to price it: 0.273 m mean error against the load disturbance
+versus 0.059 m closed-loop. The fallback is right *in the degraded window* and wrong everywhere
+else, which is exactly why it has to be switched rather than adopted.
+
+**Two smaller notes.** `FaultDetectorParams`'s defaults are scaled for a signal that swings:
+`stuck_du_threshold = 1e-3` exceeded this level loop's entire command excursion (every healthy
+tick classified as `ActuatorStuck`), and `corr_threshold = 0.3` assumes the command reacts to the
+*raw* measurement when it actually reacts to the filtered estimate. Both needed re-scaling
+(`1e-6`, `0.05`) before the classifier said anything sensible. And `ControllerStack`'s Supervisory
+bumpless transfer only helps an incoming entry that *has* state to re-seed - `bumplessInit()` is
+called, but a stateless feedforward has no integrator to seed, so the handover steps
+(measured 0.119 m^3/s). That is correct behaviour, not a defect, but do not expect bumplessness
+from a stateless entry.
+
+**Scope limit stated once:** the 2-out-of-3 vote tolerates one fault and *detects but cannot
+resolve* two, which is the standard result and the reason the second residual is load-bearing
+here. `ex140`'s staleness gate is also present but **unexercised** - 10 % per-packet loss on a
+150 ms link never opens a 450 ms gap, so the 2-sensor and 1-sensor vote paths are reached by a
+link *outage*, not by packet loss. The demo says so in its own output rather than implying
+coverage it does not have.
+
+**One planning consequence.** A3 (distributed MPC coordination) overlaps roadmap item `DT3`
+(distributed/networked control) substantially. Scope them together, or A3 gets built twice.
+
+---
+
 ## 3. Assessed as not worth attempting
 
 Recorded so they are not re-proposed. Each was checked against the actual API surface.
@@ -292,6 +368,20 @@ a rebuild cycle to find.
    succeeds on a problem it *can* handle - which converts "this looks broken" into "this
    problem class is outside the method". Run that control case before reporting a negative
    result, and never gate on an axis that cannot say yes.
+14. **Anything that masks a fault also hides it from the detector downstream.** A voter that
+   successfully outvotes a bad sensor leaves the post-fusion innovation in its null
+   distribution; an adaptive model that absorbs a drift leaves its own residual clean
+   (lesson 4b); a filter that swallows a bias erases the evidence a supervisor was about to
+   act on. Whenever a mechanism is *supposed* to make a fault invisible, the detector needs a
+   reference that mechanism does not touch - a second, structurally different residual
+   (`ex140`), or a frozen model (`ex135`). Corollary: if acting on an alarm makes the alarm
+   go away, the supervisor will flip-flop, so freeze the reference at alarm time.
+15. **Check a component's default parameters against your signal's scale before believing its
+   output.** `FaultDetectorParams` ships thresholds tuned for a swinging command; on a level
+   loop holding a near-constant flow, `stuck_du_threshold` alone classified every healthy tick
+   as `ActuatorStuck`. The classifier was not wrong - it was being asked about a signal two
+   orders of magnitude smaller than its defaults assume. Print the statistic next to the
+   threshold before trusting either.
 
 ---
 

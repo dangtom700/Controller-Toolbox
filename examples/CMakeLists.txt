@@ -229,6 +229,7 @@ add_example(ex136_autoscheduling_pipeline) # identifyLPV + clusterByGap + AutoGS
 add_example(ex137_repetitive_feedforward_stack)  # ZPETC + LearningFeedforward(ILC) + Repetitive
 add_example(ex138_safety_supervised_adaptation) # CBF + L1Adaptive + CLF + ControllerMonitor
 add_example(ex139_robustness_driven_selection)  # nuGap + MuAnalysis + WorstCase + Lyapunov
+add_example(ex140_plc_sensor_voting)            # UKF + FTCSupervisor + 3x NetworkChannel
 
 # MIMO / advanced examples (cpp/ subdirectory)
 function(add_cpp_example NAME)

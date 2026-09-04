@@ -219,6 +219,7 @@ TARGETS=(
     ex137_repetitive_feedforward_stack
     ex138_safety_supervised_adaptation
     ex139_robustness_driven_selection
+    ex140_plc_sensor_voting
     test_autoscheduling
     test_stability_margins
     example_pid_feedback

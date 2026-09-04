@@ -3,9 +3,12 @@
 Authored 2026-07-25. Codebase state: 51 `IController` subclasses, 131 C++ examples
 (highest `ex130_fuzzy_smc`), 22 complete case studies.
 
-**Status: Stages 0, 1a, 1b, 2, 3 and 5 complete - all four Tier 1 fusions plus Tier 2.1 are
-built and passing, and `NetworkChannel` is bound into Python. Only Stage 4 (full `run.py` pass
-and doc/count reconciliation) remains open.** See the Staging table below.
+**Status: Stages 0, 1a, 1b, 2, 3, 5 and 6 complete - all four Tier 1 fusions plus Tier 2.1 and
+the three-link sensor-voting demo are built and passing, and `NetworkChannel` is bound into
+Python. Only Stage 4 (full `run.py` pass and doc/count reconciliation) remains open.** See the
+Staging table below. Note that Stage 4 has grown since it was written: the example counts in
+`CLAUDE.md` (131 C++, 157 Python) and `docs/PROJECT_MASTER_STATE.md` have drifted further with
+every demo added, `ex140` included.
 
 This plan takes a proposal for four "Tier 1" server/PLC controller fusions - designs meant to be
 immediately implementable by wiring existing `lib/` components together - and turns it into
@@ -65,6 +68,7 @@ no fieldbus driver, no server process); any change to an existing `lib/` control
 | **3** | `ex133` event-triggered estimation, `ex134` bumpless redundancy + registration | **Done** |
 | 4 | Full `run.py` green pass, doc/count reconciliation | Open |
 | **5** | `ex135` PLC-adaptive online retuning (Tier 2.1) | **Done** |
+| **6** | `ex140` fault-tolerant sensor voting, 3 links (backlog A2) | **Done** |
 
 ### Measured results (Stages 1a + 2 + 3)
 
