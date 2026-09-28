@@ -95,7 +95,7 @@ cmake --build build --target ctrl_toolbox
 
 **Important:** Do **not** use `cmake --build --parallel`. The build system requires sequential target ordering; parallel builds produce linker failures on some platforms. Use `compile.bat` (Windows) or `compile.sh` (Linux/macOS) to build all ~120 targets in the correct dependency order.
 
-This produces the static library `build/lib/libcontroller_toolbox.a` (or `.lib` on Windows) and every example/test/script executable. The root [CMakeLists.txt](../CMakeLists.txt) aggregates: `lib/`, `tests/`, `examples/`, `scripts/`, `case-study/` (benchmarks are intentionally excluded).
+This produces the static library `build/lib/libcontroller_toolbox.a` (or `.lib` on Windows) and every example/test/script executable. The root [CMakeLists.txt](../CMakeLists.txt) aggregates: `lib/`, `tests/`, `examples/`, `scripts/`, `case-study/` (benchmarks are intentionally excluded). Everything except `lib/` is gated by `CTRL_BUILD_TESTS`, which defaults **ON** only when this repo is the top-level CMake project - see [2.3](#23-using-the-library-from-another-project) for building the library alone.
 
 ### 2.2 Running Tests
 
@@ -105,16 +105,147 @@ cd build && ctest --output-on-failure
 
 Many test executables are registered in [tests/CMakeLists.txt](../tests/CMakeLists.txt) (21 `add_executable` targets as of this writing): the Catch2 suites (`test_catch2_advanced`, `test_catch2_pilot`, `test_stability_margins`, `test_autoscheduling`), the legacy hand-rolled suites (`test_controllers`, `test_tuners_extended`, `test_integration`), the embedded-subset suite (`test_embedded_subset`), and the per-study regression suites. Filter by name or Catch2 tag, e.g. `ctest -R test_catch2_advanced` or `build/tests/test_catch2_advanced.exe [smc]`. Run `conda run -n soft_robotics -- python run.py` for the canonical full pass.
 
-### 2.3 Linking Against the Library
+### 2.3 Using the Library from Another Project
 
-The library publishes `lib/` as its include root, so consumers write `#include "ControllerToolbox.h"` (the umbrella header at [lib/ControllerToolbox.h](../lib/ControllerToolbox.h)) and link `controller_toolbox`:
+Use this when another project, in any directory or on any drive, needs the library without the
+examples, tests and case studies. Pick one route:
 
-```cmake
-target_link_libraries(your_target PRIVATE controller_toolbox)
-target_compile_features(your_target PRIVATE cxx_std_20)
+| You want | Route | What the other project gets |
+|---|---|---|
+| C++, repo stays where it is or moves | [A. Install a compact copy](#a-c-install-a-compact-copy-recommended) | ~12.6 MB folder: headers + `libcontroller_toolbox.a` + CMake package |
+| C++, build from source inside the other project | [B. `add_subdirectory` / `FetchContent`](#b-c-build-from-source-inside-the-other-project) | Library target only (tests/examples are skipped automatically) |
+| Python | [C. `pip install`](#c-python-pip-install) | A single `ctrl_toolbox.*.pyd` / `.so` in `site-packages` |
+| MCU, no Eigen | [D. Embedded-only headers](#d-embedded-subset-no-eigen) | Header-only `lib/embedded/` |
+
+In every C++ route the include root is `lib/`, so code writes `#include "ControllerToolbox.h"`
+(the umbrella header, [lib/ControllerToolbox.h](../lib/ControllerToolbox.h)). Eigen is a `PUBLIC`
+dependency of the target, so the consumer does not link it explicitly.
+
+#### A. C++: install a compact copy (recommended)
+
+Build only the `controller_toolbox` target and install it to a prefix of your choice:
+
+```powershell
+# From the Controller-Toolbox root (Windows / MSYS2 UCRT64 shown; drop -G/-D compiler on Linux)
+cmake -S . -B build-lib -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCTRL_BUILD_TESTS=OFF
+cmake --build build-lib
+cmake --install build-lib --prefix D:/libs/ControllerToolbox
 ```
 
-Eigen is propagated as a `PUBLIC` dependency of `controller_toolbox`, so the consumer does not need to link it explicitly.
+Result (the repo checkout is no longer needed after this):
+
+```
+D:/libs/ControllerToolbox/
+  include/controller_toolbox/*.h      (+ hal/, embedded/)
+  lib/libcontroller_toolbox.a
+  lib/cmake/ControllerToolbox/        ControllerToolboxConfig.cmake, ...Version.cmake, ...Targets*.cmake
+```
+
+In the other project's `CMakeLists.txt`:
+
+```cmake
+cmake_minimum_required(VERSION 3.16)
+project(MyApp CXX)
+set(CMAKE_CXX_STANDARD 20)
+
+find_package(ControllerToolbox 1.0 REQUIRED)     # also finds Eigen3 for you
+
+add_executable(app main.cpp)
+target_link_libraries(app PRIVATE ctrl::controller_toolbox)
+if(MINGW)   # self-contained .exe: runs without MSYS2 on PATH
+  target_link_options(app PRIVATE -static-libgcc -static-libstdc++ -static)
+endif()
+```
+
+Configure it with both the install prefix and Eigen's prefix on `CMAKE_PREFIX_PATH`:
+
+```powershell
+cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=g++ `
+      "-DCMAKE_PREFIX_PATH=D:/libs/ControllerToolbox;C:/msys64/ucrt64"
+```
+
+Constraints:
+- **Same toolchain.** A static C++ archive only links with the compiler that built it (on Windows:
+  MSYS2 UCRT64 GCC). An MSVC project needs an MSVC-built copy.
+- **Eigen must be findable** by the consumer (`Eigen3Config.cmake`), because the package config
+  calls `find_dependency(Eigen3)`. On MSYS2 it lives under `C:/msys64/ucrt64`.
+- **Feature flags are fixed at build time.** Configure with e.g. `-DCTRL_ENABLE_HINF=OFF
+  -DCTRL_ENABLE_SUBSPACE=OFF` for a smaller archive; the matching `CTRL_HAS_*` macros are
+  propagated to the consumer automatically.
+- `cmake --install` without `--component` installs everything. The C++ files belong to component
+  `dev`, the Python module to `python` (only present with `-DCTRL_BUILD_PYTHON_BINDINGS=ON`).
+
+#### B. C++: build from source inside the other project
+
+When the toolbox is not the top-level project, `CTRL_BUILD_TESTS` defaults to **OFF**, so only
+`lib/` is configured:
+
+```cmake
+# Local checkout (any path):
+add_subdirectory("C:/path/to/Controller-Toolbox" ctrl_toolbox_build)
+
+# ...or straight from Git:
+include(FetchContent)
+FetchContent_Declare(ControllerToolbox
+    GIT_REPOSITORY https://github.com/Azalea1047/Controller-Toolbox.git
+    GIT_TAG        main)            # pin a tag or commit for reproducible builds
+FetchContent_MakeAvailable(ControllerToolbox)
+
+target_link_libraries(app PRIVATE controller_toolbox)   # no ctrl:: prefix in this route
+```
+
+Eigen still has to be findable (or pass `-DCTRL_FETCH_EIGEN_IF_MISSING=ON` to download it).
+
+#### C. Python: `pip install`
+
+From the Controller-Toolbox root, into whichever environment the other project uses:
+
+```powershell
+# Windows: build with MSYS2 UCRT64 GCC + Ninja and the MSYS2 Eigen (otherwise scikit-build-core
+# may pick Visual Studio, and Eigen would be downloaded)
+$env:CMAKE_GENERATOR = "Ninja"; $env:CXX = "g++"; $env:CMAKE_PREFIX_PATH = "C:/msys64/ucrt64"
+conda run -n <env> python -m pip install .
+```
+
+```bash
+# Linux / macOS
+conda run -n <env> python -m pip install .
+```
+
+The wheel contains only `ctrl_toolbox.<tag>.pyd` (~3.8 MB, statically linked, no MSYS2 needed at
+runtime); tests/examples are not built. Then, from any directory:
+
+```python
+import ctrl_toolbox as ctrl
+print(ctrl.__file__)        # ...\site-packages\ctrl_toolbox.cp312-win_amd64.pyd
+```
+
+Constraints:
+- **One wheel per Python minor version.** The module is ABI-tagged (`cp312` etc.); install again
+  for each environment with a different Python version.
+- **It is a snapshot.** After changing `lib/` or `bindings/`, re-run `pip install .` (add
+  `--force-reinstall --no-deps` if the version number did not change).
+- **Nothing may shadow it.** A script that prepends this repo's `build/bindings/` to `sys.path`
+  (e.g. via `_setup_bindings.py`) will import that older build instead of the installed one.
+- Building takes several minutes; pass `--config-settings=build-dir=<dir>` to keep the CMake
+  build directory and make re-installs incremental.
+
+#### D. Embedded subset (no Eigen)
+
+```bash
+cmake -S . -B build-embedded -DCTRL_BUILD_EMBEDDED_ONLY=ON
+cmake --install build-embedded --prefix <prefix>   # -> <prefix>/include/controller_toolbox/embedded/
+```
+
+> **Known gap:** this install copies only `lib/embedded/`, but the umbrella
+> `embedded/EmbeddedControllers.h` includes `../BasicPID.h` and `../BasicSMC.h`, which live in
+> `lib/` and in turn include `ControllerRegistry.h`. Until the install rule covers them, either
+> include the individual headers you need (`DiscreteIntegrator.h`, `FixedRateFilter.h`,
+> `RingBuffer.h` are self-contained), or copy `lib/BasicPID.h`, `lib/BasicSMC.h` and
+> `lib/ControllerRegistry.h` next to the installed `embedded/` folder. All of these are
+> header-only and Eigen-free.
+
+See [deployment.md](deployment.md) for RT constraints.
 
 ### 2.4 Real-Time Build Flags
 

@@ -52,9 +52,16 @@ target_compile_options(ctrl_toolbox PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/wd4127 /wd4244 /wd4267>
 )
 
-# Optional: install the .so/.pyd alongside the library headers.
+# Under scikit-build-core (pip install) the install prefix is site-packages itself, so the
+# module must land at the prefix root to be importable. Plain `cmake --install` keeps lib/.
+if(SKBUILD)
+    set(_ctrl_py_dest .)
+else()
+    set(_ctrl_py_dest ${CMAKE_INSTALL_LIBDIR})
+endif()
+# COMPONENT binds only to the artifact kind before it, so tag both - a pybind11 module is
+# a MODULE library and installs through LIBRARY, not RUNTIME.
 install(TARGETS ctrl_toolbox
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT python
+    LIBRARY DESTINATION ${_ctrl_py_dest} COMPONENT python
+    RUNTIME DESTINATION ${_ctrl_py_dest} COMPONENT python
 )

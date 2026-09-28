@@ -34,6 +34,8 @@ cmake.args = [
 wheel.packages = []
 # The pybind11 module is placed directly in the wheel root by bindings/CMakeLists.txt
 wheel.install-dir = "."
+# Only the extension module; the C++ headers/static lib (component "dev") stay out of the wheel.
+install.components = ["python"]
 
 [tool.scikit-build.cmake.define]
 # Allow Eigen to be fetched if not found on the build machine (CI environments)

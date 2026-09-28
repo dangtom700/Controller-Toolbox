@@ -1690,3 +1690,49 @@ LearningFeedforwardController,FuzzySlidingModeController}.{h,cpp}`;
 `bindings/advanced_bindings.cpp`, `bindings/smoke_test.py`, `docs/DOCUMENTATION.md` (five new
 entries + the `FeedforwardController` correction), `CONTRIBUTING.md` (five sign-convention rows),
 `docs/controller_selection_matrix.md` (fusion-wrapper table + FSMC in the nonlinear roster).
+
+## Part 74 - Library-only packaging: out-of-tree C++ and `pip install` consumers - 2026-09-28
+
+Goal: use the library from another project/drive without the repo's examples, tests and case
+studies. The install/export rules from Part 57E existed, but **no out-of-tree consumer had ever
+been built against them**; doing so exposed four defects.
+
+1. **`find_package(ControllerToolbox)` always failed** - `cmake/ControllerToolboxConfig.cmake.in`
+   called `find_dependency(Eigen3 ...)` without `include(CMakeFindDependencyMacro)`, so every
+   consumer hit `Unknown CMake command "find_dependency"`. Fixed; Eigen is now resolved before
+   the targets file is included.
+2. **`ControllerToolbox.h` did not compile outside this repo** - `lib/PhaseLockedLoop.h` used
+   `M_PI`, which only the root `CMakeLists.txt` defines (`M_PI=...` / `_USE_MATH_DEFINES`) and
+   only for this repo's own targets. Replaced with C++20 `std::numbers::pi`; no API change.
+3. **`CTRL_BUILD_TESTS` did not exist**, although `pyproject.toml` and the vcpkg portfile both
+   passed `-DCTRL_BUILD_TESTS=OFF` - so `pip install .` and the port compiled every test,
+   example and case study and fetched nlohmann_json. Added the option (root `CMakeLists.txt`),
+   gating `tests/ examples/ scripts/ case-study/` and the nlohmann fetch; default ON only when
+   the repo is the top-level project, so `add_subdirectory`/`FetchContent` consumers get the
+   library alone. The Doxygen `docs` target is likewise top-level only.
+4. **`pip install .` produced an empty wheel** (9.6 KB, no module). In `bindings/CMakeLists.txt`
+   the single trailing `COMPONENT python` bound only to `RUNTIME`, while a pybind11 module is a
+   `MODULE` library installed through `LIBRARY` - it landed in the `Unspecified` component.
+   Latent until `install.components` was set; it would also have installed to `lib/` inside
+   `site-packages` (unimportable). Now tagged per artifact kind, destination `.` under `SKBUILD`.
+
+Also: all `lib/CMakeLists.txt` install rules moved to component `dev`, and
+`pyproject.toml` sets `install.components = ["python"]`, so wheels carry only the module.
+
+**Verified (MSYS2 UCRT64 GCC, Ninja):** library-only build = 96 steps, 0 executables; install =
+147 files / 12.6 MB. A strict-C++20 consumer outside the repo built via `find_package` and via
+`add_subdirectory`, and ran with MSYS2 removed from `PATH`. `pip install .` into a separate conda
+env (Python 3.12) gave a 3.8 MB wheel containing only `ctrl_toolbox.cp312-win_amd64.pyd`;
+`bindings/smoke_test.py` passed against the installed module from another project's directory.
+Default top-level configure still registers the full tree (`CTRL_BUILD_TESTS=ON`); `ex01`,
+`ex91` rebuilt and pass. Full `run.py` not re-run for this Part.
+
+**Open:** `CTRL_BUILD_EMBEDDED_ONLY` installs only `lib/embedded/`, but
+`embedded/EmbeddedControllers.h` includes `../BasicPID.h` and `../BasicSMC.h` (in `lib/`, which
+include `ControllerRegistry.h`) - the embedded install is incomplete. Documented as a known gap in
+`docs/DOCUMENTATION.md` 2.3-D; not fixed.
+
+**Files updated:** `CMakeLists.txt`, `lib/CMakeLists.txt`, `bindings/CMakeLists.txt`,
+`cmake/ControllerToolboxConfig.cmake.in`, `lib/PhaseLockedLoop.h`, `pyproject.toml`,
+`docs/DOCUMENTATION.md` (2.3 rewritten as "Using the Library from Another Project"), `README.md`
+(Quick Start subsection), `CLAUDE.md`.

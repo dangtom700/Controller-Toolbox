@@ -174,17 +174,20 @@ target_compile_options(controller_toolbox PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
 )
 
-# --- Install rules (consumed by pip/scikit-build, vcpkg, and system packaging) ---
+# --- Install rules (C++ consumers via find_package; vcpkg; system packaging) ---
+# Everything here is COMPONENT dev, so pip wheels (install.components = ["python"] in
+# pyproject.toml) ship only the extension module, not headers + static lib.
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 install(TARGETS controller_toolbox
     EXPORT ControllerToolboxTargets
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT dev
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT dev
 )
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/controller_toolbox
+    COMPONENT dev
     FILES_MATCHING PATTERN "*.h"
 )
 
@@ -195,6 +198,7 @@ install(EXPORT ControllerToolboxTargets
     FILE ControllerToolboxTargets.cmake
     NAMESPACE ctrl::
     DESTINATION ${_cfg_install_dir}
+    COMPONENT dev
 )
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/ControllerToolboxConfig.cmake.in"
@@ -210,4 +214,5 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/ControllerToolboxConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/ControllerToolboxConfigVersion.cmake"
     DESTINATION ${_cfg_install_dir}
+    COMPONENT dev
 )

@@ -1,5 +1,6 @@
 #pragma once
 #include "Features.h"
+#include <numbers>
 
 /**
  * @file PhaseLockedLoop.h
@@ -64,7 +65,9 @@ public:
     double phase() const { return theta_hat_; }
 
     /** @brief Current frequency estimate [Hz]. */
-    double frequencyHz() const { return w_hat_ / (2.0 * M_PI); }
+    // std::numbers::pi, not M_PI: this header is installed, and consumers building outside
+    // this repo don't get the root CMakeLists' M_PI / _USE_MATH_DEFINES definitions.
+    double frequencyHz() const { return w_hat_ / (2.0 * std::numbers::pi); }
 
     /** @brief Estimated input amplitude sqrt(x1^2 + x2^2) - a free byproduct of the SOGI. */
     double amplitude() const;

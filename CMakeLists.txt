@@ -66,28 +66,40 @@ endif()
 
 add_subdirectory(lib)
 
-# nlohmann/json - required by case-study executables and test_tugsim_regression.
-# Prefer a system/vcpkg installation; fall back to FetchContent so
-# the build works out-of-the-box without pre-installed packages.
-# Must be fetched BEFORE add_subdirectory(tests) and add_subdirectory(case-study)
-# so that nlohmann_json::nlohmann_json is a valid target in both.
-find_package(nlohmann_json CONFIG QUIET)
-if(NOT nlohmann_json_FOUND)
-    include(FetchContent)
-    FetchContent_Declare(
-        nlohmann_json
-        GIT_REPOSITORY https://github.com/nlohmann/json.git
-        GIT_TAG        v3.11.3
-        GIT_SHALLOW    TRUE
-    )
-    set(JSON_BuildTests OFF CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(nlohmann_json)
+# Tests, examples, scripts and case studies only matter when building this repo itself.
+# Defaults OFF when the toolbox is pulled in by another project (add_subdirectory /
+# FetchContent); pyproject.toml forces it OFF so `pip install` builds only the bindings.
+if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+    set(_ctrl_is_top_level ON)
+else()
+    set(_ctrl_is_top_level OFF)
 endif()
+option(CTRL_BUILD_TESTS "Build tests, examples, scripts and case studies" ${_ctrl_is_top_level})
 
-add_subdirectory(tests)
-add_subdirectory(examples)
-add_subdirectory(scripts)
-add_subdirectory(case-study)
+if(CTRL_BUILD_TESTS)
+    # nlohmann/json - required by case-study executables and test_tugsim_regression.
+    # Prefer a system/vcpkg installation; fall back to FetchContent so
+    # the build works out-of-the-box without pre-installed packages.
+    # Must be fetched BEFORE add_subdirectory(tests) and add_subdirectory(case-study)
+    # so that nlohmann_json::nlohmann_json is a valid target in both.
+    find_package(nlohmann_json CONFIG QUIET)
+    if(NOT nlohmann_json_FOUND)
+        include(FetchContent)
+        FetchContent_Declare(
+            nlohmann_json
+            GIT_REPOSITORY https://github.com/nlohmann/json.git
+            GIT_TAG        v3.11.3
+            GIT_SHALLOW    TRUE
+        )
+        set(JSON_BuildTests OFF CACHE BOOL "" FORCE)
+        FetchContent_MakeAvailable(nlohmann_json)
+    endif()
+
+    add_subdirectory(tests)
+    add_subdirectory(examples)
+    add_subdirectory(scripts)
+    add_subdirectory(case-study)
+endif()
 
 option(CTRL_BUILD_BENCHMARKS "Build latency benchmarks (bench_controllers)" OFF)
 if(CTRL_BUILD_BENCHMARKS)
@@ -103,7 +115,7 @@ if(CTRL_BUILD_PYTHON_BINDINGS)
 endif()
 
 find_package(Doxygen QUIET)
-if(DOXYGEN_FOUND)
+if(DOXYGEN_FOUND AND _ctrl_is_top_level)
     add_custom_target(docs
         COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Doxyfile
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}

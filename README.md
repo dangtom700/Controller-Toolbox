@@ -31,6 +31,24 @@ python run.py
 
 `run.py` compiles every C++ target sequentially, runs each executable, then runs all Python examples and reports a pass/fail summary.
 
+### Use the library from another project
+
+Library only - no examples, tests or case studies are built:
+
+```bash
+# C++: install a compact copy (headers + static lib + CMake package), then find_package() it
+cmake -S . -B build-lib -DCMAKE_BUILD_TYPE=Release -DCTRL_BUILD_TESTS=OFF
+cmake --build build-lib
+cmake --install build-lib --prefix D:/libs/ControllerToolbox
+#   other project:  find_package(ControllerToolbox REQUIRED)
+#                   target_link_libraries(app PRIVATE ctrl::controller_toolbox)
+
+# Python: install the module into any environment, then `import ctrl_toolbox` from anywhere
+python -m pip install .
+```
+
+Windows toolchain settings, `add_subdirectory`/`FetchContent`, and the constraints of each route: [docs/DOCUMENTATION.md section 2.3](docs/DOCUMENTATION.md#23-using-the-library-from-another-project).
+
 ---
 
 ## Minimal Example

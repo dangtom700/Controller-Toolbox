@@ -65,7 +65,13 @@ conda run -n soft_robotics -- python bindings/smoke_test.py
 - **`lib/` feature flags** (all **ON** by default), each defines a `CTRL_HAS_*` macro:
   `CTRL_ENABLE_HINF`, `CTRL_ENABLE_SUBSPACE`, `CTRL_ENABLE_FUZZY`, `CTRL_ENABLE_FUNCTION_APPROX`,
   `CTRL_ENABLE_ADVANCED_KALMAN`. Build-mode flags (root): `CTRL_BUILD_EMBEDDED_ONLY`,
-  `CTRL_FETCH_EIGEN_IF_MISSING`, `CTRL_BUILD_PYTHON_BINDINGS`, `CTRL_BUILD_BENCHMARKS`.
+  `CTRL_FETCH_EIGEN_IF_MISSING`, `CTRL_BUILD_PYTHON_BINDINGS`, `CTRL_BUILD_BENCHMARKS`,
+  `CTRL_BUILD_TESTS` (gates tests/examples/scripts/case-study + nlohmann_json; defaults ON only
+  when this repo is the top-level project, and pyproject.toml / the vcpkg port force it OFF).
+- **Using the library elsewhere** (install + `find_package`, `add_subdirectory`, `pip install`):
+  `[Ref: docs/DOCUMENTATION.md#23-using-the-library-from-another-project]`. Install components:
+  `dev` = headers + static lib + CMake package, `python` = the `.pyd`. `pip install .` ships only
+  `python`. A pip-installed module is a snapshot - reinstall after `lib/`/`bindings/` changes.
 - **Deps (pinned):** Eigen >=3.4.0, Catch2 v3.5.4, pybind11 v2.13.6, nlohmann/json v3.11.3.
 - **Never claim "passing" without a clean `run.py`** - README/CONTRIBUTING pass counts are stale until then.
 
@@ -74,7 +80,7 @@ conda run -n soft_robotics -- python bindings/smoke_test.py
 **WARNING - the conventional `include/`, `src/`, `python/` directories do NOT exist here.** Map:
 
 - `lib/` - **flat** core engine; every class is `lib/ClassName.{h,cpp}` (no subpackages, ~218 files: 124 `.h` + 94 `.cpp`). `[Ref: lib/]`
-  - `lib/embedded/` - header-only, no-Eigen, no-virtual MCU subset (`BasicPID`, `BasicSMC`, `DiscreteIntegrator`, `FixedRateFilter`, `RingBuffer`).
+  - `lib/embedded/` - header-only, no-Eigen, no-virtual MCU subset (`DiscreteIntegrator`, `FixedRateFilter`, `RingBuffer`, umbrella `EmbeddedControllers.h`). `BasicPID.h`/`BasicSMC.h` live in `lib/` itself and `EmbeddedControllers.h` reaches them via `../` - so `CTRL_BUILD_EMBEDDED_ONLY`'s install (which copies only `lib/embedded/`) is currently incomplete.
   - `lib/hal/` - hardware abstraction (`ISensor`/`IActuator`/`ITimer`/`IScheduler`, Sim*/Safe*, FreeRTOS/Zephyr schedulers).
   - `lib/ControllerToolbox.h` - umbrella include; `lib/Features.h` - runtime feature registry (`ctrl.features()`).
 - `bindings/` - the **C++<->Python boundary** (NOT `python/`): one flat `pybind11` module `ctrl_toolbox`. Entry `bindings/module.cpp`; dispatch to `plantmodel/controllers/estimation/advanced/analysis_bindings.cpp`. `[Ref: bindings/module.cpp:18]`
